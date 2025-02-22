@@ -120,7 +120,7 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('deleted', True))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(location='EastUS2', allow_blob_public_access=True)
+    @StorageAccountPreparer(location='EastUS2')
     def test_storage_file_main_oauth_scenario(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         s1 = self.create_share(account_info)

@@ -18,7 +18,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_create_update_activity_log_alert_anyof_conditon","date":"2025-02-21T15:26:51Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_create_update_activity_log_alert_anyof_conditon","date":"2025-02-22T07:13:58Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Feb 2025 15:26:54 GMT
+      - Sat, 22 Feb 2025 07:14:00 GMT
       expires:
       - '-1'
       pragma:
@@ -37,7 +37,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-global-reads:
-      - '3748'
+      - '3747'
     status:
       code: 200
       message: OK
@@ -71,7 +71,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Feb 2025 15:26:55 GMT
+      - Sat, 22 Feb 2025 07:14:02 GMT
       expires:
       - '-1'
       pragma:
@@ -133,7 +133,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Feb 2025 15:26:58 GMT
+      - Sat, 22 Feb 2025 07:14:04 GMT
       expires:
       - '-1'
       pragma:
@@ -147,7 +147,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/d58fda4c-fa79-4469-8b2a-04bd74f64591
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/212452c2-e3d9-46f4-b859-f4a8b3ee0e70
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
@@ -157,4 +157,143 @@ interactions:
     status:
       code: 201
       message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --all-of
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002?api-version=2020-10-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002\",\r\n
+        \ \"name\": \"clialert000002\",\r\n  \"type\": \"Microsoft.Insights/ActivityLogAlerts\",\r\n
+        \ \"location\": \"Global\",\r\n  \"properties\": {\r\n    \"scopes\": [\r\n
+        \     \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n    ],\r\n
+        \   \"condition\": {\r\n      \"allOf\": [\r\n        {\r\n          \"anyOf\":
+        [\r\n            {\r\n              \"field\": \"level\",\r\n              \"equals\":
+        \"Informational\"\r\n            }\r\n          ]\r\n        },\r\n        {\r\n
+        \         \"field\": \"category\",\r\n          \"equals\": \"ServiceHealth\"\r\n
+        \       }\r\n      ]\r\n    },\r\n    \"actions\": {\r\n      \"actionGroups\":
+        []\r\n    },\r\n    \"enabled\": false\r\n  }\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-03-01-preview, 2017-04-01, 2020-10-01, 2023-01-01-preview
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '759'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 22 Feb 2025 07:14:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-orig-api-version:
+      - '2020-10-01'
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3745'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Global", "properties": {"actions": {"actionGroups": []},
+      "condition": {"allOf": [{"anyOf": [{"equals": "Error", "field": "level"}]},
+      {"equals": "ServiceHealth", "field": "category"}]}, "enabled": false, "scopes":
+      ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '284'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --all-of
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002?api-version=2020-10-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002\",\r\n
+        \ \"name\": \"clialert000002\",\r\n  \"type\": \"Microsoft.Insights/ActivityLogAlerts\",\r\n
+        \ \"location\": \"Global\",\r\n  \"properties\": {\r\n    \"scopes\": [\r\n
+        \     \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n    ],\r\n
+        \   \"condition\": {\r\n      \"allOf\": [\r\n        {\r\n          \"anyOf\":
+        [\r\n            {\r\n              \"field\": \"level\",\r\n              \"equals\":
+        \"Error\"\r\n            }\r\n          ]\r\n        },\r\n        {\r\n          \"field\":
+        \"category\",\r\n          \"equals\": \"ServiceHealth\"\r\n        }\r\n
+        \     ]\r\n    },\r\n    \"actions\": {\r\n      \"actionGroups\": []\r\n
+        \   },\r\n    \"enabled\": false\r\n  }\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-03-01-preview, 2017-04-01, 2020-10-01, 2023-01-01-preview
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '751'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 22 Feb 2025 07:14:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/7cbcaac8-11ca-4485-8627-fbf1d868e8ea
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2998'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 version: 1

@@ -15,19 +15,28 @@ interactions:
       ParameterSetName:
       - -n --m
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: POST
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testmg/providers/Microsoft.ClassicInfrastructureMigrate/register?api-version=2022-09-01
   response:
     body:
-      string: ''
+      string: '{"error":{"code":"AuthorizationFailed","message":"The client ''zhiyihuang@microsoft.com''
+        with object id ''a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e'' does not have authorization
+        to perform action ''Microsoft.ClassicInfrastructureMigrate/register/action''
+        over scope ''/providers/Microsoft.Management/managementGroups/testmg/providers/Microsoft.ClassicInfrastructureMigrate''
+        or the scope is invalid. If access was recently granted, please refresh your
+        credentials."}}'
     headers:
       cache-control:
       - no-cache
+      connection:
+      - close
       content-length:
-      - '0'
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
       date:
-      - Fri, 09 Jul 2021 02:50:51 GMT
+      - Sat, 22 Feb 2025 07:47:55 GMT
       expires:
       - '-1'
       pragma:
@@ -36,9 +45,9 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-tenant-writes:
-      - '1199'
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 200
-      message: OK
+      code: 403
+      message: Forbidden
 version: 1

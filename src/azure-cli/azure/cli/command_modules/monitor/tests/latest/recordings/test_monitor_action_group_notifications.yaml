@@ -38,7 +38,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Feb 2025 15:25:16 GMT
+      - Sat, 22 Feb 2025 07:11:14 GMT
       expires:
       - '-1'
       pragma:
@@ -48,18 +48,99 @@ interactions:
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-activityid:
-      - 0bef1f0d-f068-11ef-b7fe-c8d9d2028398
+      - 32ee3e9a-f0ec-11ef-a7e9-c8d9d2028398
       x-content-type-options:
       - nosniff
       x-frame-options:
       - SAMEORIGIN
       x-ms-operation-identifier:
-      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/56f3427a-40b9-4654-8d23-c699c8e29df7
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/46aed5a8-26d1-442f-8992-c88bc059b243
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '24'
       x-servedby:
-      - WUS2ONEIM000002
+      - WUS2ONEIM000000
     status:
       code: 201
       message: Created
+- request:
+    body: '{"alertType": "budget", "armRoleReceivers": [{"name": "alicearmrole", "roleId":
+      "11111111-1111-1111-1111-111111111111", "useCommonAlertSchema": true}], "automationRunbookReceivers":
+      [{"automationAccountId": "alice_runbook", "isGlobalRunbook": false, "name":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/runbookTest/providers/Microsoft.Automation/automationAccounts/runbooktest",
+      "runbookName": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/runbookTest/providers/Microsoft.Automation/automationAccounts/runbooktest/webhooks/Alert1510184037084",
+      "serviceUri": "http://example.com", "useCommonAlertSchema": true, "webhookResourceId":
+      "test_runbook"}], "azureAppPushReceivers": [{"emailAddress": "alice@example.com",
+      "name": "alice_apppush"}], "azureFunctionReceivers": [{"functionAppResourceId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/aznsTest/providers/Microsoft.Web/sites/testFunctionApp",
+      "functionName": "HttpTriggerCSharp1", "httpTriggerUrl": "http://test.me", "name":
+      "azfunc", "useCommonAlertSchema": true}], "emailReceivers": [{"emailAddress":
+      "alice@example.com", "name": "alice", "useCommonAlertSchema": true}], "eventHubReceivers":
+      [{"eventHubName": "187f412d-1758-44d9-b052-169e2564721d", "eventHubNameSpace":
+      "testEventHub", "name": "alice_eventhub", "subscriptionId": "testEventHubNameSpace",
+      "useCommonAlertSchema": false}], "logicAppReceivers": [{"callbackUrl": "http://callback",
+      "name": "alice_logicapp", "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/LogicApp/providers/Microsoft.Logic/workflows/testLogicApp",
+      "useCommonAlertSchema": false}], "webhookReceivers": [{"name": "alice_web",
+      "serviceUri": "https://www.example.com/alert?name=alice", "useAadAuth": false,
+      "useCommonAlertSchema": true}]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group test-notifications create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1822'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --action-group -g -a -a -a -a -a -a -a -a --alert-type
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_notifications000001/providers/Microsoft.Insights/actionGroups/cliactiongrouptest000002/createNotifications?api-version=2022-06-01
+  response:
+    body:
+      string: '{"code":"NotSupportedArmRole","message":"NotSupportedArmRole"}'
+    headers:
+      access-control-expose-headers:
+      - x-activityid
+      api-supported-versions:
+      - 2021-09-01, 2022-04-01, 2022-06-01, 2023-01-01, 2023-03-01-preview, 2023-05-01-preview,
+        2023-05-01, 2023-08-01-preview, 2023-09-01-preview, 2024-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '62'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 22 Feb 2025 07:11:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-activityid:
+      - 346e372b-f0ec-11ef-998e-c8d9d2028398
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/fdb9b533-073c-4807-b1ab-e4bbfbe71b75
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-servedby:
+      - WUS2ONEIM000000
+    status:
+      code: 400
+      message: Bad Request
 version: 1

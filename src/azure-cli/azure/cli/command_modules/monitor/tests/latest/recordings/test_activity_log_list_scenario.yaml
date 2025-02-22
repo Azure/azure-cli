@@ -13,7 +13,7 @@ interactions:
       ParameterSetName:
       - --start-time --end-time
       User-Agent:
-      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.5.2-x86_64-i386-64bit)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/eventtypes/management/values?$filter=eventTimestamp%20ge%202018-01-01T00%3A00%3A00%2B00%3A00%20and%20eventTimestamp%20le%202999-01-01T00%3A00%3A00%2B00%3A00&api-version=2015-04-01
   response:
@@ -21,24 +21,30 @@ interactions:
       string: '{"code":"BadRequest","message":"The start time cannot be more than
         90 days in the past."}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2014-04-01, 2014-11-01, 2015-04-01, 2016-09-01-preview, 2017-03-01-preview
       cache-control:
-      - no-cache
+      - no-store, no-cache
       content-length:
       - '89'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Sun, 24 Sep 2023 11:15:50 GMT
+      - Sat, 22 Feb 2025 07:10:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/91347f66-369b-496f-9542-ed0701423f2b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3745'
     status:
       code: 400
       message: Bad Request

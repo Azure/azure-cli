@@ -13,31 +13,31 @@ interactions:
       ParameterSetName:
       - --kind -n -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001","name":"cli_test_lock_with_resource_id000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-07-07T09:27:10Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001","name":"cli_test_lock_with_resource_id000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_lock_with_three_level_resource_id","date":"2025-02-22T06:35:38Z","module":"resource"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '418'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jul 2021 09:27:14 GMT
+      - Sat, 22 Feb 2025 06:35:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3747'
     status:
       code: 200
       message: OK
@@ -61,46 +61,46 @@ interactions:
       ParameterSetName:
       - --kind -n -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002?api-version=2024-11-15
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002","name":"cli-cosmos000002","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2021-07-07T09:27:21.6685697Z"},"properties":{"provisioningState":"Creating","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":false,"analyticalStorageConfiguration":{"analyticalStorageSchemaType":"FullFidelity"},"instanceId":"00577cc8-6c1d-45bc-8b96-70a3719ded70","createMode":"Default","databaseAccountOfferType":"Standard","defaultIdentity":"","networkAclBypass":"None","disableLocalAuth":false,"consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.6"},"configurationOverrides":{},"writeLocations":[{"id":"cli-cosmos000002-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2025-02-22T06:35:48.6725955Z"},"properties":{"provisioningState":"Creating","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":false,"analyticalStorageConfiguration":{"schemaType":"FullFidelity"},"instanceId":"6fe2708d-37a1-4b8d-b69f-e8fdfeb6293c","databaseAccountOfferType":"Standard","defaultIdentity":"","networkAclBypass":"None","disableLocalAuth":false,"enablePartitionMerge":false,"enablePerRegionPerPartitionAutoscale":false,"enableBurstCapacity":false,"minimalTlsVersion":"Tls12","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.6"},"configurationOverrides":{"EnablePerRegionPerPartitionAutoscaleOptIn":"True"},"writeLocations":[{"id":"cli-cosmos000002-westus","locationName":"West
         US","provisioningState":"Creating","failoverPriority":0,"isZoneRedundant":false}],"readLocations":[{"id":"cli-cosmos000002-westus","locationName":"West
         US","provisioningState":"Creating","failoverPriority":0,"isZoneRedundant":false}],"locations":[{"id":"cli-cosmos000002-westus","locationName":"West
         US","provisioningState":"Creating","failoverPriority":0,"isZoneRedundant":false}],"failoverPolicies":[{"id":"cli-cosmos000002-westus","locationName":"West
-        US","failoverPriority":0}],"cors":[],"capabilities":[{"name":"EnableMongo"}],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":"Geo"}},"networkAclBypassResourceIds":[]},"identity":{"type":"None"}}'
+        US","failoverPriority":0}],"cors":[],"capabilities":[{"name":"EnableMongo"}],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":"Invalid"}},"networkAclBypassResourceIds":[],"keysMetadata":{"primaryMasterKey":{"generationTime":"2025-02-22T06:35:48.6725955Z"},"secondaryMasterKey":{"generationTime":"2025-02-22T06:35:48.6725955Z"},"primaryReadonlyMasterKey":{"generationTime":"2025-02-22T06:35:48.6725955Z"},"secondaryReadonlyMasterKey":{"generationTime":"2025-02-22T06:35:48.6725955Z"}}},"identity":{"type":"None"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/b9c0440d-d6f2-4a2f-a39d-bbb8c0de5aaf?api-version=2021-06-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/c17e5567-c022-4183-9e44-1d6d35d9022d?api-version=2024-11-15&t=638758029500925562&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=j78LcCm7w-ODmX_SOGEZWxvXnP6U1NrSJKIVlHnEYfD1PcqHeg5plaLmRwFER4dUk63D65ZvlDEpp5hnRylhtFZTdOor3uCA8iiaz4m-rYEJxR95z6zy7hCvGcZCbGSXldmuS4g5wz6LrcrDn0n8a0-FdF9hoxEh8fxEkvrgPhaQwUAsjr_y2wKWDieyDZxs7RfFW5j4-RCWHMeZuCWUREoir_ZcLVYSd_3S1u_uRqWSq1PjBNWh74Rr04g2_qkWfQA6vSTaofxSX1iUuj0QrRV2hsJQyLglDa0wt5ff6tG2QXaITEZU2ORDDt0PQ-dnGvD-9zPUfwr2WE190sFE7g&h=z0Mr3D4bJYmfqJTQKfHN8WojVGSb7IHJR0va3_b7f7c
       cache-control:
       - no-store, no-cache
       content-length:
-      - '2125'
+      - '2459'
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:27:24 GMT
+      - Sat, 22 Feb 2025 06:35:49 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/operationResults/b9c0440d-d6f2-4a2f-a39d-bbb8c0de5aaf?api-version=2021-06-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/operationResults/c17e5567-c022-4183-9e44-1d6d35d9022d?api-version=2024-11-15&t=638758029500925562&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=sSY-OMRzJUSXYltKkXWYqhYLMchqs5vIlLuD6rAZK1yt59yD2gMUpldS2ssykOs-td89_U9oxRgLtNYKGaR75Ig9EfvmYpGTAfTLgfGjoSzVzjIz8muBq6i0Zo_J-xVQ6QfqaS40NbsOTcmhoO4r0rZeenDZuZOlQOt_R1AVOXk9IrezVd_SJbdd1UHeqn0UFPrjfDyO0ph2Dija9x8d7G2HgI5jih2JntZulkmlX16sPvFHndJUxRZBk-yR_cBTuxyLn87FMLfO494l6IfE65iBkhfPfNbFLeod_Itzsvpg7w7yVRZmLIb9XEqLnQIWyGN5YCCCyOp4NlVeAh664w&h=sjN5PAzDheP2BzYPmnhUrWkocZodUlYDitc49SJoiX4
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/5bda6057-d054-45c4-bbc3-7c680b450f4c
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2996'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '196'
     status:
       code: 200
       message: Ok
@@ -118,9 +118,55 @@ interactions:
       ParameterSetName:
       - --kind -n -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/b9c0440d-d6f2-4a2f-a39d-bbb8c0de5aaf?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/c17e5567-c022-4183-9e44-1d6d35d9022d?api-version=2024-11-15&t=638758029500925562&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=j78LcCm7w-ODmX_SOGEZWxvXnP6U1NrSJKIVlHnEYfD1PcqHeg5plaLmRwFER4dUk63D65ZvlDEpp5hnRylhtFZTdOor3uCA8iiaz4m-rYEJxR95z6zy7hCvGcZCbGSXldmuS4g5wz6LrcrDn0n8a0-FdF9hoxEh8fxEkvrgPhaQwUAsjr_y2wKWDieyDZxs7RfFW5j4-RCWHMeZuCWUREoir_ZcLVYSd_3S1u_uRqWSq1PjBNWh74Rr04g2_qkWfQA6vSTaofxSX1iUuj0QrRV2hsJQyLglDa0wt5ff6tG2QXaITEZU2ORDDt0PQ-dnGvD-9zPUfwr2WE190sFE7g&h=z0Mr3D4bJYmfqJTQKfHN8WojVGSb7IHJR0va3_b7f7c
+  response:
+    body:
+      string: '{"status":"Enqueued"}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json
+      date:
+      - Sat, 22 Feb 2025 06:35:50 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-gatewayversion:
+      - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/8982196e-8d55-4875-8d94-e1bcd59a79e0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3746'
+    status:
+      code: 200
+      message: Ok
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --kind -n -g
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/c17e5567-c022-4183-9e44-1d6d35d9022d?api-version=2024-11-15&t=638758029500925562&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=j78LcCm7w-ODmX_SOGEZWxvXnP6U1NrSJKIVlHnEYfD1PcqHeg5plaLmRwFER4dUk63D65ZvlDEpp5hnRylhtFZTdOor3uCA8iiaz4m-rYEJxR95z6zy7hCvGcZCbGSXldmuS4g5wz6LrcrDn0n8a0-FdF9hoxEh8fxEkvrgPhaQwUAsjr_y2wKWDieyDZxs7RfFW5j4-RCWHMeZuCWUREoir_ZcLVYSd_3S1u_uRqWSq1PjBNWh74Rr04g2_qkWfQA6vSTaofxSX1iUuj0QrRV2hsJQyLglDa0wt5ff6tG2QXaITEZU2ORDDt0PQ-dnGvD-9zPUfwr2WE190sFE7g&h=z0Mr3D4bJYmfqJTQKfHN8WojVGSb7IHJR0va3_b7f7c
   response:
     body:
       string: '{"status":"Dequeued"}'
@@ -132,21 +178,21 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:27:55 GMT
+      - Sat, 22 Feb 2025 06:36:20 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/8cfc5f04-6122-43d0-843f-c06e0f01cad6
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
     status:
       code: 200
       message: Ok
@@ -164,9 +210,9 @@ interactions:
       ParameterSetName:
       - --kind -n -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/b9c0440d-d6f2-4a2f-a39d-bbb8c0de5aaf?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/c17e5567-c022-4183-9e44-1d6d35d9022d?api-version=2024-11-15&t=638758029500925562&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=j78LcCm7w-ODmX_SOGEZWxvXnP6U1NrSJKIVlHnEYfD1PcqHeg5plaLmRwFER4dUk63D65ZvlDEpp5hnRylhtFZTdOor3uCA8iiaz4m-rYEJxR95z6zy7hCvGcZCbGSXldmuS4g5wz6LrcrDn0n8a0-FdF9hoxEh8fxEkvrgPhaQwUAsjr_y2wKWDieyDZxs7RfFW5j4-RCWHMeZuCWUREoir_ZcLVYSd_3S1u_uRqWSq1PjBNWh74Rr04g2_qkWfQA6vSTaofxSX1iUuj0QrRV2hsJQyLglDa0wt5ff6tG2QXaITEZU2ORDDt0PQ-dnGvD-9zPUfwr2WE190sFE7g&h=z0Mr3D4bJYmfqJTQKfHN8WojVGSb7IHJR0va3_b7f7c
   response:
     body:
       string: '{"status":"Dequeued"}'
@@ -178,21 +224,21 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:28:26 GMT
+      - Sat, 22 Feb 2025 06:36:50 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/e6fb1550-fdb3-4c04-bd7c-1821949fc669
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
     status:
       code: 200
       message: Ok
@@ -210,9 +256,9 @@ interactions:
       ParameterSetName:
       - --kind -n -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/b9c0440d-d6f2-4a2f-a39d-bbb8c0de5aaf?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/c17e5567-c022-4183-9e44-1d6d35d9022d?api-version=2024-11-15&t=638758029500925562&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=j78LcCm7w-ODmX_SOGEZWxvXnP6U1NrSJKIVlHnEYfD1PcqHeg5plaLmRwFER4dUk63D65ZvlDEpp5hnRylhtFZTdOor3uCA8iiaz4m-rYEJxR95z6zy7hCvGcZCbGSXldmuS4g5wz6LrcrDn0n8a0-FdF9hoxEh8fxEkvrgPhaQwUAsjr_y2wKWDieyDZxs7RfFW5j4-RCWHMeZuCWUREoir_ZcLVYSd_3S1u_uRqWSq1PjBNWh74Rr04g2_qkWfQA6vSTaofxSX1iUuj0QrRV2hsJQyLglDa0wt5ff6tG2QXaITEZU2ORDDt0PQ-dnGvD-9zPUfwr2WE190sFE7g&h=z0Mr3D4bJYmfqJTQKfHN8WojVGSb7IHJR0va3_b7f7c
   response:
     body:
       string: '{"status":"Dequeued"}'
@@ -224,21 +270,21 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:28:56 GMT
+      - Sat, 22 Feb 2025 06:37:21 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/ebf6ce99-bfd9-4f8e-ad75-1af541ddedff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
     status:
       code: 200
       message: Ok
@@ -256,9 +302,9 @@ interactions:
       ParameterSetName:
       - --kind -n -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/b9c0440d-d6f2-4a2f-a39d-bbb8c0de5aaf?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/c17e5567-c022-4183-9e44-1d6d35d9022d?api-version=2024-11-15&t=638758029500925562&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=j78LcCm7w-ODmX_SOGEZWxvXnP6U1NrSJKIVlHnEYfD1PcqHeg5plaLmRwFER4dUk63D65ZvlDEpp5hnRylhtFZTdOor3uCA8iiaz4m-rYEJxR95z6zy7hCvGcZCbGSXldmuS4g5wz6LrcrDn0n8a0-FdF9hoxEh8fxEkvrgPhaQwUAsjr_y2wKWDieyDZxs7RfFW5j4-RCWHMeZuCWUREoir_ZcLVYSd_3S1u_uRqWSq1PjBNWh74Rr04g2_qkWfQA6vSTaofxSX1iUuj0QrRV2hsJQyLglDa0wt5ff6tG2QXaITEZU2ORDDt0PQ-dnGvD-9zPUfwr2WE190sFE7g&h=z0Mr3D4bJYmfqJTQKfHN8WojVGSb7IHJR0va3_b7f7c
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -270,21 +316,21 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:29:26 GMT
+      - Sat, 22 Feb 2025 06:37:51 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/aba741ac-0ebb-47e4-befc-b57e5b099faf
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3746'
     status:
       code: 200
       message: Ok
@@ -302,40 +348,38 @@ interactions:
       ParameterSetName:
       - --kind -n -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002?api-version=2024-11-15
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002","name":"cli-cosmos000002","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2021-07-07T09:28:53.8292189Z"},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli-cosmos000002.documents.azure.com:443/","mongoEndpoint":"https://cli-cosmos000002.mongo.cosmos.azure.com:443/","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":false,"analyticalStorageConfiguration":{"analyticalStorageSchemaType":"FullFidelity"},"instanceId":"00577cc8-6c1d-45bc-8b96-70a3719ded70","createMode":"Default","databaseAccountOfferType":"Standard","defaultIdentity":"FirstPartyIdentity","networkAclBypass":"None","disableLocalAuth":false,"consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.6"},"configurationOverrides":{"EnableBsonSchema":"True"},"writeLocations":[{"id":"cli-cosmos000002-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2025-02-22T06:37:13.6024205Z"},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli-cosmos000002.documents.azure.com:443/","sqlEndpoint":"https://cli-cosmos000002.documents.azure.com:443/","mongoEndpoint":"https://cli-cosmos000002.mongo.cosmos.azure.com:443/","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":false,"analyticalStorageConfiguration":{"schemaType":"FullFidelity"},"instanceId":"6fe2708d-37a1-4b8d-b69f-e8fdfeb6293c","databaseAccountOfferType":"Standard","defaultIdentity":"FirstPartyIdentity","networkAclBypass":"None","disableLocalAuth":false,"enablePartitionMerge":false,"enablePerRegionPerPartitionAutoscale":false,"enableBurstCapacity":false,"minimalTlsVersion":"Tls12","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.6"},"configurationOverrides":{"EnableBsonSchema":"True","EnablePerRegionPerPartitionAutoscaleOptIn":"True"},"writeLocations":[{"id":"cli-cosmos000002-westus","locationName":"West
         US","documentEndpoint":"https://cli-cosmos000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"readLocations":[{"id":"cli-cosmos000002-westus","locationName":"West
         US","documentEndpoint":"https://cli-cosmos000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"locations":[{"id":"cli-cosmos000002-westus","locationName":"West
         US","documentEndpoint":"https://cli-cosmos000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"failoverPolicies":[{"id":"cli-cosmos000002-westus","locationName":"West
-        US","failoverPriority":0}],"cors":[],"capabilities":[{"name":"EnableMongo"}],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":"Geo"}},"networkAclBypassResourceIds":[]},"identity":{"type":"None"}}'
+        US","failoverPriority":0}],"cors":[],"capabilities":[{"name":"EnableMongo"}],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":"Geo"}},"networkAclBypassResourceIds":[],"keysMetadata":{"primaryMasterKey":{"generationTime":"2025-02-22T06:37:13.6024205Z"},"secondaryMasterKey":{"generationTime":"2025-02-22T06:37:13.6024205Z"},"primaryReadonlyMasterKey":{"generationTime":"2025-02-22T06:37:13.6024205Z"},"secondaryReadonlyMasterKey":{"generationTime":"2025-02-22T06:37:13.6024205Z"}}},"identity":{"type":"None"}}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '2618'
+      - '2945'
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:29:26 GMT
+      - Sat, 22 Feb 2025 06:37:51 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3745'
     status:
       code: 200
       message: Ok
@@ -353,45 +397,44 @@ interactions:
       ParameterSetName:
       - --kind -n -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002?api-version=2024-11-15
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002","name":"cli-cosmos000002","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2021-07-07T09:28:53.8292189Z"},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli-cosmos000002.documents.azure.com:443/","mongoEndpoint":"https://cli-cosmos000002.mongo.cosmos.azure.com:443/","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":false,"analyticalStorageConfiguration":{"analyticalStorageSchemaType":"FullFidelity"},"instanceId":"00577cc8-6c1d-45bc-8b96-70a3719ded70","createMode":"Default","databaseAccountOfferType":"Standard","defaultIdentity":"FirstPartyIdentity","networkAclBypass":"None","disableLocalAuth":false,"consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.6"},"configurationOverrides":{"EnableBsonSchema":"True"},"writeLocations":[{"id":"cli-cosmos000002-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"MongoDB","tags":{},"systemData":{"createdAt":"2025-02-22T06:37:13.6024205Z"},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli-cosmos000002.documents.azure.com:443/","sqlEndpoint":"https://cli-cosmos000002.documents.azure.com:443/","mongoEndpoint":"https://cli-cosmos000002.mongo.cosmos.azure.com:443/","publicNetworkAccess":"Enabled","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"MongoDB","disableKeyBasedMetadataWriteAccess":false,"enableFreeTier":false,"enableAnalyticalStorage":false,"analyticalStorageConfiguration":{"schemaType":"FullFidelity"},"instanceId":"6fe2708d-37a1-4b8d-b69f-e8fdfeb6293c","databaseAccountOfferType":"Standard","defaultIdentity":"FirstPartyIdentity","networkAclBypass":"None","disableLocalAuth":false,"enablePartitionMerge":false,"enablePerRegionPerPartitionAutoscale":false,"enableBurstCapacity":false,"minimalTlsVersion":"Tls12","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"apiProperties":{"serverVersion":"3.6"},"configurationOverrides":{"EnableBsonSchema":"True","EnablePerRegionPerPartitionAutoscaleOptIn":"True"},"writeLocations":[{"id":"cli-cosmos000002-westus","locationName":"West
         US","documentEndpoint":"https://cli-cosmos000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"readLocations":[{"id":"cli-cosmos000002-westus","locationName":"West
         US","documentEndpoint":"https://cli-cosmos000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"locations":[{"id":"cli-cosmos000002-westus","locationName":"West
         US","documentEndpoint":"https://cli-cosmos000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"failoverPolicies":[{"id":"cli-cosmos000002-westus","locationName":"West
-        US","failoverPriority":0}],"cors":[],"capabilities":[{"name":"EnableMongo"}],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":"Geo"}},"networkAclBypassResourceIds":[]},"identity":{"type":"None"}}'
+        US","failoverPriority":0}],"cors":[],"capabilities":[{"name":"EnableMongo"}],"ipRules":[],"backupPolicy":{"type":"Periodic","periodicModeProperties":{"backupIntervalInMinutes":240,"backupRetentionIntervalInHours":8,"backupStorageRedundancy":"Geo"}},"networkAclBypassResourceIds":[],"keysMetadata":{"primaryMasterKey":{"generationTime":"2025-02-22T06:37:13.6024205Z"},"secondaryMasterKey":{"generationTime":"2025-02-22T06:37:13.6024205Z"},"primaryReadonlyMasterKey":{"generationTime":"2025-02-22T06:37:13.6024205Z"},"secondaryReadonlyMasterKey":{"generationTime":"2025-02-22T06:37:13.6024205Z"}}},"identity":{"type":"None"}}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '2618'
+      - '2945'
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:29:27 GMT
+      - Sat, 22 Feb 2025 06:37:52 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3744'
     status:
       code: 200
       message: Ok
 - request:
-    body: '{"properties": {"resource": {"id": "cli-db000003"}, "options": {}}}'
+    body: '{"properties": {"resource": {"id": "cli-db000003", "createMode": "Default"},
+      "options": {}}}'
     headers:
       Accept:
       - application/json
@@ -402,21 +445,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '85'
+      - '92'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n --account-name -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003?api-version=2024-11-15
   response:
     body:
       string: '{"status":"Enqueued"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/ea4e91bf-7911-4261-9462-f35da83265ad?api-version=2021-06-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/f36ac2fc-8acb-4831-a354-5f14f5d30c6a?api-version=2024-11-15&t=638758030755956955&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=wKJswz_etbqVMtc7BxBsYtWZKJVdubD3JtwmTEIzKLsfnObKB8LogEtmV-5GA-ddhlRu7_GdaMxpSMkurOe_FpFDkLQXLwmDfc7UG02j6tsItd7tBq_qJ8kRv5zY7rG1yFxDDNjlavO9UWYb68ecEuzMy_g78Qm7L2PrIwTm8SbrvOd_q7KSPoWU-zUZX2T34cQ4L3TwM8CxZ5S4lIL0LP4WlyhwLz_F6nGUSUTbOnk7w41nzSdGyzsKu-32D8AcQq3RMMPo0OgzRDM19dwXXymTJWNMivarYDUFwEa12BllbEd7JCrizEcjb6qV1mgjeHlTDouuVmgPHicUegojSQ&h=ejFRnBj54v_ILOsjhYmjCKoF20a88FipdZz5vWjT0Ws
       cache-control:
       - no-store, no-cache
       content-length:
@@ -424,9 +467,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:29:28 GMT
+      - Sat, 22 Feb 2025 06:37:55 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/operationResults/ea4e91bf-7911-4261-9462-f35da83265ad?api-version=2021-06-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/operationResults/f36ac2fc-8acb-4831-a354-5f14f5d30c6a?api-version=2024-11-15&t=638758030756113185&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=uL2PTZUja2jdCrrfKCnUQUvNtlh9R0Agy0V9jEWVVXndObujixgHiJhkVLblf6E7pT2uoegeFr9JCHWbRD7pXdSuPPJ015SBlmA2z0_HZdIg5XPIvI0JcHsqYYv6vmHDKqtuI_gLqr5aTLUhBISH13sgCSmL5B6NmuT0xX7Fh59WucPCZExSKJoc0IdcFuWCHBPhlGUCs8WBwBSEM6uWzICRI2yhhH7-PMJNo4rFavS1vUH9ybbJ79kdbSDQDB4yV1CLG8uYLHskNj5jKdcBYdteDrN5vrz61KZI5d5mXMOZTpC1xA7P0h1YSm6DKZt3GiikUTsS39ynwrzcgay58Q&h=WWrF6xWcp2vbOW9dZVU_HqOGkT0RhKi4JTswR-9jbDQ
       pragma:
       - no-cache
       server:
@@ -437,8 +480,12 @@ interactions:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/34c7690f-1b58-403d-90cb-722c2bbc5ea8
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2996'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '196'
     status:
       code: 202
       message: Accepted
@@ -456,35 +503,35 @@ interactions:
       ParameterSetName:
       - -n --account-name -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/ea4e91bf-7911-4261-9462-f35da83265ad?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/f36ac2fc-8acb-4831-a354-5f14f5d30c6a?api-version=2024-11-15&t=638758030755956955&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=wKJswz_etbqVMtc7BxBsYtWZKJVdubD3JtwmTEIzKLsfnObKB8LogEtmV-5GA-ddhlRu7_GdaMxpSMkurOe_FpFDkLQXLwmDfc7UG02j6tsItd7tBq_qJ8kRv5zY7rG1yFxDDNjlavO9UWYb68ecEuzMy_g78Qm7L2PrIwTm8SbrvOd_q7KSPoWU-zUZX2T34cQ4L3TwM8CxZ5S4lIL0LP4WlyhwLz_F6nGUSUTbOnk7w41nzSdGyzsKu-32D8AcQq3RMMPo0OgzRDM19dwXXymTJWNMivarYDUFwEa12BllbEd7JCrizEcjb6qV1mgjeHlTDouuVmgPHicUegojSQ&h=ejFRnBj54v_ILOsjhYmjCKoF20a88FipdZz5vWjT0Ws
   response:
     body:
-      string: '{"status":"Succeeded"}'
+      string: '{"status":"Enqueued"}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '22'
+      - '21'
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:29:59 GMT
+      - Sat, 22 Feb 2025 06:37:55 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/532f2451-edb1-46e1-ad02-ca1a5c10c341
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3743'
     status:
       code: 200
       message: Ok
@@ -502,9 +549,55 @@ interactions:
       ParameterSetName:
       - -n --account-name -g
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/f36ac2fc-8acb-4831-a354-5f14f5d30c6a?api-version=2024-11-15&t=638758030755956955&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=wKJswz_etbqVMtc7BxBsYtWZKJVdubD3JtwmTEIzKLsfnObKB8LogEtmV-5GA-ddhlRu7_GdaMxpSMkurOe_FpFDkLQXLwmDfc7UG02j6tsItd7tBq_qJ8kRv5zY7rG1yFxDDNjlavO9UWYb68ecEuzMy_g78Qm7L2PrIwTm8SbrvOd_q7KSPoWU-zUZX2T34cQ4L3TwM8CxZ5S4lIL0LP4WlyhwLz_F6nGUSUTbOnk7w41nzSdGyzsKu-32D8AcQq3RMMPo0OgzRDM19dwXXymTJWNMivarYDUFwEa12BllbEd7JCrizEcjb6qV1mgjeHlTDouuVmgPHicUegojSQ&h=ejFRnBj54v_ILOsjhYmjCKoF20a88FipdZz5vWjT0Ws
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json
+      date:
+      - Sat, 22 Feb 2025 06:38:25 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-gatewayversion:
+      - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/9d463a73-c839-4ba4-a98e-462107386bb4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3747'
+    status:
+      code: 200
+      message: Ok
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb mongodb database create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --account-name -g
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003?api-version=2024-11-15
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases","name":"cli-db000003","properties":{"resource":{"id":"cli-db000003"}}}'
@@ -512,31 +605,31 @@ interactions:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '448'
+      - '341'
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:30:00 GMT
+      - Sat, 22 Feb 2025 06:38:26 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/c1b84050-276f-4024-9086-11264b5b3789
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3746'
     status:
       code: 200
       message: Ok
 - request:
     body: '{"properties": {"resource": {"id": "cli-collection000004", "shardKey":
-      {"ShardingKey": "Hash"}}, "options": {}}}'
+      {"ShardingKey": "Hash"}, "createMode": "Default"}, "options": {}}}'
     headers:
       Accept:
       - application/json
@@ -547,21 +640,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '142'
+      - '137'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -d -a -g --shard
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004?api-version=2024-11-15
   response:
     body:
       string: '{"status":"Enqueued"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/f1932ffa-14b5-4b1a-8ae8-8ec82f8d18f7?api-version=2021-06-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/a6a8b721-7825-47f0-a0a5-fa1e7f3391ad?api-version=2024-11-15&t=638758031095694087&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=h5moSXbsEc-PheUq33KL4UNax3cMCVHFJw1fUrPBe7jzvPGrVT69DIb8thCakARKn5ZLmAsqSGCTbO-qlvdnPplN5soA9pQZksbYg4hpQsD9NiVAECIeyRfbMsk-ICrVYtfVWC3Oj1j_VkCLw-bJN6-9hW3-SiHb_X8nnh4ZMU9n8jUVtxeP2r6W3Uac7NUVGhXlMlTvF52KP5TG7Q_Beu3RUOt-8HOnY_mmNGFSN5tVK9lqjqjH5lmJEjFe_aADt-DNgAquAs8B2FXmb-AuvgaF3kpx8nL0y_1xUn4ZaCUiBakdnN-Dv1g1YzN88SlUIb1iLvkOWRB4YfTW0Eyenw&h=xv_MY1JFLsHLpgcMzHDCGDnhygAXre9wcW6-KrkhA08
       cache-control:
       - no-store, no-cache
       content-length:
@@ -569,9 +662,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:30:02 GMT
+      - Sat, 22 Feb 2025 06:38:29 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004/operationResults/f1932ffa-14b5-4b1a-8ae8-8ec82f8d18f7?api-version=2021-06-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004/operationResults/a6a8b721-7825-47f0-a0a5-fa1e7f3391ad?api-version=2024-11-15&t=638758031095850440&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=DheTs1izKNavfnYaO7K2ZCYFasA6bndiKHBLhuAC8oWqOKgUxdXq1GLpVvclou1npBky3-NABgrIfFA4ifaBFIiM7CkcRDcyLKH5pqrqWTxYSGSmpdpRhqbaJWgaSTFAIDml7_42GHUja-BDTTbmY_gAtT82UJ9pgHKEBU2_b8xwRdM9ai5N-Bd7V0T0a_YucwVLG9gaNnHapwapDPdFAdJPe_oueAufb_CRSjPLwC5_-hu3tcY47hol3YfGze2MOtSP_mkSmRk14EtsWK910P8FbYK-Cf2ZAqONIJe9QBjXKDkDNZqXgGVML6rUMDr0CLmsWaLNxzpe571gk0YTfA&h=T-h1xE7Yb2eg4v7vPM-e41OOwBnJ-1lMvcmHn4m20rc
       pragma:
       - no-cache
       server:
@@ -582,8 +675,12 @@ interactions:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/f645f23b-8205-45d5-9602-93f56f8ac711
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2997'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '197'
     status:
       code: 202
       message: Accepted
@@ -601,35 +698,35 @@ interactions:
       ParameterSetName:
       - -n -d -a -g --shard
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/f1932ffa-14b5-4b1a-8ae8-8ec82f8d18f7?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/a6a8b721-7825-47f0-a0a5-fa1e7f3391ad?api-version=2024-11-15&t=638758031095694087&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=h5moSXbsEc-PheUq33KL4UNax3cMCVHFJw1fUrPBe7jzvPGrVT69DIb8thCakARKn5ZLmAsqSGCTbO-qlvdnPplN5soA9pQZksbYg4hpQsD9NiVAECIeyRfbMsk-ICrVYtfVWC3Oj1j_VkCLw-bJN6-9hW3-SiHb_X8nnh4ZMU9n8jUVtxeP2r6W3Uac7NUVGhXlMlTvF52KP5TG7Q_Beu3RUOt-8HOnY_mmNGFSN5tVK9lqjqjH5lmJEjFe_aADt-DNgAquAs8B2FXmb-AuvgaF3kpx8nL0y_1xUn4ZaCUiBakdnN-Dv1g1YzN88SlUIb1iLvkOWRB4YfTW0Eyenw&h=xv_MY1JFLsHLpgcMzHDCGDnhygAXre9wcW6-KrkhA08
   response:
     body:
-      string: '{"status":"Succeeded"}'
+      string: '{"status":"Enqueued"}'
     headers:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '22'
+      - '21'
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:30:32 GMT
+      - Sat, 22 Feb 2025 06:38:29 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/d35d376f-2a15-46f7-9e36-713d093a1d02
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
     status:
       code: 200
       message: Ok
@@ -647,9 +744,55 @@ interactions:
       ParameterSetName:
       - -n -d -a -g --shard
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-mgmt-cosmosdb/6.4.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004?api-version=2021-06-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/a6a8b721-7825-47f0-a0a5-fa1e7f3391ad?api-version=2024-11-15&t=638758031095694087&c=MIIHhjCCBm6gAwIBAgITfAaX0D2c-iM1n_047QAABpfQPTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTIzMzI3WhcNMjUwNDIzMTIzMzI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT6cGM0B3y7ALaE-Skle4LGL_KvvE0RUfR5t5rwMeM3CUzeYQjKDViOQv-6ECcNTQ188o9xa72JZw6T10LTAadlAlNEt-D4ZgXojTXXdRtgYN-AZ-uCCkJCPAJEWs5EDD7mSbt4aK42yALzlx5HkO8DReVYve0sKKD5r_M3y_OScnMTmV2SqALMQFfQHE2BCDOEjnPMJyRgh-7NvAqTuj-04DaveAIZSPJ9ljaYUCJ6fuyHJpPPDJvqzMYvVtE8OSAbxMClc2r5faOd2VDJXmbWWCx5jgb6bsGk0OJlSYIWH4DG7ERimIDapcgwLFJy4o8a8bkK0bi9A_5dTellBPUCAwEAAaOCBHMwggRvMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAcsGCCsGAQUFBwEBBIIBvTCCAbkwYwYIKwYBBQUHMAKGV2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDEuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDQuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwHQYDVR0OBBYEFM-T8L9nIeCFTohGWTDyVFKymXV6MA4GA1UdDwEB_wQEAwIFoDCCASYGA1UdHwSCAR0wggEZMIIBFaCCARGgggENhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmyGMWh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFHrWGYUoeWxxdh5g-PNL76IFQhYdMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAL5-mSvqTMKZ-yWP_ZT759pg-E4fR6CLCeXO0jrmpqWWL7kI50BvqMxrc_lgbkvtph9Pxa7ubGsAa1Exeoi8qx0ROCtQv-NyhNyDLePoY5JfVD6QGmvlnIziXrlYvbbnilY_vo-wieWJGJhuESMEaTphDiHpFdEuA2NZNxyxXsQV5fUpa2Rls0wrtnmPPIzhMrpswh3rBEnbxvlgC6SUihf90jSN_Hkn0T201tVzyjd5G1RK9QNqmdL0lKL-OZm8rpl-nwepifa5s6-Qa7cwTV2CMjAXPtsPHtNsPXvte52PFBn_dZiXBQN2njTerWOgNEpj5mIZ-nr3-pWeHhqAXSQ&s=h5moSXbsEc-PheUq33KL4UNax3cMCVHFJw1fUrPBe7jzvPGrVT69DIb8thCakARKn5ZLmAsqSGCTbO-qlvdnPplN5soA9pQZksbYg4hpQsD9NiVAECIeyRfbMsk-ICrVYtfVWC3Oj1j_VkCLw-bJN6-9hW3-SiHb_X8nnh4ZMU9n8jUVtxeP2r6W3Uac7NUVGhXlMlTvF52KP5TG7Q_Beu3RUOt-8HOnY_mmNGFSN5tVK9lqjqjH5lmJEjFe_aADt-DNgAquAs8B2FXmb-AuvgaF3kpx8nL0y_1xUn4ZaCUiBakdnN-Dv1g1YzN88SlUIb1iLvkOWRB4YfTW0Eyenw&h=xv_MY1JFLsHLpgcMzHDCGDnhygAXre9wcW6-KrkhA08
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json
+      date:
+      - Sat, 22 Feb 2025 06:38:59 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-gatewayversion:
+      - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/741f3e88-d11d-4873-8617-45e26375da71
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+    status:
+      code: 200
+      message: Ok
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb mongodb collection create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -d -a -g --shard
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004?api-version=2024-11-15
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004","type":"Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections","name":"cli-collection000004","properties":{"resource":{"id":"cli-collection000004","shardKey":{"ShardingKey":"Hash"},"indexes":[{"key":{"keys":["_id"]}}]}}}'
@@ -657,25 +800,25 @@ interactions:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '634'
+      - '473'
       content-type:
       - application/json
       date:
-      - Wed, 07 Jul 2021 09:30:33 GMT
+      - Sat, 22 Feb 2025 06:39:00 GMT
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
       - version=2.14.0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/c51c4f38-22f6-4a6d-bbcd-df024a81f02c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3747'
     status:
       code: 200
       message: Ok
@@ -697,7 +840,7 @@ interactions:
       ParameterSetName:
       - -n --resource --lock-type
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004/providers/Microsoft.Authorization/locks/cli-lock000005?api-version=2016-09-01
   response:
@@ -707,11 +850,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '529'
+      - '396'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jul 2021 09:30:34 GMT
+      - Sat, 22 Feb 2025 06:39:02 GMT
       expires:
       - '-1'
       pragma:
@@ -720,8 +863,12 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/fa35680b-eed3-46c7-a088-efc99513f3e8
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '199'
     status:
       code: 201
       message: Created
@@ -739,103 +886,43 @@ interactions:
       ParameterSetName:
       - --name --resource
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
     body:
-      string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest2/providers/Microsoft.Compute/snapshots/s1/providers/Microsoft.Authorization/locks/l4","type":"Microsoft.Authorization/locks","name":"l4"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/FYTEST2/providers/Microsoft.Compute/disks/vm1_disk1_acf86aae49414fe8b70f669510e33728/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest2/providers/Microsoft.Compute/virtualMachines/vm1/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest2/providers/Microsoft.Compute/galleries/g1/providers/Microsoft.Authorization/locks/l2","type":"Microsoft.Authorization/locks","name":"l2"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest2/providers/Microsoft.Compute/galleries/g1/images/image1/providers/Microsoft.Authorization/locks/l3","type":"Microsoft.Authorization/locks","name":"l3"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest2/providers/Microsoft.Compute/galleries/g1/images/image1/versions/1.0.0/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004/providers/Microsoft.Authorization/locks/cli-lock000005","type":"Microsoft.Authorization/locks","name":"cli-lock000005"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acctestRG-ibt-24/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/bez-rg/providers/Microsoft.Authorization/locks/del","type":"Microsoft.Authorization/locks","name":"del"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320008debd5bc/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
+      string: '{"value":[{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/bez-rg/providers/Microsoft.Storage/storageAccounts/bezsharedstorage/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fypurview/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_group_lockrgwagzm22v4cfj5mslx4raxnijvhaamtlft5g2mmyte3ssnpw45ghtjw/providers/Microsoft.Authorization/locks/cli-test-lockgcxd3rdzssjobpnqlqn6tbyzs3wrsbhpk4f","type":"Microsoft.Authorization/locks","name":"cli-test-lockgcxd3rdzssjobpnqlqn6tbyzs3wrsbhpk4f"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lightning/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lock3cyeygkrtosacajli3otim3j6altiytn2o/providers/Microsoft.Authorization/locks/cli-test-locksnf4vuadrtx27bhkdzgek6vzpz5xb63bg7j","type":"Microsoft.Authorization/locks","name":"cli-test-locksnf4vuadrtx27bhkdzgek6vzpz5xb63bg7j"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fybot/providers/Microsoft.Authorization/locks/delete-lock","type":"Microsoft.Authorization/locks","name":"delete-lock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/galleryappaccount/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AutoTagFunctionAppRG/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/queuetest/providers/Microsoft.Storage/storageAccounts/qteststac/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Authorization/locks/test-databricks","type":"Microsoft.Authorization/locks","name":"test-databricks"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Storage/storageAccounts/hangstorage/providers/Microsoft.Authorization/locks/2","type":"Microsoft.Authorization/locks","name":"2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shiying-rg/providers/Microsoft.Authorization/locks/donotdelete","type":"Microsoft.Authorization/locks","name":"donotdelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_commands_with_idsvvj5j3j7mlet4rxc2rgzlxazqkyyi33intic3axolqmf/providers/Microsoft.Network/virtualNetworks/cli-lock-vnetkj4zew76vmcy3qobm/subnets/cli-lock-subnetd2zr7ud2w6dh2za/providers/Microsoft.Authorization/locks/cli-test-lockmggd4tg","type":"Microsoft.Authorization/locks","name":"cli-test-lockmggd4tg"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-live-test/providers/Microsoft.Authorization/locks/can
+        not delete","type":"Microsoft.Authorization/locks","name":"can not delete"},{"properties":{"level":"CanNotDelete","notes":"Public
+        preview - do not delete until after 6/15/24"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clis-login-preview/providers/Microsoft.Authorization/locks/preview","type":"Microsoft.Authorization/locks","name":"preview"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Authorization/locks/rg2","type":"Microsoft.Authorization/locks","name":"rg2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
         by Azure Backup for storage accounts registered with a Recovery Services Vault.
         This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgxp7uwuibs5/providers/microsoft.storage/storageAccounts/clitestzrwidkqplnw3jmz4z/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbo2ure7pgp/providers/microsoft.storage/storageAccounts/clitestsnv7joygpazk23npj/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ljin-test/providers/Microsoft.KeyVault/vaults/kv-ljin-sni/providers/Microsoft.Authorization/locks/reserved","type":"Microsoft.Authorization/locks","name":"reserved"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fybot/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete","notes":"for
-        Asir"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/emerald-city-bookstore/providers/Microsoft.Authorization/locks/No-DELETE","type":"Microsoft.Authorization/locks","name":"No-DELETE"},{"properties":{"level":"CanNotDelete","notes":"Nanxuan
-        uses this for troubleshooting a high pri issue"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acctestRG-201105133030970486/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgh5duq2f6uh/providers/microsoft.storage/storageAccounts/clitest2vjedutxs37ymp4ni/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_readonly_resource_locklucgtzf5vgc65f5gjnxtn3kf4axeyzdcowlatqmvexq3/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrctghseyfj2qky7arbn/providers/Microsoft.Authorization/locks/cli-test-lockxjl4qh7c7dmei6gakhxdn4dx5etj6bbsgikpxf635qwkbtxezall4ysvef37t","type":"Microsoft.Authorization/locks","name":"cli-test-lockxjl4qh7c7dmei6gakhxdn4dx5etj6bbsgikpxf635qwkbtxezall4ysvef37t"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg46ia57tmnz/providers/microsoft.storage/storageAccounts/clitestdlxtp24ycnjl3jui2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_acctestRG-ibt-24_acctest-IBT-0710-2_4ebedb5a-e3b1-4675-aa4c-3c160fe70907/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgn6glpfa25c/providers/microsoft.storage/storageAccounts/clitestgt3fjzabc7taya5zo/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgiudkrkxpl4/providers/microsoft.storage/storageAccounts/clitestbiegaggvgwivkqyyi/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgl6l3rg6atb/providers/microsoft.storage/storageAccounts/clitest4sjmiwke5nz3f67pu/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgptzwacrnwa/providers/microsoft.storage/storageAccounts/clitestivtrt5tp624n63ast/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbbt37xr2le/providers/microsoft.storage/storageAccounts/clitest74vl6rwuxl5fbuklw/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbbt37xr2le/providers/microsoft.storage/storageAccounts/clitest5frikrzhxwryrkfel/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgu7jwflzo6g/providers/microsoft.storage/storageAccounts/clitestwqzjytdeun46rphfd/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rggrglkh7zr7/providers/microsoft.storage/storageAccounts/clitest2f63bh43aix4wcnlh/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/msyyc-test/providers/Microsoft.Storage/storageAccounts/storagemsyyc/providers/Microsoft.Authorization/locks/no-delete","type":"Microsoft.Authorization/locks","name":"no-delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fyvm/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgovptfsocfg/providers/microsoft.storage/storageAccounts/clitestz72bbbbv2cio2pmom/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Web/sites/portal2cli/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Web/sites/webp2c/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Storage/storageAccounts/portal2clistorage/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/FYTEST3/providers/Microsoft.Compute/disks/vm1_OsDisk_1_3eb858856d5643d0a15aca7514d2eecd/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest3/providers/Microsoft.Compute/images/image/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/feng-cli-rg/providers/Microsoft.Storage/storageAccounts/fengtestsa/providers/Microsoft.Authorization/locks/salock","type":"Microsoft.Authorization/locks","name":"salock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg6i4hl6iakg/providers/microsoft.storage/storageAccounts/clitestu3p7a7ib4n4y7gt4m/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgzjznhcqaoh/providers/microsoft.storage/storageAccounts/clitestwznnmnfot33xjztmk/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_gallery_image_version_vhddqxkb6y7azmjc53fhkyr66se7po4i2ve5es2y46av/providers/Microsoft.Storage/storageAccounts/clitestuxrcexs7kgo3dqsiz/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/new-experiences/providers/Microsoft.Authorization/locks/NO-DELETE","type":"Microsoft.Authorization/locks","name":"NO-DELETE"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zuh/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-cli-dev/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgp6ikwpcsq7/providers/microsoft.storage/storageAccounts/clitestggvkyebv5o55dhakj/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgrc4sjsrzt4/providers/microsoft.storage/storageAccounts/clitest63b5vtkhuf7auho6z/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Storage/storageAccounts/azurecliedge/providers/Microsoft.Authorization/locks/azurecliedge-dl","type":"Microsoft.Authorization/locks","name":"azurecliedge-dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.Storage/storageAccounts/sharedvmextension/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.Compute/images/img1/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.Compute/galleries/gallery1/images/image1/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete","notes":"In
-        case of deleting by incident"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azuresdktest_reserved/providers/Microsoft.Authorization/locks/LockReservedResources","type":"Microsoft.Authorization/locks","name":"LockReservedResources"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgv3m577d7ho/providers/microsoft.storage/storageAccounts/clitestej2fvhoj3zogyp5e7/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xz3-test/providers/Microsoft.Authorization/locks/NO-DELETE","type":"Microsoft.Authorization/locks","name":"NO-DELETE"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-beta/providers/Microsoft.Authorization/locks/donotdelete","type":"Microsoft.Authorization/locks","name":"donotdelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kairu-persist/providers/Microsoft.Authorization/locks/antidelete","type":"Microsoft.Authorization/locks","name":"antidelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azps-test-group/providers/Microsoft.Authorization/locks/do-not-delete","type":"Microsoft.Authorization/locks","name":"do-not-delete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgltfej7yr4u/providers/microsoft.storage/storageAccounts/clitestwvsg2uskf4i7vjfto/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/qianwens/providers/Microsoft.Storage/storageAccounts/qianwendev/providers/Microsoft.Authorization/locks/donotedelete","type":"Microsoft.Authorization/locks","name":"donotedelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.Storage/storageAccounts/clitestresultstac/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.DBforMySQL/servers/clisqldbserver/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete","notes":"for
-        customer issue repro  (snowflake)"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/storage-v2rt-repro/providers/Microsoft.Authorization/locks/DontDelete","type":"Microsoft.Authorization/locks","name":"DontDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgdc25pvki6m/providers/microsoft.storage/storageAccounts/clitestkxu4ahsqaxv42cyyf/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgekim5ct43n/providers/microsoft.storage/storageAccounts/clitest6jusqp4qvczw52pql/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jl-vm-ssh/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cannotdelete_resource_lockbfuaftaa7m4m77urywe56rs3yfr4sr3ybmrsclix/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrchikdj2r5lezlez4w6/providers/Microsoft.Authorization/locks/cli-test-locklxyko2yruqpd6z2mdw7bw43sff3nuyz2n5ygpm5opgtajrdjgyb7c7fau6kgw","type":"Microsoft.Authorization/locks","name":"cli-test-locklxyko2yruqpd6z2mdw7bw43sff3nuyz2n5ygpm5opgtajrdjgyb7c7fau6kgw"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/t-yakou2/providers/Microsoft.Web/sites/WebAppPortal2CLI20200827092707/providers/Microsoft.Authorization/locks/dont_delete_me","type":"Microsoft.Authorization/locks","name":"dont_delete_me"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgghkyqf7pb5/providers/microsoft.storage/storageAccounts/clitestpuea6vlqwxw6ihiws/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_gallery_image_version_vhddmban3xow2tgyly5j6xaruoliqaj443p3brq46idi/providers/Microsoft.Storage/storageAccounts/clitest4ydp57ynxl5tcjktl/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/t-yueshi/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"}]}'
+        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/zhiyihuang-rg/providers/microsoft.storage/storageAccounts/sauserassignedidentity2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004/providers/Microsoft.Authorization/locks/cli-lock000005","type":"Microsoft.Authorization/locks","name":"cli-lock000005"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-file-handle-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"ReadOnly","notes":"notesshckaxq4q5olwp3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_group_lockysvg7gszppjdrtkjqar33v2xe574f33wf3pw3x563rwgrvi7253pjkpq/providers/Microsoft.Authorization/locks/cli-test-lockyaqz6xi2wzehlsoiunyzz57lkafiplztnxz","type":"Microsoft.Authorization/locks","name":"cli-test-lockyaqz6xi2wzehlsoiunyzz57lkafiplztnxz"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhwen-domain/providers/Microsoft.Authorization/locks/zhwen","type":"Microsoft.Authorization/locks","name":"zhwen"},{"properties":{"level":"CanNotDelete","notes":"Prevent
+        the resource group from being deleted."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzurePowerShellLiveTest/providers/Microsoft.Authorization/locks/CanNotDelete","type":"Microsoft.Authorization/locks","name":"CanNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_cli_loadbalance/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgforaishellzips/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Web/sites/webp2c/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Storage/storageAccounts/portal2clistorage/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/feng-cli-rg/providers/Microsoft.Storage/storageAccounts/fengtestsa/providers/Microsoft.Authorization/locks/salock","type":"Microsoft.Authorization/locks","name":"salock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Storage/storageAccounts/azurecliedge/providers/Microsoft.Authorization/locks/azurecliedge-dl","type":"Microsoft.Authorization/locks","name":"azurecliedge-dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lockpembndygj27seh3526ltophqdxgykxuiqr/providers/Microsoft.Authorization/locks/cli-test-lockwx6sud5iv4muguritoc5v7olcdzvnqy6tv2","type":"Microsoft.Authorization/locks","name":"cli-test-lockwx6sud5iv4muguritoc5v7olcdzvnqy6tv2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/liwang3_rg_7651/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Storage/storageAccounts/privatepackage/providers/Microsoft.Authorization/locks/private
+        package","type":"Microsoft.Authorization/locks","name":"private package"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lockrit2pstga6awvduw7jbo2rzoeytrg7czn4/providers/Microsoft.Authorization/locks/cli-test-lock54muowjnzxw35v4yes4rmacxpnnhcsyftvq","type":"Microsoft.Authorization/locks","name":"cli-test-lock54muowjnzxw35v4yes4rmacxpnnhcsyftvq"},{"properties":{"level":"CanNotDelete","notes":"notesmut447ip6bcayxj"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_readonly_resource_group_lock2jovaf37yqd237mis4cdywthsuzu3clyadhryo/providers/Microsoft.Authorization/locks/cli-test-lock6pbp4r52n4fhg6eoby7ulsge322he2kjuua","type":"Microsoft.Authorization/locks","name":"cli-test-lock6pbp4r52n4fhg6eoby7ulsge322he2kjuua"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xz3-test/providers/Microsoft.Authorization/locks/del","type":"Microsoft.Authorization/locks","name":"del"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kairu-persist/providers/Microsoft.Authorization/locks/antidelete","type":"Microsoft.Authorization/locks","name":"antidelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_locki3dsms5o52dt7hqqzk5ursevnq2cfyu2km/providers/Microsoft.Authorization/locks/cli-test-lock5di7wb5l4rsye4w6kegahfbywctwlsa2jbi","type":"Microsoft.Authorization/locks","name":"cli-test-lock5di7wb5l4rsye4w6kegahfbywctwlsa2jbi"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bernard-test/providers/Microsoft.Authorization/locks/delete-lock","type":"Microsoft.Authorization/locks","name":"delete-lock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureCliBCD/providers/Microsoft.Authorization/locks/in-use","type":"Microsoft.Authorization/locks","name":"in-use"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tangerry-test/providers/Microsoft.Authorization/locks/prevent
+        deletion","type":"Microsoft.Authorization/locks","name":"prevent deletion"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/t-yakou2/providers/Microsoft.Web/sites/WebAppPortal2CLI20200827092707/providers/Microsoft.Authorization/locks/dont_delete_me","type":"Microsoft.Authorization/locks","name":"dont_delete_me"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-storagemover-rg2/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/GitHubAction_CI_RG/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzSecPackAutoConfigRG/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cannotdelete_resource_lockyupyfwxe35gm4yg73nnzfsn4tr2teojrocrm5z4r/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrcjnfmtwgkjchdkfede/providers/Microsoft.Authorization/locks/cli-test-locktyxqcswfb2y4pbhyqcbarz4c2pmr3teb766j5wxyckm3voil3bzbatg4pxnd5","type":"Microsoft.Authorization/locks","name":"cli-test-locktyxqcswfb2y4pbhyqcbarz4c2pmr3teb766j5wxyckm3voil3bzbatg4pxnd5"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '25802'
+      - '14400'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jul 2021 09:30:35 GMT
+      - Sat, 22 Feb 2025 06:39:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/e173426b-4bb1-436d-8c11-14112f8ddcfe
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
     status:
       code: 200
       message: OK
@@ -855,7 +942,7 @@ interactions:
       ParameterSetName:
       - --name --resource
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.DocumentDB/databaseAccounts/cli-cosmos000002/mongodbDatabases/cli-db000003/collections/cli-collection000004/providers/Microsoft.Authorization/locks/cli-lock000005?api-version=2016-09-01
   response:
@@ -867,7 +954,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 07 Jul 2021 09:30:35 GMT
+      - Sat, 22 Feb 2025 06:39:04 GMT
       expires:
       - '-1'
       pragma:
@@ -876,8 +963,12 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/dc6dcd81-eabf-4b37-a333-0e87c9c30736
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '198'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2998'
     status:
       code: 200
       message: OK
