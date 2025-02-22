@@ -17,7 +17,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 20 Feb 2025 15:02:14 GMT
+      - Sat, 22 Feb 2025 02:58:32 GMT
       x-ms-meta:
       - '{''key1'': ''value1''}'
       x-ms-meta-key1:
@@ -33,7 +33,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 20 Feb 2025 15:02:15 GMT
+      - Sat, 22 Feb 2025 02:58:34 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -57,7 +57,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 20 Feb 2025 15:02:16 GMT
+      - Sat, 22 Feb 2025 02:58:35 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
@@ -73,7 +73,295 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 20 Feb 2025 15:02:17 GMT
+      - Sat, 22 Feb 2025 02:58:35 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --include-metadata --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sat, 22 Feb 2025 02:58:36 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://storage000002.queue.core.windows.net/?comp=list&maxresults=5000&include=metadata
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://storage000002.queue.core.windows.net/\"><MaxResults>5000</MaxResults><Queues><Queue><Name>firstq000003</Name><Metadata><key1>value1</key1></Metadata></Queue></Queues><NextMarker
+        /></EnumerationResults>"
+    headers:
+      cache-control:
+      - no-cache
+      content-type:
+      - application/xml
+      date:
+      - Sat, 22 Feb 2025 02:58:37 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sat, 22 Feb 2025 02:58:38 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: PUT
+    uri: https://storage000002.queue.core.windows.net/secondq000004
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Sat, 22 Feb 2025 02:58:39 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sat, 22 Feb 2025 02:58:40 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://storage000002.queue.core.windows.net/?comp=list&maxresults=5000
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://storage000002.queue.core.windows.net/\"><MaxResults>5000</MaxResults><Queues><Queue><Name>firstq000003</Name></Queue><Queue><Name>secondq000004</Name></Queue></Queues><NextMarker
+        /></EnumerationResults>"
+    headers:
+      cache-control:
+      - no-cache
+      content-type:
+      - application/xml
+      date:
+      - Sat, 22 Feb 2025 02:58:40 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --num-results --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sat, 22 Feb 2025 02:58:42 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://storage000002.queue.core.windows.net/?comp=list&maxresults=1
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://storage000002.queue.core.windows.net/\"><MaxResults>1</MaxResults><Queues><Queue><Name>firstq000003</Name></Queue></Queues><NextMarker>/storage000002/secondq000004</NextMarker></EnumerationResults>"
+    headers:
+      cache-control:
+      - no-cache
+      content-type:
+      - application/xml
+      date:
+      - Sat, 22 Feb 2025 02:58:42 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --num-results --show-next-marker --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sat, 22 Feb 2025 02:58:43 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://storage000002.queue.core.windows.net/?comp=list&maxresults=1
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://storage000002.queue.core.windows.net/\"><MaxResults>1</MaxResults><Queues><Queue><Name>firstq000003</Name></Queue></Queues><NextMarker>/storage000002/secondq000004</NextMarker></EnumerationResults>"
+    headers:
+      cache-control:
+      - no-cache
+      content-type:
+      - application/xml
+      date:
+      - Sat, 22 Feb 2025 02:58:44 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --marker --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sat, 22 Feb 2025 02:58:45 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://storage000002.queue.core.windows.net/?comp=list&marker=%2Fstorage000002%2Fsecondq000004&maxresults=5000
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://storage000002.queue.core.windows.net/\"><Marker>/storage000002/secondq000004</Marker><MaxResults>5000</MaxResults><Queues><Queue><Name>secondq000004</Name></Queue></Queues><NextMarker
+        /></EnumerationResults>"
+    headers:
+      cache-control:
+      - no-cache
+      content-type:
+      - application/xml
+      date:
+      - Sat, 22 Feb 2025 02:58:45 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --prefix --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sat, 22 Feb 2025 02:58:46 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://storage000002.queue.core.windows.net/?comp=list&prefix=second&maxresults=5000
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://storage000002.queue.core.windows.net/\"><Prefix>second</Prefix><MaxResults>5000</MaxResults><Queues><Queue><Name>secondq000004</Name></Queue></Queues><NextMarker
+        /></EnumerationResults>"
+    headers:
+      cache-control:
+      - no-cache
+      content-type:
+      - application/xml
+      date:
+      - Sat, 22 Feb 2025 02:58:47 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
