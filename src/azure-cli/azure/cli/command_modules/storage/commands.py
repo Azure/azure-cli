@@ -969,3 +969,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account migration'):
         from .operations.account import AccountMigrationStart
         self.command_table['storage account migration start'] = AccountMigrationStart(loader=self)
+
+    with self.command_group('storage account'):
+        from .operations.account import FileServiceUsage
+        self.command_table['storage account file-service-usage'] = FileServiceUsage(loader=self)

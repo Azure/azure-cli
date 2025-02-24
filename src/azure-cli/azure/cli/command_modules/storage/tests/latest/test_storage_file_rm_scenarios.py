@@ -147,6 +147,123 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('storage share-rm exists --ids {share_id_2}').get_output_in_json()
         self.assertEqual(result['exists'], False)
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2024-01-01')
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus2euap")
+    def test_storage_file_using_rm_provisioned_v2_scenario(self, resource_group):
+        self.kwargs = {
+            'sku': 'StandardV2_LRS',
+            'sa': self.create_random_name(prefix='sastdlrs', length=24),
+            'rg': resource_group
+        }
+        self.cmd('az storage account create -n {sa} -g {rg} --sku {sku} --kind FileStorage '
+                 '-l eastus2euap',
+                 checks=[self.check('sku.name', self.kwargs.get('sku'))])
+
+        self.kwargs.update({
+            'share_name_1': self.create_random_name('share', 24)
+        })
+        # create default provisioned v2 share
+        self.cmd('az storage share-rm create --storage-account {sa} -g {rg} -n {share_name_1}',
+                 checks=[self.check('name', self.kwargs['share_name_1']),
+                         self.exists('includedBurstIops'),
+                         self.exists('maxBurstCreditsForIops'),
+                         self.exists('nextAllowedProvisionedBandwidthDowngradeTime'),
+                         self.exists('nextAllowedProvisionedIopsDowngradeTime'),
+                         self.exists('provisionedBandwidthMibps'),
+                         self.exists('provisionedIops')])
+
+        self.kwargs.update({
+            'share_name_2': self.create_random_name('share', 24)
+        })
+        # create provisioned v2 share with new params
+        self.cmd('az storage share-rm create --storage-account {sa} -g {rg} -n {share_name_2} '
+                 '--provisioned-bandwidth-mibps 60 --provisioned-iops 500',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('provisionedBandwidthMibps', 60),
+                         self.check('provisionedIops', 500),
+                         self.exists('includedBurstIops'),
+                         self.exists('maxBurstCreditsForIops'),
+                         self.exists('nextAllowedProvisionedBandwidthDowngradeTime'),
+                         self.exists('nextAllowedProvisionedIopsDowngradeTime')])
+
+        self.cmd('az storage share-rm show --storage-account {sa} -g {rg} -n {share_name_2}',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('provisionedBandwidthMibps', 60),
+                         self.check('provisionedIops', 500),
+                         self.exists('includedBurstIops'),
+                         self.exists('maxBurstCreditsForIops'),
+                         self.exists('nextAllowedProvisionedBandwidthDowngradeTime'),
+                         self.exists('nextAllowedProvisionedIopsDowngradeTime')])
+
+        self.cmd('az storage share-rm update --storage-account {sa} -g {rg} -n {share_name_2} '
+                 '--provisioned-bandwidth-mibps 70 --provisioned-iops 600',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('provisionedBandwidthMibps', 70),
+                         self.check('provisionedIops', 600),
+                         self.exists('includedBurstIops'),
+                         self.exists('maxBurstCreditsForIops'),
+                         self.exists('nextAllowedProvisionedBandwidthDowngradeTime'),
+                         self.exists('nextAllowedProvisionedIopsDowngradeTime')])
+
+        self.cmd('az storage account file-service-usage --account-name {sa} -g {rg}',
+                 checks=[self.exists('properties.fileShareLimits.maxProvisionedBandwidthMiBPerSec'),
+                         self.exists('properties.fileShareLimits.maxProvisionedIOPS'),
+                         self.exists('properties.fileShareLimits.maxProvisionedStorageGiB')])
+
+        self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('az storage share-rm delete --storage-account {sa} -g {rg} -n {share_name_2} -y')
+
+        self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
+                 checks=[self.check('length(@)', 1)])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2024-01-01')
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus2euap")
+    def test_storage_file_using_rm_provisioned_v1_scenario(self, resource_group):
+        self.kwargs = {
+            'sku': 'Premium_LRS',
+            'sa': self.create_random_name(prefix='sastdlrs', length=24),
+            'rg': resource_group
+        }
+        self.cmd('az storage account create -n {sa} -g {rg} --sku {sku} --kind FileStorage '
+                 '-l eastus2euap',
+                 checks=[self.check('sku.name', self.kwargs.get('sku'))])
+
+        self.kwargs.update({
+            'share_name_1': self.create_random_name('share', 24)
+        })
+        # create default provisioned v1 share
+        self.cmd('az storage share-rm create --storage-account {sa} -g {rg} -n {share_name_1}',
+                 checks=[self.check('name', self.kwargs['share_name_1']),
+                         self.check('fileSharePaidBursting.paidBurstingEnabled', False)])
+
+        self.kwargs.update({
+            'share_name_2': self.create_random_name('share', 24)
+        })
+        # create provisioned v1 share with new params
+        self.cmd('az storage share-rm create --storage-account {sa} -g {rg} -n {share_name_2} '
+                 '--paid-bursting-enabled true '
+                 '--paid-bursting-max-bandwidth-mibps 100 --paid-bursting-max-iops 1000',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('fileSharePaidBursting.paidBurstingEnabled', True),
+                         self.check('fileSharePaidBursting.paidBurstingMaxBandwidthMibps', 100),
+                         self.check('fileSharePaidBursting.paidBurstingMaxIops', 1000)])
+
+        self.cmd('az storage share-rm show --storage-account {sa} -g {rg} -n {share_name_2}',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('fileSharePaidBursting.paidBurstingEnabled', True),
+                         self.check('fileSharePaidBursting.paidBurstingMaxBandwidthMibps', 100),
+                         self.check('fileSharePaidBursting.paidBurstingMaxIops', 1000)])
+
+        self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('az storage share-rm delete --storage-account {sa} -g {rg} -n {share_name_2} -y')
+
+        self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
+                 checks=[self.check('length(@)', 1)])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_nfs", location="eastus2euap")
     @StorageAccountPreparer(name_prefix="nfs", location="eastus2", kind='FileStorage', sku='Premium_LRS')

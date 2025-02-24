@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
+
 """
 Commands for storage file share operations
 """
@@ -540,8 +542,8 @@ class ShareRmCreate(_ShareRmCreate):
         return args_schema
 
     def pre_operations(self):
-        args = self.ctx.args
         from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
         parse_storage_account_aaz(self, args)
 
 
@@ -568,13 +570,36 @@ class ShareRmDelete(_ShareRmDelete):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         _format_storage_account_id(args_schema)
-
         return args_schema
 
     def pre_operations(self):
         from .._validators import parse_storage_account_aaz
         args = self.ctx.args
         parse_storage_account_aaz(self, args)
+
+
+def _transform_share_rm_output(result):
+    from datetime import datetime
+    if hasattr(result, 'properties'):
+        if hasattr(result.properties, 'next_allowed_quota_downgrade_time') \
+                and result.properties.next_allowed_quota_downgrade_time:
+            time_str = str(result.properties.next_allowed_quota_downgrade_time)
+            time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
+            result.properties.next_allowed_quota_downgrade_time = \
+                time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+        if hasattr(result.properties, 'next_allowed_provisioned_iops_downgrade_time') \
+                and result.properties.next_allowed_provisioned_iops_downgrade_time:
+            time_str = str(result.properties.next_allowed_provisioned_iops_downgrade_time)
+            time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
+            result.properties.next_allowed_provisioned_iops_downgrade_time = \
+                time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+        if hasattr(result.properties, 'next_allowed_provisioned_bandwidth_downgrade_time') \
+                and result.properties.next_allowed_provisioned_bandwidth_downgrade_time:
+            time_str = str(result.properties.next_allowed_provisioned_bandwidth_downgrade_time)
+            time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
+            result.properties.next_allowed_provisioned_bandwidth_downgrade_time = \
+                time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+    return result
 
 
 class ShareRmShow(_ShareRmShow):
@@ -588,6 +613,11 @@ class ShareRmShow(_ShareRmShow):
         from .._validators import parse_storage_account_aaz
         args = self.ctx.args
         parse_storage_account_aaz(self, args)
+
+    def post_operations(self):
+        result = self.ctx.vars.instance
+        new_result = _transform_share_rm_output(result)
+        self.ctx.vars.instance = new_result
 
 
 class ShareRmList(_ShareRmList):
@@ -623,3 +653,10 @@ class ShareRmList(_ShareRmList):
             args.expand = ','.join(expand_item)
 
         parse_storage_account_aaz(self, args)
+
+    def post_operations(self):
+        result = self.ctx.vars.instance.value
+        new_result = []
+        for item in result:
+            new_result.append(_transform_share_rm_output(item))
+        self.ctx.vars.instance.value = new_result
