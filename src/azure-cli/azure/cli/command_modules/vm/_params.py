@@ -1510,13 +1510,6 @@ def load_arguments(self, _):
                         'Check out help for more examples')
     # endregion
 
-    # region DiskAccess
-    with self.argument_context('disk-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disk_accesses') as c:
-        c.argument('disk_access_name', arg_type=name_arg_type, help='Name of the disk access resource.', id_part='name')
-        c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-    # endRegion
-
     # region Capacity
     with self.argument_context('capacity reservation group') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
