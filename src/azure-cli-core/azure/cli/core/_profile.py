@@ -892,6 +892,7 @@ class SubscriptionFinder:
                            "Use `az login --allow-no-subscriptions` to have tenant level access.")
             for t in empty_tenants:
                 logger.warning("%s", t.tenant_id_name)
+            logger.warning('')
 
         # Show warning for InteractionRequired tenants
         if interaction_required_tenants:
@@ -899,6 +900,8 @@ class SubscriptionFinder:
                            "`az login --tenant TENANT_ID`.")
             for t in interaction_required_tenants:
                 logger.warning("%s", t.tenant_id_name)
+            logger.warning('')
+
         return all_subscriptions
 
     def find_using_specific_tenant(self, tenant, credential, tenant_id_description=None):
