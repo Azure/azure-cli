@@ -22,7 +22,7 @@ class AddCustomizedKeys(argparse.Action):
             return properties
         except ValueError:
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
-        
+
 
 class AddAdditionalConnectionStringProperties(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -38,7 +38,7 @@ class AddAdditionalConnectionStringProperties(argparse.Action):
             return properties
         except ValueError:
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
-        
+
 
 def is_k8s_source(command_name):
     source_name = command_name.split(' ')[0]

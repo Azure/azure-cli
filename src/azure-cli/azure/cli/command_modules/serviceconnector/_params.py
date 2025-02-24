@@ -270,10 +270,6 @@ def add_opt_out_argument(context):
                      'Use publicnetwork to disable public network access configuration.'
                      'Use auth to skip auth configuration such as enabling managed identity and granting RBAC roles.'
                      )
-    context.argument('test3', options_list=['--test3'],
-                    default=None, type=str,
-                    help='Test3.'
-                    )
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
@@ -307,7 +303,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_source_resource_block(c, source)
 
         for target in TARGET_RESOURCES_PARAMS:
-            print(target)
             with self.argument_context('{} connection create {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
@@ -322,12 +317,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_customized_keys_argument(c)
                 add_opt_out_argument(c)
                 add_connstr_props_argument(c)
-                add_confluent_kafka_argument(c)
-                c.argument('test2', options_list=['--test2'], type=str, help='Testing123')
-
-                if target == RESOURCE.FabricSql:
-                    add_connstr_props_argument(c)
-                    c.argument('test', options_list=['--test'], type=str, help='Testing123')
 
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
@@ -340,9 +329,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
                 add_opt_out_argument(c)
-
-                if target == RESOURCE.FabricSql:
-                    add_connstr_props_argument(c)
+                add_connstr_props_argument(c)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka

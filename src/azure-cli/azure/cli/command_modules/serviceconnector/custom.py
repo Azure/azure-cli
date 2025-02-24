@@ -345,7 +345,9 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                                       customized_keys=customized_keys,
                                                       opt_out_list=opt_out_list,
                                                       app_config_id=app_config_id,
-                                                      connstr_props=connstr_props)
+                                                      connstr_props=connstr_props,
+                                                      fabric_workspace_uuid=fabric_workspace_uuid,
+                                                      fabrick_sql_database_uuid=fabric_sql_database_uuid)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
                                " and rerun the command")
