@@ -1642,7 +1642,7 @@ def index_tuning_show(client, resource_group_name, server_name):
     index_tuning_configuration = client.get(resource_group_name, server_name, "index_tuning.mode")
     query_capture_mode_configuration = client.get(resource_group_name, server_name, "pg_qs.query_capture_mode")
 
-    if index_tuning_configuration.value.lower() == "report" and query_capture_mode_configuration != "none":
+    if index_tuning_configuration.value.lower() == "report" and query_capture_mode_configuration.value.lower() != "none":
         logger.warning("Index tuning is enabled for the server.")
     else:
         logger.warning("Index tuning is disabled for the server.")
