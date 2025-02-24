@@ -4686,6 +4686,28 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(applicationGatewayBackendAddressPools)', 1))
         self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {ag_pool_id}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_ip_config_private_ip_address_prefix_length')
+    def test_network_nic_nic_ip_config_private_ip_address_prefix_length(self, resource_group):
+        self.kwargs.update({
+            'nic': self.create_random_name('nic', 10),
+            'vnet': self.create_random_name('vnet', 10),
+            'subnet': self.create_random_name('subnet', 10),
+            'config1': self.create_random_name('config', 10),
+            'config2': self.create_random_name('config', 10)
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet} --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+        self.cmd('network nic create -g {rg} -n {nic} --vnet-name {vnet} --subnet {subnet} --accelerated-networking true ')
+        self.cmd('network nic ip-config create -g {rg} -n {config1} --nic-name {nic} --private-ip-address-version IPv4 --private-ip-address-prefix-length 28 --make-primary false', checks=[
+            self.check('privateIPAddressPrefixLength', 28)
+        ])
+
+        self.cmd('network nic ip-config create -g {rg} -n {config2} --nic-name {nic}  --private-ip-address-version IPv4 ', checks=[
+            self.check('privateIPAddressPrefixLength', None)
+        ])
+        self.cmd('network nic ip-config update -g {rg} -n {config2} --nic-name {nic} --private-ip-address-prefix-length 28', checks=[
+            self.check('privateIPAddressPrefixLength', 28)
+        ])
+
 
 class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
 
@@ -7118,7 +7140,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'vnet': 'clitestvnet',
             'nic': 'clitestnic',
             'rg': resource_group,
-            'edge_name': 'microsoftrrdclab1'
+            'edge_name': 'microsoftdclabs1'
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1 --edge-zone {edge_name}',
                  checks=self.check('newVNet.extendedLocation.name', '{edge_name}'))
