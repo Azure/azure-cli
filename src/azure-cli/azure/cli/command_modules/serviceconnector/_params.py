@@ -327,6 +327,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
                 if target == RESOURCE.FabricSql:
                     add_connstr_props_argument(c)
+                    add_fabric_arguments(c)
 
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
@@ -342,6 +343,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
                 if target == RESOURCE.FabricSql:
                     add_connstr_props_argument(c)
+                    add_fabric_arguments(c)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka
