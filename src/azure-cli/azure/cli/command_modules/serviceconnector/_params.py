@@ -34,7 +34,7 @@ from ._resource_config import (
 )
 from ._addon_factory import AddonFactory
 from knack.arguments import CLIArgumentType
-from .action import AddCustomizedKeys, AddAdditionalConnectionStringProperties
+from .action import AddCustomizedKeys
 
 
 def add_source_resource_block(context, source, enable_id=True, target=None):
