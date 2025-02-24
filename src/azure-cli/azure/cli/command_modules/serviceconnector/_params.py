@@ -184,7 +184,7 @@ def add_connstr_props_argument(context):
     # linter: length '--additional-connection-string-properties' longer than 22, so use abbreviation
     context.argument('connstr_props', options_list=['--connstr-props'],
                      action=AddAdditionalConnectionStringProperties, nargs='*',
-                     help='The addtional connection string properties used to for building connection string.')
+                     help='The additional connection string properties used to build connection string.')
     
 
 def add_target_type_argument(context, source):
@@ -301,8 +301,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         with self.argument_context('{} connection wait'.format(source.value)) as c:
             add_connection_name_argument(c, source)
             add_source_resource_block(c, source)
-
-        print("FAKER")
 
         for target in TARGET_RESOURCES_PARAMS:
             with self.argument_context('{} connection create {}'.format(source.value, target.value)) as c:
