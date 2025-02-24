@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "target_resource_name": {
+          "defaultValue": "videoindexer-privatelink",
+          "type": "String"
+      },
+      "storage_account": {
+          "defaultValue": "/subscriptions/24237b72-8546-4da5-b204-8c3cb76dd930/resourceGroups/yaeld-rg/providers/Microsoft.Storage/storageAccounts/yaeldeastussa",
+          "type": "String"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.VideoIndexer/accounts",
+          "apiVersion": "2024-06-01-preview",
+          "name": "[parameters('target_resource_name')]",
+          "location": "eastus",
+          "identity": {
+              "type": "SystemAssigned"
+          },
+          "properties": {
+              "storageServices": {
+                  "resourceId": "[parameters('storage_account')]"
+              }
+          }
+      }
+  ]
+}

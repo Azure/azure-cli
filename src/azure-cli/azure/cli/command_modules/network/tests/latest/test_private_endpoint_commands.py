@@ -2236,6 +2236,102 @@ class NetworkARMTemplateBasedScenarioTest(ScenarioTest):
         self._test_private_endpoint_connection_scenario(resource_group, 'clitestappconfig', 'Microsoft.AppConfiguration/configurationStores')
 
 
+class VideoIndexerNetworkARMTemplateBasedScenarioTest(ScenarioTest):
+    def _test_private_endpoint_connection_scenario(self, resource_group, storage_account, target_resource_name):
+        from azure.mgmt.core.tools import resource_id
+        resource_type = 'Microsoft.VideoIndexer/accounts'
+        self.kwargs.update({
+            'target_resource_name': target_resource_name,
+            'storage_account': resource_id(subscription=self.get_subscription_id(),
+                                           resource_group=resource_group,
+                                           namespace='Microsoft.Storage',
+                                           type='storageAccounts',
+                                           name=storage_account),
+            'target_resource_id': resource_id(subscription=self.get_subscription_id(),
+                                              resource_group=resource_group,
+                                              namespace=resource_type.split('/')[0],
+                                              type=resource_type.split('/')[1],
+                                              name=target_resource_name),
+            'rg': resource_group,
+            'resource_type': resource_type,
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        param_file_name = "{}_{}_parameters.json".format(resource_type.split('/')[0].split('.')[1].lower(), resource_type.split('/')[1].lower())
+        template_file_name = "{}_{}_template.json".format(resource_type.split('/')[0].split('.')[1].lower(), resource_type.split('/')[1].lower())
+        self.kwargs.update({
+            'param_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', param_file_name),
+            'template_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', template_file_name)
+        })
+        self.cmd('az deployment group create -g {rg} -p "@{param_path}" target_resource_name={target_resource_name} storage_account={storage_account} -f "{template_path}"')
+
+        self.cmd('az network vnet create -n {vnet} -g {rg} --subnet-name {subnet} -o json',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true -o json',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        target_private_link_resource = self.cmd('az network private-link-resource list --name {target_resource_name} --resource-group {rg} --type {resource_type} -o json').get_output_in_json()
+        self.kwargs.update({
+            'group_id': target_private_link_resource[0]['properties']['groupId']
+        })
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} '
+            '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
+            '--group-id {group_id} -o json').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Show the connection at cosmos db side
+        list_private_endpoint_conn = self.cmd('az network private-endpoint-connection list --name {target_resource_name} --resource-group {rg} --type {resource_type} -o json').get_output_in_json()
+        self.kwargs.update({
+            "pec_id": list_private_endpoint_conn[0]['id']
+        })
+
+        self.kwargs.update({
+            "pec_name": self.kwargs['pec_id'].split('/')[-1]
+        })
+        self.cmd('az network private-endpoint-connection show --id {pec_id} -o json',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('az network private-endpoint-connection show --resource-name {target_resource_name} --name {pec_name} --resource-group {rg} --type {resource_type} -o json')
+        self.cmd('az network private-endpoint-connection show --resource-name {target_resource_name} -n {pec_name} -g {rg} --type {resource_type} -o json')
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {target_resource_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
+            '--description "{approval_desc}" -o json', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}" -o json',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd(
+            'az network private-endpoint-connection list --name {target_resource_name} --resource-group {rg} --type {resource_type} -o json',
+            checks=[
+                self.check('length(@)', 1)
+            ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y -o json')
+
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_video_indexer", location="westus")
+    @StorageAccountPreparer(name_prefix="testpevi", allow_shared_key_access=False)
+    def test_private_endpoint_connection_video_indexer(self, resource_group, storage_account):
+        from azure.cli.testsdk.scenario_tests.utilities import create_random_name
+        vi_name = create_random_name(prefix='clitestvideoindexer')
+        self._test_private_endpoint_connection_scenario(resource_group, storage_account, vi_name)
+
+
 class NetworkPrivateLinkDigitalTwinsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(
         name_prefix="test_digital_twin_private_endpoint_", location="eastus"
