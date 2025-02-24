@@ -148,6 +148,7 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
+        c.argument('sitecontainers_app', help="If true, a webapp which supports sitecontainers will be created", arg_type=get_three_state_flag())
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
@@ -171,6 +172,40 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.ignore('language')
         c.ignore('using_webapp_up')
+
+    with self.argument_context("webapp sitecontainers") as c:
+        c.argument('name', arg_type=webapp_name_arg_type, help='Name of the linux webapp')
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument("container_name", help='Name of the SiteContainer')
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
+
+    with self.argument_context("webapp sitecontainers create") as c:
+        c.argument("image", help='Image Name')
+        c.argument("target_port", help='Target port for SiteContainer')
+        c.argument("startup_cmd", help='Startup Command for the SiteContainer')
+        c.argument("is_main", help="true if the container is the main SiteContainer; false otherwise",
+                   arg_type=get_three_state_flag())
+        c.argument("system_assigned_identity", options_list=['--system-assigned-identity', '--si'], help="If true, the system-assigned identity will be used for auth while pulling image",
+                   arg_type=get_three_state_flag())
+        c.argument("user_assigned_identity", options_list=['--user-assigned-identity', '--ui'], help='ClientID for the user-maganed identity which will be used for auth while pulling image')
+        c.argument("registry_username", help='Username used for image registry auth')
+        c.argument("registry_password", help='Password used for image registry auth')
+        c.argument("sitecontainers_spec_file", options_list=['--sitecontainers-spec-file', '--ssf'], help="Path to a json sitecontainer spec file containing a list of sitecontainers, other sitecontainer input args will be ignored if this arg is provided")
+
+    with self.argument_context("webapp sitecontainers update") as c:
+        c.argument("image", help='Image Name')
+        c.argument("target_port", help='Target port for SiteContainer')
+        c.argument("startup_cmd", help='Startup Command for the SiteContainer')
+        c.argument("is_main", help="true if the container is the main site container; false otherwise",
+                   arg_type=get_three_state_flag())
+        c.argument("system_assigned_identity", options_list=['--system-assigned-identity', '--si'], help="If true, the system-assigned identity will be used for auth while pulling image",
+                   arg_type=get_three_state_flag())
+        c.argument("user_assigned_identity", options_list=['--user-assigned-identity', '--ui'], help='ClientID for the user-maganed identity which will be used for auth while pulling image')
+        c.argument("registry_username", help='Username used for image registry auth')
+        c.argument("registry_password", help='Password used for image registry auth')
+
+    with self.argument_context("webapp sitecontainers list") as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None, help='Name of the linux webapp')
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
