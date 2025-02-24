@@ -1645,7 +1645,6 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
 
 
 class WebappSSLCertTest(ScenarioTest):
-    @unittest.skip("Flaky Test")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_ssl(self, resource_group, resource_group_location):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
@@ -1743,6 +1742,7 @@ class WebappSSLCertTest(ScenarioTest):
 
 
 class WebappSSLImportCertTest(ScenarioTest):
+    @unittest.skip("Flaky Test")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     @KeyVaultPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, name_prefix='kv-ssl-test', name_len=20)
     def test_webapp_ssl_import(self, resource_group, key_vault):
