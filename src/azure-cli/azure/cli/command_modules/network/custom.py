@@ -10,7 +10,7 @@ from collections import Counter, OrderedDict
 
 import socket
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client
 from azure.cli.core.aaz._client import AAZMgmtClient
@@ -113,31 +113,33 @@ from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPa
 from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
 from .operations.dns import (RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAShow as DNSRecordSetAAAAShow,  # pylint: disable=unused-import
                              RecordSetDSShow as DNSRecordSetDSShow, RecordSetMXShow as DNSRecordSetMXShow,
-                             RecordSetNSShow as DNSRecordSetNSShow, RecordSetPTRShow as DNSRecordSetPTRShow,
-                             RecordSetSRVShow as DNSRecordSetSRVShow, RecordSetTLSAShow as DNSRecordSetTLSAShow,
-                             RecordSetTXTShow as DNSRecordSetTXTShow, RecordSetCAAShow as DNSRecordSetCAAShow,
-                             RecordSetCNAMEShow as DNSRecordSetCNAMEShow, RecordSetSOAShow as DNSRecordSetSOAShow)
+                             RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSShow as DNSRecordSetNSShow,
+                             RecordSetPTRShow as DNSRecordSetPTRShow, RecordSetSRVShow as DNSRecordSetSRVShow,
+                             RecordSetTLSAShow as DNSRecordSetTLSAShow, RecordSetTXTShow as DNSRecordSetTXTShow,
+                             RecordSetCAAShow as DNSRecordSetCAAShow, RecordSetCNAMEShow as DNSRecordSetCNAMEShow,
+                             RecordSetSOAShow as DNSRecordSetSOAShow)
 from .operations.dns import (RecordSetACreate as DNSRecordSetACreate, RecordSetAAAACreate as DNSRecordSetAAAACreate,  # pylint: disable=unused-import
                              RecordSetDSCreate as DNSRecordSetDSCreate, RecordSetMXCreate as DNSRecordSetMXCreate,
-                             RecordSetNSCreate as DNSRecordSetNSCreate, RecordSetPTRCreate as DNSRecordSetPTRCreate,
-                             RecordSetSRVCreate as DNSRecordSetSRVCreate, RecordSetTLSACreate as DNSRecordSetTLSACreate,
-                             RecordSetTXTCreate as DNSRecordSetTXTCreate, RecordSetCAACreate as DNSRecordSetCAACreate,
-                             RecordSetCNAMECreate as DNSRecordSetCNAMECreate, RecordSetSOACreate as DNSRecordSetSOACreate)
+                             RecordSetNAPTRCreate as DNSRecordSetNAPTRCreate, RecordSetNSCreate as DNSRecordSetNSCreate,
+                             RecordSetPTRCreate as DNSRecordSetPTRCreate, RecordSetSRVCreate as DNSRecordSetSRVCreate,
+                             RecordSetTLSACreate as DNSRecordSetTLSACreate, RecordSetTXTCreate as DNSRecordSetTXTCreate,
+                             RecordSetCAACreate as DNSRecordSetCAACreate, RecordSetCNAMECreate as DNSRecordSetCNAMECreate,
+                             RecordSetSOACreate as DNSRecordSetSOACreate)
 from .operations.dns import (RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate,  # pylint: disable=unused-import
                              RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate,
-                             RecordSetNSUpdate as DNSRecordSetNSUpdate, RecordSetPTRUpdate as DNSRecordSetPTRUpdate,
-                             RecordSetSRVUpdate as DNSRecordSetSRVUpdate, RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate,
-                             RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate,
-                             RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate)
+                             RecordSetNAPTRUpdate as DNSRecordSetNAPTRUpdate, RecordSetNSUpdate as DNSRecordSetNSUpdate,
+                             RecordSetPTRUpdate as DNSRecordSetPTRUpdate, RecordSetSRVUpdate as DNSRecordSetSRVUpdate,
+                             RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, RecordSetTXTUpdate as DNSRecordSetTXTUpdate,
+                             RecordSetCAAUpdate as DNSRecordSetCAAUpdate, RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate)
 from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetAAAADelete as DNSRecordSetAAAADelete,  # pylint: disable=unused-import
                              RecordSetDSDelete as DNSRecordSetDSDelete, RecordSetMXDelete as DNSRecordSetMXDelete,
-                             RecordSetNSDelete as DNSRecordSetNSDelete, RecordSetPTRDelete as DNSRecordSetPTRDelete,
-                             RecordSetSRVDelete as DNSRecordSetSRVDelete, RecordSetTLSADelete as DNSRecordSetTLSADelete,
-                             RecordSetTXTDelete as DNSRecordSetTXTDelete, RecordSetCAADelete as DNSRecordSetCAADelete,
-                             RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
+                             RecordSetNAPTRDelete as DNSRecordSetNAPTRDelete, RecordSetNSDelete as DNSRecordSetNSDelete,
+                             RecordSetPTRDelete as DNSRecordSetPTRDelete, RecordSetSRVDelete as DNSRecordSetSRVDelete,
+                             RecordSetTLSADelete as DNSRecordSetTLSADelete, RecordSetTXTDelete as DNSRecordSetTXTDelete,
+                             RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
-RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
+RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "1.1": "1.1", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
                           "Please be aware that Basic option will be removed in the future."
@@ -430,7 +432,7 @@ class AddressPoolCreate(_AddressPoolCreate):
             try:
                 socket.inet_aton(str(server))  # pylint:disable=no-member
                 return {"ip_address": server}
-            except socket.error:  # pylint:disable=no-member
+            except OSError:  # pylint:disable=no-member
                 return {"fqdn": server}
 
         args.backend_addresses = assign_aaz_list_arg(
@@ -476,7 +478,7 @@ class AddressPoolUpdate(_AddressPoolUpdate):
             try:
                 socket.inet_aton(str(server))  # pylint:disable=no-member
                 return {"ip_address": server}
-            except socket.error:  # pylint:disable=no-member
+            except OSError:  # pylint:disable=no-member
                 return {"fqdn": server}
 
         args.backend_addresses = assign_aaz_list_arg(
@@ -1945,7 +1947,7 @@ class WAFCreate(_WAFCreate):
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
             help="Version of the web application firewall rule set type. "
-                 "0.1 and 1.0 are used for Microsoft_BotManagerRuleSet",
+                 "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
             default="2.1",
             enum=RULESET_VERSION
         )
@@ -2007,9 +2009,9 @@ class WAFCustomRuleMatchConditionAdd(_WAFCustomRuleMatchConditionAdd):
         args.variables = variables
         # validate
         if str(args.operator).lower() == "any" and has_value(args.values):
-            raise ArgumentUsageError("Any operator does not require --match-values.")
+            raise ArgumentUsageError("\"Any\" operator does not require --values.")
         if str(args.operator).lower() != "any" and not has_value(args.values):
-            raise ArgumentUsageError("Non-any operator requires --match-values.")
+            raise ArgumentUsageError("Non-any operator requires --values.")
 
 
 class WAFPolicySettingUpdate(_WAFPolicySettingUpdate):
@@ -2024,7 +2026,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
                              rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
-    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+    Visit: https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
     """
     if rules is None:
         managed_rule_overrides = []
@@ -2400,7 +2402,7 @@ def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=
         Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
         show_args = Show_Ddos_Protection(show_args)
         logger.info('Attempting to update the VNets attached to the DDoS protection plan.')
-        vnet_ids = set([])
+        vnet_ids = set()
         if len(vnets) == 1 and not vnets[0]:
             pass
         else:
@@ -2408,7 +2410,7 @@ def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=
         if 'virtualNetworks' in show_args:
             existing_vnet_ids = {x['id'] for x in show_args['virtualNetworks']}
         else:
-            existing_vnet_ids = set([])
+            existing_vnet_ids = set()
         from azure.cli.core.commands import LongRunningOperation
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
@@ -2443,7 +2445,7 @@ def _to_snake(s):
 
 def _convert_to_snake_case(element):
     if isinstance(element, dict):
-        ret = dict()
+        ret = {}
         for k, v in element.items():
             ret[_to_snake(k)] = _convert_to_snake_case(v)
 
@@ -2520,7 +2522,7 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
     })
 
     record_camal = record_set["SOARecord"]
-    record = dict()
+    record = {}
     record["host"] = host or record_camal.get("host", None)
     record["email"] = email or record_camal.get("email", None)
     record["serial_number"] = serial_number or record_camal.get("serialNumber", None)
@@ -2542,6 +2544,7 @@ def _type_to_property_name(key):
         'cname': ('cname_record', "CNAMERecord"),
         'ds': ('ds_records', "DSRecords"),
         'mx': ('mx_records', "MXRecords"),
+        'naptr': ('naptr_records', "NAPTRRecords"),
         'ns': ('ns_records', "NSRecords"),
         'ptr': ('ptr_records', "PTRRecords"),
         'soa': ('soa_record', "SOARecord"),
@@ -2600,6 +2603,9 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
                 record_obj.update({'key_tag': record["key_tag"], 'algorithm': record["algorithm"], 'digest_type': record["digest"]["algorithm_type"], 'digest': record["digest"]["value"]})
             elif record_type == 'mx':
                 record_obj.update({'preference': record["preference"], 'host': record["exchange"].rstrip('.') + '.'})
+            elif record_type == 'naptr':
+                regexp_value = record["regexp"] if record["regexp"] != "" else "EMPTY"
+                record_obj.update({'order': record["order"], 'preference': record["preference"], 'flags': record["flags"], 'services': record["services"], 'regexp': regexp_value, 'replacement': record["replacement"].rstrip('.') + '.'})
             elif record_type == 'ns':
                 record_obj.update({'host': record["nsdname"].rstrip('.') + '.'})
             elif record_type == 'ptr':
@@ -2647,7 +2653,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
         try:
             with open(file_name, 'w') as f:
                 f.write(zone_file_content)
-        except IOError:
+        except OSError:
             raise CLIError('Unable to export to file: {}'.format(file_name))
 
 
@@ -2668,6 +2674,9 @@ def _build_record(cmd, data):
                     "digest": {"algorithm_type": int(data["digest_type"]), "value": data["digest"]}}
         if record_type == 'mx':
             return {"preference": int(data["preference"]), "exchange": data["host"]}
+        if record_type == 'naptr':
+            return {"order": int(data["order"]), "preference": int(data["preference"]), "flags": data["flags"],
+                    "services": data["services"], "regexp": data["regexp"], "replacement": data["replacement"]}
         if record_type == 'ns':
             return {"nsdname": data["host"]}
         if record_type == 'ptr':
@@ -2811,7 +2820,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             rs = _convert_to_snake_case(root_ns)
         try:
             rs["target_resource"] = rs.get("target_resource").get("id") if rs.get("target_resource") else None
-
+            rs["traffic_management_profile"] = rs.get("traffic_management_profile").get("id") if rs.get("traffic_management_profile") else None
             _record_create = _record_create_func(rs_type)
             _record_create(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
@@ -2872,6 +2881,14 @@ def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, pref
                       ttl=3600, if_none_match=None):
     record = {"preference": int(preference), "exchange": exchange}
     record_type = 'mx'
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl, if_none_match=if_none_match)
+
+
+def add_dns_naptr_record(cmd, resource_group_name, zone_name, record_set_name, order, preference, flags, services, regexp, replacement,
+                         ttl=3600, if_none_match=None):
+    record = {"flags": flags, "order": order, "preference": preference, "regexp": regexp, "replacement": replacement, "services": services}
+    record_type = 'naptr'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
 
@@ -2971,6 +2988,13 @@ def remove_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, p
                           keep_empty_record_set=keep_empty_record_set)
 
 
+def remove_dns_naptr_record(cmd, resource_group_name, zone_name, record_set_name, order, preference, flags, services, regexp, replacement, keep_empty_record_set=False):
+    record = {"flags": flags, "order": order, "preference": preference, "regexp": regexp, "replacement": replacement, "services": services}
+    record_type = 'naptr'
+    return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
 def remove_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
                          keep_empty_record_set=False):
     record = {"nsdname": dname}
@@ -3048,6 +3072,13 @@ def _check_ds_record_exist(record, exist_list):
 def _check_mx_record_exist(record, exist_list):
     for r in exist_list:
         if (r["preference"], r["exchange"]) == (record["preference"], record["exchange"]):
+            return True
+    return False
+
+
+def _check_naptr_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r["flags"], r["order"], r["preference"], r["regexp"], r["replacement"], r["services"]) == (record["flags"], record["order"], record["preference"], record["regexp"], record["replacement"], record["services"]):
             return True
     return False
 
@@ -3136,7 +3167,7 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
             "subscription": subscription_id,
             "resource_group": resource_group_name
         })
-        record_set = dict()
+        record_set = {}
         record_set["ttl"] = ret.get("TTL", None)
         record_set[record_snake] = ret.get(record_camel, None)
         record_set = _convert_to_snake_case(record_set)
@@ -3171,7 +3202,7 @@ def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group
         "resource_group": resource_group_name,
         "record_type": record_type
     })
-    record_set = dict()
+    record_set = {}
     record_set["ttl"] = ret.get("TTL", None)
     record_set[record_snake] = ret.get(record_camel, None)
     record_set = _convert_to_snake_case(record_set)
@@ -3258,7 +3289,7 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         if has_value(args.express_route_port):
             args.provider = None
             args.peering_location = None
-            args.bandwidth_in_gbps = (converted_bandwidth / 1000.0)
+            args.bandwidth_in_gbps = converted_bandwidth / 1000.0
         else:
             args.bandwidth_in_mbps = int(converted_bandwidth)
 
@@ -3872,7 +3903,7 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
         args_schema.private_ip_allocation_method = AAZStrArg(options=['--private-ip-allocation-method'], arg_group="IP Configuration", help="Private IP address allocation method.",
                                                              enum={"Dynamic": "Dynamic", "Static": "Static"})
         args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", required=True)
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
         args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
@@ -3902,6 +3933,8 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
 
         if has_value(args.edge_zone):
             args.edge_zone_type = 'EdgeZone'
+        if not has_value(args.lb_frontend_ip_configs) and not has_value(args.destination_ip_address):
+            raise CLIError("usage error: either --lb-frontend-ip-configs or --destination-ip-address is required")
 
 
 class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
@@ -5247,7 +5280,7 @@ class PublicIPUpdate(_PublicIPUpdate):
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.ip_tags):
-            if ip_tags := args.ip_tags.to_serialized_data() is None:
+            if (ip_tags := args.ip_tags.to_serialized_data()) is None:
                 args.ip_tags_list = []
             else:
                 args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]
@@ -5511,6 +5544,9 @@ class VNetCreate(_VNetCreate):
                 subnet["network_security_group"] = {"id": args.subnet_nsg}
             args.subnets = [subnet]
 
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
+
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return {"newVNet": result}
@@ -5527,6 +5563,11 @@ class VNetUpdate(_VNetUpdate):
                      "/ddosProtectionPlans/{}",
         )
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_protection_plan.id):
@@ -5920,6 +5961,8 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.enable_bgp._registered = False
         args_schema.nat_rules.Element.external_mappings_ip._registered = False
         args_schema.nat_rules.Element.internal_mappings_ip._registered = False
+        args_schema.mi_system_assigned._registered = False
+        args_schema.mi_user_assigned._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -6418,6 +6461,7 @@ def create_virtual_hub(cmd,
                        hosted_subnet,
                        public_ip_address,
                        hub_routing_preference=None,
+                       auto_scale_config=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -6437,7 +6481,8 @@ def create_virtual_hub(cmd,
         'location': location,
         'tags': tags,
         'sku': 'Standard',
-        "hub_routing_preference": hub_routing_preference
+        "hub_routing_preference": hub_routing_preference,
+        "auto_scale_config": auto_scale_config
     }
     from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)

@@ -18,12 +18,20 @@ short-summary: Create an App Configuration.
 examples:
   - name: Create an App Configuration store with name, location, sku, tags and resource group.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --tags key1=value1 key2=value2
+  - name: Create a premium sku App Configuration store with a replica
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Premium --replica-name MyReplica --replica-location eastus
+  - name: Create a premium sku App Configuration store without a replica
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Premium --no-replica
   - name: Create an App Configuration store with name, location, sku and resource group with system assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
   - name: Create an App Configuration store with name, location, sku and resource group with user assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
   - name: Create an App Configuration store with name, location and resource group with public network access enabled and local auth disabled.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network --disable-local-auth
+  - name: Create an App Configuration store with name, location and resource group with ARM authentication mode set to Pass-through.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through
+  - name: Create an App Configuration store with name, location and resource group with ARM authentication mode set to Pass-through and private network access via ARM Private Link enabled.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through --enable-arm-private-network-access true
 """
 
 helps['appconfig list-deleted'] = """
@@ -145,7 +153,7 @@ helps['appconfig kv export'] = """
 type: command
 short-summary: Export configurations to another place from your App Configuration store.
 examples:
-  - name: Export all keys and feature flags with label test to a json file.
+  - name: Export all keys and feature flags with label test to a json file. To use the Microsoft Feature Management schema when exporting feature flags to a file, set the environment variable AZURE_APPCONFIG_FM_COMPATIBLE to False.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
   - name: Export all keys with null label to an App Service application.
     text: az appconfig kv export -n MyAppConfiguration -d appservice --appservice-account MyAppService
@@ -355,14 +363,20 @@ short-summary: Update an App Configuration store.
 examples:
   - name: Update tags of an App Configuration store
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --tags key1=value1 key2=value2
-  - name: Upgrade sku of an App Configuration store to standard
+  - name: Upgrade sku of an App Configuration store to the standard tier
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Standard
+  - name: Upgrade sku of an App Configuration store to the premium tier
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Premium
   - name: Enable customer encryption key with system assigned identity
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net
   - name: Remove customer encryption key
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
   - name: Update an App Configuration store to enable public network access and disable local auth.
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true --disable-local-auth true
+  - name: Update an App Configuration store to set ARM authentication mode set to Pass-through.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through
+  - name: Update an App Configuration store to set ARM authentication mode set to Pass-through and enable private network access via ARM Private Link.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through --enable-arm-private-network-access true
 """
 
 helps['appconfig feature'] = """

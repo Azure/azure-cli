@@ -3,10 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-try:
-    from urllib.parse import urlencode, urlparse, urlunparse
-except ImportError:
-    from urllib import urlencode
+from urllib.parse import urlencode, urlparse, urlunparse
 
 import time
 from json import loads
@@ -100,7 +97,7 @@ def _handle_challenge_phase(login_server,
 
     request_url = 'https://' + login_server + '/v2/'
     logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(request_url)))
-    challenge = requests.get(request_url, verify=(not should_disable_connection_verify()))
+    challenge = requests.get(request_url, verify=not should_disable_connection_verify())
 
     if challenge.status_code != 401 or 'WWW-Authenticate' not in challenge.headers:
         from ._errors import CONNECTIVITY_CHALLENGE_ERROR
@@ -163,8 +160,8 @@ def _get_aad_token_after_challenge(cli_ctx,
     }
 
     logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
-    response = requests.post(authhost, urlencode(content), headers=headers,
-                             verify=(not should_disable_connection_verify()))
+    response = requests.post(url=authhost, data=urlencode(content), headers=headers,
+                             verify=not should_disable_connection_verify())
 
     if response.status_code == 429:
         if is_diagnostics_context:
@@ -199,8 +196,8 @@ def _get_aad_token_after_challenge(cli_ctx,
     }
 
     logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
-    response = requests.post(authhost, urlencode(content), headers=headers,
-                             verify=(not should_disable_connection_verify()))
+    response = requests.post(url=authhost, data=urlencode(content), headers=headers,
+                             verify=not should_disable_connection_verify())
 
     if response.status_code not in [200]:
         from ._errors import CONNECTIVITY_ACCESS_TOKEN_ERROR
@@ -300,8 +297,8 @@ def _get_token_with_username_and_password(login_server,
     }
 
     logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
-    response = requests.post(authhost, urlencode(content), headers=headers,
-                             verify=(not should_disable_connection_verify()))
+    response = requests.post(url=authhost, data=urlencode(content), headers=headers,
+                             verify=not should_disable_connection_verify())
 
     if response.status_code != 200:
         from ._errors import CONNECTIVITY_ACCESS_TOKEN_ERROR
@@ -365,7 +362,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     url = 'https://' + login_server + '/v2/'
     try:
         logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(url)))
-        challenge = requests.get(url, verify=(not should_disable_connection_verify()))
+        challenge = requests.get(url, verify=not should_disable_connection_verify())
         if challenge.status_code == 403:
             raise CLIError("Looks like you don't have access to registry '{}'. "
                            "To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. "
@@ -713,7 +710,7 @@ def parse_error_message(error_message, response):
 
 class RegistryException(CLIError):
     def __init__(self, message, status_code):
-        super(RegistryException, self).__init__(message)
+        super().__init__(message)
         self.status_code = status_code
 
 

@@ -675,11 +675,12 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('webSocketsEnabled', True),
             JMESPathCheck('minTlsVersion', '1.0'),
             JMESPathCheck('http20Enabled', True),
-            JMESPathCheck('ftpsState', 'Disabled')]
+            JMESPathCheck('ftpsState', 'Disabled'),
+            JMESPathCheck('minTlsCipherSuite', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384')]
 
         self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.4 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
-                 '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
+                 '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --min-tls-cipher-suite TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
             .assert_with_checks(checks)
 
@@ -694,7 +695,7 @@ class WebappConfigureTest(ScenarioTest):
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
+        s2 = next(x for x in result if x['name'] == 's2')
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
@@ -915,7 +916,7 @@ class WebappConfigureTest(ScenarioTest):
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
+        s2 = next(x for x in result if x['name'] == 's2')
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
@@ -1217,11 +1218,11 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(set(x['value'] for x in result if x['name'] ==
                              'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))   # we mask the password
         sample = next(
-            (x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
+            x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL')
         self.assertEqual(sample, {
                          'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
         sample = next(
-            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+            x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE')
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'false'})
 
@@ -1230,7 +1231,7 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(set(x['value'] for x in result if x['name'] ==
                              'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
         sample = next(
-            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+            x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE')
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'true'})
 
@@ -1648,7 +1649,7 @@ class WebappSSLCertTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         slot_name = self.create_random_name(prefix='slot-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1716,7 +1717,7 @@ class WebappSSLCertTest(ScenarioTest):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1745,7 +1746,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1779,7 +1780,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'

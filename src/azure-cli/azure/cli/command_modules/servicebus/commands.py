@@ -55,3 +55,8 @@ def load_command_table(self, _):
     with self.command_group('servicebus namespace encryption', custom_command_type=sb_namespace_custom) as g:
         g.custom_command('add', 'cli_add_encryption')
         g.custom_command('remove', 'cli_remove_encryption')
+
+# Replica Location Region
+    with self.command_group('servicebus namespace replica', custom_command_type=sb_namespace_custom) as g:
+        g.custom_command('add', 'cli_add_location')
+        g.custom_command('remove', 'cli_remove_location')

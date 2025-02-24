@@ -78,7 +78,7 @@ def load_arguments(self, _):
 
     static_web_app_sku_arg_type = CLIArgumentType(
         help='The pricing tiers for Static Web App',
-        arg_type=get_enum_type(['Free', 'Standard'])
+        arg_type=get_enum_type(['Free', 'Standard', 'Dedicated'])
     )
 
     # use this hidden arg to give a command the right instance, that functionapp commands
@@ -151,7 +151,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
-                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+                   help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`)')
         c.argument('container_registry_user', options_list=['--container-registry-user', '-s', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
         c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
@@ -193,6 +193,10 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp list-flexconsumption-runtimes') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help="limit the output to just the runtimes available in the specified location")
         c.argument('runtime', help="limit the output to just the specified runtime")
+
+    with self.argument_context('functionapp list-flexconsumption-locations') as c:
+        c.argument('zone_redundant', arg_type=get_three_state_flag(),
+                   help='Filter the list to return only locations which support zone redundancy.', is_preview=True)
 
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -368,6 +372,8 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
             c.argument('min_tls_version',
                        help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
+            c.argument('min_tls_cipher_suite', options_list=['--min-tls-cipher-suite'],
+                       help="The minimum TLS Cipher Suite required for requests, e.g., 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384'")
             c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.",
                        arg_type=get_three_state_flag(return_label=True))
             c.argument('app_command_line', options_list=['--startup-file'],
@@ -402,7 +408,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='The container registry server url')
         c.argument('container_image_name',
                    options_list=['--container-image-name', '-c', '-i', c.deprecate(target='--docker-custom-image-name', redirect='--container-image-name')],
-                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+                   help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`)')
         c.argument('container_registry_user',
                    options_list=['--container-registry-user', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')],
                    help='The container registry server username')
@@ -416,7 +422,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('registry_server', options_list=['--registry-server', '-r', c.deprecate(target='--docker-registry-server-url', redirect='--registry-server')],
                    help='the container registry server url')
         c.argument('image', options_list=['--image', '-c', '-i', c.deprecate(target='--docker-custom-image-name', redirect='--image')],
-                   help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+                   help='the container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`)')
         c.argument('registry_username', options_list=['--registry-username', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')],
                    help='the container registry server username')
         c.argument('registry_password', options_list=['--registry-password', '-p', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
@@ -432,7 +438,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
         c.argument('workload_profile_name', help="The name of the workload profile to run the app on.", is_preview=True)
         c.argument('cpu', type=float, help="Required CPU in cores from 0.5 to 2.0.", is_preview=True)
-        c.argument('memory', help="Required momory from 1.0 to 4.0 ending with ""Gi"" e.g. 1.0Gi, ", is_preview=True)
+        c.argument('memory', help="Required momory from 1.0 to 4.0 ending with Gi e.g. 1.0Gi, ", is_preview=True)
 
     with self.argument_context('functionapp runtime config') as c:
         c.argument('runtime_version', help='The version of the functions runtime stack. Use "az functionapp list-flexconsumption-runtimes" to check supported runtimes and versions', is_preview=True)
@@ -478,7 +484,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='Container image name, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url', '-r'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
-                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+                   help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`)')
         c.argument('container_registry_user', options_list=['--container-registry-user', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
         c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')],
                    help='The container registry server password')
@@ -490,7 +496,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp deployment github-actions')as c:
         c.argument('name', arg_type=webapp_name_arg_type)
         c.argument('resource_group', arg_type=resource_group_name_type, options_list=['--resource-group', '-g'])
-        c.argument('repo', help='The GitHub repository to which the workflow file will be added. In the format: <owner>/<repository-name>')
+        c.argument('repo', help='The GitHub repository to which the workflow file will be added. In the format: `<owner>/<repository-name>`')
         c.argument('token', help='A Personal Access Token with write access to the specified repository. For more information: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line')
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the production slot if not specified.')
         c.argument('branch', options_list=['--branch', '-b'], help='The branch to which the workflow file will be added. Defaults to "master" if not specified.')
@@ -661,7 +667,7 @@ subscription than the app service environment, please use the resource ID for --
                    arg_group='Azure Active Directory', help="One or more token audiences (comma-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
                    help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from `az cloud show` at \"endpoints.activeDirectory\". '
-                        'The tenantID can be found using `az account show`. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.',
+                        'The tenantID can be found using `az account show`. Get the \"issuer\" from the JSON at `<active directory endpoint>/<tenantId>/.well-known/openid-configuration`.',
                    arg_group='Azure Active Directory')
         c.argument('facebook_app_id', arg_group='Facebook',
                    help="Application ID to integrate Facebook Sign-in into your web app")
@@ -820,6 +826,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
                    "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
                    "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.", is_preview=True)
+        c.argument('zone_redundant', arg_type=get_three_state_flag(),
+                   help='Enable zone redundancy for high availability. Applies to Flex Consumption SKU only.', is_preview=True)
 
     with self.argument_context('functionapp deployment config set') as c:
         c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.", is_preview=True)
@@ -993,6 +1001,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('registry_password', options_list=['--registry-password', '-d', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='The container registry server password')
         c.argument('registry_username', options_list=['--registry-username', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')], help='the container registry server username')
+        c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.", arg_type=get_three_state_flag())
     with self.argument_context('functionapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
@@ -1001,7 +1010,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp deployment github-actions')as c:
         c.argument('name', arg_type=functionapp_name_arg_type)
         c.argument('resource_group', arg_type=resource_group_name_type)
-        c.argument('repo', help='The GitHub repository to which the workflow file will be added. In the format: https://github.com/<owner>/<repository-name> or <owner>/<repository-name>')
+        c.argument('repo', help='The GitHub repository to which the workflow file will be added. In the format: `https://github.com/<owner>/<repository-name>` or `<owner>/<repository-name>`')
         c.argument('token', help='A Personal Access Token with write access to the specified repository. For more information: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line', arg_group="Github")
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the production slot if not specified.')
         c.argument('branch', options_list=['--branch', '-b'], help='The branch to which the workflow file will be added.')
@@ -1073,6 +1082,10 @@ subscription than the app service environment, please use the resource ID for --
                        arg_type=get_three_state_flag())
             c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
             c.argument('http_headers', nargs='+', help="space-separated http headers in a format of `<name>=<value>`")
+            c.argument('skip_service_tag_validation',
+                       options_list=['--skip-service-tag-validation', '-k'],
+                       help='Skip validating public service tags',
+                       arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction remove') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
@@ -1087,6 +1100,10 @@ subscription than the app service environment, please use the resource ID for --
                        arg_type=get_three_state_flag())
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
+            c.argument('skip_service_tag_validation',
+                       options_list=['--skip-service-tag-validation', '-k'],
+                       help='Skip validating public service tags',
+                       arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction set') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('use_same_restrictions_for_scm_site',

@@ -18,8 +18,7 @@ from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
-from azure.cli.testsdk.checkers import (
-    StringContainCheckIgnoreCase)
+from azure.cli.testsdk.checkers import StringContainCheckIgnoreCase
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
@@ -396,10 +395,10 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag add-value -n {tag} --value test')
         self.cmd('tag add-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-                 checks=self.check('[].values[].tagValue', [u'test', u'test2']))
+                 checks=self.check('[].values[].tagValue', ['test', 'test2']))
         self.cmd('tag remove-value -n {tag} --value test')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-                 checks=self.check('[].values[].tagValue', [u'test2']))
+                 checks=self.check('[].values[].tagValue', ['test2']))
         self.cmd('tag remove-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.check('[].values[].tagValue', []))
@@ -453,10 +452,13 @@ class TagScenarioTest(ScenarioTest):
         # Test Microsoft.ContainerInstance/containerGroups
         self.kwargs.update({
             'container_group_name': self.create_random_name('clicontainer', 16),
-            'image': 'nginx:latest',
+            'image': 'mcr.microsoft.com/azuredocs/aci-helloworld:latest',
+            'cpu': 1,
+            'memory': 1,
+            'os_type': 'Linux',
         })
 
-        container = self.cmd('container create -g {rg} -n {container_group_name} --image {image}',
+        container = self.cmd('container create -g {rg} -n {container_group_name} --image {image} --cpu {cpu} --memory {memory} --os-type {os_type}',
                              checks=self.check('name', '{container_group_name}')).get_output_in_json()
         self.kwargs['container_id'] = container['id']
         self.cmd('resource tag --ids {container_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
@@ -2400,7 +2402,6 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
-            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'data', 'bicep_simple_template.bicep').replace('\\', '\\\\'),
             'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
             'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
@@ -2550,7 +2551,6 @@ class DeploymentStacksTest(ScenarioTest):
 
         self.kwargs.update({
             'name': deployment_stack_name,
-            'resource-group': resource_group,
             'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
@@ -3043,7 +3043,6 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
-            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'data', 'bicep_simple_template.bicep').replace('\\', '\\\\'),
             'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
             'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
@@ -4577,7 +4576,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
                 'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
@@ -4656,7 +4655,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
                 'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
@@ -4717,7 +4716,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
                 'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
         self.kwargs.update({
             'app_def': self.create_random_name('def', 10),
@@ -4750,7 +4749,7 @@ class ManagedAppScenarioTest(ScenarioTest):
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd('role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({

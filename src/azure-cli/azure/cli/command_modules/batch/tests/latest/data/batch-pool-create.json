@@ -1,19 +1,26 @@
 {
   "id": "azure-cli-test-json",
-  "vmSize": "small",
-  "cloudServiceConfiguration": {
-    "osFamily": "4",
-    "targetOSVersion": "*"
-  },
-  "targetLowPriorityNodes": 2,
-  "taskSlotsPerNode": 3,
-  "resizeTimeout": "PT15M",
-  "environmentSettings": [
-    {
-      "name": "TEST_ENV",
-      "value": "TEST_VALUE"
+  "vmSize": "STANDARD_D2S_V3",
+  "virtualMachineConfiguration": {
+    "imageReference": {
+      "publisher": "microsoftwindowsserver",
+      "offer": "windowsserver",
+      "sku": "2022-datacenter",
+      "version": "latest"
+    },
+    "nodeAgentSKUId": "batch.node.windows amd64",
+    "nodePlacementConfiguration": {
+      "policy": "regional"
+    },
+    "osDisk": {
+      "caching": "none",
+      "managedDisk": {
+        "storageAccountType": "premium_lrs"
+      }
     }
-  ],
+  },
+  "targetDedicatedNodes": 0,
+  "taskSlotsPerNode": 3,
   "startTask": {
     "commandLine": "cmd /c echo test",
     "waitForSuccess": true,

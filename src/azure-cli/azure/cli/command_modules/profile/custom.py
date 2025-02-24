@@ -114,9 +114,14 @@ def account_clear(cmd):
     profile.logout_all()
 
 
-# pylint: disable=inconsistent-return-statements, too-many-branches
-def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
+# pylint: disable=too-many-branches, too-many-locals
+def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
+          # Device code flow
+          use_device_code=False,
+          # Service principal
+          service_principal=None, certificate=None, use_cert_sn_issuer=None, client_assertion=None,
+          # Managed identity
+          identity=False, client_id=None, object_id=None, resource_id=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -138,12 +143,14 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     if identity:
         if in_cloud_console():
             return profile.login_in_cloud_shell()
-        return profile.login_with_managed_identity(username, allow_no_subscriptions)
+        return profile.login_with_managed_identity(
+            identity_id=username, client_id=client_id, object_id=object_id, resource_id=resource_id,
+            allow_no_subscriptions=allow_no_subscriptions)
     if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not (password or client_assertion):
+        if not (password or client_assertion or certificate):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -153,7 +160,10 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     if service_principal:
         from azure.cli.core.auth.identity import ServicePrincipalAuth
-        password = ServicePrincipalAuth.build_credential(password, client_assertion, use_cert_sn_issuer)
+        password = ServicePrincipalAuth.build_credential(
+            client_secret=password,
+            certificate=certificate, use_cert_sn_issuer=use_cert_sn_issuer,
+            client_assertion=client_assertion)
 
     login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
     # Send login_experience_v2 config to telemetry

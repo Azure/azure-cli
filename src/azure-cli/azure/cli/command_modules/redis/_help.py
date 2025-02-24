@@ -58,6 +58,8 @@ examples:
     crafted: true
   - name: Configure the multiple zones for new Premium Azure Cache for Redis
     text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --zones 1 2
+  - name: Deploying a Premium Azure Cache for Redis with zones automatically allocated
+    text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --zonal-allocation-policy Automatic
     crafted: true
   - name: Configure the memory policies for the cache.
     text: az redis create --resource-group resourceGroupName --name cacheName --location westus2 --sku Standard --vm-size c0 --redis-configuration @"config_max-memory.json"
@@ -74,8 +76,8 @@ examples:
   - name: Deploying a Premium Azure Cache for Redis inside an existing Azure Virtual Network
     text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --subnet-id "/subscriptions/{subid}/resourceGroups/{resourceGroupName}/providers/Microsoft.{Network|ClassicNetwork}/virtualNetworks/vnet1/subnets/subnet1"
     crafted: true
-  - name: Deploying a Premium Azure Cache for Redis with Microsoft Entra Authentication configured
-    text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --redis-configuration @"config_enable-aad.json"
+  - name: Deploying a Premium Azure Cache for Redis with Microsoft Entra Authentication configured and access keys disabled
+    text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --disable-access-keys true --redis-configuration @"config_enable-aad.json"
 """
 
 helps['redis export'] = """
@@ -177,6 +179,10 @@ examples:
   - name: Scale an Azure Cache for Redis Instance in/out using Redis Cluster.
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set shardCount=2
     crafted: true
+  - name: Disable access keys authentication for Redis.
+    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "disableAccessKeyAuthentication=true"
+  - name: Updating a non zone redundant cache to zone redundant cache using automatic zonal allocation policy.
+    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "zonalAllocationPolicy=Automatic"
 """
 
 helps['redis force-reboot'] = """

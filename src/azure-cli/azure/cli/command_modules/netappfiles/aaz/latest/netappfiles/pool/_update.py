@@ -24,9 +24,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}", "2024-07-01"],
         ]
     }
 
@@ -113,7 +113,7 @@ class Update(AAZCommand):
         _args_schema.size = AAZIntArg(
             options=["--size"],
             arg_group="Properties",
-            help="Provisioned size of the pool (in bytes). Allowed values are in 1TiB chunks (value must be multiply of 4398046511104).",
+            help="Provisioned size of the pool. Must be an integer number of tebibytes in multiples of 4",
         )
         return cls._args_schema
 
@@ -199,7 +199,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -302,7 +302,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }

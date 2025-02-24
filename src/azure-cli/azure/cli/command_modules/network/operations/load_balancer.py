@@ -7,7 +7,7 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
     AAZStrArg, AAZArgEnum
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
@@ -636,11 +636,6 @@ class LBAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
             # convert subnet name to subnet id
             subnet = f"{virtual_network}/subnets/{subnet}"
             args.subnet = subnet
-
-        if not virtual_network and not subnet:
-            raise ArgumentUsageError(
-                "vnet or subnet is required."
-            )
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)

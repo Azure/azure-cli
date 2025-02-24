@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class ListEndpointServices(AAZCommand):
     """List which services support VNet service tunneling in a given region.
 
-    To learn more about service endpoints visit https://docs.microsoft.com/azure/virtual-network/virtual-network-service-endpoints-configure#azure-cli.
+    To learn more about service endpoints visit https://learn.microsoft.com/azure/virtual-network/virtual-network-service-endpoints-configure#azure-cli.
 
     :example: List the endpoint services available for use in the West US region.
         az network vnet list-endpoint-services -l westus -o table
@@ -29,6 +29,8 @@ class ListEndpointServices(AAZCommand):
             ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/locations/{}/virtualnetworkavailableendpointservices", "2022-01-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)

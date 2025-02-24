@@ -23,15 +23,14 @@ import requests
 from knack.log import get_logger
 from knack.util import CLIError
 from msrest.serialization import Deserializer
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from urllib.parse import urlparse
 
 from azure.cli.core import keys
 from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.mgmt.batchai import models
 
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
@@ -133,7 +132,7 @@ def _ensure_subnet_is_valid(client, subnet, nfs_resource_group, nfs_workspace, n
     nfs = None  # type: models.FileServer
     try:
         nfs = client.file_servers.get(nfs_resource_group, nfs_workspace, nfs_name)
-    except CloudError as e:
+    except HttpResponseError as e:
         if e.status_code != 404:
             raise
     if not nfs:

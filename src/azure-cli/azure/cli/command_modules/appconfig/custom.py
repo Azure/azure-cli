@@ -4,7 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from knack.log import get_logger
+import time
+
+from azure.cli.command_modules.appconfig._client_factory import cf_configstore, cf_replicas
+from azure.cli.core.commands.progress import IndeterminateStandardOut
+from azure.cli.core.util import user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
@@ -16,8 +20,14 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 KeyVaultProperties,
                                                 RegenerateKeyParameters,
                                                 CreateMode,
-                                                Replica)
+                                                Replica,
+                                                AuthenticationMode,
+                                                PublicNetworkAccess,
+                                                PrivateLinkDelegation,
+                                                DataPlaneProxyProperties)
+from knack.log import get_logger
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
+from ._constants import ARMAuthenticationMode, ProvisioningStatus
 
 logger = get_logger(__name__)
 
@@ -27,7 +37,8 @@ SYSTEM_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
 SYSTEM_ASSIGNED_IDENTITY = '[system]'
 
 
-def create_configstore(client,
+def create_configstore(cmd,
+                       client,
                        resource_group_name,
                        name,
                        location,
@@ -37,18 +48,26 @@ def create_configstore(client,
                        enable_public_network=None,
                        disable_local_auth=None,
                        retention_days=None,
-                       enable_purge_protection=None):
+                       enable_purge_protection=None,
+                       replica_name=None,
+                       replica_location=None,
+                       no_replica=None,  # pylint: disable=unused-argument
+                       arm_auth_mode=None,
+                       enable_arm_private_network_access=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
     public_network_access = None
     if enable_public_network is not None:
-        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+        public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
 
-    if sku.lower() == 'free' and (enable_purge_protection or retention_days):
-        logger.warning("Options '--enable-purge-protection' and '--retention-days' will be ignored when creating a free store.")
-        retention_days = None
-        enable_purge_protection = None
+    arm_private_link_delegation = None
+    if enable_arm_private_network_access is not None:
+        arm_private_link_delegation = PrivateLinkDelegation.ENABLED if enable_arm_private_network_access else PrivateLinkDelegation.DISABLED
+
+    arm_authentication_mode = None
+    if arm_auth_mode is not None:
+        arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
@@ -58,9 +77,41 @@ def create_configstore(client,
                                             disable_local_auth=disable_local_auth,
                                             soft_delete_retention_in_days=retention_days,
                                             enable_purge_protection=enable_purge_protection,
-                                            create_mode=CreateMode.DEFAULT)
+                                            create_mode=CreateMode.DEFAULT,
+                                            data_plane_proxy=DataPlaneProxyProperties(
+                                                authentication_mode=arm_authentication_mode,
+                                                private_link_delegation=arm_private_link_delegation))
 
-    return client.begin_create(resource_group_name, name, configstore_params)
+    progress = IndeterminateStandardOut()
+
+    progress.write({"message": "Starting"})
+    config_store = client.begin_create(resource_group_name, name, configstore_params)
+
+    # # Poll request and create replica after store is created
+    while config_store.status() != ProvisioningStatus.SUCCEEDED:
+        progress.spinner.step(label="Creating store")
+        config_store.wait(1)
+
+    progress.write({"message": "Store created"})
+    time.sleep(1)
+
+    if replica_name is not None:
+        replica_client = cf_replicas(cmd.cli_ctx)
+        store_replica = create_replica(cmd, replica_client, name, replica_name, replica_location, resource_group_name)
+
+        while store_replica.status() != ProvisioningStatus.SUCCEEDED:
+            progress.spinner.step(label="Creating replica")
+            store_replica.wait(1)
+
+        if store_replica.status() == ProvisioningStatus.SUCCEEDED:
+            progress.write({"message": "Replica created"})
+            time.sleep(1)
+        else:
+            progress.write({"message": "Replica creation failed"})
+
+    progress.clear()
+
+    return config_store
 
 
 def recover_deleted_configstore(cmd, client, name, resource_group_name=None, location=None):
@@ -127,19 +178,33 @@ def update_configstore(cmd,
                        identity_client_id=None,
                        enable_public_network=None,
                        disable_local_auth=None,
-                       enable_purge_protection=None):
+                       enable_purge_protection=None,
+                       arm_auth_mode=None,
+                       enable_arm_private_network_access=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
 
     public_network_access = None
     if enable_public_network is not None:
-        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+        public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
+
+    arm_private_link_delegation = None
+    if enable_arm_private_network_access is not None:
+        arm_private_link_delegation = PrivateLinkDelegation.ENABLED if enable_arm_private_network_access else PrivateLinkDelegation.DISABLED
+
+    arm_authentication_mode = None
+    if arm_auth_mode is not None:
+        arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
+
     update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,
                                                        public_network_access=public_network_access,
                                                        disable_local_auth=disable_local_auth,
-                                                       enable_purge_protection=enable_purge_protection)
+                                                       enable_purge_protection=enable_purge_protection,
+                                                       data_plane_proxy=DataPlaneProxyProperties(
+                                                           authentication_mode=arm_authentication_mode,
+                                                           private_link_delegation=arm_private_link_delegation))
 
     if encryption_key_name is not None:
         key_vault_properties = KeyVaultProperties()
@@ -150,9 +215,11 @@ def update_configstore(cmd,
 
         update_params.encryption = EncryptionProperties(key_vault_properties=key_vault_properties)
 
-    return client.begin_update(resource_group_name=resource_group_name,
-                               config_store_name=name,
-                               config_store_update_parameters=update_params)
+    return client.begin_update(
+        resource_group_name=resource_group_name,
+        config_store_name=name,
+        config_store_update_parameters=update_params,
+    )
 
 
 def assign_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
@@ -269,13 +336,29 @@ def create_replica(cmd, client, store_name, name, location, resource_group_name=
                                replica_creation_parameters=replica_creation_params)
 
 
-def delete_replica(cmd, client, store_name, name, resource_group_name=None):
+def delete_replica(cmd, client, store_name, name, yes=False, resource_group_name=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, store_name)
 
-    return client.begin_delete(resource_group_name=resource_group_name,
-                               config_store_name=store_name,
-                               replica_name=name)
+    if not yes:
+        config_store_client = cf_configstore(cmd.cli_ctx)
+        config_store = show_configstore(
+            cmd, config_store_client, store_name, resource_group_name
+        )
+        replicas = list_replica(cmd, client, store_name, resource_group_name)
+
+        if config_store.sku.name.lower() == "premium" and len(list(replicas)) == 1:
+            user_confirmation(
+                "Deleting the last replica will disable geo-replication. It is recommended that a premium tier store have geo-replication enabled to take advantage of the improved SLA. The first replica for a premium tier store comes at no additional cost. Do you want to continue?"
+            )
+        else:
+            user_confirmation("Are you sure you want to continue with this operation?")
+
+    return client.begin_delete(
+        resource_group_name=resource_group_name,
+        config_store_name=store_name,
+        replica_name=name,
+    )
 
 
 def __get_resource_identity(assign_identity):

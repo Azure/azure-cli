@@ -281,7 +281,7 @@ def _find_edition_capability(sku, supported_editions):
             return next(e for e in supported_editions if e.name == sku.tier)
         except StopIteration:
             candidate_editions = [e.name for e in supported_editions]
-            raise CLIError('Could not find tier ''{}''. Supported tiers are: {}'.format(
+            raise CLIError('Could not find tier {}. Supported tiers are: {}'.format(
                 sku.tier, candidate_editions
             ))
     else:
@@ -304,7 +304,7 @@ def _find_family_capability(sku, supported_families):
             return next(f for f in supported_families if f.name == sku.family)
         except StopIteration:
             candidate_families = [e.name for e in supported_families]
-            raise CLIError('Could not find family ''{}''. Supported families are: {}'.format(
+            raise CLIError('Could not find family {}. Supported families are: {}'.format(
                 sku.family, candidate_families
             ))
     else:
@@ -596,7 +596,7 @@ def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
     Completes maintenance configuration id from short to full type if needed
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if argument_value and not is_valid_resource_id(argument_value):
@@ -641,6 +641,11 @@ class ClientAuthenticationType(Enum):
 class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
+
+
+class FailoverGroupDatabasesSecondaryType(Enum):
+    geo = 'Geo'
+    standby = 'Standby'
 
 
 class SqlServerMinimalTlsVersionType(Enum):
@@ -736,7 +741,7 @@ def _get_managed_db_resource_id(
     Gets the Managed db resource id in this Azure environment.
     '''
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -755,7 +760,7 @@ def _to_filetimeutc(dateTime):
     NET_epoch = datetime(1601, 1, 1)
     UNIX_epoch = datetime(1970, 1, 1)
 
-    epoch_delta = (UNIX_epoch - NET_epoch)
+    epoch_delta = UNIX_epoch - NET_epoch
 
     log_time = parse(dateTime)
 
@@ -780,7 +785,7 @@ def _get_managed_dropped_db_resource_id(
 
     from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -803,7 +808,7 @@ def _get_managed_instance_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -822,7 +827,7 @@ def _get_managed_instance_pool_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if instance_pool_name:
         return (resource_id(
@@ -936,7 +941,7 @@ def db_show_conn_str(
     return f.format(**conn_str_props)
 
 
-class DatabaseIdentity():  # pylint: disable=too-few-public-methods
+class DatabaseIdentity:  # pylint: disable=too-few-public-methods
     '''
     Helper class to bundle up database identity properties and generate
     database resource id.
@@ -1023,7 +1028,7 @@ def _validate_elastic_pool_id(
     Returns the elastic_pool_id, which may have been updated and may be None.
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
@@ -3775,6 +3780,11 @@ def elastic_pool_create(
     # using capabilities.
     kwargs['sku'] = _find_elastic_pool_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
 
+    # The min_capacity property is only applicable to serverless SKUs.
+    #
+    if kwargs['sku'] is not None and not _is_serverless_slo(kwargs['sku'].name):
+        kwargs['min_capacity'] = None
+
     # Expand maintenance configuration id if needed
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
         cmd.cli_ctx,
@@ -4957,6 +4967,7 @@ def managed_instance_create(
         zone_redundant=None,
         instance_pool_name=None,
         dns_zone_partner=None,
+        authentication_metadata=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4995,6 +5006,7 @@ def managed_instance_create(
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
     kwargs['zone_redundant'] = zone_redundant
+    kwargs['authentication_metadata'] = authentication_metadata
 
     kwargs['dns_zone_partner'] = dns_zone_partner
 
@@ -5063,10 +5075,12 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
         resource_group_name,
+        is_general_purpose_v2=None,
         administrator_login_password=None,
         license_type=None,
         vcores=None,
         storage_size_in_gb=None,
+        storage_iops=None,
         assign_identity=False,
         proxy_override=None,
         public_data_endpoint_enabled=None,
@@ -5086,7 +5100,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         zone_redundant=None,
         instance_pool_name=None,
         database_format=None,
-        pricing_model=None):
+        pricing_model=None,
+        authentication_metadata=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5102,6 +5117,18 @@ def managed_instance_update(  # pylint: disable=too-many-locals
     instance.service_principal = _get_service_principal_object_from_type(service_principal_type)
 
     # Apply params to instance
+    #   Note on is_general_purpose_v2
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #   Note on storage_iops
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    #   Note on storage_throughput_mbps
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    instance.is_general_purpose_v2 = is_general_purpose_v2
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
     instance.license_type = (
@@ -5110,6 +5137,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         vcores or instance.v_cores)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
+    instance.storage_iops = storage_iops
+    instance.storage_throughput_mbps = None
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
     instance.minimal_tls_version = (
@@ -5164,6 +5193,9 @@ def managed_instance_update(  # pylint: disable=too-many-locals
 
     if pricing_model is not None:
         instance.pricing_model = pricing_model
+
+    if authentication_metadata is not None:
+        instance.authentication_metadata = authentication_metadata
 
     return instance
 
@@ -6398,8 +6430,9 @@ def failover_group_create(
         server_name,
         failover_group_name,
         partner_server,
+        secondary_type=None,
         partner_resource_group=None,
-        failover_policy=FailoverPolicyType.automatic.value,
+        failover_policy=FailoverPolicyType.manual.value,
         grace_period=1,
         add_db=None):
     '''
@@ -6434,18 +6467,24 @@ def failover_group_create(
         add_db,
         [])
 
+    failover_group_params = FailoverGroup(
+        partner_servers=[partner_server],
+        databases=databases,
+        read_write_endpoint=FailoverGroupReadWriteEndpoint(
+            failover_policy=failover_policy,
+            failover_with_data_loss_grace_period_minutes=grace_period),
+        read_only_endpoint=FailoverGroupReadOnlyEndpoint(
+            failover_policy="Disabled")
+    )
+
+    if secondary_type is not None:
+        failover_group_params.secondary_type = secondary_type
+
     return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         failover_group_name=failover_group_name,
-        parameters=FailoverGroup(
-            partner_servers=[partner_server],
-            databases=databases,
-            read_write_endpoint=FailoverGroupReadWriteEndpoint(
-                failover_policy=failover_policy,
-                failover_with_data_loss_grace_period_minutes=grace_period),
-            read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-                failover_policy="Disabled")))
+        parameters=failover_group_params)
 
 
 def failover_group_update(
@@ -6453,6 +6492,7 @@ def failover_group_update(
         instance,
         resource_group_name,
         server_name,
+        secondary_type=None,
         failover_policy=None,
         grace_period=None,
         add_db=None,
@@ -6481,6 +6521,8 @@ def failover_group_update(
         remove_db)
 
     instance.databases = databases
+    if secondary_type is not None:
+        instance.secondary_type = secondary_type
 
     return instance
 

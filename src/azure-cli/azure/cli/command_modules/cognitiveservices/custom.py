@@ -174,7 +174,7 @@ def add_network_rule(client, resource_group_name, account_name, subnet=None,
         rules = default_network_acls()
 
     if subnet:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
             raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
 

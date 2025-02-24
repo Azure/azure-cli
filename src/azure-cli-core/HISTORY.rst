@@ -3,6 +3,38 @@
 Release History
 ===============
 
+2.69.0
+++++++
+* `aaz`: Support simple type parsed from string value (#30623)
+
+2.68.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Linux server (#30267)
+* Drop old Track 2 SDK authentication support (#29690)
+* Resolve CVE-2024-50602 (#30533)
+
+2.67.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Windows server (#29187)
+
+2.66.0
+++++++
+* `aaz`: Support managed identity (#29953)
+* Resolve CVE-2024-6119 (#29887)
+* Resolve CVE-2024-5535 (#29887)
+* Resolve CVE-2024-4741 (#29887)
+* Resolve CVE-2024-4603 (#29887)
+* Resolve CVE-2024-2511 (#29887)
+* Use MSAL for Cloud Shell authentication (#29637)
+
+2.65.0
+++++++
+* Minor fixes
+
+2.64.0
+++++++
+* Minor fixes
+
 2.63.0
 ++++++
 * Resolve CVE-2024-39689 (#29320)

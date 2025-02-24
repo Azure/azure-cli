@@ -12,11 +12,11 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
-                                                          cf_disk_encryption_set, cf_shared_galleries,
-                                                          cf_gallery_sharing_profile, cf_shared_gallery_image,
+                                                          cf_disk_encryption_set,
+                                                          cf_shared_gallery_image,
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
-                                                          cf_vmss_run_commands, cf_gallery_application,
+                                                          cf_vmss_run_commands,
                                                           cf_gallery_application_version, cf_restore_point,
                                                           cf_restore_point_collection, cf_community_gallery,
                                                           cf_community_gallery_image,
@@ -26,7 +26,7 @@ from azure.cli.command_modules.vm._format import (
     transform_disk_create_table_output, transform_sku_for_table_output, transform_disk_show_table_output,
     transform_extension_show_table_output, get_vmss_table_output_transformer,
     transform_vm_encryption_show_table_output, transform_log_analytics_query_output,
-    transform_vmss_list_with_zones_table_output, transform_vmss_list_without_zones_table_output)
+    transform_vmss_list_with_zones_table_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_create_namespace, process_snapshot_create_namespace,
@@ -34,7 +34,7 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_ppg_create_namespace)
+    process_image_version_undelete_namespace, process_ppg_create_namespace, process_vm_disk_detach_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -154,9 +154,8 @@ def load_command_table(self, _):
         client_factory=cf_gallery_image_versions,
     )
 
-    compute_gallery_application_sdk = CliCommandType(
+    compute_gallery_application_profile = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationsOperations.{}',
-        client_factory=cf_gallery_application,
     )
 
     compute_gallery_application_version_sdk = CliCommandType(
@@ -234,18 +233,18 @@ def load_command_table(self, _):
         client_factory=cf_community_gallery_image_version)
 
     with self.command_group("ppg"):
-        from .custom import PPGShow
+        from .operations.ppg import PPGShow
         self.command_table["ppg show"] = PPGShow(loader=self)
 
-    with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
+    with self.command_group('disk', compute_disk_sdk, operation_group='disks') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
-        g.custom_command('grant-access', 'grant_disk_access')
-        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
+        from .operations.disk import DiskUpdate, DiskGrantAccess
+        self.command_table["disk grant-access"] = DiskGrantAccess(loader=self)
+        self.command_table["disk update"] = DiskUpdate(loader=self)
 
-        from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
-        Disk = import_aaz_by_profile(self.cli_ctx.cloud.profile, "disk")
-        self.command_table['disk list'] = Disk.List(loader=self, table_transformer='[].' + transform_disk_show_table_output)
-        self.command_table['disk show'] = Disk.Show(loader=self, table_transformer=transform_disk_show_table_output)
+        from .aaz.latest.disk import List as DiskList, Show as DiskShow
+        self.command_table['disk list'] = DiskList(loader=self, table_transformer='[].' + transform_disk_show_table_output)
+        self.command_table['disk show'] = DiskShow(loader=self, table_transformer=transform_disk_show_table_output)
 
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
@@ -260,9 +259,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
         g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom, supports_no_wait=True)
 
-    with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
+    with self.command_group('image', compute_image_sdk) as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_image')
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
@@ -311,10 +309,10 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_template_error_handler', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_error_handler', supports_local_cache=True)
 
-    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
+    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
-        g.custom_command('grant-access', 'grant_snapshot_access')
-        g.generic_update_command('update', custom_func_name='update_snapshot', setter_name='begin_create_or_update', setter_arg_name='snapshot', supports_no_wait=True)
+        from .operations.snapshot import SnapshotUpdate
+        self.command_table['snapshot update'] = SnapshotUpdate(loader=self)
 
     with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
@@ -340,6 +338,8 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
+        from .operations.vm import VMListSizes
+        self.command_table['vm list-sizes'] = VMListSizes(loader=self)
 
     with self.command_group('vm', compute_vm_sdk, client_factory=cf_vm) as g:
         g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')
@@ -362,7 +362,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm disk', compute_vm_sdk, min_api='2017-03-30') as g:
         g.custom_command('attach', 'attach_managed_data_disk', validator=process_vm_disk_attach_namespace)
-        g.custom_command('detach', 'detach_managed_data_disk')
+        g.custom_command('detach', 'detach_managed_data_disk', validator=process_vm_disk_detach_namespace)
 
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
         g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
@@ -383,9 +383,9 @@ def load_command_table(self, _):
         g.custom_command('list-publishers', 'list_publishers')
         g.custom_command('list-skus', 'list_sku')
         g.custom_command('list', 'list_vm_images')
+        g.custom_show_command('show', 'show_vm_image')
         g.custom_command('accept-terms', 'accept_market_ordering_terms',
                          deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='3.0.0'))
-        g.custom_show_command('show', 'show_vm_image')
 
     with self.command_group('vm image terms', compute_vm_image_term_sdk, validator=None) as g:
         g.custom_command('accept', 'accept_terms')
@@ -459,18 +459,12 @@ def load_command_table(self, _):
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
-        from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
-        VMSS = import_aaz_by_profile(self.cli_ctx.cloud.profile, "vmss")
-        if self.supported_api_version(min_api='2017-03-30'):
-            self.command_table['vmss list'] = VMSS.List(loader=self,
-                                                        table_transformer=transform_vmss_list_with_zones_table_output)
-        else:
-            self.command_table['vmss list'] = VMSS.List(loader=self,
-                                                        table_transformer=transform_vmss_list_without_zones_table_output)
+        from .aaz.latest.vmss import List as VMSSList
+        self.command_table['vmss list'] = VMSSList(loader=self,
+                                                   table_transformer=transform_vmss_list_with_zones_table_output)
 
-        if self.cli_ctx.cloud.profile == 'latest':
-            from .custom import VMSSListInstances
-            self.command_table['vmss list-instances'] = VMSSListInstances(loader=self)
+        from .operations.vmss import VMSSListInstances
+        self.command_table['vmss list-instances'] = VMSSListInstances(loader=self)
 
     with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')
@@ -503,16 +497,16 @@ def load_command_table(self, _):
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
         g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
-        g.custom_command('create', 'create_image_gallery')
-        g.custom_show_command('show', 'show_image_gallery')
-        g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
+    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries') as g:
+        from .operations.sig import SigCreate, SigUpdate, SigShow
+        self.command_table['sig create'] = SigCreate(loader=self)
+        self.command_table['sig update'] = SigUpdate(loader=self)
+        self.command_table['sig show'] = SigShow(loader=self)
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_gallery_list')
 
     with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
-        g.command('show-community', 'get')
         g.custom_command('list-community', 'sig_community_image_definition_list')
 
     with self.command_group('sig image-version', community_gallery_image_version_sdk, client_factory=cf_community_gallery_image_version, operation_group='shared_galleries', min_api='2022-01-03') as g:
@@ -520,40 +514,30 @@ def load_command_table(self, _):
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
-        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
+        from .operations.sig_image_definition import SigImageDefinitionUpdate
+        self.command_table['sig image-definition update'] = SigImageDefinitionUpdate(loader=self)
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
-        g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')
         g.custom_command('create', 'create_image_version', supports_no_wait=True, validator=process_image_version_create_namespace)
-        g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, min_api='2021-07-01', validator=process_image_version_undelete_namespace, is_preview=True)
+        g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, validator=process_image_version_undelete_namespace, is_preview=True)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
-        g.wait_command('wait')
-
-    vm_shared_gallery = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations._shared_galleries_operations#SharedGalleriesOperations.{}',
-        client_factory=cf_shared_galleries,
-        operation_group='shared_galleries'
-    )
-    with self.command_group('sig', vm_shared_gallery) as g:
-        g.custom_command('list-shared', 'sig_shared_gallery_list', client_factory=cf_shared_galleries,
-                         operation_group='shared_galleries', min_api='2020-09-30')
+        from .aaz.latest.sig.image_version import Show as SigImageVersionShow
+        self.command_table['sig image-version show'] = SigImageVersionShow(loader=self,
+                                                                           table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')
 
     vm_gallery_sharing_profile = CliCommandType(
         operations_tmpl=(
             'azure.mgmt.compute.operations._gallery_sharing_profile_operations#GallerySharingProfileOperations.{}'
         ),
-        client_factory=cf_gallery_sharing_profile,
         operation_group='shared_galleries'
     )
-    with self.command_group('sig share', vm_gallery_sharing_profile,
-                            client_factory=cf_gallery_sharing_profile,
-                            operation_group='shared_galleries',
-                            min_api='2020-09-30') as g:
-        g.custom_command('add', 'sig_share_update', supports_no_wait=True)
-        g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
-        g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
-        g.custom_command('enable-community', 'sig_share_update', supports_no_wait=True)
-        g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
+    with self.command_group('sig share', vm_gallery_sharing_profile, operation_group='shared_galleries'):
+        from .operations.sig_share import SigShareAdd, SigShareRemove, SigShareReset, SigShareEnableCommunity, SigShareWait
+        self.command_table['sig share add'] = SigShareAdd(loader=self)
+        self.command_table['sig share remove'] = SigShareRemove(loader=self)
+        self.command_table['sig share reset'] = SigShareReset(loader=self)
+        self.command_table['sig share enable-community'] = SigShareEnableCommunity(loader=self)
+        self.command_table['sig share wait'] = SigShareWait(loader=self)
 
     vm_shared_gallery_image = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._shared_gallery_images_operations#SharedGalleryImagesOperations.'
@@ -573,10 +557,9 @@ def load_command_table(self, _):
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list')
 
-    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
-        g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
-        g.custom_command('update', 'gallery_application_update', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group('sig gallery-application', compute_gallery_application_profile, operation_group='gallery_applications') as g:
+        from .operations.sig_gallery_application import SigGalleryApplicationCreate
+        self.command_table['sig gallery-application create'] = SigGalleryApplicationCreate(loader=self)
 
     with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
         g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
@@ -600,17 +583,17 @@ def load_command_table(self, _):
             pass
 
     with self.command_group('capacity reservation group', capacity_reservation_groups_sdk, min_api='2021-04-01',
-                            client_factory=cf_capacity_reservation_groups, is_preview=True) as g:
+                            client_factory=cf_capacity_reservation_groups) as g:
         g.custom_command('create', 'create_capacity_reservation_group')
         g.custom_command('update', 'update_capacity_reservation_group')
         g.custom_show_command('show', 'show_capacity_reservation_group')
 
     with self.command_group('capacity reservation group'):
-        from .custom import CapacityReservationGroupList
+        from .operations.capacity_reservation_group import CapacityReservationGroupList
         self.command_table['capacity reservation group list'] = CapacityReservationGroupList(loader=self)
 
     with self.command_group('capacity reservation', capacity_reservations_sdk, min_api='2021-04-01',
-                            client_factory=cf_capacity_reservations, is_preview=True) as g:
+                            client_factory=cf_capacity_reservations) as g:
         g.custom_command('create', 'create_capacity_reservation', supports_no_wait=True)
         g.custom_command('update', 'update_capacity_reservation', supports_no_wait=True)
         g.custom_show_command('show', 'show_capacity_reservation')

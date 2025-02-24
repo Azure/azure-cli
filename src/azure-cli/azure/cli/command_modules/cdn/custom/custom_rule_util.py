@@ -6,7 +6,7 @@
 
 from azure.cli.core.aaz._base import has_value
 from azure.mgmt.cdn.models import (RequestMethodOperator, RuleIsCompressionEnabled)
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 
 
 def create_condition(match_variable,
@@ -292,7 +292,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         action = {
             "cache_key_query_string": {
                 "parameters": {
-                    "type_name" "DeliveryRuleCacheKeyQueryStringBehaviorActionParameters"
+                    "type_name": "DeliveryRuleCacheKeyQueryStringBehaviorActionParameters",
                     "query_string_behavior": query_string_behavior,
                     "query_parameters": query_parameters
                 }

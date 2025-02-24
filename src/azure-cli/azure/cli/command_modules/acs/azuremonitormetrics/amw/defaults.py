@@ -12,7 +12,7 @@ from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCAT
 def get_default_region(cmd):
     cloud_name = cmd.cli_ctx.cloud.name
     if cloud_name.lower() == 'azurechinacloud':
-        raise "chinanorth3"
+        return "chinanorth3"
     if cloud_name.lower() == 'azureusgovernment':
         return "usgovvirginia"
     if cloud_name.lower() == 'ussec':

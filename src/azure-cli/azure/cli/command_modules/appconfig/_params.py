@@ -14,9 +14,9 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
-from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants
+from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants, ARMAuthenticationMode
 
-from ._validators import (validate_appservice_name_or_id, validate_snapshot_query_fields,
+from ._validators import (validate_appservice_name_or_id, validate_sku, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
@@ -57,7 +57,7 @@ def load_arguments(self, _):
     )
     datatime_filter_arg_type = CLIArgumentType(
         validator=validate_datetime,
-        help='Format: "YYYY-MM-DDThh:mm:ssZ". If no time zone specified, use UTC by default.'
+        help='Format: "YYYY-MM-DDThh:mm:ss["Z"/±hh:mm]. If no time zone or offset specified, use UTC by default.'
     )
     top_arg_type = CLIArgumentType(
         options_list=['--top', '-t'],
@@ -79,6 +79,19 @@ def load_arguments(self, _):
         help='Name of the App Configuration store. You can configure the default name using `az configure --defaults app_configuration_store=<name>`.',
         configured_default='app_configuration_store'
     )
+
+    store_creation_replica_name_arg_type = CLIArgumentType(
+        options_list=['--replica-name'],
+        help='Name of the replica of the App Configuration store.',
+        configured_default=None
+    )
+
+    replica_location_arg_type = CLIArgumentType(
+        options_list=['--replica-location'],
+        help='The location of the replica of the App Configuration store.',
+        configured_default=None
+    )
+
     replica_name_arg_type = CLIArgumentType(
         options_list=['--name', '-n'],
         type=str,
@@ -106,6 +119,19 @@ def load_arguments(self, _):
         help='Filter snapshots by their status. If no status specified, return all snapshots by default.'
     )
 
+    arm_auth_mode_arg_type = CLIArgumentType(
+        options_list=['--arm-auth-mode'],
+        arg_type=get_enum_type([ARMAuthenticationMode.LOCAL, ARMAuthenticationMode.PASS_THROUGH]),
+        help="The authentication mode for accessing the App Configuration Store via ARM. 'pass-through' (Recommended) uses Microsoft Entra ID to access the store via ARM with proper authorization.'local' uses access keys for authentication. This requires access keys to be enabled."
+    )
+
+    enable_arm_private_network_access_arg_type = CLIArgumentType(
+        option_list=['--enable-arm-private-network-access'],
+        arg_type=get_three_state_flag(),
+        help="Enable access to the App Configuration store via ARM Private Link if resource is restricted to private network access. Requires Pass-through ARM authentication mode."
+
+    )
+
     # Used with data plane commands. These take either a store name or connection string argument.
     # We only read default values when neither connection string nor store name is provided so configured defaults are not supplied.
     data_plane_name_arg_type = CLIArgumentType(
@@ -125,16 +151,16 @@ def load_arguments(self, _):
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
-        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Standard']))
         c.argument('endpoint', help='If auth mode is "login", provide endpoint URL of the App Configuration store. The endpoint can be retrieved using "az appconfig show" command. You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
         c.argument('auth_mode', arg_type=get_enum_type(['login', 'key']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
                    help='This parameter can be used for indicating how a data operation is to be authorized. ' +
                    'If the auth mode is "key", provide connection string or store name and your account access keys will be retrieved for authorization. ' +
                    'If the auth mode is "login", provide the `--endpoint` or `--name` and your "az login" credentials will be used for authorization. ' +
                    'You can configure the default auth mode using `az configure --defaults appconfig_auth_mode=<auth_mode>`. ' +
-                   'For more information, see https://docs.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
+                   'For more information, see https://learn.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
 
     with self.argument_context('appconfig create') as c:
+        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']), validator=validate_sku)
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
         c.argument('assign_identity', arg_type=identities_arg_type,
@@ -144,13 +170,21 @@ def load_arguments(self, _):
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('retention_days', arg_type=retention_days_arg_type)
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
+        c.argument('replica_name', arg_type=store_creation_replica_name_arg_type)
+        c.argument('replica_location', arg_type=replica_location_arg_type)
+        c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
+        c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
+        c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
 
     with self.argument_context('appconfig update') as c:
+        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']))
         c.argument('tags', arg_type=tags_type)
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
+        c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
+        c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
 
     with self.argument_context('appconfig recover') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration store. Can be viewed using command `az appconfig show-deleted`.')
@@ -246,7 +280,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
         c.argument('export_as_reference', options_list=['--export-as-reference', '-r'], arg_type=get_three_state_flag(), validator=validate_export_as_reference,
-                   help="Export key-values as App Configuration references. For more information, see https://docs.microsoft.com/en-us/azure/app-service/app-service-configuration-references")
+                   help="Export key-values as App Configuration references. For more information, see https://learn.microsoft.com/en-us/azure/app-service/app-service-configuration-references")
 
     with self.argument_context('appconfig kv set') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
@@ -382,7 +416,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig snapshot create') as c:
         c.argument('filters', arg_type=snapshot_filter_arg_type)
         c.argument('composition_type', arg_type=get_enum_type(["key", "key_label"]), help='Composition type used in building App Configuration snapshots. If not specified, defaults to key.')
-        c.argument('retention_period', type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free tier stores and 90 days (7,776,000s) for standard tier stores. If specified, retention period must be at least 1 hour (3600s)')
+        c.argument('retention_period', type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free tier stores and 90 days (7,776,000s) for standard and premium tier stores. If specified, retention period must be at least 1 hour (3600s)')
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig snapshot show') as c:

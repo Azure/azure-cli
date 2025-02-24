@@ -6,6 +6,7 @@ import abc
 import copy
 
 from azure.cli.core import azclierror
+from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage
 from knack.arguments import CLICommandArgument, CaseInsensitiveList
 from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
@@ -357,9 +358,6 @@ class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):
 
 class AAZCompoundTypeArg(AAZBaseArg):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     @abc.abstractmethod
     def _build_cmd_action(self):
         raise NotImplementedError()
@@ -626,12 +624,11 @@ class AAZGenericUpdateArg(AAZBaseArg, AAZListType):
 
 
 class AAZGenericUpdateSetArg(AAZGenericUpdateArg):
-    _example = '--set property1.property2=<value>'
 
     def __init__(
             self, options=('--set',), arg_group='Generic Update',
             help='Update an object by specifying a property path and value to set.'
-                 '  Example: {}'.format(_example),
+                 '  Example: {}'.format(set_usage),
             **kwargs):
         super().__init__(
             options=options,
@@ -653,12 +650,11 @@ class AAZGenericUpdateSetArg(AAZGenericUpdateArg):
 
 
 class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
-    _example = '--add property.listProperty <key=value, string or JSON string>'
 
     def __init__(
             self, options=('--add',), arg_group='Generic Update',
             help='Add an object to a list of objects by specifying a path and key value pairs.'
-                 '  Example: {}'.format(_example),
+                 '  Example: {}'.format(add_usage),
             **kwargs):
         super().__init__(
             options=options,
@@ -680,12 +676,11 @@ class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
 
 
 class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
-    _example = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
 
     def __init__(
             self, options=('--remove', ), arg_group='Generic Update',
             help='Remove a property or an element from a list.'
-                 '  Example: {}'.format(_example),
+                 '  Example: {}'.format(remove_usage),
             **kwargs):
         super().__init__(
             options=options,

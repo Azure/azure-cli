@@ -46,7 +46,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
-    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL)
+    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL,
+    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_READONLY,
+    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_UNRESTRICTED)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -186,6 +188,11 @@ gpu_instance_profiles = [
     CONST_GPU_INSTANCE_PROFILE_MIG7_G,
 ]
 
+nrg_lockdown_restriction_levels = [
+    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_READONLY,
+    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_UNRESTRICTED,
+]
+
 # consts for maintenance configuration
 schedule_types = [
     CONST_DAILY_MAINTENANCE_SCHEDULE,
@@ -306,6 +313,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
+        c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
@@ -317,7 +325,6 @@ def load_arguments(self, _):
         c.argument('node_os_upgrade_channel', arg_type=get_enum_type(node_os_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Comma-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
-        c.argument('uptime_sla', action='store_true', deprecate_info=c.deprecate(target='--uptime-sla', hide=True))
         c.argument('tier', arg_type=get_enum_type(sku_tiers), validator=validate_sku_tier)
         c.argument('fqdn_subdomain')
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
@@ -331,9 +338,6 @@ def load_arguments(self, _):
         c.argument('assign_kubelet_identity', validator=validate_assign_kubelet_identity)
         c.argument('enable_aad', action='store_true')
         c.argument('enable_azure_rbac', action='store_true')
-        c.argument('aad_client_app_id', deprecate_info=c.deprecate(target='--aad-client-app-id', hide=True))
-        c.argument('aad_server_app_id', deprecate_info=c.deprecate(target='--aad-server-app-id', hide=True))
-        c.argument('aad_server_app_secret', deprecate_info=c.deprecate(target='--aad-server-app-secret', hide=True))
         c.argument('aad_tenant_id')
         c.argument('aad_admin_group_object_ids')
         c.argument('enable_oidc_issuer', action='store_true')
@@ -466,11 +470,20 @@ def load_arguments(self, _):
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_cost_analysis', action='store_true')
+        c.argument('enable_vtpm', action="store_true")
+        c.argument('enable_secure_boot', action="store_true")
+        # advanced networking
+        c.argument('enable_acns', action='store_true')
+        c.argument('disable_acns_observability', action='store_true')
+        c.argument('disable_acns_security', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
         c.argument('disable_local_accounts', action='store_true')
         c.argument('enable_local_accounts', action='store_true')
+        c.argument('ip_families')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_managed_outbound_ipv6_count', type=int)
         c.argument('load_balancer_outbound_ips', validator=validate_load_balancer_outbound_ips)
@@ -478,6 +491,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
+        c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
@@ -487,10 +501,13 @@ def load_arguments(self, _):
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Comma-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
-        c.argument('uptime_sla', action='store_true', deprecate_info=c.deprecate(target='--uptime-sla', hide=True))
-        c.argument('no_uptime_sla', action='store_true', deprecate_info=c.deprecate(target='--no-uptime-sla', hide=True))
         c.argument('tier', arg_type=get_enum_type(sku_tiers), validator=validate_sku_tier)
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
+        # advanced networking
+        c.argument('enable_acns', action='store_true')
+        c.argument('disable_acns', action='store_true')
+        c.argument('disable_acns_observability', action='store_true')
+        c.argument('disable_acns_security', action='store_true')
         # private cluster parameters
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')
@@ -614,6 +631,8 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_cost_analysis', action='store_true')
         c.argument('disable_cost_analysis', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -765,6 +784,10 @@ def load_arguments(self, _):
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
+        c.argument('enable_vtpm', action='store_true')
+        c.argument('enable_secure_boot', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -786,6 +809,14 @@ def load_arguments(self, _):
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_update), validator=validate_os_sku)
+        c.argument("enable_fips_image", action="store_true")
+        c.argument("disable_fips_image", action="store_true")
+        c.argument('enable_vtpm', action='store_true')
+        c.argument('disable_vtpm', action='store_true')
+        c.argument('enable_secure_boot', action='store_true')
+        c.argument('disable_secure_boot', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
@@ -844,10 +875,6 @@ def load_arguments(self, _):
         c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
         c.argument(
             'source_resource_id',
-            options_list=[
-                '--source-resource-id',
-                c.deprecate(target='-r', redirect='--source-resource-id', hide=True),
-            ],
             help='The source resource id of the binding',
         )
 
@@ -910,6 +937,17 @@ def load_arguments(self, _):
     with self.argument_context('aks approuting zone update') as c:
         c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
         c.argument('attach_zones')
+
+    with self.argument_context('aks nodepool delete') as c:
+        c.argument("if_match")
+
+    with self.argument_context("aks nodepool delete-machines") as c:
+        c.argument(
+            "machine_names",
+            nargs="+",
+            required=True,
+            help="Space-separated machine names to delete.",
+        )
 
 
 def _get_default_install_location(exe_name):

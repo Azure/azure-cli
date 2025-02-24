@@ -64,7 +64,8 @@ from .custom import (
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType,
-    FreeLimitExhaustionBehavior
+    FreeLimitExhaustionBehavior,
+    FailoverGroupDatabasesSecondaryType
 )
 
 from ._validators import (
@@ -79,7 +80,7 @@ from ._validators import (
 #####
 
 
-class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
+class SizeWithUnitConverter:  # pylint: disable=too-few-public-methods
 
     def __init__(
             self,
@@ -88,8 +89,8 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
             unit_map=None):
         self.unit = unit
         self.result_type = result_type
-        self.unit_map = unit_map or dict(B=1, kB=1024, MB=1024 * 1024, GB=1024 * 1024 * 1024,
-                                         TB=1024 * 1024 * 1024 * 1024)
+        self.unit_map = unit_map or {"B": 1, "kB": 1024, "MB": 1024 * 1024, "GB": 1024 * 1024 * 1024,
+                                     "TB": 1024 * 1024 * 1024 * 1024}
 
     def __call__(self, value):
         numeric_part = ''.join(itertools.takewhile(str.isdigit, value))
@@ -291,13 +292,18 @@ server_key_type_param_type = CLIArgumentType(
 
 storage_param_type = CLIArgumentType(
     options_list=['--storage'],
-    type=SizeWithUnitConverter('GB', result_type=int, unit_map=dict(B=1.0 / (1024 * 1024 * 1024),
-                                                                    kB=1.0 / (1024 * 1024),
-                                                                    MB=1.0 / 1024,
-                                                                    GB=1,
-                                                                    TB=1024)),
+    type=SizeWithUnitConverter('GB', result_type=int, unit_map={"B": 1.0 / (1024 * 1024 * 1024),
+                                                                "kB": 1.0 / (1024 * 1024),
+                                                                "MB": 1.0 / 1024,
+                                                                "GB": 1,
+                                                                "TB": 1024}),
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
+
+iops_param_type = CLIArgumentType(
+    options_list=['--iops'],
+    type=int,
+    help='The storage iops.')
 
 backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
@@ -406,6 +412,11 @@ perform_cutover_param_type = CLIArgumentType(
     options_list=['--perform-cutover'],
     help='Whether to perform cutover when updating database to Hyperscale tier is in progress.',
     arg_type=get_three_state_flag())
+
+authentication_metadata_param_type = CLIArgumentType(
+    options_list=['--authentication-metadata', '--am'],
+    help='Preferred metadata to use for authentication of synced on-prem users. Default is AzureAD.',
+    arg_type=get_enum_type(['AzureAD', 'Windows', 'Paired']))
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
@@ -1709,6 +1720,8 @@ def load_arguments(self, _):
                    arg_type=allow_data_loss_param_type)
         c.argument('try_planned_before_forced_failover',
                    arg_type=try_planned_before_forced_failover_param_type)
+        c.argument('secondary_type', help="Databases secondary type on partner server",
+                   arg_type=get_enum_type(FailoverGroupDatabasesSecondaryType))
 
     ###############################################
     #             sql instance pool               #
@@ -2271,11 +2284,22 @@ def load_arguments(self, _):
                    help='The compute generation component of the sku. '
                    'Allowed values include: Gen4, Gen5.')
 
+        c.argument('is_general_purpose_v2',
+                   options_list=['--gpv2'],
+                   arg_type=get_three_state_flag(),
+                   help='Whether or not this is a GPv2 variant of General Purpose edition.')
+
         c.argument('storage_size_in_gb',
                    options_list=['--storage'],
                    arg_type=storage_param_type,
                    help='The storage size of the managed instance. '
                    'Storage size must be specified in increments of 32 GB')
+
+        c.argument('storage_iops',
+                   options_list=['--iops'],
+                   arg_type=iops_param_type,
+                   help='The storage iops of the managed instance. '
+                   'Storage iops can be specified in increments of 1.')
 
         c.argument('license_type',
                    arg_type=get_enum_type(DatabaseLicenseType),
@@ -2332,6 +2356,9 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
 
+        c.argument('authentication_metadata',
+                   arg_type=authentication_metadata_param_type)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -2344,6 +2371,7 @@ def load_arguments(self, _):
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
+                'is_general_purpose_v2',
                 'administrator_login',
                 'administrator_login_password',
                 'license_type',
@@ -2351,6 +2379,7 @@ def load_arguments(self, _):
                 'virtual_network_subnet_id',
                 'vcores',
                 'storage_size_in_gb',
+                'storage_iops',
                 'collation',
                 'proxy_override',
                 'public_data_endpoint_enabled',

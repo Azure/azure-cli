@@ -119,7 +119,7 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_vm_images_list_thru_services_edge_zone(self):
-        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
+        result = self.cmd('vm image list --edge-zone losangeles --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
         assert result.index('7.7') >= 0
 
     @AllowLargeResponse()
@@ -129,8 +129,19 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_vm_image_list_thru_services_edge_zone_by_arch(self):
-        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 -o tsv --all').output
+        result = self.cmd('vm image list --edge-zone losangeles --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 -o tsv --all').output
         assert result.index('x64') >= 0
+
+    @AllowLargeResponse()
+    def test_vm_image_list_thru_services_deprecation_status(self):
+        self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --all ', checks=[
+            self.check('[0].imageDeprecationStatus.imageState', 'Active'),
+            self.check('[0].imageDeprecationStatus.scheduledDeprecationTime', None),
+        ])
+        self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --edge-zone losangeles', checks=[
+            self.check('[0].imageDeprecationStatus.imageState', 'Active'),
+            self.check('[0].imageDeprecationStatus.scheduledDeprecationTime', None)
+        ])
 
 
 class VMOpenPortTest(ScenarioTest):
@@ -519,7 +530,7 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
         ])
-        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --orchestration-mode Flexible', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
         ])
@@ -549,7 +560,7 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --orchestration-mode Flexible', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 2),
@@ -1183,17 +1194,17 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a disk and update
         data_disk = self.cmd('disk create -g {rg} -n {disk1} --size-gb 1 --tags tag1=d1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1),
+            self.check('diskSizeGB', 1),
             self.check('tags.tag1', 'd1')
         ]).get_output_in_json()
         self.cmd('disk update -g {rg} -n {disk1} --size-gb 10 --sku Standard_LRS', checks=[
             self.check('sku.name', 'Standard_LRS'),
-            self.check('diskSizeGb', 10)
+            self.check('diskSizeGB', 10)
         ])
 
         # get SAS token
         result = self.cmd('disk grant-access -g {rg} -n {disk1} --duration-in-seconds 10').get_output_in_json()
-        self.assertTrue('sv=' in result['accessSas'])
+        self.assertTrue('sv=' in result['accessSAS'])
 
         # create another disk by importing from the disk1
         self.kwargs['disk1_id'] = data_disk['id']
@@ -1202,13 +1213,13 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a snpashot
         os_snapshot = self.cmd('snapshot create -g {rg} -n {snapshot1} --size-gb 1 --sku Premium_LRS --tags tag1=s1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1),
+            self.check('diskSizeGB', 1),
             self.check('tags.tag1', 's1')
         ]).get_output_in_json()
         # update the sku
         self.cmd('snapshot update -g {rg} -n {snapshot1} --sku Standard_LRS', checks=[
             self.check('sku.name', 'Standard_LRS'),
-            self.check('diskSizeGb', 1)
+            self.check('diskSizeGB', 1)
         ])
 
         # create another snapshot by importing from the disk1
@@ -1271,7 +1282,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a disk and update
         data_disk = self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1)
+            self.check('diskSizeGB', 1)
         ]).get_output_in_json()
         # create a vm
         vm = self.cmd('vm create -n {vm_name} -g {rg} --image {vm_image} --attach-data-disks {disk_name1} '
@@ -1303,7 +1314,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku {disk_sku} --size-gb {disk_size2} --source {disk_restore_point_id}',
                  checks=[
                      self.check('sku.name', 'Premium_LRS'),
-                     self.check('diskSizeGb', 2),
+                     self.check('diskSizeGB', 2),
                      self.check('creationData.createOption', 'Restore'),
                      self.check('creationData.sourceResourceId', '{disk_restore_point_id}')
                  ])
@@ -1458,12 +1469,12 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         })
 
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
-            self.check('diskIopsReadOnly', 200),
+            self.check('diskIOPSReadOnly', 200),
             self.check('diskMBpsReadOnly', 30)
         ])
 
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-only 250 --disk-mbps-read-only 40', checks=[
-            self.check('diskIopsReadOnly', 250),
+            self.check('diskIOPSReadOnly', 250),
             self.check('diskMBpsReadOnly', 40)
         ])
 
@@ -2617,7 +2628,7 @@ class VMMonitorTestDefault(ScenarioTest):
                  replay_processors=None, recording_patches=None, replay_patches=None):
         from azure.cli.command_modules.vm.tests.latest._test_util import TimeSpanProcessor
         TIMESPANTEMPLATE = '0000-00-00'
-        super(VMMonitorTestDefault, self).__init__(
+        super().__init__(
             method_name,
             recording_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)],
             replay_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)]
@@ -2947,7 +2958,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Uniform --no-wait')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Uniform --lb-sku Standard --no-wait')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3012,7 +3023,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3069,7 +3080,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'ext_name': 'MyNetworkWatcher'
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Flexible')
         self.cmd('vmss extension set -n {ext_type} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} '
                  '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
@@ -3301,7 +3312,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
 
         subscription_id = self.get_subscription_id()
 
@@ -3513,6 +3524,63 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-detach')
+    def test_vm_disk_attach_detach_api(self, resource_group):
+        self.kwargs.update({
+            'loc': 'westus',
+            'vm': self.create_random_name('vm', 10),
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 2 --lun 2 --sku standard_lrs')
+        disks = self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].name', '{disk1}'),
+            self.check('storageProfile.dataDisks[0].caching', 'ReadOnly'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[1].name', '{disk2}'),
+            self.check('storageProfile.dataDisks[1].lun', 2),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[1].caching', 'None')
+        ]).get_output_in_json()['storageProfile']['dataDisks']
+        self.kwargs.update({
+            'disk1_id': disks[0]['managedDisk']['id'],
+            'disk2_id': disks[1]['managedDisk']['id']
+        })
+
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} --disk-ids {disk1_id}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('length(storageProfile.dataDisks)', 1),
+            # self.check('storageProfile.dataDisks[0].name', '{disk2}'),
+            # self.check('storageProfile.dataDisks[0].lun', 2)
+        ])
+
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} --disk-ids {disk2_id} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('length(storageProfile.dataDisks)', 0)
+        ])
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk-ids {disk1_id} {disk2_id}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            # self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            # self.check('storageProfile.dataDisks[0].lun', 0)
+        ])
+
+        # force detach a disk
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} --disk-ids {disk1_id} {disk2_id} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('length(storageProfile.dataDisks)', 0)
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-multiple-disks')
     def test_vm_disk_attach_multiple_disks(self, resource_group):
 
@@ -3533,14 +3601,23 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use --name or --disks to specify the disk names'):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use at least one of --name, --disks and --disk-ids'):
             self.cmd('vm disk attach -g {rg} --vm-name {vm} --new --size-gb 1 ')
 
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disks'):
             self.cmd('vm disk attach -g {rg} --name {disk1} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
 
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disk-ids'):
+            self.cmd('vm disk attach -g {rg} --name {disk1} --disk-ids {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --disks and --disk-ids'):
+            self.cmd('vm disk attach -g {rg} --disk-ids {disk1} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
+
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You cannot specify the --lun for multiple disks'):
             self.cmd('vm disk attach -g {rg} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 --lun 2')
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You cannot specify the --lun for multiple disk IDs'):
+            self.cmd('vm disk attach -g {rg} --disk-ids {disk1} {disk2} {disk3} --vm-name {vm} --lun 2')
 
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --disks {disk1} {disk2} {disk3} --new --size-gb 1 ')
 
@@ -3692,7 +3769,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 2')
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-write 510 --disk-mbps-read-write 10', checks=[
-            self.check('diskIopsReadWrite', 510),
+            self.check('diskIOPSReadWrite', 510),
             self.check('diskMBpsReadWrite', 10)
         ])
 
@@ -3706,7 +3783,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1} --sku Standard_ZRS',
                  checks=self.check('sku.name', 'Standard_ZRS'))
 
-    @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vmss_ultra_ssd_storage_sku(self, resource_group):
 
         self.kwargs.update({
@@ -3714,13 +3791,14 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vmss2': 'vm-ultrassd2'
         })
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --storage-sku UltraSSD_LRS '
-                 ' --data-disk-sizes-gb 4 --zone 2 --location eastus --vm-sku Standard_D2s_v3 --instance-count 1 --lb "" --orchestration-mode Uniform')
+                 '--data-disk-sizes-gb 4 --zones 2 --location eastus2 --vm-sku Standard_D2s_v3 --instance-count 1 --lb "" --orchestration-mode Uniform --lb-sku Standard')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --ultra-ssd-enabled --zone 2 --location eastus --vm-sku Standard_D2s_v3 --lb "" --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --ultra-ssd-enabled --zones 2 '
+                 '--location eastus2 --vm-sku Standard_D2s_v3 --lb "" --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss disk attach -g {rg} --vmss-name {vmss2} --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
@@ -3744,7 +3822,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --vm-sku Standard_D2s_v3 --zone 2 --admin-username azureuser '
+            'vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --vm-sku Standard_D2s_v3 --zones 2 --admin-username azureuser '
             '--admin-password testPassword0 --authentication-type password --lb "" --location eastus2 --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss deallocate -g {rg} -n {vmss}')
         self.cmd('vmss update -g {rg} -n {vmss} --ultra-ssd-enabled', checks=[
@@ -4001,7 +4079,8 @@ class VMSSCreateAndModify(ScenarioTest):
             'vmss2': self.create_random_name('vmss', 10)
         })
 
-        self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count} --orchestration-mode Uniform')
+        self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2022Datacenter '
+                 '--instance-count {count} --orchestration-mode Uniform --lb-sku Standard')
 
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('virtualMachineProfile.priority', None),
@@ -4063,12 +4142,12 @@ class VMSSCreateAndModify(ScenarioTest):
             'vmss1': self.create_random_name('vmss1', 10),
             'vmss2': self.create_random_name('vmss2', 10),
         })
-        self.cmd('vmss create -g {rg} -n {vmss1} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789#', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789# --orchestration-mode Flexible', checks=[
             self.check('vmss.additionalCapabilities.hibernationEnabled', True),
         ])
         self.cmd('vmss deallocate -g {rg} -n {vmss1} --hibernate true')
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789#', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss2} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789# --orchestration-mode Flexible', checks=[
             self.check('vmss.additionalCapabilities.hibernationEnabled', True),
         ])
         result = self.cmd('vmss list-instances -g {rg} -n {vmss2}')
@@ -4080,7 +4159,8 @@ class VMSSCreateAndModify(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --scale-in-policy NewestVM --admin-username azureuser --orchestration-mode Uniform', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --scale-in-policy NewestVM '
+                 '--admin-username azureuser --orchestration-mode Uniform --lb-sku Standard', checks=[
             self.check('vmss.scaleInPolicy.rules[0]', 'NewestVM')
         ])
         self.cmd('vmss update -g {rg} -n {vmss} --scale-in-policy OldestVM', checks=[
@@ -4088,6 +4168,29 @@ class VMSSCreateAndModify(ScenarioTest):
         ])
         self.cmd('vmss update -g {rg} -n {vmss} --force-deletion', checks=[
             self.check('scaleInPolicy.forceDeletion', True)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scale_extended_location', location='westus')
+    def test_vmss_scale_extended_location(self, resource_group):
+        self.kwargs.update({
+            'nsg': self.create_random_name('nsg', 10),
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'vmss': self.create_random_name('vmss', 15)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.7:latest --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform -l westus --edge-zone losangeles')
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('extendedLocation.name', 'losangeles'),
+            self.check('sku.capacity', 2)
+        ])
+        self.cmd('vmss scale -n {vmss} -g {rg} --new-capacity 5', checks=[
+            self.check('extendedLocation.name', 'losangeles'),
+            self.check('extendedLocation.type', 'EdgeZone'),
+        ])
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('extendedLocation.name', 'losangeles'),
+            self.check('extendedLocation.type', 'EdgeZone'),
+            self.check('sku.capacity', 5)
         ])
 
 
@@ -4107,7 +4210,8 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('network public-ip create --name {ip} -g {rg}')
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1 --orchestration-mode Uniform')
+        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} '
+                 '--os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1 --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
                  checks=self.check('frontendIPConfigurations[0].publicIPAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -4152,7 +4256,8 @@ class VMSSCreateOptions(ScenarioTest):
             'PTB': PTB
         })
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -g {rg} -n {vmss} --instance-count 1 --generate-ssh-keys --admin-username myadmin --max-batch-instance-percent {maxBIP} --max-unhealthy-instance-percent {maxUIP} --max-unhealthy-upgraded-instance-percent {maxUUIP} --pause-time-between-batches {PTB} --prioritize-unhealthy-instances true --orchestration-mode Uniform')
+        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -g {rg} -n {vmss} --instance-count 1 --generate-ssh-keys --lb-sku Standard '
+                 '--admin-username myadmin --max-batch-instance-percent {maxBIP} --max-unhealthy-instance-percent {maxUIP} --max-unhealthy-upgraded-instance-percent {maxUUIP} --pause-time-between-batches {PTB} --prioritize-unhealthy-instances true --orchestration-mode Uniform')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('upgradePolicy.rollingUpgradePolicy.maxBatchInstancePercent', maxBIP),
@@ -4169,7 +4274,8 @@ class VMSSCreateOptions(ScenarioTest):
             'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
             'sku': 'Standard_D1_v2',
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# --enable-resilient-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# '
+                 '--enable-resilient-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', True),
         ])
@@ -4185,7 +4291,8 @@ class VMSSCreateOptions(ScenarioTest):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision --orchestration-mode Uniform', checks=[
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual '
+                 '--max-surge true --disable-overprovision --orchestration-mode Uniform --lb-sku Standard', checks=[
             self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True),
         ])
         self.cmd('vmss update -n {vmss} -g {rg} --max-surge false', checks=[
@@ -4210,7 +4317,8 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
 
-        self.cmd('vmss create --debug -n {vmss} -g {rg} --image {image} --upgrade-policy-mode Automatic --enable-auto-os-upgrade --orchestration-mode Uniform --load-balancer {lb} --admin-username {admin_username} --admin-password {admin_password} --vm-sku {sku} --health-probe {probe}',
+        self.cmd('vmss create --debug -n {vmss} -g {rg} --image {image} --upgrade-policy-mode Automatic --enable-auto-os-upgrade --orchestration-mode Uniform '
+                 '--load-balancer {lb} --admin-username {admin_username} --admin-password {admin_password} --vm-sku {sku} --health-probe {probe} --lb-sku Standard',
                  checks=[
                      self.check('vmss.upgradePolicy.automaticOSUpgradePolicy.enableAutomaticOSUpgrade', True),
                      self.check('vmss.upgradePolicy.mode', 'Automatic'),
@@ -4230,7 +4338,7 @@ class VMSSCreateOptions(ScenarioTest):
         })
 
         # check that we can create a vmss with local / ephemeral os disk.
-        self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --ephemeral-os-disk --disable-overprovision '
+        self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --ephemeral-os-disk --disable-overprovision --lb-sku Standard '
                  '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs --admin-username {user} --admin-password {password} --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
@@ -4242,7 +4350,7 @@ class VMSSCreateOptions(ScenarioTest):
         ])
 
         # explicitly specify os-disk-caching
-        self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk '
+        self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk --lb-sku Standard '
                  '--os-disk-caching {caching} --disable-overprovision --instance-count {count} --admin-username {user} --admin-password {password} --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss_2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
@@ -4256,7 +4364,8 @@ class VMSSCreateOptions(ScenarioTest):
             'vmss1': self.create_random_name('vmss', 10),
             'vmss2': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create --resource-group {rg} --name {vmss1} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --instance-count 2 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform', checks=[
+        self.cmd('vmss create --resource-group {rg} --name {vmss1} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --lb-sku Standard '
+                 '--disable-overprovision --instance-count 2 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
         ])
@@ -4272,7 +4381,8 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk')
         ])
 
-        self.cmd('vmss create --resource-group {rg} --name {vmss2} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --instance-count 2 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform', checks=[
+        self.cmd('vmss create --resource-group {rg} --name {vmss2} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --lb-sku Standard '
+                 '--disable-overprovision --instance-count 2 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk')
         ])
@@ -4302,7 +4412,8 @@ class VMSSCreateOptions(ScenarioTest):
 
         # check base
         self.cmd(
-            'vmss create -n {base} -g {rg} --image {image} --vm-sku Standard_DS4_v2 --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username vmtest')
+            'vmss create -n {base} -g {rg} --image {image} --vm-sku Standard_DS4_v2 --ephemeral-os-disk '
+            '--ephemeral-os-disk-placement {placement1} --admin-username vmtest --orchestration-mode Flexible')
         self.cmd('vmss show -g {rg} -n {base}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
@@ -4314,7 +4425,7 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd(
             'vmss create --resource-group {rg} --name {vmss} --image {image} --vm-sku Standard_DS4_v2 --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --disable-overprovision '
             '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs --admin-username {user} --admin-password {password} --admin-username vmtest '
-            '--orchestration-mode Uniform')
+            '--orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
@@ -4329,7 +4440,7 @@ class VMSSCreateOptions(ScenarioTest):
         # check that we can create a vmss with CacheDisk.
         self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk --ephemeral-os-disk-placement {placement2} '
                  '--os-disk-caching {caching} --disable-overprovision --instance-count {count} --admin-username {user} --admin-password {password} --admin-username vmtest '
-                 '--orchestration-mode Uniform')
+                 '--orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss_2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
@@ -4350,7 +4461,8 @@ class VMSSCreateOptions(ScenarioTest):
             'sku': 'Standard_LRS'
         })
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-username clitest1 --admin-password testPassword0 -l westus -g {rg} -n {vmss}  --storage-sku {sku} --orchestration-mode Uniform')
+        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-username clitest1 --admin-password testPassword0 '
+                 '-l westus -g {rg} -n {vmss}  --storage-sku {sku} --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('disk create -g {rg} -n {disk} --size-gb 1 --sku {sku}')
         instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs['instance_id'] = instances[0]['instanceId']
@@ -4379,14 +4491,14 @@ class VMSSCreateOptions(ScenarioTest):
             f.write(TEST_SSH_KEY_PUB_2)
 
         self.cmd('vmss create --image Debian:debian-10:10:latest -l westus -g {rg} -n {vmss_1} --authentication-type all '
-                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'',
+                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\' --orchestration-mode Flexible',
                  checks=[
                      self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', False),
                      self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB)
                  ])
 
         self.cmd('vmss create --image Debian:debian-10:10:latest -l westus -g {rg} -n {vmss_2} --authentication-type ssh '
-                 ' --admin-username myadmin --ssh-key-value "{ssh_key}" "{ssh_key_2}" --ssh-dest-key-path "{ssh_dest}"',
+                 ' --admin-username myadmin --ssh-key-value "{ssh_key}" "{ssh_key_2}" --ssh-dest-key-path "{ssh_dest}" --orchestration-mode Flexible',
                  checks=[
                      self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', True),
                      self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
@@ -4405,7 +4517,8 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'ssh_key': TEST_SSH_KEY_PUB,
             'quotes': '""' if platform.system() == 'Windows' else "''"
         })
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --load-balancer {quotes} --admin-username ubuntu --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --vm-sku Basic_A1 --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --load-balancer {quotes} --admin-username ubuntu '
+                 '--ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --vm-sku Basic_A1 --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
             self.check('tags', {}),
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None),
@@ -4422,7 +4535,8 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss': 'vmss1',
             'ssh_key': TEST_SSH_KEY_PUB
         })
-        self.cmd("vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username clittester --ssh-key-value '{ssh_key}' --app-gateway apt1 --instance-count 5 --orchestration-mode Uniform",
+        self.cmd("vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username clittester "
+                 "--ssh-key-value '{ssh_key}' --app-gateway apt1 --instance-count 5 --orchestration-mode Uniform --lb-sku Standard",
                  checks=self.check('vmss.provisioningState', 'Succeeded'))
         # spot check it is using gateway
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
@@ -4437,7 +4551,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         })
 
         res = self.cmd('vmss create -g {rg} --name {vmss} --validate --image Canonical:UbuntuServer:18.04-LTS:latest --disable-overprovision --instance-count 101 --single-placement-group false '
-                       '--admin-username ubuntuadmin --generate-ssh-keys --lb "" --orchestration-mode Uniform').get_output_in_json()
+                       '--admin-username ubuntuadmin --generate-ssh-keys --lb "" --orchestration-mode Uniform --lb-sku Standard').get_output_in_json()
         # Ensure generated template is valid. "Quota Exceeding" is expected on most subscriptions, so we allow that.
         self.assertTrue(not res['error'] or (res['error']['details'][0]['code'] == 'QuotaExceeded'))
 
@@ -4448,7 +4562,8 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'lb': 'lb1'
         })
         self.cmd('network lb create -g {rg} -n {lb} --backend-pool-name test')
-        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitester --admin-password TestTest12#$ --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image Canonical:UbuntuServer:18.04-LTS:latest '
+                 '--admin-username clitester --admin-password TestTest12#$ --orchestration-mode Uniform --lb-sku Standard')
 
     @record_only()
     @ResourceGroupPreparer()
@@ -4528,6 +4643,28 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss6} -g {rg}')
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_balance', location='eastus2')
+    def test_vmss_zone_balance(self, resource_group):
+        self.kwargs.update({
+            'nsg': self.create_random_name('nsg', 10),
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'vmss1': self.create_random_name('vmss', 15),
+            'vmss2': self.create_random_name('vmss', 15)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -n {vmss1} -g {rg} --image Debian:debian-10:10:latest --zone-balance true --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}"  --zones 1 2 -l eastus2', checks=[
+            self.check('vmss.zoneBalance', True),
+        ])
+        self.cmd('vmss update -n {vmss1} -g {rg} --zone-balance false', checks=[
+            self.check('zoneBalance', False)
+        ])
+
+        self.cmd('vmss create -n {vmss2} -g {rg} --image Debian:debian-10:10:latest --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}"  --zones 1 2 -l eastus2')
+        self.cmd('vmss update -n {vmss2} -g {rg} --zone-balance True', checks=[
+            self.check('zoneBalance', True)
+        ])
+
 
 class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
@@ -4542,7 +4679,8 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
             'dns_label': self.create_random_name('clivmss', 20)
         })
         nsg_result = self.cmd('network nsg create -g {rg} -n {nsg}').get_output_in_json()
-        self.cmd("vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username clittester --ssh-key-value '{ssh_key}' --vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmtest --orchestration-mode Uniform",
+        self.cmd("vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username clittester --ssh-key-value '{ssh_key}' --lb-sku Standard "
+                 "--vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmtest --orchestration-mode Uniform",
                  checks=self.check('vmss.provisioningState', 'Succeeded'))
         result = self.cmd("vmss show -n {vmss} -g {rg}", checks=[
             self.check('length(virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers)', 2),
@@ -4555,7 +4693,7 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
 
-        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest --orchestration-mode Flexible')
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss list-instance-public-ips -n {flex_vmss} -g {rg}')
@@ -4570,7 +4708,8 @@ class VMSSUpdateTests(ScenarioTest):
             'vmss2': self.create_random_name('vmss', 10)
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1 --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
+                 '--license-type Windows_Server --instance-count 1 --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.licenseType', 'Windows_Server'),
         ])
@@ -4603,7 +4742,7 @@ class VMSSUpdateTests(ScenarioTest):
         # test that cannot try to update protection policy on VMSS itself
         self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest --orchestration-mode Flexible')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('additionalCapabilities.hibernationEnabled', None),
         ])
@@ -4640,11 +4779,11 @@ class VMSSUpdateTests(ScenarioTest):
             'linux_vmss': self.create_random_name('vmss', 10),
             'windows_vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create -g {rg} -n {linux_vmss} --image ubuntu2204 --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234!', checks=[
+        self.cmd('vmss create -g {rg} -n {linux_vmss} --image ubuntu2204 --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234! --lb-sku Standard', checks=[
             self.check('vmss.upgradePolicy.mode', 'Rolling'),
             self.check('vmss.virtualMachineProfile.extensionProfile.extensions[0].name', 'ApplicationHealthLinux')
         ])
-        self.cmd('vmss create -g {rg} -n {windows_vmss} --image Win2022Datacenter --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234!', checks=[
+        self.cmd('vmss create -g {rg} -n {windows_vmss} --image Win2022Datacenter --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --orchestration-mode Uniform --admin-username clitester1 --admin-password Testqwer1234! --lb-sku Standard', checks=[
             self.check('vmss.upgradePolicy.mode', 'Rolling'),
             self.check('vmss.virtualMachineProfile.extensionProfile.extensions[0].name', 'ApplicationHealthWindows')
         ])
@@ -4665,7 +4804,8 @@ class VMSSUpdateTests(ScenarioTest):
             'uniform_vmss': self.create_random_name('vmss', 10),
             'flexible_vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create -g {rg} -n {uniform_vmss} --image Canonical:0001-com-ubuntu-server-jammy:22_04-LTS-Gen2:latest --orchestration-mode uniform --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --admin-password Test123456789#', checks=[
+        self.cmd('vmss create -g {rg} -n {uniform_vmss} --image Canonical:0001-com-ubuntu-server-jammy:22_04-LTS-Gen2:latest --lb-sku Standard '
+                 '--orchestration-mode uniform --upgrade-policy-mode rolling --platform-fault-domain-count 1 --instance-count 2 --admin-password Test123456789#', checks=[
             self.check('vmss.upgradePolicy.mode', 'Rolling'),
             self.check('vmss.orchestrationMode', 'Uniform')
         ])
@@ -4692,6 +4832,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.automaticOsUpgradePolicy.enableAutomaticOsUpgrade', True)
         ])
 
+    @live_only()
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
     def test_vmss_update_image(self):
@@ -4722,7 +4863,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('tags.foo', 'bar')
         ])
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegex(HttpResponseError, 'Managed Images are not supported for virtual machines with security type TrustedLaunch\.'):
+        with self.assertRaisesRegex(HttpResponseError, 'Managed Images are not supported for virtual machines with security type TrustedLaunch.'):
             self.cmd('vmss update -g {rg} -n {vmss} --security-type TrustedLaunch')
 
     @AllowLargeResponse()
@@ -4737,7 +4878,7 @@ class VMSSUpdateTests(ScenarioTest):
             'vmss4': self.create_random_name('vmss', 10),
             'img4': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest',
         })
-        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true', checks=[
             self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'windowsserver'),
             self.check('virtualMachineProfile.storageProfile.imageReference.sku', '{img2_sku_gen2}'),
@@ -4746,7 +4887,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
 
-        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys --orchestration-mode Uniform', checks=[
+        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
         ])
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
@@ -4766,14 +4907,15 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('securityProfile', None),
         ])
 
-        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly --orchestration-mode Uniform', checks=[
+        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 '
+                 '--security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly --orchestration-mode Uniform --lb-sku Standard', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'ConfidentialVM'),
         ])
         with self.assertRaisesRegex(InvalidArgumentValueError, r'vmss.* is already configured with ConfidentialVM\..*'):
             self.cmd('vmss update -g {rg} -n {vmss4} --security-type TrustedLaunch')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_vm_sku_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_vm_sku_', location='eastus2')
     def test_vmss_update_vm_sku(self, resource_group, resource_group_location):
         self.kwargs.update({
             'base': 'cli-test-vmss-local-base',
@@ -4784,7 +4926,7 @@ class VMSSUpdateTests(ScenarioTest):
         })
 
         # check base
-        self.cmd('vmss create -n {base} -g {rg} --image {image} --vm-sku Standard_DS4_v2 --admin-username vmtest')
+        self.cmd('vmss create -n {base} -g {rg} --image {image} --vm-sku Standard_DS4_v2 --admin-username vmtest --orchestration-mode Flexible')
         self.cmd('vmss show -g {rg} -n {base}', checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -4806,7 +4948,7 @@ class VMSSUpdateTests(ScenarioTest):
         ])
 
         # check create with default size
-        self.cmd('vmss create -n {base2} -g {rg} --image {image}  --location {loc} --admin-username vmtest')
+        self.cmd('vmss create -n {base2} -g {rg} --image {image}  --location {loc} --admin-username vmtest --orchestration-mode Flexible')
         self.cmd('vmss show -g {rg} -n {base2}', checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -4866,7 +5008,8 @@ class AcceleratedNetworkingTest(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd("vmss create -n {vmss} -g {rg} --vm-sku Standard_DS4_v2 --image Win2022Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1")
+        self.cmd("vmss create -n {vmss} -g {rg} --vm-sku Standard_DS4_v2 --image Win2022Datacenter --admin-username clittester "
+                 "--admin-password Test12345678!!! --accelerated-networking --instance-count 1 --orchestration-mode Flexible")
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].enableAcceleratedNetworking', True))
 
@@ -5038,7 +5181,8 @@ class VMSSCreateExistingOptions(ScenarioTest):
         self.cmd('network vnet create -n {vnet} -g {rg} --subnet-name {subnet}')
         self.cmd('network lb create --name {lb} -g {rg} --backend-pool-name {bepool}')
 
-        self.cmd('vmss create --image OpenLogic:CentOS:7.5:latest --os-disk-name {os_disk} --admin-username ubuntu --vnet-name {vnet} --subnet {subnet} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk --orchestration-mode Uniform')
+        self.cmd('vmss create --image OpenLogic:CentOS:7.5:latest --os-disk-name {os_disk} --admin-username ubuntu --vnet-name {vnet} --lb-sku Standard '
+                 '--subnet {subnet} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk --orchestration-mode Uniform')
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('sku.name', '{sku}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
@@ -5080,7 +5224,7 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
@@ -5106,7 +5250,8 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
         assert is_valid_resource_id(self.kwargs['subnet_id'])
         assert is_valid_resource_id(self.kwargs['lb_id'])
 
-        self.cmd('vmss create --image OpenLogic:CentOS:7.5:latest --os-disk-name {os_disk} --admin-username ubuntu --subnet {subnet_id} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb_id} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk --orchestration-mode Uniform')
+        self.cmd('vmss create --image OpenLogic:CentOS:7.5:latest --os-disk-name {os_disk} --admin-username ubuntu --subnet {subnet_id} -l "West US" --lb-sku Standard '
+                 '--vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb_id} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk --orchestration-mode Uniform')
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('sku.name', '{sku}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
@@ -5135,7 +5280,8 @@ class VMSSVMsScenarioTest(ScenarioTest):
             'instance_ids': []
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password TestTest12#$ --instance-count {count} --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --lb-sku Standard '
+                 '--admin-username admin123 --admin-password TestTest12#$ --instance-count {count} --orchestration-mode Uniform')
 
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss}', checks=[
             self.check('type(@)', 'array'),
@@ -5163,7 +5309,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
         self.cmd('vmss delete-instances --resource-group {rg} --name {vmss} --instance-ids *')
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss}')
 
-        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest --lb-sku Standard')
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {flex_vmss}')
@@ -5178,7 +5324,8 @@ class VMSSVMsScenarioTest(ScenarioTest):
             'instance_ids': []
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --authentication-type password --admin-username admin123 --admin-password TestTest12#$ --instance-count {count} --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --authentication-type password --admin-username admin123 '
+                 '--admin-password TestTest12#$ --instance-count {count} --orchestration-mode Uniform --lb-sku Standard')
 
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss}', checks=[
             self.check('type(@)', 'array'),
@@ -5206,7 +5353,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
         self.cmd('vmss delete-instances --resource-group {rg} --name {vmss} --instance-ids *')
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss}')
 
-        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Debian:debian-10:10:latest --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image Debian:debian-10:10:latest --admin-username vmtest --lb-sku Standard')
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {flex_vmss}')
@@ -5226,14 +5373,16 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
         })
 
         # simulate-eviction on a Regular VMSS, expect failure
-        self.cmd('vmss create --resource-group {rg} --name {vmss1} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Regular --admin-username vmtest --orchestration-mode Uniform')
+        self.cmd('vmss create --resource-group {rg} --name {vmss1} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest '
+                 '--priority Regular --admin-username vmtest --orchestration-mode Uniform --lb-sku Standard')
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss1}').get_output_in_json()
         self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
         self.kwargs['id'] = self.kwargs['instance_ids'][0]
         self.cmd('vmss simulate-eviction --resource-group {rg} --name {vmss1} --instance-id {id}', expect_failure=True)
 
         # simulate-eviction on a Spot VMSS with Deallocate policy, expect VMSS instance to be deallocated
-        self.cmd('vmss create --resource-group {rg} --name {vmss2} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Deallocate --single-placement-group True --admin-username vmtest --orchestration-mode Uniform')
+        self.cmd('vmss create --resource-group {rg} --name {vmss2} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest --lb-sku Standard '
+                 '--priority Spot --eviction-policy Deallocate --single-placement-group True --admin-username vmtest --orchestration-mode Uniform')
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss2}').get_output_in_json()
         self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
         self.kwargs['id'] = self.kwargs['instance_ids'][0]
@@ -5246,7 +5395,8 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
         ])
 
         # simulate-eviction on a Spot VMSS with Delete policy, expect VMSS instance to be deleted
-        self.cmd('vmss create --resource-group {rg} --name {vmss3} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Delete --single-placement-group True --admin-username vmtest --orchestration-mode Uniform')
+        self.cmd('vmss create --resource-group {rg} --name {vmss3} --location {loc} --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot '
+                 '--eviction-policy Delete --single-placement-group True --admin-username vmtest --orchestration-mode Uniform --lb-sku Standard')
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss3}').get_output_in_json()
         self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
         self.kwargs['id'] = self.kwargs['instance_ids'][0]
@@ -5266,7 +5416,8 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
             'restore_timeout2': 'PT2H'
 
         })
-        self.cmd('vmss create -g {rg} -n {spot_vmss_name} --location NorthEurope --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot --eviction-policy Deallocate --single-placement-group True --enable-spot-restore {enabled_1} --spot-restore-timeout {restore_timeout1} --admin-username vmtest --orchestration-mode Uniform', checks=[
+        self.cmd('vmss create -g {rg} -n {spot_vmss_name} --location NorthEurope --instance-count 2 --image OpenLogic:CentOS:7.5:latest --priority Spot --lb-sku Standard '
+                 '--eviction-policy Deallocate --single-placement-group True --enable-spot-restore {enabled_1} --spot-restore-timeout {restore_timeout1} --admin-username vmtest --orchestration-mode Uniform', checks=[
             self.check('vmss.spotRestorePolicy.enabled', True),
             self.check('vmss.spotRestorePolicy.restoreTimeout', '{restore_timeout1}')
         ])
@@ -5323,7 +5474,8 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             'user_data_file': user_data_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value "{ssh_key}" --user-data "{user_data}" --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value "{ssh_key}" '
+                 '--user-data "{user_data}" --orchestration-mode Uniform --lb-sku Standard')
 
         self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -5382,7 +5534,8 @@ class VMSSNicScenarioTest(ScenarioTest):
             'vmss': self.create_random_name('vmss', 10)
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1! '
+                 '--image Win2022Datacenter --orchestration-mode Uniform --lb-sku Standard')
 
         self.cmd('vmss nic list -g {rg} --vmss-name {vmss}', checks=[
             self.check('type(@)', 'array'),
@@ -5559,20 +5712,20 @@ class MSIScenarioTest(ScenarioTest):
 
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor --orchestration-mode Uniform', checks=[
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor --orchestration-mode Uniform --lb-sku Standard', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
                 self.check('vmss.identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])
 
             # create a windows vm with reader role on the linux vm
-            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform', checks=[
+            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard', checks=[
                 self.check('vmss.identity.role', 'reader'),
                 self.check('vmss.identity.scope', '{vmss1_id}'),
             ]).get_output_in_json()
             uuid.UUID(result['vmss']['identity']['systemAssignedIdentity'])
 
             # create a linux vm w/o identity and later enable it
-            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform').get_output_in_json()['vmss']
+            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard').get_output_in_json()['vmss']
             self.assertIsNone(result.get('identity'))
 
             with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
@@ -5719,7 +5872,8 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vmss with system + user assigned identities
-        result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 --generate-ssh-keys --admin-username ubuntuadmin --orchestration-mode Uniform').get_output_in_json()
+        result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} [system] '
+                          '--role reader --scope {scope} --instance-count 1 --generate-ssh-keys --admin-username ubuntuadmin --orchestration-mode Uniform --lb-sku Standard').get_output_in_json()
         emsis = [x.lower() for x in result['vmss']['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
 
@@ -6097,7 +6251,7 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_w_params')
     def test_vmss_run_command_with_parameters(self, resource_group):
         self.kwargs.update({'vmss': 'test-run-command-vmss2'})
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username clitest1 --generate-ssh-keys --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username clitest1 --generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard')
         self.kwargs['instance_ids'] = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
 
         for id in self.kwargs['instance_ids']:
@@ -6111,7 +6265,8 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
             'run_cmd': self.create_random_name('cmd_', 10),
             'user': self.create_random_name('user-', 10)
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --security-type Standard --admin-username {user} --generate-ssh-keys --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --security-type Standard --admin-username {user} '
+                 '--generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('name', '{vmss}'),
             self.check('securityProfile', None),
@@ -6120,10 +6275,10 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
         self.kwargs.update({
             'instance_id': instace_ids[0]
         })
-        self.cmd('vmss run-command create --name {run_cmd} -g {rg} --vmss-name {vmss} --instance-id {instance_id}', checks=[
+        self.cmd('vmss run-command create --name {run_cmd} -g {rg} --vmss-name {vmss} --instance-id {instance_id} --script "Write-Host Hello World!"', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
-            self.check('source.script', None),
+            self.check('source.script', 'Write-Host Hello World!'),
             self.check('asyncExecution', False),
             self.check('timeoutInSeconds', 0),
             self.check('type', 'Microsoft.Compute/virtualMachineScaleSets/virtualMachines/runCommands')
@@ -6157,6 +6312,188 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
         self.cmd('vmss run-command list --vmss-name {vmss} --instance-id {instance_id} -g {rg}', checks=self.is_empty())
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMSecurityProfileTestForDiskEncryption(ScenarioTest):
+    
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='test_vm_encryption_identity_for_disk_encryption', location='westus')
+    def test_vm_encryption_identity_for_disk_encryption(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result['id']
+        principalId = emsi_result['principalId']
+            
+        self.kwargs.update({
+            'encryptionIdentityId' : encryptionIdentityId,
+            'principalId' : principalId
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --encryption-identity {encryptionIdentityId} --assign-identity {emsi}')
+        virtualMachine = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['securityProfile'])
+        self.assertIsNotNone(virtualMachine['securityProfile']['encryptionIdentity'])
+        self.assertEqual(virtualMachine['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], encryptionIdentityId)
+    
+    
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='test_vm_incorrect_encryption_identity_for_disk_encryption', location='westus')
+    def test_vm_incorrect_encryption_identity_for_disk_encryption(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'emsi2':'id2',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result2 = self.cmd('identity create -g {rg} -n {emsi2} --tags tag1=d2', checks=[
+            self.check('name', '{emsi2}'),
+            self.check('tags.tag1', 'd2')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result2['id']
+            
+        self.kwargs.update({
+            'encryptionIdentityId' : encryptionIdentityId
+        })
+        
+        from knack.util import CLIError
+        message = 'Encryption Identity should be an ARM Resource ID of one of the user assigned identities associated to the resource'
+        with self.assertRaisesRegex(CLIError, message) as context:
+            self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --encryption-identity {encryptionIdentityId} --assign-identity {emsi}')
+    
+        
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='test_vm_null_encryption_identity_for_disk_encryption', location='westus')
+    def test_vm_null_encryption_identity_for_disk_encryption(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result['id']
+        principalId = emsi_result['principalId']
+            
+        self.kwargs.update({
+            'encryptionIdentityId' : encryptionIdentityId,
+            'principalId' : principalId
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --assign-identity {emsi}')
+        virtualMachine = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['securityProfile'])
+        self.assertIsNone(virtualMachine['securityProfile']['encryptionIdentity'])    
+        
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='test_vmss_encryption_identity_for_disk_encryption', location='westus')
+    def test_vmss_encryption_identity_for_disk_encryption(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result['id']
+            
+        self.kwargs.update({
+            'encryptionIdentityId' : encryptionIdentityId,
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789! --encryption-identity {encryptionIdentityId} --assign-identity {emsi} --orchestration-mode Uniform --lb-sku Standard')
+        virtualMachine = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile'])
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile'])
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity'])
+        self.assertEqual(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], encryptionIdentityId)
+        
+        
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='test_vmss_incorrect_encryption_identity_for_disk_encryption', location='westus')
+    def test_vmss_incorrect_encryption_identity_for_disk_encryption(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vmss': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'emsi2':'id2',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result2 = self.cmd('identity create -g {rg} -n {emsi2} --tags tag1=d2', checks=[
+            self.check('name', '{emsi2}'),
+            self.check('tags.tag1', 'd2')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result2['id']
+            
+        self.kwargs.update({
+            'encryptionIdentityId' : encryptionIdentityId
+        })
+        
+        from knack.util import CLIError
+        message = 'Encryption Identity should be an ARM Resource ID of one of the user assigned identities associated to the resource'
+        with self.assertRaisesRegex(CLIError, message) as context:
+            self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789! --encryption-identity {encryptionIdentityId} --assign-identity {emsi} --orchestration-mode Uniform --lb-sku Standard')
+        
+       
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='test_vmss_null_encryption_identity_for_disk_encryption', location='westus')
+    def test_vmss_null_encryption_identity_for_disk_encryption(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vmss': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result['id']
+            
+        self.kwargs.update({
+            'encryptionIdentityId' : encryptionIdentityId,
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789! --orchestration-mode Uniform --lb-sku Standard --assign-identity {emsi}')
+        virtualMachine = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile'])
+        self.assertIsNone(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity']) 
+        
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMDiskEncryptionTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption', location='westus')
@@ -6184,7 +6521,7 @@ class VMDiskEncryptionTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
-                      additional_params='--enabled-for-disk-encryption true')
+                      additional_params='--enabled-for-disk-encryption true ')
     def test_vm_disk_encryption_e2e(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -6200,6 +6537,407 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault}')
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
         self.cmd('vm encryption disable -g {rg} -n {vm}')
+        
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_with_encryption_identity', location='westus')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
+                      additional_params='--enable-rbac-authorization false')
+    def test_vm_disk_encryption_with_encryption_identity_e2e(self, resource_group, resource_group_location, key_vault):
+        
+        self.kwargs.update({
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result['id']
+        principalId = emsi_result['principalId']
+        
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+    
+        self.kwargs.update({
+            'vault_id':vault_id,
+            'encryptionIdentityId' : encryptionIdentityId,
+            'principalId' : principalId
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --encryption-identity {encryptionIdentityId} --assign-identity {emsi}')
+        virtualMachine = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['securityProfile'])
+        self.assertIsNotNone(virtualMachine['securityProfile']['encryptionIdentity'])
+        self.assertEqual(virtualMachine['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], encryptionIdentityId)
+        
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {principalId} --key-permissions all --secret-permissions all')
+                        
+        time.sleep(15)
+
+        self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId}')
+        self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
+        
+   
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_identity_set_at_encryption_cmdlet', location='westus')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
+                      additional_params='--enable-rbac-authorization false')
+    def test_vm_encryption_identity_set_at_encryption_cmdlet(self, resource_group, resource_group_location, key_vault):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'emsi1': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result1 = self.cmd('identity create -g {rg} -n {emsi1} --tags tag1=d1', checks=[
+            self.check('name', '{emsi1}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId1 = emsi_result1['id']
+        principalId1 = emsi_result1['principalId']
+        
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+    
+        self.kwargs.update({
+            'vault_id':vault_id,
+            'encryptionIdentityId1' : encryptionIdentityId1,
+            'principalId1' : principalId1,
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --assign-identity {emsi1}')
+        virtualMachine = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId1.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {principalId1} --key-permissions all --secret-permissions all')
+        
+        time.sleep(15)
+                        
+        self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId1}')
+        self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
+   
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_with_incorrect_encryption_identity', location='westus')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
+                      additional_params='--enable-rbac-authorization false')
+    def test_vm_disk_encryption_with_incorrect_encryption_identity_e2e(self, resource_group, resource_group_location, key_vault):
+        
+        self.kwargs.update({
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'emsi1': 'id1',
+            'emsi2':'id2',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result1 = self.cmd('identity create -g {rg} -n {emsi1} --tags tag1=d1', checks=[
+            self.check('name', '{emsi1}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+        
+        emsi_result2 = self.cmd('identity create -g {rg} -n {emsi2} --tags tag1=d2', checks=[
+            self.check('name', '{emsi2}'),
+            self.check('tags.tag1', 'd2')]).get_output_in_json()
+         
+        encryptionIdentityId1 = emsi_result1['id']
+        encryptionIdentityId2 = emsi_result2['id']
+        principalId1 = emsi_result1['principalId']
+        principalId2 = emsi_result2['principalId']
+        
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+    
+        self.kwargs.update({
+            'vault_id':vault_id,
+            'encryptionIdentityId1' : encryptionIdentityId1,
+            'principalId1' : principalId1,
+            'encryptionIdentityId2' : encryptionIdentityId2,
+            'principalId2' : principalId2
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --encryption-identity {encryptionIdentityId2} --assign-identity {emsi2}')
+        virtualMachine = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId2.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['securityProfile'])
+        self.assertIsNotNone(virtualMachine['securityProfile']['encryptionIdentity'])
+        self.assertEqual(virtualMachine['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], encryptionIdentityId2)
+
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {principalId1} --key-permissions all --secret-permissions all')
+                        
+        time.sleep(15)
+        from azure.cli.core.azclierror import ArgumentUsageError
+        message = 'Encryption Identity should be an ARM Resource ID of one of the user assigned identities associated to the resource'
+        with self.assertRaisesRegex(ArgumentUsageError, message) as context:
+            self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId1}')
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_with_encryption_identity', location='westus')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
+                      additional_params='--enable-rbac-authorization false')
+    def test_vm_disk_encryption_with_encryption_identity_not_acled_in_keyvaulte2e(self, resource_group, resource_group_location, key_vault):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result['id']
+        principalId = emsi_result['principalId']
+        
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+    
+        self.kwargs.update({
+            'vault_id':vault_id,
+            'encryptionIdentityId' : encryptionIdentityId,
+            'principalId' : principalId
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --encryption-identity {encryptionIdentityId} --assign-identity {emsi}')
+        virtualMachine = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['securityProfile'])
+        self.assertIsNotNone(virtualMachine['securityProfile']['encryptionIdentity'])
+        self.assertEqual(virtualMachine['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], encryptionIdentityId)
+                                
+        time.sleep(15)
+
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaises(HttpResponseError):
+            self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId}')
+
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_with_encryption_identity', location='westus')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
+                      additional_params='--enable-rbac-authorization false')
+    def test_vmss_disk_encryption_with_encryption_identity_e2e(self, resource_group, resource_group_location, key_vault):
+        self.kwargs.update({
+            'vmss': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result['id']
+        principalId = emsi_result['principalId']
+        
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+    
+        self.kwargs.update({
+            'vault_id':vault_id,
+            'encryptionIdentityId' : encryptionIdentityId,
+            'principalId' : principalId
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789! --encryption-identity {encryptionIdentityId} --assign-identity {emsi} --orchestration-mode Uniform --lb-sku Standard')
+        virtualMachine = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile'])
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity'])
+        self.assertEqual(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], 
+                         encryptionIdentityId)
+        
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {principalId} --key-permissions all --secret-permissions all')
+                        
+        time.sleep(15)
+
+        self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault}')
+        self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
+        self.cmd('vmss encryption show -g {rg} -n {vmss}', checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted'))
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'EnableEncryption'),
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
+        self.cmd('vmss encryption disable -g {rg} -n {vmss}')
+        self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
+        self.cmd('vmss encryption show -g {rg} -n {vmss}', checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/notEncrypted'))
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_identity_set_at_encryption_cmdlet', location='westus')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
+                      additional_params='--enable-rbac-authorization false')
+    def test_vmss_encryption_identity_set_at_encryption_cmdlet(self, resource_group, resource_group_location, key_vault):
+        self.kwargs.update({
+            'vmss': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result1 = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result1['id']
+        principalId = emsi_result1['principalId']
+        
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+    
+        self.kwargs.update({
+            'vault_id':vault_id,
+            'encryptionIdentityId' : encryptionIdentityId,
+            'principalId' : principalId,
+        })
+
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789! --assign-identity {emsi} --orchestration-mode Uniform --lb-sku Standard')
+        virtualMachine = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile'])
+        self.assertIsNone(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity'])
+        
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {principalId} --key-permissions all --secret-permissions all')
+                        
+        time.sleep(15)
+
+        self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId}')
+        self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
+        self.cmd('vmss encryption show -g {rg} -n {vmss}', checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted'))
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'EnableEncryption'),
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
+        self.cmd('vmss encryption disable -g {rg} -n {vmss}')
+        self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
+        self.cmd('vmss encryption show -g {rg} -n {vmss}', checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/notEncrypted'))
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
+        
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_with_incorrect_encryption_identity', location='westus')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
+                      additional_params='--enable-rbac-authorization false')
+    def test_vmss_disk_encryption_with_incorrect_encryption_identity_e2e(self, resource_group, resource_group_location, key_vault):
+        
+        self.kwargs.update({
+            'vmss': 'vm1',
+            'subnet': 'subnet1',
+            'emsi1': 'id1',
+            'emsi2':'id2',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result1 = self.cmd('identity create -g {rg} -n {emsi1} --tags tag1=d1', checks=[
+            self.check('name', '{emsi1}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+        
+        emsi_result2 = self.cmd('identity create -g {rg} -n {emsi2} --tags tag1=d2', checks=[
+            self.check('name', '{emsi2}'),
+            self.check('tags.tag1', 'd2')]).get_output_in_json()
+         
+        encryptionIdentityId1 = emsi_result1['id']
+        encryptionIdentityId2 = emsi_result2['id']
+        principalId1 = emsi_result1['principalId']
+        principalId2 = emsi_result2['principalId']
+        
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+    
+        self.kwargs.update({
+            'vault_id':vault_id,
+            'encryptionIdentityId1' : encryptionIdentityId1,
+            'principalId1' : principalId1,
+            'encryptionIdentityId2' : encryptionIdentityId2,
+            'principalId2' : principalId2
+        })
+        
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789! --encryption-identity {encryptionIdentityId2} --assign-identity {emsi2} --orchestration-mode Uniform --lb-sku Standard')
+
+        virtualMachine = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId2.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile'])
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity'])
+        self.assertEqual(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], encryptionIdentityId2)
+
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {principalId1} --key-permissions all --secret-permissions all')
+                        
+        time.sleep(15)
+        from azure.cli.core.azclierror import ArgumentUsageError
+        message = 'Encryption Identity should be an ARM Resource ID of one of the user assigned identities associated to the resource'
+        with self.assertRaisesRegex(ArgumentUsageError, message) as context:
+            self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId1}')
+
+    
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_with_encryption_identity', location='westus')
+    @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
+                      additional_params='--enable-rbac-authorization false')
+    def test_vmss_disk_encryption_with_encryption_identity_not_acled_in_keyvaulte2e(self, resource_group, resource_group_location, key_vault):
+        self.kwargs.update({
+            'vmss': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi} --tags tag1=d1', checks=[
+            self.check('name', '{emsi}'),
+            self.check('tags.tag1', 'd1')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result['id']
+        principalId = emsi_result['principalId']
+        
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+    
+        self.kwargs.update({
+            'vault_id':vault_id,
+            'encryptionIdentityId' : encryptionIdentityId,
+            'principalId' : principalId
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789! --encryption-identity {encryptionIdentityId} --assign-identity {emsi} --orchestration-mode Uniform --lb-sku Standard')
+        virtualMachine = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
+        
+        self.assertIsNotNone(virtualMachine)
+        self.assertIsNotNone(virtualMachine['identity'])
+        self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile'])
+        self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity'])
+        self.assertEqual(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], encryptionIdentityId)
+                                
+        time.sleep(15)
+
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaises(HttpResponseError):
+            self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault}')
+            self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='eastus2')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, location='eastus2', key='vault',
@@ -6535,7 +7273,7 @@ class VMGalleryImage(ScenarioTest):
         ])
 
         # Check result by shared user
-        self.cmd('sig list-shared --location {location}', checks=[
+        self.cmd('sig list-shared --location {location} --query "[?name==\'{unique_name}\']"', checks=[
             self.check('[0].location', '{location}'),
             self.check('[0].name', '{unique_name}'),
             self.check('[0].uniqueId', '/SharedGalleries/{unique_name}')
@@ -6661,7 +7399,7 @@ class VMGalleryImage(ScenarioTest):
                  ])
 
     @ResourceGroupPreparer(location='eastus2')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_gallery_e2e(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -6681,7 +7419,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('sig show -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1',
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation V1',
                  checks=self.check('name', self.kwargs['image']))
         self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
         res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
@@ -6760,7 +7498,7 @@ class VMGalleryImage(ScenarioTest):
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_image_update_add_set_', location='westus')
-    def test_image_update_add_set(self, resource_group, resource_group_location):
+    def test_image_update_add_set(self, resource_group: object, resource_group_location: object) -> object:
         self.kwargs.update({
             'vm': 'vm1',
             'gallery': self.create_random_name(prefix='gallery_', length=20),
@@ -6851,7 +7589,7 @@ class VMGalleryImage(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_create_os_vhd')
     def test_image_version_create_os_vhd(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         self.kwargs.update({
             'vm': 'myvm',
@@ -6893,7 +7631,7 @@ class VMGalleryImage(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
-                      additional_params='--enable-purge-protection true')
+                      additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_create_image_version_with_region_cvm_encryption(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -6990,6 +7728,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('safetyProfile.allowDeletionOfReplicatedLocations', False)
         ])
 
+    @unittest.skip("The value of Edge Zone name 'attdallas1' and 'microsoftlosangeles1' are invalid.")
     @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations', location='southcentralus')
     def test_image_version_with_target_extended_locations(self):
         self.kwargs.update({
@@ -7071,7 +7810,6 @@ class VMGalleryImage(ScenarioTest):
         # Deleting the image version before performing encryption test
         self.cmd(
             'sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations_encryption', location='westus')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus', additional_params='--enable-purge-protection')
@@ -7156,7 +7894,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location} --target-region-cvm-encryption EncryptedWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
             self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
-            self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.securityProfile.confidentialVmEncryptionType', 'EncryptedWithPmk'),
+            self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.securityProfile.confidentialVMEncryptionType', 'EncryptedWithPmk'),
         ])
 
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
@@ -7406,9 +8144,6 @@ class VMGalleryImage(ScenarioTest):
         if self.is_live:
             time.sleep(30)
 
-        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
-                 '--gallery-image-version {version}')
-
         self.cmd('sig update -g {rg} -r {gallery} --soft-delete False', checks=[
             self.check('location', 'westus'),
             self.check('name', '{gallery}'),
@@ -7423,6 +8158,9 @@ class VMGalleryImage(ScenarioTest):
         ])
         if self.is_live:
             time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version}')
 
         from azure.cli.core.azclierror import InvalidArgumentValueError
         with self.assertRaises(InvalidArgumentValueError):
@@ -7634,12 +8372,13 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
-        # update gallery from private to community
-        self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Community '
-                 '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
-                 checks=[
-                     self.check('sharingProfile.permissions', 'Community')
-                 ])
+        # Update gallery from private to community.
+        # This command is commented out because the backend service currently prevents updating 'Private' to 'Community'.
+        # self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Community '
+        #          '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
+        #          checks=[
+        #              self.check('sharingProfile.permissions', 'Community')
+        #          ])
 
 
 class VMGalleryApplication(ScenarioTest):
@@ -7653,15 +8392,16 @@ class VMGalleryApplication(ScenarioTest):
         self.cmd('sig create -r {gallery} -g {rg}')
         self.cmd('sig gallery-application create -n {app_name} -r {gallery} --os-type windows -g {rg}', checks=[
             self.check('name', '{app_name}'),
-            self.check('supportedOsType', 'Windows'),
+            self.check('supportedOSType', 'Windows'),
             self.check('description', None),
             self.check('tags', None),
             self.check('type', 'Microsoft.Compute/galleries/applications')
         ])
+        self.cmd('sig gallery-application wait -n {app_name} -r {gallery} -g {rg} --exists')
         self.cmd('sig create -r {gallery} -g {rg}')
         self.cmd('sig gallery-application update -n {app_name} -r {gallery} -g {rg} --description test --tags tag=test', checks=[
             self.check('name', '{app_name}'),
-            self.check('supportedOsType', 'Windows'),
+            self.check('supportedOSType', 'Windows'),
             self.check('description', 'test'),
             self.check('tags', {'tag': 'test'})
         ])
@@ -7697,7 +8437,7 @@ class VMGalleryApplication(ScenarioTest):
         self.cmd('sig create -r {gallery} -g {rg}')
         self.cmd('sig gallery-application create -n {app_name} -r {gallery} --os-type windows -g {rg}', checks=[
             self.check('name', '{app_name}'),
-            self.check('supportedOsType', 'Windows'),
+            self.check('supportedOSType', 'Windows'),
             self.check('description', None),
             self.check('tags', None),
             self.check('type', 'Microsoft.Compute/galleries/applications')
@@ -7918,7 +8658,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
     #
     # however, the CLI does not replace resource group values in payloads in the recordings.
     def _assert_ids_equal(self, id_1, id_2, rg_prefix=None):
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
 
         id_1, id_2, rg_prefix = id_1.lower(), id_2.lower(), rg_prefix.lower() if rg_prefix else rg_prefix
 
@@ -8420,6 +9160,41 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_scheduled_events_policy_', location='centraluseuap')
+    def test_vm_scheduled_events_policy(self, resource_group):
+        self.kwargs.update({
+            'vm1': self.create_random_name('vm', 10),
+            'vm2': self.create_random_name('vm', 10)
+        })
+        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --enable-reboot True --enable-redeploy True --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+        ])
+        self.cmd('vm update -g {rg} -n {vm1} --additional-events False --enable-reboot False --enable-redeploy False', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', False),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
+        ])
+        self.cmd('vm update -g {rg} -n {vm1} --additional-events true --enable-redeploy true --enable-reboot False ', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:18.04-LTS:latest --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('scheduledEventsPolicy', None)
+        ])
+        self.cmd('vm update -g {rg} -n {vm2} --additional-events True ', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True)
+        ])
+        self.cmd('vm update -g {rg} -n {vm2} --enable-reboot True --enable-redeploy true', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+        ])
 
 class VMPriorityEvictionBillingTest(ScenarioTest):
 
@@ -9084,13 +9859,13 @@ class DiskEncryptionSetTest(ScenarioTest):
         
         # create disk with des name
         self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
-            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check_pattern('securityProfile.secureVMDiskEncryptionSetId', self.kwargs['des_pattern']),
             self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
         ])
 
         # create disk with des id
         self.cmd('disk create -g {rg} -n {disk2} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
-            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check_pattern('securityProfile.secureVMDiskEncryptionSetId', self.kwargs['des_pattern']),
             self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
         ])
 
@@ -9379,7 +10154,7 @@ class DiskBurstingTest(ScenarioTest):
 
 class VMSSCreateDiskOptionTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disk_iops_mbps_', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disk_iops_mbps_', location='eastus2')
     @AllowLargeResponse(size_kb=99999)
     def test_vmss_create_disk_iops_mbps(self, resource_group):
         self.kwargs.update({
@@ -9387,8 +10162,8 @@ class VMSSCreateDiskOptionTest(ScenarioTest):
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --data-disk-sizes-gb 10 10 --data-disk-iops 555 666 '
-                 '--data-disk-mbps 77 88 --ultra-ssd-enabled --zone 1 --vm-sku Standard_D2s_v3 '
-                 '--storage-sku UltraSSD_LRS --location eastus --admin-username azureuser --lb "" --orchestration-mode Uniform',
+                 '--data-disk-mbps 77 88 --ultra-ssd-enabled --zones 1 --vm-sku Standard_D2s_v3 --lb-sku Standard '
+                 '--storage-sku UltraSSD_LRS --location eastus2 --admin-username azureuser --lb "" --orchestration-mode Uniform',
                  checks=[
                      self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[0].diskIOPSReadWrite', '555'),
                      self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[1].diskIOPSReadWrite', '666'),
@@ -9418,7 +10193,6 @@ class VMCreateAutoCreateSubnetScenarioTest(ScenarioTest):
         self.kwargs.update({
             'loc': 'eastus',
             'vm': 'vm-subnet',
-            'vnet': 'myvnet',
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
@@ -9473,7 +10247,8 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
         # Test enable automatic repairs with a health probe when create vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30  --automatic-repairs-action restart --admin-username azureuser --orchestration-mode Uniform',
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30 '
+                 '--automatic-repairs-action restart --admin-username azureuser --orchestration-mode Uniform --lb-sku Standard',
                  checks=[
                      self.check('vmss.automaticRepairsPolicy.enabled', True),
                      self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M'),
@@ -9489,7 +10264,7 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         })
 
         # Prepare vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --orchestration-mode Uniform --lb-sku Standard')
 
         # Validate automatic repairs parameters
         with self.assertRaises(ArgumentUsageError):
@@ -9529,7 +10304,7 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         })
 
         # Prepare vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --orchestration-mode Uniform --lb-sku Standard')
 
         # Prepare health extension
         _, settings_file = tempfile.mkstemp()
@@ -9558,6 +10333,39 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
                      self.check('automaticRepairsPolicy.enabled', True),
                      self.check('automaticRepairsPolicy.gracePeriod', 'PT30M')
                  ])
+
+class SkuProfileTest(ScenarioTest):
+        
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile', location='eastus2')
+    def test_vmss_create_sku_profile(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.skuProfile.allocationStrategy', 'LowestPrice'),
+            self.check('vmss.skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('vmss.skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
+        ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile_update', location='eastus2')
+    def test_vmss_create_sku_profile_update(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 --skuprofile-allocation-strategy CapacityOptimized', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.skuProfile.allocationStrategy', 'CapacityOptimized'),
+            self.check('vmss.skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+        ])
+        self.cmd('vmss update -n {vmss} -g {rg} ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --skuprofile-allocation-strategy CapacityOptimized', checks=[
+            self.check('skuProfile.allocationStrategy', 'CapacityOptimized'),
+            self.check('skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
+        ])
 
 
 class VMCreateNSGRule(ScenarioTest):
@@ -9600,7 +10408,8 @@ class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
         self.cmd(
             'network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser --orchestration-mode Uniform',
+            'vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} '
+            '--health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser --orchestration-mode Uniform --lb-sku Standard',
             checks=[
                 self.check('vmss.automaticRepairsPolicy.enabled', True),
                 self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M')
@@ -9888,7 +10697,6 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('[0].type', 'Microsoft.Network/loadBalancers/inboundNatRules')
         ])
 
-
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_', location='westus2')
@@ -10133,14 +10941,41 @@ class VMSSSecurityPostureScenarioTest(ScenarioTest):
     def test_vmss_security_posture_reference(self, resource_group):
         self.kwargs.update({
             'vmss1': self.create_random_name('clitestvmss1', 20),
-            'security_posture_reference_id': '/internal/Providers/Microsoft.Compute/galleries/SecurityPostureGallery-uiualhwjibht/securityPostures/VMSSUniformLinux/versions/1.0.0'
+            'security_posture_reference_id': '/CommunityGalleries/SecurityPosturesBVTGallery/securityPostures/VMSSUniformWindows/versions/latest',
+            'nsg': 'testnsg',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'dns_label': self.create_random_name('clivmss', 20)
         })
-
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username sdk-test-admin --orchestration-mode Uniform '
-                 '--security-posture-reference-id {security_posture_reference_id}')
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd(
+            "vmss create -n {vmss1} -g {rg} --image Win2022Datacenter --admin-username clittester --lb-sku Standard "
+            "--vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform "
+            "--security-posture-reference-id {security_posture_reference_id} --exclude-extensions SecurityPostureSecurityAgent --is-overridable True")
 
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
-            self.check('virtualMachineProfile.securityPostureReference.id', '{security_posture_reference_id}')
+            self.check('virtualMachineProfile.securityPostureReference.id', '{security_posture_reference_id}'),
+            self.check('virtualMachineProfile.securityPostureReference.isOverridable', True),
+            self.check('virtualMachineProfile.securityPostureReference.excludeExtensions[0]',
+                       'SecurityPostureSecurityAgent')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_security_posture_reference_overridable_', location='eastus2euap')
+    def test_vmss_security_posture_reference_overridable(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('clitestvmss1', 20),
+            'security_posture_reference_id': '/CommunityGalleries/SecurityPosturesBVTGallery/securityPostures/VMSSUniformWindows/versions/latest',
+            'nsg': 'testnsg',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'dns_label': self.create_random_name('clivmss', 20)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd("vmss create -n {vmss1} -g {rg} --image Win2022Datacenter --admin-username clittester --lb-sku Standard "
+                 "--vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform "
+                 "--security-posture-reference-id {security_posture_reference_id} --is-overridable False")
+
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('virtualMachineProfile.securityPostureReference.id', '{security_posture_reference_id}'),
+            self.check('virtualMachineProfile.securityPostureReference.isOverridable', False),
         ])
 
 
@@ -10164,7 +10999,7 @@ class VMSSReimageScenarioTest(ScenarioTest):
             'vmss': self.create_random_name('vmss', 10)
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username vmtest --instance-count 2 --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username vmtest --instance-count 2 --orchestration-mode Uniform --lb-sku Standard')
         instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs['instance_id1'] = instances[0]['instanceId']
         self.kwargs['instance_id2'] = instances[1]['instanceId']
@@ -10177,7 +11012,8 @@ class VMSSReimageScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create --resource-group {rg} --name {vmss} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --instance-count 1 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform')
+        self.cmd('vmss create --resource-group {rg} --name {vmss} --image OpenLogic:CentOS:7.5:latest --ephemeral-os-disk --disable-overprovision --lb-sku Standard '
+                 '--instance-count 1 --data-disk-sizes-gb 2 --storage-sku os=standard_lrs 0=premium_lrs --admin-username testuser1 --admin-password testPassword01! --orchestration-mode Uniform')
         before_reimage_os_disk_name = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['storageProfile']['osDisk']['name']
 
         self.cmd('vmss reimage -g {rg} -n {vmss}')
@@ -10234,6 +11070,7 @@ class VMSSHKeyScenarioTest(ScenarioTest):
             "ssh_key": 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+N4unGvv6pXPYebWiQ6Ak618DjYm5g6d2ECnq/1F0x generated-by-azure',
             'vm1': 'vm1',
             'vm2': 'vm2',
+            'vm3': 'vm3',
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
@@ -10245,29 +11082,47 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --nsg-rule None  --ssh-key-value \'{ssh_key}\' --admin-username vmtest2 --subnet {subnet} --vnet-name {vnet}')
+        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --nsg-rule None --ssh-key-value \'{ssh_key}\' --admin-username vmtest2 --subnet {subnet} --vnet-name {vnet}')
+
+        self.cmd('vm create -g {rg} -n {vm3} --image OpenLogic:CentOS:7.5:latest --nsg-rule None --generate-ssh-keys --ssh-key-type ed25519 --admin-username vmtest3 --subnet {subnet} --vnet-name {vnet}')
 
 
 class VMInstallPatchesScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_install_patches_')
     def test_vm_install_patches(self, resource_group):
+        from azure.core.exceptions import HttpResponseError
+
         self.kwargs.update({
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        # Create new one
-        self.cmd('vm create -g {rg} -n vm --image MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition-Hotpatch:latest '
+        # Create a windows vm
+        self.cmd('vm create -g {rg} -n vm -l westus --image MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition-Hotpatch:latest '
                  '--enable-hotpatching true --patch-mode AutomaticByPlatform --enable-agent --admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Create a linux vm
+        self.cmd('vm create -g {rg} -n vm2 --image Ubuntu2204 -l westus --admin-username azureuser --admin-password Password123! '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-win Critical Security --exclude-kbs-requiring-reboot true --max-patch-publish-date 2024-08-01T02:36:43', checks=[
+        # Test for WindowsParameters and check for serialization warning/errors
+        with self.assertRaisesRegex(HttpResponseError, "The entry in 'kbNumbersToInclude' with value '1111' is not valid. It must be a KBID such as"):
+            self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting Never --classifications-to-include-win Critical Security '
+                     '--exclude-kbs-requiring-reboot true --kb-numbers-to-include=1111 --max-patch-publish-date 2024-11-01T02:36:43')
+
+        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting Never --classifications-to-include-win Critical Security '
+                 '--exclude-kbs-requiring-reboot true --kb-numbers-to-include=KB4512508 --max-patch-publish-date 2024-11-01T02:36:43', 
+                 checks=[
+                    self.check('status', 'Succeeded')
+                    ])
+
+        # Test for LinuxParameters and check for success
+        self.cmd('vm install-patches -g {rg} -n vm2 --maximum-duration PT4H --reboot-setting ifRequired --classifications-to-include-linux Critical Security', checks=[
             self.check('status', 'Succeeded')
         ])
-
-
 
 class VMTrustedLaunchScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
@@ -10409,8 +11264,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('creationData.createOption', 'UploadPreparedSecure'),
         ])
         self.cmd('disk grant-access -n {disk} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
-            self.exists('accessSas'),
-            self.exists('securityDataAccessSas')
+            self.exists('accessSAS'),
+            self.exists('securityDataAccessSAS')
         ])
 
         self.cmd('disk create -n {disk1} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
@@ -10418,15 +11273,15 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('creationData.createOption', 'UploadPreparedSecure')
         ])
         self.cmd('disk grant-access -n {disk1} -g {rg} --access-level Write --duration-in-seconds 86400 --secure-vm-guest-state-sas', checks=[
-            self.exists('accessSas'),
-            self.exists('securityDataAccessSas')
+            self.exists('accessSAS'),
+            self.exists('securityDataAccessSAS')
         ])
 
         self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v2 --upload-type Upload --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
             self.check('creationData.createOption', 'Upload'),
         ])
         self.cmd('disk grant-access -n {disk2} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
-            self.exists('accessSas'),
+            self.exists('accessSAS'),
         ])
 
         message = "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'"
@@ -10543,16 +11398,40 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v1_', location='northeurope')
+    def test_enable_trusted_launch_on_v1(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm1', 10),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
+        self.cmd('vm create -g {rg} -n {vm} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk:latest '
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('securityProfile', None)
+        ])
+        self.cmd('disk list -g {rg}', checks=[
+            self.check('[0].hyperVGeneration', 'V1')
+        ])
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --security-type TrustedLaunch', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v2_', location='northeurope')
     def test_enable_trusted_launch_on_v2(self, resource_group):
         self.kwargs.update({
             'vm1': self.create_random_name('vm1', 10),
             'vm2': self.create_random_name('vm2', 10),
-            'vm3': self.create_random_name('vm3', 10),
-            'vm4': self.create_random_name('vm4', 10),
             'disk1': self.create_random_name('disk1', 10),
             'disk2': self.create_random_name('disk2', 10),
-            'image1': self.create_random_name('image1', 10),
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
@@ -10572,42 +11451,25 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
         self.cmd('vm update -g {rg} -n {vm1} --security-type TrustedLaunch', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
-            self.check('securityProfile.uefiSettings.secureBootEnabled', 'False'),
-            self.check('securityProfile.uefiSettings.vTpmEnabled', 'True'),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
         ])
-
-        # create Gen1 VM
-        self.cmd(
-            'vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu '
-            '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
-        self.cmd('vm deallocate -g {rg} -n {vm2}')
-        self.cmd('vm generalize -g {rg} -n {vm2}')
-        self.kwargs['image_id'] = self.cmd('image create -g {rg} -n {image1} --source {vm2} --hyper-v-generation V1',
-                                           checks=[
-                                               self.check('hyperVGeneration', 'V1')
-                                           ]).get_output_in_json()['id']
-        self.cmd(
-            'vm create -g {rg} -n {vm3} --image {image_id} --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
-
-        message = 'Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.'
-        with self.assertRaisesRegex(InvalidArgumentValueError, message):
-            self.cmd('vm update -g {rg} -n {vm3} --security-type TrustedLaunch')
 
         # create ConfidentialVM VM
         self.cmd(
             'disk create -g {rg} -n {disk2} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_DiskEncryptedWithPlatformKey')
         self.cmd(
-            'vm create -g {rg} -n {vm4} --attach-os-disk {disk2} --nsg-rule NONE --os-type windows --security-type confidentialvm --subnet {subnet} --vnet-name {vnet} '
+            'vm create -g {rg} -n {vm2} --attach-os-disk {disk2} --nsg-rule NONE --os-type windows --security-type confidentialvm --subnet {subnet} --vnet-name {vnet} '
             '--os-disk-security-encryption-type diskwithvmgueststate --size Standard_DC2as_v5 --enable-secure-boot true --enable-vtpm true')
-        self.cmd('vm show -g {rg} -n {vm4}',
+        self.cmd('vm show -g {rg} -n {vm2}',
                  checks=[
                      self.check('securityProfile.securityType', 'ConfidentialVM')
                  ])
 
         message = '{} is already configured with {}. Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch.'.format(
-            self.kwargs['vm4'], 'ConfidentialVM')
+            self.kwargs['vm2'], 'ConfidentialVM')
         with self.assertRaisesRegex(InvalidArgumentValueError, message):
-            self.cmd('vm update -g {rg} -n {vm4} --security-type TrustedLaunch')
+            self.cmd('vm update -g {rg} -n {vm2} --security-type TrustedLaunch')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_vm_vmss_extension_autoupgrade_', location='eastus')
@@ -10739,11 +11601,19 @@ class VMCreateCountScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_count_', location='eastus')
     def test_vm_create_count(self, resource_group):
+        self.kwargs.update({
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
         self.cmd('az network vnet create -g {rg} -n vnet --address-prefix 10.0.0.0/16')
         self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet1 --address-prefixes 10.0.0.0/24 --default-outbound false')
         self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet2 --address-prefixes 10.0.1.0/24 --default-outbound false')
-        self.cmd('vm create -g {rg} -n vma --image Canonical:UbuntuServer:18.04-LTS:latest --count 3 --vnet-name vnet --subnet subnet1 --nsg-rule None '
+        self.cmd('vm create -g {rg} -n vma --image Canonical:UbuntuServer:18.04-LTS:latest --count 3 --subnet {subnet} --vnet-name {vnet} --nsg-rule None '
                  '--generate-ssh-keys --nic-delete-option Delete --admin-username vmtest')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm list -g {rg}', checks=[
             self.check('length(@)', 3),
             self.check('[0].networkProfile.networkInterfaces[0].deleteOption', 'Delete'),
@@ -10751,7 +11621,7 @@ class VMCreateCountScenarioTest(ScenarioTest):
             self.check('[2].networkProfile.networkInterfaces[0].deleteOption', 'Delete')
         ])
 
-        self.cmd('vm create -g {rg} -n vmb --image Canonical:UbuntuServer:18.04-LTS:latest --count 3 --vnet-name vnet --subnet subnet2 --nsg-rule None --generate-ssh-keys --admin-username vmtest')
+        self.cmd('vm create -g {rg} -n vmb --image Canonical:UbuntuServer:18.04-LTS:latest --count 3 --subnet {subnet} --vnet-name {vnet} --nsg-rule None --generate-ssh-keys --admin-username vmtest')
         self.cmd('vm list -g {rg}', checks=[
             self.check('length(@)', 6)
         ])
@@ -10853,6 +11723,10 @@ class DiskZRSScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_disk_zrs_', location='westus2')
     def test_disk_zrs(self, resource_group):
+        self.kwargs.update({
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
         # az feature register --namespace Microsoft.Compute -n SharedDisksForStandardSSD
         # az provider register -n Microsoft.Compute
         self.cmd('disk create -g {rg} -n d1 --size-gb 1024 --sku StandardSSD_ZRS --max-shares 3', checks=[
@@ -10861,7 +11735,12 @@ class DiskZRSScenarioTest(ScenarioTest):
         self.cmd('disk update -g {rg} -n d1 --sku Premium_ZRS', checks=[
             self.check('sku.name', 'Premium_ZRS')
         ])
-        self.cmd('vm create -g {rg} -n d1 --image Canonical:UbuntuServer:18.04-LTS:latest --zone 1 --attach-data-disks d1 --generate-ssh-keys --nsg-rule None --admin-username vmtest')
+        self.cmd('vm create -g {rg} -n d1 --image Canonical:UbuntuServer:18.04-LTS:latest --zone 1 --attach-data-disks d1 '
+                 '--generate-ssh-keys --nsg-rule None --admin-username vmtest --subnet {subnet} --vnet-name {vnet}')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         # ZRS disks cannot be pinned with a zone
         self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku StandardSSD_ZRS --zone 1', expect_failure=True)
 
@@ -11105,19 +11984,27 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_add_application_empty_version_ids(self, resource_group):
         self.kwargs.update({
-            'vm': 'vm1'
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         # Prepare VM
-        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm application set -g {rg} -n {vm} --app-version-ids')
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
     # Need prepare app versions
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_add_application(self, resource_group):
         self.kwargs.update({
@@ -11128,14 +12015,21 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
             'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
                 sub=self.get_subscription_id()
             ),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         # Prepare VM
-        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 '
+                 '--admin-password Test123456789# --license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2}')
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_add_application_with_order_application(self, resource_group):
         self.kwargs.update({
@@ -11146,9 +12040,15 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
             'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
                 sub=self.get_subscription_id()
             ),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         # Prepare VM
-        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --order-applications', checks=[
             self.check('applicationProfile.galleryApplications[0].order', 1),
@@ -11157,6 +12057,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_add_application_with_config_override(self, resource_group):
         self.kwargs.update({
@@ -11167,10 +12068,16 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
             'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
                 sub=self.get_subscription_id()
             ),
-            'config': 'https://galleryappaccount.blob.core.windows.net/gallerytest/MyAppConfig'
+            'config': 'https://galleryappaccount.blob.core.windows.net/gallerytest/MyAppConfig',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         # Prepare VM
-        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # wrong length of config-overrides
         message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
@@ -11207,7 +12114,8 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
+                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids')
 
@@ -11227,7 +12135,8 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
+                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2}')
 
@@ -11247,7 +12156,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications', checks=[
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].order', 1),
@@ -11271,7 +12180,8 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
+                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
 
         # wrong length of config-overrides
         message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
@@ -11420,7 +12330,7 @@ class DiskRPTestScenario(ScenarioTest):
         self.cmd('snapshot create -g {rg2} -n snapb --copy-start true --incremental true --source {source} -l eastus')
         # show snapshot B, check completionPercent
         self.cmd('snapshot show -g {rg2} -n snapb', checks=[
-            self.check_pattern('completionPercent', '\d?.\d?')
+            self.check_pattern('completionPercent', r'\d?.\d?')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_completion_percent1_', location='westus')
@@ -11492,16 +12402,24 @@ class DiskRPTestScenario(ScenarioTest):
 
 class RestorePointScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_restore_point', location='EASTUS2EUAP')
     def test_restore_point(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
             'collection_name': self.create_random_name('collection_', 20),
             'point_name': self.create_random_name('point_', 15),
-            'vm_name': self.create_random_name('vm_', 15)
+            'vm_name': self.create_random_name('vm_', 15),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest --admin-password testPassword0 --nsg-rule NONE --tag EnableCrashConsistentRestorePoint=True').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest '
+                      '--admin-password testPassword0 --nsg-rule NONE --tag EnableCrashConsistentRestorePoint=True --subnet {subnet} --vnet-name {vnet}').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs.update({
             'vm_id': vm['id']
         })
@@ -11540,16 +12458,23 @@ class RestorePointScenarioTest(ScenarioTest):
 
         self.cmd('restore-point delete -g {rg} -n {point_name} --collection-name {collection_name} -y')
 
-
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collection', location='westus')
     def test_restore_point_collection(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
             'collection_name': self.create_random_name('point_', 15),
-            'vm_name': self.create_random_name('vm_', 15)
+            'vm_name': self.create_random_name('vm_', 15),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest '
+                      '--admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs.update({
             'vm_id': vm['id']
         })
@@ -11600,10 +12525,16 @@ class RestorePointScenarioTest(ScenarioTest):
             'collection_name1': self.create_random_name('collection_', 20),
             'point_name': self.create_random_name('point_', 15),
             'point_name1': self.create_random_name('point_', 15),
-            'vm_name': self.create_random_name('vm_', 15)
+            'vm_name': self.create_random_name('vm_', 15),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image ubuntu2204 --admin-username vmtest').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image ubuntu2204 --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs.update({
             'vm_id': vm['id']
         })

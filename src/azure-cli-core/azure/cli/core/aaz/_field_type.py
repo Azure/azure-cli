@@ -5,8 +5,11 @@
 import abc
 
 from collections import OrderedDict
+
+from azure.cli.core.util import shell_safe_json_parse
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
-from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue
+from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue, \
+    AAZIdentityObject
 from ._utils import to_snack_case
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZInvalidFieldError, AAZInvalidValueError
@@ -22,9 +25,6 @@ class AAZSimpleType(AAZBaseType):
     DataType = None
 
     _ValueCls = AAZSimpleValue
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def process_data(self, data, **kwargs):
         if data == None:  # noqa: E711, pylint: disable=singleton-comparison
@@ -45,7 +45,13 @@ class AAZSimpleType(AAZBaseType):
 
         assert self.DataType is not None
         if not isinstance(data, self.DataType):
-            raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            try:
+                json_data = shell_safe_json_parse(data)
+            except:  # pylint:disable=bare-except
+                raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            if not isinstance(json_data, self.DataType):
+                raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            data = json_data
 
         return data
 
@@ -89,7 +95,18 @@ class AAZFloatType(AAZSimpleType):
             data = float(data)
 
         if not isinstance(data, self.DataType):
-            raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            try:
+                json_data = shell_safe_json_parse(data)
+            except:  # pylint:disable=bare-except
+                raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            if isinstance(json_data, int):
+                # transform int to float
+                if float(json_data) != json_data:
+                    raise AAZValuePrecisionLossError(json_data, float(json_data))
+                json_data = float(json_data)
+            if not isinstance(json_data, self.DataType):
+                raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            data = json_data
 
         return data
 
@@ -275,9 +292,6 @@ class AAZBaseDictType(AAZBaseType):
 
     _PatchDataCls = dict
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @abc.abstractmethod
     def __getitem__(self, key):
         raise NotImplementedError()
@@ -409,3 +423,7 @@ class AAZListType(AAZBaseType):
                 value[idx] = sub_data
 
         return result
+
+
+class AAZIdentityObjectType(AAZObjectType):
+    _ValueCls = AAZIdentityObject

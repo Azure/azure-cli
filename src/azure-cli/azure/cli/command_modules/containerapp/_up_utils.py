@@ -24,9 +24,8 @@ from azure.cli.command_modules.appservice._create_util import (
 from azure.cli.command_modules.acr.custom import acr_show
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 from knack.log import get_logger
-
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._clients import ManagedEnvironmentClient, ContainerAppClient, GitHubActionClient, ContainerAppsJobClient
 
@@ -451,9 +450,9 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
                         task_command_kwargs = {"resource_type": ResourceType.MGMT_CONTAINERREGISTRY,
                                                'operation_group': 'webhooks'}
                         old_command_kwargs = {}
-                        for key in task_command_kwargs:  # pylint: disable=consider-using-dict-items
-                            old_command_kwargs[key] = self.cmd.command_kwargs.get(key)
-                            self.cmd.command_kwargs[key] = task_command_kwargs[key]
+                        for k, v in task_command_kwargs.items():
+                            old_command_kwargs[k] = self.cmd.command_kwargs.get(k)
+                            self.cmd.command_kwargs[k] = v
                         if self.acr and self.acr.name is not None:
                             acr_login(self.cmd, self.acr.name)
                         for k, v in old_command_kwargs.items():
@@ -558,9 +557,9 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         run_client = cf_acr_runs(self.cmd.cli_ctx)
         task_command_kwargs = {"resource_type": ResourceType.MGMT_CONTAINERREGISTRY, 'operation_group': 'webhooks'}
         old_command_kwargs = {}
-        for key in task_command_kwargs:  # pylint: disable=consider-using-dict-items
-            old_command_kwargs[key] = self.cmd.command_kwargs.get(key)
-            self.cmd.command_kwargs[key] = task_command_kwargs[key]
+        for k, v in task_command_kwargs.items():
+            old_command_kwargs[k] = self.cmd.command_kwargs.get(k)
+            self.cmd.command_kwargs[k] = v
 
         with NamedTemporaryFile(mode="w", delete=False) as task_file:
             try:
@@ -596,8 +595,16 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         # Creating a tag for the image using the current time to avoid overwriting customer's existing images
         now = datetime.now()
         tag_now_suffix = str(now).replace(" ", "").replace("-", "").replace(".", "").replace(":", "")
-        image_name_with_tag = image_name + ":{}".format(tag_now_suffix)
-        self.image = self.registry_server + "/" + image_name_with_tag
+
+        if ":" in image_name.split("/")[-1]:
+            image_name_with_tag = image_name
+        else:
+            image_name_with_tag = image_name + ":{}".format(tag_now_suffix)
+
+        if not image_name_with_tag.startswith(self.registry_server):
+            self.image = self.registry_server + "/" + image_name_with_tag
+        else:
+            self.image = image_name_with_tag
 
         if build_from_source:
             logger.warning(

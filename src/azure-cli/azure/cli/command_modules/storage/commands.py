@@ -95,11 +95,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
-        g.storage_custom_command('remove', 'storage_remove')
+        g.storage_custom_command_oauth('remove', 'storage_remove')
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
         from ._validators import validate_azcopy_credential
-        g.storage_custom_command('copy', 'storage_copy', validator=validate_azcopy_credential)
+        g.storage_custom_command_oauth('copy', 'storage_copy', validator=validate_azcopy_credential)
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
@@ -392,7 +392,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
 
     blob_service_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storagev2.blob._blob_service_client#' 'BlobServiceClient.{}',
+        operations_tmpl='azure.multiapi.storagev2.blob._blob_service_client#BlobServiceClient.{}',
         client_factory=cf_blob_service,
         resource_type=ResourceType.DATA_STORAGE_BLOB
     )
@@ -957,3 +957,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('set-recursive', 'set_access_control_recursive', min_api='2020-02-10')
         g.storage_custom_command_oauth('update-recursive', 'update_access_control_recursive', min_api='2020-02-10')
         g.storage_custom_command_oauth('remove-recursive', 'remove_access_control_recursive', min_api='2020-02-10')
+
+    with self.command_group('storage account migration'):
+        from .operations.account import AccountMigrationStart
+        self.command_table['storage account migration start'] = AccountMigrationStart(loader=self)

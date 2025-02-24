@@ -47,11 +47,11 @@ long-summary: >
 
     - Configure public access
 
-    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
+    https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
 
-    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
+    https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
   - name: >
@@ -231,11 +231,11 @@ long-summary: >
 
     - Configure public access
 
-    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
+    https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
 
-    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
+    https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
   - name: >
@@ -454,6 +454,35 @@ examples:
   - name: Detach vnet for a flexible server with public access disabled.
     text: az mysql flexible-server detach-vnet --resource-group testGroup --name testserver --public-network-access Disabled
     crafted: true
+"""
+
+helps['mysql flexible-server maintenance'] = """
+type: group
+short-summary: Manage maintenance on a flexible server.
+"""
+
+helps['mysql flexible-server maintenance reschedule'] = """
+type: command
+short-summary: Reschedule the ongoing planned maintenance of a flexible server.
+examples:
+  - name: reschedule a existing maintenance '_T9Q-TS8' of the server 'testserver' under resource gruop 'testgroup' to a new start time 'UTC 20240601 09:00:00'
+    text: az mysql flexible-server maintenance reschedule --resource-group testgroup --server-name testserver --maintenance-name _T9Q-TS8 --start-time 2024-06-01T09:00:00Z
+"""
+
+helps['mysql flexible-server maintenance list'] = """
+type: command
+short-summary: List all of the maintenances of a flexible server.
+examples:
+  - name: List all of the maintenances of mysql flexible server 'testserver' under resource group 'testgroup'.
+    text: az mysql flexible-server maintenance list --resource-group testgroup --server-name testserver
+"""
+
+helps['mysql flexible-server maintenance show'] = """
+type: command
+short-summary: Get the specific maintenance of a flexible server by maintenance name.
+examples:
+  - name: Get a maintenance of mysql flexible server 'testserver' under resource group 'testgroup', with maintenance name '_T9Q-TS8'
+    text: az mysql flexible-server maintenance show --resource-group testgroup --server-name testserver --maintenance-name _T9Q-TS8
 """
 
 helps['mysql flexible-server wait'] = """
