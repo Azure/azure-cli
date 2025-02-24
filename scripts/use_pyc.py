@@ -64,9 +64,7 @@ def main(folder, version=None):
             shutil.move(file, py_path.with_suffix('.pyc'))
 
     for f in glob.glob(f'{folder}/**/__pycache__', recursive=True):
-        # Remove pip __pycache__ folder for Windows only to save more space
-        if 'site-packages/pip' in f and not platform.system() == 'Windows':
-            continue
+        # Remove emtpy __pycache__ folder
         shutil.rmtree(f)
 
     _LOGGER.info('Finish processing')
