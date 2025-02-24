@@ -2772,7 +2772,7 @@ has been deployed ".format(app_service_environment)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_tier(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
+                              reserved=(is_linux or None), hyper_v=(hyper_v or None),
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
 
     if sku.upper() in ['WS1', 'WS2', 'WS3']:
