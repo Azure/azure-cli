@@ -676,7 +676,7 @@ TARGET_RESOURCES_PARAMS = {
             'placeholder': 'TargetFabricWorkspaceUUID'
         },
         'fabric_sql_db_uuid': {
-            'options': ['--fabric-sql-database-uuid'],
+            'options': ['--fabric-sql-db-uuid'],
             'help': 'UUID of the target Fabric SQL database',
             'placeholder': 'TargetFabricSQLDatabaseUUID'
         }
