@@ -39,17 +39,13 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
         connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
         target_id = 'https://api.fabric.microsoft.com/v1/workspaces/13c65326-ecab-43f6-8a05-60927aaa4cec/SqlDatabases/4fdf6efe-23a9-4d74-8c4a-4ecc70c4d323'
-        server = 'tcp:renzo-srv-6ae35870-c362-44b9-8389-ada214a46bb5-51240650dd56.database.windows.net,1433'
-        database = 'AzureServiceConnectorTestSqlDb-4fdf6efe-23a9-4d74-8c4a-4ecc70c4d323'
 
         # prepare
         self.cmd('webapp identity remove --ids {}'.format(source_id))
 
         # create
         self.cmd('webapp connection create fabric-sql --connection {} --source-id {} --target-id {} \
-                 --system-identity --client-type dotnet --opt-out publicnetwork \
-                 --connstr-props "Server={}" \
-                 "Database={}" '.format(name, source_id, target_id, server, database)
+                 --system-identity --client-type dotnet'.format(name, source_id, target_id, server, database)
                 )
 
         # list connection
@@ -65,8 +61,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # update
         self.cmd('webapp connection create fabric-sql --connection {} --source-id {} --target-id {} \
-                 --system-identity --client-type python --opt-out publicnetwork \
-                 --connstr-props "Server={}" "Database={}" '.format(name, source_id, target_id, server, database), 
+                 --system-identity --client-type python'.format(name, source_id, target_id), 
                  checks = [ self.check('clientType', 'python')])
 
         # list configuration
