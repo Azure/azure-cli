@@ -259,7 +259,7 @@ class ListBySubscription(AAZCommand):
                 serialized_name="purchaseOrderNumber",
                 flags={"read_only": True},
             )
-            properties.rebill_details = AAZDictType(
+            properties.rebill_details = AAZObjectType(
                 serialized_name="rebillDetails",
                 flags={"read_only": True},
             )
@@ -324,14 +324,11 @@ class ListBySubscription(AAZCommand):
             )
 
             rebill_details = cls._schema_on_200.value.Element.properties.rebill_details
-            rebill_details.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.rebill_details.Element
-            _element.credit_note_document_id = AAZStrType(
+            rebill_details.credit_note_document_id = AAZStrType(
                 serialized_name="creditNoteDocumentId",
                 flags={"read_only": True},
             )
-            _element.invoice_document_id = AAZStrType(
+            rebill_details.invoice_document_id = AAZStrType(
                 serialized_name="invoiceDocumentId",
                 flags={"read_only": True},
             )
