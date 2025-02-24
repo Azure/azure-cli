@@ -385,16 +385,8 @@ class Profile:
         identity.logout_all_users()
         identity.logout_all_service_principal()
 
-    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
-        """Get a CredentialAdaptor instance to be used with both Track 1 and Track 2 SDKs.
-
-        :param resource: The resource ID to acquire an access token. Only provide it for Track 1 SDKs.
-        :param subscription_id:
-        :param aux_subscriptions:
-        :param aux_tenants:
-        """
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
+    def get_login_credentials(self, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
+        """Get a credential compatible with Track 2 SDK."""
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
 
@@ -407,7 +399,7 @@ class Profile:
             from .auth.msal_credentials import CloudShellCredential
             from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
             # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
-            cred = CredentialAdaptor(CloudShellCredential(), resource=resource)
+            cred = CredentialAdaptor(CloudShellCredential())
 
         elif managed_identity_type:
             # managed identity
@@ -415,9 +407,13 @@ class Profile:
                 from .auth.msal_credentials import ManagedIdentityCredential
                 from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
                 # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
-                cred = CredentialAdaptor(ManagedIdentityCredential(), resource=resource)
+                cred = CredentialAdaptor(ManagedIdentityCredential())
             else:
-                cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id, resource)
+                # The resource is merely used by msrestazure to get the first access token.
+                # It is not actually used in an API invocation.
+                cred = MsiAccountTypes.msi_auth_factory(
+                    managed_identity_type, managed_identity_id,
+                    self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
         else:
             # user and service principal
@@ -436,9 +432,7 @@ class Profile:
             for external_tenant in external_tenants:
                 external_credentials.append(self._create_credential(account, tenant_id=external_tenant))
             from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
-            cred = CredentialAdaptor(credential,
-                                     auxiliary_credentials=external_credentials,
-                                     resource=resource)
+            cred = CredentialAdaptor(credential, auxiliary_credentials=external_credentials)
 
         return (cred,
                 str(account[_SUBSCRIPTION_ID]),

@@ -2126,7 +2126,8 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'vmss': 'vmss1',
             'avset': 'avset1',
-            'ssh_key': TEST_SSH_KEY_PUB
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'nsg': 'nsg1',
         })
 
         self.kwargs['ppg_id'] = self.cmd('ppg create -n {ppg} -t standard -g {rg}').get_output_in_json()['id']
@@ -2135,8 +2136,9 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg} --nsg-rule NONE').get_output_in_json()[
             'id']
 
+        self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id}')
+            'vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id} --nsg {nsg}')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.kwargs['avset_id'] = \
@@ -2160,12 +2162,14 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'vmss': 'vmss1',
             'avset': 'avset1',
-            'ssh_key': TEST_SSH_KEY_PUB
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'nsg': 'nsg1',
         })
 
         self.kwargs['ppg_id'] = self.cmd('ppg create -g {rg} -n {ppg} -t standard').get_output_in_json()['id']
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\'')
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --nsg {nsg}')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
         self.cmd('vmss deallocate -g {rg} -n {vmss}')
         time.sleep(30)

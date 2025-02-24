@@ -35,7 +35,9 @@ from dateutil.parser import parse
 import colorama
 import requests
 import yaml
-from azure.cli.command_modules.acs._client_factory import cf_agent_pools
+from azure.cli.command_modules.acs._client_factory import (
+    cf_agent_pools
+)
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
@@ -356,6 +358,14 @@ def which(binary):
             return bin_path
 
     return None
+
+
+def aks_machine_list(cmd, client, resource_group_name, cluster_name, nodepool_name):
+    return client.list(resource_group_name, cluster_name, nodepool_name)
+
+
+def aks_machine_show(cmd, client, resource_group_name, cluster_name, nodepool_name, machine_name):
+    return client.get(resource_group_name, cluster_name, nodepool_name, machine_name)
 
 
 def aks_maintenanceconfiguration_list(
@@ -2570,7 +2580,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         instance.upgrade_settings.max_surge = max_surge
     if drain_timeout:
         instance.upgrade_settings.drain_timeout_in_minutes = drain_timeout
-    if node_soak_duration:
+    if isinstance(node_soak_duration, int) and node_soak_duration >= 0:
         instance.upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
 
     # custom headers
@@ -2666,7 +2676,8 @@ def aks_agentpool_stop(cmd,   # pylint: disable=unused-argument
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                          nodepool_name,
                          no_wait=False,
-                         if_match=None):
+                         if_match=None,
+                         ignore_pdb=None):
     agentpool_exists = False
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2678,11 +2689,10 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
         raise CLIError("Node pool {} doesnt exist, "
                        "use 'aks nodepool list' to get current node pool list".format(nodepool_name))
 
-    active_cloud = get_active_cloud(cmd.cli_ctx)
-    if active_cloud.profile != "latest":
+    if cmd.cli_ctx.cloud.profile != "latest":
         return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
 
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name, if_match=if_match)
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name, if_match=if_match, ignore_pod_disruption_budget=ignore_pdb)
 
 
 def aks_agentpool_operation_abort(cmd,

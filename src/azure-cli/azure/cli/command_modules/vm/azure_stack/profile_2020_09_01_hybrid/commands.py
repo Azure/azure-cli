@@ -11,8 +11,9 @@ from .operations._util import import_aaz_by_profile
 
 
 def load_command_table(self, _):
-    from .operations.ppg import PPGShow
+    from .operations.ppg import PPGShow, PPGUpdate
     self.command_table["ppg show"] = PPGShow(loader=self)
+    self.command_table["ppg update"] = PPGUpdate(loader=self)
 
     Disk = import_aaz_by_profile("disk")
     self.command_table['disk list'] = Disk.List(loader=self, table_transformer='[].' + transform_disk_show_table_output)

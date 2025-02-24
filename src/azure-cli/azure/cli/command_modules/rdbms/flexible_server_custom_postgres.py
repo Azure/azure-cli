@@ -233,12 +233,10 @@ def flexible_server_restore(cmd, client,
             logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
         validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
-        instance = client.get(id_parts['resource_group'], id_parts['name'])
-
-        cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+        cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, source_server_object)
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
-        storage = postgresql_flexibleservers.models.Storage(type=storage_type if instance.storage.type != "PremiumV2_LRS" else None)
+        storage = postgresql_flexibleservers.models.Storage(type=storage_type if source_server_object.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
@@ -362,6 +360,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if instance.storage.type == "PremiumV2_LRS":
         instance.storage.tier = None
 
+        if sku_name or storage_gb:
+            logger.warning("You are changing the compute and/or storage size of the server. "
+                           "The server will be restarted for this operation and you will see a short downtime.")
+
         if iops:
             instance.storage.iops = iops
 
@@ -483,23 +485,29 @@ def flexible_server_postgresql_get(cmd, resource_group_name, server_name):
 
 def flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     validate_resource_group(resource_group_name)
-    if source is None and value is None:
-        # update the command with system default
-        try:
-            parameter = client.get(resource_group_name, server_name, configuration_name)
-            value = parameter.default_value  # reset value to default
+    parameter_value = value
+    parameter_source = source
+    try:
+        # validate configuration name
+        parameter = client.get(resource_group_name, server_name, configuration_name)
 
-            # this should be 'system-default' but there is currently a bug in PG, so keeping as what it is for now
+        # update the command with system default
+        if parameter_value is None and parameter_source is None:
+            parameter_value = parameter.default_value  # reset value to default
+
+            # this should be 'system-default' but there is currently a bug in PG
             # this will reset source to be 'system-default' anyway
-            source = parameter.source
-        except HttpResponseError as e:
+            parameter_source = "user-override"
+        elif parameter_source is None:
+            parameter_source = "user-override"
+    except HttpResponseError as e:
+        if parameter_value is None and parameter_source is None:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
-    elif source is None:
-        source = "user-override"
+        raise CLIError(str(e))
 
     parameters = postgresql_flexibleservers.models.Configuration(
-        value=value,
-        source=source
+        value=parameter_value,
+        source=parameter_source
     )
 
     return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
