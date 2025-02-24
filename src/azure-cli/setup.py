@@ -6,16 +6,8 @@
 # --------------------------------------------------------------------------------------------
 
 from codecs import open
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 import sys
-
-try:
-    from azure_cli_bdist_wheel import cmdclass
-except ImportError:
-    import logging
-
-    logging.warning("Wheel is not available, disabling bdist_wheel hook")
-    cmdclass = {}
 
 VERSION = "2.69.0"
 # If we have source, validate that our version numbers match
@@ -157,6 +149,7 @@ DEPENDENCIES = [
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
+
 setup(
     name='azure-cli',
     version=VERSION,
@@ -174,7 +167,7 @@ setup(
         'az.bat',
         'azps.ps1'
     ],
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
+    packages=find_namespace_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.9.0',
     package_data={
@@ -204,6 +197,5 @@ setup(
             'random/adjectives.txt',
             'random/nouns.txt'
         ]
-    },
-    cmdclass=cmdclass
+    }
 )
