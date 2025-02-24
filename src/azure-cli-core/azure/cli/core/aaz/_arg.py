@@ -372,7 +372,7 @@ class AAZAnyTypeArg(AAZBaseArg, AAZAnyType):
         short_summary += shorthand_help_messages['short-summary-anytype']
         arg.help = short_summary
         return arg
-    
+
     @property
     def _type_in_help(self):
         return "Any"

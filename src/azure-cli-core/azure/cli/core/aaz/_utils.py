@@ -190,13 +190,13 @@ class AAZShortHandSyntaxParser:
 
         if remain[:idx] in self.HELP_EXPRESSIONS:
             raise AAZShowHelp()
-        
+
         if convert_simple_type:
             try:
                 converted = json.loads(remain[:idx])
                 if isinstance(converted, (str, int, float, bool)):
                     return converted, idx
-            except Exception as ex:
+            except ValueError:
                 pass
 
         return remain[:idx], idx

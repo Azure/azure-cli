@@ -203,8 +203,11 @@ class AAZAnyTypeArgAction(AAZArgAction):
         # check if the value is a partial value
         key, _, v = cls._str_parser.split_partial_value(value)
         if key is not None:
-            raise AAZInvalidValueError(f"AnyType args only support full value shorthand syntax, please don't use partial value shorthand syntax. If it's a simple string, please wrap it with single quotes.")
-        
+            raise AAZInvalidValueError(
+                "AnyType args only support full value shorthand syntax, "
+                "please don't use partial value shorthand syntax. "
+                "If it's a simple string, please wrap it with single quotes.")
+
         # read from file
         path = os.path.expanduser(value)
         if os.path.exists(path):

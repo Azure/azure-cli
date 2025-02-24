@@ -390,6 +390,7 @@ class AAZDictType(AAZBaseDictType):
     def __getitem__(self, key):
         return self.Element
 
+
 # Warning: This type should not be used any more, the new aaz-dev-tools only use AAZDictType with AAZAnyType
 class AAZFreeFormDictType(AAZDictType):
     """Free form dict value type"""

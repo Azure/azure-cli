@@ -3,10 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=protected-access
-import copy
-
 from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
-from .exceptions import AAZInvalidValueError
 import abc
 
 
@@ -57,8 +54,8 @@ class AAZSimpleValue(AAZBaseValue):
         return result
 
 
-class AAZAnyValue(AAZSimpleValue):
-    # TODO: may need to override the __getitem__, __setitem__, __delitem__, __getattr__, __setattr__, __delattr__, 
+class AAZAnyValue(AAZSimpleValue):  # pylint: disable=too-few-public-methods
+    # TODO: may need to override the __getitem__, __setitem__, __delitem__, __getattr__, __setattr__, __delattr__,
     pass
 
 

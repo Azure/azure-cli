@@ -15,7 +15,7 @@ from knack.log import get_logger
 
 from ._command_ctx import AAZCommandCtx
 from ._field_type import AAZSimpleType
-from ._field_value import AAZUndefined, AAZSimpleValue, AAZDict, AAZFreeFormDict, AAZList, AAZObject
+from ._field_value import AAZUndefined, AAZSimpleValue, AAZDict, AAZList, AAZObject
 from .exceptions import AAZInvalidArgValueError
 
 logger = get_logger(__name__)
