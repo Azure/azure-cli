@@ -682,8 +682,8 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
 
 
-def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=True):
-    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status)
+def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=True, enable_kudu_warmup=True):
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status, enable_kudu_warmup)
 
 
 def check_flex_app_after_deployment(cmd, resource_group_name, name):
@@ -769,8 +769,8 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
                                  .format(res.status_code, res.text))
 
 
-# This funtion makes zip deployment for both function app and web app
-def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
+# This funtion performs deployment using /zipdeploy for both function app and web app
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False, enable_kudu_warmup=True):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -802,13 +802,20 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         if app_is_linux_webapp and track_status is not None and track_status:
             headers["x-ms-artifact-checksum"] = _compute_checksum(zip_content)
 
-        if app_is_linux_webapp and not app_is_function_app:
-            cookie = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
-            if cookie is None:
+        if app_is_linux_webapp and not app_is_function_app and enable_kudu_warmup:
+            try:
+                logger.info("Warming up Kudu before deployment.")
+                cookie = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
+                if cookie is None:
+                    logger.info("Failed to fetch affinity cookie. Deployment will proceed without pre-warming a Kudu instance.")
+                    res = requests.post(zip_url, data=zip_content, headers=headers,
+                                        verify=not should_disable_connection_verify())
+                else:
+                    res = requests.post(zip_url, data=zip_content, headers=headers, cookies=cookie,
+                                        verify=not should_disable_connection_verify())
+            except Exception as ex: # pylint: disable=broad-except
+                logger.info("Failed to deploy using affinity cookie. Deployment will proceed without pre-warming a Kudu instance.", ex)
                 res = requests.post(zip_url, data=zip_content, headers=headers,
-                                    verify=not should_disable_connection_verify())
-            else:
-                res = requests.post(zip_url, data=zip_content, headers=headers, cookies=cookie,
                                     verify=not should_disable_connection_verify())
         else:
             res = requests.post(zip_url, data=zip_content, headers=headers,
@@ -6563,7 +6570,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None, track_status=True, basic_auth=""):
+              app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth=""):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -6740,7 +6747,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
     # zip contents & deploy
     zip_file_path = zip_contents_from_dir(src_dir, language)
-    enable_zip_deploy(cmd, rg_name, name, zip_file_path, track_status=track_status)
+    enable_zip_deploy(cmd, rg_name, name, zip_file_path, track_status=track_status, enable_kudu_warmup=enable_kudu_warmup)
 
     if launch_browser:
         logger.warning("Launching app using default browser")
@@ -6977,7 +6984,8 @@ def perform_onedeploy_webapp(cmd,
                              ignore_stack=None,
                              timeout=None,
                              slot=None,
-                             track_status=True):
+                             track_status=True,
+                             enable_kudu_warmup=True):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -6994,6 +7002,7 @@ def perform_onedeploy_webapp(cmd,
     params.timeout = timeout
     params.slot = slot
     params.track_status = track_status
+    params.enable_kudu_warmup = enable_kudu_warmup
 
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
@@ -7020,6 +7029,7 @@ class OneDeployParams:
         self.timeout = None
         self.slot = None
         self.track_status = False
+        self.enable_kudu_warmup = None
         self.is_linux_webapp = None
         self.is_functionapp = None
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
@@ -7164,79 +7174,61 @@ def _update_artifact_type(params):
                    "Possible values: war, jar, ear, zip, startup, script, static", params.artifact_type)
 
 
-def _get_instances_list_arm_internal(params):
+def _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot):
     from azure.cli.core.commands.client_factory import get_subscription_id
     try:
-        client = web_client_factory(params.cmd.cli_ctx)
-        sub_id = get_subscription_id(params.cmd.cli_ctx)
-        if params.slot:
+        client = web_client_factory(cmd.cli_ctx)
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        if slot:
             base_url = (
-                f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-                f"{params.webapp_name}/slots/{params.slot}/instances"
+                f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
+                f"{webapp_name}/slots/{slot}/instances"
                 f"?api-version={client.DEFAULT_API_VERSION}"
             )
         else:
             base_url = (
-                f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-                f"{params.webapp_name}/instances?api-version={client.DEFAULT_API_VERSION}"
+                f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
+                f"{webapp_name}/instances?api-version={client.DEFAULT_API_VERSION}"
             )
 
-        url = params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
-        response = send_raw_request(params.cmd.cli_ctx, "GET", url)
+        url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+        response = send_raw_request(cmd.cli_ctx, "GET", url)
         if response.status_code == 200:
-            return response.json().get("value", [])
+            instances = response.json().get("value", [])
+            if not instances or len(instances) == 0:
+                return None
+            sorted_instances = sorted(instances, key=lambda x: x['name'])
+            return sorted_instances[0]['name']
         return None
-    except Exception as ex:
-        logger.info("Getting exception while trying to get instances list: %s", ex)
-
-
-def _get_instance_id_internal(param):
-    instances = _get_instances_list_arm_internal(param)
-
-    if not instances or len(instances) == 0:
+    except Exception as ex: # pylint: disable=broad-except
+        logger.info("Failed to get list of available Kudu instances for deployment. Exception:%s", ex)
         return None
-    sorted_instances = sorted(instances, key=lambda x: x['name'])
-    return sorted_instances[0]['name']
 
 
-def _get_affinity_cookie_internal(param):
-    instance = _get_instance_id_internal(param)
-    if instance is None:
-        logger.info("Affinity cookie cannot be set...")
+def _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, webapp_name, slot):
+    import requests
+    scm_url = _get_scm_url(cmd, resource_group_name, webapp_name, slot)
+    instance_id = _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot)
+    if instance_id is None:
+        logger.info("Failed to get a Kudu instance id...")
         return None
-    cookie = {"ARRAffinity": instance, "ARRAffinitySameSite": instance}
-    return cookie
-
-
-def _warmup_kudu_and_get_cookie_internal(param):
-    scm_url = _get_scm_url(param.cmd, param.resource_group_name, param.webapp_name, param.slot)
-    cookie = _get_affinity_cookie_internal(param)
+    cookies = {"ARRAffinity": instance_id, "ARRAffinitySameSite": instance_id}
     max_retries = 3
     time_out = 60
-    SleepInterval = 60
 
-    if cookie is None:
-        logger.info("Cannot start kudu using cookies...")
-        return None
     for retry in range(max_retries):
-        if _ping_kudu_internal(scm_url, param, cookie, time_out):
-            logger.info("Kudu started successfully after %d retry", retry)
-            return cookie
-        time_out = 300
-        time.sleep(SleepInterval)
-    logger.warning("Unable to start kudu before deployment.")
+        try:
+            headers = get_scm_site_headers(cmd.cli_ctx, webapp_name, resource_group_name)
+            response = requests.get(scm_url + '/api/deployments?warmup=true', headers=headers, cookies=cookies, timeout=time_out)
+            if response.status_code in (200, 201, 202):
+                logger.info("Warmed up Kudu instance with instanceId:%s successfully", instance_id)
+                return cookies
+            time_out = 300
+        except Exception as ex: # pylint: disable=broad-except
+            logger.info("Error while warming-up Kudu with instanceid: %s, ex: %s",instance_id, ex)
+            return False
+    logger.warning("Failed to warm-up Kudu with instanceid: %s, the deployment will proceed without pre-warmup."instance_id)
     return None
-
-
-def _ping_kudu_internal(scm_url, param, cookie, timeout):
-    import requests
-    try:
-        headers = get_scm_site_headers(param.cmd.cli_ctx, param.webapp_name, param.resource_group_name)
-        response = requests.get(scm_url + '/deployments', headers=headers, cookies=cookie, timeout=timeout)
-    except Exception as ex:
-        logger.info("Getting exception while trying to warm-up kudu: %s", ex)
-        return False
-    return response.status_code == 200
 
 
 def _make_onedeploy_request(params):
@@ -7255,16 +7247,22 @@ def _make_onedeploy_request(params):
     # For that, set poll_async_deployment_for_debugging=True
     logger.info("Deployment API: %s", deploy_url)
     if not params.src_url:  # use SCM endpoint
-        # if linux webapp then warmup kudu and use warmed up kudu for deployment
-        if params.is_linux_webapp and not params.is_functionapp:
-            logger.info("Warming up Kudu before deployment.")
-            cookies = _warmup_kudu_and_get_cookie_internal(params)
-            if cookies is None:
+        # if linux webapp and not function app, then warmup kudu and use warmed up kudu for deployment
+        if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
+            try:
+                logger.info("Warming up Kudu before deployment.")
+                cookies = _warmup_kudu_and_get_cookie_internal(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+                if cookies is None:
+                    logger.info("Failed to fetch affinity cookie for Kudu. Deployment will proceed without pre-warming a Kudu instance.")
+                    response = requests.post(deploy_url, data=body, headers=headers,
+                                            verify=not should_disable_connection_verify())
+                else:
+                    response = requests.post(deploy_url, data=body, headers=headers, cookies=cookies,
+                                            verify=not should_disable_connection_verify())
+            except Exception as ex: # pylint: disable=broad-except
+                logger.info("Failed to deploy using affinity cookie. Deployment will proceed without pre-warming a Kudu instance. Ex: ", ex)
                 response = requests.post(deploy_url, data=body, headers=headers,
-                                         verify=not should_disable_connection_verify())
-            else:
-                response = requests.post(deploy_url, data=body, headers=headers, cookies=cookies,
-                                         verify=not should_disable_connection_verify())
+                                        verify=not should_disable_connection_verify())
         else:
             response = requests.post(deploy_url, data=body, headers=headers,
                                      verify=not should_disable_connection_verify())
