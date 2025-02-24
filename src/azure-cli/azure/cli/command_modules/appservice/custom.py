@@ -7567,7 +7567,7 @@ def _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, webapp_name, 
         except Exception as ex: # pylint: disable=broad-except
             logger.info("Error while warming-up Kudu with instanceid: %s, ex: %s",instance_id, ex)
             return False
-    logger.warning("Failed to warm-up Kudu with instanceid: %s, the deployment will proceed without pre-warmup."instance_id)
+    logger.warning("Failed to warm-up Kudu with instanceid: %s, the deployment will proceed without pre-warmup.", instance_id)
     return None
 
 
