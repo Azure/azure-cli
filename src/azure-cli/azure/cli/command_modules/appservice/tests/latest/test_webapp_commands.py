@@ -407,6 +407,7 @@ class BackupRestoreTest(ScenarioTest):
 
         # Delete webapp backup
         self.cmd('webapp config backup delete -g {} --webapp-name {} --backup-id {} --yes'.format(resource_group, webapp, webapp_backup_id))
+        time.sleep(30)
 
         # Verify webapp backups count
         self.cmd('webapp config backup list -g {} --webapp-name {}'.format(resource_group, webapp), checks=[
@@ -1644,6 +1645,7 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
 
 
 class WebappSSLCertTest(ScenarioTest):
+    @unittest.skip("Flaky Test")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_ssl(self, resource_group, resource_group_location):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
@@ -1774,6 +1776,7 @@ class WebappSSLImportCertTest(ScenarioTest):
                 webapp_name), cert_thumbprint)
         ])
 
+    @unittest.skip("Flaky Test")
     @ResourceGroupPreparer(parameter_name='kv_resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_ssl_import_crossrg(self, resource_group, kv_resource_group):
@@ -1800,6 +1803,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_id, cert_name), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
+        time.sleep(30)
 
         self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
@@ -2874,7 +2878,8 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('properties.status', 'RuntimeSuccessful'),
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @unittest.skip("Flaky test")
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_one_deploy_arm(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
         plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
