@@ -411,7 +411,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 bytes(message_of_the_day, 'ascii')).decode('ascii')
 
         # try to read the property value corresponding to the parameter from the `mc` object
-        if self.agentpool and self.agentpool.message_of_the_day is not None:
+        if self.agentpool and hasattr(self.agentpool, "message_of_the_day") and self.agentpool.message_of_the_day is not None:
             message_of_the_day = self.agentpool.message_of_the_day
 
         # this parameter does not need dynamic completion
