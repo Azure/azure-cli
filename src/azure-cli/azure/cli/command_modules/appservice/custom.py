@@ -815,14 +815,14 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         if app_is_linux_webapp and not app_is_function_app and enable_kudu_warmup:
             try:
                 logger.info("Warming up Kudu before deployment.")
-                cookie = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
-                if cookie is None:
+                cookies = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
+                if cookies is None:
                     logger.info("Failed to fetch affinity cookie. Deployment "
                                 "will proceed without pre-warming a Kudu instance.")
                     res = requests.post(zip_url, data=zip_content, headers=headers,
                                         verify=not should_disable_connection_verify())
                 else:
-                    res = requests.post(zip_url, data=zip_content, headers=headers, cookies=cookie,
+                    res = requests.post(zip_url, data=zip_content, headers=headers, cookies=cookies,
                                         verify=not should_disable_connection_verify())
             except Exception as ex:  # pylint: disable=broad-except
                 logger.info("Failed to deploy using affinity cookie. "
