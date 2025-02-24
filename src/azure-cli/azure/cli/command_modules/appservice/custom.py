@@ -7,6 +7,7 @@ import ast
 import threading
 import time
 import re
+import requests
 from xml.etree import ElementTree
 
 from urllib.parse import urlparse
@@ -97,6 +98,7 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
+
 
 logger = get_logger(__name__)
 
@@ -791,6 +793,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     from azure.cli.core.util import should_disable_connection_verify
     # check if the app is a linux web app
     app_is_linux_webapp = is_linux_webapp(app)
+    app_is_function_app = is_functionapp(app)
 
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
@@ -799,7 +802,11 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         if app_is_linux_webapp and track_status is not None and track_status:
             headers["x-ms-artifact-checksum"] = _compute_checksum(zip_content)
 
-        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        if app_is_linux_webapp and not app_is_function_app:
+            cookie = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
+            res = requests.post(zip_url, data=zip_content, headers=headers, cookies={cookie}, verify=not should_disable_connection_verify())
+        else:
+            res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     # check the status of async deployment
@@ -6981,6 +6988,9 @@ def perform_onedeploy_webapp(cmd,
     params.slot = slot
     params.track_status = track_status
 
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    params.is_linux_webapp = is_linux_webapp(app)
     return _perform_onedeploy_internal(params)
 
 
@@ -7002,6 +7012,7 @@ class OneDeployParams:
         self.timeout = None
         self.slot = None
         self.track_status = False
+        self.is_linux_webapp = False
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -7050,6 +7061,24 @@ def _build_onedeploy_arm_url(params):
         )
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
+def _build_get_instances_list_arm_url(params):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(params.cmd.cli_ctx)
+    sub_id = get_subscription_id(params.cmd.cli_ctx)
+    if not params.slot:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/instances?api-version={client.DEFAULT_API_VERSION}"
+        )
+    else:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/slots/{params.slot}/instances"
+            f"?api-version={client.DEFAULT_API_VERSION}"
+        )
+
+    logger.info("get instances list url: %s", base_url)
+    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 def _build_deploymentstatus_url(cmd, resource_group_name, webapp_name, slot, deployment_id):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -7143,6 +7172,52 @@ def _update_artifact_type(params):
     logger.warning("Deployment type: %s. To override deployment type, please specify the --type parameter. "
                    "Possible values: war, jar, ear, zip, startup, script, static", params.artifact_type)
 
+def _get_instances_list_arm_internal(params):
+    url = _build_get_instances_list_arm_url(params)
+    response = send_raw_request(params.cmd.cli_ctx, "GET", url)
+    if response.status_code == 200:
+        logger.info("Instances list retrieved successfully.")
+        return response.json().get("value", [])
+    raise CLIError("Unable to get instances list.")
+
+def _get_instance_id_internal(param):
+    instances = _get_instances_list_arm_internal(param)
+
+    if not instances or len(instances) == 0:
+        raise CLIError("No instances found.")
+    
+    logger.info("returning instance id for instance: %s", instances[0]['name'])
+    return instances[0]['name']
+
+
+def _get_affinity_cookie_internal(param):
+    instance = _get_instance_id_internal(param)
+    logger.info("returning affinity cookie for instance: %s", instance)
+    cookie = {
+        "ARRAffinity": instance,
+        "ARRAffinitySameSite": instance
+        }
+    return cookie
+
+def _warmup_kudu_and_get_cookie_internal(param):
+    scm_url = _get_scm_url(param.cmd, param.resource_group_name, param.webapp_name, param.slot)
+    cookie = _get_affinity_cookie_internal(param)
+    Max_Retries = 3
+    TimeOut = 300
+    SleepInterval = 60
+    for retry in range(Max_Retries):
+        if _ping_kudu_internal(scm_url, param, cookie, TimeOut):
+            logger.info("Kudu warmed up successfully. Retry count: %d", retry)
+            return cookie
+        time.sleep(SleepInterval)
+
+    raise CLIError("Unable to warm up Kudu.")
+
+def _ping_kudu_internal(scm_url, param, cookie, timeout):
+    logger.info("Warming up Kudu.")
+    headers = get_scm_site_headers(param.cmd.cli_ctx, param.webapp_name, param.resource_group_name)
+    response = requests.get(scm_url + '/deployments', headers=headers, cookies=cookie, timeout=timeout)
+    return response.status_code == 200
 
 def _make_onedeploy_request(params):
     import requests
@@ -7161,7 +7236,13 @@ def _make_onedeploy_request(params):
     # For that, set poll_async_deployment_for_debugging=True
     logger.info("Deployment API: %s", deploy_url)
     if not params.src_url:  # use SCM endpoint
-        response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+    # if linux webapp then warmup kudu and use warmed up kudu for deployment
+        if params.is_linux_webapp and not params.is_functionapp:
+            logger.info("Warming up Kudu before deployment.")
+            cookies = _warmup_kudu_and_get_cookie_internal(params)
+            response = requests.post(deploy_url, data=body, headers=headers, cookies=cookies, verify=not should_disable_connection_verify())
+        else:
+            response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
         poll_async_deployment_for_debugging = True
     else:
         response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
