@@ -316,7 +316,6 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       appinsights=None,                                      # Resource.AppInsights
                       target_app_name=None,                                  # Resource.ContainerApp
                       connstr_props=None,                                    # Resource.FabricSql
-                      fabric_workspace_uuid=None, fabric_sql_database_uuid=None,
                       ):
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
@@ -345,9 +344,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                                       customized_keys=customized_keys,
                                                       opt_out_list=opt_out_list,
                                                       app_config_id=app_config_id,
-                                                      connstr_props=connstr_props,
-                                                      fabric_workspace_uuid=fabric_workspace_uuid,
-                                                      fabrick_sql_database_uuid=fabric_sql_database_uuid)
+                                                      connstr_props=connstr_props)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
                                " and rerun the command")
