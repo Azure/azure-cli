@@ -205,9 +205,9 @@ for /f %%f in ('dir /b /s *.pyc') do (
 )
 popd
 
-REM Remove __pycache__
+REM Remove empty __pycache__ directories because .pyc files are already moved to parent directories
 echo remove pycache
-for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
+for /d /r %BUILDING_DIR%\Lib\site-packages\ %%d in (__pycache__) do (
     if exist %%d rmdir /s /q "%%d"
 )
 

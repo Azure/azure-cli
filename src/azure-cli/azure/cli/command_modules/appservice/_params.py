@@ -863,6 +863,8 @@ subscription than the app service environment, please use the resource ID for --
                    "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.", is_preview=True)
         c.argument('zone_redundant', arg_type=get_three_state_flag(),
                    help='Enable zone redundancy for high availability. Applies to Flex Consumption SKU only.', is_preview=True)
+        c.argument('configure_networking_later', options_list=['--configure-networking-later', '--cnl'], arg_type=get_three_state_flag(),
+                   help='Use this option if you want to configure networking later for an app using network-restricted storage.')
 
     with self.argument_context('functionapp deployment config set') as c:
         c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.", is_preview=True)
@@ -1036,6 +1038,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('registry_password', options_list=['--registry-password', '-d', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='The container registry server password')
         c.argument('registry_username', options_list=['--registry-username', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')], help='the container registry server username')
+        c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.", arg_type=get_three_state_flag())
     with self.argument_context('functionapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",

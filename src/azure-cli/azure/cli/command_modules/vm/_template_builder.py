@@ -1004,7 +1004,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                         enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
-                        security_posture_reference_is_overridable=None):
+                        security_posture_reference_is_overridable=None, zone_balance=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1436,6 +1436,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
+    if zone_balance is not None:
+        vmss_properties['zoneBalance'] = zone_balance
+
     scheduled_events_profile = {}
     if terminate_notification_time is not None:
         scheduled_events_profile.update({
@@ -1611,16 +1614,16 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
 
 def build_av_set_resource(cmd, name, location, tags, platform_update_domain_count,
-                          platform_fault_domain_count, unmanaged, proximity_placement_group=None):
+                          platform_fault_domain_count, unmanaged, proximity_placement_group=None,
+                          additional_scheduled_events=None,
+                          enable_user_reboot_scheduled_events=None,
+                          enable_user_redeploy_scheduled_events=None):
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
         'location': location,
         'tags': tags,
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='availability_sets'),
-        "properties": {
-            'platformFaultDomainCount': platform_fault_domain_count,
-        }
     }
 
     if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='availability_sets'):
@@ -1628,13 +1631,40 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
             'name': 'Classic' if unmanaged else 'Aligned'
         }
 
+    properties = {"platformFaultDomainCount": platform_fault_domain_count}
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+
+    if scheduled_events_policy:
+        properties['scheduledEventsPolicy'] = scheduled_events_policy
+
     # server defaults the UD to 5 unless set otherwise
     if platform_update_domain_count is not None:
-        av_set['properties']['platformUpdateDomainCount'] = platform_update_domain_count
+        properties['platformUpdateDomainCount'] = platform_update_domain_count
 
     if proximity_placement_group:
-        av_set['properties']['proximityPlacementGroup'] = {'id': proximity_placement_group}
+        properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
+    av_set["properties"] = properties
     return av_set
 
 

@@ -389,13 +389,14 @@ def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throug
         if instance is not None:
             original_size = instance.storage.storage_size_gb
             if original_size > storage_gb:
-                raise CLIError('Updating storage cannot be smaller than the original storage size {} GiB.'
-                               .format(original_size))
+                raise CLIError('Decrease of current storage size isn\'t supported. Current storage size is {} GiB \
+                                and you\'re trying to set it to {} GiB.'
+                               .format(original_size, storage_gb))
         if not is_ssdv2:
             storage_sizes = get_postgres_storage_sizes(sku_info, tier)
             if storage_gb not in storage_sizes:
                 storage_sizes = sorted([int(size) for size in storage_sizes])
-                raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
+                raise CLIError('Incorrect value for --storage-size : Allowed values (in GiB) : {}'
                                .format(storage_sizes))
 
     # ssdv2 range validation
@@ -420,29 +421,26 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     storage = storage_gib * 1.07374182
     # find min and max values for IOPS
     min_iops = sku_info[sku_tier]["supported_storageV2_iops"]
-    if sku_info[sku_tier]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
-        max_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
-    else:
-        max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
+    supported_max_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
+    calculated_max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
+    max_iops = min(supported_max_iops, calculated_max_iops)
 
     if not min_iops <= storage_iops <= max_iops:
         raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'
                        .format(min_iops, max_iops))
 
-    # find min and max values for throughout
-    min_throughout = sku_info[sku_tier]["supported_storageV2_throughput"]
+    # find min and max values for throughput
+    min_throughput = sku_info[sku_tier]["supported_storageV2_throughput"]
+    supported_max_throughput = sku_info[sku_tier]["supported_storageV2_throughput_max"]
     if storage > 6:
-        max_storage_throughout = math.floor(max(0.25 * storage_iops, min_throughout))
+        max_storage_throughput = math.floor(max(0.25 * storage_iops, min_throughput))
     else:
-        max_storage_throughout = min_throughout
-    if sku_info[sku_tier]["supported_storageV2_throughput_max"] < max_storage_throughout:
-        max_throughout = sku_info[sku_tier]["supported_storageV2_throughput_max"]
-    else:
-        max_throughout = max_storage_throughout
+        max_storage_throughput = min_throughput
+    max_throughput = min(supported_max_throughput, max_storage_throughput)
 
-    if not min_throughout <= storage_throughput <= max_throughout:
+    if not min_throughput <= storage_throughput <= max_throughput:
         raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'
-                       .format(min_throughout, max_throughout))
+                       .format(min_throughput, max_throughput))
 
 
 def _pg_tier_validator(tier, sku_info):
@@ -682,6 +680,15 @@ def firewall_rule_name_validator(ns):
                               "and no more than 128 characters in length. ")
 
 
+def postgres_firewall_rule_name_validator(ns):
+    if not ns.firewall_rule_name:
+        return
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', ns.firewall_rule_name):
+        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
+                              "Additionally, the name of the firewall rule must be at least 1, "
+                              "and no more than 80 characters in length. Firewall rule must not end with '-'.")
+
+
 def validate_server_name(db_context, server_name, type_):
     client = db_context.cf_availability(db_context.cmd.cli_ctx, '_')
 
@@ -808,7 +815,7 @@ def validate_and_format_restore_point_in_time(restore_time):
         return parser.parse(restore_time)
     except:
         raise ValidationError("The restore point in time value has incorrect date format. "
-                              "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
+                              "Please use ISO format e.g., 2024-10-22T00:08:23+00:00.")
 
 
 def is_citus_cluster(cmd, resource_group_name, server_name):
@@ -831,7 +838,8 @@ def validate_public_access_server(cmd, client, resource_group_name, server_name)
 
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
-        raise ValidationError("Firewall rule operations cannot be requested for a private access enabled server.")
+        raise ValidationError("Firewall rule operations cannot be requested for "
+                              "a server that doesn't have public access enabled.")
 
 
 def _validate_identity(cmd, namespace, identity):

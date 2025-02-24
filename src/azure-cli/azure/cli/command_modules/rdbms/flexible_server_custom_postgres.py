@@ -233,12 +233,10 @@ def flexible_server_restore(cmd, client,
             logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
         validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
-        instance = client.get(id_parts['resource_group'], id_parts['name'])
-
-        cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+        cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, source_server_object)
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
-        storage = postgresql_flexibleservers.models.Storage(type=storage_type if instance.storage.type != "PremiumV2_LRS" else None)
+        storage = postgresql_flexibleservers.models.Storage(type=storage_type if source_server_object.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
@@ -362,6 +360,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if instance.storage.type == "PremiumV2_LRS":
         instance.storage.tier = None
 
+        if sku_name or storage_gb:
+            logger.warning("You are changing the compute and/or storage size of the server. "
+                           "The server will be restarted for this operation and you will see a short downtime.")
+
         if iops:
             instance.storage.iops = iops
 
@@ -483,23 +485,29 @@ def flexible_server_postgresql_get(cmd, resource_group_name, server_name):
 
 def flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     validate_resource_group(resource_group_name)
-    if source is None and value is None:
-        # update the command with system default
-        try:
-            parameter = client.get(resource_group_name, server_name, configuration_name)
-            value = parameter.default_value  # reset value to default
+    parameter_value = value
+    parameter_source = source
+    try:
+        # validate configuration name
+        parameter = client.get(resource_group_name, server_name, configuration_name)
 
-            # this should be 'system-default' but there is currently a bug in PG, so keeping as what it is for now
+        # update the command with system default
+        if parameter_value is None and parameter_source is None:
+            parameter_value = parameter.default_value  # reset value to default
+
+            # this should be 'system-default' but there is currently a bug in PG
             # this will reset source to be 'system-default' anyway
-            source = parameter.source
-        except HttpResponseError as e:
+            parameter_source = "user-override"
+        elif parameter_source is None:
+            parameter_source = "user-override"
+    except HttpResponseError as e:
+        if parameter_value is None and parameter_source is None:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
-    elif source is None:
-        source = "user-override"
+        raise CLIError(str(e))
 
     parameters = postgresql_flexibleservers.models.Configuration(
-        value=value,
-        source=source
+        value=parameter_value,
+        source=parameter_source
     )
 
     return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
@@ -615,7 +623,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
                                vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
                                private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
-                               byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
+                               byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, restore_point_in_time=None):
     validate_resource_group(resource_group_name)
 
     server_name = server_name.lower()
@@ -631,6 +639,8 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
             raise CLIError('The provided source-server {} is invalid.'.format(source_server))
     else:
         source_server_id = source_server
+
+    restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
 
     try:
         id_parts = parse_resource_id(source_server_id)
@@ -659,7 +669,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
     storage = postgresql_flexibleservers.models.Storage(type=None)
 
     parameters = postgresql_flexibleservers.models.Server(
-        point_in_time_utc=get_current_time(),
+        point_in_time_utc=restore_point_in_time,
         location=location,
         source_server_resource_id=source_server_id,
         create_mode="GeoRestore",
@@ -1511,12 +1521,17 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
     flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
+
+    if server.high_availability.mode != "Disabled":
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
     databases = ','.join(database_names[0].split())
     user_confirmation("Are you sure you want to prepare and enable your server" +
                       " '{0}' in resource group '{1}' for mirroring of databases '{2}'.".format(server_name, resource_group_name, databases) +
                       " This requires restart.", yes=yes)
-    server = flexible_servers_client.get(resource_group_name, server_name)
+
     if (server.identity is None or 'SystemAssigned' not in server.identity.type):
         logger.warning('Enabling system assigned managed identity on the server.')
         flexible_server_identity_update(cmd, flexible_servers_client, resource_group_name, server_name, 'Enabled')
@@ -1538,6 +1553,14 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
 def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, server_name, yes=False):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
+
+    if server.high_availability.mode != "Disabled":
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
+
     user_confirmation("Are you sure you want to disable mirroring for server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=yes)
 
     configuration_name = "azure.fabric_mirror_enabled"
@@ -1552,6 +1575,14 @@ def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, serv
 def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_group_name, server_name, database_names, yes=False):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
+
+    if server.high_availability.mode != "Disabled":
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
+
     databases = ','.join(database_names[0].split())
     user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
                       .format(server_name, resource_group_name, databases), yes=yes)
