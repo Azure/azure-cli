@@ -316,6 +316,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       appinsights=None,                                      # Resource.AppInsights
                       target_app_name=None,                                  # Resource.ContainerApp
                       connstr_props=None,                                    # Resource.FabricSql
+                      fabric_workspace_uuid=None, fabric_sql_database_uuid=None,
                       ):
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None

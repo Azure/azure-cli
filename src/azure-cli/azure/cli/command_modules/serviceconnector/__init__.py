@@ -18,11 +18,13 @@ class MicrosoftServiceConnectorCommandsLoader(AzCommandsLoader):
         super().__init__(cli_ctx=cli_ctx, custom_command_type=connection_custom)
 
     def load_command_table(self, args):
+        print("Loading command table")
         from azure.cli.command_modules.serviceconnector.commands import load_command_table as load_command_table_manual
         load_command_table_manual(self, args)
         return self.command_table
 
     def load_arguments(self, command):
+        print("Loading arguments")
         from azure.cli.command_modules.serviceconnector._params import load_arguments as load_arguments_manual
         load_arguments_manual(self, command)
 

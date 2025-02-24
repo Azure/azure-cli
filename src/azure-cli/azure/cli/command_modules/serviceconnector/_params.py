@@ -186,14 +186,6 @@ def add_connstr_props_argument(context):
                      action=AddAdditionalConnectionStringProperties, nargs='*',
                      help='The additional connection string properties used to build connection string.')
     
-    
-def add_fabric_arguments(context):
-    # linter: length '--additional-connection-string-properties' longer than 22, so use abbreviation
-    context.argument('workspace_id', options_list=['--workspace-id'], type=str,
-                        help='The UUID of the target workspace in Fabric.')
-    context.argument('sql_database_id', options_list=['--sql-database-id'], type=str,
-                     help='The UUID of the target SQL database in Fabric.')
-    
 
 def add_target_type_argument(context, source):
     TARGET_TYPES = [
@@ -278,6 +270,10 @@ def add_opt_out_argument(context):
                      'Use publicnetwork to disable public network access configuration.'
                      'Use auth to skip auth configuration such as enabling managed identity and granting RBAC roles.'
                      )
+    context.argument('test3', options_list=['--test3'],
+                    default=None, type=str,
+                    help='Test3.'
+                    )
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
@@ -311,6 +307,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_source_resource_block(c, source)
 
         for target in TARGET_RESOURCES_PARAMS:
+            print(target)
             with self.argument_context('{} connection create {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
@@ -324,10 +321,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
                 add_opt_out_argument(c)
+                add_connstr_props_argument(c)
+                add_confluent_kafka_argument(c)
+                c.argument('test2', options_list=['--test2'], type=str, help='Testing123')
 
                 if target == RESOURCE.FabricSql:
                     add_connstr_props_argument(c)
-                    add_fabric_arguments(c)
+                    c.argument('test', options_list=['--test'], type=str, help='Testing123')
 
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
@@ -343,7 +343,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
                 if target == RESOURCE.FabricSql:
                     add_connstr_props_argument(c)
-                    add_fabric_arguments(c)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka
