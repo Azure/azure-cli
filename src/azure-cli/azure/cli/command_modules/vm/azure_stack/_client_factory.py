@@ -95,10 +95,6 @@ def cf_gallery_image_versions(cli_ctx, _):
     return _compute_client_factory(cli_ctx).gallery_image_versions
 
 
-def cf_gallery_application_version(cli_ctx, *_):
-    return _compute_client_factory(cli_ctx).gallery_application_versions
-
-
 def cf_proximity_placement_groups(cli_ctx, _):
     return _compute_client_factory(cli_ctx).proximity_placement_groups
 
@@ -130,20 +126,14 @@ def cf_log_analytics_data_plane(cli_ctx, _):
     from azure.monitor.query import LogsQueryClient
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
-    cred, _, _ = profile.get_login_credentials(
-        resource=cli_ctx.cloud.endpoints.log_analytics_resource_id)
+    cred, _, _ = profile.get_login_credentials()
     api_version = 'v1'
-    return LogsQueryClient(cred, endpoint=cli_ctx.cloud.endpoints.log_analytics_resource_id + '/' + api_version)
+    return LogsQueryClient(cred, endpoint=cli_ctx.cloud.endpoints.log_analytics_resource_id + '/' + api_version,
+                           audience=cli_ctx.cloud.endpoints.log_analytics_resource_id)
 
 
 def cf_disk_encryption_set(cli_ctx, _):
     return _compute_client_factory(cli_ctx).disk_encryption_sets
-
-
-def _dev_test_labs_client_factory(cli_ctx, subscription_id, *_):
-    from azure.mgmt.devtestlabs import DevTestLabsClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, DevTestLabsClient, subscription_id=subscription_id)
 
 
 def cf_vm_cl(cli_ctx, *_):

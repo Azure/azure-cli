@@ -18,6 +18,9 @@ from azure.cli.core.aaz import *
 )
 class Offboard(AAZCommand):
     """Offboard an Azure API Management API from Microsoft Defender for APIs. The system will stop monitoring the operations within the Azure API Management API for intrusive behaviors.
+
+    :example: Onboard an Azure API Management API to Microsoft Defender for APIs.
+        az security api-collection apim offboard --resource-group MyResourceGroup --service-name MyApiManagementServiceName --api-id echo-api
     """
 
     _aaz_info = {
