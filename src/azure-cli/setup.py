@@ -121,7 +121,7 @@ DEPENDENCIES = [
     'azure-mgmt-storage==22.1.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
-    'azure-mgmt-web==7.2.0',
+    'azure-mgmt-web==7.3.1',
     'azure-monitor-query==1.2.0',
     'azure-multiapi-storage~=1.3.0',
     'azure-storage-common~=1.4',

@@ -1658,6 +1658,9 @@ examples:
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:12LTS" --deployment-local-git
+  - name: Create a web app which supports sitecontainers.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --sitecontainers-app
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
@@ -2206,6 +2209,132 @@ examples:
     text: az webapp traffic-routing show --name MyWebApp --resource-group MyResourceGroup
     crafted: true
 """
+
+helps['webapp sitecontainers'] = """
+type: group
+short-summary: Manage linux web apps sitecontainers.
+"""
+
+helps['webapp sitecontainers create'] = """
+type: command
+short-summary: Create sitecontainers for a linux webapp
+long-summary: |
+    Multiple sitecontainers can be added or updated at once by passing arg --sitecontainers-spec-file, which is the path to a json file containing an array of sitecontainer specs.
+    Example json file:
+    [
+    {
+        "name": "firstcontainer",
+        "properties": {
+            "image": "myregistry.io/firstimage:latest",
+            "targetPort": "80",
+            "isMain": true,
+            "environmentVariables": [
+                {
+                    "name": "VARIABLE_1",
+                    "value": "APPSETTING_NAME1"
+                }
+            ],
+            "volumeMounts": [
+                {
+                    "containerMountPath": "mountPath",
+                    "readOnly": true,
+                    "volumeSubPath": "subPath"
+                }
+            ]
+        }
+    },
+    {
+        "name": "secondcontainer",
+        "properties": {
+            "image": "myregistry.io/secondimage:latest",
+            "targetPort": "3000",
+            "isMain": false,
+            "authType": "SystemIdentity",
+            "startUpCommand": "MyStartupCmd"
+        }
+    },
+    {
+        "name": "thirdcontainer",
+        "properties": {
+            "image": "myregistry.io/thirdimage:latest",
+            "targetPort": "3001",
+            "isMain": false,
+            "authType": "UserAssigned",
+            "userManagedIdentityClientId": "ClientID"
+        }
+    },
+    {
+        "name": "fourthcontainer",
+        "properties": {
+            "image": "myregistry.io/fourthimage:latest",
+            "targetPort": "3002",
+            "isMain": false,
+            "authType": "UserCredentials",
+            "userName": "Username",
+            "passwordSecret": "Password"
+        }
+    }
+    ]
+examples:
+  - name: Create a main sitecontainer for a linux webapp
+    text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer --image MyImageRegistry.io/MyImage:latest --target-port 80 --is-main
+  - name : Create or update multiple sitecontainers for a linux webapp using a json sitecontainer-spec file
+    text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --sitecontainers-spec-file ./sitecontainersspec.json
+"""
+
+
+helps['webapp sitecontainers update'] = """
+type: command
+short-summary: Update an existing sitecontainer for a linux webapp
+examples:
+  - name: Update a sitecontainer for a linux webapp
+    text: az webapp sitecontainers update --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer --image MyImageRegistry.io/MyImage:latest --target-port 3000 --is-main false
+"""
+
+
+helps['webapp sitecontainers delete'] = """
+type: command
+short-summary: Delete a sitecontainer for a linux webapp
+examples:
+  - name: Delete a sitecontainer for a linux webapp
+    text: az webapp sitecontainers delete --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+"""
+
+
+helps['webapp sitecontainers show'] = """
+type: command
+short-summary: List the details of a sitecontainer for a linux webapp
+examples:
+  - name: List the details of a sitecontainer for a linux webapp
+    text: az webapp sitecontainers show --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+"""
+
+
+helps['webapp sitecontainers list'] = """
+type: command
+short-summary: List all the sitecontainers for a linux webapp
+examples:
+  - name: List all the sitecontainers for a linux webapp
+    text: az webapp sitecontainers list --name MyWebApp --resource-group MyResourceGroup
+"""
+
+
+helps['webapp sitecontainers status'] = """
+type: command
+short-summary: Get the status of a sitecontainer for a linux webapp
+examples:
+  - name: Get the status of a sitecontainer for a linux webapp
+    text: az webapp sitecontainers status --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+"""
+
+helps['webapp sitecontainers log'] = """
+type: command
+short-summary: Get the logs of a sitecontainer for a linux webapp
+examples:
+  - name: Get the logs of a sitecontainer for a linux webapp
+    text: az webapp sitecontainers log --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+"""
+
 
 helps['webapp up'] = """
 type: command
