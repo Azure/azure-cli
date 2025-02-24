@@ -5444,24 +5444,6 @@ def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_
 # endregion
 
 
-# region Disk Access
-def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
-    DiskAccess = cmd.get_models('DiskAccess')
-    disk_access = DiskAccess(location=location, tags=tags)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access)
-
-
-def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
-    location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    DiskAccess = cmd.get_models('DiskAccess')
-    disk_access = DiskAccess(location=location, tags=tags)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access)
-
-# endregion
-
-
 # region install patches
 def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
                        exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, max_patch_publish_date=None, no_wait=False):
