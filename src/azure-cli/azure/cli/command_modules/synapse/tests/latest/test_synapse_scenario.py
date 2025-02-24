@@ -2039,13 +2039,13 @@ class SynapseScenarioTests(ScenarioTest):
     def test_spark_job(self, resource_group):
         self.kwargs.update({
             'spark-pool': 'testsparkpool',
-            'workspace': 'testsynapseworkspace',
+            'workspace': 'yanjuntestws001',
             'job': 'WordCount_Java',
-            'main-definition-file': 'abfss://testfilesystem@adlsgen2account.dfs.core.windows.net/samples/java/wordcount/wordcount.jar',
+            'main-definition-file': 'abfss://filesystem01@ywtestaccount.dfs.core.windows.net/wordcount/wordcount_2.11-0.1.jar',
             'main-class-name': 'WordCount',
             'arguments': [
-                'abfss://testfilesystem@adlsgen2account.dfs.core.windows.net/samples/java/wordcount/shakespeare.txt',
-                'abfss://testfilesystem@adlsgen2account.dfs.core.windows.net/samples/java/wordcount/result/'],
+                'abfss://filesystem01@ywtestaccount.dfs.core.windows.net/wordcount/input/shakespeare.txt',
+                'abfss://filesystem01@ywtestaccount.dfs.core.windows.net/wordcount/output/'],
             'executors': 2,
             'executor-size': 'Medium',
             'configuration': '{\\"spark.dynamicAllocation.maxExecutors\\":\\"18\\"}'
@@ -2092,7 +2092,7 @@ class SynapseScenarioTests(ScenarioTest):
     def test_spark_session_and_statements(self, resource_group):
         self.kwargs.update({
             'spark-pool': 'testsparkpool',
-            'workspace': 'testsynapseworkspace',
+            'workspace': 'yanjuntestws001',
             'job': self.create_random_name(prefix='clisession', length=14),
             'executor-size': 'Small',
             'executors': 2,

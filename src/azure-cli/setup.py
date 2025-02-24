@@ -126,9 +126,9 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=1.3.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.19.0',
+    'azure-synapse-artifacts~=0.20.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
-    'azure-synapse-spark~=0.2.0',
+    'azure-synapse-spark~=0.7.0',
     'chardet~=5.2.0',
     'colorama~=0.4.4',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked for `az feedback`
