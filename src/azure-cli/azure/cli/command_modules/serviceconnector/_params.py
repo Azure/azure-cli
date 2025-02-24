@@ -34,7 +34,7 @@ from ._resource_config import (
 )
 from ._addon_factory import AddonFactory
 from knack.arguments import CLIArgumentType
-from .action import AddCustomizedKeys
+from .action import AddAdditionalConnectionStringProperties, AddCustomizedKeys
 
 
 def add_source_resource_block(context, source, enable_id=True, target=None):
@@ -185,6 +185,14 @@ def add_connstr_props_argument(context):
     context.argument('connstr_props', options_list=['--connstr-props'],
                      action=AddAdditionalConnectionStringProperties, nargs='*',
                      help='The additional connection string properties used to build connection string.')
+    
+    
+def add_fabric_arguments(context):
+    # linter: length '--additional-connection-string-properties' longer than 22, so use abbreviation
+    context.argument('workspace_id', options_list=['--workspace-id'], type=str,
+                        help='The UUID of the target workspace in Fabric.')
+    context.argument('sql_database_id', options_list=['--sql-database-id'], type=str,
+                     help='The UUID of the target SQL database in Fabric.')
     
 
 def add_target_type_argument(context, source):
