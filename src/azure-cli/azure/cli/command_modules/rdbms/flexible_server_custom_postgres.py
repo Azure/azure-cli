@@ -1623,23 +1623,29 @@ def index_tuning_update(cmd, client, resource_group_name, server_name, index_tun
         value = "report"
         _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
         configuration_name = "pg_qs.query_capture_mode"
-        value = "all"
-        return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        query_capture_mode_configuration = client.get(resource_group_name, server_name, configuration_name)
 
-    logger.warning("Disabling index tuning for the server.")
-    configuration_name = "index_tuning.mode"
-    value = "off"
-    return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        if query_capture_mode_configuration.value.lower() == "none":
+            value = "all"
+            _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        logger.warning("Index tuning is enabled for the server.")
+    else:
+        logger.warning("Disabling index tuning for the server.")
+        configuration_name = "index_tuning.mode"
+        value = "off"
+        _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        logger.warning("Index tuning is disabled for the server.")
 
 
-def index_tuning_show(cmd, client, resource_group_name, server_name):
+def index_tuning_show(client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
     index_tuning_configuration = client.get(resource_group_name, server_name, "index_tuning.mode")
+    query_capture_mode_configuration = client.get(resource_group_name, server_name, "pg_qs.query_capture_mode")
 
-    if index_tuning_configuration.value.lower() == "report":
-        print("Index tuning is enabled for the server.")
+    if index_tuning_configuration.value.lower() == "report" and query_capture_mode_configuration != "none":
+        logger.warning("Index tuning is enabled for the server.")
     else:
-        print("Index tuning is not enabled for the server.")
+        logger.warning("Index tuning is disabled for the server.")
 
 
 def index_tuning_settings_list(cmd, client, resource_group_name, server_name):

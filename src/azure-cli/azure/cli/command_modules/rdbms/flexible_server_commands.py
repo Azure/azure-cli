@@ -300,7 +300,7 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('postgres flexible-server index-tuning', postgres_flexible_config_sdk,
                             client_factory=cf_postgres_flexible_config) as g:
         g.custom_command('update', 'index_tuning_update', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('show', 'index_tuning_show', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('show', 'index_tuning_show', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('list-settings', 'index_tuning_settings_list', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('show-settings', 'index_tuning_settings_get', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('set-settings', 'index_tuning_settings_set', custom_command_type=flexible_servers_custom_postgres)

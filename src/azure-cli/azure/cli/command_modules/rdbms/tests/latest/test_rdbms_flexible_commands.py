@@ -2867,7 +2867,7 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_tuning_options_resource(self, resource_group):
+    def test_postgres_flexible_server_tuning_options(self, resource_group):
         self._test_tuning_options_mgmt('postgres', resource_group)
 
     def _test_tuning_options_mgmt(self, database_engine, resource_group):
@@ -2885,7 +2885,7 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
         # Enable index tuning for server
         self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled True'.format(database_engine, resource_group, server_name),
-                 checks=[JMESPathCheck('value', 'all')])
+                 checks=NoneCheck())
 
         # Show that index tuning is enabled
         self.cmd('{} flexible-server index-tuning show -g {} -s {}'.format(database_engine, resource_group, server_name),
@@ -2898,11 +2898,13 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
         # Show properties of index tuning setting for server
         self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
                  checks=[JMESPathCheck('value', 'report')])
+        self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'pg_qs.query_capture_mode', resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'all')])
 
         # Set new value of index tuning setting for server
         value = '1006'
         self.cmd('{} flexible-server index-tuning set-settings -g {} -s {} -n {} -v {}'.format(database_engine, resource_group, server_name,
-                                                                                               'unused-reads-per-table', value),
+                                                                                               'unused_reads_per_table', value),
                  checks=[JMESPathCheck('value', value)])
 
         # List recommendations associated with index tuning for server
@@ -2911,4 +2913,8 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
         # Disable index tuning for server
         self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled False'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show properties of index tuning setting for server
+        self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
                  checks=[JMESPathCheck('value', 'off')])

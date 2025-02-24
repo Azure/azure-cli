@@ -107,16 +107,16 @@ def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condit
 
 def get_index_tuning_settings_map():
     return {
-        'analysis-interval': 'index_tuning.analysis_interval',
-        'max-columns-per-index': 'index_tuning.max_columns_per_index',
-        'max-index-count': 'index_tuning.max_index_count',
-        'max-indexes-per-table': 'index_tuning.max_indexes_per_table',
-        'max-queries-per-database': 'index_tuning.max_queries_per_database',
-        'max-regression-factor': 'index_tuning.max_regression_factor',
-        'max-total-size-factor': 'index_tuning.max_total_size_factor',
-        'min-improvement-factor': 'index_tuning.min_improvement_factor',
+        'analysis_interval': 'index_tuning.analysis_interval',
+        'max_columns_per_index': 'index_tuning.max_columns_per_index',
+        'max_index_count': 'index_tuning.max_index_count',
+        'max_indexes_per_table': 'index_tuning.max_indexes_per_table',
+        'max_queries_per_database': 'index_tuning.max_queries_per_database',
+        'max_regression_factor': 'index_tuning.max_regression_factor',
+        'max_total_size_factor': 'index_tuning.max_total_size_factor',
+        'min_improvement_factor': 'index_tuning.min_improvement_factor',
         'mode': 'index_tuning.mode',
-        'unused-dml-per-table': 'index_tuning.unused_dml_per_table',
-        'unused-min-period': 'index_tuning.unused_min_period',
-        'unused-reads-per-table': 'index_tuning.unused_reads_per_table'
+        'unused_dml_per_table': 'index_tuning.unused_dml_per_table',
+        'unused_min_period': 'index_tuning.unused_min_period',
+        'unused_reads_per_table': 'index_tuning.unused_reads_per_table'
     }
