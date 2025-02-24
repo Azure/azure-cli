@@ -104,7 +104,7 @@ def check_required_args(resource, cmd_arg_values, is_azure_resource=True):
     '''Check whether a resource's required arguments are in cmd_arg_values
     '''
     args = re.findall(r'\{([^\{\}]*)\}', resource)
-    
+
     if is_azure_resource:
         args.remove('subscription')
     for arg in args:

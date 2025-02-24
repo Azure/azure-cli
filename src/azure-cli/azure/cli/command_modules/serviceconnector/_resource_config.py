@@ -672,12 +672,12 @@ TARGET_RESOURCES_PARAMS = {
     RESOURCE.FabricSql: {
         'workspace_id': {
             'options': ['--workspace-id'],
-            'help': 'The Fabric workspace which contains the target SQL database',
+            'help': 'UUID of Fabric workspace which contains the target SQL database',
             'placeholder': 'TargetWorkspaceId'
         },
         'sql_database_id': {
             'options': ['--sql-database-id'],
-            'help': 'ID of the target Fabric SQL database',
+            'help': 'UUID of the target Fabric SQL database',
             'placeholder': 'TargetSQLDatabaseFabricId'
         }
     }

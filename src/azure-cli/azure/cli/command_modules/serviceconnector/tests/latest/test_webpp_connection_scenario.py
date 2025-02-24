@@ -31,21 +31,20 @@ class WebAppConnectionScenarioTest(ScenarioTest):
     def test_webapp_fabric_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'azure-service-connector',
-            'site': 'DotNetAppSqlDb20240704',
-            'database': 'clitest'
+            'source_resource_group': 'rg-Test',
+            'site': 'TonyFabricTest'
         })
         name = 'testfabricconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
         connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
-        target_id = 'https://api.fabric.microsoft.com/v1/workspaces/13c65326-ecab-43f6-8a05-60927aaa4cec/SqlDatabases/4fdf6efe-23a9-4d74-8c4a-4ecc70c4d323'
+        target_id = 'https://api.fabric.microsoft.com/v1/workspaces/6fb24b6c-6d5e-4533-91e7-1cc745b8b0f4/SqlDatabases/92f30990-7ba7-426c-a98d-c7a7565b81d2'
 
         # prepare
         self.cmd('webapp identity remove --ids {}'.format(source_id))
 
         # create
         self.cmd('webapp connection create fabric-sql --connection {} --source-id {} --target-id {} \
-                 --system-identity --client-type dotnet'.format(name, source_id, target_id, server, database)
+                 --system-identity --client-type dotnet'.format(name, source_id, target_id)
                 )
 
         # list connection
