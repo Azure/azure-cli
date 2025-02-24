@@ -7,7 +7,6 @@ import ast
 import threading
 import time
 import re
-import requests
 from xml.etree import ElementTree
 
 from urllib.parse import urlparse
@@ -770,6 +769,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
                                  .format(res.status_code, res.text))
 
 
+# This funtion makes zip deployment for both function app and web app
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
     logger.warning("Getting scm site credentials for zip deployment")
 
@@ -804,9 +804,15 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
         if app_is_linux_webapp and not app_is_function_app:
             cookie = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
-            res = requests.post(zip_url, data=zip_content, headers=headers, cookies={cookie}, verify=not should_disable_connection_verify())
+            if cookie is None:
+                res = requests.post(zip_url, data=zip_content, headers=headers,
+                                    verify=not should_disable_connection_verify())
+            else:
+                res = requests.post(zip_url, data=zip_content, headers=headers, cookies=cookie,
+                                    verify=not should_disable_connection_verify())
         else:
-            res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+            res = requests.post(zip_url, data=zip_content, headers=headers,
+                                verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     # check the status of async deployment
@@ -6953,6 +6959,7 @@ def perform_onedeploy_functionapp(cmd,
     params.timeout = timeout
     params.slot = slot
     params.track_status = False
+    params.is_functionapp = True
 
     return _perform_onedeploy_internal(params)
 
@@ -6991,6 +6998,7 @@ def perform_onedeploy_webapp(cmd,
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     params.is_linux_webapp = is_linux_webapp(app)
+    params.is_functionapp = False
     return _perform_onedeploy_internal(params)
 
 
@@ -7012,7 +7020,8 @@ class OneDeployParams:
         self.timeout = None
         self.slot = None
         self.track_status = False
-        self.is_linux_webapp = False
+        self.is_linux_webapp = None
+        self.is_functionapp = None
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -7061,24 +7070,6 @@ def _build_onedeploy_arm_url(params):
         )
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
-def _build_get_instances_list_arm_url(params):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    client = web_client_factory(params.cmd.cli_ctx)
-    sub_id = get_subscription_id(params.cmd.cli_ctx)
-    if not params.slot:
-        base_url = (
-            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/instances?api-version={client.DEFAULT_API_VERSION}"
-        )
-    else:
-        base_url = (
-            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/slots/{params.slot}/instances"
-            f"?api-version={client.DEFAULT_API_VERSION}"
-        )
-
-    logger.info("get instances list url: %s", base_url)
-    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 def _build_deploymentstatus_url(cmd, resource_group_name, webapp_name, slot, deployment_id):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -7172,52 +7163,81 @@ def _update_artifact_type(params):
     logger.warning("Deployment type: %s. To override deployment type, please specify the --type parameter. "
                    "Possible values: war, jar, ear, zip, startup, script, static", params.artifact_type)
 
+
 def _get_instances_list_arm_internal(params):
-    url = _build_get_instances_list_arm_url(params)
-    response = send_raw_request(params.cmd.cli_ctx, "GET", url)
-    if response.status_code == 200:
-        logger.info("Instances list retrieved successfully.")
-        return response.json().get("value", [])
-    raise CLIError("Unable to get instances list.")
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    try:
+        client = web_client_factory(params.cmd.cli_ctx)
+        sub_id = get_subscription_id(params.cmd.cli_ctx)
+        if params.slot:
+            base_url = (
+                f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+                f"{params.webapp_name}/slots/{params.slot}/instances"
+                f"?api-version={client.DEFAULT_API_VERSION}"
+            )
+        else:
+            base_url = (
+                f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+                f"{params.webapp_name}/instances?api-version={client.DEFAULT_API_VERSION}"
+            )
+
+        url = params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+        response = send_raw_request(params.cmd.cli_ctx, "GET", url)
+        if response.status_code == 200:
+            return response.json().get("value", [])
+        return None
+    except Exception as ex:
+        logger.info("Getting exception while trying to get instances list: %s", ex)
+
 
 def _get_instance_id_internal(param):
     instances = _get_instances_list_arm_internal(param)
 
     if not instances or len(instances) == 0:
-        raise CLIError("No instances found.")
-    
-    logger.info("returning instance id for instance: %s", instances[0]['name'])
-    return instances[0]['name']
+        return None
+    sorted_instances = sorted(instances, key=lambda x: x['name'])
+    return sorted_instances[0]['name']
 
 
 def _get_affinity_cookie_internal(param):
     instance = _get_instance_id_internal(param)
-    logger.info("returning affinity cookie for instance: %s", instance)
-    cookie = {
-        "ARRAffinity": instance,
-        "ARRAffinitySameSite": instance
-        }
+    if instance is None:
+        logger.info("Affinity cookie cannot be set...")
+        return None
+    cookie = {"ARRAffinity": instance, "ARRAffinitySameSite": instance}
     return cookie
+
 
 def _warmup_kudu_and_get_cookie_internal(param):
     scm_url = _get_scm_url(param.cmd, param.resource_group_name, param.webapp_name, param.slot)
     cookie = _get_affinity_cookie_internal(param)
-    Max_Retries = 3
-    TimeOut = 300
+    max_retries = 3
+    time_out = 60
     SleepInterval = 60
-    for retry in range(Max_Retries):
-        if _ping_kudu_internal(scm_url, param, cookie, TimeOut):
-            logger.info("Kudu warmed up successfully. Retry count: %d", retry)
-            return cookie
-        time.sleep(SleepInterval)
 
-    raise CLIError("Unable to warm up Kudu.")
+    if cookie is None:
+        logger.info("Cannot start kudu using cookies...")
+        return None
+    for retry in range(max_retries):
+        if _ping_kudu_internal(scm_url, param, cookie, time_out):
+            logger.info("Kudu started successfully after %d retry", retry)
+            return cookie
+        time_out = 300
+        time.sleep(SleepInterval)
+    logger.warning("Unable to start kudu before deployment.")
+    return None
+
 
 def _ping_kudu_internal(scm_url, param, cookie, timeout):
-    logger.info("Warming up Kudu.")
-    headers = get_scm_site_headers(param.cmd.cli_ctx, param.webapp_name, param.resource_group_name)
-    response = requests.get(scm_url + '/deployments', headers=headers, cookies=cookie, timeout=timeout)
+    import requests
+    try:
+        headers = get_scm_site_headers(param.cmd.cli_ctx, param.webapp_name, param.resource_group_name)
+        response = requests.get(scm_url + '/deployments', headers=headers, cookies=cookie, timeout=timeout)
+    except Exception as ex:
+        logger.info("Getting exception while trying to warm-up kudu: %s", ex)
+        return False
     return response.status_code == 200
+
 
 def _make_onedeploy_request(params):
     import requests
@@ -7228,7 +7248,6 @@ def _make_onedeploy_request(params):
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
     headers = _get_ondeploy_headers(params)
-
     if file_hash:
         headers["x-ms-artifact-checksum"] = file_hash
 
@@ -7236,13 +7255,19 @@ def _make_onedeploy_request(params):
     # For that, set poll_async_deployment_for_debugging=True
     logger.info("Deployment API: %s", deploy_url)
     if not params.src_url:  # use SCM endpoint
-    # if linux webapp then warmup kudu and use warmed up kudu for deployment
+        # if linux webapp then warmup kudu and use warmed up kudu for deployment
         if params.is_linux_webapp and not params.is_functionapp:
             logger.info("Warming up Kudu before deployment.")
             cookies = _warmup_kudu_and_get_cookie_internal(params)
-            response = requests.post(deploy_url, data=body, headers=headers, cookies=cookies, verify=not should_disable_connection_verify())
+            if cookies is None:
+                response = requests.post(deploy_url, data=body, headers=headers,
+                                         verify=not should_disable_connection_verify())
+            else:
+                response = requests.post(deploy_url, data=body, headers=headers, cookies=cookies,
+                                         verify=not should_disable_connection_verify())
         else:
-            response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+            response = requests.post(deploy_url, data=body, headers=headers,
+                                     verify=not should_disable_connection_verify())
         poll_async_deployment_for_debugging = True
     else:
         response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
