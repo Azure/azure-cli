@@ -155,7 +155,7 @@ TARGET_RESOURCES = {
 
     RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.App/containerApps/{target_app_name}',
 
-    RESOURCE.FabricSql: 'https://api.fabric.microsoft.com/v1/workspaces/{workspace_id}/SqlDatabases/{sql_id}'
+    RESOURCE.FabricSql: 'https://api.fabric.microsoft.com/v1/workspaces/{workspace_id}/SqlDatabases/{sql_database_id}'
 }
 
 
@@ -670,6 +670,16 @@ TARGET_RESOURCES_PARAMS = {
         }
     },
     RESOURCE.FabricSql: {
+        'workspace_id': {
+            'options': ['--workspace-id'],
+            'help': 'The Fabric workspace which contains the target SQL database',
+            'placeholder': 'TargetWorkspaceId'
+        },
+        'sql_database_id': {
+            'options': ['--sql-database-id'],
+            'help': 'ID of the target Fabric SQL database',
+            'placeholder': 'TargetSQLDatabaseFabricId'
+        }
     }
 }
 

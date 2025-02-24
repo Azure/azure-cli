@@ -100,11 +100,13 @@ def get_resource_regex(resource):
     return regex
 
 
-def check_required_args(resource, cmd_arg_values):
+def check_required_args(resource, cmd_arg_values, is_azure_resource=True):
     '''Check whether a resource's required arguments are in cmd_arg_values
     '''
     args = re.findall(r'\{([^\{\}]*)\}', resource)
-    args.remove('subscription')
+    
+    if is_azure_resource:
+        args.remove('subscription')
     for arg in args:
         if not cmd_arg_values.get(arg, None):
             return False
@@ -747,7 +749,7 @@ def apply_target_args(cmd, namespace, arg_values):
     '''
     target = get_target_resource_name(cmd)
     resource = TARGET_RESOURCES.get(target)
-    if check_required_args(resource, arg_values):
+    if check_required_args(resource, arg_values, target not in [RESOURCE.FabricSql]):
         namespace.target_id = resource.format(
             subscription=get_subscription_id(cmd.cli_ctx),
             **arg_values
