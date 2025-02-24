@@ -1655,7 +1655,7 @@ examples:
   - name: Create a web app with a Java 21 runtime.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "JAVA:21-java21"
-  - name: Create a web app with a NodeJS 10.20 runtime and deployed from a local git repository.
+  - name: Create a web app with a NodeJS 20 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:20LTS" --deployment-local-git
   - name: Create a web app with both SCM and FTP Basic Auth Publishing Credentials disabled.
