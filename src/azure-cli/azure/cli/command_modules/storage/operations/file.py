@@ -13,8 +13,14 @@ from knack.log import get_logger
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files_track2,
                                                     guess_content_type)
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.aaz import has_value
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError, ResourceExistsError
 from .fileshare import _get_client
+from ..aaz.latest.storage.share_rm import Create as _ShareRmCreate
+from ..aaz.latest.storage.share_rm import Update as _ShareRmUpdate
+from ..aaz.latest.storage.share_rm import Delete as _ShareRmDelete
+from ..aaz.latest.storage.share_rm import Show as _ShareRmShow
+from ..aaz.latest.storage.share_rm import List as _ShareRmList
 
 logger = get_logger(__name__)
 
@@ -515,3 +521,105 @@ def file_exists(client, **kwargs):
 
 def file_updates(client, **kwargs):
     return client.set_http_headers(**kwargs)
+
+
+def _format_storage_account_id(args_schema):
+    from azure.cli.core.aaz import AAZResourceIdArgFormat
+    args_schema.storage_account._fmt = AAZResourceIdArgFormat(
+        template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/"
+                 "storageAccounts/{}"
+    )
+    args_schema.resource_group._required = False
+
+
+class ShareRmCreate(_ShareRmCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        from .._validators import parse_storage_account_aaz
+        parse_storage_account_aaz(self, args)
+
+
+class ShareRmUpdate(_ShareRmUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
+        parse_storage_account_aaz(self, args)
+
+    def post_instance_update(self, instance):
+        args = self.ctx.args
+        if args.metadata:
+            instance.properties.metadata = args.metadata
+
+
+class ShareRmDelete(_ShareRmDelete):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
+        parse_storage_account_aaz(self, args)
+
+
+class ShareRmShow(_ShareRmShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
+        parse_storage_account_aaz(self, args)
+
+
+class ShareRmList(_ShareRmList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.include_deleted = AAZBoolArg(
+            options=["--include-deleted"],
+            help="Include soft deleted file shares when specified."
+        )
+        args_schema.include_snapshot = AAZBoolArg(
+            options=["--include-snapshot"],
+            help="Include file share snapshots when specified."
+        )
+        _format_storage_account_id(args_schema)
+
+        args_schema.include_deleted._registered = True
+        args_schema.include_snapshot._registered = True
+        args_schema.expand._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
+        expand_item = []
+        if has_value(args.include_deleted):
+            expand_item.append('deleted')
+        if has_value(args.include_snapshot):
+            expand_item.append('snapshots')
+        if expand_item:
+            args.expand = ','.join(expand_item)
+
+        parse_storage_account_aaz(self, args)

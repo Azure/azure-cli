@@ -91,7 +91,8 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'non_exist_share_name': non_exist_share_name
         })
-        with self.assertRaisesRegex(SystemExit, '3'):
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {non_exist_share_name}')
 
         # 5. Test update command.
@@ -224,7 +225,8 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 1)
         })
 
-        with self.assertRaisesRegex(SystemExit, '3'):
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot}')
 
         self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')

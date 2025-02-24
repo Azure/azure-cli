@@ -8,3 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "storage share-rm",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage Azure file shares using the Microsoft.Storage resource provider.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
