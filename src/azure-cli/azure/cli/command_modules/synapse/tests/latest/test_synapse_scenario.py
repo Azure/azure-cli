@@ -2087,7 +2087,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('result', 'Cancelled')
                  ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_session_and_statements(self, resource_group):
         self.kwargs.update({
