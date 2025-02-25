@@ -8,32 +8,39 @@
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
-from knack.log import get_logger
+provider_namespace = "Microsoft.DataBoxEdge"
+sub_provider = "Microsoft.EdgeMarketPlace"
+api_version = "2023-08-01-preview"
 
-logger = get_logger(__name__)
 
 def _get_management_endpoint(cli_ctx):
     """Helper function to determine management endpoint based on cloud configuration."""
     # cloud = cli_ctx.cloud
     # return cloud.endpoints.resource_manager
-    return "brazilus.management.azure.com" # For testing purposes
+    return "brazilus.management.azure.com"  # For testing purposes
 
-def package_offer(cmd, 
-              resource_group_name,
-              resource_name,
-              publisher_name,
-              offer_name,
-              sku,
-              version,
-              output_folder):
+
+def package_offer(
+    cmd,
+    resource_group_name,
+    resource_name,
+    publisher_name,
+    offer_name,
+    sku,
+    version,
+    output_folder,
+):
     """Get details of a specific marketplace offer and download its logos."""
 
-    import os
     import json
+    import os
+    import shutil
+
     import requests
+    from knack.log import get_logger
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import send_raw_request
-    from knack.log import get_logger
 
     # Use helper function if management_endpoint not explicitly provided
     management_endpoint = _get_management_endpoint(cmd.cli_ctx)
@@ -41,294 +48,552 @@ def package_offer(cmd,
 
     # Get subscription ID from current context
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    
-    provider_namespace = "Private.EdgeInternal"
-    sub_provider = "Microsoft.EdgeMarketPlace"
-    api_version = "2023-08-01-preview"
 
     # Construct URL with parameters
     url = (
         f"https://{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
         f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
         f"?api-version={api_version}"
     )
 
     resource = "https://management.azure.com"
-    
+
     try:
-        response = send_raw_request(cmd.cli_ctx, 'get', url, resource=resource)
-        
+        response = send_raw_request(cmd.cli_ctx, "get", url, resource=resource)
+
         if response.status_code == 200:
             data = response.json()
-            offer_content = data.get('properties', {}).get('offerContent', {})
-            icon_uris = offer_content.get('iconFileUris', {})
-            
+            offer_content = data.get("properties", {}).get("offerContent", {})
+            icon_uris = offer_content.get("iconFileUris", {})
             # Download logos and metadata if output folder is specified
             if output_folder:
-                publisher_id = offer_content.get('offerPublisher', {}).get('publisherId', '')
-                offer_id = offer_content.get('offerId', '')
-                skus = data.get('properties', {}).get('marketplaceSkus', [])
-                
-                for sku in skus:
-                    sku_id = sku.get('marketplaceSkuId', '')
-                    versions = sku.get('marketplaceSkuVersions', [])
-                    
-                    # If version is specified, filter for that version, else take the latest
-                    if version:
-                        versions = [v for v in versions if v.get('name') == version]
-                    else:
-                        versions = versions[:1]  # Take only the latest version
-                    
-                    if not versions:
-                        logger.warning(f"No matching version found for SKU {sku_id}")
+                publisher_id = offer_content.get("offerPublisher", {}).get(
+                    "publisherId", ""
+                )
+                offer_id = offer_content.get("offerId", "")
+                skus = data.get("properties", {}).get("marketplaceSkus", [])
+
+                for _sku in skus:
+                    sku_id = _sku.get("marketplaceSkuId", "")
+
+                    if sku_id != sku:
                         continue
+                    else:
+                        # Store the generation information
+                        generation = _sku.get("generation")
 
-                    for version in versions:
-                        version_id = version.get('name')
-                        
-                        # Create base path for this version
-                        base_path = os.path.join(output_folder, 'catalog_artifacts', 
-                                               publisher_id, offer_id, sku_id)
-                        version_level_path = os.path.join(base_path, version_id)
-                        icon_path = os.path.join(base_path, 'icons')
-                        
-                        # Check if version directory exists and has content
-                        if os.path.exists(version_level_path):
-                            # Check if directory has any files
-                            if os.path.exists(os.path.join(version_level_path, 'metadata.json')) or \
-                               any(os.scandir(version_level_path)):
-                                error_message = f"Version directory already exists and contains files: {version_level_path}. Please delete the version folder in case you want to re-download the package."
-                                logger.error(error_message)
-                                return {
-                                    'error': error_message,
-                                    'status': 'failed',
-                                    'path': version_level_path
-                                }
+                        # Get all versions for this SKU
+                        versions = _sku.get("marketplaceSkuVersions", [])
 
-                        os.makedirs(icon_path, exist_ok=True)
-                        os.makedirs(version_level_path, exist_ok=True)
+                        versions = [v for v in versions if v.get("name") == version]
 
-                        # Save metadata.json
-                        metadata_path = os.path.join(version_level_path, 'metadata.json')
-                        metadata = {
-                            'name': data.get('name'),
-                            'publisher': offer_content.get('offerPublisher'),
-                            'offer_id': offer_content.get('offerId'),
-                            'summary': offer_content.get('summary'),
-                            'description': offer_content.get('description'),
-                            'sku': {
-                                'name': sku.get('displayName'),
-                                'id': sku.get('marketplaceSkuId'),
-                                'os_type': sku.get('operatingSystem'),
-                                'version': version
-                            }
+                        if not versions:
+                            logger.warning(
+                                f"No matching version found for SKU {sku_id}"
+                            )
+                            return
+
+                        # print if version and generation are found
+                        print(f"Found VM version: {versions[0].get('name')}")
+                        print(f"VM Generation: {generation}")
+
+                        version_id = versions[0].get("name")
+
+                # check if sku is not found
+                if not version_id:
+                    logger.warning(f"No matching SKU found: {sku}")
+                    return
+
+                # Create base path for this version
+                base_path = os.path.join(
+                    output_folder,
+                    "catalog_artifacts",
+                    publisher_id,
+                    offer_id,
+                    sku_id,
+                )
+                version_level_path = os.path.join(base_path, version_id)
+                icon_path = os.path.join(base_path, "icons")
+
+                # Check if version directory exists and has content
+                if os.path.exists(version_level_path):
+                    try:
+                        # Remove directory and all its contents
+                        shutil.rmtree(version_level_path)
+                        logger.info(
+                            f"Cleaned up existing version directory: {version_level_path}"
+                        )
+                    except Exception as e:
+                        error_message = f"Failed to clean up version directory {version_level_path}: {str(e)}"
+                        logger.error(error_message)
+                        return {
+                            "error": error_message,
+                            "status": "failed",
+                            "path": version_level_path,
                         }
-                        
-                        with open(metadata_path, 'w', encoding='utf-8') as f:
-                            json.dump(metadata, f, indent=2)
-                            logger.info(f"Saved metadata to {metadata_path}")
-                        
-                        # Download icons
-                        if icon_uris:
-                            for size, uri in icon_uris.items():
-                                file_extension = 'png'
-                                file_path = os.path.join(icon_path, f"{size}.{file_extension}")
-                                
-                                # Skip if icon already exists
-                                if os.path.exists(file_path):
-                                    logger.info(f"Icon {size} already exists at {file_path}, skipping download")
-                                    continue
-                                
-                                try:
-                                    logo_response = requests.get(uri)
-                                    if logo_response.status_code == 200:
-                                        with open(file_path, 'wb') as f:
-                                            f.write(logo_response.content)
-                                        logger.info(f"Downloaded {size} logo to {file_path}")
-                                    else:
-                                        logger.error(f"Failed to download {size} logo: {logo_response.status_code}")
-                                except Exception as e:
-                                    logger.error(f"Error downloading {size} logo: {str(e)}")
 
-            print ("Metadata and icons downloaded successfully")
-            
+                os.makedirs(icon_path, exist_ok=True)
+                os.makedirs(version_level_path, exist_ok=True)
+
+                # Save metadata.json
+                metadata_path = os.path.join(version_level_path, "metadata.json")
+                # Save Api response as it is on metadata.json
+                metadata = data
+
+                with open(metadata_path, "w", encoding="utf-8") as f:
+                    json.dump(metadata, f, indent=2)
+                    logger.info(f"Saved metadata to {metadata_path}")
+
+                # Download icons
+                if icon_uris:
+                    for size, uri in icon_uris.items():
+                        file_extension = "png"
+                        file_path = os.path.join(icon_path, f"{size}.{file_extension}")
+
+                        # Skip if icon already exists
+                        if os.path.exists(file_path):
+                            logger.info(
+                                f"Icon {size} already exists at {file_path}, skipping download"
+                            )
+                            continue
+
+                        try:
+                            logo_response = requests.get(uri)
+                            if logo_response.status_code == 200:
+                                with open(file_path, "wb") as f:
+                                    f.write(logo_response.content)
+                                logger.info(f"Downloaded {size} logo to {file_path}")
+                            else:
+                                logger.error(
+                                    f"Failed to download {size} logo: {logo_response.status_code}"
+                                )
+                        except Exception as e:
+                            logger.error(f"Error downloading {size} logo: {str(e)}")
+
+            print("Metadata and icons downloaded successfully")
+
         else:
             error_message = f"Request failed with status code: {response.status_code}"
             logger.error(error_message)
             return {
-                'error': error_message,
-                'status': 'failed',
-                'resource_group_name': resource_group_name,
-                'response': response.text
+                "error": error_message,
+                "status": "failed",
+                "resource_group_name": resource_group_name,
+                "response": response.text,
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to retrieve offer: {str(e)}")
         return {
-            'error': str(e),
-            'status': 'failed',
-            'resource_group_name': resource_group_name
+            "error": str(e),
+            "status": "failed",
+            "resource_group_name": resource_group_name,
         }
+
+    print("Offer details retrieved successfully. Proceeding to download VHD.")
+    # Downloading VM image
+    return download_vhd(
+        cmd,
+        resource_group_name,
+        resource_name,
+        publisher_name,
+        offer_name,
+        sku,
+        version,
+        generation,
+        version_level_path,
+    )
+
+
+def download_vhd(
+    cmd,
+    resource_group_name,
+    resource_name,
+    publisher_name,
+    offer_name,
+    sku,
+    version,
+    generation,
+    output_folder,
+):
+    """Generate access token for VHD download."""
+    import json
+    import os
+    import time
+    from datetime import datetime
+
+    from knack.log import get_logger
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.core.util import send_raw_request
+
+    logger = get_logger(__name__)
+    management_endpoint = _get_management_endpoint(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    # API endpoint construction
+    url = (
+        f"https://{management_endpoint}"
+        f"/subscriptions/{subscription_id}"
+        f"/resourceGroups/{resource_group_name}"
+        f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/Microsoft.EdgeMarketPlace/offers/{publisher_name}:{offer_name}"
+        f"/generateAccessToken?api-version=2023-08-01-preview"
+    )
+
+    # Request body
+    body = {
+        "edgeMarketPlaceRegion": "westus",
+        "hypervGeneration": generation,
+        "marketPlaceSku": sku,
+        "marketPlaceSkuVersion": version,
+    }
+
+    try:
+        print("Generating access token for VHD download...")
+        response = send_raw_request(
+            cmd.cli_ctx,
+            "post",
+            url,
+            resource="https://management.azure.com",
+            body=json.dumps(body),
+        )
+
+        print("Checking status of VHD download URL generation...")
+        print(response)
+
+        # Check if the request was successful
+        if response.status_code not in (200, 202):
+            error_message = f"Request failed with status code: {response.status_code}"
+            logger.error(error_message)
+            return {
+                "error": error_message,
+                "status": "failed",
+                "resource_group_name": resource_group_name,
+                "response": response.text,
+            }
+
+        # parse headers
+        headers = response.headers
+
+        # get async operation URL from headers
+        async_operation_url = headers.get("Azure-AsyncOperation")
+
+        # hit async operation URL until "status" in response is "Succeeded" with exponential backoff
+        if async_operation_url:
+            max_retries = 10
+            base_delay = 2  # seconds
+            timeout = 300  # 5 minutes timeout
+            start_time = datetime.now()
+
+            print("Hitting async operation URL...")
+            for attempt in range(max_retries):
+                print(f"Attempt {attempt + 1} of {max_retries}...")
+                try:
+                    # Calculate exponential backoff delay
+                    delay = base_delay * (2**attempt)
+
+                    # Check if we've exceeded timeout
+                    if (datetime.now() - start_time).total_seconds() > timeout:
+                        logger.error("Operation timed out after 5 minutes")
+                        return {
+                            "error": "Operation timed out",
+                            "status": "failed",
+                            "resource_group_name": resource_group_name,
+                        }
+
+                    # Get operation status
+                    status_response = send_raw_request(
+                        cmd.cli_ctx,
+                        "get",
+                        async_operation_url,
+                        resource="https://management.azure.com",
+                    )
+
+                    if status_response.status_code in (200, 202):
+                        status_data = status_response.json()
+                        status = status_data.get("status", "").lower()
+
+                        print("Current status:", status)
+
+                        if status == "succeeded":
+                            logger.info("VHD download URL generation succeeded")
+                            print(status_response)
+                            # Get the download URL from the response
+                            requestId = status_data.get("properties", {}).get(
+                                "requestId"
+                            )
+
+                            # Obtaining SAS token using request Id
+                            if requestId:
+                                print(
+                                    f"Fetched request Id for VHD Download: {requestId}"
+                                )
+
+                                # Obtaining SAS token using request Id
+                                token_url = (
+                                    f"https://{management_endpoint}"
+                                    f"/subscriptions/{subscription_id}"
+                                    f"/resourceGroups/{resource_group_name}"
+                                    f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
+                                    f"/providers/Microsoft.EdgeMarketPlace/offers/{publisher_name}:{offer_name}"
+                                    f"/getAccessToken?api-version={api_version}"
+                                )
+
+                                token_body = {"requestId": requestId}
+
+                                token_response = send_raw_request(
+                                    cmd.cli_ctx,
+                                    "post",
+                                    token_url,
+                                    resource="https://management.azure.com",
+                                    body=json.dumps(token_body),
+                                )
+
+                                if token_response.status_code == 200:
+                                    token_data = token_response.json()
+
+                                    # Generate azcopy command
+                                    download_url = token_data.get("accessToken")
+                                    # diskId = token_data.get("diskId")
+
+                                    # Construct the azcopy command
+                                    command = f'azcopy copy "{download_url}" "{output_folder}" --check-md5 NoCheck'
+
+                                    print(command)
+                                    print("Executing command...")
+
+                                    # Execute the command
+                                    os.system(command)
+                                    print("Download completed successfully.")
+                                    return {
+                                        "status": "succeeded",
+                                        "message": "Download completed successfully.",
+                                    }
+                                else:
+                                    logger.error(
+                                        f"Failed to get access token: {token_response.status_code}"
+                                    )
+                                    return {
+                                        "error": f"Failed to get access token: {token_response.status_code}",
+                                        "status": "failed",
+                                    }
+
+                            else:
+                                logger.error("Download URL not found in response")
+                                return {
+                                    "error": "Download URL not found",
+                                    "status": "failed",
+                                }
+
+                        elif status == "failed":
+                            error_message = status_data.get("error", {}).get(
+                                "message", "Unknown error"
+                            )
+                            logger.error(f"Operation failed: {error_message}")
+                            return {"error": error_message, "status": "failed"}
+
+                        else:  # In progress
+                            logger.info(
+                                f"Operation in progress... (attempt {attempt + 1}/{max_retries})"
+                            )
+                            time.sleep(delay)
+                            continue
+
+                    else:
+                        logger.error(
+                            f"Failed to get operation status: {status_response.status_code}"
+                        )
+                        return {
+                            "error": f"Status check failed: {status_response.status_code}",
+                            "status": "failed",
+                        }
+
+                except Exception as e:
+                    logger.error(f"Error checking operation status: {str(e)}")
+                    time.sleep(delay)
+                    continue
+
+            # If we've exhausted all retries
+            logger.error("Maximum retry attempts reached")
+            return {"error": "Maximum retry attempts reached", "status": "failed"}
+
+    except Exception as e:
+        logger.error(f"Failed to generate access token: {str(e)}")
+        return {
+            "error": str(e),
+            "status": "failed",
+            "resource_group_name": resource_group_name,
+        }
+
 
 def list_offers(cmd, resource_group_name, resource_name):
     """List all offers for disconnected operations."""
 
+    from knack.log import get_logger
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import send_raw_request
-    from knack.log import get_logger
 
     logger = get_logger(__name__)
 
     management_endpoint = _get_management_endpoint(cmd.cli_ctx)
-    
+
     # Get subscription ID from current context
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    provider_namespace="Private.EdgeInternal"
-    sub_provider="Microsoft.EdgeMarketPlace"
-    api_version="2023-08-01-preview"
-    
+
     # Construct URL with parameters
     url = (
         f"https://{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
         f"/providers/{sub_provider}/offers"
         f"?api-version={api_version}"
     )
 
     # Define headers with resource for authentication
     headers = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     }
 
     # Define the resource for authentication
-    resource = "https://management.azure.com"  # Using standard Azure management endpoint
-    
+    resource = (
+        "https://management.azure.com"  # Using standard Azure management endpoint
+    )
+
     try:
-        response = send_raw_request(cmd.cli_ctx, 'get', url, resource=resource)
-        
+        response = send_raw_request(cmd.cli_ctx, "get", url, resource=resource)
+
         if response.status_code == 200:
             data = response.json()
             result = []
-            
-            for offer in data.get('value', []):
-                offer_content = offer.get('properties', {}).get('offerContent', {})
-                skus = offer.get('properties', {}).get('marketplaceSkus', [])
-                
+
+            for offer in data.get("value", []):
+                offer_content = offer.get("properties", {}).get("offerContent", {})
+                skus = offer.get("properties", {}).get("marketplaceSkus", [])
+
                 for sku in skus:
-                    versions = sku.get('marketplaceSkuVersions', [])[:]
+                    versions = sku.get("marketplaceSkuVersions", [])[:]
                     row = {
-                        'Publisher': offer_content.get('offerPublisher', {}).get('publisherId'),
-                        'Offer': offer_content.get('offerId'),
-                        'SKU': sku.get('marketplaceSkuId'),
-                        'Versions': f"{len(versions)} {'version' if len(versions) == 1 else 'versions'} available",                        
-                        'OS_Type': sku.get('operatingSystem', {}).get('type')
+                        "Publisher": offer_content.get("offerPublisher", {}).get(
+                            "publisherId"
+                        ),
+                        "Offer": offer_content.get("offerId"),
+                        "SKU": sku.get("marketplaceSkuId"),
+                        "Versions": f"{len(versions)} {'version' if len(versions) == 1 else 'versions'} available",
+                        "OS_Type": sku.get("operatingSystem", {}).get("type"),
                     }
                     result.append(row)
-            
+
             return result
-            
+
         else:
             error_message = f"Request failed with status code: {response.status_code}"
             logger.error(error_message)
             return {
-                'error': error_message,
-                'status': 'failed',
-                'resource_group_name': resource_group_name,
-                'response': response.text
+                "error": error_message,
+                "status": "failed",
+                "resource_group_name": resource_group_name,
+                "response": response.text,
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to retrieve offers: {str(e)}")
         return {
-            'error': str(e),
-            'status': 'failed',
-            'resource_group_name': resource_group_name
+            "error": str(e),
+            "status": "failed",
+            "resource_group_name": resource_group_name,
         }
-    
+
+
 def get_offer(cmd, resource_group_name, resource_name, publisher_name, offer_name):
     """List all offers for disconnected operations."""
 
+    from knack.log import get_logger
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import send_raw_request
-    from knack.log import get_logger
 
     logger = get_logger(__name__)
 
     management_endpoint = _get_management_endpoint(cmd.cli_ctx)
-    
+
     # Get subscription ID from current context
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    provider_namespace="Private.EdgeInternal"
-    sub_provider="Microsoft.EdgeMarketPlace"
-    api_version="2023-08-01-preview"
-    
+
     # Construct URL with parameters
     url = (
         f"https://{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
         f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
         f"?api-version={api_version}"
     )
 
     # Define headers with resource for authentication
     headers = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     }
 
     # Define the resource for authentication
-    resource = "https://management.azure.com"  # Using standard Azure management endpoint
-    
+    resource = (
+        "https://management.azure.com"  # Using standard Azure management endpoint
+    )
+
     try:
-        response = send_raw_request(cmd.cli_ctx, 'get', url, resource=resource)
-        
+        response = send_raw_request(cmd.cli_ctx, "get", url, resource=resource)
+
         if response.status_code == 200:
             data = response.json()
             result = []
-            
 
-            offer_content = data.get('properties', {}).get('offerContent', {})
-            skus = data.get('properties', {}).get('marketplaceSkus', [])
+            offer_content = data.get("properties", {}).get("offerContent", {})
+            skus = data.get("properties", {}).get("marketplaceSkus", [])
 
             for sku in skus:
                 # Get all versions for this SKU
-                versions = sku.get('marketplaceSkuVersions', [])[:]
+                versions = sku.get("marketplaceSkuVersions", [])[:]
 
                 # transform versions and size array into a multi-line string
-                version_str = ', '.join([f"{v.get('name')}({v.get('minimumDownloadSizeInMb')}MB)" 
-                                        for v in versions])
-                
+                version_str = ", ".join(
+                    [
+                        f"{v.get('name')}({v.get('minimumDownloadSizeInMb')}MB)"
+                        for v in versions
+                    ]
+                )
+
                 # Create a single row with flattened version info
                 row = {
-                    'Publisher': offer_content.get('offerPublisher', {}).get('publisherId'),
-                    'Offer': offer_content.get('offerId'),
-                    'SKU': sku.get('marketplaceSkuId'),
-                    'Versions': version_str,
-                    'OS_Type': sku.get('operatingSystem', {}).get('type')
+                    "Publisher": offer_content.get("offerPublisher", {}).get(
+                        "publisherId"
+                    ),
+                    "Offer": offer_content.get("offerId"),
+                    "SKU": sku.get("marketplaceSkuId"),
+                    "Versions": version_str,
+                    "OS_Type": sku.get("operatingSystem", {}).get("type"),
                 }
                 result.append(row)
             return result
-            
+
         else:
             error_message = f"Request failed with status code: {response.status_code}"
             logger.error(error_message)
             return {
-                'error': error_message,
-                'status': 'failed',
-                'resource_group_name': resource_group_name,
-                'response': response.text
+                "error": error_message,
+                "status": "failed",
+                "resource_group_name": resource_group_name,
+                "response": response.text,
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to retrieve offers: {str(e)}")
         return {
-            'error': str(e),
-            'status': 'failed',
-            'resource_group_name': resource_group_name
+            "error": str(e),
+            "status": "failed",
+            "resource_group_name": resource_group_name,
         }
