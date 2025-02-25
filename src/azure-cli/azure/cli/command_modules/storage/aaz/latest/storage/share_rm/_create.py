@@ -122,7 +122,7 @@ class Create(AAZCommand):
             help="Indicates whether paid bursting is enabled for the share. This property is only for file shares created under Files Provisioned v1 SSD account type.",
         )
         _args_schema.paid_bursting_max_bandwidth_mibps = AAZIntArg(
-            options=["--paid-bursting-bandwidth", "--paid-bursting-max-bandwidth-mibps"],
+            options=["--bursting-max-mibps", "--paid-bursting-max-bandwidth-mibps"],
             arg_group="Provisioned V1 Paid Bursting",
             help="The maximum paid bursting bandwidth for the share, in mebibytes per second. This property is only for file shares created under Files Provisioned v1 SSD account type. The maximum allowed value is 10340 which is the maximum allowed bandwidth for a share.",
         )
