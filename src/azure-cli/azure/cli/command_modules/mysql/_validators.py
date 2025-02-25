@@ -269,7 +269,7 @@ def _mysql_high_availability_validator(high_availability, standby_availability_z
                                      "in a single availability zone region.")
         if not single_az and high_availability.lower() == 'samezone':
             user_confirmation("The region supports multi-AZ, and the server will be provisioned as "
-                              "a zone-redundant HA server. Do you want to continue?", yes=False)
+                              "a zone-redundant HA server. Do you want to continue?", yes=yes)
         if auto_grow.lower == 'Disabled':
             raise ArgumentUsageError("Enabling High availability requires auto-grow to be turned ON.")
     if standby_availability_zone:
