@@ -17,8 +17,17 @@ from azure.cli.core.aaz import *
 class Show(AAZCommand):
     """Show the properties for a specified Azure file share or share snapshot.
 
-    :example: GetSharesShow the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    :example: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
         az storage share-rm show -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+
+    :example: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+        az storage share-rm show --storage-account mystorageaccount --name myfileshare
+
+    :example: Show the properties of an Azure file share by resource id.
+        az storage share-rm show --ids file-share-id
+
+    :example: Show the properties of an Azure file share snapshot
+        az storage share-rm show --ids file-share-id --snapshot "2021-03-25T05:29:56.0000000Z"
     """
 
     _aaz_info = {

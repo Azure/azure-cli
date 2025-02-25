@@ -17,8 +17,20 @@ from azure.cli.core.aaz import *
 class List(AAZCommand):
     """List all shares.
 
-    :example: ListSharesList the Azure file shares under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    :example: List the Azure file shares under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
         az storage share-rm list -g MyResourceGroup --storage-account mystorageaccount
+
+    :example: List the Azure file shares under the storage account 'mystorageaccount' (account id).
+        az storage share-rm list --storage-account mystorageaccount
+
+    :example: List all file shares include deleted under the storage account 'mystorageaccount' .
+        az storage share-rm list --storage-account mystorageaccount --include-deleted
+
+    :example: List all file shares include its all snapshots under the storage account 'mystorageaccount'
+        az storage share-rm list --storage-account mystorageaccount --include-snapshot
+
+    :example: List all file shares include its all snapshots and deleted file shares under the storage account 'mystorageaccount'
+        az storage share-rm list --storage-account mystorageaccount --include-deleted --include-snapshot
     """
 
     _aaz_info = {

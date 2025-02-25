@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class FileServiceUsage(AAZCommand):
     """Get the usage of file service in storage account including account limits, file share limits and constants used in recommendations and bursting formula.
+
+    :example: Get file service usage for the storage account, only works for provisioned v2
+        az storage account file-service-usage --account-name sa1 -g rg1
     """
 
     _aaz_info = {

@@ -23,6 +23,21 @@ class Delete(AAZCommand):
 
     :example: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
         az storage share-rm delete -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+
+    :example: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+        az storage share-rm delete --storage-account mystorageaccount --name myfileshare
+
+    :example: Delete an Azure file share by resource id.
+        az storage share-rm delete --ids file-share-id
+
+    :example: Delete an Azure file share snapshot.
+        az storage share-rm delete --ids file-share-id --snapshot "2021-03-25T05:29:56.0000000Z"
+
+    :example: Delete an Azure file share and all its snapshots.
+        az storage share-rm delete --include snapshots -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+
+    :example: Delete an Azure file share and all its snapshots (leased/unleased).
+        az storage share-rm delete --include leased-snapshots -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
     """
 
     _aaz_info = {

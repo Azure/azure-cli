@@ -27,17 +27,8 @@ from ..aaz.latest.storage.share_rm import List as _ShareRmList
 logger = get_logger(__name__)
 
 
-def create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
-                    enabled_protocols=None, root_squash=None, access_tier=None):
-
-    return _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=metadata,
-                            share_quota=share_quota, enabled_protocols=enabled_protocols, root_squash=root_squash,
-                            access_tier=access_tier, snapshot=False)
-
-
 def snapshot_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
                       enabled_protocols=None, root_squash=None, access_tier=None):
-
     return _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=metadata,
                             share_quota=share_quota, enabled_protocols=enabled_protocols, root_squash=root_squash,
                             access_tier=access_tier, snapshot=True)
@@ -71,20 +62,7 @@ def get_stats(client, resource_group_name, account_name, share_name):
                       expand='stats')
 
 
-def list_share_rm(client, resource_group_name, account_name, include_deleted=None, include_snapshot=None):
-    expand = None
-    expand_item = []
-    if include_deleted:
-        expand_item.append('deleted')
-    if include_snapshot:
-        expand_item.append('snapshots')
-    if expand_item:
-        expand = ','.join(expand_item)
-    return client.list(resource_group_name=resource_group_name, account_name=account_name, expand=expand)
-
-
 def restore_share_rm(cmd, client, resource_group_name, account_name, share_name, deleted_version, restored_name=None):
-
     restored_name = restored_name if restored_name else share_name
 
     deleted_share = cmd.get_models('DeletedShare',
@@ -93,20 +71,6 @@ def restore_share_rm(cmd, client, resource_group_name, account_name, share_name,
 
     return client.restore(resource_group_name=resource_group_name, account_name=account_name,
                           share_name=restored_name, deleted_share=deleted_share)
-
-
-def update_share_rm(cmd, instance, metadata=None, share_quota=None, root_squash=None, access_tier=None):
-    FileShare = cmd.get_models('FileShare', resource_type=ResourceType.MGMT_STORAGE)
-
-    params = FileShare(
-        share_quota=share_quota if share_quota is not None else instance.share_quota,
-        root_squash=root_squash if root_squash is not None else instance.root_squash,
-        metadata=metadata if metadata is not None else instance.metadata,
-        enabled_protocols=instance.enabled_protocols,
-        access_tier=access_tier if access_tier is not None else instance.access_tier
-    )
-
-    return params
 
 
 def create_share_url(client, share_name, unc=None, protocol=None):
@@ -546,6 +510,11 @@ class ShareRmCreate(_ShareRmCreate):
         args = self.ctx.args
         parse_storage_account_aaz(self, args)
 
+    def post_operations(self):
+        result = self.ctx.vars.instance
+        new_result = _transform_share_rm_output(result)
+        self.ctx.vars.instance = new_result
+
 
 class ShareRmUpdate(_ShareRmUpdate):
     @classmethod
@@ -564,6 +533,11 @@ class ShareRmUpdate(_ShareRmUpdate):
         if args.metadata:
             instance.properties.metadata = args.metadata
 
+    def post_operations(self):
+        result = self.ctx.vars.instance
+        new_result = _transform_share_rm_output(result)
+        self.ctx.vars.instance = new_result
+
 
 class ShareRmDelete(_ShareRmDelete):
     @classmethod
@@ -580,26 +554,29 @@ class ShareRmDelete(_ShareRmDelete):
 
 def _transform_share_rm_output(result):
     from datetime import datetime
-    if hasattr(result, 'properties'):
-        if hasattr(result.properties, 'next_allowed_quota_downgrade_time') \
-                and result.properties.next_allowed_quota_downgrade_time:
-            time_str = str(result.properties.next_allowed_quota_downgrade_time)
-            time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
-            result.properties.next_allowed_quota_downgrade_time = \
-                time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
-        if hasattr(result.properties, 'next_allowed_provisioned_iops_downgrade_time') \
-                and result.properties.next_allowed_provisioned_iops_downgrade_time:
-            time_str = str(result.properties.next_allowed_provisioned_iops_downgrade_time)
-            time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
-            result.properties.next_allowed_provisioned_iops_downgrade_time = \
-                time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
-        if hasattr(result.properties, 'next_allowed_provisioned_bandwidth_downgrade_time') \
-                and result.properties.next_allowed_provisioned_bandwidth_downgrade_time:
-            time_str = str(result.properties.next_allowed_provisioned_bandwidth_downgrade_time)
-            time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
-            result.properties.next_allowed_provisioned_bandwidth_downgrade_time = \
-                time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
-    return result
+    try:
+        if hasattr(result, 'properties'):
+            if hasattr(result.properties, 'next_allowed_quota_downgrade_time') \
+                    and result.properties.next_allowed_quota_downgrade_time:
+                time_str = str(result.properties.next_allowed_quota_downgrade_time)
+                time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
+                result.properties.next_allowed_quota_downgrade_time = \
+                    time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+            if hasattr(result.properties, 'next_allowed_provisioned_iops_downgrade_time') \
+                    and result.properties.next_allowed_provisioned_iops_downgrade_time:
+                time_str = str(result.properties.next_allowed_provisioned_iops_downgrade_time)
+                time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
+                result.properties.next_allowed_provisioned_iops_downgrade_time = \
+                    time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+            if hasattr(result.properties, 'next_allowed_provisioned_bandwidth_downgrade_time') \
+                    and result.properties.next_allowed_provisioned_bandwidth_downgrade_time:
+                time_str = str(result.properties.next_allowed_provisioned_bandwidth_downgrade_time)
+                time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
+                result.properties.next_allowed_provisioned_bandwidth_downgrade_time = \
+                    time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+            return result
+    except ValueError:  # make sure service side fix does not break
+        return result
 
 
 class ShareRmShow(_ShareRmShow):

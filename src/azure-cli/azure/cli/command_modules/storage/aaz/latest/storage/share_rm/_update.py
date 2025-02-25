@@ -19,6 +19,12 @@ class Update(AAZCommand):
 
     :example: Update the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
         az storage share-rm update -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
+
+    :example: Update the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+        az storage share-rm update --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
+
+    :example: Update the properties for an Azure file shares by resource id.
+        az storage share-rm update --ids file-share-id --quota 3 --metadata key1=value1 key2=value2
     """
 
     _aaz_info = {
