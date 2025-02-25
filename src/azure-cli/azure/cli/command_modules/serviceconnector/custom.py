@@ -336,14 +336,14 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                                       user_identity_auth_info, system_identity_auth_info,
                                                       service_principal_auth_info_secret,
                                                       key_vault_id,
+                                                      app_config_id,
                                                       service_endpoint,
                                                       private_endpoint,
                                                       store_in_connection_string,
                                                       new_addon, no_wait,
-                                                      cluster, scope, enable_csi,
+                                                      cluster=cluster, scope=scope, enable_csi=enable_csi,
                                                       customized_keys=customized_keys,
                                                       opt_out_list=opt_out_list,
-                                                      app_config_id=app_config_id,
                                                       connstr_props=connstr_props)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
