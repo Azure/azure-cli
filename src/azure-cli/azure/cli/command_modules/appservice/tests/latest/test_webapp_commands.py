@@ -2855,7 +2855,7 @@ class WebappLocalContextScenarioTest(LocalContextScenarioTest):
             self.cmd('webapp delete')
 
         self.cmd('webapp delete -n {webapp_name}')
-        self.cmd('appservice plan delete -n {plan_name} -y')
+        selfj.cmd('appservice plan delete -n {plan_name} -y')
 
 
 class WebappOneDeployScenarioTest(ScenarioTest):
@@ -2877,18 +2877,20 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('properties.status', 'RuntimeSuccessful'),
         ])
 
-    @unittest.skip("Flaky test")
-    @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=LINUX_ASP_LOCATION_WEBAPP)
-    def test_one_deploy_arm(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_one_deploy_pull_with_MSI(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
         plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
         war_url = "https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war"
         self.cmd(
-            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        self.cmd(
+            'webapp identity assign -g {} -n {}'.format(resource_group, webapp_name)
+        )
         
-        self.cmd(f'webapp deploy -g {resource_group} -n {webapp_name} --src-url {war_url} --type war').assert_with_checks([
+        self.cmd(f'webapp deploy -g {resource_group} -n {webapp_name} --src-url {war_url} --type zip --pull-identity system').assert_with_checks([
             JMESPathCheck('deployer', 'OneDeploy'),
             JMESPathCheck('message', 'OneDeploy'),
         ])
