@@ -5604,6 +5604,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "enable_encryption_at_host": True,
                 "enable_ultra_ssd": True,
                 "enable_fips_image": True,
+                "message_of_the_day": get_test_data_file_path("invalidconfig.json"),
                 "kubelet_config": None,
                 "linux_os_config": None,
             },
@@ -5650,6 +5651,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_encryption_at_host=True,
             enable_ultra_ssd=True,
             enable_fips=True,
+            message_of_the_day="W10=",  # base64 encode of "[]"
             mode=CONST_NODEPOOL_MODE_SYSTEM,
         )
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")

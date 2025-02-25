@@ -27,11 +27,13 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_check_resource_availability_with_location, \
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
-    cf_postgres_flexible_private_endpoint_connections
+    cf_postgres_flexible_private_endpoint_connections, \
+    cf_postgres_flexible_tuning_options
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
+from ._util import get_index_tuning_settings_map
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
@@ -1604,6 +1606,91 @@ def _update_parameters(cmd, client, server_name, configuration_name, resource_gr
 
     return resolve_poller(
         client.begin_update(resource_group_name, server_name, configuration_name, parameters), cmd.cli_ctx, 'PostgreSQL Parameter update')
+
+
+def index_tuning_update(cmd, client, resource_group_name, server_name, index_tuning_enabled):
+    validate_resource_group(resource_group_name)
+    source = "user-override"
+
+    if index_tuning_enabled == "True":
+        subscription = get_subscription_id(cmd.cli_ctx)
+        postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, subscription)
+        source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
+        location = ''.join(source_server_object.location.lower().split())
+        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+        index_tuning_supported = list_location_capability_info['index_tuning_supported']
+        if not index_tuning_supported:
+            raise CLIError("Index tuning is not supported for the server.")
+
+        logger.warning("Enabling index tuning for the server.")
+        configuration_name = "index_tuning.mode"
+        value = "report"
+        _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        configuration_name = "pg_qs.query_capture_mode"
+        query_capture_mode_configuration = client.get(resource_group_name, server_name, configuration_name)
+
+        if query_capture_mode_configuration.value.lower() == "none":
+            value = "all"
+            _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        logger.warning("Index tuning is enabled for the server.")
+    else:
+        logger.warning("Disabling index tuning for the server.")
+        configuration_name = "index_tuning.mode"
+        value = "off"
+        _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        logger.warning("Index tuning is disabled for the server.")
+
+
+def index_tuning_show(client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    index_tuning_configuration = client.get(resource_group_name, server_name, "index_tuning.mode")
+    query_capture_mode_configuration = client.get(resource_group_name, server_name, "pg_qs.query_capture_mode")
+
+    if index_tuning_configuration.value.lower() == "report" and query_capture_mode_configuration.value.lower() != "none":
+        logger.warning("Index tuning is enabled for the server.")
+    else:
+        logger.warning("Index tuning is disabled for the server.")
+
+
+def index_tuning_settings_list(cmd, client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    index_tuning_configurations_map_values = get_index_tuning_settings_map().values()
+    configurations_list = client.list_by_server(resource_group_name, server_name)
+
+    # Filter the list based on the values in the dictionary
+    index_tuning_settings = [setting for setting in configurations_list if setting.name in index_tuning_configurations_map_values]
+
+    return index_tuning_settings
+
+
+def index_tuning_settings_get(cmd, client, resource_group_name, server_name, setting_name):
+    validate_resource_group(resource_group_name)
+    index_tuning_configurations_map = get_index_tuning_settings_map()
+    index_tuning_configuration_name = index_tuning_configurations_map[setting_name]
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        configuration_name=index_tuning_configuration_name)
+
+
+def index_tuning_settings_set(client, resource_group_name, server_name, setting_name, value=None):
+    source = "user-override" if value else None
+    tuning_settings = get_index_tuning_settings_map()
+    configuration_name = tuning_settings[setting_name]
+    return flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source, value)
+
+
+def recommendations_list(cmd, resource_group_name, server_name, recommendation_type=None):
+    validate_resource_group(resource_group_name)
+    tuning_options_client = cf_postgres_flexible_tuning_options(cmd.cli_ctx, None)
+
+    return tuning_options_client.list_recommendations(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        tuning_option="index",
+        recommendation_type=recommendation_type
+    )
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
