@@ -27,6 +27,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         )
 
     @record_only()
+    @unittest.skip('Needs passwordless extension released')
     def test_webapp_fabric_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
