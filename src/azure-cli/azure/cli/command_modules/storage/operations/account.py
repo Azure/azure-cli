@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
+
 """Custom operations for storage account commands"""
 
 import os
@@ -11,6 +13,7 @@ from azure.cli.command_modules.storage._client_factory import storage_client_fac
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item, user_confirmation
 from azure.cli.core.profiles import ResourceType, get_sdk
 from ..aaz.latest.storage.account.migration._start import Start as _AccountMigrationStart
+from ..aaz.latest.storage.account import FileServiceUsage as _FileServiceUsage
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -1220,3 +1223,31 @@ class AccountMigrationStart(_AccountMigrationStart):
                        'be stopped after being initiated, and for accounts with geo redundancy a failover can’t be '
                        'initiated while conversion is in progress. The data within the storage account will continue '
                        'to be accessible with no loss of durability or availability.')
+
+
+def _format_storage_account_id(args_schema):
+    from azure.cli.core.aaz import AAZResourceIdArgFormat
+    args_schema.account_name._fmt = AAZResourceIdArgFormat(
+        template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/"
+                 "storageAccounts/{}"
+    )
+    args_schema.resource_group._required = False
+
+
+class FileServiceUsage(_FileServiceUsage):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        args_schema.file_services_name._registered = False
+        args_schema.file_services_name._required = False
+        args_schema.file_service_usages_name._registered = False
+        args_schema.file_service_usages_name._required = False
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_account_name_aaz
+        args = self.ctx.args
+        parse_account_name_aaz(self, args)
+        args.file_services_name = 'default'
+        args.file_service_usages_name = 'default'

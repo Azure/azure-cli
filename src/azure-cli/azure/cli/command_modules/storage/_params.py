@@ -1743,13 +1743,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
 
-    with self.argument_context('storage share-rm delete', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.argument('include', default='none')
-
-    with self.argument_context('storage share-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.ignore('x_ms_snapshot')
-
-    for item in ['create', 'update', 'snapshot']:
+    for item in ['snapshot']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
             t_enabled_protocols, t_root_squash, t_access_tier = \
                 self.get_models('EnabledProtocols', 'RootSquashType', 'ShareAccessTier',
@@ -1769,13 +1763,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('access_tier', arg_type=get_enum_type(t_access_tier), min_api='2019-06-01',
                        help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '
                        '(default), Hot, and Cool. FileStorage account can choose Premium.')
-
-    with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.argument('account_name', storage_account_type, id_part=None)
-        c.argument('include_deleted', action='store_true',
-                   help='Include soft deleted file shares when specified.')
-        c.argument('include_snapshot', action='store_true',
-                   help='Include file share snapshots when specified.')
 
     with self.argument_context('storage share-rm restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('deleted_version',
