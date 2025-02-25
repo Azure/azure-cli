@@ -8,11 +8,13 @@
 [CmdletBinding()]
 Param(
     [Parameter()]
-    [ValidateSet('clean_up')]
-    [string]$clean_up, 
+    [switch]$clean_up, 
 
     [Parameter()]
-    [string]$resource_group_name = "cli-local-test-rg"
+    [string]$resource_group_name = "cli-local-test-rg",
+
+    [Parameter()]
+    [switch]$live
 )
 
 # Set rg for local testing
@@ -23,7 +25,14 @@ $prefix=(Get-Date).ToString("yyyyMMddHHmm")
 $env:AZURE_CLI_LOCAL_TEST_RESOURCE_PREFIX=$prefix
 
 # Run tests
-azdev test appconfig --live
+if ($live) {
+    Write-Host "Running all tests live"
+    azdev test appconfig --live
+}
+else {
+    Write-Host "Running all tests"
+    azdev test appconfig
+}
 
 function clean_up_resources {
     param (
@@ -56,7 +65,7 @@ function clean_up_resources {
 }
 
 # Clean up 
-if ($clean_up -eq 'clean_up') {
+if ($clean_up) {
     Write-Host "Cleaning up resources"
     clean_up_resources -rgName $resource_group_name $prefix
 }
