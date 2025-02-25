@@ -6,64 +6,80 @@
 # --------------------------------------------------------------------------------------------
 
 
-from azure.cli.core.commands import CliCommandType
 from collections import OrderedDict
+
+from azure.cli.core.commands import CliCommandType
+
 
 def transform_offers_table(result):
     if not result:
         return result
-    
+
     # Transform each row while preserving order
     transformed = []
     for item in result:
-        row = OrderedDict([
-            ('Publisher', item['Publisher']),
-            ('Offer', item['Offer']),
-            ('SKU', item['SKU']),
-            ('Version', item['Versions']),
-            ('OS_Type', item['OS_Type'])
-        ])
+        row = OrderedDict(
+            [
+                ("Publisher", item["Publisher"]),
+                ("Offer", item["Offer"]),
+                ("SKU", item["SKU"]),
+                ("Version", item["Versions"]),
+                ("OS_Type", item["OS_Type"]),
+            ]
+        )
         transformed.append(row)
-    
+
     return transformed
+
 
 def transform_offer_table(result):
     if not result:
         return result
-    
+
     # Transform each row while preserving order
     transformed = []
     for item in result:
         # Format versions to be on separate lines if it's a list/array
-        versions = item['Versions']
+        versions = item["Versions"]
         if isinstance(versions, str):
             # Split by comma if it's a comma-separated string
-            versions = [v.strip() for v in versions.split(',')]
-        
+            versions = [v.strip() for v in versions.split(",")]
+
         if isinstance(versions, (list, tuple)):
             # Format each version on a new line, preserving the full format
-            formatted_versions = '\n'.join(str(v).strip() for v in versions)
+            formatted_versions = "\n".join(str(v).strip() for v in versions)
         else:
             formatted_versions = str(versions)
-        row = OrderedDict([
-            ('Publisher', item['Publisher']),
-            ('Offer', item['Offer']),
-            ('SKU', item['SKU']),
-            ('Version', formatted_versions),
-            ('OS_Type', item['OS_Type'])
-        ])
+        row = OrderedDict(
+            [
+                ("Publisher", item["Publisher"]),
+                ("Offer", item["Offer"]),
+                ("SKU", item["SKU"]),
+                ("Version", formatted_versions),
+                ("OS_Type", item["OS_Type"]),
+            ]
+        )
         transformed.append(row)
-    
+
     return transformed
+
 
 def load_command_table(self, _):
     custom_command_type = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.disconnectedoperations.custom#{}'
+        operations_tmpl="azure.cli.command_modules.disconnectedoperations.custom#{}"
     )
 
-    with self.command_group('disconnectedoperations edgemarketplace', custom_command_type=custom_command_type) as g:
-        g.custom_command('listoffers', 'list_offers', table_transformer=transform_offers_table)
-        g.custom_command('getoffer', 'get_offer', table_transformer=transform_offer_table)
-        g.custom_command('packageoffer', 'package_offer')
-    
+    with self.command_group(
+        "disconnectedoperations edgemarketplace",
+        custom_command_type=custom_command_type,
+        is_preview=True,
+    ) as g:
+        g.custom_command(
+            "listoffers", "list_offers", table_transformer=transform_offers_table
+        )
+        g.custom_command(
+            "getoffer", "get_offer", table_transformer=transform_offer_table
+        )
+        g.custom_command("packageoffer", "package_offer")
+
     return self.command_table

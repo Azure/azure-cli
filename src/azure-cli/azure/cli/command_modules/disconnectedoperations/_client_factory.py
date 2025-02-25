@@ -7,15 +7,9 @@
 def get_disconnectedoperations_management_client(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.disconnectedoperations import DisconnectedOperationsClient
+
     return get_mgmt_service_client(cli_ctx, DisconnectedOperationsClient)
 
 
 def cf_image(cli_ctx, *_):
     return get_disconnectedoperations_management_client(cli_ctx).image
-
-def cf_logos(cli_ctx, *_):
-    return get_disconnectedoperations_management_client(cli_ctx).logos
-
-def cf_metadata(cli_ctx, *_):
-    return get_disconnectedoperations_management_client(cli_ctx).metadata
-
