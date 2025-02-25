@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 import re
+import requests
 import random
 import string
 
@@ -23,7 +23,6 @@ from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
 )
-import requests
 
 from ._utils import (
     run_cli_cmd,
@@ -106,7 +105,7 @@ def check_required_args(resource, cmd_arg_values):
     '''Check whether a resource's required arguments are in cmd_arg_values
     '''
     args = re.findall(r'\{([^\{\}]*)\}', resource)
-    
+
     if 'subscription' in args:
         args.remove('subscription')
     for arg in args:
@@ -116,7 +115,8 @@ def check_required_args(resource, cmd_arg_values):
 
 
 def get_fabric_access_token():
-    return run_cli_cmd('az account get-access-token --output json --resource https://api.fabric.microsoft.com/').get('accessToken')
+    get_fabric_token_cmd = 'az account get-access-token --output json --resource https://api.fabric.microsoft.com/'
+    return run_cli_cmd(get_fabric_token_cmd).get('accessToken')
 
 
 def generate_fabric_connstr_props(target_id):
@@ -975,7 +975,7 @@ def validate_connstr_props(cmd, namespace):
             namespace.connstr_props = generate_fabric_connstr_props(namespace.target_id)
 
             if namespace.connstr_props is None:
-                e = InvalidArgumentValueError("Fabric Connection String Properties must exist, and contain Server and Database")
+                e = InvalidArgumentValueError("Fabric Connection String Properties must be provided")
                 telemetry.set_exception('fabric-connstr-props-unavailable')
                 raise e
         else:

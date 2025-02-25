@@ -187,7 +187,7 @@ def add_connstr_props_argument(context):
                      action=AddAdditionalConnectionStringProperties, nargs='*',
                      help='The additional connection string properties used to build connection string.',
                      validator=validate_connstr_props)
-    
+
 
 def add_target_type_argument(context, source):
     TARGET_TYPES = [
