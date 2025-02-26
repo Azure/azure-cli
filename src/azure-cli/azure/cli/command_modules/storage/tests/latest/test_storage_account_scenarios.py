@@ -392,6 +392,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update -n {} --allow-blob-public-access false'.format(storage_account),
                  checks=[JMESPathCheck('allowBlobPublicAccess', False)])
 
+    @unittest.skip('Failure due to service behavior change')
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     def test_storage_create_with_min_tls(self, resource_group):
@@ -414,6 +415,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name4, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
 
+    @unittest.skip('Failure due to service behavior change')
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     @StorageAccountPreparer(name_prefix='tls')
@@ -1773,14 +1775,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group,
             'container': self.create_random_name(prefix='container', length=24),
         }
-        self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab3 -l eastus2euap --sku Premium_LRS',
+        self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftdclabs1 -l eastus2euap --sku Premium_LRS',
                  checks=[
-                     JMESPathCheck('extendedLocation.name', 'microsoftrrdclab3'),
+                     JMESPathCheck('extendedLocation.name', 'microsoftdclabs1'),
                      JMESPathCheck('extendedLocation.type', 'EdgeZone')
                  ])
-        self.cmd('storage account create -n {sa2} -g {rg} --edge-zone microsoftlosangeles1 --sku Premium_LRS',
+        self.cmd('storage account create -n {sa2} -g {rg} --edge-zone losangeles --sku Premium_LRS',
                  checks=[
-                     JMESPathCheck('extendedLocation.name', 'microsoftlosangeles1'),
+                     JMESPathCheck('extendedLocation.name', 'losangeles'),
                      JMESPathCheck('extendedLocation.type', 'EdgeZone')
                  ])
 
@@ -2196,7 +2198,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
             JMESPathCheck('shareDeleteRetentionPolicy.days', 7),
-            JMESPathCheck('protocolSettings.smb.multichannel.enabled', False))
+            JMESPathCheck('protocolSettings.smb.multichannel.enabled', True))
 
         self.cmd('{cmd} show -n {sa2} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
@@ -2228,7 +2230,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
             JMESPathCheck('shareDeleteRetentionPolicy.days', 7),
-            JMESPathCheck('protocolSettings.smb.multichannel.enabled', False),
+            JMESPathCheck('protocolSettings.smb.multichannel.enabled', True),
             JMESPathCheck('protocolSettings.smb.authenticationMethods', None),
             JMESPathCheck('protocolSettings.smb.channelEncryption', None),
             JMESPathCheck('protocolSettings.smb.kerberosTicketEncryption', None),
@@ -2246,7 +2248,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
             JMESPathCheck('shareDeleteRetentionPolicy.days', 7),
-            JMESPathCheck('protocolSettings.smb.multichannel.enabled', False),
+            JMESPathCheck('protocolSettings.smb.multichannel.enabled', True),
             JMESPathCheck('protocolSettings.smb.authenticationMethods', "NTLMv2;Kerberos"),
             JMESPathCheck('protocolSettings.smb.channelEncryption', "AES-128-CCM;AES-128-GCM;AES-256-GCM"),
             JMESPathCheck('protocolSettings.smb.kerberosTicketEncryption', "RC4-HMAC;AES-256"),
@@ -2361,6 +2363,45 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
         ])
 
         self.cmd('az storage account delete -n {gzrs_sa} -g {rg} -y')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2024-01-01')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='eastus2euap')
+    def test_storage_account_provisioned_v2_sku(self, resource_group):
+        self.kwargs = {
+            'StandardV2_LRS': self.create_random_name(prefix='sastdlrs', length=24),
+            'StandardV2_ZRS': self.create_random_name(prefix='sastdzrs', length=24),
+            'StandardV2_GRS': self.create_random_name(prefix='sastdgrs', length=24),
+            'StandardV2_GZRS': self.create_random_name(prefix='sastdgzrs', length=24),
+            'PremiumV2_LRS': self.create_random_name(prefix='saprmlrs', length=24),
+            'PremiumV2_ZRS': self.create_random_name(prefix='saprmzrs', length=24),
+            'rg': resource_group
+        }
+        provisioned_v2_skus = [
+            "StandardV2_LRS", "StandardV2_ZRS", "StandardV2_GRS", "StandardV2_GZRS", "PremiumV2_LRS", "PremiumV2_ZRS"
+        ]
+        provisioned_v2_update_skus = [
+            "StandardV2_GRS", "StandardV2_GZRS", "StandardV2_LRS", "StandardV2_ZRS"
+        ]
+
+        # Create storage account with each new provisioned v2 skus
+        for index, sku in enumerate(provisioned_v2_skus):
+            self.cmd('az storage account create -n {} -g {} --sku {} --kind FileStorage -l eastus2euap'
+                     .format(self.kwargs.get(sku), resource_group, sku),
+                     checks=[self.check('sku.name', sku)])
+
+            self.cmd('az storage account show -n {} -g {}'.format(self.kwargs.get(sku), resource_group), checks=[
+                self.check('sku.name', sku)
+            ])
+
+            if index > 3:
+                continue
+
+            self.cmd('az storage account update -n {} -g {} --sku {}'
+                     .format(self.kwargs.get(sku), resource_group, provisioned_v2_update_skus[index]),
+                     checks=[self.check('sku.name', provisioned_v2_update_skus[index])])
+
+        sku_list = self.cmd('az storage account list -g {rg} --query [].sku.name').get_output_in_json()
+        self.assertSetEqual(set(provisioned_v2_skus), set(sku_list))
 
 
 class StorageAccountFailoverScenarioTest(ScenarioTest):
