@@ -9,7 +9,7 @@ from knack.log import get_logger
 from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.util import parse_proxy_resource_id, user_confirmation
+from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from ._client_factory import cf_mysql_flexible_servers
@@ -267,9 +267,6 @@ def _mysql_high_availability_validator(high_availability, standby_availability_z
             raise ArgumentUsageError("This region is single availability zone. "
                                      "Zone redundant high availability is not supported "
                                      "in a single availability zone region.")
-        if not single_az and high_availability.lower() == 'samezone':
-            user_confirmation("The region supports multi-AZ, and the server will be provisioned as "
-                              "a zone-redundant HA server. Do you want to continue?", yes=yes)
         if auto_grow.lower == 'Disabled':
             raise ArgumentUsageError("Enabling High availability requires auto-grow to be turned ON.")
     if standby_availability_zone:

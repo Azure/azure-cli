@@ -380,7 +380,6 @@ def flexible_server_create(cmd, client,
                               iops=iops)
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
-    single_az = list_skus_info['single_az']
 
     server_result = firewall_name = None
 
@@ -407,8 +406,6 @@ def flexible_server_create(cmd, client,
     accelerated_logs = _determine_acceleratedLogs(accelerated_logs, tier)
 
     storage_redundancy = _determine_storage_redundancy(storage_redundancy, tier)
-
-    high_availability = _determine_hight_availability(high_availability, single_az)
 
     storage = models.Storage(storage_size_gb=storage_gb,
                              iops=iops,
@@ -1673,11 +1670,6 @@ def _determine_acceleratedLogs(accelerated_logs, tier):
     if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
         accelerated_logs = "Disabled"
     return accelerated_logs
-
-
-def _determine_hight_availability(high_availability, single_az):
-    if not single_az and high_availability.lower() == 'samezone':
-        return 'ZoneRedundant'
 
 
 def _determine_storage_redundancy(storage_redundancy, tier):
