@@ -3,6 +3,89 @@
 Release History
 ===============
 
+2.70.0
+++++++
+
+**AKS**
+
+* `az aks create/az aks nodepool add`: Emit error message when using `--asg-ids` alone without `--allowed-host-ports` (#30768)
+* `az aks nodepool upgrade`: Fix `--node-soak-duration` cannot be set to 0 (#30778)
+* `az aks machine list`: Add command to fetch list of machines in an agentpool (#29939)
+* `az aks machine show`: Add command to fetch information about a specific machine in an agentpool (#29939)
+* `az aks nodepool delete`: Add `--ignore-pod-disruption-budget` option for ignoring PodDisruptionBudget (#30196)
+* `az aks create`: Add `--message-of-the-day` parameter to support message of the day (#30862)
+* `az aks nodepool add`: Add `--message-of-the-day` parameter to support message of the day (#30862)
+
+**App Config**
+
+* `az appconfig kv import`: Fix bug when importing feature flag with percentile allocation property (#30732)
+* `az appconfig kv export`: Fix bug when importing feature flag with percentile allocation property (#30732)
+* `az appconfig`: Add support for custom token audience to `--auth-mode login` parameter (#30739)
+
+**App Service**
+
+* `functionapp create`: Check if storage account is network restricted (#30605)
+* `az functionapp create`: Refactor EOL message (#30791)
+* Fix #28104: `az webapp config storage-account`: Remove windows limitation notes (#30775)
+* Fix #28374: `az webapp create`: Improve error message for globally unique name for new app create (#30750)
+* `az webapp sitecontainers`: Add new commands for linux web app sitecontainers (#30776)
+* `az webapp up`: Add `--enable-kudu-warmup` parameter to support warm-up Kudu before making deployment (#30872)
+* `az webapp deploy`: Add `--enable-kudu-warmup` parameter to support warm-up Kudu before making deployment (#30872)
+* `az webapp deployment source config-zip`: Add `--enable-kudu-warmup` parameter to support warm-up Kudu before making deployment (#30872)
+* Fix #29493: `az webapp create`: Update basic-auth parameter description (#30734)
+
+**ARM**
+
+* `az bicep`: Fix installation check for concurrent usages (#30722)
+
+**Backup**
+
+* `az backup restore restore-disks`: Support NoZone as a valid target zone for `--target-zone` parameter (#30720)
+
+**Compute**
+
+* `az vm available-set create/update`: Add `--additional-scheduled-events` parameter to support setting scheduled event policy (#30835)
+* `az vm available-set create/update`: Add `--enable-user-reboot-scheduled-events` parameter to support setting scheduled event policy (#30835)
+* `az vm available-set create/update`: Add `--enable-user-redeploy-scheduled-events` parameter to support setting scheduled event policy (#30835)
+
+**Container app**
+
+* `az containerapp create`: Fix to make `--registry-username` value to be `DNS1123` compliant (#30563)
+
+**Cosmos DB**
+
+* `az cosmosdb offline-region`: New command to support offline region for cosmosdb account (#30781)
+
+**IoT**
+
+* `az iot hub update`: Add `--min-tls-version` parameter to allow updating min tls version in a cleaner way (#30710)
+
+**NetAppFiles**
+
+* `az netappfiles account`: Add new command ` change-key-vault` to change KeyVault/Managed HSM that is used for encryption of volumes under NetApp account (#30773)
+* `az netappfiles account`: Add new command `get-key-vault-status` to get KeyVault information. Response from this command can be used for transitiontocmk (#30773)
+* `az netappfiles account`: Add new command `transitiontocmk` to transition all volumes in a VNet to a different encryption key source (Microsoft-managed key or Azure Key Vault). Operation fails if targeted volumes share encryption sibling set with volumes from another account (#30773)
+* `az netappfiles volume create/update`: Add parameter `--cool-access-tiering-policy` (#30773)
+
+**Network**
+
+* `az network nic ip-config create/update`: Add new parameter `--private-ip-address-prefix-length` to support setting private ip address prefix length (#30837)
+
+**RDBMS**
+
+* `az postgres flexible-server index-tuning`: Support tuning options operations (#30851)
+
+**Service Connector**
+
+* `az containerapp connection create redis`: Add `--system-identity` paramter (#30808)
+* `az webapp connection create fabric-sql`: Fix interactive mode & allow new parameters `--fabric-workspace-uuid` and `fabric-sql-db-uuid` (#30881)
+
+**Storage**
+
+* `az storage account create`: Add new `--sku StandardV2_LRS/StandardV2_ZRS/StandardV2_ZRS/StandardV2_ZRS/PremiumV2_LRS/PremiumV2_ZRS` for provisioned v2 support (#30873)
+* `az storage account file-service-usage`: Support getting file-service usage for storage account (#30873)
+* `az storage share-rm create/update`: Add `--paid-bursting-enabled`, `--paid-bursting-max-bandwidth-mibps`, `--paid-bursting-max-iops` for provisioned v1, add `--provisioned-bandwidth-mibps`, `--provisioned-iops` for provisioned v2 accounts (#30873)
+
 2.69.0
 ++++++
 
