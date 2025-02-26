@@ -5687,44 +5687,63 @@ def show_capacity_reservation(client, resource_group_name, capacity_reservation_
 
 
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
+    # client = _compute_client_factory(cmd.cli_ctx)
+    # ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
-        vm = client.virtual_machines.get(resource_group_name, vm_name)
+        from .operations.vm import VMShow
+        vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "resource_group": resource_group_name,
+            "vm_name": vm_name
+        })
+        # vm = client.virtual_machines.get(resource_group_name, vm_name)
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
 
-    vm.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+    # vm.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+    vm["application_profile"] = {
+        "gallery_applications": [{"package_reference_id": avid} for avid in application_version_ids]
+    }
 
     if order_applications:
         index = 1
-        for app in vm.application_profile.gallery_applications:
-            app.order = index
+        for app in vm["application_profile"]["gallery_applications"]:
+            app["order"] = index
             index += 1
 
     if application_configuration_overrides:
         index = 0
         for over_ride in application_configuration_overrides:
             if over_ride or over_ride.lower() != 'null':
-                vm.application_profile.gallery_applications[index].configuration_reference = over_ride
+                vm["application_profile"]["gallery_applications"][index]["configuration_reference"] = over_ride
             index += 1
 
     if treat_deployment_as_failure:
         index = 0
         for treat_as_failure in treat_deployment_as_failure:
-            vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = \
+            vm["application_profile"]["gallery_applications"][index]["treat_failure_as_deployment_failure"] = \
                 treat_as_failure.lower() == 'true'
             index += 1
-    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
+    # return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
+
+    vm["resource_group"] = resource_group_name
+    vm["vm_name"] = vm_name
+
+    from .operations.vm import VMCreate
+    return VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
 
 
 def list_vm_applications(cmd, vm_name, resource_group_name):
-    client = _compute_client_factory(cmd.cli_ctx)
+    # client = _compute_client_factory(cmd.cli_ctx)
     try:
-        vm = client.virtual_machines.get(resource_group_name, vm_name)
+        # vm = client.virtual_machines.get(resource_group_name, vm_name)
+        from .operations.vm import VMShow
+        vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "resource_group": resource_group_name,
+            "vm_name": vm_name
+        })
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
-    return vm.application_profile
+    return vm["applicationProfile"]
 
 
 def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
