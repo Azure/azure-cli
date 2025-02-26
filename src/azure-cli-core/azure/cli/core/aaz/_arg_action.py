@@ -167,6 +167,9 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if isinstance(data, cls._schema.DataType):
             return data
 
+        if isinstance(data, int) and cls._schema.DataType == float:
+            return data
+
         raise AAZInvalidValueError(f"{cls._schema.DataType} type value expected, got '{data}'({type(data)})")
 
 

@@ -1520,6 +1520,19 @@ class TestAAZArg(unittest.TestCase):
             "new_i_pv6": '00:00:00'
         })
 
+        # test assign the int value to the float field, it should be converted to float
+        action.setup_operations(dest_ops, ["{enable:True,tags:null,vnets:null,pt:12,newIPv6:'00:00:00'}"])
+        self.assertEqual(len(dest_ops._ops), 13)
+        dest_ops.apply(v, "properties")
+        self.assertEqual(v.properties, {
+            "enable": True,
+            "tags": None,
+            "vnets": None,
+            "pt": 12.0,
+            "new_i_pv6": '00:00:00'
+        })
+
+
     def test_aaz_has_value_for_buildin(self):
         from azure.cli.core.aaz import has_value, AAZUndefined
         self.assertTrue(has_value(0))
