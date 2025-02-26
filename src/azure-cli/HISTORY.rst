@@ -18,13 +18,12 @@ Release History
 
 **App Config**
 
-* `az appconfig kv import`: Fix bug when importing feature flag with percentile allocation property (#30732)
-* `az appconfig kv export`: Fix bug when importing feature flag with percentile allocation property (#30732)
+* `az appconfig kv import/export`: Fix bug when importing feature flag with percentile allocation property (#30732)
 * `az appconfig`: Add support for custom token audience to `--auth-mode login` parameter (#30739)
 
 **App Service**
 
-* `functionapp create`: Check if storage account is network restricted (#30605)
+* `az functionapp create`: Check if storage account is network restricted (#30605)
 * `az functionapp create`: Refactor EOL message (#30791)
 * Fix #28104: `az webapp config storage-account`: Remove windows limitation notes (#30775)
 * Fix #28374: `az webapp create`: Improve error message for globally unique name for new app create (#30750)
@@ -54,7 +53,7 @@ Release History
 
 **Cosmos DB**
 
-* `az cosmosdb offline-region`: New command to support offline region for cosmosdb account (#30781)
+* `az cosmosdb offline-region`: Add new command to support offline region for cosmosdb account (#30781)
 
 **IoT**
 
@@ -62,14 +61,14 @@ Release History
 
 **NetAppFiles**
 
-* `az netappfiles account`: Add new command ` change-key-vault` to change KeyVault/Managed HSM that is used for encryption of volumes under NetApp account (#30773)
+* `az netappfiles account`: Add new command `change-key-vault` to change KeyVault/Managed HSM that is used for encryption of volumes under NetApp account (#30773)
 * `az netappfiles account`: Add new command `get-key-vault-status` to get KeyVault information. Response from this command can be used for transitiontocmk (#30773)
 * `az netappfiles account`: Add new command `transitiontocmk` to transition all volumes in a VNet to a different encryption key source (Microsoft-managed key or Azure Key Vault). Operation fails if targeted volumes share encryption sibling set with volumes from another account (#30773)
 * `az netappfiles volume create/update`: Add parameter `--cool-access-tiering-policy` (#30773)
 
 **Network**
 
-* `az network nic ip-config create/update`: Add new parameter `--private-ip-address-prefix-length` to support setting private ip address prefix length (#30837)
+* `az network nic ip-config create/update`: Add `--private-ip-address-prefix-length` to support setting private ip address prefix length (#30837)
 
 **RDBMS**
 
