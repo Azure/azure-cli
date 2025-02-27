@@ -12,7 +12,6 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_gallery_image_versions,
                                                                       cf_dedicated_hosts, cf_dedicated_host_groups,
                                                                       cf_log_analytics_data_plane,
-                                                                      cf_disk_encryption_set,
                                                                       cf_shared_gallery_image,
                                                                       cf_shared_gallery_image_version,
                                                                       cf_capacity_reservation_groups,
@@ -157,11 +156,6 @@ def load_command_table(self, _):
         client_factory=cf_img_bldr_image_templates,
     )
 
-    compute_disk_encryption_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
-        client_factory=cf_disk_encryption_set
-    )
-
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
         exception_handler=monitor_exception_handler
@@ -205,15 +199,6 @@ def load_command_table(self, _):
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
-
-    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
-        g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
-
-    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2022-03-02') as g:
-        g.custom_command('assign', 'assign_disk_encryption_set_identity')
-        g.custom_command('remove', 'remove_disk_encryption_set_identity', confirmation=True)
-        g.custom_show_command('show', 'show_disk_encryption_set_identity')
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
