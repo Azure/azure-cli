@@ -23,3 +23,4 @@ from ._reimage import *
 from ._show import *
 from ._simulate_eviction import *
 from ._start import *
+from ._update import *
