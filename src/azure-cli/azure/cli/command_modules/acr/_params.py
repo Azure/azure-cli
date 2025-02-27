@@ -535,7 +535,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('cleanup', help='It will aslo delete the sync token and the scope map resources.')
         c.argument('no_children', help='Used to remove all children from the list.', action='store_true')
         c.argument('sync_audit_logs_enabled', options_list=['--audit-logs-enabled'], help='Indicate whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
-
         c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Specify the protocol used to communicate with its parent.', required=True)
         c.argument('generate_password', arg_type=get_enum_type(['1', '2']), options_list=['--generate-password'], help='Select which password you want to generate, and it is required to retrieve the password from the sync token.')
 
@@ -547,6 +546,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
         c.argument('sync_message_ttl', help='Determine how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
         c.argument('notifications', options_list=['--notifications'], nargs='+', help='List of artifact pattern for which notifications need to be generated. Use the format "--notifications [PATTERN1 PATTERN2 ...]".')
+        c.argument('garbage_collection_enabled', options_list=['--garbage-collection-enabled'], 
+                   help='Indicate whether garbage collection is enabled. It is enabled by default.',arg_type=get_three_state_flag(),required=False, default="true")
+        c.argument('garbage_collection_schedule', options_list=['--garbage-collection-schedule'],
+                   help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.',required=False, default="0 0 * * *")
 
     with self.argument_context('acr connected-registry update') as c:
         c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.')
@@ -561,7 +564,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='List of artifact pattern to be added to notifications list. Use the format "--add-notifications [PATTERN1 PATTERN2 ...]".')
         c.argument('remove_notifications', options_list=['--remove-notifications'], nargs='*',
                    help='List of artifact pattern to be removed from notifications list. Use the format "--remove-notifications [PATTERN1 PATTERN2 ...]".')
-
+        c.argument('garbage_collection_enabled', options_list=['--garbage-collection-enabled'], 
+                   help='Indicate whether garbage collection is enabled. It is enabled by default.',arg_type=get_three_state_flag())
+        c.argument('garbage_collection_schedule', options_list=['--garbage-collection-schedule'], help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.')
     with self.argument_context('acr connected-registry permissions') as c:
         c.argument('add_repos', options_list=['--add'], nargs='*',
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
