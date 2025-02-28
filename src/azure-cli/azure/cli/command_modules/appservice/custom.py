@@ -36,7 +36,8 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resou
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
-from azure.mgmt.web.models import KeyInfo
+from azure.mgmt.web.models import KeyInfo, SiteContainer, AuthType
+from azure.mgmt.web import WebSiteManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -108,7 +109,8 @@ logger = get_logger(__name__)
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, container_registry_password=None, container_registry_user=None,
+                  deployment_local_git=None, sitecontainers_app=None,
+                  container_registry_password=None, container_registry_user=None,
                   container_registry_url=None, container_image_name=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
@@ -172,7 +174,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         app_details = get_app_details(cmd, name)
         if app_details is None:
             raise ResourceNotFoundError("Unable to retrieve details of the existing app '{}'. Please check that "
-                                        "the app is a part of the current subscription".format(name))
+                                        "the app is a part of the current subscription. If "
+                                        "creating a new app, app names must be globally unique. Please try a more "
+                                        "unique name".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
             raise ValidationError("The webapp '{}' exists in resource group '{}' and does not "
@@ -224,20 +228,24 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     current_stack = None
     if is_linux:
         if not validate_container_app_create_options(runtime, container_image_name,
-                                                     multicontainer_config_type, multicontainer_config_file):
+                                                     multicontainer_config_type, multicontainer_config_file,
+                                                     sitecontainers_app):
             if deployment_container_image_name:
                 raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                          'and --multicontainer-config-file FILE, '
                                          'and only specify one out of --runtime, '
-                                         '--deployment-container-image-name and --multicontainer-config-type')
+                                         '--deployment-container-image-name, --multicontainer-config-type '
+                                         'or --sitecontainers_app')
             raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                      'and --multicontainer-config-file FILE, '
                                      'and only specify one out of --runtime, '
-                                     '--container-image-name and --multicontainer-config-type')
+                                     '--container-image-name, --multicontainer-config-type '
+                                     'or --sitecontainers_app')
         if startup_file:
             site_config.app_command_line = startup_file
-
-        if runtime:
+        if sitecontainers_app:
+            site_config.linux_fx_version = 'SITECONTAINERS'
+        elif runtime:
             match = helper.resolve(runtime, is_linux)
             if not match:
                 raise ValidationError("Linux Runtime '{}' is not supported."
@@ -431,10 +439,11 @@ def get_managed_environment(cmd, resource_group_name, environment_name):
 
 
 def validate_container_app_create_options(runtime=None, container_image_name=None,
-                                          multicontainer_config_type=None, multicontainer_config_file=None):
+                                          multicontainer_config_type=None, multicontainer_config_file=None,
+                                          sitecontainers_app=None):
     if bool(multicontainer_config_type) != bool(multicontainer_config_file):
         return False
-    opts = [runtime, container_image_name, multicontainer_config_type]
+    opts = [runtime, container_image_name, multicontainer_config_type, sitecontainers_app]
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
 
 
@@ -681,8 +690,9 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
 
 
-def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=True):
-    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status)
+def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=True,
+                             enable_kudu_warmup=True):
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status, enable_kudu_warmup)
 
 
 def check_flex_app_after_deployment(cmd, resource_group_name, name):
@@ -768,7 +778,9 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
                                  .format(res.status_code, res.text))
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=False):
+# This funtion performs deployment using /zipdeploy for both function app and web app
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None,
+                      track_status=False, enable_kudu_warmup=True):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -791,6 +803,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     from azure.cli.core.util import should_disable_connection_verify
     # check if the app is a linux web app
     app_is_linux_webapp = is_linux_webapp(app)
+    app_is_function_app = is_functionapp(app)
 
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
@@ -799,7 +812,26 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         if app_is_linux_webapp and track_status is not None and track_status:
             headers["x-ms-artifact-checksum"] = _compute_checksum(zip_content)
 
-        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        if app_is_linux_webapp and not app_is_function_app and enable_kudu_warmup:
+            try:
+                logger.info("Warming up Kudu before deployment.")
+                cookies = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
+                if cookies is None:
+                    logger.info("Failed to fetch affinity cookie. Deployment "
+                                "will proceed without pre-warming a Kudu instance.")
+                    res = requests.post(zip_url, data=zip_content, headers=headers,
+                                        verify=not should_disable_connection_verify())
+                else:
+                    res = requests.post(zip_url, data=zip_content, headers=headers, cookies=cookies,
+                                        verify=not should_disable_connection_verify())
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info("Failed to deploy using affinity cookie. "
+                            "Deployment will proceed without pre-warming a Kudu instance. Exception: %s", ex)
+                res = requests.post(zip_url, data=zip_content, headers=headers,
+                                    verify=not should_disable_connection_verify())
+        else:
+            res = requests.post(zip_url, data=zip_content, headers=headers,
+                                verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     # check the status of async deployment
@@ -989,6 +1021,336 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
     except Exception as ex:  # pylint: disable=broad-except
         if ex.response.status_code != 200:
             raise ex
+
+
+class SiteContainerSpec:
+    # pylint: disable=too-many-instance-attributes,too-few-public-methods
+    from azure.mgmt.web.models import VolumeMount, EnvironmentVariable
+
+    def __init__(self, name: str, image: str, target_port: str, is_main: bool, start_up_command: str = None,
+                 auth_type: str = None, user_name: str = None, password_secret: str = None,
+                 user_managed_identity_client_id: str = None, volume_mounts: list[VolumeMount] = None,
+                 environment_variables: list[EnvironmentVariable] = None):
+        self.name = name
+        self.image = image
+        self.target_port = target_port
+        self.is_main = is_main
+        self.start_up_command = start_up_command
+        self.auth_type = auth_type
+        self.user_name = user_name
+        self.password_secret = password_secret
+        self.user_managed_identity_client_id = user_managed_identity_client_id
+        self.volume_mounts = volume_mounts
+        self.environment_variables = environment_variables
+
+    @classmethod
+    def from_json(cls, json_data):
+        name = json_data.get("name")
+        properties = {k.lower(): v for k, v in json_data.get("properties", {}).items()}
+        volume_mounts = properties.get("volumemounts")
+        if volume_mounts:
+            for mount in volume_mounts:
+                mount = {k.lower(): v for k, v in mount.items()}
+                if "containermountpath" in mount:
+                    mount["container_mount_path"] = mount.pop("containermountpath")
+                if "volumesubpath" in mount:
+                    mount["volume_sub_path"] = mount.pop("volumesubpath")
+                if "readonly" in mount:
+                    mount["read_only"] = mount.pop("readonly")
+        return cls(
+            name=name,
+            image=properties.get("image"),
+            target_port=properties.get("targetport"),
+            is_main=properties.get("ismain"),
+            start_up_command=properties.get("startupcommand"),
+            auth_type=properties.get("authtype"),
+            user_name=properties.get("username"),
+            password_secret=properties.get("passwordsecret"),
+            user_managed_identity_client_id=properties.get("usermanagedidentityclientid"),
+            volume_mounts=volume_mounts,
+            environment_variables=properties.get("environmentvariables")
+        )
+
+    @classmethod
+    def from_sitecontainer(cls, sitecontainer_name, sitecontainer):
+        return cls(
+            name=sitecontainer_name,  # Required explicitly as SiteContainer.name is read-only in SiteContainer model
+            image=sitecontainer.image,
+            target_port=sitecontainer.target_port,
+            is_main=sitecontainer.is_main,
+            start_up_command=sitecontainer.start_up_command,
+            auth_type=sitecontainer.auth_type,
+            user_name=sitecontainer.user_name,
+            password_secret=sitecontainer.password_secret,
+            user_managed_identity_client_id=sitecontainer.user_managed_identity_client_id,
+            volume_mounts=sitecontainer.volume_mounts,
+            environment_variables=sitecontainer.environment_variables
+        )
+
+
+def create_webapp_sitecontainers(cmd, name, resource_group, slot=None, container_name=None, image=None,
+                                 target_port=None, startup_cmd=None, is_main=None, system_assigned_identity=None,
+                                 user_assigned_identity=None, registry_username=None,
+                                 registry_password=None, sitecontainers_spec_file=None):
+    import os
+    response = None
+    is_system_identity_enabled, user_assigned_identities, app_settings = _get_site_props_for_sitecontainer_app_internal(
+        cmd, resource_group, name, slot)
+
+    # check if sitecontainers_spec_file is provided
+    if sitecontainers_spec_file:
+        response = []
+        logger.warning("Using sitecontainer-spec-file to create sitecontainer(s)")
+        if not os.path.exists(sitecontainers_spec_file):
+            raise ValidationError("The sitecontainer-spec-file does not exist at the path '{}'"
+                                  .format(sitecontainers_spec_file))
+        with open(sitecontainers_spec_file, 'r') as file:
+            sitecontainers_spec_json = None
+            try:
+                sitecontainers_spec_json = json.load(file)
+            except Exception as ex:
+                raise ValidationError("The sitecontainer-spec-file is not a valid JSON. Error: {}".format(str(ex)))
+
+            if not isinstance(sitecontainers_spec_json, list):
+                raise ValidationError("The sitecontainer-spec-file should contain a list of sitecontainers.")
+            try:
+                sitecontainers_spec = [SiteContainerSpec.from_json(container) for container in sitecontainers_spec_json]
+            except Exception as ex:
+                raise ValidationError("Failed to parse the sitecontainer-spec-file. Error: {}".format(str(ex)))
+            if sitecontainers_spec is None or len(sitecontainers_spec) == 0:
+                raise ValidationError("No sitecontainers found in the sitecontainers spec file.")
+            for spec in sitecontainers_spec:
+                existing_sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
+                existing_sitecontainers_spec = [SiteContainerSpec.from_sitecontainer(container.name, container)
+                                                for container in existing_sitecontainers]
+                try:
+                    _validate_sitecontainer_internal(spec, existing_sitecontainers_spec, is_system_identity_enabled,
+                                                     user_assigned_identities, app_settings)
+                except ValidationError as ex:
+                    logger.error(("Validation failed for sitecontainer '%s'. "
+                                 "This sitecontainer will be skipped. Error: %s"), spec.name, ex.error_msg)
+                    continue
+                sitecontainer = SiteContainer(image=spec.image, target_port=spec.target_port,
+                                              start_up_command=spec.start_up_command,
+                                              is_main=spec.is_main, auth_type=spec.auth_type, user_name=spec.user_name,
+                                              password_secret=spec.password_secret,
+                                              user_managed_identity_client_id=spec.user_managed_identity_client_id,
+                                              volume_mounts=spec.volume_mounts,
+                                              environment_variables=spec.environment_variables)
+                response.append(_create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group,
+                                                                                spec.name, sitecontainer, slot))
+                logger.warning("Sitecontainer '%s' added successfully.", spec.name)
+    else:
+        if container_name is None or is_main is None or image is None:
+            raise RequiredArgumentMissingError(("The following arguments are required if argument "
+                                                "--sitecontainers-spec-file "
+                                                "is not provided: --container-name, --image, --is-main"))
+        auth_type = AuthType.ANONYMOUS
+        if system_assigned_identity is True:
+            auth_type = AuthType.SYSTEM_IDENTITY
+        elif user_assigned_identity:
+            auth_type = AuthType.USER_ASSIGNED
+        elif registry_username and registry_password:
+            auth_type = AuthType.USER_CREDENTIALS
+
+        sitecontainer = SiteContainer(image=image, target_port=target_port, start_up_command=startup_cmd,
+                                      is_main=is_main, auth_type=auth_type, user_name=registry_username,
+                                      password_secret=registry_password,
+                                      user_managed_identity_client_id=user_assigned_identity)
+        existing_sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
+        existing_sitecontainers_spec = [SiteContainerSpec.from_sitecontainer(container.name, container)
+                                        for container in existing_sitecontainers]
+        _validate_sitecontainer_internal(SiteContainerSpec.from_sitecontainer(container_name, sitecontainer),
+                                         existing_sitecontainers_spec, is_system_identity_enabled,
+                                         user_assigned_identities, app_settings)
+        response = _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group,
+                                                                   container_name, sitecontainer, slot)
+    return response
+
+
+def _validate_sitecontainer_internal(new_sitecontainer_spec, existing_sitecontainers_spec,
+                                     is_system_assigned_identity_enabled, user_assigned_identities, appsettings):
+    # ensure that isMain=true is unique
+    existing_main_sitecontainer = next((spec for spec in existing_sitecontainers_spec
+                                        if spec.is_main and spec.name != new_sitecontainer_spec.name), None)
+    if new_sitecontainer_spec.is_main and existing_main_sitecontainer:
+        raise ValidationError(("SiteContainer '{}' with isMain=true already exists. "
+                               "Cannot add SiteContainer '{}' as the main sitecontainer.")
+                              .format(existing_main_sitecontainer.name, new_sitecontainer_spec.name))
+    # ensure that targetPort is in range 1 to 65535
+    if new_sitecontainer_spec.target_port is not None:
+        target_port = int(new_sitecontainer_spec.target_port)
+        if target_port < 1 or target_port > 65535:
+            raise ValidationError(("Invalid targetPort '{}' for SiteContainer '{}'. "
+                                  "targetPort must be in the range 1 to 65535.")
+                                  .format(new_sitecontainer_spec.target_port, new_sitecontainer_spec.name))
+    # ensure that targetPort is unique
+    existing_same_port_sitecontainer = next((spec for spec in existing_sitecontainers_spec
+                                             if spec.target_port == new_sitecontainer_spec.target_port and
+                                             spec.name != new_sitecontainer_spec.name), None)
+    if existing_same_port_sitecontainer:
+        raise ValidationError(("SiteContainer '{}' with targetPort '{}' already exists. "
+                              "targetPort must be unique for SiteContainer '{}'.")
+                              .format(existing_same_port_sitecontainer.name, new_sitecontainer_spec.target_port,
+                                      new_sitecontainer_spec.name))
+    # ensure that environment variable value should be a key in appsettings
+    if new_sitecontainer_spec.environment_variables:
+        for env_var in new_sitecontainer_spec.environment_variables:
+            if env_var['value'] not in [setting['name'] for setting in appsettings]:
+                raise ValidationError("The value of env variable '{}' for SiteContainer '{}' is not an app setting."
+                                      .format(env_var['name'], new_sitecontainer_spec.name))
+    # if authType is systemAssigned, ensure that systemAssignedIdentity is enabled
+    if new_sitecontainer_spec.auth_type == AuthType.SYSTEM_IDENTITY and not is_system_assigned_identity_enabled:
+        raise ValidationError(("System assigned identity is not enabled for the site. "
+                              "Cannot use this auth type for SiteContainer '{}'.").format(new_sitecontainer_spec.name))
+    # if authType is userAssigned, ensure that userAssignedIdentity that is provided is enabled for the site
+    if new_sitecontainer_spec.auth_type == AuthType.USER_ASSIGNED and \
+            new_sitecontainer_spec.user_managed_identity_client_id not in user_assigned_identities:
+        raise ValidationError(("User assigned identity with ClientID '{}' is not added for the site. "
+                              "Cannot use this identity for SiteContainer '{}'.").format(
+            new_sitecontainer_spec.user_managed_identity_client_id, new_sitecontainer_spec.name))
+
+
+def _get_site_props_for_sitecontainer_app_internal(cmd, resource_group, name, slot):
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get_slot(resource_group, name, slot) if slot else client.web_apps.get(resource_group, name)
+    if not is_linux_webapp(app):
+        raise ValidationError("Site is not a linux webapp. Sitecontainers are only supported for linux webapps.")
+    is_system_identity_enabled = False
+    user_assigned_identities = []
+    if app.identity:
+        is_system_identity_enabled = 'SystemAssigned' in app.identity.type
+        if app.identity.user_assigned_identities:
+            user_assigned_identities = [identity.client_id
+                                        for identity in app.identity.user_assigned_identities.values()]
+    app_settings = get_app_settings(cmd, resource_group, name, slot)
+    return is_system_identity_enabled, user_assigned_identities, app_settings
+
+
+def _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, container_name,
+                                                    sitecontainer, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    try:
+        if slot:
+            return web_client.create_or_update_site_container_slot(resource_group, name,
+                                                                   slot, container_name, sitecontainer)
+        return web_client.create_or_update_site_container(resource_group, name, container_name, sitecontainer)
+    except Exception as ex:
+        raise AzureInternalError("Failed to create or update sitecontainer {}. Error: {}"
+                                 .format(container_name, str(ex)))
+
+
+def update_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None, image=None, target_port=None,
+                                startup_cmd=None, is_main=None, system_assigned_identity=None,
+                                user_assigned_identity=None, registry_username=None, registry_password=None):
+    # get the sitecontainer
+    site_container = None
+    try:
+        site_container = get_webapp_sitecontainer(cmd, name, resource_group, container_name, slot)
+    except:
+        raise ResourceNotFoundError("Sitecontainer '{}' does not exist, failed to update the sitecontainer."
+                                    .format(container_name))
+    site_container.image = image or site_container.image
+    site_container.target_port = target_port
+    site_container.start_up_command = startup_cmd
+    if is_main is not None:
+        site_container.is_main = is_main
+    if system_assigned_identity is not None:
+        site_container.auth_type = AuthType.SYSTEM_IDENTITY
+    if user_assigned_identity:
+        site_container.auth_type = AuthType.USER_ASSIGNED
+        site_container.user_managed_identity_client_id = user_assigned_identity
+    if registry_username and registry_password:
+        site_container.auth_type = AuthType.USER_CREDENTIALS
+        site_container.user_name = registry_username
+        site_container.password_secret = registry_password
+
+    # ensure that the updated sitecontainer specs are valid
+    is_system_identity_enabled, user_assigned_identities, app_settings = \
+        _get_site_props_for_sitecontainer_app_internal(cmd, resource_group, name, slot)
+    site_container_specs = SiteContainerSpec.from_sitecontainer(container_name, site_container)
+    existing_sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
+    existing_sitecontainers_spec = [SiteContainerSpec.from_sitecontainer(container.name, container)
+                                    for container in existing_sitecontainers]
+    _validate_sitecontainer_internal(site_container_specs, existing_sitecontainers_spec, is_system_identity_enabled,
+                                     user_assigned_identities, app_settings)
+    return _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group,
+                                                           container_name, site_container, slot)
+
+
+def get_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    try:
+        if slot:
+            return web_client.get_site_container_slot(resource_group, name, slot, container_name)
+        return web_client.get_site_container(resource_group, name, container_name)
+    except Exception as ex:
+        raise ResourceNotFoundError("Failed to fetch sitecontainer '{}'. Error: {}".format(container_name, str(ex)))
+
+
+def delete_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    response = None
+    try:
+        if slot:
+            response = web_client.delete_site_container_slot(resource_group, name, slot,
+                                                             container_name, cls=lambda x, y, z: x)
+        else:
+            response = web_client.delete_site_container(resource_group, name, container_name, cls=lambda x, y, z: x)
+        if response and response.http_response.status_code in (200, 204):
+            # TODO: Validate deletion via response status code once api bug is fixed,
+            # Status 200 -> container existed and was deleted successfully
+            # Status 204 -> container does not exist
+            logger.warning("Sitecontainer %s was deleted successfully.", container_name)
+        else:
+            logger.error("Failed to delete sitecontainer %s.", container_name)
+    except Exception as ex:
+        raise AzureInternalError("Failed to delete sitecontainer '{}'. Error: {}".format(container_name, str(ex)))
+
+
+def list_webapp_sitecontainers(cmd, name, resource_group, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    site_containers = None
+    try:
+        if slot:
+            site_containers = web_client.list_site_containers_slot(resource_group, name, slot)
+        else:
+            site_containers = web_client.list_site_containers(resource_group, name)
+    except Exception as ex:
+        raise ResourceNotFoundError("Failed to fetch sitecontainers. Error: {}".format(str(ex)))
+    # the PageIterator returned by SDK throws an exception during extraction if there are 0 containers
+    try:
+        site_containers = list(site_containers)
+    except:  # pylint: disable=bare-except
+        return []
+    return site_containers
+
+
+def get_webapp_sitecontainers_status(cmd, name, resource_group, container_name=None, slot=None):
+    import requests
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    site_container_status_url = scm_url + '/api/sitecontainers/' + (container_name
+                                                                    if container_name is not None else "")
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+    try:
+        response = requests.get(site_container_status_url, headers=headers)
+        return response.json()
+    except Exception as ex:
+        raise AzureInternalError("Failed to fetch sitecontainer status. Error: {}".format(str(ex)))
+
+
+def get_webapp_sitecontainer_log(cmd, name, resource_group, container_name, slot=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    site_container_logs_url = scm_url + '/api/sitecontainers/' + container_name + '/logs'
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+    try:
+        t = threading.Thread(target=_get_log, args=(site_container_logs_url, headers))
+        t.daemon = True
+        t.start()
+        while True:
+            time.sleep(100)  # so that ctrl+c can stop the command
+    except Exception as ex:
+        raise AzureInternalError("Failed to fetch sitecontainer logs. Error: {}".format(str(ex)))
 
 
 # for generic updater
@@ -2770,7 +3132,7 @@ has been deployed ".format(app_service_environment)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_tier(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
+                              reserved=(is_linux or None), hyper_v=(hyper_v or None),
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
 
     if sku.upper() in ['WS1', 'WS2', 'WS3']:
@@ -3346,6 +3708,7 @@ def set_traffic_routing(cmd, resource_group_name, name, distribution):
     configs.experiments.ramp_up_rules = []
     for r in distribution:
         slot, percentage = r.split('=')
+        host_name_val = host_name_val[:40] if len(host_name_val) > 40 else host_name_val
         action_host_name_slot = host_name_val + "-" + slot
         configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=action_host_name_slot + host_name_suffix,
                                                             reroute_percentage=float(percentage),
@@ -6550,7 +6913,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None, track_status=True, basic_auth=""):
+              app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth=""):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -6727,7 +7090,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
     # zip contents & deploy
     zip_file_path = zip_contents_from_dir(src_dir, language)
-    enable_zip_deploy(cmd, rg_name, name, zip_file_path, track_status=track_status)
+    enable_zip_deploy(cmd, rg_name, name, zip_file_path, track_status=track_status,
+                      enable_kudu_warmup=enable_kudu_warmup)
 
     if launch_browser:
         logger.warning("Launching app using default browser")
@@ -6946,6 +7310,7 @@ def perform_onedeploy_functionapp(cmd,
     params.timeout = timeout
     params.slot = slot
     params.track_status = False
+    params.is_functionapp = True
 
     return _perform_onedeploy_internal(params)
 
@@ -6963,7 +7328,8 @@ def perform_onedeploy_webapp(cmd,
                              ignore_stack=None,
                              timeout=None,
                              slot=None,
-                             track_status=True):
+                             track_status=True,
+                             enable_kudu_warmup=True):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -6980,7 +7346,12 @@ def perform_onedeploy_webapp(cmd,
     params.timeout = timeout
     params.slot = slot
     params.track_status = track_status
+    params.enable_kudu_warmup = enable_kudu_warmup
 
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    params.is_linux_webapp = is_linux_webapp(app)
+    params.is_functionapp = False
     return _perform_onedeploy_internal(params)
 
 
@@ -7002,6 +7373,9 @@ class OneDeployParams:
         self.timeout = None
         self.slot = None
         self.track_status = False
+        self.enable_kudu_warmup = None
+        self.is_linux_webapp = None
+        self.is_functionapp = None
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -7144,6 +7518,65 @@ def _update_artifact_type(params):
                    "Possible values: war, jar, ear, zip, startup, script, static", params.artifact_type)
 
 
+def _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    try:
+        client = web_client_factory(cmd.cli_ctx)
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        if slot:
+            base_url = (
+                f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
+                f"{webapp_name}/slots/{slot}/instances"
+                f"?api-version={client.DEFAULT_API_VERSION}"
+            )
+        else:
+            base_url = (
+                f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
+                f"{webapp_name}/instances?api-version={client.DEFAULT_API_VERSION}"
+            )
+
+        url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+        response = send_raw_request(cmd.cli_ctx, "GET", url)
+        if response.status_code == 200:
+            instances = response.json().get("value", [])
+            if not instances or len(instances) == 0:
+                return None
+            sorted_instances = sorted(instances, key=lambda x: x['name'])
+            return sorted_instances[0]['name']
+        return None
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info("Failed to get list of available Kudu instances for deployment. Exception:%s", ex)
+        return None
+
+
+def _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, webapp_name, slot):
+    import requests
+    scm_url = _get_scm_url(cmd, resource_group_name, webapp_name, slot)
+    instance_id = _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot)
+    if instance_id is None:
+        logger.info("Failed to get a Kudu instance id...")
+        return None
+    cookies = {"ARRAffinity": instance_id, "ARRAffinitySameSite": instance_id}
+    max_retries = 3
+    time_out = 60
+
+    for _ in range(max_retries):
+        try:
+            headers = get_scm_site_headers(cmd.cli_ctx, webapp_name, resource_group_name)
+            response = requests.get(scm_url + '/api/deployments?warmup=true',
+                                    headers=headers, cookies=cookies, timeout=time_out)
+            if response.status_code in (200, 201, 202):
+                logger.warning("Warmed up Kudu instance successfully.")
+                return cookies
+            time_out = 300
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info("Error while warming-up Kudu with instanceid: %s, ex: %s", instance_id, ex)
+            return False
+    logger.warning("Failed to warm-up Kudu with instanceid: %s, "
+                   "the deployment will proceed without pre-warmup.", instance_id)
+    return None
+
+
 def _make_onedeploy_request(params):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
@@ -7161,7 +7594,28 @@ def _make_onedeploy_request(params):
     # For that, set poll_async_deployment_for_debugging=True
     logger.info("Deployment API: %s", deploy_url)
     if not params.src_url:  # use SCM endpoint
-        response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+        # if linux webapp and not function app, then warmup kudu and use warmed up kudu for deployment
+        if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
+            try:
+                logger.warning("Warming up Kudu before deployment.")
+                cookies = _warmup_kudu_and_get_cookie_internal(params.cmd, params.resource_group_name,
+                                                               params.webapp_name, params.slot)
+                if cookies is None:
+                    logger.info("Failed to fetch affinity cookie for Kudu. "
+                                "Deployment will proceed without pre-warming a Kudu instance.")
+                    response = requests.post(deploy_url, data=body, headers=headers,
+                                             verify=not should_disable_connection_verify())
+                else:
+                    response = requests.post(deploy_url, data=body, headers=headers, cookies=cookies,
+                                             verify=not should_disable_connection_verify())
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info("Failed to deploy using affinity cookie. "
+                            "Deployment will proceed without pre-warming a Kudu instance. Ex: %s", ex)
+                response = requests.post(deploy_url, data=body, headers=headers,
+                                         verify=not should_disable_connection_verify())
+        else:
+            response = requests.post(deploy_url, data=body, headers=headers,
+                                     verify=not should_disable_connection_verify())
         poll_async_deployment_for_debugging = True
     else:
         response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)

@@ -7,7 +7,7 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_vm_ext, cf_vm_ext_image,
                                                                       cf_vm_image, cf_vm_image_term, cf_usage,
                                                                       cf_vmss, cf_disks, cf_snapshots,
-                                                                      cf_disk_accesses, cf_images, cf_run_commands,
+                                                                      cf_images, cf_run_commands,
                                                                       cf_gallery_images,
                                                                       cf_gallery_image_versions,
                                                                       cf_dedicated_hosts, cf_dedicated_host_groups,
@@ -74,12 +74,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#DisksOperations.{}',
         client_factory=cf_disks,
         operation_group='disks'
-    )
-
-    compute_disk_access_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#DiskAccessesOperations.{}',
-        client_factory=cf_disk_accesses,
-        operation_group='disk_accesses'
     )
 
     compute_image_sdk = CliCommandType(
@@ -220,10 +214,6 @@ def load_command_table(self, _):
         g.custom_command('assign', 'assign_disk_encryption_set_identity')
         g.custom_command('remove', 'remove_disk_encryption_set_identity', confirmation=True)
         g.custom_show_command('show', 'show_disk_encryption_set_identity')
-
-    with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
-        g.custom_command('create', 'create_disk_access', supports_no_wait=True)
-        g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom, supports_no_wait=True)
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)

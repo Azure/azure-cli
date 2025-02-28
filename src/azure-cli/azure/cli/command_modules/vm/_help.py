@@ -91,33 +91,6 @@ examples:
     crafted: true
 """
 
-helps['disk-access create'] = """
-type: command
-short-summary: Create a disk access resource.
-examples:
-  - name: Create a disk access resource.
-    text: >
-        az disk-access create -g MyResourceGroup -l centraluseuap -n MyDiskAccess
-"""
-
-helps['disk-access update'] = """
-type: command
-short-summary: Update a disk access resource.
-examples:
-  - name: Update a disk access resource.
-    text: >
-        az disk-access update -g MyResourceGroup -n MyDiskAccess --tags tag1=val1 tag2=val2
-"""
-
-helps['disk-access wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of a disk access is met.
-examples:
-  - name: Place the CLI in a waiting state until the disk access is created with 'provisioningState' at 'Succeeded'.
-    text: |
-        az disk-access wait --created -g MyResourceGroup -n MyDiskAccess
-"""
-
 helps['disk-encryption-set create'] = """
 type: command
 short-summary: Create a disk encryption set.
