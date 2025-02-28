@@ -54,13 +54,14 @@ interactions:
       x-msedge-ref:
       - 'Ref A: F7A7A36C496C407C88E78FAF0406F7B0 Ref B: CO6AA3150219049 Ref C: 2025-02-28T01:27:38Z'
     status:
-      code: 201
-      message: Created
+      code: 503
+      message: Service Unavailable
 - request:
-    body: null
+    body: '{"location": "eastus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
+      false, "anonymousPullEnabled": false}}'
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -269,11 +270,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '45'
+      - '124'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n --data-endpoint-enabled
+      - -n -g -l --sku
       User-Agent:
       - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: PATCH
@@ -492,15 +493,11 @@ interactions:
       User-Agent:
       - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/scopeMaps/connectedregistry?api-version=2020-11-01-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2024-11-01-preview
   response:
     body:
       string: '{"type":"Microsoft.ContainerRegistry/registries/scopeMaps","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/scopeMaps/connectedregistry","name":"connectedregistry","systemData":{"createdBy":"trisavo@microsoft.com","createdByType":"User","createdAt":"2025-02-28T01:27:51.8643099+00:00","lastModifiedBy":"trisavo@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2025-02-28T01:27:51.8643099+00:00"},"properties":{"type":"UserDefined","creationDate":"2025-02-28T01:27:51.9784775+00:00","provisioningState":"Succeeded","actions":["repositories/repo1/content/read","repositories/repo1/content/write","repositories/repo1/content/delete","repositories/repo1/metadata/read","repositories/repo1/metadata/write","repositories/repo2/content/read","repositories/repo2/content/write","repositories/repo2/content/delete","repositories/repo2/metadata/read","repositories/repo2/metadata/write","repositories/repo3/content/read","repositories/repo3/content/write","repositories/repo3/content/delete","repositories/repo3/metadata/read","repositories/repo3/metadata/write","gateway/connectedregistry/config/read","gateway/connectedregistry/config/write","gateway/connectedregistry/message/read","gateway/connectedregistry/message/write"]}}'
     headers:
-      api-supported-versions:
-      - 2019-05-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview, 2023-06-01-preview,
-        2023-07-01, 2023-08-01-preview, 2023-11-01-preview, 2024-01-01-preview, 2024-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -526,22 +523,22 @@ interactions:
       x-msedge-ref:
       - 'Ref A: F9377FE46E3149A1908165F29DCF7CBB Ref B: CO6AA3150217053 Ref C: 2025-02-28T01:27:51Z'
     status:
-      code: 200
-      message: OK
+      code: 503
+      message: Service Unavailable
 - request:
-    body: '{"properties": {"scopeMapId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/scopeMaps/connectedregistry",
-      "status": "enabled"}}'
+    body: '{"location": "eastus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
+      false, "anonymousPullEnabled": false}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr connected-registry create
+      - acr create
       Connection:
       - keep-alive
       Content-Length:
-      - '228'
+      - '124'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -549,7 +546,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/tokens/connectedregistry?api-version=2020-11-01-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2024-11-01-preview
   response:
     body:
       string: '{"type":"Microsoft.ContainerRegistry/registries/tokens","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/tokens/connectedregistry","name":"connectedregistry","systemData":{"createdBy":"trisavo@microsoft.com","createdByType":"User","createdAt":"2025-02-28T01:27:52.2387328+00:00","lastModifiedBy":"trisavo@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2025-02-28T01:27:52.2387328+00:00"},"properties":{"creationDate":"2025-02-28T01:27:56.4480044+00:00","provisioningState":"Creating","scopeMapId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/scopeMaps/connectedregistry","credentials":{"passwords":[]},"status":"enabled"}}'
@@ -585,10 +582,11 @@ interactions:
       x-msedge-ref:
       - 'Ref A: 8A414C6116A34D349622C160A5F17032 Ref B: CO6AA3150217037 Ref C: 2025-02-28T01:27:52Z'
     status:
-      code: 201
-      message: Created
+      code: 503
+      message: Service Unavailable
 - request:
-    body: null
+    body: '{"location": "eastus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
+      false, "anonymousPullEnabled": false}}'
     headers:
       Accept:
       - '*/*'
@@ -753,7 +751,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr connected-registry create
+      - acr create
       Connection:
       - keep-alive
       Content-Length:
@@ -772,10 +770,6 @@ interactions:
         * * * *","messageTtl":"P2D","gatewayEndpoint":"clireg000002.westcentralus.data.azurecr.io"}},"loginServer":{"tls":{"certificate":{}}},"logging":{"logLevel":"Information","auditLogStatus":"Disabled"},"garbageCollection":{"enabled":false,"schedule":"0
         0 * * *"}}}'
     headers:
-      api-supported-versions:
-      - 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview, 2021-12-01-preview,
-        2022-02-01-preview, 2023-01-01-preview, 2023-06-01-preview, 2023-08-01-preview,
-        2023-11-01-preview, 2024-01-01-preview, 2024-11-01-preview
       cache-control:
       - no-cache
       content-length:
