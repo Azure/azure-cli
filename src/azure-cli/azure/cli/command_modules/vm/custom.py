@@ -5267,12 +5267,15 @@ def assign_disk_encryption_set_identity(cmd, resource_group_name, disk_encryptio
         "resource_group": resource_group_name
     }
     identity = _Show(cli_ctx=cmd.cli_ctx)(command_args=args).get('identity', {})
+    _user_mi = identity.pop('userAssignedIdentities', None)
+    if _user_mi:
+        identity.update({'user_assigned_identities': _user_mi})
 
     existing_system_identity = False
     existing_user_identities = set()
     if identity:
         existing_system_identity = identity['type'] in ['SystemAssigned', 'SystemAssigned, UserAssigned']
-        existing_user_identities = {x.lower() for x in list(identity.get('userAssignedIdentities', {}).keys())}
+        existing_user_identities = {x.lower() for x in list(identity.get('user_assigned_identities', {}).keys())}
 
     add_system_assigned = mi_system_assigned
     add_user_assigned = {x.lower() for x in (mi_user_assigned or [])}
@@ -5283,7 +5286,7 @@ def assign_disk_encryption_set_identity(cmd, resource_group_name, disk_encryptio
     identity['type'] = 'SystemAssigned'
     if updated_user_assigned:
         identity['type'] = 'SystemAssigned, UserAssigned' if updated_system_assigned else 'UserAssigned'
-        identity['userAssignedIdentities'] = dict.fromkeys(updated_user_assigned, {})
+        identity['user_assigned_identities'] = dict.fromkeys(updated_user_assigned, {})
 
     args['identity'] = identity
     result = LongRunningOperation(cmd.cli_ctx)(_Update(cli_ctx=cmd.cli_ctx)(command_args=args))
@@ -5303,12 +5306,13 @@ def remove_disk_encryption_set_identity(cmd, resource_group_name, disk_encryptio
     identity = _Show(cli_ctx=cmd.cli_ctx)(command_args=args).get('identity', None)
     if identity is None:
         return None
-
-    update_identity = identity.copy()
+    _user_mi = identity.pop('userAssignedIdentities', None)
+    if _user_mi:
+        identity.update({'user_assigned_identities': _user_mi})
 
     user_identities_to_remove = []
     if mi_user_assigned is not None:
-        existing_user_identities = {x.lower() for x in list(identity.get("userAssignedIdentities", {}).keys())}
+        existing_user_identities = {x.lower() for x in list(identity.get("user_assigned_identities", {}).keys())}
 
         # all user assigned identities will be removed if the length of mi_user_assigned is 0,
         # otherwise the specified identity
@@ -5320,21 +5324,20 @@ def remove_disk_encryption_set_identity(cmd, resource_group_name, disk_encryptio
             raise InvalidArgumentValueError("'{}' are not associated with '{}', please provide existing user managed "
                                             "identities".format(','.join(non_existing), disk_encryption_set_name))
         if not list(existing_user_identities - user_identities_to_remove):
-            update_identity.pop('userAssignedIdentities', None)
+            identity.pop('user_assigned_identities', None)
             if identity['type'] == "UserAssigned":
-                update_identity['type'] = "None"
+                identity['type'] = "None"
             elif identity['type'] == "SystemAssigned, UserAssigned":
-                update_identity['type'] = "SystemAssigned"
+                identity['type'] = "SystemAssigned"
 
     if remove_system_assigned_identity:
-        update_identity['type'] = "None" if identity['type'] == "SystemAssigned" else "UserAssigned"
+        identity['type'] = "None" if identity['type'] == "SystemAssigned" else "UserAssigned"
 
     if user_identities_to_remove:
-        if update_identity['type'] not in ["None", "SystemAssigned"]:
-            update_identity['userAssignedIdentities'] = {}
+        if identity['type'] not in ["None", "SystemAssigned"]:
             for _id in user_identities_to_remove:
-                update_identity['userAssignedIdentities'][_id] = {}
-    args['identity'] = update_identity
+                identity['user_assigned_identities'].pop(_id, None)
+    args['identity'] = identity
     result = LongRunningOperation(cmd.cli_ctx)(_Update(cli_ctx=cmd.cli_ctx)(command_args=args))
     return result.get('identity', None)
 
