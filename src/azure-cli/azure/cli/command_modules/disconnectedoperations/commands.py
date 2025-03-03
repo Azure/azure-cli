@@ -23,7 +23,7 @@ def transform_offers_table(result):
                 ("Publisher", item["Publisher"]),
                 ("Offer", item["Offer"]),
                 ("SKU", item["SKU"]),
-                ("Version", item["Versions"]),
+                ("Version(s)", item["Versions"]),
                 ("OS_Type", item["OS_Type"]),
             ]
         )
@@ -55,7 +55,7 @@ def transform_offer_table(result):
                 ("Publisher", item["Publisher"]),
                 ("Offer", item["Offer"]),
                 ("SKU", item["SKU"]),
-                ("Version", formatted_versions),
+                ("Version(s)", formatted_versions),
                 ("OS_Type", item["OS_Type"]),
             ]
         )

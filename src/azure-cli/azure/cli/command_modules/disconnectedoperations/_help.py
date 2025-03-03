@@ -42,15 +42,15 @@ short-summary: Get details of a specific marketplace offer.
 examples:
 - name: Get details of a specific marketplace offer
   text: >
-az disconnectedoperations edgemarketplace getoffer --resource-group myResourceGroup --resource-name myResource 
+az disconnectedoperations edgemarketplace getoffer --resource-group myResourceGroup --resource-name myResource
 --publisher-name publisherName --offer-name offerName
 - name: Get offer details and output as JSON
   text: >
-az disconnectedoperations edgemarketplace getoffer -g myResourceGroup --resource-name myResource 
+az disconnectedoperations edgemarketplace getoffer -g myResourceGroup --resource-name myResource
 --publisher-name publisherName --offer-name offerName --output json
 - name: Get offer details with custom query
   text: >
-az disconnectedoperations edgemarketplace getoffer -g myResourceGroup --resource-name myResource 
+az disconnectedoperations edgemarketplace getoffer -g myResourceGroup --resource-name myResource
 --publisher-name publisherName --offer-name offerName --query "[].{SKU:SKU,Version:Versions}"
 parameters:
 - name: --resource-group -g
@@ -74,8 +74,8 @@ long-summary: Downloads the marketplace offer metadata, icons, and creates a pac
 examples:
 - name: Package a marketplace offer with specific version
   text: >
-az disconnectedoperations edgemarketplace packageoffer --resource-group myResourceGroup --resource-name myResource 
---publisher-name publisherName --offer-name offerName --sku skuName --version versionNumber 
+az disconnectedoperations edgemarketplace packageoffer --resource-group myResourceGroup --resource-name myResource
+--publisher-name publisherName --offer-name offerName --sku skuName --version versionNumber
 --output-folder "D:\\MarketplacePackages"
 parameters:
 - name: --resource-group -g
