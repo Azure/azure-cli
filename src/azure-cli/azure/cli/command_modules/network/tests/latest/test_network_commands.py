@@ -6812,6 +6812,9 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
             self.check('virtualApplianceAsn', 20000),
             self.check('cloudInitConfiguration', "echo $abcd")
         ])
+        self.cmd('network virtual-appliance get-boot-diagnostic-log -n {name} -g {rg} ', checks=[
+            self.check('instanceId', 0)
+        ])
         self.cmd('network virtual-appliance list -g {rg}', checks=[
             self.check('length(@)', 1)
         ])
