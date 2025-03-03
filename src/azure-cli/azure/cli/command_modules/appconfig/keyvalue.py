@@ -72,6 +72,7 @@ def import_config(cmd,
                   auth_mode="key",
                   endpoint=None,
                   import_mode=ImportMode.IGNORE_MATCH,
+                  dry_run=False,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -217,7 +218,11 @@ def import_config(cmd,
 
     if not need_kv_change and not need_feature_change:
         return
-
+    
+    # If yes is provided, it takes precedence over dry-run
+    if dry_run and not yes:
+        return
+    
     if not yes:
         user_confirmation("Do you want to continue? \n")
 
@@ -267,6 +272,7 @@ def export_config(cmd,
                   auth_mode="key",
                   endpoint=None,
                   snapshot=None,
+                  dry_run=False,
                   # to-file parameters
                   path=None,
                   format_=None,
@@ -412,6 +418,11 @@ def export_config(cmd,
 
     if not need_feature_change and not need_kv_change:
         return
+    
+    # If yes is provided, it takes precedence over dry-run
+    if dry_run and not yes:
+        return
+
     # if customer needs preview & confirmation
     if not yes:
         user_confirmation("Do you want to continue? \n")
@@ -810,6 +821,7 @@ def restore_key(cmd,
                 connection_string=None,
                 yes=False,
                 auth_mode="key",
+                dry_run=False,
                 endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -832,6 +844,9 @@ def restore_key(cmd,
         restore_diff = comparer.compare(current_keyvalues, strict=True)
 
         need_change = __print_restore_preview(restore_diff, yes=yes)
+
+        if dry_run and not yes:
+            return
 
         if not yes:
             if need_change is False:
