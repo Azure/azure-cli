@@ -11,6 +11,7 @@ from enum import Enum
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
 from azure.cli.core.util import in_cloud_console, can_launch_browser, is_github_codespaces
 from knack.log import get_logger
 from knack.util import CLIError
@@ -313,9 +314,10 @@ class Profile:
         import jwt
         identity_type = MsiAccountTypes.system_assigned
         from .auth.msal_credentials import ManagedIdentityCredential
+        from .auth.constants import ACCESS_TOKEN
 
         cred = ManagedIdentityCredential()
-        token = cred.get_token(*self._arm_scope).token
+        token = cred.acquire_token(self._arm_scope)[ACCESS_TOKEN]
         logger.info('Managed identity: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
@@ -339,9 +341,10 @@ class Profile:
     def login_in_cloud_shell(self):
         import jwt
         from .auth.msal_credentials import CloudShellCredential
+        from .auth.constants import ACCESS_TOKEN
 
         cred = CloudShellCredential()
-        token = cred.get_token(*self._arm_scope).token
+        token = cred.acquire_token(self._arm_scope)[ACCESS_TOKEN]
         logger.info('Cloud Shell token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
@@ -397,21 +400,19 @@ class Profile:
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
             from .auth.msal_credentials import CloudShellCredential
-            from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
             # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
-            cred = CredentialAdaptor(CloudShellCredential())
+            sdk_cred = CredentialAdaptor(CloudShellCredential())
 
         elif managed_identity_type:
             # managed identity
             if _on_azure_arc():
                 from .auth.msal_credentials import ManagedIdentityCredential
-                from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
                 # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
-                cred = CredentialAdaptor(ManagedIdentityCredential())
+                sdk_cred = CredentialAdaptor(ManagedIdentityCredential())
             else:
                 # The resource is merely used by msrestazure to get the first access token.
                 # It is not actually used in an API invocation.
-                cred = MsiAccountTypes.msi_auth_factory(
+                sdk_cred = MsiAccountTypes.msi_auth_factory(
                     managed_identity_type, managed_identity_id,
                     self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
@@ -431,10 +432,9 @@ class Profile:
             external_credentials = []
             for external_tenant in external_tenants:
                 external_credentials.append(self._create_credential(account, tenant_id=external_tenant))
-            from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
-            cred = CredentialAdaptor(credential, auxiliary_credentials=external_credentials)
+            sdk_cred = CredentialAdaptor(credential, auxiliary_credentials=external_credentials)
 
-        return (cred,
+        return (sdk_cred,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
@@ -460,7 +460,7 @@ class Profile:
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
             from .auth.msal_credentials import CloudShellCredential
-            cred = CloudShellCredential()
+            sdk_cred = CredentialAdaptor(CloudShellCredential())
 
         elif managed_identity_type:
             # managed identity
@@ -468,16 +468,16 @@ class Profile:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
             if _on_azure_arc():
                 from .auth.msal_credentials import ManagedIdentityCredential
-                cred = ManagedIdentityCredential()
+                sdk_cred = CredentialAdaptor(ManagedIdentityCredential())
             else:
                 from .auth.util import scopes_to_resource
-                cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id,
-                                                        scopes_to_resource(scopes))
+                sdk_cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id,
+                                                            scopes_to_resource(scopes))
 
         else:
-            cred = self._create_credential(account, tenant_id=tenant)
+            sdk_cred = CredentialAdaptor(self._create_credential(account, tenant_id=tenant))
 
-        sdk_token = cred.get_token(*scopes)
+        sdk_token = sdk_cred.get_token(*scopes)
         # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
         # WARNING: expiresOn is deprecated and will be removed in future release.
         import datetime
@@ -856,7 +856,6 @@ class SubscriptionFinder:
             specific_tenant_credential = identity.get_user_credential(username)
 
             try:
-
                 subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential,
                                                                 tenant_id_description=t)
             except AuthenticationError as ex:
@@ -927,9 +926,9 @@ class SubscriptionFinder:
             raise CLIInternalError("Unable to get '{}' in profile '{}'"
                                    .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, self.cli_ctx.cloud.profile))
         api_version = get_api_version(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-        client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, credential)
-
-        client = client_type(credential, api_version=api_version,
+        sdk_cred = CredentialAdaptor(credential)
+        client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, sdk_cred)
+        client = client_type(sdk_cred, api_version=api_version,
                              base_url=self.cli_ctx.cloud.endpoints.resource_manager,
                              **client_kwargs)
         return client
