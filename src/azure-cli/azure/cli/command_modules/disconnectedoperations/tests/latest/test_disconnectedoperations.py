@@ -233,9 +233,9 @@ class DisconnectedOperationsScenarioTests(ScenarioTest):
             # Create Edge device first (requires additional setup)
             # This would need an actual Edge device setup in the resource group
             # For recording purposes, we're just showing the structure
-            self.cmd('az databoxedge device create -g {resource_group} -n {resource}')
+            self.cmd('az databoxedge device create --resource-group-name {resource_group} -n {resource}')
             
-            offers = self.cmd('az disconnectedoperations edgemarketplace listoffer -g {resource_group} --resource-name {resource}').get_output_in_json()
+            offers = self.cmd('az disconnectedoperations edgemarketplace listoffer --resource-group-name {resource_group} --resource-name {resource}').get_output_in_json()
             self.assertIsNotNone(offers)
             # In a real test, we'd validate specific values in the output
     @ResourceGroupPreparer(name_prefix='cli_test_disconnectedops')
@@ -253,7 +253,7 @@ class DisconnectedOperationsScenarioTests(ScenarioTest):
             # This test would need to be updated with actual device creation
             # and valid offer details that exist in your test environment
             
-            result = self.cmd('az disconnectedoperations edgemarketplace getoffer -g {resource_group} --resource-name {resource} --publisher-name {publisher} --offer-name {offer}').get_output_in_json()
+            result = self.cmd('az disconnectedoperations edgemarketplace getoffer --resource-group-name {resource_group} --resource-name {resource} --publisher-name {publisher} --offer-name {offer}').get_output_in_json()
             self.assertIsNotNone(result)
             # Verify specific values in output for a real test
             
