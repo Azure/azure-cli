@@ -12071,7 +12071,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
     @ResourceGroupPreparer()
     def test_vm_add_application_with_order_application(self, resource_group):
         self.kwargs.update({
-            'vm': 'vm1',
+            'vm': self.create_random_name('vm', 10),
             'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
                 sub=self.get_subscription_id()
             ),

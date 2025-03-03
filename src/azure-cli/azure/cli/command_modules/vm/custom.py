@@ -5725,11 +5725,11 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
             # instance.properties.web_application_firewall_configuration = waf_config
 
             # gallery_applications =
-            instance.application_profile.gallery_applications = [{"package_reference_id": avid} for avid in application_version_ids]
+            instance.properties.application_profile.gallery_applications = [{"package_reference_id": avid} for avid in application_version_ids]
 
             if order_applications:
                 index = 1
-                for app in instance.application_profile.gallery_applications:
+                for app in instance.properties.application_profile.gallery_applications:
                     app["order"] = index
                     index += 1
 
@@ -5737,13 +5737,13 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
                 index = 0
                 for over_ride in application_configuration_overrides:
                     if over_ride or over_ride.lower() != 'null':
-                        instance.application_profile.gallery_applications[index]["configuration_reference"] = over_ride
+                        instance.properties.application_profile.gallery_applications[index]["configuration_reference"] = over_ride
                     index += 1
 
             if treat_deployment_as_failure:
                 index = 0
                 for treat_as_failure in treat_deployment_as_failure:
-                    instance.application_profile.gallery_applications[index]["treat_failure_as_deployment_failure"] = \
+                    instance.properties.application_profile.gallery_applications[index]["treat_failure_as_deployment_failure"] = \
                         treat_as_failure.lower() == 'true'
                     index += 1
 
