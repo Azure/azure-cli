@@ -148,7 +148,7 @@ def package_offer(cmd, resource_group_name, resource_name, publisher_name,
     )
 
     try:
-        response = send_raw_request(cmd.cli_ctx, "get", url, resource=management_endpoint)
+        response = send_raw_request(cmd.cli_ctx, "get", url, resource="https://management.azure.com")
 
         if response.status_code != 200:
             error_message = f"Request failed with status code: {response.status_code}"
@@ -206,9 +206,27 @@ def package_offer(cmd, resource_group_name, resource_name, publisher_name,
         }
 
 
+def _check_azcopy_available():
+    """Check if azcopy is available in the system path."""
+    import shutil
+    import subprocess
+
+    # First try using shutil.which which is the proper way to check for executables
+    if shutil.which("azcopy"):
+        return True
+
+    # Fallback to trying the command directly
+    try:
+        result = subprocess.run(["azcopy", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        return result.returncode == 0
+    except FileNotFoundError:
+        return False
+
+
 def _handle_token_response(token_response, output_folder, logger):
     """Helper function to handle token response and download."""
     import os
+    import platform
 
     if token_response.status_code != 200:
         logger.error("Failed to get access token: %s", token_response.status_code)
@@ -219,6 +237,35 @@ def _handle_token_response(token_response, output_folder, logger):
 
     token_data = token_response.json()
     download_url = token_data.get("accessToken")
+
+    # Check if azcopy is available
+    if not _check_azcopy_available():
+        # Determine OS-specific download link
+        system = platform.system().lower()
+        if system == 'windows':
+            azcopy_url = "https://aka.ms/downloadazcopy-v10-windows"
+            install_instructions = "Download, extract the ZIP file, and add the extracted folder to your PATH."
+        elif system == 'linux':
+            azcopy_url = "https://aka.ms/downloadazcopy-v10-linux"
+            install_instructions = "Download, extract the tar.gz file, and move the azcopy binary to a directory in your PATH."
+        elif system == 'darwin':  # macOS
+            azcopy_url = "https://aka.ms/downloadazcopy-v10-mac"
+            install_instructions = "Download, extract the .zip file, and move the azcopy binary to a directory in your PATH."
+        else:
+            azcopy_url = "https://aka.ms/downloadazcopy"
+            install_instructions = "Download and install AzCopy for your platform."
+
+        error_message = (
+            f"AzCopy tool not found. Please install AzCopy for your {system} system and make sure it's available in your PATH.\n"
+            f"Download link: {azcopy_url}\n"
+            f"Installation: {install_instructions}"
+        )
+        logger.error(error_message)
+        return {
+            "error": error_message,
+            "status": "failed",
+            "download_url": azcopy_url
+        }
 
     # Construct and execute azcopy command
     command = f'azcopy copy "{download_url}" "{output_folder}" --check-md5 NoCheck'
@@ -249,9 +296,9 @@ def _get_token_url(management_endpoint, subscription_id, resource_group_name,
 def _process_async_operation(cmd, async_operation_url, logger, resource_group_name,
                              output_folder, subscription_id, resource_name, publisher_name, offer_name):
     """Process async operation and monitor status."""
-    import datetime
     import json
     import time
+    from datetime import datetime
 
     import requests
 
