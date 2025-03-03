@@ -69,6 +69,15 @@ def load_command_table(self, _):
         operations_tmpl="azure.cli.command_modules.disconnectedoperations.custom#{}"
     )
 
+    # Register the parent command group
+    with self.command_group(
+        "disconnectedoperations",
+        custom_command_type=custom_command_type,
+        is_preview=True,
+    ) as g:
+        pass  # No commands directly at this level
+
+    # Register the subgroup and its commands
     with self.command_group(
         "disconnectedoperations edgemarketplace",
         custom_command_type=custom_command_type,

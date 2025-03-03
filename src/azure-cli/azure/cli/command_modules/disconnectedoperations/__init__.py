@@ -12,9 +12,7 @@ from azure.cli.core import AzCommandsLoader
 class DisconnectedoperationsCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        from azure.cli.core.profiles import (
-            ResourceType,  # required when using python sdk
-        )
+        from azure.cli.core.profiles import ResourceType
 
         disconnectedoperations_custom = CliCommandType(
             operations_tmpl="azure.cli.command_modules.disconnectedoperations.custom#{}",

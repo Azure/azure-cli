@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
 import unittest
 from unittest import mock
 
@@ -239,7 +238,6 @@ class DisconnectedOperationsScenarioTests(ScenarioTest):
             offers = self.cmd('az disconnectedoperations edgemarketplace listoffer -g {resource_group} --resource-name {resource}').get_output_in_json()
             self.assertIsNotNone(offers)
             # In a real test, we'd validate specific values in the output
-    
     @ResourceGroupPreparer(name_prefix='cli_test_disconnectedops')
     def test_get_offer(self, resource_group):
         """Integration test for get_offer command"""
@@ -258,7 +256,45 @@ class DisconnectedOperationsScenarioTests(ScenarioTest):
             result = self.cmd('az disconnectedoperations edgemarketplace getoffer -g {resource_group} --resource-name {resource} --publisher-name {publisher} --offer-name {offer}').get_output_in_json()
             self.assertIsNotNone(result)
             # Verify specific values in output for a real test
+            
+    @ResourceGroupPreparer(name_prefix='cli_test_disconnectedops_params')
+    def test_get_offer_with_resource_group_name_parameter(self, resource_group):
+        """Test get_offer with explicit resource-group-name parameter"""
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'resource': self.create_random_name('edgedevice', 20),
+            'publisher': 'microsoftwindowsserver',
+            'offer': 'windowsserver'
+        })
+        
+        # Skip if recording as this requires an actual Edge device
+        if self.is_live:
+            # Create Edge device first (requires additional setup)
+            self.cmd('az databoxedge device create --resource-group-name {resource_group} --name {resource}')
+            
+            # Test with the full --resource-group-name parameter
+            result = self.cmd('az disconnectedoperations edgemarketplace getoffer --resource-group-name {resource_group} --resource-name {resource} --publisher-name {publisher} --offer-name {offer}').get_output_in_json()
+            self.assertIsNotNone(result)
+            # In a real test with actual data, we would add more specific assertions
 
+    @ResourceGroupPreparer(name_prefix='cli_test_disconnectedops_pkg')
+    def test_package_offer_with_resource_group_name_parameter(self, resource_group):
+        """Test package_offer with explicit resource-group-name parameter"""
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'resource': self.create_random_name('edgedevice', 20),
+            'publisher': 'microsoftwindowsserver',
+            'offer': 'windowsserver',
+            'sku': 'datacenter-core-1903-with-containers-smalldisk',
+            'version': '18362.720.2003120536',
+            'output_folder': self.create_temp_dir()
+        })
+        
+        if self.is_live:
+            # Skip actual device creation in recorded tests
+            # Test with the full --resource-group-name parameter
+            result = self.cmd('az disconnectedoperations edgemarketplace packageoffer --resource-group-name {resource_group} --resource-name {resource} --publisher-name {publisher} --offer-name {offer} --sku {sku} --version {version} --output-folder {output_folder}').get_output_in_json()
+            self.assertIsNotNone(result)
 
 if __name__ == '__main__':
     unittest.main()
