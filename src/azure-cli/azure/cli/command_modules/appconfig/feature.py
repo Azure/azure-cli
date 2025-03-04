@@ -296,15 +296,13 @@ def list_feature(cmd,
                  top=None,
                  all_=False,
                  auth_mode="key",
-                 endpoint=None,
-                 tags=None):
+                 endpoint=None):
     return __list_features(
         cmd=cmd,
         feature=feature,
         key=key,
         name=name,
         label=label,
-        tags=tags,
         fields=fields,
         connection_string=connection_string,
         top=top,

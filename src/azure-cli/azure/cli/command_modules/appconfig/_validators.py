@@ -364,6 +364,10 @@ def validate_snapshot_filters(namespace):
                 if parsed_filter.get("label", None) and not isinstance(parsed_filter["label"], str):
                     raise InvalidArgumentValueError("Label filter must be a string if specified.")
 
+                if parsed_filter.get("tags", None):
+                    if not isinstance(parsed_filter["tags"], list) or not all(isinstance(tag, str) for tag in parsed_filter["tags"]):
+                        raise InvalidArgumentValueError("Tags filter must be a list of strings if specified.")
+
                 filter_parameters.append(parsed_filter)
 
             except ValueError:

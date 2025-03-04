@@ -147,6 +147,8 @@ examples:
     text: az appconfig kv delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label MyLabel
   - name: Delete a key using your 'az login' credentials and App Configuration store endpoint.
     text: az appconfig kv delete --endpoint https://myappconfiguration.azconfig.io --key color --auth-mode login --yes
+  - name: Delete a key with key name "color" and has tags "tag1=value1" and "tag2=value2".
+    text: az appconfig kv delete -n MyAppConfiguration --key color --tags tag1=value1 tag2=value2 --yes
 """
 
 helps['appconfig kv export'] = """
@@ -224,6 +226,10 @@ examples:
     text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --snapshot MySnapshot
   - name: List all key-values with specific tags
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=value1 tag2=value2
+  - name: List all key-values with tag name "tag1" with empty value
+    text: az appconfig kv list -n MyAppConfiguration --tags tag1=
+  - name: List all key-values with tag name "tag1" with null value
+    text: az appconfig kv list -n MyAppConfiguration --tags tag1=\\0
 """
 
 helps['appconfig kv lock'] = """
@@ -645,6 +651,9 @@ helps['appconfig snapshot create'] = """
         - name: Create a snapshot of all keys starting with 'app/' and no label as default, then override the key-values with keys with the label 'prod' if they exist.
           text:
             az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"app/*\\"}' '{\\"key\\":\\"app/*\\", \\"label\\":\\"prod\\"}' --composition-type 'key'
+        - name: Create a snapshot of all keys starting with 'Test' and have tags 'tag1=value1' and 'tag2=value2'.
+          text:
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"Test*\\", \\"tags\\":[\\"tag1=value1\\", \\"tag2=value2\\"]}'
     """
 
 helps['appconfig snapshot show'] = """

@@ -627,6 +627,7 @@ def delete_key(cmd,
                key,
                name=None,
                label=None,
+               tags=None,
                yes=False,
                connection_string=None,
                auth_mode="key",
@@ -644,6 +645,7 @@ def delete_key(cmd,
     entries = __read_kv_from_config_store(azconfig_client,
                                           key=key,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                                          tags=tags,
                                           correlation_request_id=correlation_request_id)
     confirmation_message = "Found '{}' key-values matching the specified key and label. Are you sure you want to delete these key-values?".format(len(entries))
     user_confirmation(confirmation_message, yes)
