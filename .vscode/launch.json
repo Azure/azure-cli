@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "Azure CLI Debug (Integrated Console)",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "python": "${command:python.interpreterPath}",
             "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
@@ -12,16 +12,11 @@
                 "--help"
             ],
             "console": "integratedTerminal",
-            "debugOptions": [
-                "WaitOnAbnormalExit",
-                "WaitOnNormalExit",
-                "RedirectOutput"
-            ],
             "justMyCode": false
         },
         {
             "name": "Azure CLI Debug (External Console)",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "stopOnEntry": true,
             "python": "${command:python.interpreterPath}",
@@ -30,15 +25,24 @@
             "args": [
                 "--help"
             ],
-            "console": "externalTerminal",
-            "debugOptions": [
-                "WaitOnAbnormalExit",
-                "WaitOnNormalExit"
-            ]
+            "console": "externalTerminal"
+        },
+        {
+            "name": "Azure CLI Debug interactive",
+            "type": "debugpy",
+            "request": "launch",
+            "stopOnEntry": true,
+            "python": "${command:python.interpreterPath}",
+            "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "interactive"
+            ],
+            "console": "externalTerminal"
         },
         {
             "name": "Azdev Scripts",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "python": "${command:python.interpreterPath}",
             "program": "${workspaceRoot}/tools/automation/__main__.py",
@@ -46,12 +50,18 @@
             "args": [
                 "--help"
             ],
-            "console": "integratedTerminal",
-            "debugOptions": [
-                "WaitOnAbnormalExit",
-                "WaitOnNormalExit",
-                "RedirectOutput"
-            ]
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python test debug",
+            "type": "debugpy",
+            "request": "launch",
+            "stopOnEntry": true,
+            "python": "${command:python.interpreterPath}",
+            "purpose": ["debug-test"],
+            "cwd": "${workspaceRoot}",
+            "console": "externalTerminal",
+            "justMyCode": false
         }
     ]
 }

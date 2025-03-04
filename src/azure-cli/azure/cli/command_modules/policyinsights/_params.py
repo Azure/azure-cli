@@ -7,8 +7,9 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type, get_enum_type)
 
 from azure.cli.command_modules.resource._completers import (
-    get_policy_set_completion_list, get_policy_completion_list,
-    get_policy_assignment_completion_list, get_providers_completion_list, get_resource_types_completion_list)
+    # get_policy_set_completion_list, get_policy_completion_list,
+    # get_policy_assignment_completion_list,
+    get_providers_completion_list, get_resource_types_completion_list)
 
 from ._validators import (validate_resource, validate_expand)
 from azure.cli.command_modules.resource._validators import validate_metadata
@@ -59,19 +60,19 @@ def load_arguments(self, _):
             c.argument(
                 'policy_set_definition_name',
                 options_list=['--policy-set-definition', '-s'],
-                completer=get_policy_set_completion_list,
+                #completer=get_policy_set_completion_list,
                 arg_group='Scope',
                 help='Name of policy set definition.')
             c.argument(
                 'policy_definition_name',
                 options_list=['--policy-definition', '-d'],
-                completer=get_policy_completion_list,
+                #completer=get_policy_completion_list,
                 arg_group='Scope',
                 help='Name of policy definition.')
             c.argument(
                 'policy_assignment_name',
                 options_list=['--policy-assignment', '-a'],
-                completer=get_policy_assignment_completion_list,
+                #completer=get_policy_assignment_completion_list,
                 arg_group='Scope',
                 help='Name of policy assignment.')
             c.argument(
@@ -141,7 +142,7 @@ def load_arguments(self, _):
         c.argument(
             'policy_assignment',
             options_list=['--policy-assignment', '-a'],
-            completer=get_policy_assignment_completion_list,
+            #completer=get_policy_assignment_completion_list,
             help='Name or resource ID of the policy assignment.')
         c.argument(
             'definition_reference_id',
@@ -187,7 +188,7 @@ def load_arguments(self, _):
                 options_list=['--policy-assignment-id',
                               '--policy-assignment', '-a'],
                 arg_group="Properties",
-                completer=get_policy_assignment_completion_list,
+                #completer=get_policy_assignment_completion_list,
                 help="The resource ID of the policy assignment that the attestation is setting the state for."
             )
             c.argument(
