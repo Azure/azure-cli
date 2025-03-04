@@ -5688,43 +5688,13 @@ def show_capacity_reservation(client, resource_group_name, capacity_reservation_
 
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     from .aaz.latest.vm import Update as _VMUpdate
+
     class SetVMApplications(_VMUpdate):
-        # def pre_operations(self):
-        #     args = self.ctx.args
-        #     args.no_wait = no_wait
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
 
         def pre_instance_update(self, instance):
-            # def _flatten(collection, expand_property_fn):
-            #     for each in collection:
-            #         yield from expand_property_fn(each)
-
-            # if disabled_rule_groups or disabled_rules:
-            #     disabled_groups = []
-            #     # disabled groups can be added directly
-            #     for group in disabled_rule_groups or []:
-            #         disabled_groups.append({"rule_group_name": group})
-            #     # for disabled rules, we have to look up the IDs
-            #     if disabled_rules:
-            #         rule_sets = list_ag_waf_rule_sets(cmd, _type=rule_set_type, version=rule_set_version, group='*')
-            #         for group in _flatten(rule_sets, lambda r: r["ruleGroups"]):
-            #             disabled_group = {
-            #                 "rule_group_name": group["ruleGroupName"],
-            #                 "rules": []
-            #             }
-            #             for rule in group["rules"]:
-            #                 if str(rule["ruleId"]) in disabled_rules:
-            #                     disabled_group["rules"].append(rule["ruleId"])
-            #             if disabled_group["rules"]:
-            #                 disabled_groups.append(disabled_group)
-            #     waf_config["disabled_rule_groups"] = disabled_groups
-            # waf_config["request_body_check"] = request_body_check
-            # waf_config["max_request_body_size_in_kb"] = max_request_body_size
-            # waf_config["file_upload_limit_in_mb"] = file_upload_limit
-            # waf_config["exclusions"] = exclusions
-            #
-            # instance.properties.web_application_firewall_configuration = waf_config
-
-            # gallery_applications =
             instance.properties.application_profile.gallery_applications = [{"package_reference_id": avid} for avid in application_version_ids]
 
             if order_applications:
@@ -5747,49 +5717,19 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
                         treat_as_failure.lower() == 'true'
                     index += 1
 
+        def _output(self, *args, **kwargs):
+            from azure.cli.core.aaz import AAZUndefined, has_value
 
-    # client = _compute_client_factory(cmd.cli_ctx)
-    # ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
-    # try:
-    #     from .operations.vm import VMShow
-    #     vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
-    #         "resource_group": resource_group_name,
-    #         "vm_name": vm_name
-    #     })
-    #     # vm = client.virtual_machines.get(resource_group_name, vm_name)
-    # except ResourceNotFoundError:
-    #     raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
-    #
-    # # vm.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
-    # vm["application_profile"] = {
-    #     "gallery_applications": [{"package_reference_id": avid} for avid in application_version_ids]
-    # }
-    #
-    # if order_applications:
-    #     index = 1
-    #     for app in vm["application_profile"]["gallery_applications"]:
-    #         app["order"] = index
-    #         index += 1
-    #
-    # if application_configuration_overrides:
-    #     index = 0
-    #     for over_ride in application_configuration_overrides:
-    #         if over_ride or over_ride.lower() != 'null':
-    #             vm["application_profile"]["gallery_applications"][index]["configuration_reference"] = over_ride
-    #         index += 1
-    #
-    # if treat_deployment_as_failure:
-    #     index = 0
-    #     for treat_as_failure in treat_deployment_as_failure:
-    #         vm["application_profile"]["gallery_applications"][index]["treat_failure_as_deployment_failure"] = \
-    #             treat_as_failure.lower() == 'true'
-    #         index += 1
-    # # return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
-    #
-    # vm["resource_group"] = resource_group_name
-    # vm["vm_name"] = vm_name
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            if has_value(self.ctx.vars.instance.resources):
+                for resource in self.ctx.vars.instance.resources:
+                    if has_value(resource.type):
+                        resource.type = AAZUndefined
 
-    # from .operations.vm import VMCreate
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result
+
     return SetVMApplications(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "vm_name": vm_name,
@@ -5797,9 +5737,7 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
 
 
 def list_vm_applications(cmd, vm_name, resource_group_name):
-    # client = _compute_client_factory(cmd.cli_ctx)
     try:
-        # vm = client.virtual_machines.get(resource_group_name, vm_name)
         from .operations.vm import VMShow
         vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
             "resource_group": resource_group_name,
@@ -5807,7 +5745,7 @@ def list_vm_applications(cmd, vm_name, resource_group_name):
         })
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
-    return vm["applicationProfile"]
+    return vm.get("applicationProfile", {})
 
 
 def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):

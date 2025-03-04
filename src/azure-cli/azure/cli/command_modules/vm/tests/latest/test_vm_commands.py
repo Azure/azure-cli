@@ -12023,7 +12023,7 @@ class CapacityReservationScenarioTest(ScenarioTest):
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='eastus')
     def test_vm_add_application_empty_version_ids(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
@@ -12043,7 +12043,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
     # Need prepare app versions
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='eastus')
     def test_vm_add_application(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
@@ -12068,7 +12068,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         self.cmd('vm application list -g {rg} -n {vm}')
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='eastus')
     def test_vm_add_application_with_order_application(self, resource_group):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 10),
@@ -12096,7 +12096,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         self.cmd('vm application list -g {rg} -n {vm}')
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='eastus')
     def test_vm_add_application_with_config_override(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
