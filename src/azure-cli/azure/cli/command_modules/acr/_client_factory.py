@@ -11,6 +11,7 @@ VERSION_2020_11_01_PREVIEW = "2020-11-01-preview"
 VERSION_2021_08_01_PREVIEW = "2021-08-01-preview"
 VERSION_2022_02_01_PREVIEW = "2022-02-01-preview"
 VERSION_2023_01_01_PREVIEW = "2023-01-01-preview"
+VERSION_2024_11_01_PREVIEW = "2024-11-01-preview"
 
 
 def get_acr_service_client(cli_ctx, api_version=None):
@@ -81,4 +82,4 @@ def cf_acr_agentpool(cli_ctx, *_):
 
 
 def cf_acr_connected_registries(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2021_08_01_PREVIEW).connected_registries
+    return get_acr_service_client(cli_ctx, VERSION_2024_11_01_PREVIEW).connected_registries
