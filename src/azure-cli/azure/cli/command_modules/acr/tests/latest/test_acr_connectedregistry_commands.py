@@ -39,7 +39,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
             'notificationStr': 'hello-world:tag:push',
             'notificationStr2': '*:*'
         })
-        # Create Registr and enable data endpoint
+        # Create Registry and enable data endpoint
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
                          self.check('location', '{rg_loc}'),
