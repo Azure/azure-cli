@@ -552,6 +552,10 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
                                  "Please provide --backup-identity and --backup-key together.")
 
+    if (byok_identity is None and byok_key is None) and (backup_byok_identity is not None and backup_byok_key is not None):
+        raise ArgumentUsageError("Primary user assigned identity and keyvault key need to be provided. "
+                                 "Please also provide --identity and --key.")
+
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
        (byok_key or backup_byok_key):
