@@ -391,6 +391,19 @@ for source in SOURCE_RESOURCES:
             source_display_name=source_display_name
         ) if source is RESOURCE.KubernetesCluster and target is RESOURCE.KeyVault else ''
 
+        id_example = '''
+            - name: Create a connection between {source_display_name} and {target} with resource id
+              text: |-
+                     az {source} connection create {target} --source-id {source_id} --target-id {target_id} {auth_params}
+        '''.format(
+            source=source.value,
+            target=target.value,
+            source_id=source_id,
+            target_id=target_id,
+            auth_params=auth_params,
+            source_display_name=source_display_name
+        ) if target is not RESOURCE.NeonPostgres else ''
+
         helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
           type: command
           short-summary: Create a {source_display_name} connection to {target}.
@@ -409,9 +422,7 @@ for source in SOURCE_RESOURCES:
               text: |-
                      az {source} connection create {target} {source_params} {target_params} {auth_params}
             {webappslot_example}
-            - name: Create a connection between {source_display_name} and {target} with resource id
-              text: |-
-                     az {source} connection create {target} --source-id {source_id} --target-id {target_id} {auth_params}
+            {id_example}
             {provision_example}
         """.format(
             source=source.value,
@@ -429,6 +440,7 @@ for source in SOURCE_RESOURCES:
             auth_params=auth_params,
             provision_example=provision_example,
             webappslot_example=webappslot_example,
+            id_example=id_example,
             source_display_name=source_display_name)
 
         helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """

@@ -369,6 +369,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   opt_out_list=opt_out_list,
                                   app_config_id=app_config_id,
                                   enable_appconfig_extension=enable_appconfig_extension,
+                                  server=server, database=database,
                                   connstr_props=connstr_props
                                   )
 
@@ -442,6 +443,12 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             "id": target_id
         }
 
+    if target_type == RESOURCE.NeonPostgres:
+        if connstr_props is None:
+            connstr_props = {}
+        connstr_props['Database'] = database
+        connstr_props['Server'] = server
+    
     parameters = {
         'target_service': targetService,
         'auth_info': auth_info,
