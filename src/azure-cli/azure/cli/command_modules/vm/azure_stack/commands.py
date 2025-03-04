@@ -273,9 +273,6 @@ def load_command_table(self, _):
         g.custom_command('identity remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_show_command('identity show', 'show_vm_identity')
 
-        g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
-        g.custom_command('application list', 'list_vm_applications', min_api='2021-07-01')
-
         g.custom_command('capture', 'capture_vm')
         g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
