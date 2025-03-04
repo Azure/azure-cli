@@ -20,10 +20,12 @@ class MsalCredentialStub:
     def __init__(self, *args, **kwargs):
         self.acquire_token_scopes = None
         self.acquire_token_kwargs = None
+        self.acquire_token_claims_challenge = None
         super().__init__()
 
-    def acquire_token(self, scopes, **kwargs):
+    def acquire_token(self, scopes, claims_challenge=None, **kwargs):
         self.acquire_token_scopes = scopes
+        self.acquire_token_claims_challenge = claims_challenge
         self.acquire_token_kwargs = kwargs
         return {
             'access_token': MOCK_ACCESS_TOKEN,
@@ -55,7 +57,7 @@ class TestCredentialAdaptor(unittest.TestCase):
         assert msal_cred.acquire_token_kwargs['data'] == MOCK_DATA
 
         sdk_cred.get_token('https://management.core.windows.net//.default', claims=MOCK_CLAIMS)
-        assert msal_cred.acquire_token_kwargs['claims'] == MOCK_CLAIMS
+        assert msal_cred.acquire_token_claims_challenge == MOCK_CLAIMS
 
 
     @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
@@ -77,7 +79,7 @@ class TestCredentialAdaptor(unittest.TestCase):
         assert msal_cred.acquire_token_kwargs['data'] == MOCK_DATA
 
         sdk_cred.get_token_info('https://management.core.windows.net//.default', options={'claims': MOCK_CLAIMS})
-        assert msal_cred.acquire_token_kwargs['claims'] == MOCK_CLAIMS
+        assert msal_cred.acquire_token_claims_challenge == MOCK_CLAIMS
 
 
 if __name__ == '__main__':

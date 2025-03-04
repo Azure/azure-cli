@@ -53,7 +53,7 @@ def aad_error_handler(error, **kwargs):
     raise AuthenticationError(error_description, msal_error=error, recommendation=recommendation)
 
 
-def _generate_login_command(scopes=None, claims=None):
+def _generate_login_command(scopes=None, claims_challenge=None):
     login_command = ['az login']
 
     # Rejected by Conditional Access policy, like MFA
@@ -61,7 +61,7 @@ def _generate_login_command(scopes=None, claims=None):
         login_command.append('--scope {}'.format(' '.join(scopes)))
 
     # Rejected by CAE
-    if claims:
+    if claims_challenge:
         # Explicit logout is needed: https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
         return 'az logout\n' + ' '.join(login_command)
 

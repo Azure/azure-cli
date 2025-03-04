@@ -56,7 +56,7 @@ def _prepare_msal_kwargs(options=None):
             msal_kwargs['data'] = options['data']
         # For CAE
         if 'claims' in options:
-            msal_kwargs['claims'] = options['claims']
+            msal_kwargs['claims_challenge'] = options['claims']
     return msal_kwargs
 
 
