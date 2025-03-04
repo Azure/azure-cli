@@ -24,14 +24,20 @@ class CredentialAdaptor:
         self._auxiliary_credentials = auxiliary_credentials
 
     def get_token(self, *scopes, **kwargs):
-        """Old SDK token protocol. Get an access token from the main credential."""
+        """Get an access token from the main credential.
+        Implement the old SDK token protocol azure.core.credentials.TokenCredential
+        Return azure.core.credentials.AccessToken
+        """
         logger.debug("CredentialAdaptor.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
         msal_kwargs = _prepare_msal_kwargs(kwargs)
         return build_sdk_access_token(self._credential.acquire_token(list(scopes), **msal_kwargs))
 
     def get_token_info(self, *scopes, options=None):
-        """New SDK token protocol. Get an access token from the main credential."""
+        """Get an access token from the main credential.
+        Implement the new SDK token protocol azure.core.credentials.SupportsTokenInfo
+        Return azure.core.credentials.AccessTokenInfo
+        """
         logger.debug("CredentialAdaptor.get_token_info: scopes=%r, options=%r", scopes, options)
 
         msal_kwargs = _prepare_msal_kwargs(options)
@@ -51,7 +57,8 @@ def _prepare_msal_kwargs(options=None):
     # Both get_token's kwargs and get_token_info's options are accepted as their schema is the same (at least for now).
     msal_kwargs = {}
     if options:
-        # For VM SSH. TokenRequestOptions doesn't support 'data'.
+        # For VM SSH. 'data' support is a CLI-specific extension.
+        # SDK doesn't support 'data': https://github.com/Azure/azure-sdk-for-python/pull/16397
         if 'data' in options:
             msal_kwargs['data'] = options['data']
         # For CAE
