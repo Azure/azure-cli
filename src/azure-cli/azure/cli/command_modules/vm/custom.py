@@ -5258,90 +5258,6 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
 
 
 # disk encryption set
-def assign_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_set_name,
-                                        mi_system_assigned=None, mi_user_assigned=None):
-    from .aaz.latest.disk_encryption_set import Update as _Update, Show as _Show
-
-    args = {
-        "disk_encryption_set_name": disk_encryption_set_name,
-        "resource_group": resource_group_name
-    }
-    identity = _Show(cli_ctx=cmd.cli_ctx)(command_args=args).get('identity', {})
-    _user_mi = identity.pop('userAssignedIdentities', None)
-    if _user_mi:
-        identity.update({'user_assigned_identities': _user_mi})
-
-    existing_system_identity = False
-    existing_user_identities = set()
-    if identity:
-        existing_system_identity = identity['type'] in ['SystemAssigned', 'SystemAssigned, UserAssigned']
-        existing_user_identities = {x.lower() for x in list(identity.get('user_assigned_identities', {}).keys())}
-
-    add_system_assigned = mi_system_assigned
-    add_user_assigned = {x.lower() for x in (mi_user_assigned or [])}
-
-    updated_system_assigned = existing_system_identity or add_system_assigned
-    updated_user_assigned = list(existing_user_identities.union(add_user_assigned))
-
-    identity['type'] = 'SystemAssigned'
-    if updated_user_assigned:
-        identity['type'] = 'SystemAssigned, UserAssigned' if updated_system_assigned else 'UserAssigned'
-        identity['user_assigned_identities'] = dict.fromkeys(updated_user_assigned, {})
-
-    args['identity'] = identity
-    result = LongRunningOperation(cmd.cli_ctx)(_Update(cli_ctx=cmd.cli_ctx)(command_args=args))
-    return result.get('identity', None)
-
-
-def remove_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_set_name,
-                                        mi_system_assigned=None, mi_user_assigned=None):
-    remove_system_assigned_identity = mi_system_assigned is not None
-
-    from .aaz.latest.disk_encryption_set import Update as _Update, Show as _Show
-
-    args = {
-        "disk_encryption_set_name": disk_encryption_set_name,
-        "resource_group": resource_group_name
-    }
-    identity = _Show(cli_ctx=cmd.cli_ctx)(command_args=args).get('identity', None)
-    if identity is None:
-        return None
-    _user_mi = identity.pop('userAssignedIdentities', None)
-    if _user_mi:
-        identity.update({'user_assigned_identities': _user_mi})
-
-    user_identities_to_remove = []
-    if mi_user_assigned is not None:
-        existing_user_identities = {x.lower() for x in list(identity.get("user_assigned_identities", {}).keys())}
-
-        # all user assigned identities will be removed if the length of mi_user_assigned is 0,
-        # otherwise the specified identity
-        user_identities_to_remove = {x.lower() for x in mi_user_assigned} \
-            if len(mi_user_assigned) > 0 else existing_user_identities
-        non_existing = user_identities_to_remove.difference(existing_user_identities)
-        if non_existing:
-            from azure.cli.core.azclierror import InvalidArgumentValueError
-            raise InvalidArgumentValueError("'{}' are not associated with '{}', please provide existing user managed "
-                                            "identities".format(','.join(non_existing), disk_encryption_set_name))
-        if not list(existing_user_identities - user_identities_to_remove):
-            identity.pop('user_assigned_identities', None)
-            if identity['type'] == "UserAssigned":
-                identity['type'] = "None"
-            elif identity['type'] == "SystemAssigned, UserAssigned":
-                identity['type'] = "SystemAssigned"
-
-    if remove_system_assigned_identity:
-        identity['type'] = "None" if identity['type'] == "SystemAssigned" else "UserAssigned"
-
-    if user_identities_to_remove:
-        if identity['type'] not in ["None", "SystemAssigned"]:
-            for _id in user_identities_to_remove:
-                identity['user_assigned_identities'].pop(_id, None)
-    args['identity'] = identity
-    result = LongRunningOperation(cmd.cli_ctx)(_Update(cli_ctx=cmd.cli_ctx)(command_args=args))
-    return result.get('identity', None)
-
-
 def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_set_name):
     from .aaz.latest.disk_encryption_set import Show as _Show
     des = _Show(cli_ctx=cmd.cli_ctx)(command_args={
@@ -5349,7 +5265,6 @@ def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_
         "resource_group": resource_group_name
     })
     return des.get('identity', {})
-
 # endregion
 
 

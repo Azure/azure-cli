@@ -96,36 +96,6 @@ type: group
 short-summary: Manage identities of a disk encryption set.
 """
 
-helps['disk-encryption-set identity assign'] = """
-type: command
-short-summary: Add managed identities to an existing disk encryption set.
-examples:
-  - name: Add a system assigned managed identity to an existing disk encryption set.
-    text: >
-        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned
-  - name: Add a user assigned managed identity to an existing disk encryption set.
-    text: >
-        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned MyAssignedId
-  - name: Add system assigned identity and a user assigned managed identity to an existing disk encryption set.
-    text: >
-        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned --user-assigned MyAssignedId
-"""
-
-helps['disk-encryption-set identity remove'] = """
-type: command
-short-summary: Remove managed identities from an existing disk encryption set.
-examples:
-  - name: Remove a system assigned managed identity from an existing disk encryption set.
-    text: >
-        az disk-encryption-set identity remove --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned
-  - name: Remove a user assigned managed identity from an existing disk encryption set.
-    text: >
-        az disk-encryption-set identity remove --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned MyAssignedId
-  - name: Remove all user assigned managed identities from an existing disk encryption set.
-    text: >
-        az disk-encryption-set identity remove --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned
-"""
-
 helps['disk-encryption-set identity show'] = """
 type: command
 short-summary: Display managed identities of a disk encryption set.
