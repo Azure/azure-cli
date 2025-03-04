@@ -574,6 +574,7 @@ def set_cluster_setting(cmd,
                         parameter=None,
                         value=None,
                         settings_section_description=None):
+
     cli_ctx = cmd.cli_ctx
 
     def _set(setting_dict, section, parameter, value):
@@ -581,15 +582,19 @@ def set_cluster_setting(cmd,
             setting_dict[section] = {}
         setting_dict[section][parameter] = value
         return setting_dict
+
     if settings_section_description and (section or parameter or value):
         raise CLIError(
             'Only can use either \'--settings-section-description\' or \'--section\', \'--parameter\' and \'--value\' to set the settings')
+
     if section or parameter or value:
         if section is None or parameter is None or value is None:
             raise CLIError(
                 '\'--section\' , \'--parameter\' and \'--value\' can not be None')
+
     cluster = client.get(resource_group_name, cluster_name)
     setting_dict = _fabric_settings_to_dict(cluster.fabric_settings)
+
     if settings_section_description:
         for setting in settings_section_description:
             if 'section' in setting and 'parameter' in setting and 'value' in setting:
@@ -599,6 +604,7 @@ def set_cluster_setting(cmd,
                 raise CLIError('settings_section_description is invalid')
     else:
         setting_dict = _set(setting_dict, section, parameter, value)
+
     settings = _dict_to_fabric_settings(setting_dict)
     patch_request = ClusterUpdateParameters(fabric_settings=settings)
     update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
@@ -627,8 +633,10 @@ def remove_cluster_setting(cmd,
     if settings_section_description and (section or parameter):
         raise CLIError(
             'Only can use either \'--settings-section-description\' or \'--section\' and \'--parameter \' to set the settings')
+
     cluster = client.get(resource_group_name, cluster_name)
     setting_dict = _fabric_settings_to_dict(cluster.fabric_settings)
+
     if settings_section_description:
         for setting in settings_section_description:
             if 'section' in setting and 'parameter' in setting:
@@ -677,6 +685,71 @@ def update_cluster_reliability_level(cmd,
         node_types=cluster.node_types, reliability_level=reliability_level)
     update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
     return LongRunningOperation(cli_ctx)(update_cluster_poll)
+
+
+def validate_arguments(*args):
+    for arg in args:
+        if arg is None or arg is False:
+            raise CLIError(
+                'Invalid argument {}, Please run command: `az sf cluster update -h` for help message and examples of how to use the command'.
+                format(arg))
+
+
+def validate_none_arguments(*args):
+    for arg in args:
+        if arg is not None and arg is True:
+            raise CLIError(
+                'Invalid argument {}, Please run command: `az sf cluster update -h` for help message and examples of how to use the command'.
+                format(arg))
+
+
+def update_cluster(cmd,
+                   client,
+                   resource_group_name,
+                   cluster_name,
+                   node_type=None,
+                   reliability_level=None,
+                   auto_add_node=False,
+                   section=None,
+                   parameter=None,
+                   settings_section_set=False,
+                   settings_section_rem=False,
+                   value=None,
+                   upgrade_mode=None,
+                   version=None,
+                   durability_level=None):
+
+    if settings_section_set is True:
+        validate_none_arguments(node_type, reliability_level, auto_add_node,
+                                settings_section_rem, upgrade_mode, version, durability_level)
+        validate_arguments(section, parameter, value)
+        return set_cluster_setting(cmd, client, resource_group_name, cluster_name, section, parameter, value)
+
+    if settings_section_rem is True:
+        validate_none_arguments(node_type, reliability_level, auto_add_node, value,
+                                settings_section_set, upgrade_mode, version, durability_level)
+        validate_arguments(section, parameter)
+        return remove_cluster_setting(cmd, client, resource_group_name, cluster_name, section, parameter)
+
+    if reliability_level is not None:
+        validate_none_arguments(node_type, section, parameter, settings_section_set,
+                                settings_section_rem, value, upgrade_mode, version, durability_level)
+        return update_cluster_reliability_level(cmd, client, resource_group_name,
+                                                cluster_name, reliability_level, auto_add_node)
+
+    if durability_level is not None:
+        validate_none_arguments(auto_add_node, reliability_level, section, parameter,
+                                settings_section_set, settings_section_rem, value, upgrade_mode, version)
+        validate_arguments(node_type)
+        return update_cluster_durability(cmd, client, resource_group_name, cluster_name, node_type, durability_level)
+
+    if upgrade_mode is not None:
+        validate_none_arguments(node_type, reliability_level, auto_add_node, section, parameter,
+                                settings_section_set, settings_section_rem, value, durability_level)
+        return update_cluster_upgrade_type(cmd, client, resource_group_name, cluster_name, upgrade_mode, version)
+
+    raise CLIError(
+        'Invalid arguments. Please run command: `az sf cluster update -h` for help message and examples of how to use the command')
 
 
 def add_cluster_node_type(cmd,

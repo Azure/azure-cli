@@ -280,6 +280,32 @@ examples:
 
 """
 
+helps['sf cluster update'] = """
+type: command
+short-summary: Manage cluster updates.
+examples:
+  - name: Change the cluster durability level to 'Silver'.
+    text: >
+        az sf cluster update -g group-name -c cluster1 --durability-level Silver --node-type nt1
+
+  - name: Change the cluster reliability level to 'Silver'.
+    text: >
+        az sf cluster update -g group-name -c cluster1 --reliability-level Silver --auto-add-node
+
+  - name: Set the `MaxFileOperationTimeout` setting for a cluster to 5 seconds.
+    text: >
+        az sf cluster update -g group-name -c cluster1 --settings-section-set --section 'NamingService' --parameter 'MaxFileOperationTimeout' --value 5000
+
+  - name: Remove the `MaxFileOperationTimeout` setting from a cluster.
+    text: >
+        az sf cluster update -g group-name -c cluster1 --settings-section-rem --section 'NamingService' --parameter 'MaxFileOperationTimeout'
+
+  - name: Set a cluster to use the 'Automatic' upgrade mode.
+    text: >
+        az sf cluster update -g group-name -c cluster1 --upgrade-mode Automatic
+
+"""
+
 helps['sf cluster list'] = """
 type: command
 short-summary: List cluster resources.
@@ -306,7 +332,7 @@ short-summary: Remove nodes from a node type in a cluster.
 examples:
   - name: Remove 2 'nt1' nodes from a cluster.
     text: >
-        az sf cluster node remove -g group-name -c cluster1 --node-type 'nt1' --number-of-nodes-to-remove 2
+        az sf cluster node remove -g group-name -c cluster1 --number-of-nodes-to-rem 2 --node-type 'nt1'
 
 """
 
@@ -321,7 +347,7 @@ short-summary: Add a new node type to a cluster.
 examples:
   - name: Add a new node type to a cluster.
     text: >
-        az sf cluster node-type add -g group-name -c cluster1 --node-type 'n2' --capacity 5 --vm-user-name 'adminName' --vm-password testPassword0
+        az sf cluster node-type add -g group-name -c cluster1 --node-type 'n2' --capacity 5 --vm-user-name 'adminName' --vm-password testPassword0 --durability-level Bronze
 
 """
 
