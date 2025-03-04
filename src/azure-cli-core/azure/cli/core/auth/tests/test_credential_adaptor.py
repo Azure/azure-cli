@@ -53,6 +53,7 @@ class TestCredentialAdaptor(unittest.TestCase):
         assert access_token.token == MOCK_ACCESS_TOKEN
         assert access_token.expires_on == 1630920323
 
+        # Note that SDK doesn't support 'data'.
         sdk_cred.get_token('https://management.core.windows.net//.default', data=MOCK_DATA)
         assert msal_cred.acquire_token_kwargs['data'] == MOCK_DATA
 
@@ -74,7 +75,7 @@ class TestCredentialAdaptor(unittest.TestCase):
 
         assert msal_cred.acquire_token_scopes == ['https://management.core.windows.net//.default']
 
-        # Actually, TokenRequestOptions doesn't support 'data'.
+        # Note that SDK doesn't support 'data'.
         sdk_cred.get_token_info('https://management.core.windows.net//.default', options={'data': MOCK_DATA})
         assert msal_cred.acquire_token_kwargs['data'] == MOCK_DATA
 
