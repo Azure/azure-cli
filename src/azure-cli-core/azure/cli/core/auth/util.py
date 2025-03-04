@@ -140,9 +140,6 @@ def check_result(result, **kwargs):
 
 
 def build_sdk_access_token(token_entry):
-    import time
-    request_time = int(time.time())
-
     # MSAL token entry sample:
     # {
     #     'access_token': 'eyJ0eXAiOiJKV...',
@@ -153,7 +150,8 @@ def build_sdk_access_token(token_entry):
     # Importing azure.core.credentials.AccessToken is expensive.
     # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
     # So We define our own AccessToken.
-    return AccessToken(token_entry["access_token"], request_time + token_entry["expires_in"])
+    from .constants import ACCESS_TOKEN, EXPIRES_IN
+    return AccessToken(token_entry[ACCESS_TOKEN], _now_timestamp() + token_entry[EXPIRES_IN])
 
 
 def decode_access_token(access_token):
@@ -177,3 +175,8 @@ def read_response_templates():
         error_template = f.read()
 
     return success_template, error_template
+
+
+def _now_timestamp():
+    import time
+    return int(time.time())
