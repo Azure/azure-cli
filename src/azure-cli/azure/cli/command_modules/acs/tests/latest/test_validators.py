@@ -164,6 +164,40 @@ class TestMaxSurge(unittest.TestCase):
         self.assertTrue('positive' in str(cm.exception), msg=str(cm.exception))
 
 
+class MessageOfTheDayNamespace:
+    def __init__(self, message_of_the_day, os_type):
+        self.os_type = os_type
+        self.message_of_the_day = message_of_the_day
+        
+class TestMessageOfTheday(unittest.TestCase):
+    def test_valid_cases(self):
+        valid = ["foo", ""]
+        for v in valid:
+            validators.validate_message_of_the_day(MessageOfTheDayNamespace(v, "Linux"))
+
+    def test_fail_if_os_type_windows(self):
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_message_of_the_day(
+                MessageOfTheDayNamespace("foo", "Windows")
+            )
+        self.assertTrue(
+            "--message-of-the-day can only be set for linux nodepools"
+            in str(cm.exception),
+            msg=str(cm.exception),
+        )
+
+    def test_fail_if_os_type_invalid(self):
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_message_of_the_day(
+                MessageOfTheDayNamespace("foo", "invalid")
+            )
+        self.assertTrue(
+            "--message-of-the-day can only be set for linux nodepools"
+            in str(cm.exception),
+            msg=str(cm.exception),
+        )
+
+
 class TestLabels(unittest.TestCase):
     def test_invalid_labels_prefix(self):
         invalid_labels = "k8s##.io/label1=value"

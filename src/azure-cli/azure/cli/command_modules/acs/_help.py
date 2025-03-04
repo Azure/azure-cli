@@ -265,6 +265,9 @@ parameters:
     type: string
     short-summary: A CIDR notation IP range from which to assign pod IPs when kubenet is used.
     long-summary: This range must not overlap with any Subnet IP ranges. For example, 172.244.0.0/16.
+  - name: --message-of-the-day
+    type: string
+    short-summary: Path to a file containing the desired message of the day. Only valid for linux nodes. Will be written to /etc/motd.
   - name: --service-cidr
     type: string
     short-summary: A CIDR notation IP range from which to assign service cluster IPs.
@@ -1608,6 +1611,9 @@ parameters:
   - name: --linux-os-config
     type: string
     short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --message-of-the-day
+    type: string
+    short-summary: Path to a file containing the desired message of the day. Only valid for linux nodes. Will be written to /etc/motd.
   - name: --host-group-id
     type: string
     short-summary: The fully qualified dedicated host group id used to provision agent node pool.

@@ -827,3 +827,11 @@ def validate_disable_windows_outbound_nat(namespace):
         if hasattr(namespace, 'os_type') and str(namespace.os_type).lower() != "windows":
             raise ArgumentUsageError(
                 '--disable-windows-outbound-nat can only be set for Windows nodepools')
+
+
+def validate_message_of_the_day(namespace):
+    """Validates message of the day can only be used on Linux."""
+    if namespace.message_of_the_day is not None and namespace.message_of_the_day != "":
+        if namespace.os_type is not None and namespace.os_type != "Linux":
+            raise ArgumentUsageError(
+                '--message-of-the-day can only be set for linux nodepools')
