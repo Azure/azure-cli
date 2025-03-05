@@ -657,7 +657,6 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('retention_period_in_days',
                    help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention',
                    options_list=['--retention'])
-        c.argument('enable_backup_over_vnet', help='Enable backup over VNet', arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp config backup restore') as c:
         c.argument('backup_name', help='Name of the backup to restore',
