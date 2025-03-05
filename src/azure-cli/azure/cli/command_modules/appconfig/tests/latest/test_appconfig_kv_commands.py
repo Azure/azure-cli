@@ -252,24 +252,6 @@ class AppConfigKVScenarioTest(ScenarioTest):
         list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key} --tags {tag1}').get_output_in_json()
         assert len(list_keys) == 2
 
-        # Set key with tags with null value
-        # tag_with_null_value_dict = {"tag1": "\\0"}
-        # tag_with_null_value = ' '.join([f"{k}={v}" for k, v in tag_with_null_value_dict.items()])
-        # new_label_for_null_tag = "newLabelForNullTag"
-        # self.kwargs.update({
-        #     'label': new_label_for_null_tag,
-        #     'tag_with_null_value': tag_with_null_value
-        # })
-
-        # self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags "{tag_with_null_value}" -y',
-        #      checks=[self.check('key', key_with_tags),
-        #      self.check('label', new_label_for_null_tag),
-        #      self.check('tags', tag_with_null_value_dict)])
-
-        # # List key-values with tag with null value
-        # list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key} --tags "{tag_with_null_value}"').get_output_in_json()
-        # assert len(list_keys) == 1
-
         # Set key-value with empty tag value
         empty_tag_value_dict = {"tag1": ""}
         tag_with_empty_value = ' '.join([f"{k}={v}" for k, v in empty_tag_value_dict.items()])
@@ -293,10 +275,14 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert len(list_keys) == 3
 
         # Delete key-values with tags tag1=value1
+        self.kwargs.update({
+            'label': '*'
+        })
+
         deleted_kvs = self.cmd('appconfig kv delete --connection-string {connection_string} --key {key} --label {label} --tags {tag1} -y',
              checks=[self.check('[0].key', key_with_tags),
                     self.check('[0].label', label_with_tag1),
-                    self.check('[0].tags', tag1_dict)])
+                    self.check('[0].tags', tag1_dict)]).get_output_in_json()
         assert(len(deleted_kvs) == 2)
 
 
@@ -478,21 +464,6 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # List revisions with tag1 = value1
         list_keys = self.cmd('appconfig revision list -n {config_store_name} --key {key} --tags {tag1}').get_output_in_json()
         assert len(list_keys) == 2
-
-        # # Set key with tags with null value
-        # tag_null_value_dict = {"tag1": "\\0"}
-        # tag_with_null_value = ' '.join([f"{k}={v}" for k, v in tag_null_value_dict.items()])
-        # self.kwargs.update({
-        #     'tag_with_null_value': tag_with_null_value
-        # })
-
-        # self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} --tags "{tag_with_null_value}" -y',
-        #      checks=[self.check('key', key_with_tags),
-        #             self.check('tags', tag_null_value_dict)])
-
-        # # List revisions with tag with null value
-        # list_keys = self.cmd('appconfig revision list -n {config_store_name} --key {key} --tags "{tag_with_null_value}"').get_output_in_json()
-        # assert len(list_keys) == 1
 
         # Set key-value with empty tag value
         empty_tag_value_dict = {"tag1": ""}
