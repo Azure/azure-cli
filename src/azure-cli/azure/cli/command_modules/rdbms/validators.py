@@ -553,7 +553,7 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
                                  "Please provide --backup-identity and --backup-key together.")
 
     if bool(byok_identity is not None) and bool(backup_byok_identity is not None) and \
-        byok_identity.lower() == backup_byok_identity.lower():
+       byok_identity.lower() == backup_byok_identity.lower():
         raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
                                  "Please provide different identities for --identity and --backup-identity.")
 
@@ -572,8 +572,10 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
             raise ArgumentUsageError("Please provide both primary as well as geo-back user assigned identity "
                                      "and keyvault key to enable Data encryption for geo-redundant backup.")
         if instance is not None and (bool(byok_identity is None) ^ bool(backup_byok_identity is None)):
-            primary_user_assigned_identity_id = byok_identity if byok_identity else instance.data_encryption.primary_user_assigned_identity_id
-            geo_backup_user_assigned_identity_id = backup_byok_identity if backup_byok_identity else instance.data_encryption.geo_backup_user_assigned_identity_id
+            primary_user_assigned_identity_id = byok_identity if byok_identity else \
+                instance.data_encryption.primary_user_assigned_identity_id
+            geo_backup_user_assigned_identity_id = backup_byok_identity if backup_byok_identity else \
+                instance.data_encryption.geo_backup_user_assigned_identity_id
             if primary_user_assigned_identity_id == geo_backup_user_assigned_identity_id:
                 raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
                                          "Please provide different identities for --identity and --backup-identity.")

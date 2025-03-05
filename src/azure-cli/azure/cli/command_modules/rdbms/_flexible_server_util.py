@@ -443,34 +443,42 @@ def _is_resource_name(resource):
 
 
 def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byok_identity=None,
-                                       byok_key=None, backup_byok_key=None):
+                                       byok_key=None, backup_byok_key=None, instance=None):
     identity, data_encryption = None, None
 
-    if byok_identity and byok_key:
-        identities = {byok_identity: {}}
+    primary_user_assigned_identity_id = byok_identity
+    primary_key_uri = byok_key
+    geo_backup_user_assigned_identity_id = backup_byok_identity
+    geo_backup_key_uri = backup_byok_key
+    if instance is not None and (byok_identity is None) and (backup_byok_identity is not None):
+        primary_user_assigned_identity_id = instance.data_encryption.primary_user_assigned_identity_id
+        primary_key_uri = instance.data_encryption.primary_key_uri
 
-        if backup_byok_identity:
-            identities[backup_byok_identity] = {}
+    if primary_user_assigned_identity_id and primary_key_uri:
+        identities = {primary_user_assigned_identity_id: {}}
+
+        if geo_backup_user_assigned_identity_id:
+            identities[geo_backup_user_assigned_identity_id] = {}
 
         if db_engine == 'mysql':
             identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
                                                              type="UserAssigned")
 
             data_encryption = mysql_flexibleservers.models.DataEncryption(
-                primary_user_assigned_identity_id=byok_identity,
-                primary_key_uri=byok_key,
-                geo_backup_user_assigned_identity_id=backup_byok_identity,
-                geo_backup_key_uri=backup_byok_key,
+                primary_user_assigned_identity_id=primary_user_assigned_identity_id,
+                primary_key_uri=primary_key_uri,
+                geo_backup_user_assigned_identity_id=geo_backup_user_assigned_identity_id,
+                geo_backup_key_uri=geo_backup_key_uri,
                 type="AzureKeyVault")
         else:
             identity = postgresql_flexibleservers.models.UserAssignedIdentity(user_assigned_identities=identities,
                                                                               type="UserAssigned")
 
             data_encryption = postgresql_flexibleservers.models.DataEncryption(
-                primary_user_assigned_identity_id=byok_identity,
-                primary_key_uri=byok_key,
-                geo_backup_user_assigned_identity_id=backup_byok_identity,
-                geo_backup_key_uri=backup_byok_key,
+                primary_user_assigned_identity_id=primary_user_assigned_identity_id,
+                primary_key_uri=primary_key_uri,
+                geo_backup_user_assigned_identity_id=geo_backup_user_assigned_identity_id,
+                geo_backup_key_uri=geo_backup_key_uri,
                 type="AzureKeyVault")
 
     return identity, data_encryption
