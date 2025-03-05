@@ -324,6 +324,7 @@ subscription than the app service environment, please use the resource ID for --
         with self.argument_context(scope + ' config ssl import') as c:
             c.argument('key_vault', help='The name or resource ID of the Key Vault')
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
+            c.argument('name', help='Name of the web app. This is used to set the location of the webspace for the certificate import. If not specified, the location of the resource group will be used. If you have apps in multiple regions/webspaces, you must specify the name of the app to set the location of the webspace for the certificate import.')
         with self.argument_context(scope + ' config ssl create') as c:
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
@@ -656,6 +657,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('retention_period_in_days',
                    help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention',
                    options_list=['--retention'])
+        c.argument('enable_backup_over_vnet', help='Enable backup over VNet', arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp config backup restore') as c:
         c.argument('backup_name', help='Name of the backup to restore',

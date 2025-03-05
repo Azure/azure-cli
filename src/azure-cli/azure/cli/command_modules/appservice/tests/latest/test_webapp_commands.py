@@ -1776,6 +1776,26 @@ class WebappSSLImportCertTest(ScenarioTest):
         ])
 
     @unittest.skip("Flaky Test")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @KeyVaultPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, name_prefix='kv-ssl-test', name_len=20)
+    def test_webapp_ssl_import_no_app(self, resource_group, key_vault):
+        # Cert Generated using
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-cert'
+        self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(
+            resource_group, key_vault, 'Microsoft.Azure.WebSites'))
+        self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
+            cert_name, key_vault, pfx_file, cert_password))
+
+        self.cmd('webapp config ssl import --resource-group {}  --key-vault {} --key-vault-certificate-name {} --certificate-name {}'.format(resource_group, key_vault, cert_name, "test123"), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+			JMESPathCheck('test123')
+        ])
+
+    @unittest.skip("Flaky Test")
     @ResourceGroupPreparer(parameter_name='kv_resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_ssl_import_crossrg(self, resource_group, kv_resource_group):
