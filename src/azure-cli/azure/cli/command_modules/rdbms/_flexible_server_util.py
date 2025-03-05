@@ -450,7 +450,7 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
     primary_key_uri = byok_key
     geo_backup_user_assigned_identity_id = backup_byok_identity
     geo_backup_key_uri = backup_byok_key
-    if instance is not None and (byok_identity is None) and (backup_byok_identity is not None):
+    if (instance is not None) and (byok_identity is None) and (backup_byok_identity is not None):
         primary_user_assigned_identity_id = instance.data_encryption.primary_user_assigned_identity_id
         primary_key_uri = instance.data_encryption.primary_key_uri
 

@@ -576,7 +576,7 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
                 instance.data_encryption.primary_user_assigned_identity_id
             geo_backup_user_assigned_identity_id = backup_byok_identity if backup_byok_identity else \
                 instance.data_encryption.geo_backup_user_assigned_identity_id
-            if primary_user_assigned_identity_id == geo_backup_user_assigned_identity_id:
+            if primary_user_assigned_identity_id.lower() == geo_backup_user_assigned_identity_id.lower():
                 raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
                                          "Please provide different identities for --identity and --backup-identity.")
 
