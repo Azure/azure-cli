@@ -54,7 +54,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
                  checks=self.check('dataEndpointEnabled', True))
 
         # Create a default connected registry.
-        self.cmd('acr connected-registry create -n {cr_name} -r {registry_name} -m ReadWrite --repository {repo_1} {repo_2} {repo_3} --garbage-collection-enabled {garbage_collection_enabled_false}',
+        self.cmd('acr connected-registry create -n {cr_name} -r {registry_name} -m ReadWrite --repository {repo_1} {repo_2} {repo_3} --gc-enabled {garbage_collection_enabled_false}',
                  checks=[self.check('name', '{cr_name}'),
                          self.check('mode', 'ReadWrite'),
                          self.check('logging.logLevel', 'Information'),
@@ -102,13 +102,14 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
 
         # Update the connected registry
         self.cmd('acr token create -r {registry_name} -n {clientToken2} --repository {repo_2} metadata/read --no-passwords')
-        self.cmd('acr connected-registry update -n {root_name} -r {registry_name} --log-level Information -s "{defaultSyncSchedule}"  --remove-client-tokens {clientToken} --add-client-tokens {clientToken2} --add-notifications {notificationStr2} --remove-notifications {notificationStr} --garbage-collection-schedule "{garbage_collection_schedule}"',
+        self.cmd('acr connected-registry update -n {root_name} -r {registry_name} --log-level Information -s "{defaultSyncSchedule}"  --remove-client-tokens {clientToken} --add-client-tokens {clientToken2} --add-notifications {notificationStr2} --remove-notifications {notificationStr} --gc-enabled {garbage_collection_enabled_true} --gc-schedule "{garbage_collection_schedule}"',
                  checks=[self.check('name', '{root_name}'),
                          self.check('logging.logLevel', 'Information'),
                          self.check('parent.syncProperties.schedule', '{defaultSyncSchedule}'),
                          self.check('parent.syncProperties.syncWindow', 'None'),
                          self.check('resourceGroup', '{rg}'),
-                         self.check('notificationsList[0]', '{notificationStr2}')])
+                         self.check('notificationsList[0]', '{notificationStr2}'),
+                         self.check('garbageCollection.schedule', '{garbage_collection_schedule}')])
 
         # List client tokens
         self.cmd('acr connected-registry list-client-tokens -n {root_name} -r {registry_name}',
