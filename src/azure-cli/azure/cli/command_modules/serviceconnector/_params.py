@@ -158,8 +158,8 @@ def add_target_resource_block(context, target):
             context.ignore('target_id')
         else:
             context.argument('target_id', type=str,
-                         help='The resource id of target service. Required if {required_args} '
-                         'are not specified.'.format(required_args=str(required_args)))
+                             help='The resource id of target service. Required if {required_args} '
+                             'are not specified.'.format(required_args=str(required_args)))
 
     if target != RESOURCE.KeyVault:
         context.ignore('enable_csi')

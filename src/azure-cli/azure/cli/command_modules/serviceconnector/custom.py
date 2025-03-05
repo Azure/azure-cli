@@ -448,7 +448,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             connstr_props = {}
         connstr_props['Database'] = database
         connstr_props['Server'] = server
-    
+
     parameters = {
         'target_service': targetService,
         'auth_info': auth_info,

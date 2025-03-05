@@ -427,8 +427,6 @@ for source in SOURCE_RESOURCES:
         """.format(
             source=source.value,
             target=target.value,
-            source_id=source_id,
-            target_id=target_id,
             secret_param=secret_param,
             secret_auto_param=secret_auto_param,
             system_identity_param=system_identity_param,
