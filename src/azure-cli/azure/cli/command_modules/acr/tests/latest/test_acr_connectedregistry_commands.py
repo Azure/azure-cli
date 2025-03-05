@@ -24,7 +24,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
             'root_name': rootName,
             'child_name': childName,
             'grandchild_name': grandchildName,
-            'rg_loc': 'eastus',
+            'rg_loc': 'westcentralus',
             'sku': 'Premium',
             'syncToken': 'syncToken',
             'clientToken': 'clientToken',
@@ -37,7 +37,10 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
             'defaultSyncSchedule': '* * * * *',
             'syncWindow': 'PT4H',
             'notificationStr': 'hello-world:tag:push',
-            'notificationStr2': '*:*'
+            'notificationStr2': '*:*',
+            'garbage_collection_enabled_true': True,
+            'garbage_collection_enabled_false': False,
+            'garbage_collection_schedule': '0 0 */2 * *',
         })
         # Create Registry and enable data endpoint
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
@@ -51,12 +54,13 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
                  checks=self.check('dataEndpointEnabled', True))
 
         # Create a default connected registry.
-        self.cmd('acr connected-registry create -n {cr_name} -r {registry_name} -m ReadWrite --repository {repo_1} {repo_2} {repo_3}',
+        self.cmd('acr connected-registry create -n {cr_name} -r {registry_name} -m ReadWrite --repository {repo_1} {repo_2} {repo_3} --garbage-collection-enabled {garbage_collection_enabled_false}',
                  checks=[self.check('name', '{cr_name}'),
                          self.check('mode', 'ReadWrite'),
                          self.check('logging.logLevel', 'Information'),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('resourceGroup', '{rg}')])
+                         self.check('resourceGroup', '{rg}'),
+                         self.check('garbageCollection.enabled', False)])
 
         # Create a custom connected-registry with a previously created token.
         self.cmd('acr token create -r {registry_name} -n {syncToken} --repository {repo_1} content/read metadata/read --gateway {root_name} config/read config/write message/read message/write --no-passwords')
@@ -98,7 +102,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
 
         # Update the connected registry
         self.cmd('acr token create -r {registry_name} -n {clientToken2} --repository {repo_2} metadata/read --no-passwords')
-        self.cmd('acr connected-registry update -n {root_name} -r {registry_name} --log-level Information -s "{defaultSyncSchedule}" --remove-client-tokens {clientToken} --add-client-tokens {clientToken2} --add-notifications {notificationStr2} --remove-notifications {notificationStr}',
+        self.cmd('acr connected-registry update -n {root_name} -r {registry_name} --log-level Information -s "{defaultSyncSchedule}"  --remove-client-tokens {clientToken} --add-client-tokens {clientToken2} --add-notifications {notificationStr2} --remove-notifications {notificationStr} --garbage-collection-schedule "{garbage_collection_schedule}"',
                  checks=[self.check('name', '{root_name}'),
                          self.check('logging.logLevel', 'Information'),
                          self.check('parent.syncProperties.schedule', '{defaultSyncSchedule}'),
