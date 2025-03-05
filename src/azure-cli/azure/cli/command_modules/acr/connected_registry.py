@@ -113,7 +113,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
     notifications_set = set(notifications) \
         if notifications else set()
 
-    ConnectedRegistry, LoggingProperties, SyncProperties, ParentProperties, GarbageCollectionProperties = cmd.get_models(
+    ConnectedRegistry, LoggingProperties, SyncProperties, \
+    ParentProperties, GarbageCollectionProperties = cmd.get_models(
         'ConnectedRegistry', 'LoggingProperties', 'SyncProperties', 'ParentProperties','GarbageCollectionProperties')
     connected_registry_create_parameters = ConnectedRegistry(
         provisioning_state=None,
@@ -219,7 +220,8 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
 
     notifications_list = list(notifications_set) if notifications_set != current_notifications_set else None
 
-    ConnectedRegistryUpdateParameters, SyncUpdateProperties, LoggingProperties, GarbageCollectionProperties = cmd.get_models(
+    ConnectedRegistryUpdateParameters, SyncUpdateProperties, \
+        LoggingProperties, GarbageCollectionProperties = cmd.get_models(
         'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties','GarbageCollectionProperties')
     connected_registry_update_parameters = ConnectedRegistryUpdateParameters(
         sync_properties=SyncUpdateProperties(
