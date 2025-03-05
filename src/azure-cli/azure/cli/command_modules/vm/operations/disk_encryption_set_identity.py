@@ -60,8 +60,8 @@ class DiskEncryptionSetIdentityAssign(_DiskEncryptionSetUpdate):
         existing_system_identity = False
         existing_user_identity = set()
         if instance.to_serialized_data().get('identity', None):
-            existing_system_identity = instance['identity']['type'].to_serialized_data() in ['SystemAssigned', 'SystemAssigned, UserAssigned']
-            existing_user_identity = {x.lower() for x in list(instance['identity'].to_serialized_data().get('userAssignedIdentities', {}).keys())}
+            existing_system_identity = instance.identity.type in ['SystemAssigned', 'SystemAssigned, UserAssigned']
+            existing_user_identity = {x.lower() for x in list(getattr(instance.identity, 'user_assigned_identities', {}).keys())}
 
         add_system_assigned = self.ctx.args.system_assigned.to_serialized_data()
         add_user_assigned = {x.lower() for x in self.ctx.args.user_assigned.to_serialized_data() or []}
@@ -69,10 +69,10 @@ class DiskEncryptionSetIdentityAssign(_DiskEncryptionSetUpdate):
         updated_system_assigned = existing_system_identity or add_system_assigned
         updated_user_assigned = list(existing_user_identity.union(add_user_assigned))
 
-        instance['identity']['type'] = 'SystemAssigned'
+        instance.identity.type = 'SystemAssigned'
         if updated_user_assigned:
-            instance['identity']['type'] = 'SystemAssigned, UserAssigned' if updated_system_assigned else 'UserAssigned'
-            instance['identity']['user_assigned_identities'] = dict.fromkeys(updated_user_assigned, {})
+            instance.identity.type = 'SystemAssigned, UserAssigned' if updated_system_assigned else 'UserAssigned'
+            instance.identity.user_assigned_identities = dict.fromkeys(updated_user_assigned, {})
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -145,40 +145,40 @@ class DiskEncryptionSetIdentityRemove(_DiskEncryptionSetUpdate):
                 return None
             self._output = MethodType(_output, self)
 
-            _no_current_identity = True
-            return _no_current_identity
+            # skip the update operation if the identity is not present
+            return True
 
         user_identities_to_remove = []
         if has_value(self.ctx.args.user_assigned):
-            existing_user_identities = {x.lower() for x in list(instance['identity'].to_serialized_data().get('userAssignedIdentities', {}).keys())}
+            existing_user_identities = {x.lower() for x in list(getattr(instance.identity, 'user_assigned_identities', {}).keys())}
 
             # all user assigned identities will be removed if the length of mi_user_assigned is 0,
             # otherwise the specified identity
-            user_identities_to_remove = {x.lower() for x in self.ctx.args.user_assigned.to_serialized_data()} \
-                if len(self.ctx.args.user_assigned.to_serialized_data()) > 0 else existing_user_identities
+            for x in self.ctx.args.user_assigned:
+                pass
+            user_identities_to_remove = {str(x).lower() for x in self.ctx.args.user_assigned} \
+                if len(self.ctx.args.user_assigned) > 0 else existing_user_identities
             non_existing = user_identities_to_remove.difference(existing_user_identities)
             if non_existing:
                 from azure.cli.core.azclierror import InvalidArgumentValueError
                 raise InvalidArgumentValueError("'{}' are not associated with '{}', please provide existing user managed "
-                                                "identities".format(','.join(non_existing), instance['name']))
+                                                "identities".format(','.join(non_existing), instance.name))
             if not list(existing_user_identities - user_identities_to_remove):
-                _identity = instance['identity'].to_serialized_data()
-                _identity.pop('userAssignedIdentities', None)
-                instance['identity'] = _identity
-                if instance['identity']['type'] == 'UserAssigned':
-                    instance['identity']['type'] = 'None'
-                elif instance['identity']['type'] == 'SystemAssigned, UserAssigned':
-                    instance['identity']['type'] = 'SystemAssigned'
+                if hasattr(instance.identity, 'user_assigned_identities'):
+                    del instance.identity.user_assigned_identities
+                if instance.identity.type == 'UserAssigned':
+                    instance.identity.type = 'None'
+                elif instance.identity.type == 'SystemAssigned, UserAssigned':
+                    instance.identity.type = 'SystemAssigned'
 
         if self.ctx.args.system_assigned:
-            instance['identity']['type'] = 'None' if instance['identity']['type'] == 'SystemAssigned' else 'UserAssigned'
+            instance.identity.type = 'None' if instance.identity.type == 'SystemAssigned' else 'UserAssigned'
 
         if user_identities_to_remove:
-            if instance['identity']['type'] not in ['None', 'SystemAssigned']:
-                _user_ids = instance['identity']['user_assigned_identities'].to_serialized_data()
+            if instance.identity.type not in ['None', 'SystemAssigned']:
                 for _id in user_identities_to_remove:
-                    _user_ids.pop(_id.lower(), None)
-                instance['identity']['user_assigned_identities'] = _user_ids
+                    if hasattr(instance.identity.user_assigned_identities, _id):
+                        del instance.identity.user_assigned_identities[_id]
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
