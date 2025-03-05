@@ -392,11 +392,19 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.maintenance_window.start_minute = start_minute
         instance.maintenance_window.custom_window = custom_window
 
+    primary_user_assigned_identity_id = byok_identity
+    primary_key_uri = byok_key
+    geo_backup_user_assigned_identity_id = backup_byok_identity
+    geo_backup_key_uri = backup_byok_key
+    if (byok_identity is None) and (backup_byok_identity is not None):
+        primary_user_assigned_identity_id = instance.data_encryption.primary_user_assigned_identity_id
+        primary_key_uri = instance.data_encryption.primary_key_uri
+
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                   byok_identity=byok_identity,
-                                                                   byok_key=byok_key,
-                                                                   backup_byok_identity=backup_byok_identity,
-                                                                   backup_byok_key=backup_byok_key)
+                                                                   byok_identity=primary_user_assigned_identity_id,
+                                                                   byok_key=primary_key_uri,
+                                                                   backup_byok_identity=geo_backup_user_assigned_identity_id,
+                                                                   backup_byok_key=geo_backup_key_uri)
 
     auth_config = instance.auth_config
     administrator_login = instance.administrator_login if instance.administrator_login else None
