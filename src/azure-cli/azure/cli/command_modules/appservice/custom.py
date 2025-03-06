@@ -3961,7 +3961,7 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
     client = web_client_factory(cmd.cli_ctx)
 
     # Webapp name is not required for this command, but the location of the webspace is required since the certificate
-    # is associated with the webspace, not the app. All apps and plans in the same webspace will share the same 
+    # is associated with the webspace, not the app. All apps and plans in the same webspace will share the same
     # certificates. If the app is not provided, the location of the resource group is used.
     if name:
         webapp = client.web_apps.get(resource_group_name, name)
