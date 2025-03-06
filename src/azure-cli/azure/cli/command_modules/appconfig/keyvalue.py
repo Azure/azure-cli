@@ -52,7 +52,7 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          JsonDiff, ImportMode)
 from ._featuremodels import map_keyvalue_to_featureflag
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
-from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
+from ._utils import get_appconfig_data_client, prep_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
 from ._diff_utils import print_preview, KVComparer
 from .feature import __list_features
@@ -923,7 +923,8 @@ def list_revision(cmd,
 
     key = key if key else SearchFilterOptions.ANY_KEY
     label = label if label else SearchFilterOptions.ANY_LABEL
-    label = prep_label_filter_for_url_encoding(label)
+    label = prep_filter_for_url_encoding(label)
+    prepped_tags = [prep_filter_for_url_encoding(tag) for tag in tags] if tags else []
 
     try:
         query_fields = None
@@ -934,7 +935,7 @@ def list_revision(cmd,
 
         revisions_iterable = azconfig_client.list_revisions(key_filter=key,
                                                             label_filter=label,
-                                                            tags_filter=tags,
+                                                            tags_filter=prepped_tags,
                                                             accept_datetime=datetime,
                                                             fields=query_fields)
         retrieved_revisions = []

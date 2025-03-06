@@ -26,7 +26,8 @@ from ._validators import (validate_appservice_name_or_id, validate_sku, validate
                           validate_identity, validate_auth_mode,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
                           validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
-                          validate_snapshot_export, validate_snapshot_import)
+                          validate_snapshot_export, validate_snapshot_import, validate_tag_filters,
+                          validate_import_tag_filters)
 
 
 def load_arguments(self, _):
@@ -132,7 +133,8 @@ def load_arguments(self, _):
     )
 
     tags_arg_type = CLIArgumentType(
-        nargs='*'
+        nargs='*',
+        validator=validate_tag_filters
     )
 
     # Used with data plane commands. These take either a store name or connection string argument.
@@ -219,7 +221,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv import') as c:
         c.argument('label', help="Imported KVs and feature flags will be assigned with this label. If no label specified, will assign null label.")
-        c.argument('tags', arg_type=tags_type, help="Imported KVs and feature flags will be assigned with these tags. If no tags are specified, imported KVs and feature flags will retain existing tags. Support space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.")
+        c.argument('tags', nargs="*", help="Imported KVs and feature flags will be assigned with these tags. If no tags are specified, imported KVs and feature flags will retain existing tags. Support space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.")
         c.argument('prefix', help="This prefix will be appended to the front of imported keys. Prefix will be ignored for feature flags.")
         c.argument('source', options_list=['--source', '-s'], arg_type=get_enum_type(['file', 'appconfig', 'appservice']), validator=validate_import, help="The source of importing. Note that importing feature flags from appservice is not supported.")
         c.argument('yes', help="Do not prompt for preview.")
@@ -247,7 +249,7 @@ def load_arguments(self, _):
                    help='Auth mode for connecting to source App Configuration store. For details, refer to "--auth-mode" argument.')
         c.argument('src_snapshot', validator=validate_snapshot_import,
                    help='Import all keys in a given snapshot of the source App Configuration store. If no snapshot is specified, the keys currently in the store are imported based on the specified key and label filters.')
-        c.argument('src_tags', arg_type=tags_arg_type, help="Key-values which contain the specified tags in source AppConfig will be imported. If no tags are specified, all key-values with any tags can be imported. Support space-separated tag filters: key[=value] [key[=value] ...].")
+        c.argument('src_tags', nargs="*", validator=validate_import_tag_filters, help="Key-values which contain the specified tags in source AppConfig will be imported. If no tags are specified, all key-values with any tags can be imported. Support space-separated tag filters: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
@@ -282,7 +284,7 @@ def load_arguments(self, _):
         c.argument('dest_endpoint', help='If --dest-auth-mode is "login", provide endpoint URL of the destination App Configuration store.')
         c.argument('dest_auth_mode', arg_type=get_enum_type(['login', 'key']),
                    help='Auth mode for connecting to the destination App Configuration store. For details, refer to "--auth-mode" argument.')
-        c.argument('dest_tags', arg_type=tags_arg_type, help="Exported KVs and feature flags will be assigned with these tags. If no tags are specified, exported KVs and features will retain existing tags. Support space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.")
+        c.argument('dest_tags', nargs="*", help="Exported KVs and feature flags will be assigned with these tags. If no tags are specified, exported KVs and features will retain existing tags. Support space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.")
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')

@@ -228,8 +228,6 @@ examples:
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=value1 tag2=value2
   - name: List all key-values with tag name "tag1" with empty value
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=
-  - name: List all key-values with tag name "tag1" with null value
-    text: az appconfig kv list -n MyAppConfiguration --tags tag1=\\0
 """
 
 helps['appconfig kv lock'] = """

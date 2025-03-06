@@ -189,7 +189,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_snapshot_filtering(self, resource_group, location):
-        store_name_prefix = get_resource_name_prefix('SnapshotStoreFiltering') 
+        store_name_prefix = get_resource_name_prefix('SnapshotFilters') 
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
         store_location = 'francecentral'
         sku = 'standard'

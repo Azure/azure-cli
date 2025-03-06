@@ -11,7 +11,7 @@ import time
 
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only)
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
@@ -284,6 +284,24 @@ class AppConfigKVScenarioTest(ScenarioTest):
                     self.check('[0].label', label_with_tag1),
                     self.check('[0].tags', tag1_dict)]).get_output_in_json()
         assert(len(deleted_kvs) == 2)
+
+        # Error if more than 5 tags are provided
+        too_many_tags = {
+            "tag1": "value1",
+            "tag2": "value2",
+            "tag3": "value3",
+            "tag4": "value4",
+            "tag5": "value5",
+            "tag6": "value6"
+        }
+        too_many_tags_str = ' '.join([f"{k}={v}" for k, v in too_many_tags.items()])
+
+        self.kwargs.update({
+            'too_many_tags': too_many_tags_str
+        })
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Too many tag filters provided. Maximum allowed is 5."):
+            self.cmd('appconfig kv list --connection-string {connection_string} --tags {too_many_tags}')
 
 
     @AllowLargeResponse()

@@ -29,7 +29,7 @@ from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import (get_appconfig_data_client,
-                     prep_label_filter_for_url_encoding,
+                     prep_filter_for_url_encoding,
                      validate_feature_flag_name)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
@@ -1254,7 +1254,7 @@ def __list_all_keyvalues(azconfig_client,
     if unescaped_comma_regex.search(key_filter):
         raise CLIError("Comma separated feature names are not supported. Please provide escaped string if your feature name contains comma. \nSee \"az appconfig feature list -h\" for correct usage.")
 
-    label = prep_label_filter_for_url_encoding(label)
+    label = prep_filter_for_url_encoding(label)
 
     try:
         configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, tags_filter=tags, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})

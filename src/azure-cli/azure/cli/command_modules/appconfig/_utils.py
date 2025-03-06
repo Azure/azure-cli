@@ -147,13 +147,13 @@ def get_store_endpoint_from_connection_string(connection_string):
     return None
 
 
-def prep_label_filter_for_url_encoding(label=None):
-    if label is not None:
+def prep_filter_for_url_encoding(filter_value=None):
+    if filter_value is not None:
         import ast
         # ast library requires quotes around string
-        label = '"{0}"'.format(label)
-        label = ast.literal_eval(label)
-    return label
+        filter_value = '"{0}"'.format(filter_value)
+        filter_value = ast.literal_eval(filter_value)
+    return filter_value
 
 
 def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint):
