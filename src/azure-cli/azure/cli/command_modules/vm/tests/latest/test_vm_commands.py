@@ -1654,6 +1654,20 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk2} --size-gb 10 -l westus --optimized-for-frequent-attach false',
                  self.check('optimizedForFrequentAttach', False))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_config_update_')
+    def test_disk_config_update(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', length=10)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 ',checks=[
+            self.check('diskSizeGB', 10)
+        ])
+
+        self.cmd('disk config update -g {rg} -n {disk} --size-gb 20 ', checks=[
+            self.check('diskSizeGB', 20)
+        ])
+
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
