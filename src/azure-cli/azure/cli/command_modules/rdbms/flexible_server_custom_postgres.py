@@ -552,7 +552,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         source_server_id = source_server
 
     source_server_id_parts = parse_resource_id(source_server_id)
-    validate_citus_cluster(cmd, resource_group_name, source_server_id_parts['name'])
+    validate_citus_cluster(cmd, source_server_id_parts['resource_group'], source_server_id_parts['name'])
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
     except Exception as e:
