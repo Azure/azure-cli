@@ -548,9 +548,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_message_ttl', help='Determine how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
         c.argument('notifications', options_list=['--notifications'], nargs='+', help='List of artifact pattern for which notifications need to be generated. Use the format "--notifications [PATTERN1 PATTERN2 ...]".')
         c.argument('garbage_collection_enabled', options_list=['--gc-enabled'],
-                   help='Indicate whether garbage collection is enabled. It is enabled by default.',arg_type=get_three_state_flag(),required=False, default="true")
+                   help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag(), required=False, default="true")
         c.argument('garbage_collection_schedule', options_list=['--gc-schedule'],
-                   help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.',required=False, default="0 0 * * *")
+                   help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.', required=False, default="0 0 * * *")
 
     with self.argument_context('acr connected-registry update') as c:
         c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.')
@@ -566,7 +566,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('remove_notifications', options_list=['--remove-notifications'], nargs='*',
                    help='List of artifact pattern to be removed from notifications list. Use the format "--remove-notifications [PATTERN1 PATTERN2 ...]".')
         c.argument('garbage_collection_enabled', options_list=['--gc-enabled'],
-                   help='Indicate whether garbage collection is enabled. It is enabled by default.',arg_type=get_three_state_flag())
+                   help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag())
         c.argument('garbage_collection_schedule', options_list=['--gc-schedule'], help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.')
     with self.argument_context('acr connected-registry permissions') as c:
         c.argument('add_repos', options_list=['--add'], nargs='*',

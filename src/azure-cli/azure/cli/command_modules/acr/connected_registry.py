@@ -114,8 +114,9 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
         if notifications else set()
 
     ConnectedRegistry, LoggingProperties, SyncProperties, \
-    ParentProperties, GarbageCollectionProperties = cmd.get_models(
-        'ConnectedRegistry', 'LoggingProperties', 'SyncProperties', 'ParentProperties','GarbageCollectionProperties')
+        ParentProperties, GarbageCollectionProperties = cmd.get_models(
+            'ConnectedRegistry', 'LoggingProperties', 'SyncProperties',
+            'ParentProperties', 'GarbageCollectionProperties')
     connected_registry_create_parameters = ConnectedRegistry(
         provisioning_state=None,
         mode=mode,
@@ -133,10 +134,10 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             log_level=log_level,
             audit_log_status='Enabled' if sync_audit_logs_enabled else 'Disabled'
         ),
-         garbage_collection=GarbageCollectionProperties(
+        garbage_collection=GarbageCollectionProperties(
             enabled=garbage_collection_enabled,
             schedule=garbage_collection_schedule
-         ),
+        ),
         notifications_list=list(notifications_set) if notifications_set else None
     )
 
@@ -222,7 +223,8 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
 
     ConnectedRegistryUpdateParameters, SyncUpdateProperties, \
         LoggingProperties, GarbageCollectionProperties = cmd.get_models(
-        'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties','GarbageCollectionProperties')
+            'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties',
+            'LoggingProperties', 'GarbageCollectionProperties')
     connected_registry_update_parameters = ConnectedRegistryUpdateParameters(
         sync_properties=SyncUpdateProperties(
             schedule=sync_schedule,
