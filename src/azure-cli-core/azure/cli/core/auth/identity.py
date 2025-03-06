@@ -192,9 +192,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
         client_credential = sp_auth.get_msal_client_credential()
-        cca = ConfidentialClientApplication(client_id, client_credential=client_credential, **self._msal_app_kwargs)
-        result = cca.acquire_token_for_client(scopes)
-        check_result(result)
+        cred = ServicePrincipalCredential(client_id, client_credential, **self._msal_app_kwargs)
+        cred.acquire_token(scopes)
 
         # Only persist the service principal after a successful login
         entry = sp_auth.get_entry_to_persist()
