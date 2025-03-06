@@ -396,7 +396,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
-                                                                   byok_key=byok_key)
+                                                                   byok_key=byok_key,
+                                                                   backup_byok_identity=backup_byok_identity,
+                                                                   backup_byok_key=backup_byok_key,
+                                                                   instance=instance)
 
     auth_config = instance.auth_config
     administrator_login = instance.administrator_login if instance.administrator_login else None
