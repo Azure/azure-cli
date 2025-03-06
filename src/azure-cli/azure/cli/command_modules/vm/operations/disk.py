@@ -78,6 +78,9 @@ class __CMDGroup(AAZCommandGroup):
 )
 class DiskConfigUpdate(_UpdatePatch):
     """Update disk config.
+
+    :example: Update disk size.
+        az disk config update --name MyManagedDisk --resource-group MyResourceGroup --size-gb 20
     """
     pass
 
