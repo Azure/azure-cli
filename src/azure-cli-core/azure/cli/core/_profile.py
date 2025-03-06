@@ -926,7 +926,10 @@ class SubscriptionFinder:
             raise CLIInternalError("Unable to get '{}' in profile '{}'"
                                    .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, self.cli_ctx.cloud.profile))
         api_version = get_api_version(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-        sdk_cred = CredentialAdaptor(credential)
+
+        # MSIAuthenticationWrapper already implements get_token, so no need to wrap it with CredentialAdaptor
+        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
+        sdk_cred = credential if isinstance(credential, MSIAuthenticationWrapper) else CredentialAdaptor(credential)
         client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, sdk_cred)
         client = client_type(sdk_cred, api_version=api_version,
                              base_url=self.cli_ctx.cloud.endpoints.resource_manager,
