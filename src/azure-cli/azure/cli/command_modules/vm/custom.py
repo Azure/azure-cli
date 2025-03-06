@@ -5511,44 +5511,65 @@ def show_capacity_reservation(client, resource_group_name, capacity_reservation_
 
 
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
-    try:
-        vm = client.virtual_machines.get(resource_group_name, vm_name)
-    except ResourceNotFoundError:
-        raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
+    from .aaz.latest.vm import Update as _VMUpdate
 
-    vm.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+    class SetVMApplications(_VMUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
 
-    if order_applications:
-        index = 1
-        for app in vm.application_profile.gallery_applications:
-            app.order = index
-            index += 1
+        def pre_instance_update(self, instance):
+            instance.properties.application_profile.gallery_applications = [{"package_reference_id": avid} for avid in application_version_ids]
 
-    if application_configuration_overrides:
-        index = 0
-        for over_ride in application_configuration_overrides:
-            if over_ride or over_ride.lower() != 'null':
-                vm.application_profile.gallery_applications[index].configuration_reference = over_ride
-            index += 1
+            if order_applications:
+                index = 1
+                for app in instance.properties.application_profile.gallery_applications:
+                    app["order"] = index
+                    index += 1
 
-    if treat_deployment_as_failure:
-        index = 0
-        for treat_as_failure in treat_deployment_as_failure:
-            vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = \
-                treat_as_failure.lower() == 'true'
-            index += 1
-    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
+            if application_configuration_overrides:
+                index = 0
+                for over_ride in application_configuration_overrides:
+                    if over_ride or over_ride.lower() != 'null':
+                        instance.properties.application_profile.gallery_applications[index]["configuration_reference"] = over_ride
+                    index += 1
+
+            if treat_deployment_as_failure:
+                index = 0
+                for treat_as_failure in treat_deployment_as_failure:
+                    instance.properties.application_profile.gallery_applications[index]["treat_failure_as_deployment_failure"] = \
+                        treat_as_failure.lower() == 'true'
+                    index += 1
+
+        def _output(self, *args, **kwargs):
+            from azure.cli.core.aaz import AAZUndefined, has_value
+
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            if has_value(self.ctx.vars.instance.resources):
+                for resource in self.ctx.vars.instance.resources:
+                    if has_value(resource.type):
+                        resource.type = AAZUndefined
+
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result
+
+    return SetVMApplications(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "vm_name": vm_name,
+    })
 
 
 def list_vm_applications(cmd, vm_name, resource_group_name):
-    client = _compute_client_factory(cmd.cli_ctx)
     try:
-        vm = client.virtual_machines.get(resource_group_name, vm_name)
+        from .operations.vm import VMShow
+        vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "resource_group": resource_group_name,
+            "vm_name": vm_name
+        })
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
-    return vm.application_profile
+    return vm.get("applicationProfile", {})
 
 
 def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
