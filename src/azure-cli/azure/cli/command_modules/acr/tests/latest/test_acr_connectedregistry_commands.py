@@ -24,7 +24,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
             'root_name': rootName,
             'child_name': childName,
             'grandchild_name': grandchildName,
-            'rg_loc': 'westcentralus',
+            'rg_loc': 'eastus',
             'sku': 'Premium',
             'syncToken': 'syncToken',
             'clientToken': 'clientToken',
