@@ -1518,6 +1518,42 @@ class WebappSlotScenarioTest(ScenarioTest):
         # try another way to delete a slot and exercise all options
         self.cmd('webapp delete -g {} -n {} --slot {} --keep-dns-registration --keep-empty-plan --keep-metrics'.format(resource_group, webapp, slot2))
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_slot_clone(self, resource_group):
+        plan_name = self.create_random_name(prefix='slot-test-plan', length=24)
+        webapp_name = self.create_random_name(prefix='slot-test-web', length=24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+        
+        plan_result = self.cmd(
+            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name)).get_output_in_json()
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_result['name']))
+        self.cmd('webapp update -g {} -n {} --https-only {}'.format(resource_group, webapp_name, True))
+        subnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()["newVNet"]["subnets"][0]["id"]
+        
+        self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, webapp_name, vnet_name, subnet_name))
+
+        slot_from_prod = 'staging'
+        slot_from_nonprod = 'test'
+
+        # verify we can clone from prod slot and https-only + vnet integration is cloned
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(
+            resource_group, webapp_name, slot_from_prod, webapp_name))
+        self.cmd('webapp show -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_from_prod), checks=[
+            JMESPathCheck('httpsOnly', True),
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # verify we can clone from non-prod slot and only have https-only cloned
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(
+            resource_group, webapp_name, slot_from_nonprod, slot_from_prod))
+        self.cmd('webapp show -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_from_nonprod), checks=[
+            JMESPathCheck('httpsOnly', True),
+            JMESPathCheck('virtualNetworkSubnetId', None)
+        ])
+
 
 class WebappSlotTrafficRouting(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
