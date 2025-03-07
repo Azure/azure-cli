@@ -18,7 +18,7 @@ class GetBootDiagnosticLog(AAZCommand):
     """Retrieve the boot diagnostic logs for a VM instance belonging to the specified Network Virtual Appliance.
 
     :example: Get boot diagnostic logs
-        az network virtual-appliance get-boot-diagnostic-log --resource-group rg --network-virtual-appliance-name name
+        az network virtual-appliance get-boot-diagnostic-log --resource-group rg --network-virtual-appliance-name name --scs-sas-url serialconsole-sas-url --css-sas-url consoleScreenshot-sas-url
     """
 
     _aaz_info = {
