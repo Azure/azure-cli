@@ -36,20 +36,49 @@ All breaking changes **must** be pre-announced two sprints ahead Release. It giv
 1. (**Mandatory**) Breaking Changes must be pre-announced through Warning Log while executing.
 2. (*Automatic*) Breaking Changes would be collected automatically and listed in [Upcoming Breaking Change](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes) Document.
 
+### Breaking Changes in Extensions
+
+All breaking changes in GA extensions **must** be pre-announced at least **30** days prior to their Release. 
+
+Extensions don't need to follow the breaking change window. However, we still strongly recommend releasing breaking changes only in breaking change windows along with Core Azure CLI.
+
+```text
+[GA Release with Breaking Change Pre-Announcement]
+│
+├─ Must include complete Breaking Change Information
+│
+└─┬─ [Minimum 30-day Announcement Period] ────────────────┐
+  │                                                       │
+  │  Allow releases during this period:                   │
+  │  - Other unrelated GA versions (vX.(Y+1), v(X+1).Y)   │
+  │  - Multiple preview releases (Beta)                   │
+  │                                                       │
+  ▼                                                       ▼
+[GA Release Containing Breaking Changes]
+(Must fulfill 30-day announcement requirement)
+```
+
 ## Workflow
 
-### Overview
+### CLI Workflow Overview
 
-* CLI Owned Module
-  * Service Team should create an Issue that requests CLI Team to create the pre-announcement several sprints ahead Breaking Change Window. The issue should include the label `Breaking Change`. The CLI team will look at the issue and evaluate if it will be accepted in the next breaking change release.
+* **CLI Owned Module**
+  * Service Team should create an Issue that requests CLI Team to create the pre-announcement at least **2** sprints ahead of Breaking Change Window. The issue should include the label `Breaking Change`. The CLI team will look at the issue and evaluate if it will be accepted in the next breaking change release.
     * Please ensure sufficient time for CLI Team to finish the pre-announcement.
-  * The pre-announcement should be released ahead of Breaking Change Window.
-* Service Owned Module
-  * Service Team should create a Pull Request that create the pre-announcement several sprints ahead Breaking Change Window.
-  * The pre-announcement should be released ahead of Breaking Change Window.
+  * The pre-announcement should be released at least **2** sprints ahead of Breaking Change Window.
+* **Service Owned Module**
+  * Service Team should create a Pull Request that adds the pre-announcement at least **2** sprints ahead of Breaking Change Window.
+  * The pre-announcement should be released at least **2** sprints ahead of Breaking Change Window.
 * After releasing the pre-announcement, a pipeline would be triggered, and the Upcoming Breaking Change Documentation would be updated.
 * At the start of Breaking Change window, the CLI team would notify Service Teams to adopt Breaking Changes.
 * Breaking Changes should be adopted within Breaking Change Window. Any unfinished pre-announcements of breaking changes targeting this release will be deleted by the CLI team.
+
+### Extensions Workflow Overview
+
+* Service Team should create a Pull Request that includes the pre-announcement.
+* The pre-announcement should be released after merged.
+* After releasing the pre-announcement, a pipeline would be triggered, and the Upcoming Breaking Change Documentation would be updated.
+* After 30 days, the Pull Request that contains the actual breaking changes could be merged and released.
 
 ### Pre-announce Breaking Changes
 
@@ -72,7 +101,7 @@ You can then pre-announce breaking changes for different command groups or comma
 from azure.cli.core.breaking_change import register_required_flag_breaking_change, register_default_value_breaking_change, register_other_breaking_change
 
 register_required_flag_breaking_change('bar foo', '--name')
-register_default_value_breaking_change('bar foo baz', '--foobar', 'A', 'B')
+register_default_value_breaking_change('bar foo baz', '--foobar', 'A', 'B', target_version='May 2025')
 register_other_breaking_change('bar foo baz', 'During May 2024, another Breaking Change would happen in Build Event.')
 ```
 
@@ -84,7 +113,7 @@ az bar foo baz
 
 # =====Warning output=====
 # The argument '--name' will become required in next breaking change release(2.61.0).
-# The default value of '--foobar' will be changed to 'B' from 'A' in next breaking change release(2.61.0).
+# The default value of '--foobar' will be changed to 'B' from 'A' in May 2025.
 # During May 2024, another Breaking Change would happen in Build Event.
 ```
 
@@ -132,6 +161,8 @@ from azure.cli.core.breaking_change import register_argument_deprecate
 
 register_argument_deprecate('bar foo', '--name', target_version='2.70.0')
 # Warning Message: Option `--name` has been deprecated and will be removed in 2.70.0.
+register_argument_deprecate('bar foo', '--name', target_version='May 2025')
+# Warning Message: Option `--name` has been deprecated and will be removed in May 2025.
 ```
 
 **Rename**
@@ -143,6 +174,8 @@ from azure.cli.core.breaking_change import register_argument_deprecate
 
 register_argument_deprecate('bar foo', '--name', '--new-name')
 # Warning Message: Option `--name` has been deprecated and will be removed in next breaking change release(2.67.0). Use `--new-name` instead.
+register_argument_deprecate('bar foo', '--name', '--new-name', target_version='May 2025')
+# Warning Message: Option `--name` has been deprecated and will be removed in May 2025. Use `--new-name` instead.
 ```
 
 **Output Change**
