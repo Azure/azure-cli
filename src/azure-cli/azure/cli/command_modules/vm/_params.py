@@ -1486,21 +1486,7 @@ def load_arguments(self, _):
                    options_list=['--enable-auto-key-rotation', '--auto-rotation'],
                    help='Enable automatic rotation of keys.')
 
-    with self.argument_context('disk-encryption-set create', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
-        c.argument('mi_system_assigned', arg_group='Managed Identity', arg_type=get_three_state_flag(),
-                   help='Provide this flag to use system assigned identity. Check out help for more examples')
-        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+',
-                   help='User Assigned Identity ids to be used for disk encryption set. '
-                        'Check out help for more examples')
-
-    with self.argument_context('disk-encryption-set update', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
-
-    with self.argument_context('disk-encryption-set identity', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
+    with self.argument_context('disk-encryption-set identity', operation_group='disk_encryption_sets') as c:
         c.argument('mi_system_assigned', options_list=['--system-assigned'],
                    arg_group='Managed Identity', arg_type=get_three_state_flag(),
                    help='Provide this flag to use system assigned identity for disk encryption set. '

@@ -556,6 +556,11 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
                                  "Please provide --backup-identity and --backup-key together.")
 
+    if bool(byok_identity is not None) and bool(backup_byok_identity is not None) and \
+       byok_identity.lower() == backup_byok_identity.lower():
+        raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
+                                 "Please provide different identities for --identity and --backup-identity.")
+
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
        (byok_key or backup_byok_key):
@@ -570,6 +575,14 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         if instance is None and (bool(byok_key is not None) ^ bool(backup_byok_key is not None)):
             raise ArgumentUsageError("Please provide both primary as well as geo-back user assigned identity "
                                      "and keyvault key to enable Data encryption for geo-redundant backup.")
+        if instance is not None and (bool(byok_identity is None) ^ bool(backup_byok_identity is None)):
+            primary_user_assigned_identity_id = byok_identity if byok_identity else \
+                instance.data_encryption.primary_user_assigned_identity_id
+            geo_backup_user_assigned_identity_id = backup_byok_identity if backup_byok_identity else \
+                instance.data_encryption.geo_backup_user_assigned_identity_id
+            if primary_user_assigned_identity_id.lower() == geo_backup_user_assigned_identity_id.lower():
+                raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
+                                         "Please provide different identities for --identity and --backup-identity.")
 
 
 def _network_arg_validator(subnet, public_access):
