@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import abc
 import argparse
+import re
 from collections import defaultdict
 
 from knack.log import get_logger
@@ -14,6 +15,7 @@ from knack.util import StatusTag, color_map
 logger = get_logger()
 
 NEXT_BREAKING_CHANGE_RELEASE = '2.73.0'
+NEXT_BREAKING_CHANGE_DATE = 'May 2025'
 DEFAULT_BREAKING_CHANGE_TAG = '[Breaking Change]'
 
 
@@ -152,7 +154,7 @@ class NextBreakingChangeWindow(TargetVersion):
     def __str__(self):
         next_breaking_change_version = _next_breaking_change_version()
         if next_breaking_change_version:
-            return f'in next breaking change release({next_breaking_change_version})'
+            return f'in next breaking change release({next_breaking_change_version}) scheduled for {NEXT_BREAKING_CHANGE_DATE}'
         return 'in next breaking change release'
 
     def version(self):
@@ -169,6 +171,18 @@ class ExactVersion(TargetVersion):
 
     def version(self):
         return self._version
+
+
+# pylint: disable=too-few-public-methods
+class NonVersion(TargetVersion):
+    def __init__(self, msg):
+        self._msg = msg
+
+    def __str__(self):
+        return f'in {self._msg}'
+
+    def version(self):
+        return None
 
 
 # pylint: disable=too-few-public-methods
@@ -192,8 +206,10 @@ class BreakingChange(abc.ABC):
         self.target = target if target else '/'.join(self.args) if self.args else self.cmd
         if isinstance(target_version, TargetVersion):
             self._target_version = target_version
-        elif isinstance(target_version, str):
+        elif isinstance(target_version, str) and re.match(r'\d+.\d+.\d+', target_version):
             self._target_version = ExactVersion(target_version)
+        elif isinstance(target_version, str):
+            self._target_version = NonVersion(target_version)
         else:
             self._target_version = UnspecificVersion()
 
