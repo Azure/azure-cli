@@ -396,7 +396,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
-                                                                   byok_key=byok_key)
+                                                                   byok_key=byok_key,
+                                                                   backup_byok_identity=backup_byok_identity,
+                                                                   backup_byok_key=backup_byok_key,
+                                                                   instance=instance)
 
     auth_config = instance.auth_config
     administrator_login = instance.administrator_login if instance.administrator_login else None
@@ -549,7 +552,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         source_server_id = source_server
 
     source_server_id_parts = parse_resource_id(source_server_id)
-    validate_citus_cluster(cmd, resource_group_name, source_server_id_parts['name'])
+    validate_citus_cluster(cmd, source_server_id_parts['resource_group'], source_server_id_parts['name'])
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
     except Exception as e:

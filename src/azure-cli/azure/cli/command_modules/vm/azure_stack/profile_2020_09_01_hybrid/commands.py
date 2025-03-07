@@ -39,6 +39,10 @@ def load_command_table(self, _):
     from .operations.vm import VMListSizes
     self.command_table['vm list-sizes'] = VMListSizes(loader=self)
 
+    from .operations.disk_encryption_set import DiskEncryptionSetCreate, DiskEncryptionSetUpdate
+    self.command_table["disk-encryption-set create"] = DiskEncryptionSetCreate(loader=self)
+    self.command_table["disk-encryption-set update"] = DiskEncryptionSetUpdate(loader=self)
+
     # pylint: disable=line-too-long
     SigImageVersion = import_aaz_by_profile("sig.image_version")
     self.command_table['sig image-version show'] = SigImageVersion.Show(loader=self,

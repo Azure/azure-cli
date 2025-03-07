@@ -26,6 +26,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_ROTATION_POLL_INTERVAL,
@@ -1747,7 +1749,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             network_profile=network_profile,
         )
         ctx_2.attach_mc(mc)
-        self.assertEqual(ctx_2.get_nat_gateway_managed_outbound_ip_count(), 10)
+        self.assertEqual(ctx_2.get_nat_gateway_managed_outbound_ip_count(), None)
 
         ctx_2_notnull = AKSManagedClusterContext(
             self.cmd,
@@ -1790,7 +1792,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             network_profile=network_profile,
         )
         ctx_2.attach_mc(mc)
-        self.assertEqual(ctx_2.get_nat_gateway_idle_timeout(), 20)
+        self.assertEqual(ctx_2.get_nat_gateway_idle_timeout(), None)
 
     def test_get_outbound_type(self):
         # default
@@ -1805,7 +1807,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1._get_outbound_type(read_only=True), None)
-        self.assertEqual(ctx_1.get_outbound_type(), None)
+        self.assertEqual(ctx_1.get_outbound_type(), CONST_OUTBOUND_TYPE_LOAD_BALANCER) # auto-fill
         network_profile_1 = self.models.ContainerServiceNetworkProfile(outbound_type="test_outbound_type")
         mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
         ctx_1.attach_mc(mc)
@@ -1967,6 +1969,31 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_8.attach_mc(mc)
         existingOutboundType = ctx_8.get_outbound_type()
         self.assertEqual(existingOutboundType, "test_outbound_type")
+
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(outbound_type=CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY)
+        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
+        ctx_9 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "outbound_type": CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+                    "vnet_subnet_id": "test_vnet_subnet_id"
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        agentpool_ctx_9 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.UPDATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_9.attach_agentpool_context(agentpool_ctx_9)
+        ctx_9.attach_mc(mc)
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_9.get_outbound_type()
 
     def test_get_network_plugin_mode(self):
         # default
