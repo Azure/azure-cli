@@ -581,7 +581,7 @@ def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage
                               share_name, access_key, mount_path=None, slot=None, slot_setting=False):
     from azure.storage.fileshare import ShareServiceClient
     AzureStorageInfoValue = cmd.get_models('AzureStorageInfoValue')
-    
+
     # Check if the file share exists
     share_service_client = ShareServiceClient(account_url=f"https://{account_name}.file.core.windows.net",
                                               credential=access_key)
