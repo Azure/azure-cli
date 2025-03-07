@@ -2544,8 +2544,7 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
                               settings=None, slot=None, slot_settings=None):
     from azure.mgmt.web.models import ConnStringValueTypePair
     if not settings and not slot_settings:
-        raise ArgumentUsageError('Usage Error: --settings |--slot-settings')
-    
+        raise ArgumentUsageError('Usage Error: --settings |--slot-settings')    
     settings = _build_app_settings_input(settings, connection_string_type)
     sticky_slot_settings = _build_app_settings_input(slot_settings, connection_string_type)
     rm_sticky_slot_settings = set()
