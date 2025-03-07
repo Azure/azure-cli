@@ -85,16 +85,16 @@ def format_what_if_operation_result(what_if_operation_result, enable_color=True)
     _format_resource_changes_stats(builder,
                                    what_if_operation_result.changes,
                                    definite_changes=True)
-    _format_resource_changes(builder,
-                             what_if_operation_result.potential_changes,
-                             definite_changes=False)
-    _format_resource_changes_stats(builder,
-                                   what_if_operation_result.potential_changes,
-                                   definite_changes=False)
-    _format_diagnostics(builder,
-                        what_if_operation_result.changes,
-                        what_if_operation_result.potential_changes,
-                        what_if_operation_result.diagnostics)
+    # _format_resource_changes(builder,
+    #                          what_if_operation_result.potential_changes,
+    #                          definite_changes=False)
+    # _format_resource_changes_stats(builder,
+    #                                what_if_operation_result.potential_changes,
+    #                                definite_changes=False)
+    # _format_diagnostics(builder,
+    #                     what_if_operation_result.changes,
+    #                     what_if_operation_result.potential_changes,
+    #                     what_if_operation_result.diagnostics)
     return builder.build()
 
 

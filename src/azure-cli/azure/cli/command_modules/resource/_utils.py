@@ -87,7 +87,10 @@ def _build_preflight_error_message(preflight_error):
 
 
 def _build_http_response_error_message(http_error):
-    error_txt = http_error.response.internal_response.text
+    try:
+        error_txt = http_error.response.internal_response.text
+    except AttributeError:
+        return ''
 
     error_info = json.loads(error_txt)['error']
     error_details = error_info.pop('details') if 'details' in error_info else []
