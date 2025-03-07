@@ -338,7 +338,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('manual_integration', action='store_true',
                        help='disable automatic sync between source control and web')
             c.argument('repo_url', options_list=['--repo-url', '-u'],
-                       help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
+                       help='repository url to pull the latest source from, e.g. `https://github.com/foo/foo-web`')
             c.argument('branch', help='the branch name of the repository')
             c.argument('repository_type', help='repository type',
                        arg_type=get_enum_type(['git', 'mercurial', 'github', 'externalgit', 'localgit']))
