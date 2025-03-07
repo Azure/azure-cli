@@ -29,9 +29,9 @@ You could find the next Breaking Change Release plan in our [milestones](https:/
 > 
 > Please note that providing the required info for assessment does not mean it will be assured to be green-lighted for breaking changes. Team will still make the decision based on the overall impact.
 
-### Pre-announce Breaking Changes
+### Ahead-of-1-Month Pre-announcement Policy
 
-All breaking changes **must** be pre-announced two sprints ahead Release. It give users the buffer time ahead to mitigate for better command experience. There are two approaches to inform both interactive users and automatic users about the breaking changes.
+All breaking changes **must** be pre-announced **30** days(usually **2** sprints for modules in Core CLI) ahead Release. It gives users the buffer time ahead to mitigate for better command experience. There are two approaches to inform both interactive users and automatic users about the breaking changes.
 
 1. (**Mandatory**) Breaking Changes must be pre-announced through Warning Log while executing.
 2. (*Automatic*) Breaking Changes would be collected automatically and listed in [Upcoming Breaking Change](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes) Document.
