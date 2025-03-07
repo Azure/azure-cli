@@ -2865,9 +2865,8 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
 
-    # if it is a Windows Container site, at least pass the necessary
-    # app settings to perform the container image validation:
-    if configuration_source and site_config.windows_fx_version:
+    # Copy all app settings and connection strings
+    if configuration_source:
         # get settings from the source
         clone_from_prod = configuration_source.lower() == webapp.lower()
         src_slot = None if clone_from_prod else configuration_source
@@ -2875,10 +2874,14 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
                                                'list_application_settings', src_slot)
         settings = []
         for k, v in app_settings.properties.items():
-            if k in ("DOCKER_REGISTRY_SERVER_USERNAME", "DOCKER_REGISTRY_SERVER_PASSWORD",
-                     "DOCKER_REGISTRY_SERVER_URL"):
-                settings.append(NameValuePair(name=k, value=v))
+            settings.append(NameValuePair(name=k, value=v))
         slot_def.site_config = SiteConfig(app_settings=settings)
+        connection_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                                     'list_connection_strings', src_slot)
+        strings = []
+        for k, v in connection_strings.properties.items():
+            strings.append(NameValuePair(name=k, value=v))
+        slot_def.site_config = SiteConfig(connection_strings=strings)
     poller = client.web_apps.begin_create_or_update_slot(resource_group_name, webapp, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
