@@ -509,6 +509,12 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
+
+    # First, delete any existing app settings with the given names. Addresses https://github.com/Azure/azure-cli/issues/20625
+    app_setting_to_delete = [s.split('=', 1)[0] for s in settings + slot_settings]
+    delete_app_settings(cmd, resource_group_name, name, app_setting_to_delete, slot)
+
+    # Now, process and add the new app settings
     # pylint: disable=too-many-nested-blocks
     for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
         for s in src:
@@ -526,14 +532,15 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
             except CLIError:
                 setting_name, value = s.split('=', 1)
                 dest[setting_name] = value
+                if setting_type == "SlotSettings":
+                    slot_result[setting_name] = True
                 result.update(dest)
 
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
-
-# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
+    # TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
     if is_centauri_functionapp(cmd, resource_group_name, name):
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
@@ -2538,6 +2545,7 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
     from azure.mgmt.web.models import ConnStringValueTypePair
     if not settings and not slot_settings:
         raise ArgumentUsageError('Usage Error: --settings |--slot-settings')
+    
     settings = _build_app_settings_input(settings, connection_string_type)
     sticky_slot_settings = _build_app_settings_input(slot_settings, connection_string_type)
     rm_sticky_slot_settings = set()
@@ -2545,6 +2553,11 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
     conn_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_connection_strings', slot)
 
+    # First, delete any existing app settings with the given names. Addresses https://github.com/Azure/azure-cli/issues/20625
+    connection_strings_to_delete = [s['name'] for s in settings + sticky_slot_settings]
+    delete_connection_strings(cmd, resource_group_name, name, connection_strings_to_delete, slot)
+
+    # Now, process and add the new connection strings
     for name_value_type in settings + sticky_slot_settings:
         # split at the first '=', connection string should not have '=' in the name
         conn_strings.properties[name_value_type['name']] = ConnStringValueTypePair(value=name_value_type['value'],
