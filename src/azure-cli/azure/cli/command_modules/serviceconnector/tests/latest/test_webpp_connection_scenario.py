@@ -31,25 +31,20 @@ class WebAppConnectionScenarioTest(ScenarioTest):
     def test_webapp_fabric_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'azure-service-connector',
-            'site': 'DotNetAppSqlDb20240704',
-            'database': 'clitest'
+            'source_resource_group': 'rg-Test',
+            'site': 'TonyFabricTest'
         })
         name = 'testfabricconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
         connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
-        target_id = 'https://api.fabric.microsoft.com/v1/workspaces/13c65326-ecab-43f6-8a05-60927aaa4cec/SqlDatabases/4fdf6efe-23a9-4d74-8c4a-4ecc70c4d323'
-        server = 'tcp:renzo-srv-6ae35870-c362-44b9-8389-ada214a46bb5-51240650dd56.database.windows.net,1433'
-        database = 'AzureServiceConnectorTestSqlDb-4fdf6efe-23a9-4d74-8c4a-4ecc70c4d323'
+        target_id = 'https://api.fabric.microsoft.com/v1/workspaces/6fb24b6c-6d5e-4533-91e7-1cc745b8b0f4/SqlDatabases/92f30990-7ba7-426c-a98d-c7a7565b81d2'
 
         # prepare
         self.cmd('webapp identity remove --ids {}'.format(source_id))
 
         # create
-        self.cmd('webapp connection create fabric-sql --connection {} --source-id {} --target-id {} \
-                 --system-identity --client-type dotnet --opt-out publicnetwork \
-                 --connstr-props "Server={}" \
-                 "Database={}" '.format(name, source_id, target_id, server, database)
+        self.cmd('webapp connection create fabric-sql --opt-out publicnetwork --connection {} --source-id {} --target-id {} \
+                 --system-identity --client-type dotnet'.format(name, source_id, target_id)
                 )
 
         # list connection
@@ -64,9 +59,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # update
-        self.cmd('webapp connection create fabric-sql --connection {} --source-id {} --target-id {} \
-                 --system-identity --client-type python --opt-out publicnetwork \
-                 --connstr-props "Server={}" "Database={}" '.format(name, source_id, target_id, server, database), 
+        self.cmd('webapp connection create fabric-sql --opt-out publicnetwork --connection {} --source-id {} --target-id {} \
+                 --system-identity --client-type python'.format(name, source_id, target_id), 
                  checks = [ self.check('clientType', 'python')])
 
         # list configuration
@@ -642,6 +636,50 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # update connection
         self.cmd('webapp connection update postgres-flexible --id {} --client-type dotnet '
+                 '--secret name={} secret={}'.format(connection_id, user, password),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_neon_postgres_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-flexiblepostgresql-app',
+        })
+
+        # prepare password
+        user = 'servicelinker'
+        password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
+            .get_output_in_json().get('value')
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        server = 'neontest-serve'
+        database = 'testdb'
+
+        # create connection
+        self.cmd('webapp connection create neon-postgres --connection {} --source-id {} --server {} --database {} '
+                 '--secret name={} secret={} --client-type python'.format(name, source_id, server, database, user, password))
+
+        
+        connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
+
+        # update connection
+        self.cmd('webapp connection update neon-postgres --id {} --client-type dotnet '
                  '--secret name={} secret={}'.format(connection_id, user, password),
                  checks = [ self.check('clientType', 'dotnet') ])
 

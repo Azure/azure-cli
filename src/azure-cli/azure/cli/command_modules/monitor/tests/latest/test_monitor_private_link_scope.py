@@ -11,12 +11,12 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
         super().__init__(method_name)
-        self.cmd('extension add -n application-insights')
 
     # @record_only()  # record_only as the private-link-scope scoped-resource cannot find the components of application insights
     @unittest.skip('If it cannot run, how to record_only, how yaml file is created')
     @ResourceGroupPreparer(location='westus2')
     def test_monitor_private_link_scope_scenario(self, resource_group, resource_group_location):
+        self.cmd('extension add -n application-insights')
         self.kwargs.update({
             'rg': resource_group,
             'scope': 'clitestscopename',

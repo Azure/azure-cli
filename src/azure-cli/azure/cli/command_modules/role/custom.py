@@ -578,7 +578,7 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     # "atScope()" and "principalId eq '{value}'" query cannot be used together (API limitation).
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
     if scope:
-        f = 'atScope()'
+        f = 'atScope()'  # atScope() excludes role assignments at subscopes
         if assignee_object_id and include_groups:
             f = f + " and assignedTo('{}')".format(assignee_object_id)
         assignments = list(assignments_client.list_for_scope(scope=scope, filter=f))
@@ -594,8 +594,12 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     worker = MultiAPIAdaptor(cli_ctx)
     if assignments:
         assignments = [a for a in assignments if (
+            # If no scope, list all assignments
             not scope or
-            include_inherited and re.match(worker.get_role_property(a, 'scope'), scope, re.I) or
+            # If scope is provided with include_inherited, list assignments at and above the scope.
+            # Note that assignments below the scope are already excluded by atScope()
+            include_inherited or
+            # If scope is provided, list assignments at the scope
             worker.get_role_property(a, 'scope').lower() == scope.lower()
         )]
 

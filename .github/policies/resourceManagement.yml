@@ -6370,5 +6370,25 @@ configuration:
           users:
           - ReaNAiveD
       description: '[SecurityInsights] Auto assign labels and reviewers based on PR title/description.'
+    - if:
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z [Qq]uantum'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z [Qq]uantum'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
+      then:
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: Quantum
+      - addLabel:
+          label: Service Attention
+      description: '[Quantum] auto assign labels and users based on issue description.'
 onFailure:
 onSuccess:

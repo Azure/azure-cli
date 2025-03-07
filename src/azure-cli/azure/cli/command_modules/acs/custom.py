@@ -629,6 +629,7 @@ def aks_create(
     host_group_id=None,
     crg_id=None,
     gpu_instance_profile=None,
+    message_of_the_day=None,
     # azure service mesh
     enable_azure_service_mesh=None,
     revision=None,
@@ -2385,6 +2386,7 @@ def aks_agentpool_add(
     labels=None,
     tags=None,
     node_taints=None,
+    message_of_the_day=None,
     node_osdisk_type=None,
     node_osdisk_size=None,
     max_surge=None,
