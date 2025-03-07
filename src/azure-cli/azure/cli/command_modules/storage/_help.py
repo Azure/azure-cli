@@ -1462,7 +1462,7 @@ examples:
     text: az storage container create -n mystoragecontainer --fail-on-exist
   - name: Create a storage container in a storage account and allow public read access for blobs.
     text: az storage container create -n mystoragecontainer --public-access blob
-  - name: Create a storage container in a PartitionedDNS enabled storage account. 
+  - name: Create a storage container in a PartitionedDNS enabled storage account.
     text: az storage container create --account-name mystorageaccount --name mystoragecontainer --account-key "enter-your-storage_account-key" --blob-endpoint "https://mystorageaccount.z3.blob.storage.azure.net/"
 """
 
