@@ -815,8 +815,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('reset', help='Reset Java apps to the default parking page if set to true with no type specified.', arg_type=get_three_state_flag())
         c.argument('timeout', type=int, help='Timeout for the deployment operation in milliseconds. Ignored when using "--src-url" since synchronous deployments are not yet supported when using "--src-url"')
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified.")
-        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
-                   arg_type=get_three_state_flag())
+        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.", arg_type=get_three_state_flag())
+        c.argument('pull_identity', help="AAD identity used for pull based deployments. 'system' will use the app's system assigned identy. An user assigned identity can be used by providing the client ID. Only available for Windows WebApps. Support for Linux WebApps coming soon.")
         c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
                    arg_type=get_three_state_flag())
 
