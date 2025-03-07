@@ -306,11 +306,11 @@ class Create(AAZCommand):
             options=["community-gallery-image-id"],
             help="The resource Id of the source Community Gallery Image.  Only required when using Community Gallery Image as a source.",
         )
-        source.id = AAZStrArg(
+        source.id = AAZResourceIdArg(
             options=["id"],
             help="The id of the gallery artifact version source. Can specify a disk uri, snapshot uri, user image or storage account resource.",
         )
-        source.virtual_machine_id = AAZStrArg(
+        source.virtual_machine_id = AAZResourceIdArg(
             options=["virtual-machine-id"],
             help="The resource Id of the source virtual machine.  Only required when capturing a virtual machine to source this Gallery Image Version.",
         )
@@ -388,7 +388,7 @@ class Create(AAZCommand):
         cls._args_gallery_disk_image_source_create = AAZObjectArg()
 
         gallery_disk_image_source_create = cls._args_gallery_disk_image_source_create
-        gallery_disk_image_source_create.id = AAZStrArg(
+        gallery_disk_image_source_create.id = AAZResourceIdArg(
             options=["id"],
             help="The id of the gallery artifact version source. Can specify a disk uri, snapshot uri, user image or storage account resource.",
         )
