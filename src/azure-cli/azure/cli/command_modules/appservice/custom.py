@@ -510,7 +510,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
 
-    # First, delete any existing app settings with the given names. Addresses https://github.com/Azure/azure-cli/issues/20625
+    # First, delete any existing app settings with the given names
+    # Addresses https://github.com/Azure/azure-cli/issues/20625
     app_setting_to_delete = [s.split('=', 1)[0] for s in settings + slot_settings]
     delete_app_settings(cmd, resource_group_name, name, app_setting_to_delete, slot)
 
@@ -2552,7 +2553,8 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
     conn_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_connection_strings', slot)
 
-    # First, delete any existing app settings with the given names. Addresses https://github.com/Azure/azure-cli/issues/20625
+    # First, delete any existing app settings with the given names
+    # Addresses https://github.com/Azure/azure-cli/issues/20625
     connection_strings_to_delete = [s['name'] for s in settings + sticky_slot_settings]
     delete_connection_strings(cmd, resource_group_name, name, connection_strings_to_delete, slot)
 
