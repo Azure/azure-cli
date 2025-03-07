@@ -540,7 +540,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
-    # TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
+# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
     if is_centauri_functionapp(cmd, resource_group_name, name):
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
@@ -2544,7 +2544,7 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
                               settings=None, slot=None, slot_settings=None):
     from azure.mgmt.web.models import ConnStringValueTypePair
     if not settings and not slot_settings:
-        raise ArgumentUsageError('Usage Error: --settings |--slot-settings')    
+        raise ArgumentUsageError('Usage Error: --settings |--slot-settings')
     settings = _build_app_settings_input(settings, connection_string_type)
     sticky_slot_settings = _build_app_settings_input(slot_settings, connection_string_type)
     rm_sticky_slot_settings = set()
