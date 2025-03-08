@@ -579,7 +579,18 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
 
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
                               share_name, access_key, mount_path=None, slot=None, slot_setting=False):
+
+    from azure.storage.fileshare import ShareServiceClient
     AzureStorageInfoValue = cmd.get_models('AzureStorageInfoValue')
+
+    # Check if the file share exists
+    share_service_client = ShareServiceClient(account_url=f"https://{account_name}.file.core.windows.net",
+                                              credential=access_key)
+    file_shares = share_service_client.list_shares()
+    share_names = [share.name for share in file_shares]
+    if share_name not in share_names:
+        raise ValidationError(f"The share '{share_name}' does not exist in the storage account '{account_name}'.")
+    
     azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                                      'list_azure_storage_accounts', slot)
 
