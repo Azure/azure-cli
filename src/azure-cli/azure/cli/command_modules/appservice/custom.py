@@ -579,7 +579,6 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
 
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
                               share_name, access_key, mount_path=None, slot=None, slot_setting=False):
-
     from azure.storage.fileshare import ShareServiceClient
     AzureStorageInfoValue = cmd.get_models('AzureStorageInfoValue')
 
