@@ -923,15 +923,16 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
         if iops is not None:
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
 
+
 def _pg_microsoft_entra_validator(active_directory_auth, admin_name, admin_id, admin_type):
     is_microsoft_entra = active_directory_auth is not None and active_directory_auth.lower() == 'enabled'
     if not is_microsoft_entra and (admin_name or admin_id or admin_type):
-        raise CLIError('To provide values for --admin-object-id, --admin-display-name, or --admin-type '
-                              'please set --active-directory-auth to "Enable".')
-    if is_microsoft_entra and (bool(admin_name is None) ^ bool(admin_id is None)):
-        raise CLIError('To add Microsoft Entra admin, please provide values for --admin-object-id and --admin-display-name')
-    if admin_type is not None and (bool(admin_name is None) or bool(admin_id is None)):
-        raise CLIError('To set --admin-type for adding Microsoft Entra admin, please provide values for --admin-object-id and --admin-display-name')
+        raise CLIError('To provide values for --admin-object-id, --admin-display-name, and --admin-type '
+                       'please set --active-directory-auth to "Enable".')
+    if (admin_name is not None or admin_id is not None or admin_type is not None) and\
+       not (admin_name is not None and admin_id is not None and admin_type is not None):
+        raise CLIError('To add Microsoft Entra admin, please provide values for --admin-object-id, '
+                       '--admin-display-name, and --admin-type.')
 
 
 def check_resource_group(resource_group_name):
