@@ -170,6 +170,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('acr_identity', help='Accept system or user assigned identity which will be set for acr image pull. '
                                         'Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
         c.argument('basic_auth', help='Enable or disable basic auth for both SCM and FTP Basic Auth Publishing Credentials. Defaults to Enabled if not specified. See https://aka.ms/app-service-basic-auth to learn more.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
+        c.argument('auto_generated_domain_name_label_scope', help="Specifies the scope of uniqueness for the default hostname during resource creation. ", choices=['TenantReuse', 'SubscriptionReuse', 'ResourceGroupReuse', 'NoReuse'])
         c.ignore('language')
         c.ignore('using_webapp_up')
 
