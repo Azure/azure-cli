@@ -1051,7 +1051,11 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
                 if self.progress_bar:
-                    self.progress_bar.update_progress()
+                    if hasattr(poller, "status") and callable(getattr(poller, "status")):
+                        self.progress_bar.update_progress(poller.status())
+                    else:
+                        self.progress_bar.update_progress()
+
                 self._delay()
             except KeyboardInterrupt:
                 if self.progress_bar:
