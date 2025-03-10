@@ -492,7 +492,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
     with self.argument_context('webapp config storage-account list') as c:
-        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('name', help="Name of the web app.", arg_type=webapp_name_arg_type, id_part=None)
 
     with self.argument_context('webapp config hostname') as c:
         c.argument('webapp_name',
@@ -624,8 +624,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
     with self.argument_context('webapp config storage-account add') as c:
+        c.argument('name', help="Name of the web app.", id_part=None)
         c.argument('slot_setting', options_list=['--slot-setting'], help="With slot setting you can decide to make BYOS configuration sticky to a slot, meaning that when that slot is swapped, the storage account stays with that slot.")
     with self.argument_context('webapp config storage-account update') as c:
+        c.argument('name', help="Name of the web app.", id_part=None)
         c.argument('slot_setting', options_list=['--slot-setting'], help="With slot setting you can decide to make BYOS configuration sticky to a slot, meaning that when that slot is swapped, the storage account stays with that slot.")
 
     with self.argument_context('webapp config backup') as c:
