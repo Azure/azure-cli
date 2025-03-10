@@ -28,7 +28,7 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_check_resource_availability_with_location, \
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
     cf_postgres_flexible_private_endpoint_connections, \
-    cf_postgres_flexible_tuning_options
+    cf_postgres_flexible_tuning_options, cf_postgres_flexible_config
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
@@ -942,9 +942,14 @@ def flexible_server_identity_update(cmd, client, resource_group_name, server_nam
             # if user-assigned identity is enabled, then enable both system-assigned and user-assigned identity
             identity_type = 'SystemAssigned,UserAssigned'
     else:
+        # check if fabric is enabled
+        config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
+        fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
+        if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
+            raise CLIError("On servers for which Fabric mirroring is enabled, system assigned managed identity cannot be disabled.")
         if server.data_encryption.type == 'AzureKeyVault':
             # if data encryption is enabled, then system-assigned identity cannot be disabled
-            raise CLIError("Disabling system-assigned identity isn't supported on servers configured to use customer managed keys for data encryption.")
+            raise CLIError("On servers for which data encryption is based on customer managed key, system assigned managed identity cannot be disabled.")
         if identity_type == 'SystemAssigned,UserAssigned':
             # if both system-assigned and user-assigned identity is enabled, then disable system-assigned identity
             identity_type = 'UserAssigned'
