@@ -631,7 +631,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container',
                    options_list=['--container-url'])
-        c.argument('webapp_name', help='The name of the web app',
+        c.argument('webapp_name', help='The name of the web app', options_list=['--webapp-name', '-n'],
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
         c.argument('db_name', help='Name of the database in the backup', arg_group='Database')
         c.argument('db_connection_string', help='Connection string for the database in the backup',
