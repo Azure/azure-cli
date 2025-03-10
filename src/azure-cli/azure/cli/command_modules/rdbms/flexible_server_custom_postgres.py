@@ -42,6 +42,7 @@ from .validators import pg_arguments_validator, validate_server_name, validate_a
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
+POSTGRES_DB_NAME = 'postgres'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
@@ -132,7 +133,8 @@ def flexible_server_create(cmd, client,
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
-    administrator_login_password = generate_password(administrator_login_password)
+    if password_auth is not None and password_auth.lower() != 'disabled':
+        administrator_login_password = generate_password(administrator_login_password)
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
@@ -166,12 +168,14 @@ def flexible_server_create(cmd, client,
     if start_ip != -1 and end_ip != -1:
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
-    # Create mysql database if it does not exist
+    # Create database if it does not exist
     if (database_name is not None or (create_default_db and create_default_db.lower() == 'enabled') and create_cluster != 'ElasticCluster'):
         db_name = database_name if database_name else DEFAULT_DB_NAME
         _create_database(db_context, cmd, resource_group_name, server_name, db_name)
+    else:
+        db_name = POSTGRES_DB_NAME
 
-    user = server_result.administrator_login
+    user = server_result.administrator_login if server_result.administrator_login else '<admin>'
     server_id = server_result.id
     loc = server_result.location
     version = server_result.version
@@ -179,17 +183,18 @@ def flexible_server_create(cmd, client,
     host = server_result.fully_qualified_domain_name
     subnet_id = None if network is None else network.delegated_subnet_resource_id
 
-    logger.warning('Make a note of your password. If you forget, you would have to '
-                   'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
-                   server_name, resource_group_name)
+    if password_auth is not None and password_auth.lower() != 'disabled':
+        logger.warning('Make a note of your password. If you forget, you would have to '
+                    'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                    server_name, resource_group_name)
     logger.warning('Try using \'az postgres flexible-server connect\' command to test out connection.')
 
-    _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user)
+    _update_local_contexts(cmd, server_name, resource_group_name, db_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version,
-                          administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_postgresql_connection_string(host, user, administrator_login_password, database_name), database_name, firewall_id,
-                          subnet_id)
+                          administrator_login_password,
+                          _create_postgresql_connection_string(host, user, administrator_login_password, db_name),
+                          db_name, firewall_id, subnet_id, password_auth)
 # endregion create without args
 
 
@@ -1753,22 +1758,28 @@ def _create_postgresql_connection_strings(host, user, password, database, port):
 
 
 def _create_postgresql_connection_string(host, user, password, database):
-    connection_kwargs = {
-        'user': user,
-        'host': host,
-        'password': password if password is not None else '{password}',
-        'database': database,
-    }
-    return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
+    if password:
+        connection_kwargs = {
+            'user': user,
+            'host': host,
+            'password': password,
+            'database': database,
+        }
+        return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
+    else:
+        connection_kwargs = {
+            'user': user,
+            'host': host,
+            'database': database,
+        }
+        return 'postgresql://{user}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
 def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,
-                   subnet_id=None):
+                   subnet_id=None, password_auth=None):
 
     output = {
         'host': host,
-        'username': username,
-        'password': password,
         'skuname': sku,
         'location': location,
         'id': server_id,
@@ -1776,6 +1787,9 @@ def _form_response(username, sku, location, server_id, host, version, password, 
         'databaseName': database_name,
         'connectionString': connection_string
     }
+    if password_auth is not None and password_auth != "Disabled":
+        output['username'] = username
+        output['password'] = password
     if firewall_id is not None:
         output['firewallName'] = firewall_id
     if subnet_id is not None:
