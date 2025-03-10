@@ -2,12 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
+# pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, unnecessary-pass
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.aaz import has_value
-from ..aaz.latest.disk import Update as _DiskUpdate, GrantAccess as _DiskGrantAccess, Show
+from azure.cli.core.aaz import has_value, register_command, register_command_group, AAZCommandGroup
+from ..aaz.latest.disk import Update as _DiskUpdate, GrantAccess as _DiskGrantAccess, Show, UpdatePatch as _UpdatePatch
 
 logger = get_logger(__name__)
 
@@ -62,6 +62,27 @@ class DiskUpdate(_DiskUpdate):
                     subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
                     namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
             instance.properties.disk_access_id = disk_access
+
+
+@register_command_group(
+    "disk config",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage disk config.
+    """
+    pass
+
+
+@register_command(
+    "disk config update",
+)
+class DiskConfigUpdate(_UpdatePatch):
+    """Update disk config.
+
+    :example: Update disk size.
+        az disk config update --name MyManagedDisk --resource-group MyResourceGroup --size-gb 20
+    """
+    pass
 
 
 class DiskGrantAccess(_DiskGrantAccess):
