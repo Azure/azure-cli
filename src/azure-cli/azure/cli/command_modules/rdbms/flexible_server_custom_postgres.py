@@ -57,7 +57,7 @@ def flexible_server_create(cmd, client,
                            location=None, backup_retention=None,
                            sku_name=None, tier=None,
                            storage_gb=None, version=None, active_directory_auth=None,
-                           login=None, sid=None, principal_type=None,
+                           admin_name=None, admin_id=None, admin_type=None,
                            password_auth=None, administrator_login=None, administrator_login_password=None,
                            tags=None, database_name=None,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
@@ -105,7 +105,7 @@ def flexible_server_create(cmd, client,
                            performance_tier=performance_tier,
                            create_cluster=create_cluster,
                            active_directory_auth=active_directory_auth,
-                           login=login, sid=sid, principal_type=principal_type,)
+                           admin_name=admin_name, admin_id=admin_id, admin_type=admin_type,)
 
     cluster = None
     if create_cluster == 'ElasticCluster':
@@ -171,10 +171,10 @@ def flexible_server_create(cmd, client,
                                    cluster=cluster)
 
     # Add Microsoft Entra Admin
-    if is_microsoft_entra_auth_enabled and login is not None or sid is not None:
+    if is_microsoft_entra_auth_enabled and admin_name is not None or admin_id is not None:
             server_admin_client = cf_postgres_flexible_adadmin(cmd.cli_ctx, '_')
-            logger.warning("Add Microsoft Entra Admin '%s'.", login)
-            _create_admin(server_admin_client, resource_group_name, server_name, login, sid, principal_type)
+            logger.warning("Add Microsoft Entra Admin '%s'.", admin_name)
+            _create_admin(server_admin_client, resource_group_name, server_name, admin_name, admin_id, admin_type)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -188,7 +188,7 @@ def flexible_server_create(cmd, client,
         db_name = POSTGRES_DB_NAME
 
     user = server_result.administrator_login
-    admin = login
+    admin = admin_name
     server_id = server_result.id
     loc = server_result.location
     version = server_result.version
@@ -207,7 +207,7 @@ def flexible_server_create(cmd, client,
     return _form_response(user, sku, loc, server_id, host, version,
                           administrator_login_password,
                           _create_postgresql_connection_string(host, user, administrator_login_password, db_name, admin),
-                          db_name, firewall_id, subnet_id, password_auth, active_directory_auth, login)
+                          db_name, firewall_id, subnet_id, password_auth, active_directory_auth, admin_name)
 # endregion create without args
 
 
@@ -1106,15 +1106,15 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
     instance = server_operations_client.get(resource_group_name, server_name)
 
     if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
+        raise CLIError("Cannot create a Microsoft Entra admin on a server with replication role. Use the primary server instead.")
 
     return _create_admin(client, resource_group_name, server_name, login, sid, principal_type, no_wait)
 
 
 # Create Microsoft Entra admin
-def _create_admin(client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
+def _create_admin(client, resource_group_name, server_name, principal_name, sid, principal_type=None, no_wait=False):
     parameters = {
-        'principal_name': login,
+        'principal_name': principal_name,
         'tenant_id': get_tenant_id(),
         'principal_type': principal_type
     }
@@ -1130,7 +1130,7 @@ def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_nam
     instance = server_operations_client.get(resource_group_name, server_name)
 
     if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
+        raise CLIError("Cannot delete an Microsoft Entra admin on a server with replication role. Use the primary server instead.")
 
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, server_name, sid)
 
