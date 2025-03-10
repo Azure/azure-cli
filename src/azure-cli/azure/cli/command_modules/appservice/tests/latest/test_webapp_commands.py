@@ -725,6 +725,10 @@ class WebappConfigureTest(ScenarioTest):
             prefix='webapp-linux-plan', length=24)
         linux_webapp = self.create_random_name(
             prefix='webapp-linux', length=24)
+        storage_account = self.create_random_name(
+            prefix='webappstorage', length=24).lower()
+        file_share_name = self.create_random_name(
+            prefix='webappfileshare', length=24).lower()
         self.cmd('appservice plan create -g {} -n {} -l eastus2 --sku S1 --is-linux'.format(resource_group, linux_plan),
                  checks=[
                      # this weird field means it is a linux
@@ -736,14 +740,21 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('name', linux_webapp),
         ])
         # add
-        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
-                  '--share-name sharename --access-key key --mount-path /path/to/mount')
-                  .format(resource_group, linux_webapp)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
+        self.cmd('storage account create -n {} -g {} --public-network-access Disabled --allow-blob-public-access false'.format(storage_account, resource_group)).assert_with_checks([
+            JMESPathCheck('name', storage_account)
+        ])
+        time.sleep(60)
+        self.cmd('storage share-rm create -g {} --storage-account {} --name {}'.format(resource_group, storage_account, file_share_name)).assert_with_checks([
+            JMESPathCheck('name', file_share_name)
+        ])
+        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name {} '
+                '--share-name {} --access-key key --mount-path /path/to/mount')
+                .format(resource_group, linux_webapp, storage_account, file_share_name)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck('length(@)', 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
-            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
-            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", storage_account),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", file_share_name),
             JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
         # update
@@ -752,8 +763,8 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("length(@)", 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
-            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
-            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", storage_account),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", file_share_name),
             JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
         # list
