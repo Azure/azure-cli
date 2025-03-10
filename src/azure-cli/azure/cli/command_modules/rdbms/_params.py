@@ -594,6 +594,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('version', default='16', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
+                c.argument('sid', options_list=['--admin-object-id', '-i'], help='The unique ID of the Azure AD administrator.')
+                c.argument('login', options_list=['--admin-display-name', '-m'], help='Display name of the Azure AD administrator user or group.')
+                c.argument('principal_type', options_list=['--admin-type', '-t'], default='User',
+                           arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Azure AD administrator.')
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
                 c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
                 c.argument('storage_type', default=None, arg_type=storage_type_arg_type)
