@@ -115,7 +115,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                  public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="", auto_generated_domain_name_label_scope=None):
+                  public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
+                  auto_generated_domain_name_label_scope=None):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -221,7 +222,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
-                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled, auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
+                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled,
+                      auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
