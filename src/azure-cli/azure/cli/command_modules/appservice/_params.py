@@ -492,7 +492,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
     with self.argument_context('webapp config storage-account list') as c:
-        c.argument('name', help="Name of the web app.", arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('name', help="Name of the web app.", help="Name of the web app.", arg_type=webapp_name_arg_type, id_part=None)
 
     with self.argument_context('webapp config hostname') as c:
         c.argument('webapp_name',
