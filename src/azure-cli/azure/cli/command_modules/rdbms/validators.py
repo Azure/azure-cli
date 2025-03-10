@@ -310,7 +310,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
-                           active_directory_auth=None, login=None, sid=None, principal_type=None):
+                           active_directory_auth=None, admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     is_create = not instance
     if is_create:
@@ -350,7 +350,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
-    _pg_microsoft_entra_validator(active_directory_auth, login, sid, principal_type)
+    _pg_microsoft_entra_validator(active_directory_auth, admin_name, admin_id, admin_type)
 
 
 def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
@@ -923,15 +923,15 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
         if iops is not None:
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
 
-def _pg_microsoft_entra_validator(active_directory_auth, login, sid, principal_type):
+def _pg_microsoft_entra_validator(active_directory_auth, admin_name, admin_id, admin_type):
     is_microsoft_entra = active_directory_auth is not None and active_directory_auth.lower() == 'enabled'
-    if not is_microsoft_entra and (login or sid or principal_type):
-        raise CLIError('To provide values for --object-id, --display-name, or --type '
+    if not is_microsoft_entra and (admin_name or admin_id or admin_type):
+        raise CLIError('To provide values for --admin-object-id, --admin-display-name, or --admin-type '
                               'please set --active-directory-auth to "Enable".')
-    if is_microsoft_entra and (bool(login is None) ^ bool(sid is None)):
-        raise CLIError('To add Microsoft Entra admin, please provide values for --object-id and --display-name')
-    if principal_type is not None and (bool(login is None) or bool(sid is None)):
-        raise CLIError('To set --admin-type for adding Microsoft Entra admin, please provide values for --object-id and --display-name')
+    if is_microsoft_entra and (bool(admin_name is None) ^ bool(admin_id is None)):
+        raise CLIError('To add Microsoft Entra admin, please provide values for --admin-object-id and --admin-display-name')
+    if admin_type is not None and (bool(admin_name is None) or bool(admin_id is None)):
+        raise CLIError('To set --admin-type for adding Microsoft Entra admin, please provide values for --admin-object-id and --admin-display-name')
 
 
 def check_resource_group(resource_group_name):
