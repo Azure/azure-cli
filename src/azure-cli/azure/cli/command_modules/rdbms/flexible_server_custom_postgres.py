@@ -136,8 +136,8 @@ def flexible_server_create(cmd, client,
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
-    is_password_euth_enabled = True if (password_auth is not None and password_auth.lower() == 'enabled') else False
-    is_microsoft_entra_auth_enabled = True if (active_directory_auth is not None and active_directory_auth.lower() == 'enabled') else False
+    is_password_euth_enabled = bool(password_auth is not None and password_auth.lower() == 'enabled')
+    is_microsoft_entra_auth_enabled = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled')
     if is_password_euth_enabled:
         administrator_login_password = generate_password(administrator_login_password)
 
@@ -171,9 +171,9 @@ def flexible_server_create(cmd, client,
 
     # Add Microsoft Entra Admin
     if is_microsoft_entra_auth_enabled and admin_name is not None or admin_id is not None:
-            server_admin_client = cf_postgres_flexible_adadmin(cmd.cli_ctx, '_')
-            logger.warning("Add Microsoft Entra Admin '%s'.", admin_name)
-            _create_admin(server_admin_client, resource_group_name, server_name, admin_name, admin_id, admin_type)
+        server_admin_client = cf_postgres_flexible_adadmin(cmd.cli_ctx, '_')
+        logger.warning("Add Microsoft Entra Admin '%s'.", admin_name)
+        _create_admin(server_admin_client, resource_group_name, server_name, admin_name, admin_id, admin_type)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -187,7 +187,7 @@ def flexible_server_create(cmd, client,
         db_name = POSTGRES_DB_NAME
 
     user = server_result.administrator_login
-    admin = admin_name
+    admin = admin_name if admin_name else '<admin>'
     server_id = server_result.id
     loc = server_result.location
     version = server_result.version
@@ -197,8 +197,8 @@ def flexible_server_create(cmd, client,
 
     if is_password_euth_enabled:
         logger.warning('Make a note of your password. If you forget, you would have to '
-                    'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
-                    server_name, resource_group_name)
+                       'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                       server_name, resource_group_name)
     logger.warning('Try using \'az postgres flexible-server connect\' command to test out connection.')
 
     _update_local_contexts(cmd, server_name, resource_group_name, db_name, location, user)
@@ -1775,21 +1775,21 @@ def _create_postgresql_connection_strings(host, user, password, database, port):
 
 
 def _create_postgresql_connection_string(host, user, password, database, admin='<admin>'):
-    if password:
-        connection_kwargs = {
-            'user': user,
-            'host': host,
-            'password': password,
-            'database': database,
-        }
-        return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
-    else:
+    if password is None:
         connection_kwargs = {
             'user': admin,
             'host': host,
             'database': database,
         }
         return 'postgresql://{user}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
+
+    connection_kwargs = {
+        'user': user,
+        'host': host,
+        'password': password,
+        'database': database,
+    }
+    return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
 def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,

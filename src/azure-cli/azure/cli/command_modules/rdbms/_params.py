@@ -596,7 +596,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
                 c.argument('admin_name', options_list=['--admin-display-name', '-m'], help='Display name of the Microsoft Entra administrator user or group.')
-                c.argument('admin_type', options_list=['--admin-type', '-t'], default='User',
+                c.argument('admin_type', options_list=['--admin-type', '-t'],
                            arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
                 c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
