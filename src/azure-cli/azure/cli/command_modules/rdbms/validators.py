@@ -928,7 +928,7 @@ def _pg_microsoft_entra_validator(active_directory_auth, admin_name, admin_id, a
     is_microsoft_entra = active_directory_auth is not None and active_directory_auth.lower() == 'enabled'
     if not is_microsoft_entra and (admin_name or admin_id or admin_type):
         raise CLIError('To provide values for --admin-object-id, --admin-display-name, and --admin-type '
-                       'please set --active-directory-auth to "Enable".')
+                       'please set --active-directory-auth to "Enabled".')
     if (admin_name is not None or admin_id is not None or admin_type is not None) and\
        not (admin_name is not None and admin_id is not None and admin_type is not None):
         raise CLIError('To add Microsoft Entra admin, please provide values for --admin-object-id, '
