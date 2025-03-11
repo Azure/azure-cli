@@ -2042,7 +2042,7 @@ class WebappUpdateTest(ScenarioTest):
 
 class BasicAuthScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_webapp_update_basic_auth(self, resource_group):
+    def test_webapp_update(self, resource_group):
         webapp_name = self.create_random_name('webapp-basicAuth-test', 40)
         plan_name = self.create_random_name('webapp-basicAuth-plan', 40)
         self.cmd('appservice plan create -g {} -n {} --sku S1'
