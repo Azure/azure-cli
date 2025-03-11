@@ -137,9 +137,9 @@ def flexible_server_create(cmd, client,
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
-    is_password_euth_enabled = bool(password_auth is not None and password_auth.lower() == 'enabled')
+    is_password_auth_enabled = bool(password_auth is not None and password_auth.lower() == 'enabled')
     is_microsoft_entra_auth_enabled = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled')
-    if is_password_euth_enabled:
+    if is_password_auth_enabled:
         administrator_login_password = generate_password(administrator_login_password)
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
@@ -196,7 +196,7 @@ def flexible_server_create(cmd, client,
     host = server_result.fully_qualified_domain_name
     subnet_id = None if network is None else network.delegated_subnet_resource_id
 
-    if is_password_euth_enabled:
+    if is_password_auth_enabled:
         logger.warning('Make a note of your password. If you forget, you would have to '
                        'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
                        server_name, resource_group_name)
@@ -1806,10 +1806,10 @@ def _form_response(username, sku, location, server_id, host, version, password, 
         'databaseName': database_name,
         'connectionString': connection_string
     }
-    if password_auth is not None and password_auth != "Disabled":
+    if password_auth is not None and password_auth.lower() != "disabled":
         output['username'] = username
         output['password'] = password
-    if active_directory_auth is not None and active_directory_auth != "Disabled":
+    if active_directory_auth is not None and active_directory_auth.lower() != "disabled":
         output['admin'] = microsoft_admin
     if firewall_id is not None:
         output['firewallName'] = firewall_id
