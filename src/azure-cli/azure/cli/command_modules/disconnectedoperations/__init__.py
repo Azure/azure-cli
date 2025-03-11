@@ -6,6 +6,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.command_modules.disconnectedoperations._client_factory import cf_image
+from azure.cli.command_modules.disconnectedoperations._help import (
+    helps,  # pylint: disable=unused-import
+)
 from azure.cli.core import AzCommandsLoader
 
 
