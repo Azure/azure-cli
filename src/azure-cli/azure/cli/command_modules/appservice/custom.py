@@ -2498,8 +2498,10 @@ def _build_app_settings_output(app_settings, slot_cfg_names, redact=False):
 
 
 def _redact_appsettings(settings):
-    logger.warning('App settings have been redacted. '
-                   'Use `az webapp/logicapp/functionapp config appsettings list` to view.')
+    # Removing the redaction message as it's breaking people's pipelines
+    # Addresses https://github.com/Azure/azure-cli/issues/27724
+    # logger.warning('App settings have been redacted. '
+    #                'Use `az webapp/logicapp/functionapp config appsettings list` to view.')
     for x in settings:
         settings[x] = None
     return settings
@@ -2595,8 +2597,10 @@ def delete_connection_strings(cmd, resource_group_name, name, setting_names, slo
 
 
 def _redact_connection_strings(properties):
-    logger.warning('Connection string values have been redacted. '
-                   'Use `az webapp config connection-string list` to view.')
+    # Removing the redaction message as it's breaking people's pipelines
+    # Addresses https://github.com/Azure/azure-cli/issues/27724
+    # logger.warning('Connection string values have been redacted. '
+    #                'Use `az webapp config connection-string list` to view.')
     for setting in properties:
         properties[setting].value = None
     return properties
