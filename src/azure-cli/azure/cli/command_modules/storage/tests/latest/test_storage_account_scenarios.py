@@ -2555,6 +2555,7 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         with open(policy_file, "w") as f:
             policy = self.cmd('storage account or-policy show -g {rg} -n {dest_sc} --policy-id {policy_id}')\
                 .get_output_in_json()
+            policy.update({'metrics': {'enabled': True}})
             json.dump(policy, f)
         self.kwargs['policy'] = policy_file
         result = self.cmd('storage account or-policy create -g {rg} -n {src_sc} -p @"{policy}"').get_output_in_json()
@@ -2564,16 +2565,22 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['rules'][0]['sourceContainer'], src_container)
         self.assertEqual(result['rules'][0]['destinationContainer'], dest_container)
         self.assertEqual(result['rules'][0]['filters']['minCreationTime'], '2020-02-19T16:05:00Z')
+        self.assertEqual(result['metrics']['enabled'], True)
 
         src_policy_id = result["policyId"]
         self.kwargs.update({"src_policy_id": src_policy_id})
         self.cmd('storage account or-policy update -g {rg} -n {src_sc} -p @"{policy}" --policy-id {src_policy_id}')
 
-        # Service behavior change: (InvalidObjectReplicationPolicy) SourceAccount can not be overwritten
-        # # Update ORS policy
-        # result = self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
-        #     resource_group, self.kwargs["dest_sc"], self.kwargs["policy_id"], self.kwargs['new_sc'])).get_output_in_json()
-        # self.assertIn(self.kwargs['new_sc'], result['sourceAccount'])
+        policy = None
+        with open(policy_file, "r") as f:
+            policy = json.load(f)
+            policy.update({'metrics': {'enabled': False}})
+
+        with open(policy_file, "w") as f:
+            json.dump(policy, f)
+
+        self.cmd('storage account or-policy update -g {rg} -n {src_sc} -p @"{policy}" --policy-id {src_policy_id}',
+                 checks=[self.check('metrics.enabled', False)])
 
         # Delete policy from destination and source account
         self.cmd('storage account or-policy delete -g {rg} -n {src_sc} --policy-id {policy_id}')
