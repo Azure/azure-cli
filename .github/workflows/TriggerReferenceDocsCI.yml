@@ -28,11 +28,9 @@ jobs:
         AdoLatestPipelineId: ${{secrets.ADO_DocsReference_Latest_Pipeline_ID}}
         AdoLtsPipelineId: ${{secrets.ADO_DocsReference_LTS_Pipeline_ID}}
         ReleaseBranch: ${{ github.event.release.target_commitish }}
-        CheckInterval: 60
       run: |
           $organization = $env:AdoOrg
           $project = $env:AdoProject
-          $checkInterval = $env:CheckInterval
           $thisRepoLink = "${{ github.server_url }}/${{ github.repository }}"
           $thisRunLink = "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           $triggerBranch = $env:ReleaseBranch
@@ -47,12 +45,4 @@ jobs:
           }
           $runId = $output.id
           $runLink = $organization + [uri]::EscapeDataString($project) + "/_build/results?buildId=$runId"
-          $printMessage = "Triggered reference pipeline run, for details please check: $runLink"
-          if ($triggeredTargetPipeline)
-          {
-              Write-Host $printMessage
-          }
-          else
-          {
-              Write-Error $printMessage
-          }
+          Write-Host "Triggered reference pipeline run, for details please check: $runLink"
