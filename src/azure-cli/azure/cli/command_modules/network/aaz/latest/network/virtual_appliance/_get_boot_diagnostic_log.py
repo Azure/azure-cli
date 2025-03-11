@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "afd endpoint purge",
+    "network virtual-appliance get-boot-diagnostic-log",
 )
-class Purge(AAZCommand):
-    """Removes a content from AzureFrontDoor.
+class GetBootDiagnosticLog(AAZCommand):
+    """Retrieve the boot diagnostic logs for a VM instance belonging to the specified Network Virtual Appliance.
 
-    :example: Remove all cached contents under directory "/script" for domain www.contoso.com
-        az afd endpoint purge -g group --profile-name profile --domains [www.contoso.com,www.contoso1.com] --content-paths '/scripts/*'
+    :example: Get boot diagnostic logs
+        az network virtual-appliance get-boot-diagnostic-log --resource-group rg --network-virtual-appliance-name name --scs-sas-url serialconsole-sas-url --css-sas-url consoleScreenshot-sas-url
     """
 
     _aaz_info = {
-        "version": "2024-09-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/afdendpoints/{}/purge", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}/getbootdiagnosticlogs", "2024-07-01"],
         ]
     }
 
@@ -32,7 +32,7 @@ class Purge(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -45,47 +45,42 @@ class Purge(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.endpoint_name = AAZStrArg(
-            options=["--endpoint-name"],
-            help="Name of the endpoint under the profile which is unique globally.",
-            required=True,
-            id_part="child_name_1",
-        )
-        _args_schema.profile_name = AAZStrArg(
-            options=["--profile-name"],
-            help="Name of the Azure Front Door Standard or Azure Front Door Premium profile which is unique within the resource group.",
+        _args_schema.network_virtual_appliance_name = AAZStrArg(
+            options=["-n", "--name", "--network-virtual-appliance-name"],
+            help="The name of Network Virtual Appliance.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[A-Za-z0-9_]+",
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
 
-        # define Arg Group "Contents"
+        # define Arg Group "Request"
 
         _args_schema = cls._args_schema
-        _args_schema.content_paths = AAZListArg(
-            options=["--content-paths"],
-            arg_group="Contents",
-            help="The path to the content to be purged. Can describe a file path or a wild card directory.",
-            required=True,
+        _args_schema.console_screenshot_storage_sas_url = AAZStrArg(
+            options=["--css-sas-url", "--console-screenshot-storage-sas-url"],
+            arg_group="Request",
+            help="Specify the sas-url to the storage blob into which console screen shot for the requested instance will be written",
         )
-        _args_schema.domains = AAZListArg(
-            options=["--domains"],
-            arg_group="Contents",
-            help="List of domains. Example: \"www.contoso.com, www.contoso1.com\"",
+        _args_schema.instance_id = AAZIntArg(
+            options=["--instance-id"],
+            arg_group="Request",
+            help="The network virtual appliance instance id for which boot diagnostic logs is being requested",
         )
-
-        content_paths = cls._args_schema.content_paths
-        content_paths.Element = AAZStrArg()
-
-        domains = cls._args_schema.domains
-        domains.Element = AAZStrArg()
+        _args_schema.serial_console_storage_sas_url = AAZStrArg(
+            options=["--scs-sas-url", "--serial-console-storage-sas-url"],
+            arg_group="Request",
+            help="Specify the sas-url to the storage blob into which serial console logs for the requested instance will be written",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.AFDEndpointsPurgeContent(ctx=self.ctx)()
+        yield self.NetworkVirtualAppliancesGetBootDiagnosticLogs(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -96,7 +91,11 @@ class Purge(AAZCommand):
     def post_operations(self):
         pass
 
-    class AFDEndpointsPurgeContent(AAZHttpOperation):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class NetworkVirtualAppliancesGetBootDiagnosticLogs(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -108,7 +107,7 @@ class Purge(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -117,7 +116,7 @@ class Purge(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -126,7 +125,7 @@ class Purge(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/afdEndpoints/{endpointName}/purge",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkVirtualAppliances/{networkVirtualApplianceName}/getBootDiagnosticLogs",
                 **self.url_parameters
             )
 
@@ -136,17 +135,13 @@ class Purge(AAZCommand):
 
         @property
         def error_format(self):
-            return "MgmtErrorFormat"
+            return "ODataV4Format"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "endpointName", self.ctx.args.endpoint_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "profileName", self.ctx.args.profile_name,
+                    "networkVirtualApplianceName", self.ctx.args.network_virtual_appliance_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -164,7 +159,7 @@ class Purge(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -176,6 +171,9 @@ class Purge(AAZCommand):
                 **self.serialize_header_param(
                     "Content-Type", "application/json",
                 ),
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
             }
             return parameters
 
@@ -186,25 +184,39 @@ class Purge(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("contentPaths", AAZListType, ".content_paths", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("domains", AAZListType, ".domains")
-
-            content_paths = _builder.get(".contentPaths")
-            if content_paths is not None:
-                content_paths.set_elements(AAZStrType, ".")
-
-            domains = _builder.get(".domains")
-            if domains is not None:
-                domains.set_elements(AAZStrType, ".")
+            _builder.set_prop("consoleScreenshotStorageSasUrl", AAZStrType, ".console_screenshot_storage_sas_url")
+            _builder.set_prop("instanceId", AAZIntType, ".instance_id")
+            _builder.set_prop("serialConsoleStorageSasUrl", AAZStrType, ".serial_console_storage_sas_url")
 
             return self.serialize_content(_content_value)
 
         def on_200(self, session):
-            pass
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.instance_id = AAZIntType(
+                serialized_name="instanceId",
+            )
+
+            return cls._schema_on_200
 
 
-class _PurgeHelper:
-    """Helper class for Purge"""
+class _GetBootDiagnosticLogHelper:
+    """Helper class for GetBootDiagnosticLog"""
 
 
-__all__ = ["Purge"]
+__all__ = ["GetBootDiagnosticLog"]
