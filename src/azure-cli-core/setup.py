@@ -52,7 +52,7 @@ DEPENDENCIES = [
     'humanfriendly~=10.0',
     'jmespath',
     'knack~=0.11.0',
-    'microsoft-security-utilities-secret-masker~=1.0.0b2',
+    'microsoft-security-utilities-secret-masker~=1.0.0b4',
     'msal-extensions==1.2.0',
     'msal[broker]==1.31.2b1',
     'msrestazure~=0.6.4',
