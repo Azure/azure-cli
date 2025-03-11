@@ -1784,6 +1784,7 @@ def _create_postgresql_connection_string(host, user, password, database):
     }
     return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
+
 def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
     connection_kwargs = {
         'user': admin,
