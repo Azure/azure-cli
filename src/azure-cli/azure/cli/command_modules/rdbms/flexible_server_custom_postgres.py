@@ -187,7 +187,8 @@ def flexible_server_create(cmd, client,
     else:
         db_name = POSTGRES_DB_NAME
 
-    user = server_result.administrator_login
+    user = server_result.administrator_login if is_password_auth_enabled else '<user>'
+    password = administrator_login_password if is_password_auth_enabled else '<password>'
     admin = admin_name if admin_name else '<admin>'
     server_id = server_result.id
     loc = server_result.location
@@ -204,10 +205,10 @@ def flexible_server_create(cmd, client,
 
     _update_local_contexts(cmd, server_name, resource_group_name, db_name, location, user)
 
-    return _form_response(user, sku, loc, server_id, host, version,
-                          administrator_login_password,
-                          _create_postgresql_connection_string(host, user, administrator_login_password, db_name, admin),
-                          db_name, firewall_id, subnet_id, password_auth, active_directory_auth, admin_name)
+    return _form_response(user, sku, loc, server_id, host, version, password,
+                          _create_postgresql_connection_string(host, user, password, db_name),
+                          db_name, firewall_id, subnet_id, is_password_auth_enabled, is_microsoft_entra_auth_enabled, admin_name,
+                          _create_microsoft_entra_connection_string(host, db_name, admin))
 # endregion create without args
 
 
@@ -1776,29 +1777,31 @@ def _create_postgresql_connection_strings(host, user, password, database, port):
     return result
 
 
-def _create_postgresql_connection_string(host, user, password, database, admin='<admin>'):
-    if password is None:
-        connection_kwargs = {
-            'user': admin,
-            'host': host,
-            'database': database,
-        }
-        return 'postgresql://{user}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
-
+def _create_postgresql_connection_string(host, user, password, database):
     connection_kwargs = {
-        'user': user,
+        'user': user if user is not None else '{user}',
         'host': host,
-        'password': password,
+        'password': password if password is not None else '{password}',
         'database': database,
     }
     return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
+def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
+    connection_kwargs = {
+        'user': admin,
+        'host': host,
+        'database': database,
+    }
+    return 'postgresql://{user}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
+
 
 def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,
-                   subnet_id=None, password_auth=None, active_directory_auth=None, microsoft_admin=None):
+                   subnet_id=None, is_password_auth=True, is_microsoft_entra_auth_enabled=False, microsoft_admin=None, connection_string_microsoft_entra=None):
 
     output = {
         'host': host,
+        'username': username if is_password_auth else None,
+        'password': password if is_password_auth else None,
         'skuname': sku,
         'location': location,
         'id': server_id,
@@ -1806,11 +1809,9 @@ def _form_response(username, sku, location, server_id, host, version, password, 
         'databaseName': database_name,
         'connectionString': connection_string
     }
-    if password_auth is not None and password_auth.lower() != "disabled":
-        output['username'] = username
-        output['password'] = password
-    if active_directory_auth is not None and active_directory_auth.lower() != "disabled":
+    if is_microsoft_entra_auth_enabled:
         output['admin'] = microsoft_admin
+        output['connectionStringMicrosoftEntra'] = connection_string_microsoft_entra
     if firewall_id is not None:
         output['firewallName'] = firewall_id
     if subnet_id is not None:
