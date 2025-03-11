@@ -237,6 +237,10 @@ def load_command_table(self, _):
         self.command_table['disk list'] = DiskList(loader=self, table_transformer='[].' + transform_disk_show_table_output)
         self.command_table['disk show'] = DiskShow(loader=self, table_transformer=transform_disk_show_table_output)
 
+    with self.command_group("disk config"):
+        from .operations.disk import DiskConfigUpdate
+        self.command_table["disk config update"] = DiskConfigUpdate(loader=self)
+
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_profile, operation_group='disk_encryption_sets'):
         from .operations.disk_encryption_set import DiskEncryptionSetCreate, DiskEncryptionSetUpdate
         self.command_table['disk-encryption-set create'] = DiskEncryptionSetCreate(loader=self)

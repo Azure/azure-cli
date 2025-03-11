@@ -6853,6 +6853,8 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
+
+
 class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_identity')
@@ -7037,7 +7039,13 @@ class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('length(properties.routingConfiguration.propagatedRouteTables.labels)', 2),
             self.check('properties.routingConfiguration.propagatedRouteTables.labels[0]', 'label1')
-        ]) 
+        ])
+
+    @record_only()
+    def test_get_boot(self):
+        self.cmd('network virtual-appliance get-boot-diagnostic-log -n chkptbd1031 -g nashoktest --scs-sas-url "https://stonashoktest.blob.core.windows.net/testcontainer/example.txt?sp=rw&st=2025-03-07T03:47:49Z&se=2025-03-08T11:47:49Z&skoid=7f5b7efd-fa3f-4fbd-9430-8cf0f0ca6822&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-03-07T03:47:49Z&ske=2025-03-08T11:47:49Z&sks=b&skv=2022-11-02&spr=https&sv=2022-11-02&sr=b&sig=TOSsTfWx3e6ti7YLmeYms%2B3hAwMUSTlilE%2F08iht%2BUc%3D" --css-sas-url "https://stonashoktest.blob.core.windows.net/testcontainer/pstestscreenshot.png?sp=rw&st=2025-03-07T03:48:23Z&se=2025-03-08T11:48:23Z&skoid=7f5b7efd-fa3f-4fbd-9430-8cf0f0ca6822&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-03-07T03:48:23Z&ske=2025-03-08T11:48:23Z&sks=b&skv=2022-11-02&spr=https&sv=2022-11-02&sr=b&sig=4rU9xYe4T6t8GDUI0SVOhywiQWxIEtRSytpzq0xKwWY%3D"')
+
+
 class NetworkVirtualApplianceReimageScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(location='eastus2euap', name_prefix='test_network_virtual_appliance_reimage')
