@@ -35,7 +35,7 @@ jobs:
           $thisRunLink = "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           $triggerBranch = $env:ReleaseBranch
           $definitionId = $triggerBranch -eq 'release' ? $env:AdoLatestPipelineId : $env:AdoLtsPipelineId
-          $variables = @('commitAuthor=azcli', "triggerFromRepo=$thisRepoLink", "triggerBranch=$triggerBranch", "triggerByPipeline=$thisRunLink")
+          $variables = @("triggerBranch=$triggerBranch", "triggerFromRepo=$thisRepoLink", "triggerByPipeline=$thisRunLink")
 
           $output = az pipelines build queue --definition-id $definitionId --project $project --organization $organization --variables @variables | ConvertFrom-Json -AsHashtable
           if ($? -eq $false)
