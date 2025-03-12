@@ -239,7 +239,7 @@ class Profile:
 
         subscription_finder = SubscriptionFinder(self.cli_ctx)
         subscriptions = subscription_finder.find_using_specific_tenant(tenant, cred)
-        base_name, user = ManagedIdentityAccountTypes.parse_ids(client_id=client_id,
+        base_name, user = ManagedIdentityAuth.parse_ids(client_id=client_id,
                                                                 object_id=object_id,
                                                                 resource_id=resource_id)
         if not subscriptions:
@@ -321,10 +321,9 @@ class Profile:
 
         elif managed_identity_id_type:
             # managed identity
-            from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
             # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
             sdk_cred = CredentialAdaptor(
-                ManagedIdentityAccountTypes.credential_factory(managed_identity_id_type, managed_identity_id_value))
+                ManagedIdentityAuth.credential_factory(managed_identity_id_type, managed_identity_id_value))
 
         else:
             # user and service principal
@@ -378,7 +377,7 @@ class Profile:
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
             from .auth.msal_credentials import ManagedIdentityCredential
-            cred = ManagedIdentityAccountTypes.credential_factory(managed_identity_id_type, managed_identity_id_value)
+            cred = ManagedIdentityAuth.credential_factory(managed_identity_id_type, managed_identity_id_value)
 
         else:
             cred = self._create_credential(account, tenant_id=tenant)
@@ -577,7 +576,7 @@ class Profile:
             # The account contains:
             #   "assignedIdentityInfo": "MSI",
             #   "name": "systemAssignedIdentity",
-            return ManagedIdentityAccountTypes.system_assigned, None
+            return ManagedIdentityAuth.system_assigned, None
         if user_name == _USER_ASSIGNED_IDENTITY:
             # The account contains:
             #   "assignedIdentityInfo": "MSIClient-xxx"/"MSIObject-xxx"/"MSIResource-xxx",
@@ -703,7 +702,7 @@ class Profile:
         return installation_id
 
 
-class ManagedIdentityAccountTypes:
+class ManagedIdentityAuth:
     # pylint: disable=no-method-argument,no-self-argument
     system_assigned = 'MSI'
     user_assigned_client_id = 'MSIClient'
@@ -718,42 +717,35 @@ class ManagedIdentityAccountTypes:
         # As long as one ID is provided, the managed identity is treated as user-assigned.
         # See https://github.com/Azure/azure-cli/issues/13188
         identity_type = _SYSTEM_ASSIGNED_IDENTITY
-        id_type = ManagedIdentityAccountTypes.system_assigned
+        id_type = ManagedIdentityAuth.system_assigned
         id_value = None
         if client_id:
             identity_type = _USER_ASSIGNED_IDENTITY
-            id_type = ManagedIdentityAccountTypes.user_assigned_client_id
+            id_type = ManagedIdentityAuth.user_assigned_client_id
             id_value = client_id
         elif object_id:
             identity_type = _USER_ASSIGNED_IDENTITY
-            id_type = ManagedIdentityAccountTypes.user_assigned_object_id
+            id_type = ManagedIdentityAuth.user_assigned_object_id
             id_value = object_id
         elif resource_id:
             identity_type = _USER_ASSIGNED_IDENTITY
-            id_type = ManagedIdentityAccountTypes.user_assigned_resource_id
+            id_type = ManagedIdentityAuth.user_assigned_resource_id
             id_value = resource_id
         return '{}-{}'.format(id_type, id_value) if id_value else id_type, identity_type
 
     @staticmethod
-    def valid_msi_account_types():
-        return [ManagedIdentityAccountTypes.system_assigned,
-                ManagedIdentityAccountTypes.user_assigned_client_id,
-                ManagedIdentityAccountTypes.user_assigned_object_id,
-                ManagedIdentityAccountTypes.user_assigned_resource_id]
-
-    @staticmethod
-    def credential_factory(cli_account_name, id_value):
+    def credential_factory(id_type, id_value):
         # id is a python built-in name, so we use id_value
         from azure.cli.core.auth.msal_credentials import ManagedIdentityCredential
-        if cli_account_name == ManagedIdentityAccountTypes.system_assigned:
+        if id_type == ManagedIdentityAuth.system_assigned:
             return ManagedIdentityCredential()
-        if cli_account_name == ManagedIdentityAccountTypes.user_assigned_client_id:
+        if id_type == ManagedIdentityAuth.user_assigned_client_id:
             return ManagedIdentityCredential(client_id=id_value)
-        if cli_account_name == ManagedIdentityAccountTypes.user_assigned_object_id:
+        if id_type == ManagedIdentityAuth.user_assigned_object_id:
             return ManagedIdentityCredential(object_id=id_value)
-        if cli_account_name == ManagedIdentityAccountTypes.user_assigned_resource_id:
+        if id_type == ManagedIdentityAuth.user_assigned_resource_id:
             return ManagedIdentityCredential(resource_id=id_value)
-        raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
+        raise ValueError("unrecognized ID type '{}'".format(id_type))
 
 
 class SubscriptionFinder:
