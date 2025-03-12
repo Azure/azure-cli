@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import requests
+import json
 from knack.log import get_logger
 from msrestazure.azure_active_directory import MSIAuthentication
 
@@ -82,9 +83,24 @@ class MSIAuthenticationWrapper(MSIAuthentication):
             logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n%s',
                          traceback.format_exc())
             try:
+                # RPs will often bubble up detailed error messages in the HTTP response body, making response.status and response.reason alone non-actionable.
+                # Eg., The error 'Multiple user assigned identities exist, please specify the clientId / resourceId of the identity in the token request' is
+                # returned with a response status of 400 and response.reason of 'Bad Request' only.
+                #
+                # We're still using the msrestazure library which is deprecated and not accepting new PRs.
+                # As this library runs the get response without the stream=True param, the raw response that gets returned does not include the http response body.
+                # result = requests.get(request_uri, params=payload, headers={'Metadata': 'true', 'User-Agent':self._user_agent})
+                #
+                # If we have a 400 http status, retry the operation to get the error. The err.request contains the request uri, payload and headers, so we can resend the request
+                if err.response.status == 400:
+                    replay = replay_request(err)
+                    if len(replay.text) > 0:
+                        parsed_body_error = try_parse_json(replay.text)
+                    else:
+                        parsed_body_error = 'Unspecified'
                 raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
-                                         'Get Token request returned http error: {}, reason: {}'
-                                         .format(err.response.status, err.response.reason))
+                                         'Get Token request returned http error: {}, reason: {}, details: {}'
+                                         .format(err.response.status, err.response.reason, parsed_body_error))
             except AttributeError:
                 raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
                                          'Get Token request returned: {}'.format(err.response))
@@ -104,6 +120,22 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         simply return None."""
         return None
 
+def replay_request(err):
+    try:
+        replay_request = requests.get(err.request.url, headers=err.request.headers, stream=True)
+        return replay_request   
+    except requests.exceptions.HTTPError as err:
+        logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n%s',
+                    traceback.format_exc())
+        return err
+         
+def try_parse_json(json_string):
+        try:
+            parsed_json = json.loads(json_string)
+            detailed_error = parsed_json['error_description']
+            return detailed_error
+        except json.JSONDecodeError:
+            return None
 
 def _normalize_expires_on(expires_on):
     """
