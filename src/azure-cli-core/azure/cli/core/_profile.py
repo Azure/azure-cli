@@ -55,8 +55,6 @@ _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
 
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
-_SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
-_USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
@@ -239,9 +237,8 @@ class Profile:
 
         subscription_finder = SubscriptionFinder(self.cli_ctx)
         subscriptions = subscription_finder.find_using_specific_tenant(tenant, cred)
-        base_name, user = ManagedIdentityAuth.parse_ids(client_id=client_id,
-                                                                object_id=object_id,
-                                                                resource_id=resource_id)
+        from .auth.managed_identity import parse_ids
+        id_string, identity_type = parse_ids(client_id=client_id, object_id=object_id, resource_id=resource_id)
         if not subscriptions:
             if allow_no_subscriptions:
                 subscriptions = self._build_tenant_level_accounts([tenant])
@@ -249,8 +246,8 @@ class Profile:
                 raise CLIError('No access was configured for the managed identity, hence no subscriptions were found. '
                                "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
 
-        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
-                                                  user_assigned_identity_id=base_name)
+        consolidated = self._normalize_properties(identity_type, subscriptions, is_service_principal=True,
+                                                  assigned_identity_info=id_string)
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
@@ -311,19 +308,17 @@ class Profile:
 
         account = self.get_subscription(subscription_id)
 
-        managed_identity_id_type, managed_identity_id_value = Profile._parse_managed_identity_account(account)
-
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
             from .auth.msal_credentials import CloudShellCredential
             # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
             sdk_cred = CredentialAdaptor(CloudShellCredential())
 
-        elif managed_identity_id_type:
+        elif Profile._is_managed_identity_account(account):
             # managed identity
             # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
-            sdk_cred = CredentialAdaptor(
-                ManagedIdentityAuth.credential_factory(managed_identity_id_type, managed_identity_id_value))
+            from .auth.managed_identity import credential_factory
+            sdk_cred = CredentialAdaptor(credential_factory(account[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO]))
 
         else:
             # user and service principal
@@ -363,8 +358,6 @@ class Profile:
 
         account = self.get_subscription(subscription)
 
-        managed_identity_id_type, managed_identity_id_value = Profile._parse_managed_identity_account(account)
-
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
             if tenant:
@@ -372,12 +365,13 @@ class Profile:
             from .auth.msal_credentials import CloudShellCredential
             cred = CloudShellCredential()
 
-        elif managed_identity_id_type:
+        elif Profile._is_managed_identity_account(account):
             # managed identity
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
             from .auth.msal_credentials import ManagedIdentityCredential
-            cred = ManagedIdentityAuth.credential_factory(managed_identity_id_type, managed_identity_id_value)
+            from .auth.managed_identity import credential_factory
+            cred = credential_factory(account[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO])
 
         else:
             cred = self._create_credential(account, tenant_id=tenant)
@@ -408,8 +402,8 @@ class Profile:
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
 
-    def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
-                              user_assigned_identity_id=None):
+    def _normalize_properties(self, user_name, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
+                              assigned_identity_info=None):
         consolidated = []
         for s in subscriptions:
             subscription_dict = {
@@ -417,7 +411,7 @@ class Profile:
                 _SUBSCRIPTION_NAME: s.display_name,
                 _STATE: s.state,
                 _USER_ENTITY: {
-                    _USER_NAME: user,
+                    _USER_NAME: user_name,
                     _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
                 },
                 _IS_DEFAULT_SUBSCRIPTION: False,
@@ -432,8 +426,8 @@ class Profile:
 
             if cert_sn_issuer_auth:
                 consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
-            if user_assigned_identity_id:
-                consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
+            if assigned_identity_info:
+                consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = assigned_identity_info
 
         return consolidated
 
@@ -570,19 +564,10 @@ class Profile:
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
     @staticmethod
-    def _parse_managed_identity_account(account):
+    def _is_managed_identity_account(account):
         user_name = account[_USER_ENTITY][_USER_NAME]
-        if user_name == _SYSTEM_ASSIGNED_IDENTITY:
-            # The account contains:
-            #   "assignedIdentityInfo": "MSI",
-            #   "name": "systemAssignedIdentity",
-            return ManagedIdentityAuth.system_assigned, None
-        if user_name == _USER_ASSIGNED_IDENTITY:
-            # The account contains:
-            #   "assignedIdentityInfo": "MSIClient-xxx"/"MSIObject-xxx"/"MSIResource-xxx",
-            #   "name": "userAssignedIdentity",
-            return tuple(account[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO].split('-', maxsplit=1))
-        return None, None
+        from .auth.managed_identity import IDENTITY_TYPE_SYSTEM_ASSIGNED, IDENTITY_TYPE_USER_ASSIGNED
+        return user_name in (IDENTITY_TYPE_SYSTEM_ASSIGNED, IDENTITY_TYPE_USER_ASSIGNED)
 
     def _create_credential(self, account, tenant_id=None, client_id=None):
         """Create a credential object driven by MSAL
@@ -700,52 +685,6 @@ class Profile:
                 installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
-
-
-class ManagedIdentityAuth:
-    # pylint: disable=no-method-argument,no-self-argument
-    system_assigned = 'MSI'
-    user_assigned_client_id = 'MSIClient'
-    user_assigned_object_id = 'MSIObject'
-    user_assigned_resource_id = 'MSIResource'
-
-    @staticmethod
-    def parse_ids(client_id=None, object_id=None, resource_id=None):
-        # Return a tuple:
-        #   - ID string, such as MSIObject-00000000-0000-0000-0000-000000000000
-        #   - identity type: systemAssignedIdentity/userAssignedIdentity
-        # As long as one ID is provided, the managed identity is treated as user-assigned.
-        # See https://github.com/Azure/azure-cli/issues/13188
-        identity_type = _SYSTEM_ASSIGNED_IDENTITY
-        id_type = ManagedIdentityAuth.system_assigned
-        id_value = None
-        if client_id:
-            identity_type = _USER_ASSIGNED_IDENTITY
-            id_type = ManagedIdentityAuth.user_assigned_client_id
-            id_value = client_id
-        elif object_id:
-            identity_type = _USER_ASSIGNED_IDENTITY
-            id_type = ManagedIdentityAuth.user_assigned_object_id
-            id_value = object_id
-        elif resource_id:
-            identity_type = _USER_ASSIGNED_IDENTITY
-            id_type = ManagedIdentityAuth.user_assigned_resource_id
-            id_value = resource_id
-        return '{}-{}'.format(id_type, id_value) if id_value else id_type, identity_type
-
-    @staticmethod
-    def credential_factory(id_type, id_value):
-        # id is a python built-in name, so we use id_value
-        from azure.cli.core.auth.msal_credentials import ManagedIdentityCredential
-        if id_type == ManagedIdentityAuth.system_assigned:
-            return ManagedIdentityCredential()
-        if id_type == ManagedIdentityAuth.user_assigned_client_id:
-            return ManagedIdentityCredential(client_id=id_value)
-        if id_type == ManagedIdentityAuth.user_assigned_object_id:
-            return ManagedIdentityCredential(object_id=id_value)
-        if id_type == ManagedIdentityAuth.user_assigned_resource_id:
-            return ManagedIdentityCredential(resource_id=id_value)
-        raise ValueError("unrecognized ID type '{}'".format(id_type))
 
 
 class SubscriptionFinder:
