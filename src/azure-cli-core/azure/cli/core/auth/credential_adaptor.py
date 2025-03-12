@@ -32,12 +32,29 @@ class CredentialAdaptor:
         if 'data' in kwargs:
             filtered_kwargs['data'] = kwargs['data']
 
-        return build_sdk_access_token(self._credential.acquire_token(list(scopes), **filtered_kwargs))
+        return _build_sdk_access_token(self._credential.acquire_token(list(scopes), **filtered_kwargs))
 
     def get_auxiliary_tokens(self, *scopes, **kwargs):
         """Get access tokens from auxiliary credentials."""
         # To test cross-tenant authentication, see https://github.com/Azure/azure-cli/issues/16691
         if self._auxiliary_credentials:
-            return [build_sdk_access_token(cred.acquire_token(list(scopes), **kwargs))
+            return [_build_sdk_access_token(cred.acquire_token(list(scopes), **kwargs))
                     for cred in self._auxiliary_credentials]
         return None
+
+
+def _build_sdk_access_token(token_entry):
+    # MSAL token entry sample:
+    # {
+    #     'access_token': 'eyJ0eXAiOiJKV...',
+    #     'token_type': 'Bearer',
+    #     'expires_in': 1618
+    # }
+    from azure.core.credentials import AccessToken
+    from .constants import ACCESS_TOKEN, EXPIRES_IN
+    return AccessToken(token_entry[ACCESS_TOKEN], _now_timestamp() + token_entry[EXPIRES_IN])
+
+
+def _now_timestamp():
+    import time
+    return int(time.time())
