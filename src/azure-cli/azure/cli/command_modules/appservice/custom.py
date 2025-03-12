@@ -4582,7 +4582,7 @@ class _FlexFunctionAppStackRuntimeHelper:
 
     def get_flex_raw_function_app_stacks(self, cmd, location, runtime):
         stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?' \
-                         'api-version=2023-12-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
+                         'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
         if runtime == "dotnet-isolated":
             runtime = "dotnet"
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime)
@@ -6145,7 +6145,7 @@ def list_flexconsumption_locations(cmd, zone_redundant=False, details=False, run
         regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
 
     regions = [x.name.lower().replace(' ', '') for x in regions]
-    return [{x: list_flex_function_app_all_runtimes(cmd, x, "java")} for x in regions]
+    return [{x: list_flex_function_app_all_runtimes(cmd, x, runtime)} for x in regions]
 
 
 def list_flex_function_app_all_runtimes(cmd, location, runtime=None):
