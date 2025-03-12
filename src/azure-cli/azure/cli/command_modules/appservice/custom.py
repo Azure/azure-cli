@@ -6145,7 +6145,13 @@ def list_flexconsumption_locations(cmd, zone_redundant=False, details=False, run
         regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
 
     regions = [x.name.lower().replace(' ', '') for x in regions]
-    return [{x: list_flex_function_app_all_runtimes(cmd, x, runtime)} for x in regions]
+    sub_regions_list = get_subscription_locations(cmd.cli_ctx)
+    regions = [x for x in regions if x in sub_regions_list]
+
+    if not details:
+        return [{'name': x} for x in regions]
+
+    return [{'name': x, 'details': list_flex_function_app_all_runtimes(cmd, x, runtime)} for x in regions]
 
 
 def list_flex_function_app_all_runtimes(cmd, location, runtime=None):
@@ -6153,7 +6159,7 @@ def list_flex_function_app_all_runtimes(cmd, location, runtime=None):
     if runtime:
         runtimes = [runtime]
 
-    return [{x: list_flex_function_app_runtimes(cmd, location, x, True)} for x in runtimes]
+    return [{'runtime': x, 'runtime-details': list_flex_function_app_runtimes(cmd, location, x, True)} for x in runtimes]
 
 def list_flexconsumption_zone_redundant_locations(cmd):
     client = web_client_factory(cmd.cli_ctx)
