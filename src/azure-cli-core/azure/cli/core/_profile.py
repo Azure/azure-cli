@@ -226,7 +226,6 @@ class Profile:
             return self.login_with_managed_identity_azure_arc(allow_no_subscriptions=allow_no_subscriptions)
 
         import jwt
-        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
