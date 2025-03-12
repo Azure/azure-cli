@@ -228,19 +228,20 @@ class Profile:
     def login_with_managed_identity(self, client_id=None, object_id=None, resource_id=None,
                                     allow_no_subscriptions=None):
         import jwt
-        from azure.cli.core.auth.msal_credentials import ManagedIdentityCredential
+        from .auth.msal_credentials import ManagedIdentityCredential
+        from .auth.constants import ACCESS_TOKEN
 
         cred = ManagedIdentityCredential(client_id=client_id, object_id=object_id, resource_id=resource_id)
-        token = cred.get_token(*self._arm_scope).token
+        token = cred.acquire_token(self._arm_scope)[ACCESS_TOKEN]
         logger.info('Managed identity: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
 
         subscription_finder = SubscriptionFinder(self.cli_ctx)
         subscriptions = subscription_finder.find_using_specific_tenant(tenant, cred)
-        base_name, user = ManagedIdentityAccountTypes.get_id_string_and_type(client_id=client_id,
-                                                                             object_id=object_id,
-                                                                             resource_id=resource_id)
+        base_name, user = ManagedIdentityAccountTypes.parse_ids(client_id=client_id,
+                                                                object_id=object_id,
+                                                                resource_id=resource_id)
         if not subscriptions:
             if allow_no_subscriptions:
                 subscriptions = self._build_tenant_level_accounts([tenant])
@@ -315,16 +316,15 @@ class Profile:
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
             from .auth.msal_credentials import CloudShellCredential
-            # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
+            # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
             sdk_cred = CredentialAdaptor(CloudShellCredential())
 
         elif managed_identity_id_type:
             # managed identity
             from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
-            # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
-            cred = CredentialAdaptor(
-                ManagedIdentityAccountTypes.credential_factory(managed_identity_id_type, managed_identity_id_value),
-                resource=resource)
+            # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
+            sdk_cred = CredentialAdaptor(
+                ManagedIdentityAccountTypes.credential_factory(managed_identity_id_type, managed_identity_id_value))
 
         else:
             # user and service principal
@@ -371,7 +371,7 @@ class Profile:
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
             from .auth.msal_credentials import CloudShellCredential
-            sdk_cred = CredentialAdaptor(CloudShellCredential())
+            cred = CloudShellCredential()
 
         elif managed_identity_id_type:
             # managed identity
@@ -381,22 +381,25 @@ class Profile:
             cred = ManagedIdentityAccountTypes.credential_factory(managed_identity_id_type, managed_identity_id_value)
 
         else:
-            sdk_cred = CredentialAdaptor(self._create_credential(account, tenant_id=tenant))
+            cred = self._create_credential(account, tenant_id=tenant)
 
-        sdk_token = sdk_cred.get_token(*scopes)
+        msal_token = cred.acquire_token(scopes)
         # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
         # WARNING: expiresOn is deprecated and will be removed in future release.
         import datetime
-        expiresOn = datetime.datetime.fromtimestamp(sdk_token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+        from .auth.util import _now_timestamp
+        from .auth.constants import EXPIRES_IN, ACCESS_TOKEN
+        expires_on = _now_timestamp() + msal_token[EXPIRES_IN]
+        expiresOn = datetime.datetime.fromtimestamp(expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
 
         token_entry = {
-            'accessToken': sdk_token.token,
-            'expires_on': sdk_token.expires_on,  # epoch int, like 1605238724
+            'accessToken': msal_token[ACCESS_TOKEN],
+            'expires_on': expires_on,  # epoch int, like 1605238724
             'expiresOn': expiresOn  # datetime string, like "2020-11-12 13:50:47.114324"
         }
 
         # Build a tuple of (token_type, token, token_entry)
-        token_tuple = 'Bearer', sdk_token.token, token_entry
+        token_tuple = 'Bearer', msal_token[ACCESS_TOKEN], token_entry
 
         if credential_out is not None:
             credential_out['credential'] = cred
@@ -708,7 +711,10 @@ class ManagedIdentityAccountTypes:
     user_assigned_resource_id = 'MSIResource'
 
     @staticmethod
-    def get_id_string_and_type(client_id=None, object_id=None, resource_id=None):
+    def parse_ids(client_id=None, object_id=None, resource_id=None):
+        # Return a tuple:
+        #   - ID string, such as MSIObject-00000000-0000-0000-0000-000000000000
+        #   - identity type: systemAssignedIdentity/userAssignedIdentity
         # As long as one ID is provided, the managed identity is treated as user-assigned.
         # See https://github.com/Azure/azure-cli/issues/13188
         identity_type = _SYSTEM_ASSIGNED_IDENTITY
