@@ -153,9 +153,12 @@ class TargetVersion(abc.ABC):
 class NextBreakingChangeWindow(TargetVersion):
     def __str__(self):
         next_breaking_change_version = _next_breaking_change_version()
+        message = 'in next breaking change release'
         if next_breaking_change_version:
-            return f'in next breaking change release({next_breaking_change_version}) scheduled for {NEXT_BREAKING_CHANGE_DATE}'
-        return 'in next breaking change release'
+            message += f'({next_breaking_change_version})'
+        if NEXT_BREAKING_CHANGE_DATE:
+            message += f' scheduled for {NEXT_BREAKING_CHANGE_DATE}'
+        return message
 
     def version(self):
         return _next_breaking_change_version()
