@@ -1378,6 +1378,9 @@ def load_arguments(self, _):
                        help='Space-separated list of regions, edge zones, replica counts and storage types. Use `<region>=<edge zone>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
                             'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
+            c.argument('block_deletion_before_end_of_life', arg_type=get_three_state_flag(), min_api='2024-03-03',
+                       options_list=['--block-deletion-before-end-of-life', '--block-deletion'],
+                       help="Indicates whether or not the deletion is blocked for this gallery image version if its end of life has not expired")
 
     for scope in ['sig image-version create', 'sig image-version update', 'sig image-version undelete']:
         with self.argument_context(scope, operation_group='gallery_image_versions') as c:

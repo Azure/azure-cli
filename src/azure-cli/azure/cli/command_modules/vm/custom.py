@@ -4877,7 +4877,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
                          replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
                          image_version=None, target_zone_encryption=None, target_edge_zones=None,
-                         allow_replicated_location_deletion=None):
+                         allow_replicated_location_deletion=None, block_deletion_before_end_of_life=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -4988,6 +4988,11 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             args["safety_profile"] = {
                 "allow_deletion_of_replicated_locations": allow_replicated_location_deletion
             }
+        if block_deletion_before_end_of_life is not None:
+            if "safety_profile" not in args:
+                args["safety_profile"] = {}
+
+            args["safety_profile"]["block_deletion_before_end_of_life"] = block_deletion_before_end_of_life
     else:
         if managed_image is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
@@ -5074,7 +5079,7 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
 
 def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
                          target_regions=None, replica_count=None, allow_replicated_location_deletion=None,
-                         target_edge_zones=None, no_wait=False, **kwargs):
+                         target_edge_zones=None, block_deletion_before_end_of_life=None, no_wait=False, **kwargs):
     args = kwargs['gallery_image_version']
 
     if target_regions:
@@ -5097,6 +5102,10 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if "safety_profile" not in args:
             args["safety_profile"] = {}
         args["safety_profile"]["allow_deletion_of_replicated_locations"] = allow_replicated_location_deletion
+    if block_deletion_before_end_of_life is not None:
+        if "safety_profile" not in args:
+            args["safety_profile"] = {}
+        args["safety_profile"]["block_deletion_before_end_of_life"] = block_deletion_before_end_of_life
 
     args["resource_group"] = resource_group_name
     args["gallery_name"] = gallery_name
