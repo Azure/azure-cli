@@ -122,8 +122,7 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
             return
 
     installation_dir = os.path.dirname(installation_path)
-    if not os.path.exists(installation_dir):
-        os.makedirs(installation_dir)
+    os.makedirs(installation_dir, exist_ok=True)
 
     try:
         release_tag = release_tag if release_tag else get_bicep_latest_release_tag()

@@ -40,9 +40,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2024-03-01"],
         ]
     }
 
@@ -83,9 +83,6 @@ class Update(AAZCommand):
         _args_schema.location = AAZResourceLocationArg(
             help="Location to identify the exclusive Network Watcher under a region. Only one Network Watcher can be existed per subscription and region.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         _args_schema.enabled = AAZBoolArg(
             options=["--enabled"],
@@ -156,6 +153,12 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.filtering_criteria = AAZStrArg(
+            options=["--filtering-criteria"],
+            arg_group="Properties",
+            help="Update condition to filter flowlogs based on SrcIP, SrcPort, DstIP, DstPort, Protocol, Encryption, Direction and Action. If not specified, all flowlogs will be logged.",
+            nullable=True,
+        )
         _args_schema.flow_analytics_configuration = AAZObjectArg(
             options=["--flow-analytics-configuration"],
             arg_group="Properties",
@@ -296,7 +299,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -399,7 +402,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -457,7 +460,7 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity")
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -474,6 +477,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("enabled", AAZBoolType, ".enabled")
+                properties.set_prop("enabledFilteringCriteria", AAZStrType, ".filtering_criteria")
                 properties.set_prop("flowAnalyticsConfiguration", AAZObjectType, ".flow_analytics_configuration")
                 properties.set_prop("format", AAZObjectType)
                 properties.set_prop("retentionPolicy", AAZObjectType, ".retention_policy")
@@ -542,7 +546,7 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         flow_log_read.id = AAZStrType()
-        flow_log_read.identity = AAZObjectType()
+        flow_log_read.identity = AAZIdentityObjectType()
         flow_log_read.location = AAZStrType()
         flow_log_read.name = AAZStrType(
             flags={"read_only": True},
@@ -584,6 +588,9 @@ class _UpdateHelper:
 
         properties = _schema_flow_log_read.properties
         properties.enabled = AAZBoolType()
+        properties.enabled_filtering_criteria = AAZStrType(
+            serialized_name="enabledFilteringCriteria",
+        )
         properties.flow_analytics_configuration = AAZObjectType(
             serialized_name="flowAnalyticsConfiguration",
         )

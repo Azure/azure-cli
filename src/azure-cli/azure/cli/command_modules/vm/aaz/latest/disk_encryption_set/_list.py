@@ -16,13 +16,19 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List disk encryption sets.
+
+    :example: List all disk encryption sets in a subscription.
+        az disk-encryption-set list
+
+    :example: List all disk encryption sets in a resource group.
+        az disk-encryption-set list --resource-group myResourceGroup
     """
 
     _aaz_info = {
-        "version": "2022-03-02",
+        "version": "2023-04-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/diskencryptionsets", "2022-03-02"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets", "2022-03-02"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/diskencryptionsets", "2023-04-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets", "2023-04-02"],
         ]
     }
 
@@ -109,7 +115,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-03-02",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }
@@ -156,7 +162,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -205,6 +211,7 @@ class List(AAZCommand):
             _ListHelper._build_schema_key_for_disk_encryption_set_read(properties.active_key)
             properties.auto_key_rotation_error = AAZObjectType(
                 serialized_name="autoKeyRotationError",
+                flags={"read_only": True},
             )
             _ListHelper._build_schema_api_error_read(properties.auto_key_rotation_error)
             properties.encryption_type = AAZStrType(
@@ -282,7 +289,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-03-02",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }
@@ -329,7 +336,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -378,6 +385,7 @@ class List(AAZCommand):
             _ListHelper._build_schema_key_for_disk_encryption_set_read(properties.active_key)
             properties.auto_key_rotation_error = AAZObjectType(
                 serialized_name="autoKeyRotationError",
+                flags={"read_only": True},
             )
             _ListHelper._build_schema_api_error_read(properties.auto_key_rotation_error)
             properties.encryption_type = AAZStrType(
@@ -427,7 +435,9 @@ class _ListHelper:
             _schema.target = cls._schema_api_error_read.target
             return
 
-        cls._schema_api_error_read = _schema_api_error_read = AAZObjectType()
+        cls._schema_api_error_read = _schema_api_error_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         api_error_read = _schema_api_error_read
         api_error_read.code = AAZStrType()

@@ -6,11 +6,23 @@ cmd /c az batch account show --help
 cmd /c az batch account create --help
 cmd /c az batch account set --help
 cmd /c az batch account delete --help
+cmd /c az batch account outbound-endpoints --help
+cmd /c az batch account identity --help
+cmd /c az batch account identity assign --help
+cmd /c az batch account identity remove --help
+cmd /c az batch account identity show --help
 cmd /c az batch account autostorage-keys --help
 cmd /c az batch account autostorage-keys sync --help
 cmd /c az batch account keys --help
 cmd /c az batch account keys list --help
 cmd /c az batch account keys renew --help
+cmd /c az batch account network-profile --help
+cmd /c az batch account network-profile set --help
+cmd /c az batch account network-profile show --help
+cmd /c az batch account network-profile network-rule --help
+cmd /c az batch account network-profile network-rule add --help
+cmd /c az batch account network-profile network-rule delete --help
+cmd /c az batch account network-profile network-rule list --help
 
 cmd /c az batch application --help
 cmd /c az batch application list --help
@@ -29,14 +41,9 @@ cmd /c az batch application summary list --help
 cmd /c az batch application summary show --help
 
 cmd /c az batch location --help
+cmd /c az batch location list-skus --help
 cmd /c az batch location quotas --help
 cmd /c az batch location quotas show --help
-
-cmd /c az batch certificate --help
-cmd /c az batch certificate create --help
-cmd /c az batch certificate delete --help
-cmd /c az batch certificate show --help
-cmd /c az batch certificate list --help
 
 cmd /c az batch pool --help
 cmd /c az batch pool create --help
@@ -46,16 +53,14 @@ cmd /c az batch pool show --help
 cmd /c az batch pool set --help
 cmd /c az batch pool reset --help
 cmd /c az batch pool resize --help
-cmd /c az batch pool node-agent-skus --help
-cmd /c az batch pool node-agent-skus list --help
 cmd /c az batch pool usage-metrics --help
 cmd /c az batch pool usage-metrics list --help
-cmd /c az batch pool all-statistics --help
-cmd /c az batch pool all-statistics show --help
 cmd /c az batch pool autoscale --help
 cmd /c az batch pool autoscale enable --help
 cmd /c az batch pool autoscale disable --help
 cmd /c az batch pool autoscale evaluate --help
+cmd /c az batch pool supported-images --help
+cmd /c az batch pool supported-images list --help
 cmd /c az batch pool node-counts --help
 cmd /c az batch pool node-counts list --help
 
@@ -64,7 +69,6 @@ cmd /c az batch node delete --help
 cmd /c az batch node show --help
 cmd /c az batch node list --help
 cmd /c az batch node reboot --help
-cmd /c az batch node reimage --help
 cmd /c az batch node user --help
 cmd /c az batch node user create --help
 cmd /c az batch node user delete --help
@@ -74,8 +78,6 @@ cmd /c az batch node scheduling disable --help
 cmd /c az batch node scheduling enable --help
 cmd /c az batch node remote-login-settings --help
 cmd /c az batch node remote-login-settings show --help
-cmd /c az batch node remote-desktop --help
-cmd /c az batch node remote-desktop download --help
 cmd /c az batch node service-logs --help
 cmd /c az batch node service-logs upload --help
 cmd /c az batch node file --help
@@ -86,16 +88,14 @@ cmd /c az batch node file list --help
 
 cmd /c az batch job --help
 cmd /c az batch job create --help
+cmd /c az batch job list --help
 cmd /c az batch job delete --help
 cmd /c az batch job show --help
 cmd /c az batch job set --help
 cmd /c az batch job reset --help
-cmd /c az batch job list --help
 cmd /c az batch job disable --help
 cmd /c az batch job enable --help
 cmd /c az batch job stop --help
-cmd /c az batch job all-statistics --help
-cmd /c az batch job all-statistics show --help
 cmd /c az batch job prep-release-status --help
 cmd /c az batch job prep-release-status list --help
 cmd /c az batch job task-counts --help
@@ -127,3 +127,11 @@ cmd /c az batch task file delete --help
 cmd /c az batch task file download --help
 cmd /c az batch task file show --help
 cmd /c az batch task file list --help
+
+cmd /c az batch private-endpoint-connection --help
+cmd /c az batch private-endpoint-connection list --help
+cmd /c az batch private-endpoint-connection show --help
+
+cmd /c az batch private-link-resource --help
+cmd /c az batch private-link-resource list --help
+cmd /c az batch private-link-resource show --help

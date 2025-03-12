@@ -114,7 +114,7 @@ def account_clear(cmd):
     profile.logout_all()
 
 
-# pylint: disable=inconsistent-return-statements, too-many-branches
+# pylint: disable=too-many-branches, too-many-locals
 def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
           # Device code flow
           use_device_code=False,

@@ -17,13 +17,14 @@ def load_command_table(self, _):
 
     with self.command_group('lab vm'):
         from .custom import LabVmCreate, LabVmList, LabVmShow, LabVmDelete, LabVmStart, LabVmStop, \
-            LabVmApplyArtifacts
+            LabVmApplyArtifacts, LabVmHibernate
         self.command_table['lab vm create'] = LabVmCreate(loader=self)
         self.command_table['lab vm list'] = LabVmList(loader=self, table_transformer=transform_vm_list)
         self.command_table['lab vm show'] = LabVmShow(loader=self, table_transformer=transform_vm)
         self.command_table['lab vm delete'] = LabVmDelete(loader=self)
         self.command_table['lab vm start'] = LabVmStart(loader=self)
         self.command_table['lab vm stop'] = LabVmStop(loader=self)
+        self.command_table['lab vm hibernate'] = LabVmHibernate(loader=self)
         self.command_table['lab vm apply-artifacts'] = LabVmApplyArtifacts(loader=self)
 
     # Lab Operations Commands

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+import base64
 import codecs
 import hashlib
 import json
@@ -310,8 +311,12 @@ def _create_network_rule_set(cmd, bypass=None, default_action=None):
     NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions', resource_type=ResourceType.MGMT_KEYVAULT)
     NetworkRuleAction = cmd.get_models('NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
-    return NetworkRuleSet(bypass=bypass or NetworkRuleBypassOptions.azure_services.value,
-                          default_action=default_action or NetworkRuleAction.allow.value)
+    # We actually should not set any default value from client side
+    # Keep this 'if' section to avoid breaking change
+    if not bypass and not default_action:
+        return NetworkRuleSet(bypass=NetworkRuleBypassOptions.azure_services.value,
+                              default_action=NetworkRuleAction.allow.value)
+    return NetworkRuleSet(bypass=bypass, default_action=default_action)
 
 
 # region KeyVault Vault
@@ -1130,16 +1135,15 @@ def sign_key(cmd, client, algorithm, digest, name=None, version=None):
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
-    return crypto_client.sign(SignatureAlgorithm(algorithm), digest.encode('utf-8'))
+    return crypto_client.sign(SignatureAlgorithm(algorithm), base64.b64decode(digest.encode('utf-8')))
 
 
 def verify_key(cmd, client, algorithm, digest, signature, name=None, version=None):
-    import base64
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.verify(SignatureAlgorithm(algorithm),
-                                digest.encode('utf-8'),
+                                base64.b64decode(digest.encode('utf-8')),
                                 base64.b64decode(signature.encode('utf-8')))
 
 
@@ -1493,7 +1497,6 @@ def download_secret(client, file_path, name=None, encoding=None, version=''):  #
                 f.write(secret_value)
         else:
             if encoding == 'base64':
-                import base64
                 decoded = base64.b64decode(secret_value)
             elif encoding == 'hex':
                 import binascii
@@ -1558,7 +1561,6 @@ def download_certificate(client, file_path, certificate_name=None, encoding='PEM
             if encoding == 'DER':
                 f.write(cert)
             else:
-                import base64
                 encoded = base64.encodebytes(cert)
                 if isinstance(encoded, bytes):
                     encoded = encoded.decode("utf-8")

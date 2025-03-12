@@ -110,10 +110,12 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub update -n {0} -g {1} --fsi test/user/'.format(hub, rg), expect_failure=True)
 
         # Test auth config settings
-        updated_hub = self.cmd('iot hub update -n {0} -g {1} --disable-local-auth --disable-module-sas'.format(hub, rg)).get_output_in_json()
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --disable-local-auth --disable-module-sas '
+                               '--min-tls-version 1.0'.format(hub, rg)).get_output_in_json()
         assert updated_hub['properties']['disableLocalAuth']
         assert not updated_hub['properties']['disableDeviceSas']
         assert updated_hub['properties']['disableModuleSas']
+        assert updated_hub['properties']['minTlsVersion'] == '1.0'
 
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --disable-module-sas false  --disable-device-sas'.format(hub, rg)).get_output_in_json()
         assert updated_hub['properties']['disableLocalAuth']

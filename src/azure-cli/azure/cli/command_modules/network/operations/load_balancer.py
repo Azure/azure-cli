@@ -637,11 +637,6 @@ class LBAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
             subnet = f"{virtual_network}/subnets/{subnet}"
             args.subnet = subnet
 
-        if not virtual_network and not subnet:
-            raise ArgumentUsageError(
-                "vnet or subnet is required."
-            )
-
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result

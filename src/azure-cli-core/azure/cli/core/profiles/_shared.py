@@ -122,6 +122,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
     DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
     DATA_STORAGE_TABLE = ('azure.data.tables', None)
+    DATA_BATCH = ('azure.batch', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -154,7 +155,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2023-05-01',
+        ResourceType.MGMT_STORAGE: '2024-01-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2024-07-01', {
             'resource_skus': '2019-04-01',
@@ -261,7 +262,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-09-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-10-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },
     '2020-09-01-hybrid': {

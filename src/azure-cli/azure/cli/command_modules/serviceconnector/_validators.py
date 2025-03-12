@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import requests
 import random
 import string
 
@@ -104,11 +105,37 @@ def check_required_args(resource, cmd_arg_values):
     '''Check whether a resource's required arguments are in cmd_arg_values
     '''
     args = re.findall(r'\{([^\{\}]*)\}', resource)
-    args.remove('subscription')
+
+    if 'subscription' in args:
+        args.remove('subscription')
     for arg in args:
         if not cmd_arg_values.get(arg, None):
             return False
     return True
+
+
+def get_fabric_access_token():
+    get_fabric_token_cmd = 'az account get-access-token --output json --resource https://api.fabric.microsoft.com/'
+    return run_cli_cmd(get_fabric_token_cmd).get('accessToken')
+
+
+def generate_fabric_connstr_props(target_id):
+    fabric_token = get_fabric_access_token()
+    headers = {"Authorization": "Bearer {}".format(fabric_token)}
+    response = requests.get(target_id, headers=headers)
+
+    if response:
+        response_json = response.json()
+
+        if "properties" in response_json:
+            properties = response_json["properties"]
+            if "databaseName" in properties and "serverFqdn" in properties:
+                return {
+                    "Server": properties["serverFqdn"],
+                    "Database": properties["databaseName"]
+                }
+
+    return None
 
 
 def generate_connection_name(cmd):
@@ -942,6 +969,25 @@ def validate_kafka_params(cmd, namespace):
             namespace.client_type = get_client_type(cmd, namespace)
 
 
+def validate_connstr_props(cmd, namespace):
+    if 'create {}'.format(RESOURCE.FabricSql.value) in cmd.name:
+        if getattr(namespace, 'connstr_props', None) is None:
+            namespace.connstr_props = generate_fabric_connstr_props(namespace.target_id)
+
+            if namespace.connstr_props is None:
+                e = InvalidArgumentValueError("Fabric Connection String Properties must be provided")
+                telemetry.set_exception('fabric-connstr-props-unavailable')
+                raise e
+        else:
+            fabric_server = namespace.connstr_props.get('Server') or namespace.connstr_props.get('Data Source')
+            fabric_database = namespace.connstr_props.get('Database') or namespace.connstr_props.get('Initial Catalog')
+
+            if not fabric_server or not fabric_database:
+                e = InvalidArgumentValueError("Fabric Connection String Properties must contain Server and Database")
+                telemetry.set_exception('fabric-connstr-props-invalid')
+                raise e
+
+
 def validate_service_state(linker_parameters):
     '''Validate whether user provided params are applicable to service state
     '''
@@ -962,13 +1008,25 @@ def validate_service_state(linker_parameters):
         segments = parse_resource_id(target_id)
         rg = segments.get('resource_group')
         name = segments.get('name')
+        sub = segments.get('subscription')
         if not rg or not name:
             return
 
-        output = run_cli_cmd('az appconfig show -g "{}" -n "{}"'.format(rg, name))
+        output = run_cli_cmd('az appconfig show -g "{}" -n "{}" --subscription "{}"'.format(rg, name, sub))
         if output and output.get('disableLocalAuth') is True:
             raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
                                   'specified appconfig, you may use service principal or managed identity.')
+
+    if target_type == RESOURCE.Redis:
+        auth_type = linker_parameters.get('auth_info', {}).get('auth_type')
+        if auth_type == AUTH_TYPE.Secret.value or auth_type == AUTH_TYPE.SecretAuto.value:
+            return
+        redis = run_cli_cmd('az redis show --ids "{}"'.format(target_id))
+        if redis.get('redisConfiguration', {}).get('aadEnabled', 'False') != "True":
+            raise ValidationError('Please enable Microsoft Entra Authentication on your Redis first. '
+                                  'Note that it will cause your cache instances to reboot to load new '
+                                  'configuration and result in a failover. Consider performing the '
+                                  'operation during low traffic or outside of business hours.')
 
 
 def get_default_object_id_of_current_user(cmd, namespace):  # pylint: disable=unused-argument

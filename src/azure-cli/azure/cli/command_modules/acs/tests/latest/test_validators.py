@@ -164,6 +164,40 @@ class TestMaxSurge(unittest.TestCase):
         self.assertTrue('positive' in str(cm.exception), msg=str(cm.exception))
 
 
+class MessageOfTheDayNamespace:
+    def __init__(self, message_of_the_day, os_type):
+        self.os_type = os_type
+        self.message_of_the_day = message_of_the_day
+        
+class TestMessageOfTheday(unittest.TestCase):
+    def test_valid_cases(self):
+        valid = ["foo", ""]
+        for v in valid:
+            validators.validate_message_of_the_day(MessageOfTheDayNamespace(v, "Linux"))
+
+    def test_fail_if_os_type_windows(self):
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_message_of_the_day(
+                MessageOfTheDayNamespace("foo", "Windows")
+            )
+        self.assertTrue(
+            "--message-of-the-day can only be set for linux nodepools"
+            in str(cm.exception),
+            msg=str(cm.exception),
+        )
+
+    def test_fail_if_os_type_invalid(self):
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_message_of_the_day(
+                MessageOfTheDayNamespace("foo", "invalid")
+            )
+        self.assertTrue(
+            "--message-of-the-day can only be set for linux nodepools"
+            in str(cm.exception),
+            msg=str(cm.exception),
+        )
+
+
 class TestLabels(unittest.TestCase):
     def test_invalid_labels_prefix(self):
         invalid_labels = "k8s##.io/label1=value"
@@ -725,9 +759,40 @@ class TestValidateApplicationSecurityGroups(unittest.TestCase):
         namespace = SimpleNamespace(
             **{
                 "asg_ids": "invalid",
+                "allowed_host_ports": ["80/tcp", "443/tcp", "8080-8090/tcp", "53/udp"],
             }
         )
         with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_application_security_groups(
+                namespace
+            )
+
+    def test_application_security_groups_without_allowed_host_ports(self):
+        asg_ids = [
+            "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/applicationSecurityGroups/asg1",
+        ]
+        namespace = SimpleNamespace(
+            **{
+                "asg_ids": asg_ids,
+                "allowed_host_ports": [],
+            }
+        )
+        with self.assertRaises(ArgumentUsageError):
+            validators.validate_application_security_groups(
+                namespace
+            )
+
+    def test_nodepool_application_security_groups_without_allowed_host_ports(self):
+        asg_ids = [
+            "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/applicationSecurityGroups/asg1",
+        ]
+        namespace = SimpleNamespace(
+            **{
+                "nodepool_asg_ids": asg_ids,
+                "nodepool_allowed_host_ports": [],
+            }
+        )
+        with self.assertRaises(ArgumentUsageError):
             validators.validate_application_security_groups(
                 namespace
             )
@@ -736,6 +801,18 @@ class TestValidateApplicationSecurityGroups(unittest.TestCase):
         namespace = SimpleNamespace(
             **{
                 "asg_ids": "",
+                "allowed_host_ports": [],
+            }
+        )
+        validators.validate_application_security_groups(
+            namespace
+        )
+
+    def test_empty_nodepool_application_security_groups(self):
+        namespace = SimpleNamespace(
+            **{
+                "nodepool_asg_ids": "",
+                "nodepool_allowed_host_ports": [],
             }
         )
         validators.validate_application_security_groups(
@@ -750,6 +827,22 @@ class TestValidateApplicationSecurityGroups(unittest.TestCase):
         namespace = SimpleNamespace(
             **{
                 "asg_ids": asg_ids,
+                "allowed_host_ports": ["80/tcp", "443/tcp", "8080-8090/tcp", "53/udp"],
+            }
+        )
+        validators.validate_application_security_groups(
+            namespace
+        )
+
+    def test_multiple_nodepool_application_security_groups(self):
+        asg_ids = [
+            "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/applicationSecurityGroups/asg1",
+            "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Network/applicationSecurityGroups/asg2",
+        ]
+        namespace = SimpleNamespace(
+            **{
+                "nodepool_asg_ids": asg_ids,
+                "nodepool_allowed_host_ports": ["80/tcp", "443/tcp", "8080-8090/tcp", "53/udp"],
             }
         )
         validators.validate_application_security_groups(

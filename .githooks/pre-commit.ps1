@@ -26,7 +26,7 @@ $files = $(git diff --cached --name-only --diff-filter=AM $against)
 
 foreach ($file in $files) {
     # Check if the file contains secrets
-    $detected = $(azdev scan -f $file | ConvertFrom-Json).secrets_detected
+    $detected = $(azdev scan -f $file --continue-on-failure | ConvertFrom-Json).secrets_detected
     if ($detected -eq "True") {
         Write-Host "Detected secrets from $file. Please run the following command to mask it:" -ForegroundColor Red
         Write-Host "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" -ForegroundColor Red

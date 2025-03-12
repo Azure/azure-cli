@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from ._base import AAZBaseValue, AAZUndefined
-from ._field_value import AAZSimpleValue, AAZBaseDictValue, AAZDict, AAZFreeFormDict, AAZList, AAZObject
-from ._field_type import AAZObjectType
+from ._field_value import AAZSimpleValue, AAZBaseDictValue, AAZDict, AAZList, AAZObject
+from ._field_type import AAZObjectType, AAZAnyType
 from ._arg_browser import AAZArgBrowser
 
 # pylint: disable=protected-access, too-many-nested-blocks, too-many-return-statements
@@ -131,19 +131,10 @@ class AAZContentBuilder:
 
         return None
 
+    # Warning: This method is not used by the new aaz-dev-tools, it should be kept for backward compatibility
     def set_anytype_elements(self, arg_key=None):
         """Set any type elements of free from dictionary"""
-        for value, arg in zip(self._values, self._args):
-            if not isinstance(value, AAZFreeFormDict):
-                raise NotImplementedError()
-
-            for key, sub_arg in arg.get_anytype_elements():
-                if sub_arg is not None and sub_arg.data != AAZUndefined:
-                    sub_arg = sub_arg.get_prop(arg_key)
-
-                if sub_arg is not None and sub_arg.data != AAZUndefined:
-                    if not sub_arg.is_patch and arg_key:
-                        value[key] = sub_arg.data
+        self.set_elements(AAZAnyType, arg_key=arg_key)
 
     def discriminate_by(self, prop_name, prop_value):
         """discriminate object by a specify property"""

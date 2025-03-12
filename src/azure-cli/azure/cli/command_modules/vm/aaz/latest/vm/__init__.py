@@ -19,5 +19,7 @@ from ._perform_maintenance import *
 from ._reapply import *
 from ._redeploy import *
 from ._reimage import *
+from ._show import *
 from ._simulate_eviction import *
 from ._start import *
+from ._update import *

@@ -15,7 +15,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse, get_command_type_kwarg
+from azure.cli.core.util import shell_safe_json_parse, get_command_type_kwarg, getprop
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from knack.arguments import CLICommandArgument, ignore_type
@@ -600,7 +600,7 @@ def remove_properties(instance, argument_values):
 def throw_and_show_options(instance, part, path):
     from msrest.serialization import Model
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
-    if isinstance(instance, Model) and isinstance(getattr(instance, 'additional_properties', None), dict):
+    if isinstance(instance, Model) and isinstance(getprop(instance, 'additional_properties', None), dict):
         options.update(options.pop('additional_properties'))
     parent = '.'.join(path[:-1]).replace('.[', '[')
     error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
@@ -673,7 +673,7 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
                     matches.append(x)
                 elif not isinstance(x, dict):
                     snake_key = make_snake_case(key)
-                    if hasattr(x, snake_key) and getattr(x, snake_key, None) == value:
+                    if hasattr(x, snake_key) and getprop(x, snake_key, None) == value:
                         matches.append(x)
 
             if len(matches) == 1:
@@ -681,7 +681,7 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
             if len(matches) > 1:
                 raise CLIError("non-unique key '{}' found multiple matches on {}. Key must be unique."
                                .format(key, path[-2]))
-            if key in getattr(instance, 'additional_properties', {}):
+            if key in getprop(instance, 'additional_properties', {}):
                 instance.enable_additional_properties_sending()
                 return instance.additional_properties[key]
             raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
@@ -697,8 +697,8 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
             return instance[part]
 
         if hasattr(instance, make_snake_case(part)):
-            return getattr(instance, make_snake_case(part), None)
-        if part in getattr(instance, 'additional_properties', {}):
+            return getprop(instance, make_snake_case(part), None)
+        if part in getprop(instance, 'additional_properties', {}):
             instance.enable_additional_properties_sending()
             return instance.additional_properties[part]
         raise AttributeError()

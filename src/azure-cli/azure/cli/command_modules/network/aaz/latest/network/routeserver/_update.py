@@ -67,10 +67,25 @@ class Update(AAZCommand):
             nullable=True,
             enum={"ASPath": "ASPath", "ExpressRoute": "ExpressRoute", "VpnGateway": "VpnGateway"},
         )
+        _args_schema.auto_scale_config = AAZObjectArg(
+            options=["--auto-scale-config"],
+            help="The VirtualHub Router autoscale configuration.",
+            nullable=True,
+        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             help="Space-separated tags: key[=value] [key[=value] ...].",
             nullable=True,
+        )
+
+        auto_scale_config = cls._args_schema.auto_scale_config
+        auto_scale_config.min_capacity = AAZIntArg(
+            options=["min-capacity"],
+            help="The minimum number of scale units for VirtualHub Router.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                minimum=0,
+            ),
         )
 
         tags = cls._args_schema.tags
@@ -346,6 +361,11 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("allowBranchToBranchTraffic", AAZBoolType, ".allow_b2b_traffic")
                 properties.set_prop("hubRoutingPreference", AAZStrType, ".hub_routing_preference")
+                properties.set_prop("virtualRouterAutoScaleConfiguration", AAZObjectType, ".auto_scale_config")
+
+            virtual_router_auto_scale_configuration = _builder.get(".properties.virtualRouterAutoScaleConfiguration")
+            if virtual_router_auto_scale_configuration is not None:
+                virtual_router_auto_scale_configuration.set_prop("minCapacity", AAZIntType, ".min_capacity")
 
             tags = _builder.get(".tags")
             if tags is not None:

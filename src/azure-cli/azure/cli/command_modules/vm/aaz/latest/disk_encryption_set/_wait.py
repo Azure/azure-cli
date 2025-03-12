@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets/{}", "2022-03-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets/{}", "2023-04-02"],
         ]
     }
 
@@ -116,7 +116,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-03-02",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }
@@ -152,7 +152,7 @@ class Wait(AAZWaitCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -201,6 +201,7 @@ class Wait(AAZWaitCommand):
             _WaitHelper._build_schema_key_for_disk_encryption_set_read(properties.active_key)
             properties.auto_key_rotation_error = AAZObjectType(
                 serialized_name="autoKeyRotationError",
+                flags={"read_only": True},
             )
             _WaitHelper._build_schema_api_error_read(properties.auto_key_rotation_error)
             properties.encryption_type = AAZStrType(
@@ -250,7 +251,9 @@ class _WaitHelper:
             _schema.target = cls._schema_api_error_read.target
             return
 
-        cls._schema_api_error_read = _schema_api_error_read = AAZObjectType()
+        cls._schema_api_error_read = _schema_api_error_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         api_error_read = _schema_api_error_read
         api_error_read.code = AAZStrType()

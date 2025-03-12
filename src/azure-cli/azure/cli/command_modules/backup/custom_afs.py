@@ -24,6 +24,9 @@ from azure.cli.core.azclierror import ArgumentUsageError
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
+from knack.log import get_logger
+logger = get_logger(__name__)
+
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
 workload_type = "AzureFileShare"
@@ -245,9 +248,9 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
             Please either remove the flag or query for any other backup-management-type.
             """)
 
-    if is_ready_for_move is not None or target_tier is not None or tier is not None:
+    if is_ready_for_move is not None or target_tier is not None:
         raise ArgumentUsageError("""Invalid argument has been passed. --is-ready-for-move true, --target-tier
-        and --tier flags are not supported for --backup-management-type AzureStorage.""")
+        are not supported for --backup-management-type AzureStorage.""")
 
     if recommended_for_archive is not None:
         raise ArgumentUsageError("""--recommended-for-archive is supported by AzureIaasVM backup management
@@ -270,11 +273,57 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
     paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
 
+    if tier:
+        filtered_recovery_points = []
+
+        for rp in paged_recovery_points:
+            # Prepare to collect tier types
+            rp_tier_types = []
+
+            # Safely grab additional_properties
+            additional_props = getattr(rp.properties, 'additional_properties', {})
+            if not isinstance(additional_props, dict):
+                continue
+
+            # Get details list
+            tier_details_list = additional_props.get("recoveryPointTierDetails", [])
+            if not isinstance(tier_details_list, list):
+                continue
+
+            for detail in tier_details_list:
+                if not isinstance(detail, dict):
+                    continue
+                rp_type = detail.get("type")
+                if rp_type:
+                    rp_tier_types.append(rp_type)
+
+            # Map types to a tier
+            if 'InstantRP' in rp_tier_types and 'HardenedRP' in rp_tier_types:
+                rp_tier = 'SnapshotAndVaultStandard'
+            elif 'InstantRP' in rp_tier_types:
+                rp_tier = 'Snapshot'
+            elif 'HardenedRP' in rp_tier_types:
+                rp_tier = 'VaultStandard'
+            else:
+                logger.warning(
+                    "Warning: Unrecognized Recovery Point tier received."
+                    "If you see this message, please contact Microsoft Support."
+                    "The recognized tiers for AzureFileShare are: 'Snapshot', 'VaultStandard', or "
+                    "'SnapshotAndVaultStandard'."
+                )
+                rp_tier = None
+
+            # Filter by matching tier
+            if rp_tier == tier:
+                filtered_recovery_points.append(rp)
+
+        return filtered_recovery_points
+
     return paged_recovery_points
 
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
-                           is_critical_operation=False):
+                           is_critical_operation=False, yes=False):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -302,6 +351,13 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
                                                  aux_tenants=[tenant_id]).protected_items
             afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
+
+    # Validate existing & new policy
+    existing_policy_name = item.properties.policy_id.split('/')[-1]
+    existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                         existing_policy_name)
+    helper.validate_update_policy_request(existing_policy, policy, yes)
+
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
@@ -365,7 +421,7 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
 
 
 def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, tenant_id=None,
-               is_critical_operation=False):
+               is_critical_operation=False, yes=False):
     if policy_name is None:
         raise CLIError(
             """
@@ -375,7 +431,8 @@ def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name
     policy_object = helper.get_policy_from_json(client, policy)
     policy_object.properties.work_load_type = workload_type
     existing_policy = common.show_policy(client, resource_group_name, vault_name, policy_name)
-    helper.validate_update_policy_request(existing_policy, policy_object)
+
+    helper.validate_update_policy_request(existing_policy, policy_object, yes)
     if is_critical_operation:
         if helper.is_retention_duration_decreased(existing_policy, policy_object, "AzureStorage"):
             # update the payload with critical operation and add auxiliary header for cross tenant case

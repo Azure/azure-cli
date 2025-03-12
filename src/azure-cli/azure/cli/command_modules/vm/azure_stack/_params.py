@@ -61,7 +61,6 @@ def load_arguments(self, _):
 
     extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
-    disk_encryption_set_name = CLIArgumentType(overrides=name_arg_type, help='Name of disk encryption set.', id_part='name')
     ephemeral_placement_type = CLIArgumentType(options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(self.get_models('DiffDiskPlacement')), min_api='2019-12-01')
 
     license_type = CLIArgumentType(
@@ -596,21 +595,10 @@ def load_arguments(self, _):
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
-        c.argument('edge_zone', edge_zone_type)
         c.argument('architecture', help='The name of architecture. ', arg_type=get_enum_type(["x64", "Arm64"]))
-
-    with self.argument_context('vm image list-offers') as c:
-        c.argument('edge_zone', edge_zone_type)
-
-    with self.argument_context('vm image list-skus') as c:
-        c.argument('edge_zone', edge_zone_type)
-
-    with self.argument_context('vm image list-publishers') as c:
-        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image show') as c:
         c.argument('skus', options_list=['--sku', '-s'])
-        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image terms') as c:
         c.argument('urn', help='URN, in the format of \'publisher:offer:sku:version\'. If specified, other argument values can be omitted')
@@ -1339,7 +1327,6 @@ def load_arguments(self, _):
         c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
         c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
         c.argument('replication_mode', min_api='2021-07-01', arg_type=get_enum_type(ReplicationMode), help='Optional parameter which specifies the mode to be used for replication. This property is not updatable.')
-        c.argument('target_region_cvm_encryption', nargs='+', min_api='2021-10-01', help='Space-separated list of customer managed key for Confidential VM encrypting the OS disk in the gallery artifact for each region. Format for each region: `<os_cvm_encryption_type>,<os_cvm_des>`. The valid values for os_cvm_encryption_type are EncryptedVMGuestStateOnlyWithPmk, EncryptedWithPmk, EncryptedWithCmk.')
         c.argument('virtual_machine', help='Resource id of VM source')
         c.argument('image_version', help='Resource id of gallery image version source')
         c.argument('target_zone_encryption', nargs='+', min_api='2022-01-03',
@@ -1379,10 +1366,6 @@ def load_arguments(self, _):
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
-            c.argument('target_edge_zones', nargs='*', min_api='2022-01-03',
-                       help='Space-separated list of regions, edge zones, replica counts and storage types. Use <region>=<edge zone>[=<replica count>][=<storage account type>] to optionally set the replica count and/or storage account type for each region. '
-                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
-                            'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
 
     for scope in ['sig image-version create', 'sig image-version update', 'sig image-version undelete']:
         with self.argument_context(scope, operation_group='gallery_image_versions') as c:
@@ -1425,73 +1408,6 @@ def load_arguments(self, _):
                    help='distinguish add operation and remove operation')
 
     # endregion
-
-    # region Gallery applications
-    with self.argument_context('sig gallery-application') as c:
-        c.argument('gallery_application_name', options_list=['--name', '-n', '--application-name'],
-                   help='The name of the gallery Application')
-
-    with self.argument_context('sig gallery-application create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('description', help='The description of this gallery Application Definition resource. '
-                   'This property is updatable.')
-        c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='This property allows you '
-                   'to specify the supported type of the OS that application is built for. <br><br> Possible values '
-                   'are: <br><br> **Windows** <br><br> **Linux**')
-
-    with self.argument_context('sig gallery-application update') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('description', help='The description of this gallery Application Definition resource. '
-                   'This property is updatable.')
-
-    with self.argument_context('sig gallery-application version') as c:
-        c.argument('gallery_application_name', options_list=['--application-name'],
-                   help='The name of the gallery Application')
-        c.argument('gallery_application_version_name', options_list=['--name', '-n', '--version-name'],
-                   help='The name of the gallery Application Version')
-
-    with self.argument_context('sig gallery-application version create') as c:
-        c.argument('package_file_name', help='The name to assign the downloaded package file on the VM. This is limited to 4096 characters.'
-                                             'If not specified, the package file will be named the same as the Gallery Application name.')
-        c.argument('config_file_name', help='The name to assign the downloaded config file on the VM. This is limited to 4096 characters. '
-                                            'If not specified, the config file will be named the Gallery Application name appended with "_config"')
-
-    for scope in ['create', 'update']:
-        with self.argument_context('sig gallery-application version {}'.format(scope)) as c:
-            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                       validator=get_default_location_from_resource_group)
-            c.argument('tags', tags_type)
-            c.argument('package_file_link', help='The mediaLink of the artifact, must be a readable storage page blob.')
-            c.argument('install_command', help='The path and arguments to install the gallery application.')
-            c.argument('remove_command', help='The path and arguments to remove the gallery application.')
-            c.argument('update_command', help='The path and arguments to update the gallery application. If not present,'
-                                              ' then update operation will invoke remove command on the previous version'
-                                              ' and install command on the current version of the gallery application.')
-            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is'
-                       'going to be replicated to. This property is updatable. Expected value: '
-                       'json-string/json-file/@json-file.')
-            c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
-            c.argument('exclude_from', arg_type=get_three_state_flag(), help='If set to true, Virtual Machines '
-                       'deployed from the latest version of the Image Definition won\'t use this Image Version.',
-                       arg_group='Publishing Profile')
-            c.argument('end_of_life_date', help='The end of life date of the gallery image version. This property can be '
-                       'used for decommissioning purposes. This property is updatable.', arg_group='Publishing Profile')
-    # endregion
-
-    # region Proximity Placement Group
-    with self.argument_context('ppg', min_api='2018-04-01') as c:
-        c.argument('proximity_placement_group_name', arg_type=name_arg_type, help="The name of the proximity placement group.")
-
-    with self.argument_context('ppg create') as c:
-        c.argument('tags', tags_type, min_api='2018-04-01')
-        c.argument('zone', zone_type, min_api='2021-11-01')
-
-    for scope in ['ppg create', 'ppg update']:
-        with self.argument_context(scope) as c:
-            c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(self.get_models('ProximityPlacementGroupType')), min_api='2018-04-01', help="The type of the proximity placement group.")
-            c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
 
     with self.argument_context('vm create', min_api='2018-04-01') as c:
         c.argument('proximity_placement_group', options_list=['--ppg'],
@@ -1557,50 +1473,6 @@ def load_arguments(self, _):
         c.extra('resource_group_name', required=True)
         c.argument('resource_uri', arg_type=existing_vm_name, help='Name or ID of a virtual machine', validator=validate_vm_name_for_monitor_metrics, id_part=None)
     # endregion
-
-    # region disk encryption set
-    with self.argument_context('disk-encryption-set') as c:
-        c.argument('disk_encryption_set_name', disk_encryption_set_name)
-        c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
-        c.argument('source_vault', help='Name or ID of the KeyVault containing the key or secret.')
-        c.argument('encryption_type', arg_type=get_enum_type(['EncryptionAtRestWithPlatformKey', 'EncryptionAtRestWithCustomerKey', 'EncryptionAtRestWithPlatformAndCustomerKeys', 'ConfidentialVmEncryptedWithCustomerKey']),
-                   help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed. ConfidentialVmEncryptedWithCustomerKey: An additional encryption type accepted for confidential VM. Disk is encrypted at rest with Customer managed key.')
-        c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-        c.argument('enable_auto_key_rotation', arg_type=get_three_state_flag(), min_api='2020-12-01',
-                   options_list=['--enable-auto-key-rotation', '--auto-rotation'],
-                   help='Enable automatic rotation of keys.')
-
-    with self.argument_context('disk-encryption-set create', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
-        c.argument('mi_system_assigned', arg_group='Managed Identity', arg_type=get_three_state_flag(),
-                   help='Provide this flag to use system assigned identity. Check out help for more examples')
-        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+',
-                   help='User Assigned Identity ids to be used for disk encryption set. '
-                        'Check out help for more examples')
-
-    with self.argument_context('disk-encryption-set update', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
-
-    with self.argument_context('disk-encryption-set identity', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('mi_system_assigned', options_list=['--system-assigned'],
-                   arg_group='Managed Identity', arg_type=get_three_state_flag(),
-                   help='Provide this flag to use system assigned identity for disk encryption set. '
-                        'Check out help for more examples')
-        c.argument('mi_user_assigned', options_list=['--user-assigned'], arg_group='Managed Identity', nargs='*',
-                   help='User Assigned Identity ids to be used for disk encryption set. '
-                        'Check out help for more examples')
-    # endregion
-
-    # region DiskAccess
-    with self.argument_context('disk-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disk_accesses') as c:
-        c.argument('disk_access_name', arg_type=name_arg_type, help='Name of the disk access resource.', id_part='name')
-        c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-    # endRegion
 
     # region Capacity
     with self.argument_context('capacity reservation group') as c:

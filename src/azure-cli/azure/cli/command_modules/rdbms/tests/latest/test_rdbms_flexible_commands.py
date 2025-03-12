@@ -2833,10 +2833,18 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
         # test failures
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
                  .format(database_engine, resource_group, cluster_name), expect_failure=True)
+        self.cmd('{} flexible-server update -g {} -n {} --node-count {}'
+                 .format(database_engine, resource_group, cluster_name, cluster_size - 1), expect_failure=True)
         self.cmd('{} flexible-server replica list -g {} -n {}'
                  .format(database_engine, resource_group, cluster_name), expect_failure=True)
         self.cmd('{} flexible-server db create -g {} -s {} -d dbclusterfail'
                  .format(database_engine, resource_group, cluster_name), expect_failure=True)
+
+        # update cluster
+        update_cluster_size = cluster_size + 1
+        update_info = self.cmd('{} flexible-server update -g {} -n {} --node-count {}'
+                               .format(database_engine, resource_group, cluster_name, update_cluster_size)).get_output_in_json()
+        self.assertEqual(update_info['cluster']['clusterSize'], update_cluster_size)
 
         # Wait until snapshot is created
         os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
@@ -2846,8 +2854,67 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
         restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
                                   .format(database_engine, resource_group, cluster_restore_name, basic_info['id'])).get_output_in_json()
         self.assertEqual(restore_result['name'], cluster_restore_name)
-        self.assertEqual(restore_result['cluster']['clusterSize'], cluster_size)
+        self.assertEqual(restore_result['cluster']['clusterSize'], update_cluster_size)
 
         # delete everything
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_name))
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_restore_name))
+
+
+class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'eastus2euap'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_tuning_options(self, resource_group):
+        self._test_tuning_options_mgmt('postgres', resource_group)
+
+    def _test_tuning_options_mgmt(self, database_engine, resource_group):
+
+        # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D4s_v3'
+        tier = 'GeneralPurpose'
+
+        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
+                 database_engine, resource_group, server_name, sku_name, tier, storage_size, version, location))
+
+        # Enable index tuning for server
+        self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled True'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show that index tuning is enabled
+        self.cmd('{} flexible-server index-tuning show -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # List settings associated with index tuning for server
+        self.cmd('{} flexible-server index-tuning list-settings -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Show properties of index tuning setting for server
+        self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'report')])
+        self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'pg_qs.query_capture_mode', resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'all')])
+
+        # Set new value of index tuning setting for server
+        value = '1006'
+        self.cmd('{} flexible-server index-tuning set-settings -g {} -s {} -n {} -v {}'.format(database_engine, resource_group, server_name,
+                                                                                               'unused_reads_per_table', value),
+                 checks=[JMESPathCheck('value', value)])
+
+        # List recommendations associated with index tuning for server
+        self.cmd('{} flexible-server index-tuning list-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Disable index tuning for server
+        self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled False'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show properties of index tuning setting for server
+        self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'off')])

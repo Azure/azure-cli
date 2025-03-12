@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2020-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/proximityplacementgroups/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/proximityplacementgroups/{}", "2020-06-01"],
         ]
     }
 
@@ -100,7 +100,7 @@ class Show(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -127,7 +127,7 @@ class Show(AAZCommand):
                     "includeColocationStatus", self.ctx.args.include_colocation_status,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2020-06-01",
                     required=True,
                 ),
             }
@@ -176,7 +176,6 @@ class Show(AAZCommand):
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.zones = AAZListType()
 
             properties = cls._schema_on_200.properties
             properties.availability_sets = AAZListType(
@@ -187,7 +186,6 @@ class Show(AAZCommand):
                 serialized_name="colocationStatus",
             )
             _ShowHelper._build_schema_instance_view_status_read(properties.colocation_status)
-            properties.intent = AAZObjectType()
             properties.proximity_placement_group_type = AAZStrType(
                 serialized_name="proximityPlacementGroupType",
             )
@@ -204,14 +202,6 @@ class Show(AAZCommand):
             availability_sets.Element = AAZObjectType()
             _ShowHelper._build_schema_sub_resource_with_colocation_status_read(availability_sets.Element)
 
-            intent = cls._schema_on_200.properties.intent
-            intent.vm_sizes = AAZListType(
-                serialized_name="vmSizes",
-            )
-
-            vm_sizes = cls._schema_on_200.properties.intent.vm_sizes
-            vm_sizes.Element = AAZStrType()
-
             virtual_machine_scale_sets = cls._schema_on_200.properties.virtual_machine_scale_sets
             virtual_machine_scale_sets.Element = AAZObjectType()
             _ShowHelper._build_schema_sub_resource_with_colocation_status_read(virtual_machine_scale_sets.Element)
@@ -222,9 +212,6 @@ class Show(AAZCommand):
 
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
-
-            zones = cls._schema_on_200.zones
-            zones.Element = AAZStrType()
 
             return cls._schema_on_200
 

@@ -419,7 +419,7 @@ parameters:
     long-summary: |
         Usage:  --condition {avg,min,max,total,count} [NAMESPACE.]METRIC
                            [{=,!=,>,>=,<,<=} THRESHOLD]
-                           [{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]
+                           [{>,><,<} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
                            [with skipmetricvalidation]

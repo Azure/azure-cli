@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import base64
 from math import isnan
 from types import SimpleNamespace
 from typing import Dict, List, Tuple, TypeVar, Union
@@ -38,9 +39,10 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import get_file_json, sdk_no_wait
+from azure.cli.core.util import get_file_json, sdk_no_wait, read_file_content
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -388,6 +390,37 @@ class AKSAgentPoolContext(BaseAKSContext):
         else:
             crg_id = raw_value
         return crg_id
+
+    def get_message_of_the_day(self) -> Union[str, None]:
+        """Obtain the value of message_of_the_day.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        message_of_the_day = None
+        message_of_the_day_file_path = self.raw_param.get("message_of_the_day")
+
+        if message_of_the_day_file_path:
+            if not os.path.isfile(message_of_the_day_file_path):
+                raise InvalidArgumentValueError(
+                    f"{message_of_the_day_file_path} is not valid file, or not accessible."
+                )
+            message_of_the_day = read_file_content(
+                message_of_the_day_file_path)
+            message_of_the_day = base64.b64encode(
+                bytes(message_of_the_day, 'ascii')).decode('ascii')
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "message_of_the_day") and
+            self.agentpool.message_of_the_day is not None
+        ):
+            message_of_the_day = self.agentpool.message_of_the_day
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return message_of_the_day
 
     def get_enable_vtpm(self) -> bool:
         return self._get_enable_vtpm(enable_validation=True)
@@ -1504,6 +1537,20 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_disable_windows_outbound_nat()
 
+    def get_if_match(self) -> str:
+        """Obtain the value of if_match.
+
+        :return: string
+        """
+        return self.raw_param.get("if_match")
+
+    def get_if_none_match(self) -> str:
+        """Obtain the value of if_none_match.
+
+        :return: string
+        """
+        return self.raw_param.get("if_none_match")
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1782,6 +1829,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
+    def set_up_motd(self, agentpool: AgentPool) -> AgentPool:
+        """Set up message of the day for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.message_of_the_day = self.context.get_message_of_the_day()
+        return agentpool
+
     def set_up_gpu_properties(self, agentpool: AgentPool) -> AgentPool:
         """Set up gpu related properties for the AgentPool object.
 
@@ -1900,6 +1957,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_crg_id(agentpool)
         # set up agentpool security profile
         agentpool = self.set_up_agentpool_security_profile(agentpool)
+        # set up message of the day
+        agentpool = self.set_up_motd(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -1916,6 +1975,18 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
 
+        active_cloud = get_active_cloud(self.cmd.cli_ctx)
+        if active_cloud.profile != "latest":
+            return sdk_no_wait(
+                self.context.get_no_wait(),
+                self.client.begin_create_or_update,
+                self.context.get_resource_group_name(),
+                self.context.get_cluster_name(),
+                self.context._get_nodepool_name(enable_validation=False),
+                agentpool,
+                headers=self.context.get_aks_custom_headers(),
+            )
+
         return sdk_no_wait(
             self.context.get_no_wait(),
             self.client.begin_create_or_update,
@@ -1924,6 +1995,8 @@ class AKSAgentPoolAddDecorator:
             # validated in "init_agentpool", skip to avoid duplicate api calls
             self.context._get_nodepool_name(enable_validation=False),
             agentpool,
+            if_match=self.context.get_if_match(),
+            if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )
 
@@ -2221,6 +2294,18 @@ class AKSAgentPoolUpdateDecorator:
         """
         self._ensure_agentpool(agentpool)
 
+        active_cloud = get_active_cloud(self.cmd.cli_ctx)
+        if active_cloud.profile != "latest":
+            return sdk_no_wait(
+                self.context.get_no_wait(),
+                self.client.begin_create_or_update,
+                self.context.get_resource_group_name(),
+                self.context.get_cluster_name(),
+                self.context.get_nodepool_name(),
+                agentpool,
+                headers=self.context.get_aks_custom_headers(),
+            )
+
         return sdk_no_wait(
             self.context.get_no_wait(),
             self.client.begin_create_or_update,
@@ -2228,5 +2313,7 @@ class AKSAgentPoolUpdateDecorator:
             self.context.get_cluster_name(),
             self.context.get_nodepool_name(),
             agentpool,
+            if_match=self.context.get_if_match(),
+            if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )

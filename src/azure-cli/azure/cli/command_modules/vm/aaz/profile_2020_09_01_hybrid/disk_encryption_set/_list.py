@@ -16,13 +16,19 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List disk encryption sets.
+
+    :example: List all disk encryption sets in a subscription.
+        az disk-encryption-set list
+
+    :example: List all disk encryption sets in a resource group.
+        az disk-encryption-set list --resource-group myResourceGroup
     """
 
     _aaz_info = {
-        "version": "2019-07-01",
+        "version": "2023-04-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/diskencryptionsets", "2019-07-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets", "2019-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/diskencryptionsets", "2023-04-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets", "2023-04-02"],
         ]
     }
 
@@ -109,7 +115,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2019-07-01",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }
@@ -156,7 +162,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -181,12 +187,43 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             identity.type = AAZStrType()
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200.value.Element.properties
             properties.active_key = AAZObjectType(
                 serialized_name="activeKey",
             )
-            _ListHelper._build_schema_key_vault_and_key_reference_read(properties.active_key)
+            _ListHelper._build_schema_key_for_disk_encryption_set_read(properties.active_key)
+            properties.auto_key_rotation_error = AAZObjectType(
+                serialized_name="autoKeyRotationError",
+                flags={"read_only": True},
+            )
+            _ListHelper._build_schema_api_error_read(properties.auto_key_rotation_error)
+            properties.encryption_type = AAZStrType(
+                serialized_name="encryptionType",
+            )
+            properties.federated_client_id = AAZStrType(
+                serialized_name="federatedClientId",
+            )
+            properties.last_key_rotation_timestamp = AAZStrType(
+                serialized_name="lastKeyRotationTimestamp",
+                flags={"read_only": True},
+            )
             properties.previous_keys = AAZListType(
                 serialized_name="previousKeys",
                 flags={"read_only": True},
@@ -195,10 +232,13 @@ class List(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.rotation_to_latest_key_version_enabled = AAZBoolType(
+                serialized_name="rotationToLatestKeyVersionEnabled",
+            )
 
             previous_keys = cls._schema_on_200.value.Element.properties.previous_keys
             previous_keys.Element = AAZObjectType()
-            _ListHelper._build_schema_key_vault_and_key_reference_read(previous_keys.Element)
+            _ListHelper._build_schema_key_for_disk_encryption_set_read(previous_keys.Element)
 
             tags = cls._schema_on_200.value.Element.tags
             tags.Element = AAZStrType()
@@ -249,7 +289,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2019-07-01",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }
@@ -296,7 +336,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -321,12 +361,43 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             identity.type = AAZStrType()
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200.value.Element.properties
             properties.active_key = AAZObjectType(
                 serialized_name="activeKey",
             )
-            _ListHelper._build_schema_key_vault_and_key_reference_read(properties.active_key)
+            _ListHelper._build_schema_key_for_disk_encryption_set_read(properties.active_key)
+            properties.auto_key_rotation_error = AAZObjectType(
+                serialized_name="autoKeyRotationError",
+                flags={"read_only": True},
+            )
+            _ListHelper._build_schema_api_error_read(properties.auto_key_rotation_error)
+            properties.encryption_type = AAZStrType(
+                serialized_name="encryptionType",
+            )
+            properties.federated_client_id = AAZStrType(
+                serialized_name="federatedClientId",
+            )
+            properties.last_key_rotation_timestamp = AAZStrType(
+                serialized_name="lastKeyRotationTimestamp",
+                flags={"read_only": True},
+            )
             properties.previous_keys = AAZListType(
                 serialized_name="previousKeys",
                 flags={"read_only": True},
@@ -335,10 +406,13 @@ class List(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.rotation_to_latest_key_version_enabled = AAZBoolType(
+                serialized_name="rotationToLatestKeyVersionEnabled",
+            )
 
             previous_keys = cls._schema_on_200.value.Element.properties.previous_keys
             previous_keys.Element = AAZObjectType()
-            _ListHelper._build_schema_key_vault_and_key_reference_read(previous_keys.Element)
+            _ListHelper._build_schema_key_for_disk_encryption_set_read(previous_keys.Element)
 
             tags = cls._schema_on_200.value.Element.tags
             tags.Element = AAZStrType()
@@ -349,32 +423,72 @@ class List(AAZCommand):
 class _ListHelper:
     """Helper class for List"""
 
-    _schema_key_vault_and_key_reference_read = None
+    _schema_api_error_read = None
 
     @classmethod
-    def _build_schema_key_vault_and_key_reference_read(cls, _schema):
-        if cls._schema_key_vault_and_key_reference_read is not None:
-            _schema.key_url = cls._schema_key_vault_and_key_reference_read.key_url
-            _schema.source_vault = cls._schema_key_vault_and_key_reference_read.source_vault
+    def _build_schema_api_error_read(cls, _schema):
+        if cls._schema_api_error_read is not None:
+            _schema.code = cls._schema_api_error_read.code
+            _schema.details = cls._schema_api_error_read.details
+            _schema.innererror = cls._schema_api_error_read.innererror
+            _schema.message = cls._schema_api_error_read.message
+            _schema.target = cls._schema_api_error_read.target
             return
 
-        cls._schema_key_vault_and_key_reference_read = _schema_key_vault_and_key_reference_read = AAZObjectType()
+        cls._schema_api_error_read = _schema_api_error_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
-        key_vault_and_key_reference_read = _schema_key_vault_and_key_reference_read
-        key_vault_and_key_reference_read.key_url = AAZStrType(
+        api_error_read = _schema_api_error_read
+        api_error_read.code = AAZStrType()
+        api_error_read.details = AAZListType()
+        api_error_read.innererror = AAZObjectType()
+        api_error_read.message = AAZStrType()
+        api_error_read.target = AAZStrType()
+
+        details = _schema_api_error_read.details
+        details.Element = AAZObjectType()
+
+        _element = _schema_api_error_read.details.Element
+        _element.code = AAZStrType()
+        _element.message = AAZStrType()
+        _element.target = AAZStrType()
+
+        innererror = _schema_api_error_read.innererror
+        innererror.errordetail = AAZStrType()
+        innererror.exceptiontype = AAZStrType()
+
+        _schema.code = cls._schema_api_error_read.code
+        _schema.details = cls._schema_api_error_read.details
+        _schema.innererror = cls._schema_api_error_read.innererror
+        _schema.message = cls._schema_api_error_read.message
+        _schema.target = cls._schema_api_error_read.target
+
+    _schema_key_for_disk_encryption_set_read = None
+
+    @classmethod
+    def _build_schema_key_for_disk_encryption_set_read(cls, _schema):
+        if cls._schema_key_for_disk_encryption_set_read is not None:
+            _schema.key_url = cls._schema_key_for_disk_encryption_set_read.key_url
+            _schema.source_vault = cls._schema_key_for_disk_encryption_set_read.source_vault
+            return
+
+        cls._schema_key_for_disk_encryption_set_read = _schema_key_for_disk_encryption_set_read = AAZObjectType()
+
+        key_for_disk_encryption_set_read = _schema_key_for_disk_encryption_set_read
+        key_for_disk_encryption_set_read.key_url = AAZStrType(
             serialized_name="keyUrl",
             flags={"required": True},
         )
-        key_vault_and_key_reference_read.source_vault = AAZObjectType(
+        key_for_disk_encryption_set_read.source_vault = AAZObjectType(
             serialized_name="sourceVault",
-            flags={"required": True},
         )
 
-        source_vault = _schema_key_vault_and_key_reference_read.source_vault
+        source_vault = _schema_key_for_disk_encryption_set_read.source_vault
         source_vault.id = AAZStrType()
 
-        _schema.key_url = cls._schema_key_vault_and_key_reference_read.key_url
-        _schema.source_vault = cls._schema_key_vault_and_key_reference_read.source_vault
+        _schema.key_url = cls._schema_key_for_disk_encryption_set_read.key_url
+        _schema.source_vault = cls._schema_key_for_disk_encryption_set_read.source_vault
 
 
 __all__ = ["List"]

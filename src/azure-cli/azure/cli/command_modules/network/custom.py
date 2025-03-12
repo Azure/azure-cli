@@ -4473,6 +4473,10 @@ class NICIPConfigCreate(_NICIPConfigCreate):
     def pre_operations(self):
         args = self.ctx.args
         args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
         args.asgs_obj = assign_aaz_list_arg(
             args.asgs_obj,
@@ -4614,6 +4618,11 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             else:
                 # if specific address provided, allocation is static
                 args.private_ip_allocation_method = "Static"
+
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
     def pre_instance_update(self, instance):
         args = self.ctx.args
@@ -6461,6 +6470,7 @@ def create_virtual_hub(cmd,
                        hosted_subnet,
                        public_ip_address,
                        hub_routing_preference=None,
+                       auto_scale_config=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -6480,7 +6490,8 @@ def create_virtual_hub(cmd,
         'location': location,
         'tags': tags,
         'sku': 'Standard',
-        "hub_routing_preference": hub_routing_preference
+        "hub_routing_preference": hub_routing_preference,
+        "auto_scale_config": auto_scale_config
     }
     from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)

@@ -19,7 +19,7 @@ class Onboard(AAZCommand):
     """Onboard an Azure API Management API to Microsoft Defender for APIs. The system will start monitoring the operations within the Azure Management API for intrusive behaviors and provide alerts for attacks that have been detected.
 
     :example: Onboard an Azure API Management API to Microsoft Defender for APIs.
-        az security api-collections create --resource-group MyResourceGroup --service-name MyApiServiceName --api-id EchoApi
+        az security api-collection apim onboard --resource-group MyResourceGroup --service-name MyApiManagementServiceName --api-id echo-api
     """
 
     _aaz_info = {

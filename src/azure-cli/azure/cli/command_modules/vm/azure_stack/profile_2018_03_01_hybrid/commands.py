@@ -25,3 +25,6 @@ def load_command_table(self, _):
 
     from .operations.capacity_reservation_group import CapacityReservationGroupList
     self.command_table['capacity reservation group list'] = CapacityReservationGroupList(loader=self)
+
+    from .operations.vm import VMListSizes
+    self.command_table['vm list-sizes'] = VMListSizes(loader=self)

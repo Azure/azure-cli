@@ -52,7 +52,7 @@ examples:
         az postgres flexible-server create
   - name: >
       Create a PostgreSQL flexible server with public access and add the range of IP address to have access to this server.
-      The --public-access parameter can be 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
+      The --public-access parameter can be 'Disabled', 'Enabled', 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
     text: >
       az postgres flexible-server create --resource-group testGroup --name testserver --public-access 125.23.54.31-125.23.54.35
   - name: >
@@ -223,7 +223,7 @@ examples:
   - name: >
       Create elastic cluster with node count of 5. Default node count is 2 when --cluster-option is "ElasticCluster".
     text: >
-      az postgres flexible-server create -g testGroup -n testServer --location testLocation --cluster-option ElasticCluster --node-count 5
+      az postgres flexible-server create -g testGroup -n testCluster --location testLocation --cluster-option ElasticCluster --node-count 5
 """
 
 helps['postgres flexible-server show'] = """
@@ -282,6 +282,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --iops 3000
   - name: Update a flexible server's storage to set Throughput (MB/sec). Server must be using Premium SSD v2 Disks.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
+  - name: Update a flexible server's cluster size by scaling up node count. Must be an Elastic Cluster.
+    text: az postgres flexible-server update --resource-group testGroup --name testcluster --node-count 6
 """
 
 helps['postgres flexible-server restore'] = """
@@ -342,7 +344,7 @@ type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
 example:
   - name: Wait for the flexible server to satisfy certain conditions.
-    text: az postgres server wait --exists --resource-group testGroup --name testserver
+    text: az postgres flexible-server wait --exists --resource-group testGroup --name testserver
 """
 
 helps['postgres flexible-server delete'] = """
@@ -425,9 +427,9 @@ type: command
 short-summary: List all firewall rules for a flexible server.
 example:
   - name: List all firewall rules for a server.
-    text: az postgres server firewall-rule list --resource-group testGroup --name testserver
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver
   - name: List all firewall rules for a server in table format.
-    text: az postgres server firewall-rule list --resource-group testGroup --name testserver --output table
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver --output table
 """
 
 helps['postgres flexible-server firewall-rule show'] = """
@@ -679,7 +681,7 @@ helps['postgres flexible-server parameter show'] = """
 type: command
 short-summary: Get the parameter for a flexible server."
 examples:
-  - name: Get the parameter for a server.W
+  - name: Get the parameter for a server.
     text: az postgres flexible-server parameter show --resource-group testGroup --server-name servername --name parameterName
 """
 
@@ -1167,4 +1169,57 @@ short-summary: Update allowed mirrored databases.
 examples:
   - name: Update allowed mirrored databases.
     text: az postgres flexible-server fabric-mirroring update-databases -g testgroup -s testsvr --database-names testdb2 testdb3
+"""
+
+helps['postgres flexible-server index-tuning'] = """
+type: group
+short-summary: Index tuning analyzes read queries captured in Query Store and recommends index changes to optimize these queries.
+"""
+
+helps['postgres flexible-server index-tuning update'] = """
+type: command
+short-summary: Update index tuning to be enabled/disabled for a PostgreSQL flexible server.
+examples:
+  - name: Update index tuning to be enabled/disabled for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning update -g testgroup -s testsvr --enabled True
+"""
+
+helps['postgres flexible-server index-tuning show'] = """
+type: command
+short-summary: Show state of index tuning for a PostgreSQL flexible server.
+examples:
+  - name: Show state of index tuning for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning show -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server index-tuning list-settings'] = """
+type: command
+short-summary: Get tuning settings associated for a PostgreSQL flexible server.
+examples:
+  - name: Get tuning settings for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning list-settings -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server index-tuning show-settings'] = """
+type: command
+short-summary: Get a tuning setting for a PostgreSQL flexible server.
+examples:
+  - name: Get a tuning setting for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning show-settings -g testgroup -s testsvr --name setting-name
+"""
+
+helps['postgres flexible-server index-tuning set-settings'] = """
+type: command
+short-summary: Update a tuning setting for a PostgreSQL flexible server.
+examples:
+  - name: Update a tuning setting for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning set-settings -g testgroup -s testsvr --name setting-name --value setting-value
+"""
+
+helps['postgres flexible-server index-tuning list-recommendations'] = """
+type: command
+short-summary: Get available tuning index recommendations associated with a PostgreSQL flexible server.
+examples:
+  - name: Get tuning index recommendations for a PostgreSQL flexible server. Filter by selected type.
+    text: az postgres flexible-server index-tuning list-recommendations -g testgroup -s testsvr --recommendation-type CreateIndex
 """

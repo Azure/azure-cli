@@ -99,7 +99,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_node_public_ip_tags,
     validate_disable_windows_outbound_nat,
     validate_crg_id,
-    validate_azure_service_mesh_revision)
+    validate_azure_service_mesh_revision,
+    validate_message_of_the_day)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -424,6 +425,8 @@ def load_arguments(self, _):
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('nodepool_allowed_host_ports', nargs='+', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
         c.argument('nodepool_asg_ids', nargs='+', validator=validate_application_security_groups, help="application security groups for agentpool")
+        c.argument("message_of_the_day")
+
         # azure monitor profile
         c.argument('enable_azure_monitor_metrics', action='store_true')
         c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid)
@@ -476,6 +479,8 @@ def load_arguments(self, _):
         c.argument('enable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
         c.argument('disable_acns_security', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -629,6 +634,8 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_cost_analysis', action='store_true')
         c.argument('disable_cost_analysis', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -696,6 +703,13 @@ def load_arguments(self, _):
     with self.argument_context('aks check-acr', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('acr', validator=validate_registry_name)
         c.argument('node_name')
+
+    with self.argument_context('aks machine') as c:
+        c.argument('cluster_name')
+        c.argument('nodepool_name', validator=validate_nodepool_name)
+
+    with self.argument_context('aks machine show') as c:
+        c.argument('machine_name')
 
     with self.argument_context('aks maintenanceconfiguration') as c:
         c.argument('cluster_name', help='The cluster name.')
@@ -780,8 +794,11 @@ def load_arguments(self, _):
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
+        c.argument("message_of_the_day", validator=validate_message_of_the_day)
         c.argument('enable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -809,6 +826,8 @@ def load_arguments(self, _):
         c.argument('disable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
         c.argument('disable_secure_boot', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
@@ -929,6 +948,10 @@ def load_arguments(self, _):
     with self.argument_context('aks approuting zone update') as c:
         c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
         c.argument('attach_zones')
+
+    with self.argument_context('aks nodepool delete') as c:
+        c.argument('ignore_pdb', options_list=['--ignore-pdb', '-i'], action='store_true')
+        c.argument("if_match")
 
     with self.argument_context("aks nodepool delete-machines") as c:
         c.argument(
