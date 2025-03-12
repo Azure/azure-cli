@@ -232,6 +232,9 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp list-flexconsumption-locations') as c:
         c.argument('zone_redundant', arg_type=get_three_state_flag(),
                    help='Filter the list to return only locations which support zone redundancy.', is_preview=True)
+        c.argument('details', arg_type=get_three_state_flag(),
+                   help='Include the runtime details of the regions.', is_preview=True)
+        c.argument('runtime', help="limit the output to just the specified runtime", is_preview=True)
 
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

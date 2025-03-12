@@ -1810,13 +1810,19 @@ def list_function_app_runtimes(cmd, os_type=None):
     return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
 
-def list_flex_function_app_runtimes(cmd, location, runtime):
-    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
-    runtimes = [r for r in runtime_helper.stacks if runtime == r.name]
-    if not runtimes:
-        raise ValidationError("Runtime '{}' not supported for function apps on the Flex Consumption plan."
-                              .format(runtime))
-    return runtimes
+def list_flex_function_app_runtimes(cmd, location, runtime, ignore_error=False):
+    try:
+        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
+        runtimes = [r for r in runtime_helper.stacks if runtime == r.name]
+        if not runtimes:
+            raise ValidationError("Runtime '{}' not supported for function apps on the Flex Consumption plan."
+                                .format(runtime))
+        return runtime_helper.stacks
+    except Exception as e:
+        if ignore_error:
+            return []
+        else:
+            raise  # Rethrow the caught exception 
 
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
@@ -4576,7 +4582,7 @@ class _FlexFunctionAppStackRuntimeHelper:
 
     def get_flex_raw_function_app_stacks(self, cmd, location, runtime):
         stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?' \
-                         'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
+                         'api-version=2023-12-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
         if runtime == "dotnet-isolated":
             runtime = "dotnet"
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime)
@@ -5123,13 +5129,6 @@ def is_exactly_one_true(*args):
                 return False
             found = True
     return found
-
-
-def list_flexconsumption_zone_redundant_locations(cmd):
-    client = web_client_factory(cmd.cli_ctx)
-    regions = client.list_geo_regions(sku="FlexConsumption")
-    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
-    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
@@ -6132,19 +6131,35 @@ def get_subscription_locations(cli_ctx):
     return [item.name for item in result]
 
 
-def list_flexconsumption_locations(cmd, zone_redundant=False):
+def list_flexconsumption_locations(cmd, zone_redundant=False, details=False, runtime=None):
+    client = web_client_factory(cmd.cli_ctx)
+
+    if runtime and not details:
+        raise ArgumentUsageError(
+                '--runtime is only valid with --details parameter. '
+                'Please try again without the --details parameter.')
+
+    regions = client.list_geo_regions(sku="FlexConsumption")
+    
     if zone_redundant:
-        return list_flexconsumption_zone_redundant_locations(cmd)
+        regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    sub_id = get_subscription_id(cmd.cli_ctx)
-    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
-    flex_regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
-    flex_regions_list = [{'name': x['name'].lower().replace(' ', '')} for x in flex_regions]
-    sub_regions_list = get_subscription_locations(cmd.cli_ctx)
-    return [x for x in flex_regions_list if x['name'] in sub_regions_list]
+    regions = [x.name.lower().replace(' ', '') for x in regions]
+    return [{x: list_flex_function_app_all_runtimes(cmd, x, "java")} for x in regions]
 
+
+def list_flex_function_app_all_runtimes(cmd, location, runtime=None):
+    runtimes = ["dotnet-isolated", "node", "python", "java",  "powershell"]
+    if runtime:
+        runtimes = [runtime]
+
+    return [{x: list_flex_function_app_runtimes(cmd, location, x, True)} for x in runtimes]
+
+def list_flexconsumption_zone_redundant_locations(cmd):
+    client = web_client_factory(cmd.cli_ctx)
+    regions = client.list_geo_regions(sku="FlexConsumption")
+    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
     web_client = web_client_factory(cmd.cli_ctx)
