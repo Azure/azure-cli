@@ -12,13 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "vm availability-set show",
+    "vm availability-set create",
 )
-class Show(AAZCommand):
-    """Get information about an availability set.
-
-    :example: Get information about an availability set.
-        az vm availability-set show -n MyAvSet -g MyResourceGroup
+class Create(AAZCommand):
+    """Create an availability set.
     """
 
     _aaz_info = {
@@ -48,16 +45,92 @@ class Show(AAZCommand):
             options=["-n", "--name", "--availability-set-name"],
             help="The name of the availability set.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.location = AAZResourceLocationArg(
+            help="Resource location",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.platform_fault_domain_count = AAZIntArg(
+            options=["--platform-fault-domain-count"],
+            help="Fault Domain count.",
+        )
+        _args_schema.platform_update_domain_count = AAZIntArg(
+            options=["--platform-update-domain-count"],
+            help="Update Domain count. If unspecified, the server will pick the most optimal number like 5.",
+        )
+        _args_schema.proximity_placement_group = AAZObjectArg(
+            options=["--proximity-placement-group"],
+            help="Specifies information about the proximity placement group that the availability set should be assigned to. <br><br>Minimum api-version: 2018-04-01.",
+        )
+        cls._build_args_sub_resource_create(_args_schema.proximity_placement_group)
+        _args_schema.additional_scheduled_events = AAZBoolArg(
+            options=["--additional-events", "--additional-scheduled-events"],
+            help="The configuration parameter used while creating event grid and resource graph scheduled event setting.",
+        )
+        _args_schema.enable_user_reboot_scheduled_events = AAZBoolArg(
+            options=["--enable-reboot", "--enable-user-reboot-scheduled-events"],
+            help="The configuration parameter used while publishing scheduled events additional publishing targets.",
+        )
+        _args_schema.enable_user_redeploy_scheduled_events = AAZBoolArg(
+            options=["--enable-redeploy", "--enable-user-redeploy-scheduled-events"],
+            help="The configuration parameter used while creating user initiated redeploy scheduled event setting creation.",
+        )
+        _args_schema.sku = AAZObjectArg(
+            options=["--sku"],
+            help="Sku of the availability set, only name is required to be set. See AvailabilitySetSkuTypes for possible set of values. Use 'Aligned' for virtual machines with managed disks and 'Classic' for virtual machines with unmanaged disks. Default value is 'Classic'.",
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            help="Resource tags",
+        )
+
+        sku = cls._args_schema.sku
+        sku.capacity = AAZIntArg(
+            options=["capacity"],
+            help="Specifies the number of virtual machines in the scale set.",
+        )
+        sku.name = AAZStrArg(
+            options=["name"],
+            help="The sku name.",
+        )
+        sku.tier = AAZStrArg(
+            options=["tier"],
+            help="Specifies the tier of virtual machines in a scale set.<br /><br /> Possible Values:<br /><br /> **Standard**<br /><br /> **Basic**",
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
+
+        # define Arg Group "Properties"
         return cls._args_schema
+
+    _args_sub_resource_create = None
+
+    @classmethod
+    def _build_args_sub_resource_create(cls, _schema):
+        if cls._args_sub_resource_create is not None:
+            _schema.id = cls._args_sub_resource_create.id
+            return
+
+        cls._args_sub_resource_create = AAZObjectArg()
+
+        sub_resource_create = cls._args_sub_resource_create
+        sub_resource_create.id = AAZStrArg(
+            options=["id"],
+            help="Resource Id",
+        )
+
+        _schema.id = cls._args_sub_resource_create.id
 
     def _execute_operations(self):
         self.pre_operations()
-        self.AvailabilitySetsGet(ctx=self.ctx)()
+        self.AvailabilitySetsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -72,7 +145,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class AvailabilitySetsGet(AAZHttpOperation):
+    class AvailabilitySetsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -92,7 +165,7 @@ class Show(AAZCommand):
 
         @property
         def method(self):
-            return "GET"
+            return "PUT"
 
         @property
         def error_format(self):
@@ -130,10 +203,66 @@ class Show(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("sku", AAZObjectType, ".sku")
+            _builder.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("platformFaultDomainCount", AAZIntType, ".platform_fault_domain_count")
+                properties.set_prop("platformUpdateDomainCount", AAZIntType, ".platform_update_domain_count")
+                _CreateHelper._build_schema_sub_resource_create(properties.set_prop("proximityPlacementGroup", AAZObjectType, ".proximity_placement_group"))
+                properties.set_prop("scheduledEventsPolicy", AAZObjectType)
+
+            scheduled_events_policy = _builder.get(".properties.scheduledEventsPolicy")
+            if scheduled_events_policy is not None:
+                scheduled_events_policy.set_prop("scheduledEventsAdditionalPublishingTargets", AAZObjectType)
+                scheduled_events_policy.set_prop("userInitiatedReboot", AAZObjectType)
+                scheduled_events_policy.set_prop("userInitiatedRedeploy", AAZObjectType)
+
+            scheduled_events_additional_publishing_targets = _builder.get(".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets")
+            if scheduled_events_additional_publishing_targets is not None:
+                scheduled_events_additional_publishing_targets.set_prop("eventGridAndResourceGraph", AAZObjectType)
+
+            event_grid_and_resource_graph = _builder.get(".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph")
+            if event_grid_and_resource_graph is not None:
+                event_grid_and_resource_graph.set_prop("enable", AAZBoolType, ".additional_scheduled_events")
+
+            user_initiated_reboot = _builder.get(".properties.scheduledEventsPolicy.userInitiatedReboot")
+            if user_initiated_reboot is not None:
+                user_initiated_reboot.set_prop("automaticallyApprove", AAZBoolType, ".enable_user_reboot_scheduled_events")
+
+            user_initiated_redeploy = _builder.get(".properties.scheduledEventsPolicy.userInitiatedRedeploy")
+            if user_initiated_redeploy is not None:
+                user_initiated_redeploy.set_prop("automaticallyApprove", AAZBoolType, ".enable_user_redeploy_scheduled_events")
+
+            sku = _builder.get(".sku")
+            if sku is not None:
+                sku.set_prop("capacity", AAZIntType, ".capacity")
+                sku.set_prop("name", AAZStrType, ".name")
+                sku.set_prop("tier", AAZStrType, ".tier")
+
+            tags = _builder.get(".tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -181,7 +310,7 @@ class Show(AAZCommand):
             properties.proximity_placement_group = AAZObjectType(
                 serialized_name="proximityPlacementGroup",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
+            _CreateHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
             properties.scheduled_events_policy = AAZObjectType(
                 serialized_name="scheduledEventsPolicy",
             )
@@ -235,7 +364,7 @@ class Show(AAZCommand):
 
             virtual_machines = cls._schema_on_200.properties.virtual_machines
             virtual_machines.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(virtual_machines.Element)
+            _CreateHelper._build_schema_sub_resource_read(virtual_machines.Element)
 
             sku = cls._schema_on_200.sku
             sku.capacity = AAZIntType()
@@ -248,8 +377,14 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _CreateHelper:
+    """Helper class for Create"""
+
+    @classmethod
+    def _build_schema_sub_resource_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
     _schema_sub_resource_read = None
 
@@ -267,4 +402,4 @@ class _ShowHelper:
         _schema.id = cls._schema_sub_resource_read.id
 
 
-__all__ = ["Show"]
+__all__ = ["Create"]

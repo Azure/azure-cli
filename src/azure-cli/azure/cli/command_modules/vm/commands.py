@@ -339,8 +339,8 @@ def load_command_table(self, _):
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
-        g.custom_command('list', 'list_av_sets')
-        g.generic_update_command('update', custom_func_name='update_av_set')
+        from .operations.vm_availability_set import AvailabilitySetUpdate
+        self.command_table['vm availability-set update'] = AvailabilitySetUpdate(loader=self)
 
     with self.command_group('vm boot-diagnostics', compute_vm_sdk) as g:
         g.custom_command('disable', 'disable_boot_diagnostics')

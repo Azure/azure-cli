@@ -1783,19 +1783,40 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
 
 # region VirtualMachines AvailabilitySets
-def _get_availset(cmd, resource_group_name, name):
-    return _compute_client_factory(cmd.cli_ctx).availability_sets.get(resource_group_name, name)
+# def _get_availset(cmd, resource_group_name, name):
+#     return _compute_client_factory(cmd.cli_ctx).availability_sets.get(resource_group_name, name)
 
 
-def _set_availset(cmd, resource_group_name, name, **kwargs):
-    return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(resource_group_name, name, **kwargs)
+# def _set_availset(cmd, resource_group_name, name, **kwargs):
+#     return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(resource_group_name, name, **kwargs)
 
 
 # pylint: disable=inconsistent-return-statements, line-too-long
 def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_name):
-    av_set = _get_availset(cmd, resource_group_name, availability_set_name)
-    if av_set.sku.name != 'Aligned':
-        av_set.sku.name = 'Aligned'
+    from .aaz.latest.vm.availability_set import Show as _Show, Create as _PUT
+    av_set = _Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'availability_set_name': availability_set_name})
+    args = {
+        'resource_group': resource_group_name,
+        'availability_set_name': availability_set_name,
+        'platform_fault_domain_count': av_set.get('platformFaultDomainCount', None),
+        'platform_update_domain_count': av_set.get('platformUpdateDomainCount', None),
+        'virtual_machines': av_set['virtualMachines'],
+        'sku': av_set['sku'],
+        'tags': av_set['tags'],
+        'location': av_set['location']
+    }
+    if av_set.get('scheduledEventsPolicy', None):
+        if av_set.get('scheduledEventsPolicy', {}).get('scheduledEventsAdditionalPublishingTargets', {}).get('eventGridAndResourceGraph', {}).get('enable', None):
+            args.update({'additional_scheduled_events': av_set['scheduledEventsPolicy']['scheduledEventsAdditionalPublishingTargets']['eventGridAndResourceGraph']['enable']})
+        if av_set.get('scheduledEventsPolicy', {}).get('userInitiatedReboot', {}).get('automaticallyApprove', None):
+            args.update({'enable_user_reboot_scheduled_events': av_set['scheduledEventsPolicy']['userInitiatedReboot']['automaticallyApprove']})
+        if av_set.get('scheduledEventsPolicy', {}).get('userInitiatedRedeploy', {}).get('automaticallyApprove', None):
+            args.update({'enable_user_redeploy_scheduled_events': av_set['scheduledEventsPolicy']['userInitiatedRedeploy']['automaticallyApprove']})
+    if av_set.get('proximityPlacementGroup', None):
+        args.update({'proximity_placement_group': av_set['proximityPlacementGroup']})
+
+    if av_set['sku']['name'] != 'Aligned':
+        args['sku']['name'] = 'Aligned'
 
         # let us double check whether the existing FD number is supported
         skus = list_skus(cmd, av_set.location)
@@ -1803,13 +1824,12 @@ def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_na
         if av_sku and av_sku['capabilities']:
             max_fd = int(next((c['value'] for c in av_sku['capabilities'] if c['name'] == 'MaximumPlatformFaultDomainCount'),
                               '0'))
-            if max_fd and max_fd < av_set.platform_fault_domain_count:
+            if max_fd and max_fd < args['platform_fault_domain_count']:
                 logger.warning("The fault domain count will be adjusted from %s to %s so to stay within region's "
-                               "limitation", av_set.platform_fault_domain_count, max_fd)
-                av_set.platform_fault_domain_count = max_fd
+                               "limitation", args['platform_fault_domain_count'], max_fd)
+                args['platform_fault_domain_count'] = max_fd
 
-        return _set_availset(cmd, resource_group_name=resource_group_name, name=availability_set_name,
-                             parameters=av_set)
+        return _PUT(cli_ctx=cmd.cli_ctx)(command_args=args)
     logger.warning('Availability set %s is already configured for managed disks.', availability_set_name)
 
 
@@ -1857,50 +1877,9 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.begin_create_or_update,
                                                   resource_group_name, deployment_name, deployment))
 
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    return compute_client.availability_sets.get(resource_group_name, availability_set_name)
-
-
-def update_av_set(cmd, instance, resource_group_name, proximity_placement_group=None,
-                  additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                  enable_user_redeploy_scheduled_events=None):
-    if proximity_placement_group is not None:
-        instance.proximity_placement_group = cmd.get_models('SubResource')(id=proximity_placement_group)
-
-    if instance.scheduled_events_policy is None and (
-            additional_scheduled_events is not None or enable_user_reboot_scheduled_events is not None or
-            enable_user_redeploy_scheduled_events is not None):
-        ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
-        instance.scheduled_events_policy = ScheduledEventsPolicy()
-
-    if additional_scheduled_events is not None:
-        ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
-        EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
-        instance.scheduled_events_policy.scheduled_events_additional_publishing_targets = \
-            ScheduledEventsAdditionalPublishingTargets(
-                event_grid_and_resource_graph=EventGridAndResourceGraph(enable=additional_scheduled_events)
-            )
-
-    if enable_user_reboot_scheduled_events is not None:
-        UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
-        instance.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot(
-            automatically_approve=enable_user_reboot_scheduled_events
-        )
-
-    if enable_user_redeploy_scheduled_events is not None:
-        UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
-        instance.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy(
-            automatically_approve=enable_user_redeploy_scheduled_events
-        )
-
-    return instance
-
-
-def list_av_sets(cmd, resource_group_name=None):
-    op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
-    if resource_group_name:
-        return op_group.list(resource_group_name)
-    return op_group.list_by_subscription(expand='virtualMachines/$ref')
+    from .aaz.latest.vm.availability_set import Show as _Show
+    return _Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
+                                                    'availability_set_name': availability_set_name})
 # endregion
 
 
