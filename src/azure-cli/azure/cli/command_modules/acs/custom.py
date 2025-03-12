@@ -825,6 +825,16 @@ def aks_update(
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
+    # Check if auto_upgrade_channel is set to "none"
+    if auto_upgrade_channel == "none":
+        warning_message = (
+            "Since auto-upgrade-channel is set to none, cluster kubernetesVersion will be set to the value of "
+            "currentKubernetesVersion, all agent pools orchestratorVersion will be set to the value of "
+            "currentOrchestratorVersion respectively. Continue?"
+        )
+        if not prompt_y_n(warning_message, default="n"):
+            raise CLIError("Operation cancelled by user.")
+
     # decorator pattern
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
     aks_update_decorator = AKSManagedClusterUpdateDecorator(
@@ -836,6 +846,9 @@ def aks_update(
     try:
         # update mc profile
         mc = aks_update_decorator.update_mc_profile_default()
+        # Update kubernetes_version and orchestrator_version based on auto_upgrade_channel
+        if auto_upgrade_channel == "none":
+            mc = aks_update_decorator.update_kubernetes_version_and_orchestrator_version(mc)
     except DecoratorEarlyExitException:
         # exit gracefully
         return None

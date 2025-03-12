@@ -8432,6 +8432,25 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_node_resource_group_profile(mc)
         return mc
 
+    def update_kubernetes_version_and_orchestrator_version(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update kubernetes version and orchestrator version for the ManagedCluster object.
+
+        :param mc: The ManagedCluster object to be updated.
+        :return: The updated ManagedCluster object.
+        """
+        self._ensure_mc(mc)
+
+        # Set kubernetes version to match the current kubernetes version if it has a value
+        if mc.current_kubernetes_version:
+            mc.kubernetes_version = mc.current_kubernetes_version
+
+        # Set orchestrator version for each agent pool to match the current orchestrator version if it has a value
+        for agent_pool in mc.agent_pool_profiles:
+            if agent_pool.current_orchestrator_version:
+                agent_pool.orchestrator_version = agent_pool.current_orchestrator_version
+
+        return mc
+
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
         """Helper function to check if postprocessing is required after sending a PUT request to create the cluster.
 
