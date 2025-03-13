@@ -489,6 +489,25 @@ class MainCommandsLoader(CLICommandsLoader):
 
         return self.command_table
 
+    def sort_command_loaders(self, command_loaders):
+        core_command_loaders = []
+        extension_command_loaders = []
+
+        # Separate core and extension command loaders
+        for loader in command_loaders:
+            if loader.__module__.startswith('azext'):
+                extension_command_loaders.append(loader)
+            else:
+                core_command_loaders.append(loader)
+        
+        # Sort name in each command loader list
+        core_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
+        extension_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
+
+        # Core first, then extension
+        sorted_command_loaders = core_command_loaders + extension_command_loaders
+        return sorted_command_loaders
+
     def load_arguments(self, command=None):
         from azure.cli.core.commands.parameters import (
             resource_group_name_type, get_location_type, deployment_name_type, vnet_name_type, subnet_name_type)
@@ -504,6 +523,7 @@ class MainCommandsLoader(CLICommandsLoader):
             command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
+            command_loaders = self.sort_command_loaders(command_loaders)
             for loader in command_loaders:
 
                 # register global args
