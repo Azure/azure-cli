@@ -8,7 +8,7 @@
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
-provider_namespace = "Microsoft.DataBoxEdge"
+provider_namespace = "Microsoft.Edge"
 sub_provider = "Microsoft.EdgeMarketPlace"
 api_version = "2023-08-01-preview"
 
@@ -16,9 +16,15 @@ api_version = "2023-08-01-preview"
 def _get_management_endpoint(cli_ctx):
     """Helper function to determine management endpoint based on cloud configuration."""
     cloud = cli_ctx.cloud
-    return cloud.endpoints.resource_manager
-    # return "brazilus.management.azure.com"
+    # Remove ending slash if exists
+    if cloud.endpoints.resource_manager.endswith("/"):
+        cloud.endpoints.resource_manager = cloud.endpoints.resource_manager[:-1]
 
+    # Append https:// if not exists
+    if not cloud.endpoints.resource_manager.startswith("https://"):
+        cloud.endpoints.resource_manager = "https://" + cloud.endpoints.resource_manager
+
+    return cloud.endpoints.resource_manager
 
 def _handle_directory_cleanup(version_level_path, logger):
     """Helper function to clean up existing directory."""
@@ -87,7 +93,7 @@ def _prepare_paths_and_metadata(output_folder, publisher_id, offer_id, sku, vers
     os.makedirs(version_level_path, exist_ok=True)
 
     # Save metadata.json
-    metadata_path = os.path.join(version_level_path, "metadata.json")
+    metadata_path = os.path.join(base_path, "metadata.json")
     with open(metadata_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
         logger.info("Saved metadata to %s", metadata_path)
@@ -139,10 +145,10 @@ def package_offer(cmd, resource_group_name, resource_name, publisher_name,
 
     # Construct URL with parameters
     url = (
-        f"https://{management_endpoint}"
+        f"{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
         f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
         f"?api-version={api_version}"
     )
@@ -284,10 +290,10 @@ def _get_token_url(management_endpoint, subscription_id, resource_group_name,
                    resource_name, publisher_name, offer_name):
     """Helper function to construct token URL."""
     return (
-        f"https://{management_endpoint}"
+        f"{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
         f"/providers/Microsoft.EdgeMarketPlace/offers/{publisher_name}:{offer_name}"
         f"/getAccessToken?api-version={api_version}"
     )
@@ -403,10 +409,10 @@ def download_vhd(cmd, resource_group_name, resource_name, publisher_name,
 
     # API endpoint construction
     url = (
-        f"https://{management_endpoint}"
+        f"{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
         f"/providers/Microsoft.EdgeMarketPlace/offers/{publisher_name}:{offer_name}"
         f"/generateAccessToken?api-version=2023-08-01-preview"
     )
@@ -480,14 +486,13 @@ def list_offers(cmd, resource_group_name, resource_name):
 
     # Construct URL with parameters
     url = (
-        f"https://{management_endpoint}"
+        f"{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
         f"/providers/{sub_provider}/offers"
         f"?api-version={api_version}"
     )
-
     try:
         response = send_raw_request(cmd.cli_ctx, "get", url, resource="https://management.azure.com")
 
@@ -544,10 +549,10 @@ def get_offer(cmd, resource_group_name, resource_name, publisher_name, offer_nam
 
     # Construct URL with parameters
     url = (
-        f"https://{management_endpoint}"
+        f"{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
         f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
         f"?api-version={api_version}"
     )
