@@ -489,7 +489,11 @@ class MainCommandsLoader(CLICommandsLoader):
 
         return self.command_table
 
-    def sort_command_loaders(self, command_loaders):
+    @staticmethod
+    def _sort_command_loaders(self, command_loaders):
+        if len(command_loaders) == 1:
+            return list(command_loaders)
+
         module_command_loaders = []
         extension_command_loaders = []
 
@@ -523,7 +527,7 @@ class MainCommandsLoader(CLICommandsLoader):
             command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
-            command_loaders = self.sort_command_loaders(command_loaders)
+            command_loaders = self._sort_command_loaders(command_loaders)
             for loader in command_loaders:
 
                 # register global args
