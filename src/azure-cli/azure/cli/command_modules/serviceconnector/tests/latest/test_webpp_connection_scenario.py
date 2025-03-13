@@ -653,6 +653,50 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
+    def test_webapp_neon_postgres_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-flexiblepostgresql-app',
+        })
+
+        # prepare password
+        user = 'servicelinker'
+        password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
+            .get_output_in_json().get('value')
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        server = 'neontest-serve'
+        database = 'testdb'
+
+        # create connection
+        self.cmd('webapp connection create neon-postgres --connection {} --source-id {} --server {} --database {} '
+                 '--secret name={} secret={} --client-type python'.format(name, source_id, server, database, user, password))
+
+        
+        connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
+
+        # update connection
+        self.cmd('webapp connection update neon-postgres --id {} --client-type dotnet '
+                 '--secret name={} secret={}'.format(connection_id, user, password),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
     def test_webapp_redis_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
