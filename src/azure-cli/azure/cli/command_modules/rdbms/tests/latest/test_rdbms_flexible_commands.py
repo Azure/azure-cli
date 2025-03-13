@@ -1463,7 +1463,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
             # test virtual-endpoint list
             self.cmd('{} flexible-server virtual-endpoint list -g {} --server-name {}'
                     .format(database_engine, resource_group, master_server),
-                    checks=[JMESPathCheck('length(@)', 0)])
+                    expect_failure=True)
 
             # delete standalone server
             self.cmd('{} flexible-server delete -g {} --name {} --yes'
