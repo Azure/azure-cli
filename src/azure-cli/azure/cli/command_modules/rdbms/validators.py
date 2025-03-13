@@ -19,7 +19,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations \
     as MySqlFirewallRulesOperations
-from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
+from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers, cf_postgres_check_resource_availability
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
@@ -728,6 +728,12 @@ def validate_server_name(db_context, server_name, type_):
 
     if not result.name_available:
         raise ValidationError(result.message)
+
+def validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name):
+    client = cf_postgres_check_resource_availability(cmd.cli_ctx, '_')
+    result = client.execute(name_availability_request={'name': virtual_endpoint_name, 'type': 'Microsoft.DBforPostgreSQL/flexibleServers/virtualendpoints'})
+    if result and result.name_available is False:
+        raise ValidationError("Virtual endpoints base name is not available.")
 
 
 def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_resource_group_name, target_server_name):
