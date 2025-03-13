@@ -63,12 +63,12 @@ Extensions don't need to follow the breaking change window. However, we still st
 ### CLI Workflow Overview
 
 * **CLI Owned Module**
-  * Service Team should create an Issue that requests CLI Team to create the pre-announcement at least **2** sprints ahead of Breaking Change Window. The issue should include the label `Breaking Change`. The CLI team will look at the issue and evaluate if it will be accepted in the next breaking change release.
+  * Service Team should create an Issue that requests CLI Team to create the pre-announcement at least **1** month(usually **2** sprints) ahead of Breaking Change Window. The issue should include the label `Breaking Change`. The CLI team will look at the issue and evaluate if it will be accepted in the next breaking change release.
     * Please ensure sufficient time for CLI Team to finish the pre-announcement.
-  * The pre-announcement should be released at least **2** sprints ahead of Breaking Change Window.
+  * The pre-announcement should be released at least **1** month(usually **2** sprints) ahead of Breaking Change Window.
 * **Service Owned Module**
-  * Service Team should create a Pull Request that adds the pre-announcement at least **2** sprints ahead of Breaking Change Window.
-  * The pre-announcement should be released at least **2** sprints ahead of Breaking Change Window.
+  * Service Team should create a Pull Request that adds the pre-announcement at least **1** month(usually **2** sprints) ahead of Breaking Change Window.
+  * The pre-announcement should be released at least **1** month(usually **2** sprints) ahead of Breaking Change Window.
 * After releasing the pre-announcement, a pipeline would be triggered, and the Upcoming Breaking Change Documentation would be updated.
 * At the start of Breaking Change window, the CLI team would notify Service Teams to adopt Breaking Changes.
 * Breaking Changes should be adopted within Breaking Change Window. Any unfinished pre-announcements of breaking changes targeting this release will be deleted by the CLI team.
