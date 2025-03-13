@@ -25,7 +25,7 @@ variables:
 stages:
 # Azure DevOps limits the number of jobs to 256, so it must be split according to the platform and placed in different stages.
 - stage: TestUbuntu
-  displayName: Live Test on Ubuntu 2004
+  displayName: Live Test on Ubuntu latest
   condition: succeededOrFailed()
   jobs:
   - job: LiveTest
@@ -455,7 +455,7 @@ stages:
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
             echo "Match!"
             echo "##vso[task.setvariable variable=Match]1"
-            echo "##vso[task.setvariable variable=platform]ubuntu2004"
+            echo "##vso[task.setvariable variable=platform]ubuntulatest"
           else
             echo "Not match!"
             echo "##vso[task.setvariable variable=Match]0"
