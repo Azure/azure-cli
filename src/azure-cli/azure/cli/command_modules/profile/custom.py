@@ -144,7 +144,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         if in_cloud_console():
             return profile.login_in_cloud_shell()
         return profile.login_with_managed_identity(
-            identity_id=username, client_id=client_id, object_id=object_id, resource_id=resource_id,
+            client_id=client_id, object_id=object_id, resource_id=resource_id,
             allow_no_subscriptions=allow_no_subscriptions)
     if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)

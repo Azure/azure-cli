@@ -61,11 +61,6 @@ _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
 
-MANAGED_IDENTITY_ID_WARNING = (
-    "Passing the managed identity ID with --username is deprecated and will be removed in a future release. "
-    "Please use --client-id, --object-id or --resource-id instead."
-)
-
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     profile = Profile(cli_ctx=cli_ctx)
@@ -225,23 +220,22 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity(self, identity_id=None, client_id=None, object_id=None, resource_id=None,
+    def login_with_managed_identity(self, client_id=None, object_id=None, resource_id=None,
                                     allow_no_subscriptions=None):
         if _on_azure_arc():
-            return self.login_with_managed_identity_azure_arc(
-                identity_id=identity_id, allow_no_subscriptions=allow_no_subscriptions)
+            return self.login_with_managed_identity_azure_arc(allow_no_subscriptions=allow_no_subscriptions)
 
         import jwt
-        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        id_arg_count = len([arg for arg in (client_id, object_id, resource_id, identity_id) if arg])
+        id_arg_count = len([arg for arg in (client_id, object_id, resource_id) if arg])
         if id_arg_count > 1:
-            raise CLIError('Usage error: Provide only one of --client-id, --object-id, --resource-id, or --username.')
+            raise CLIError('Usage error: Provide only one of --client-id, --object-id, --resource-id.')
 
         if id_arg_count == 0:
             identity_type = MsiAccountTypes.system_assigned
+            identity_id = None
             msi_creds = MSIAuthenticationWrapper(resource=resource)
         elif client_id:
             identity_type = MsiAccountTypes.user_assigned_client_id
@@ -255,38 +249,6 @@ class Profile:
             identity_type = MsiAccountTypes.user_assigned_resource_id
             identity_id = resource_id
             msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=resource_id)
-        # The old way of re-using the same --username for 3 types of ID
-        elif identity_id:
-            logger.warning(MANAGED_IDENTITY_ID_WARNING)
-            if is_valid_resource_id(identity_id):
-                msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
-                identity_type = MsiAccountTypes.user_assigned_resource_id
-            else:
-                authenticated = False
-                from azure.cli.core.azclierror import AzureResponseError
-                try:
-                    msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
-                    identity_type = MsiAccountTypes.user_assigned_client_id
-                    authenticated = True
-                except AzureResponseError as ex:
-                    if 'http error: 400, reason: Bad Request' in ex.error_msg:
-                        logger.info('Sniff: not an MSI client id')
-                    else:
-                        raise
-
-                if not authenticated:
-                    try:
-                        identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
-                        authenticated = True
-                    except AzureResponseError as ex:
-                        if 'http error: 400, reason: Bad Request' in ex.error_msg:
-                            logger.info('Sniff: not an MSI object id')
-                        else:
-                            raise
-
-                if not authenticated:
-                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
 
         token_entry = msi_creds.token
         token = token_entry['access_token']
@@ -310,9 +272,8 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity_azure_arc(self, identity_id=None, allow_no_subscriptions=None):
+    def login_with_managed_identity_azure_arc(self, allow_no_subscriptions=None):
         import jwt
-        identity_type = MsiAccountTypes.system_assigned
         from .auth.msal_credentials import ManagedIdentityCredential
         from .auth.constants import ACCESS_TOKEN
 
@@ -324,8 +285,8 @@ class Profile:
 
         subscription_finder = SubscriptionFinder(self.cli_ctx)
         subscriptions = subscription_finder.find_using_specific_tenant(tenant, cred)
-        base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
-        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
+        base_name = MsiAccountTypes.system_assigned
+        user = _SYSTEM_ASSIGNED_IDENTITY
         if not subscriptions:
             if allow_no_subscriptions:
                 subscriptions = self._build_tenant_level_accounts([tenant])
