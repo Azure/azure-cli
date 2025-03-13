@@ -490,22 +490,22 @@ class MainCommandsLoader(CLICommandsLoader):
         return self.command_table
 
     def sort_command_loaders(self, command_loaders):
-        core_command_loaders = []
+        module_command_loaders = []
         extension_command_loaders = []
 
-        # Separate core and extension command loaders
+        # Separate module and extension command loaders
         for loader in command_loaders:
             if loader.__module__.startswith('azext'):
                 extension_command_loaders.append(loader)
             else:
-                core_command_loaders.append(loader)
+                module_command_loaders.append(loader)
         
         # Sort name in each command loader list
-        core_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
+        module_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
         extension_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
 
-        # Core first, then extension
-        sorted_command_loaders = core_command_loaders + extension_command_loaders
+        # Module first, then extension
+        sorted_command_loaders = module_command_loaders + extension_command_loaders
         return sorted_command_loaders
 
     def load_arguments(self, command=None):
