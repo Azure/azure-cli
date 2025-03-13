@@ -950,7 +950,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_cert_name_')
-    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
+    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium', additional_params='--enable-rbac-authorization false')
     def test_network_app_gateway_with_cert_name(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
@@ -1987,7 +1987,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  checks=(self.check('length(@)', 0)))
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_listener_with_host_names')
-    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
+    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium', additional_params='--enable-rbac-authorization false')
     def test_network_ag_listener_with_host_names(self, resource_group):
         self.kwargs.update({
             'appgw': 'appgw',
@@ -3400,7 +3400,7 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_port', location='eastus')
-    @KeyVaultPreparer(name_prefix='test-er-port-kv', location='eastus')
+    @KeyVaultPreparer(name_prefix='test-er-port-kv', location='eastus', additional_params='--enable-rbac-authorization false')
     def test_network_express_route_port(self, resource_group, key_vault):
         self.kwargs.update({
             'rg': resource_group,
