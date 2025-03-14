@@ -5055,8 +5055,8 @@ def fix_gallery_image_date_info(date_info):
 
 # pylint: disable=line-too-long
 def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
-    from .aaz.latest.sig.image_version import Show as _SigImageVersionShow
-    version = _SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
+    from .operations.sig_image_version import SigImageVersionShow
+    version = SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "gallery_name": gallery_name,
         "gallery_image_definition": gallery_image_name,
