@@ -272,8 +272,8 @@ To enhance flexibility, the CLI supports using a designated tag to specify a Bre
 **Note:** We strongly recommend using this method to display breaking change warnings under specific conditions instead of using `logger.warning` directly. This approach enables centralized documentation of breaking changes and assists in automating customer notifications.
 
 ```python
-# src/azure-cli/azure/cli/command_modules/vm/custom.py
-from azure.cli.core.breaking_change import register_conditional_breaking_change, AzCLIOtherChange
+# src/azure-cli/azure/cli/command_modules/vm/_breaking_change.py
+from azure.cli.core.breaking_change import register_conditional_breaking_change
 
 register_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_change=(
   'vm create', 'This is special Breaking Change Warning A. This breaking change is happend in "vm create" command.'))
