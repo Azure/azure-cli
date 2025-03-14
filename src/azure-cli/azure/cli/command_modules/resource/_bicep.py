@@ -108,6 +108,16 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
 
 
 def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
+    if _use_binary_from_path(cli_ctx):
+        from shutil import which
+
+        if which("bicep") is None:
+            raise ValidationError(
+                'Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".'  # pylint: disable=line-too-long
+            )
+
+        return
+
     system = platform.system()
     machine = platform.machine()
     installation_path = _get_bicep_installation_path(system)

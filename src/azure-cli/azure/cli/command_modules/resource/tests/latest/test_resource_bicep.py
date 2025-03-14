@@ -163,6 +163,18 @@ class TestBicep(unittest.TestCase):
         ensure_bicep_installation(self.cli_ctx, release_tag="v0.1.0")
 
         dirname_mock.assert_not_called()
+            
+    @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installation_path")
+    @mock.patch("shutil.which")
+    def test_ensure_bicep_installation_skip_download_if_use_binary_from_path_is_true(
+        self, which_stub, _get_bicep_installation_path_mock
+    ):
+        which_stub.return_value = True
+        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "true")
+
+        ensure_bicep_installation(self.cli_ctx, release_tag="v0.1.0")
+
+        _get_bicep_installation_path_mock.assert_not_called()
 
     def test_validate_target_scope_raise_error_if_target_scope_does_not_match_deployment_scope(self):
         with self.assertRaisesRegex(
