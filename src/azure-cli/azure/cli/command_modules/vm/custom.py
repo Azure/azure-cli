@@ -5061,7 +5061,7 @@ def fix_gallery_image_date_info(date_info):
 
 # pylint: disable=line-too-long
 def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
-    from .operations.sig_image_version import SigImageVersionShow
+    from .aaz.latest.sig.image_version import Show as SigImageVersionShow
     version = SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "gallery_name": gallery_name,
@@ -5070,16 +5070,17 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
     })
 
     # To avoid unnecessary permission check of image
-    if "storage_profile" not in version:
-        version["storage_profile"] = {}
-    version["storage_profile"]["source"] = None
-    if version["storage_profile"].get("os_disk_image", None) and \
-            version["storage_profile"]["os_disk_image"].get("source", None):
-        version["storage_profile"]["os_disk_image"]["source"] = None
-    if version["storage_profile"].get("data_disk_images", None):
-        for v in version["storage_profile"]["data_disk_images"]:
+    if "storageProfile" not in version:
+        version["storageProfile"] = {}
+    version["storageProfile"]["source"] = None
+    if version["storageProfile"].get("osDiskImage", None) and \
+            version["storageProfile"]["osDiskImage"].get("source", None):
+        version["storageProfile"]["osDiskImage"]["source"] = None
+    if version["storageProfile"].get("dataDiskImages", None):
+        for v in version["storageProfile"]["dataDiskImages"]:
             if v.get("source", None):
                 v["source"] = None
+
     return version
 
 
@@ -5087,6 +5088,9 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          target_regions=None, replica_count=None, allow_replicated_location_deletion=None,
                          target_edge_zones=None, block_deletion_before_end_of_life=None, no_wait=False, **kwargs):
     args = kwargs['gallery_image_version']
+
+    from .operations.sig_image_version import convert_show_result_to_sneak_case
+    args = convert_show_result_to_sneak_case(args)
 
     if target_regions:
         if "publishing_profile" not in args:
@@ -5118,8 +5122,8 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     args["gallery_image_definition"] = gallery_image_name
     args["gallery_image_version_name"] = gallery_image_version_name
 
-    from .aaz.latest.sig.image_version import Update
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
+    from .aaz.latest.sig.image_version import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 # endregion
 
 

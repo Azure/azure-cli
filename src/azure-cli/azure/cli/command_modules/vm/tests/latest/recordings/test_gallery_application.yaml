@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_gallery_application","date":"2025-01-21T06:06:17Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_gallery_application","date":"2025-03-14T08:49:26Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:25 GMT
+      - Fri, 14 Mar 2025 08:49:30 GMT
       expires:
       - '-1'
       pragma:
@@ -41,12 +41,12 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: C99816D8D5EB4937A18CCC3C255C0754 Ref B: MAA201060516031 Ref C: 2025-01-21T06:06:25Z'
+      - 'Ref A: C4B3C2B72F6F4A3A85F8035D4C34D249 Ref B: SEL221051802039 Ref C: 2025-03-14T08:49:30Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus"}'
+    body: '{"location": "eastus", "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -57,32 +57,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '22'
+      - '34'
       Content-Type:
       - application/json
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYQUYDMGSFK\"\r\n
-        \   },\r\n    \"provisioningState\": \"Creating\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n \
+        \     \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYPWEY2CK2W\"\
+        \r\n    },\r\n    \"provisioningState\": \"Creating\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/52458b45-1eb2-4361-9d99-7c390c434ddd?api-version=2021-10-01&t=638730363906036360&c=MIIHhzCCBm-gAwIBAgITfAWQ0hCHZtQ3fJ4PSAAABZDSEDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTI3MDkwMTAzWhcNMjUwMzI2MDkwMTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANt7qVbg97HivqUzi3BPPNiHD4wLqYw03AkBiXDpww3W8iIU6FZbbOXVgCL-rGpnbxPkLEVZ1WtRfvLgR3qDiVRjkSnE2knSE6qtvBRWdqqsD9YiSi5lYW67vgtBA_mHzHNDb0zhZ2iofVE5GjHIKYINZSTo8of54bY_fJe0xenYEq7lMpbffWaoano6LQH1L0hSdzAreTN7T_bTsK7TkXQtx45c1upRueZR1wq4PRd-9AYpkfKHhxnCe5LBeLB-Q88WZbmNxuycYiJZzbEGVcEbg5fYdfYb4QveB2WmK7bCWSEDu7WzRaYN9zfP9ZpVnTHTmRcN-f3uvUzxNBMe26UCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT07kfCxeuv0whuO9NP27UpdS8ZAzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFB6-4Y-Z7skVWaPi2vBOob5I-JLv_MqkE8tGWMMCFI9McOWBWfeJWV7aA4X4MEwnVfuFzE4mdak49KhEWgAbnGBMMumWJtlE1VDYwoYj3k6VDrhg4K8cRAO24Ezl3_L9yTqPLHhnKpjnjZONChdqvy6tXy9zLDyo9uThhHykSdIVQPaynG83JYpUlN1akyNJVLxae9NCRV251OTh00g9z6gt1b4nk-Nszy6YtF1AoskPTpeZVcsxGTlq3ITXveDCeZrYbQ6EtZf5O8ekTrNsG-8DMSDIgDta1Dud4RchYh74jtodoiwmneC_ZG5VDcpozae4Mh1w3_kD4-E11i1U1U&s=EnxwDIWTUZVgOjVOFvrAu2yotZ05rnFhk25GbVY-NE4rnkPkrMCFzbCO8wMZqalqRbnkVNjiF79hG1xtuj6Fy4lpUus1KcvMGkJC9dz_ixCJJRtrl3GuYefyx5fJEXR436aYQBLTO_NKbkzx4wiBBOvahikS6FDhMscHjtd5XmktPgQ1EnzKxW3VcCWe9DPXm0LlJJ-pAduZEQ5mlZHvD05dViXAatrR8_UjGDImsFvoLK9JG4ucBQ8CVFE1L3R4_ACnqf_FI5aeEwIQCtzvv3B7Y75MpRwdFrrM2_oKy10qIflKk6cmK6iPEDH7AuSWnXOQsBlEQJxTkcqlBzTmhg&h=MYC6I81UKE1FF8dxVBziIiNOQSsVFSW5eW3JnVzawA0
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/180b04b0-e9db-47a2-ade7-21a719ba8612?api-version=2021-07-01&t=638775389738233305&c=MIIHhzCCBm-gAwIBAgITHgYzPCNynNboIzpbwQAABjM8IzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwMTI1MTAzNDA0WhcNMjUwNzI0MTAzNDA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALKPotTDpgftA7CXtms9mFH23-tex305ckUWa8g24d-q8qk3N41lUUFI8eLSiae0-8bxgZy3xUxN9DZ4Y2pytI2w8vg4BkuXA6ovobs_lmZ_dRlh9xBzhoF17E6C3ChUl-CwBjrD4xfnNkoDLAESVqYcWf2xpEa-XyUd0NbJYcoFK3uZOuZKMn12vJMMsGNQRGwLlqw2UmwYfaAa4hMOulAjmoNpSEKPxr0cW9kMYp4u4jjhnEMtP2Kbk-RmeUUB9zhAhCLrMErH4j5COGO5ei9n-HNH-GcaKVAh3VShgIXrGQt3hVMzAe11zSBhPEBapj0krOaojng3S6zpcv7IBnkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBRONXh1wQKxnd0880VHxcMzUrnn8zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFAzp-TBnf33pZ5yOYcvtc080nAQcA9QXetcPNWPio7-d1617_hgfvXdqsT_QPZsJuOXxevQNclEa6qwS0LjsWivtqonE-FuG-EqSnhmWNrtZbMR1RFXc6ziLAKMab0YsLO9QvsUQ3zmVOw_CUzXkmmdbU-3-ri2HQYiBA_UqPwM_P4RYYv0gbHNHpzP2lUPvEvfDKi0sMMyu5hXA_WsY02ItU_Cz09BUYvyUZiGIlLD7oejSneFfjVZtLot-ma6F3nVMvw5KGUF1Rh3npMcEKmPg7c6JsdjokoN3m0uhJz1zNBjrPfLVUGWrQ3gPrAusvW4qLr6LPee3o43x0NbjNc&s=RiJaw5nbhWK69E_-WZ5qF5SIOtjp7rtWI-LE2ook8Wc3LmZZw7FVojR1Wlso2tU8J970sGSf05JKmXPMssrqVqirdJm6yjLXpGYimNJWpCboJOoXc0zPHX0QGZ0bBGOrfv-RXTOsfkguSvckSHxaFc-2ToLkl2Tp4Z_MmIlaAQlPpk_ErPLp1A6x_i-4X8FdSCzY8lLv9ua1MP3nDO4i6YSPZ0jawUfnfmp0GmaJMv-ADcWAE9wnanxgUiUVK-HaclU4gzPd-WNbCQ4AWz0AZcTxCMVv6S6fMaWY4pKB8k5VUOtNm5ZydVbdOx8SfSYoOQgyRpKzZAdyg85fNSt-jA&h=9_sR7Rxe7b9TYQ6H8DXd6stdALiJN4ODs_Mvb2DC1E8
       cache-control:
       - no-cache
       content-length:
-      - '414'
+      - '429'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:30 GMT
+      - Fri, 14 Mar 2025 08:49:33 GMT
       expires:
       - '-1'
       pragma:
@@ -100,7 +101,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '199'
       x-msedge-ref:
-      - 'Ref A: 43A356BA355F4ED782EFF616F582129E Ref B: MAA201060514045 Ref C: 2025-01-21T06:06:26Z'
+      - 'Ref A: 50272D4B9E674FCBB875CEAAE2CCB053 Ref B: SEL221051504037 Ref C: 2025-03-14T08:49:30Z'
     status:
       code: 201
       message: Created
@@ -118,14 +119,14 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/52458b45-1eb2-4361-9d99-7c390c434ddd?api-version=2021-10-01&t=638730363906036360&c=MIIHhzCCBm-gAwIBAgITfAWQ0hCHZtQ3fJ4PSAAABZDSEDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTI3MDkwMTAzWhcNMjUwMzI2MDkwMTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANt7qVbg97HivqUzi3BPPNiHD4wLqYw03AkBiXDpww3W8iIU6FZbbOXVgCL-rGpnbxPkLEVZ1WtRfvLgR3qDiVRjkSnE2knSE6qtvBRWdqqsD9YiSi5lYW67vgtBA_mHzHNDb0zhZ2iofVE5GjHIKYINZSTo8of54bY_fJe0xenYEq7lMpbffWaoano6LQH1L0hSdzAreTN7T_bTsK7TkXQtx45c1upRueZR1wq4PRd-9AYpkfKHhxnCe5LBeLB-Q88WZbmNxuycYiJZzbEGVcEbg5fYdfYb4QveB2WmK7bCWSEDu7WzRaYN9zfP9ZpVnTHTmRcN-f3uvUzxNBMe26UCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT07kfCxeuv0whuO9NP27UpdS8ZAzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFB6-4Y-Z7skVWaPi2vBOob5I-JLv_MqkE8tGWMMCFI9McOWBWfeJWV7aA4X4MEwnVfuFzE4mdak49KhEWgAbnGBMMumWJtlE1VDYwoYj3k6VDrhg4K8cRAO24Ezl3_L9yTqPLHhnKpjnjZONChdqvy6tXy9zLDyo9uThhHykSdIVQPaynG83JYpUlN1akyNJVLxae9NCRV251OTh00g9z6gt1b4nk-Nszy6YtF1AoskPTpeZVcsxGTlq3ITXveDCeZrYbQ6EtZf5O8ekTrNsG-8DMSDIgDta1Dud4RchYh74jtodoiwmneC_ZG5VDcpozae4Mh1w3_kD4-E11i1U1U&s=EnxwDIWTUZVgOjVOFvrAu2yotZ05rnFhk25GbVY-NE4rnkPkrMCFzbCO8wMZqalqRbnkVNjiF79hG1xtuj6Fy4lpUus1KcvMGkJC9dz_ixCJJRtrl3GuYefyx5fJEXR436aYQBLTO_NKbkzx4wiBBOvahikS6FDhMscHjtd5XmktPgQ1EnzKxW3VcCWe9DPXm0LlJJ-pAduZEQ5mlZHvD05dViXAatrR8_UjGDImsFvoLK9JG4ucBQ8CVFE1L3R4_ACnqf_FI5aeEwIQCtzvv3B7Y75MpRwdFrrM2_oKy10qIflKk6cmK6iPEDH7AuSWnXOQsBlEQJxTkcqlBzTmhg&h=MYC6I81UKE1FF8dxVBziIiNOQSsVFSW5eW3JnVzawA0
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/180b04b0-e9db-47a2-ade7-21a719ba8612?api-version=2021-07-01&t=638775389738233305&c=MIIHhzCCBm-gAwIBAgITHgYzPCNynNboIzpbwQAABjM8IzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwMTI1MTAzNDA0WhcNMjUwNzI0MTAzNDA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALKPotTDpgftA7CXtms9mFH23-tex305ckUWa8g24d-q8qk3N41lUUFI8eLSiae0-8bxgZy3xUxN9DZ4Y2pytI2w8vg4BkuXA6ovobs_lmZ_dRlh9xBzhoF17E6C3ChUl-CwBjrD4xfnNkoDLAESVqYcWf2xpEa-XyUd0NbJYcoFK3uZOuZKMn12vJMMsGNQRGwLlqw2UmwYfaAa4hMOulAjmoNpSEKPxr0cW9kMYp4u4jjhnEMtP2Kbk-RmeUUB9zhAhCLrMErH4j5COGO5ei9n-HNH-GcaKVAh3VShgIXrGQt3hVMzAe11zSBhPEBapj0krOaojng3S6zpcv7IBnkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBRONXh1wQKxnd0880VHxcMzUrnn8zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFAzp-TBnf33pZ5yOYcvtc080nAQcA9QXetcPNWPio7-d1617_hgfvXdqsT_QPZsJuOXxevQNclEa6qwS0LjsWivtqonE-FuG-EqSnhmWNrtZbMR1RFXc6ziLAKMab0YsLO9QvsUQ3zmVOw_CUzXkmmdbU-3-ri2HQYiBA_UqPwM_P4RYYv0gbHNHpzP2lUPvEvfDKi0sMMyu5hXA_WsY02ItU_Cz09BUYvyUZiGIlLD7oejSneFfjVZtLot-ma6F3nVMvw5KGUF1Rh3npMcEKmPg7c6JsdjokoN3m0uhJz1zNBjrPfLVUGWrQ3gPrAusvW4qLr6LPee3o43x0NbjNc&s=RiJaw5nbhWK69E_-WZ5qF5SIOtjp7rtWI-LE2ook8Wc3LmZZw7FVojR1Wlso2tU8J970sGSf05JKmXPMssrqVqirdJm6yjLXpGYimNJWpCboJOoXc0zPHX0QGZ0bBGOrfv-RXTOsfkguSvckSHxaFc-2ToLkl2Tp4Z_MmIlaAQlPpk_ErPLp1A6x_i-4X8FdSCzY8lLv9ua1MP3nDO4i6YSPZ0jawUfnfmp0GmaJMv-ADcWAE9wnanxgUiUVK-HaclU4gzPd-WNbCQ4AWz0AZcTxCMVv6S6fMaWY4pKB8k5VUOtNm5ZydVbdOx8SfSYoOQgyRpKzZAdyg85fNSt-jA&h=9_sR7Rxe7b9TYQ6H8DXd6stdALiJN4ODs_Mvb2DC1E8
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2025-01-21T06:06:30.1897166+00:00\",\r\n  \"endTime\":
-        \"2025-01-21T06:06:30.3772248+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"52458b45-1eb2-4361-9d99-7c390c434ddd\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2025-03-14T08:49:33.4849722+00:00\",\r\n  \"\
+        endTime\": \"2025-03-14T08:49:33.7037199+00:00\",\r\n  \"status\": \"Succeeded\"\
+        ,\r\n  \"name\": \"180b04b0-e9db-47a2-ade7-21a719ba8612\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -134,7 +135,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:31 GMT
+      - Fri, 14 Mar 2025 08:49:33 GMT
       expires:
       - '-1'
       pragma:
@@ -150,7 +151,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: 57CD411A5318405995BBCA62E5608E68 Ref B: MAA201060514045 Ref C: 2025-01-21T06:06:30Z'
+      - 'Ref A: 65A5925250EF43B4B8203C1BA4919C04 Ref B: SEL221051504037 Ref C: 2025-03-14T08:49:33Z'
     status:
       code: 200
       message: OK
@@ -168,24 +169,25 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYQUYDMGSFK\"\r\n
-        \   },\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n \
+        \     \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYPWEY2CK2W\"\
+        \r\n    },\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '415'
+      - '430'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:32 GMT
+      - Fri, 14 Mar 2025 08:49:34 GMT
       expires:
       - '-1'
       pragma:
@@ -197,11 +199,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;348,Microsoft.Compute/GetGallery30Min;2496
+      - Microsoft.Compute/GetGallery3Min;348,Microsoft.Compute/GetGallery30Min;2498
       x-ms-ratelimit-remaining-subscription-global-reads:
-      - '3749'
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: F62E93BEA89B452B8980F63D37F5A9AC Ref B: MAA201060514045 Ref C: 2025-01-21T06:06:31Z'
+      - 'Ref A: DEC9B44522DD48FDA6677467C8C677B2 Ref B: SEL221051504037 Ref C: 2025-03-14T08:49:34Z'
     status:
       code: 200
       message: OK
@@ -219,12 +221,12 @@ interactions:
       ParameterSetName:
       - -n -r --os-type -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_gallery_application","date":"2025-01-21T06:06:17Z","module":"vm","Creator":"aaa@foo.com","DateCreated":"2025-01-21T06:06:26Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_gallery_application","date":"2025-03-14T08:49:26Z","module":"vm","DateCreated":"2025-03-14T08:49:31Z","Creator":"zhuyan@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -233,7 +235,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:34 GMT
+      - Fri, 14 Mar 2025 08:49:35 GMT
       expires:
       - '-1'
       pragma:
@@ -247,7 +249,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: 62A04B0670804F92B72F2A6430E96F8B Ref B: MAA201060516031 Ref C: 2025-01-21T06:06:33Z'
+      - 'Ref A: E380785558084B328864C30F0E92DF49 Ref B: SEL221051504031 Ref C: 2025-03-14T08:49:35Z'
     status:
       code: 200
       message: OK
@@ -269,15 +271,15 @@ interactions:
       ParameterSetName:
       - -n -r --os-type -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\":
-        \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\"\
+        : \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -286,7 +288,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:38 GMT
+      - Fri, 14 Mar 2025 08:49:38 GMT
       expires:
       - '-1'
       pragma:
@@ -304,7 +306,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '199'
       x-msedge-ref:
-      - 'Ref A: D6D3A325326F4DDCB737904239B70D2F Ref B: MAA201060514035 Ref C: 2025-01-21T06:06:34Z'
+      - 'Ref A: 12346EADE17746CC87A8508DA05AD254 Ref B: SEL221051504049 Ref C: 2025-03-14T08:49:35Z'
     status:
       code: 201
       message: Created
@@ -322,15 +324,15 @@ interactions:
       ParameterSetName:
       - -n -r --os-type -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\":
-        \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\"\
+        : \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -339,7 +341,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:40 GMT
+      - Fri, 14 Mar 2025 08:49:39 GMT
       expires:
       - '-1'
       pragma:
@@ -351,11 +353,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGalleryApplication3Min;298,Microsoft.Compute/GetGalleryApplication30Min;1997
+      - Microsoft.Compute/GetGalleryApplication3Min;298,Microsoft.Compute/GetGalleryApplication30Min;1998
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: 5EE7E020DA7B49DFB0ABE7101D669FB6 Ref B: MAA201060514035 Ref C: 2025-01-21T06:06:39Z'
+      - 'Ref A: 61C28A279FA84F2F97DF79E2816BE1B2 Ref B: SEL221051504049 Ref C: 2025-03-14T08:49:39Z'
     status:
       code: 200
       message: OK
@@ -373,15 +375,15 @@ interactions:
       ParameterSetName:
       - -n -r -g --exists
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\":
-        \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\"\
+        : \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -390,7 +392,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:41 GMT
+      - Fri, 14 Mar 2025 08:49:41 GMT
       expires:
       - '-1'
       pragma:
@@ -402,11 +404,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGalleryApplication3Min;297,Microsoft.Compute/GetGalleryApplication30Min;1996
+      - Microsoft.Compute/GetGalleryApplication3Min;296,Microsoft.Compute/GetGalleryApplication30Min;1996
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: D9AB147E79504CBA9E2FF2F3DF6BB925 Ref B: MAA201060515033 Ref C: 2025-01-21T06:06:41Z'
+      - 'Ref A: 33028DE3377C4B35BD09FC4547D928C7 Ref B: SEL221051503047 Ref C: 2025-03-14T08:49:41Z'
     status:
       code: 200
       message: OK
@@ -424,12 +426,12 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_gallery_application","date":"2025-01-21T06:06:17Z","module":"vm","Creator":"aaa@foo.com","DateCreated":"2025-01-21T06:06:26Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_gallery_application","date":"2025-03-14T08:49:26Z","module":"vm","DateCreated":"2025-03-14T08:49:31Z","Creator":"zhuyan@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -438,7 +440,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:43 GMT
+      - Fri, 14 Mar 2025 08:49:42 GMT
       expires:
       - '-1'
       pragma:
@@ -452,12 +454,12 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: 6408378C975E402496A8671759D0790B Ref B: MAA201060514049 Ref C: 2025-01-21T06:06:43Z'
+      - 'Ref A: 9B3612442C9246199F84BC39450BA72B Ref B: SEL221051801017 Ref C: 2025-03-14T08:49:42Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus"}'
+    body: '{"location": "eastus", "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -468,32 +470,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '22'
+      - '34'
       Content-Type:
       - application/json
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYQUYDMGSFK\"\r\n
-        \   },\r\n    \"provisioningState\": \"Updating\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n \
+        \     \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYPWEY2CK2W\"\
+        \r\n    },\r\n    \"provisioningState\": \"Updating\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/452db017-2aa5-437b-9638-16e4f1502d3e?api-version=2021-10-01&t=638730364061291168&c=MIIHhzCCBm-gAwIBAgITfAWQ0hCHZtQ3fJ4PSAAABZDSEDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTI3MDkwMTAzWhcNMjUwMzI2MDkwMTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANt7qVbg97HivqUzi3BPPNiHD4wLqYw03AkBiXDpww3W8iIU6FZbbOXVgCL-rGpnbxPkLEVZ1WtRfvLgR3qDiVRjkSnE2knSE6qtvBRWdqqsD9YiSi5lYW67vgtBA_mHzHNDb0zhZ2iofVE5GjHIKYINZSTo8of54bY_fJe0xenYEq7lMpbffWaoano6LQH1L0hSdzAreTN7T_bTsK7TkXQtx45c1upRueZR1wq4PRd-9AYpkfKHhxnCe5LBeLB-Q88WZbmNxuycYiJZzbEGVcEbg5fYdfYb4QveB2WmK7bCWSEDu7WzRaYN9zfP9ZpVnTHTmRcN-f3uvUzxNBMe26UCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT07kfCxeuv0whuO9NP27UpdS8ZAzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFB6-4Y-Z7skVWaPi2vBOob5I-JLv_MqkE8tGWMMCFI9McOWBWfeJWV7aA4X4MEwnVfuFzE4mdak49KhEWgAbnGBMMumWJtlE1VDYwoYj3k6VDrhg4K8cRAO24Ezl3_L9yTqPLHhnKpjnjZONChdqvy6tXy9zLDyo9uThhHykSdIVQPaynG83JYpUlN1akyNJVLxae9NCRV251OTh00g9z6gt1b4nk-Nszy6YtF1AoskPTpeZVcsxGTlq3ITXveDCeZrYbQ6EtZf5O8ekTrNsG-8DMSDIgDta1Dud4RchYh74jtodoiwmneC_ZG5VDcpozae4Mh1w3_kD4-E11i1U1U&s=oGeuXvp9DB6JqonMUpoEKxW1YyYV0YBegoytAb56URz-FNyYo6L4WcussgH97BE4qOOBkUj0Qx4mzSCmvMnDT4qnS8tfzWd2h5edHpJe0bBTB9KCwwwIn5XP8epRAQJ_UZQCjGZeBHwVnBfqKuCf1PXHElkQ0VfYllVTICQ1WM7f9WZ-ttAxCA0aGFkpgl1zO9YmlThb6_GMePSR1I3PgWNmlikj39y7Bmim8s7N5o6N79MDgzvyCkbljkml1WmTSxH3blNpondoQMGle1eT_ntjX2ZgbNUxwuTFSAdCX6Muu5Z4XiU777g-42g2hkdWDE8fe4S-GLjfIOzfjBTPRw&h=mk4TSLPg2hKSx6e1vgZHf90ASq0gH_Rc9x5kskS8Mes
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/8800c533-bdd8-4210-afd3-6f30893bd5a5?api-version=2021-07-01&t=638775389837342302&c=MIIHhzCCBm-gAwIBAgITHgYzPCNynNboIzpbwQAABjM8IzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwMTI1MTAzNDA0WhcNMjUwNzI0MTAzNDA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALKPotTDpgftA7CXtms9mFH23-tex305ckUWa8g24d-q8qk3N41lUUFI8eLSiae0-8bxgZy3xUxN9DZ4Y2pytI2w8vg4BkuXA6ovobs_lmZ_dRlh9xBzhoF17E6C3ChUl-CwBjrD4xfnNkoDLAESVqYcWf2xpEa-XyUd0NbJYcoFK3uZOuZKMn12vJMMsGNQRGwLlqw2UmwYfaAa4hMOulAjmoNpSEKPxr0cW9kMYp4u4jjhnEMtP2Kbk-RmeUUB9zhAhCLrMErH4j5COGO5ei9n-HNH-GcaKVAh3VShgIXrGQt3hVMzAe11zSBhPEBapj0krOaojng3S6zpcv7IBnkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBRONXh1wQKxnd0880VHxcMzUrnn8zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFAzp-TBnf33pZ5yOYcvtc080nAQcA9QXetcPNWPio7-d1617_hgfvXdqsT_QPZsJuOXxevQNclEa6qwS0LjsWivtqonE-FuG-EqSnhmWNrtZbMR1RFXc6ziLAKMab0YsLO9QvsUQ3zmVOw_CUzXkmmdbU-3-ri2HQYiBA_UqPwM_P4RYYv0gbHNHpzP2lUPvEvfDKi0sMMyu5hXA_WsY02ItU_Cz09BUYvyUZiGIlLD7oejSneFfjVZtLot-ma6F3nVMvw5KGUF1Rh3npMcEKmPg7c6JsdjokoN3m0uhJz1zNBjrPfLVUGWrQ3gPrAusvW4qLr6LPee3o43x0NbjNc&s=gzgiKtl0zkCUlzvjogy0x7_vS-MWQXdn8nwk9b3Nayj8j0DqkbsgoSubG2c6D3plkU88QqgjEBdL1NW77Vx7i5FB-6jNLX7AaVZ2OK4GG-Rd6LTgYqGDp-3X0hLHHKtO1GHkKfbWb8vYtYqCorey6bjINyPJ6ggJ-MitJV73z4NhX9oquO_idekp8scUs8Q12QjoQptUh1d85b9UnmZS46KncneRRYf-gP5JABvXOJ2IEY7ySQv9QUvGwV2FNBdOOdESJbC0-uu-QehIrbtIB2VJW5TIBF4X7Nt4eV_lIHHeAZ1twWfIBhiLewmYyW6ouEnCARSVDi154ZDGKmyT2Q&h=rrZKbeTSuIdGsoABxLtlOpAkugyOKfwO4P1iIbuMVTw
       cache-control:
       - no-cache
       content-length:
-      - '414'
+      - '429'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:45 GMT
+      - Fri, 14 Mar 2025 08:49:42 GMT
       expires:
       - '-1'
       pragma:
@@ -507,11 +510,11 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/CreateUpdateGallery3Min;48,Microsoft.Compute/CreateUpdateGallery30Min;298
       x-ms-ratelimit-remaining-subscription-global-writes:
-      - '2999'
+      - '2998'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '199'
+      - '198'
       x-msedge-ref:
-      - 'Ref A: 484AC93685E842288B72D9525EEAC952 Ref B: MAA201060514039 Ref C: 2025-01-21T06:06:44Z'
+      - 'Ref A: DC1EE7BAB736451B991562B3FD2EC504 Ref B: SEL221051803027 Ref C: 2025-03-14T08:49:42Z'
     status:
       code: 200
       message: OK
@@ -529,14 +532,14 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/452db017-2aa5-437b-9638-16e4f1502d3e?api-version=2021-10-01&t=638730364061291168&c=MIIHhzCCBm-gAwIBAgITfAWQ0hCHZtQ3fJ4PSAAABZDSEDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTI3MDkwMTAzWhcNMjUwMzI2MDkwMTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANt7qVbg97HivqUzi3BPPNiHD4wLqYw03AkBiXDpww3W8iIU6FZbbOXVgCL-rGpnbxPkLEVZ1WtRfvLgR3qDiVRjkSnE2knSE6qtvBRWdqqsD9YiSi5lYW67vgtBA_mHzHNDb0zhZ2iofVE5GjHIKYINZSTo8of54bY_fJe0xenYEq7lMpbffWaoano6LQH1L0hSdzAreTN7T_bTsK7TkXQtx45c1upRueZR1wq4PRd-9AYpkfKHhxnCe5LBeLB-Q88WZbmNxuycYiJZzbEGVcEbg5fYdfYb4QveB2WmK7bCWSEDu7WzRaYN9zfP9ZpVnTHTmRcN-f3uvUzxNBMe26UCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT07kfCxeuv0whuO9NP27UpdS8ZAzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFB6-4Y-Z7skVWaPi2vBOob5I-JLv_MqkE8tGWMMCFI9McOWBWfeJWV7aA4X4MEwnVfuFzE4mdak49KhEWgAbnGBMMumWJtlE1VDYwoYj3k6VDrhg4K8cRAO24Ezl3_L9yTqPLHhnKpjnjZONChdqvy6tXy9zLDyo9uThhHykSdIVQPaynG83JYpUlN1akyNJVLxae9NCRV251OTh00g9z6gt1b4nk-Nszy6YtF1AoskPTpeZVcsxGTlq3ITXveDCeZrYbQ6EtZf5O8ekTrNsG-8DMSDIgDta1Dud4RchYh74jtodoiwmneC_ZG5VDcpozae4Mh1w3_kD4-E11i1U1U&s=oGeuXvp9DB6JqonMUpoEKxW1YyYV0YBegoytAb56URz-FNyYo6L4WcussgH97BE4qOOBkUj0Qx4mzSCmvMnDT4qnS8tfzWd2h5edHpJe0bBTB9KCwwwIn5XP8epRAQJ_UZQCjGZeBHwVnBfqKuCf1PXHElkQ0VfYllVTICQ1WM7f9WZ-ttAxCA0aGFkpgl1zO9YmlThb6_GMePSR1I3PgWNmlikj39y7Bmim8s7N5o6N79MDgzvyCkbljkml1WmTSxH3blNpondoQMGle1eT_ntjX2ZgbNUxwuTFSAdCX6Muu5Z4XiU777g-42g2hkdWDE8fe4S-GLjfIOzfjBTPRw&h=mk4TSLPg2hKSx6e1vgZHf90ASq0gH_Rc9x5kskS8Mes
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/8800c533-bdd8-4210-afd3-6f30893bd5a5?api-version=2021-07-01&t=638775389837342302&c=MIIHhzCCBm-gAwIBAgITHgYzPCNynNboIzpbwQAABjM8IzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwMTI1MTAzNDA0WhcNMjUwNzI0MTAzNDA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALKPotTDpgftA7CXtms9mFH23-tex305ckUWa8g24d-q8qk3N41lUUFI8eLSiae0-8bxgZy3xUxN9DZ4Y2pytI2w8vg4BkuXA6ovobs_lmZ_dRlh9xBzhoF17E6C3ChUl-CwBjrD4xfnNkoDLAESVqYcWf2xpEa-XyUd0NbJYcoFK3uZOuZKMn12vJMMsGNQRGwLlqw2UmwYfaAa4hMOulAjmoNpSEKPxr0cW9kMYp4u4jjhnEMtP2Kbk-RmeUUB9zhAhCLrMErH4j5COGO5ei9n-HNH-GcaKVAh3VShgIXrGQt3hVMzAe11zSBhPEBapj0krOaojng3S6zpcv7IBnkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBRONXh1wQKxnd0880VHxcMzUrnn8zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFAzp-TBnf33pZ5yOYcvtc080nAQcA9QXetcPNWPio7-d1617_hgfvXdqsT_QPZsJuOXxevQNclEa6qwS0LjsWivtqonE-FuG-EqSnhmWNrtZbMR1RFXc6ziLAKMab0YsLO9QvsUQ3zmVOw_CUzXkmmdbU-3-ri2HQYiBA_UqPwM_P4RYYv0gbHNHpzP2lUPvEvfDKi0sMMyu5hXA_WsY02ItU_Cz09BUYvyUZiGIlLD7oejSneFfjVZtLot-ma6F3nVMvw5KGUF1Rh3npMcEKmPg7c6JsdjokoN3m0uhJz1zNBjrPfLVUGWrQ3gPrAusvW4qLr6LPee3o43x0NbjNc&s=gzgiKtl0zkCUlzvjogy0x7_vS-MWQXdn8nwk9b3Nayj8j0DqkbsgoSubG2c6D3plkU88QqgjEBdL1NW77Vx7i5FB-6jNLX7AaVZ2OK4GG-Rd6LTgYqGDp-3X0hLHHKtO1GHkKfbWb8vYtYqCorey6bjINyPJ6ggJ-MitJV73z4NhX9oquO_idekp8scUs8Q12QjoQptUh1d85b9UnmZS46KncneRRYf-gP5JABvXOJ2IEY7ySQv9QUvGwV2FNBdOOdESJbC0-uu-QehIrbtIB2VJW5TIBF4X7Nt4eV_lIHHeAZ1twWfIBhiLewmYyW6ouEnCARSVDi154ZDGKmyT2Q&h=rrZKbeTSuIdGsoABxLtlOpAkugyOKfwO4P1iIbuMVTw
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2025-01-21T06:06:45.9865182+00:00\",\r\n  \"endTime\":
-        \"2025-01-21T06:06:46.0178003+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"452db017-2aa5-437b-9638-16e4f1502d3e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2025-03-14T08:49:43.5943671+00:00\",\r\n  \"\
+        endTime\": \"2025-03-14T08:49:43.6412433+00:00\",\r\n  \"status\": \"Succeeded\"\
+        ,\r\n  \"name\": \"8800c533-bdd8-4210-afd3-6f30893bd5a5\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -545,7 +548,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:46 GMT
+      - Fri, 14 Mar 2025 08:49:43 GMT
       expires:
       - '-1'
       pragma:
@@ -559,9 +562,9 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/GetOperationStatus3Min;4998,Microsoft.Compute/GetOperationStatus30Min;14998
       x-ms-ratelimit-remaining-subscription-global-reads:
-      - '3749'
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: 32E933DBBE424A03B8F56A0E67123242 Ref B: MAA201060514039 Ref C: 2025-01-21T06:06:46Z'
+      - 'Ref A: 3E23B25F74B1420CBD52564FBB9DF005 Ref B: SEL221051803027 Ref C: 2025-03-14T08:49:43Z'
     status:
       code: 200
       message: OK
@@ -579,24 +582,25 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYQUYDMGSFK\"\r\n
-        \   },\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\"\
+        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n \
+        \     \"uniqueName\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYPWEY2CK2W\"\
+        \r\n    },\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '415'
+      - '430'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:47 GMT
+      - Fri, 14 Mar 2025 08:49:44 GMT
       expires:
       - '-1'
       pragma:
@@ -608,11 +612,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;345,Microsoft.Compute/GetGallery30Min;2493
+      - Microsoft.Compute/GetGallery3Min;345,Microsoft.Compute/GetGallery30Min;2495
       x-ms-ratelimit-remaining-subscription-global-reads:
-      - '3748'
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 264B3B1CB9A64445A997A96A41DFF657 Ref B: MAA201060514039 Ref C: 2025-01-21T06:06:47Z'
+      - 'Ref A: F3DF8A9496294791A35F5F4C73D337DE Ref B: SEL221051803027 Ref C: 2025-03-14T08:49:44Z'
     status:
       code: 200
       message: OK
@@ -630,12 +634,12 @@ interactions:
       ParameterSetName:
       - -n -r -g --description --tags
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_gallery_application","date":"2025-01-21T06:06:17Z","module":"vm","Creator":"aaa@foo.com","DateCreated":"2025-01-21T06:06:26Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_gallery_application","date":"2025-03-14T08:49:26Z","module":"vm","DateCreated":"2025-03-14T08:49:31Z","Creator":"zhuyan@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -644,7 +648,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:51 GMT
+      - Fri, 14 Mar 2025 08:49:45 GMT
       expires:
       - '-1'
       pragma:
@@ -658,7 +662,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: 19734082F7A84432A0FADF05309EF475 Ref B: MAA201060515011 Ref C: 2025-01-21T06:06:51Z'
+      - 'Ref A: E6DC6C23C0EE49D1B9341D111B93B32A Ref B: SEL221051802049 Ref C: 2025-03-14T08:49:45Z'
     status:
       code: 200
       message: OK
@@ -676,15 +680,15 @@ interactions:
       ParameterSetName:
       - -n -r -g --description --tags
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\":
-        \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\"\
+        : \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -693,7 +697,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:53 GMT
+      - Fri, 14 Mar 2025 08:49:46 GMT
       expires:
       - '-1'
       pragma:
@@ -705,11 +709,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGalleryApplication3Min;296,Microsoft.Compute/GetGalleryApplication30Min;1995
+      - Microsoft.Compute/GetGalleryApplication3Min;295,Microsoft.Compute/GetGalleryApplication30Min;1995
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: 67E6A598306D47F8800BB50C8422E4A4 Ref B: MAA201060514019 Ref C: 2025-01-21T06:06:52Z'
+      - 'Ref A: 1D93E93F364649A58842DA7D4195A1F9 Ref B: SEL221051805051 Ref C: 2025-03-14T08:49:46Z'
     status:
       code: 200
       message: OK
@@ -732,16 +736,16 @@ interactions:
       ParameterSetName:
       - -n -r -g --description --tags
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\":
-        \"eastus\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"supportedOSType\": \"Windows\",\r\n    \"description\": \"test\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\"\
+        : \"eastus\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"supportedOSType\": \"Windows\",\r\n    \"description\": \"test\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -750,7 +754,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:06:58 GMT
+      - Fri, 14 Mar 2025 08:49:50 GMT
       expires:
       - '-1'
       pragma:
@@ -768,7 +772,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '199'
       x-msedge-ref:
-      - 'Ref A: 62CD78759BF4445B86A27E0163C1F91B Ref B: MAA201060514019 Ref C: 2025-01-21T06:06:54Z'
+      - 'Ref A: BB87CE98ED6246CB859B53AC83770872 Ref B: SEL221051805051 Ref C: 2025-03-14T08:49:47Z'
     status:
       code: 200
       message: OK
@@ -786,26 +790,21 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"app000002\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\",\r\n
-        \     \"type\": \"Microsoft.Compute/galleries/applications\",\r\n      \"location\":
-        \"eastus\",\r\n      \"tags\": {\r\n        \"tag\": \"test\"\r\n      },\r\n
-        \     \"properties\": {\r\n        \"supportedOSType\": \"Windows\",\r\n        \"description\":
-        \"test\"\r\n      }\r\n    }\r\n  ]\r\n}"
+      string: '{"value":[{"name":"app000002","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002","type":"Microsoft.Compute/galleries/applications","location":"eastus","tags":{"tag":"test"},"properties":{"supportedOSType":"Windows","description":"test"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '480'
+      - '354'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:07:01 GMT
+      - Fri, 14 Mar 2025 08:49:52 GMT
       expires:
       - '-1'
       pragma:
@@ -816,12 +815,14 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-original-request-ids:
+      - 35783e06-0fba-4620-9067-eeddfd6f1b5a
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/ListGalleryApplicationsInGallery3Min;1499,Microsoft.Compute/ListGalleryApplicationsInGallery30Min;9999
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: A4CB581A54C7426C818891446AF33CA5 Ref B: MAA201060516029 Ref C: 2025-01-21T06:07:00Z'
+      - 'Ref A: 7FBBF9745794431DBA860C0ACEDE6202 Ref B: SEL221051503021 Ref C: 2025-03-14T08:49:51Z'
     status:
       code: 200
       message: OK
@@ -839,16 +840,16 @@ interactions:
       ParameterSetName:
       - -n -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002?api-version=2021-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\":
-        \"eastus\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"supportedOSType\": \"Windows\",\r\n    \"description\": \"test\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\"\
+        : \"eastus\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"supportedOSType\": \"Windows\",\r\n    \"description\": \"test\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -857,7 +858,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:07:02 GMT
+      - Fri, 14 Mar 2025 08:49:53 GMT
       expires:
       - '-1'
       pragma:
@@ -869,11 +870,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGalleryApplication3Min;294,Microsoft.Compute/GetGalleryApplication30Min;1993
+      - Microsoft.Compute/GetGalleryApplication3Min;293,Microsoft.Compute/GetGalleryApplication30Min;1993
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: D264F034EB94481EAC03262D66571E4F Ref B: MAA201060516033 Ref C: 2025-01-21T06:07:02Z'
+      - 'Ref A: FBCA06E4F3344CA58D7FB01DC0E662C4 Ref B: SEL221051803049 Ref C: 2025-03-14T08:49:53Z'
     status:
       code: 200
       message: OK
@@ -893,7 +894,7 @@ interactions:
       ParameterSetName:
       - -n -r -g -y
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002?api-version=2021-07-01
   response:
@@ -905,7 +906,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 21 Jan 2025 06:07:12 GMT
+      - Fri, 14 Mar 2025 08:49:58 GMT
       expires:
       - '-1'
       pragma:
@@ -923,7 +924,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-deletes:
       - '2999'
       x-msedge-ref:
-      - 'Ref A: E3CC4BA14F354C40BF580F29E8E02C92 Ref B: MAA201060514035 Ref C: 2025-01-21T06:07:04Z'
+      - 'Ref A: D7A0096CE1A24047AAE2B02DA0E4A435 Ref B: SEL221051503039 Ref C: 2025-03-14T08:49:54Z'
     status:
       code: 200
       message: OK
@@ -941,7 +942,7 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications?api-version=2021-07-01
   response:
@@ -955,7 +956,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Jan 2025 06:07:13 GMT
+      - Fri, 14 Mar 2025 08:50:00 GMT
       expires:
       - '-1'
       pragma:
@@ -969,7 +970,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: 3912A2A8575B4E1BB10AA41E9A057DCF Ref B: MAA201060513021 Ref C: 2025-01-21T06:07:13Z'
+      - 'Ref A: 90513E3889C14CF38597EABA3F545BAF Ref B: SEL221051504021 Ref C: 2025-03-14T08:50:00Z'
     status:
       code: 200
       message: OK

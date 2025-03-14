@@ -514,18 +514,18 @@ class ImageTemplateTest(ScenarioTest):
 
         self.kwargs.update({
             'loc': resource_group_location,
-            'img_src': LINUX_IMAGE_SOURCE,
+            'img_src': WIN_IMAGE_SOURCE,
             'gallery': self.create_random_name("ib_sig", 10),
             'sig1': 'image1',
             'tmpl': 'template01',
             'tmpl_2': 'template02',
-            'script': TEST_SHELL_SCRIPT_URL,
+            'script': TEST_PWSH_SCRIPT_URL,
             'vm': 'custom-vm'
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
-                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+                 '--os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation V1')
 
         self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
         self.cmd('image builder output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
@@ -551,7 +551,7 @@ class ImageTemplateTest(ScenarioTest):
         self.kwargs['image_id'] = output['artifactId']
 
         # check that vm successfully created from template.
-        self.cmd('vm create --name {vm} -g {rg} --image {image_id} --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm create --name {vm} -g {rg} --image {image_id} --generate-ssh-keys --admin-username azureuser --nsg-rule None')
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
         # test template creation from sig image
