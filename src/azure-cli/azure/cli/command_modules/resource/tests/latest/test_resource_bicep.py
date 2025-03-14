@@ -24,18 +24,19 @@ from azure.cli.core.mock import DummyCli
 
 class TestBicep(unittest.TestCase):
     def setUp(self):
-        self.cli_ctx = DummyCli(random_config_dir=True)
+        self.default_cli = DummyCli(random_config_dir=True)
 
     @mock.patch("os.path.isfile")
     def test_run_bicep_command_raise_error_if_not_installed_and_not_auto_install(self, isfile_stub):
         isfile_stub.return_value = False
+        cli = DummyCli(random_config_dir=True)
 
         with contextlib.suppress(FileNotFoundError):
-            remove_bicep_installation(self.cli_ctx)
+            remove_bicep_installation(cli)
 
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
+        cli.config.set_value("bicep", "use_binary_from_path", "false")
         with self.assertRaisesRegex(CLIError, 'Bicep CLI not found. Install it now by running "az bicep install".'):
-            run_bicep_command(self.cli_ctx, ["--version"], auto_install=False)
+            run_bicep_command(cli, ["--version"], auto_install=False)
 
     @mock.patch("os.chmod")
     @mock.patch("os.stat")
@@ -62,22 +63,21 @@ class TestBicep(unittest.TestCase):
         response.read.return_value = b"test"
         urlopen_stub.return_value = response
 
-        ensure_bicep_installation(self.cli_ctx, release_tag="v0.14.85", stdout=False)
+        ensure_bicep_installation(self.default_cli, release_tag="v0.14.85", stdout=False)
 
-        self.assertTrue(self.cli_ctx.config.get("bicep", "use_binary_from_path") == "false")
+        self.assertTrue(self.default_cli.config.get("bicep", "use_binary_from_path") == "false")
 
     @mock.patch("shutil.which")
     def test_run_bicep_command_raise_error_if_bicep_cli_not_found_when_use_binary_from_path_is_true(self, which_stub):
         which_stub.return_value = None
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "true")
+        cli = DummyCli(random_config_dir=True)
+        cli.config.set_value("bicep", "use_binary_from_path", "true")
 
         with self.assertRaisesRegex(
             CLIError,
             'Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".',
         ):
-            run_bicep_command(self.cli_ctx, ["--version"], auto_install=False)
-
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
+            run_bicep_command(cli, ["--version"], auto_install=False)
 
     @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True)
     @mock.patch("azure.cli.command_modules.resource._bicep._logger.debug")
@@ -86,9 +86,10 @@ class TestBicep(unittest.TestCase):
     def test_run_bicep_command_use_bicep_cli_from_path_in_ci(self, which_stub, run_command_stub, debug_mock):
         which_stub.return_value = True
         run_command_stub.return_value = "Bicep CLI version 0.13.1 (e3ac80d678)"
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "if_found_in_ci")
+        cli = DummyCli(random_config_dir=True)
+        cli.config.set_value("bicep", "use_binary_from_path", "if_found_in_ci")
 
-        run_bicep_command(self.cli_ctx, ["--version"], auto_install=False)
+        run_bicep_command(cli, ["--version"], auto_install=False)
 
         debug_mock.assert_called_with(
             "Using Bicep CLI from PATH. %s",
@@ -114,9 +115,10 @@ class TestBicep(unittest.TestCase):
         _get_bicep_installed_version_stub.return_value = semver.VersionInfo.parse("1.0.0")
         get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
 
-        self.cli_ctx.config.set_value("bicep", "check_version", "True")
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
-        run_bicep_command(self.cli_ctx, ["--version"])
+        cli = DummyCli(random_config_dir=True)
+        cli.config.set_value("bicep", "check_version", "True")
+        cli.config.set_value("bicep", "use_binary_from_path", "false")
+        run_bicep_command(cli, ["--version"])
 
         warning_mock.assert_called_once_with(
             'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
@@ -145,7 +147,7 @@ class TestBicep(unittest.TestCase):
             _get_bicep_installed_version_stub.return_value = semver.VersionInfo.parse("1.0.0")
             get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
 
-            run_bicep_command(self.cli_ctx, ["--version"])
+            run_bicep_command(self.default_cli, ["--version"])
 
             self.assertTrue(os.path.isfile(_bicep_version_check_file_path))
         finally:
@@ -160,7 +162,7 @@ class TestBicep(unittest.TestCase):
         _get_bicep_installed_version_stub.return_value = semver.VersionInfo.parse("0.1.0")
         isfile_stub.return_value = True
 
-        ensure_bicep_installation(self.cli_ctx, release_tag="v0.1.0")
+        ensure_bicep_installation(self.default_cli, release_tag="v0.1.0")
 
         dirname_mock.assert_not_called()
             
@@ -170,9 +172,10 @@ class TestBicep(unittest.TestCase):
         self, which_stub, _get_bicep_installation_path_mock
     ):
         which_stub.return_value = True
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "true")
+        cli = DummyCli(random_config_dir=True)
+        cli.config.set_value("bicep", "use_binary_from_path", "true")
 
-        ensure_bicep_installation(self.cli_ctx, release_tag="v0.1.0")
+        ensure_bicep_installation(cli, release_tag="v0.1.0")
 
         _get_bicep_installation_path_mock.assert_not_called()
 
