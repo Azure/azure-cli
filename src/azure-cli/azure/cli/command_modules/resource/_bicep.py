@@ -285,18 +285,22 @@ def _get_bicep_installed_version(bicep_executable_path):
     return _extract_version(installed_version_output)
 
 
+def _is_arm_architecture(machine):
+    return machine in ("arm64", "aarch64", "aarch64_be", "armv8b", "armv8l")
+
+
 def _has_musl_library_only():
     return os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6")
 
 
 def _get_bicep_download_url(system, machine, release_tag, target_platform=None):
     if not target_platform:
-        if system == "Windows" and machine == "arm64":
+        if system == "Windows" and _is_arm_architecture(machine):
             target_platform = "win-arm64"
         elif system == "Windows":
             # default to x64
             target_platform = "win-x64"
-        elif system == "Linux" and machine == "arm64":
+        elif system == "Linux" and _is_arm_architecture(machine):
             target_platform = "linux-arm64"
         elif system == "Linux" and _has_musl_library_only():
             # check for alpine linux
@@ -304,7 +308,7 @@ def _get_bicep_download_url(system, machine, release_tag, target_platform=None):
         elif system == "Linux":
             # default to x64
             target_platform = "linux-x64"
-        elif system == "Darwin" and machine == "arm64":
+        elif system == "Darwin" and _is_arm_architecture(machine):
             target_platform = "osx-arm64"
         elif system == "Darwin":
             # default to x64

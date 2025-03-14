@@ -220,6 +220,9 @@ class TestBicep(unittest.TestCase):
         download_url = _get_bicep_download_url("Linux", "arm64", "v0.26.54")
         self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-linux-arm64")
 
+        download_url = _get_bicep_download_url("Linux", "aarch64", "v0.26.54")
+        self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-linux-arm64")
+
         download_url = _get_bicep_download_url("Linux", "x64", "v0.26.54")
         self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-linux-x64")
 
