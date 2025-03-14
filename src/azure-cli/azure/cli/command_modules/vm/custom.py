@@ -1597,6 +1597,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
 
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
     if security_type == "TrustedLaunch":
         from azure.cli.core.azclierror import InvalidArgumentValueError
         if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
@@ -1615,6 +1616,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             if vm.security_profile is None:
                 vm.security_profile = SecurityProfile()
             vm.security_profile.security_type = security_type
+    elif security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+        if vm.security_profile is None:
+            vm.security_profile = SecurityProfile()
+        vm.security_profile.security_type = security_type
+        vm.security_profile.uefi_settings = None
 
     if write_accelerator is not None:
         update_write_accelerator_settings(vm.storage_profile, write_accelerator)
@@ -1683,7 +1689,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if proximity_placement_group is not None:
         vm.proximity_placement_group = {'id': proximity_placement_group}
 
-    if enable_secure_boot is not None or enable_vtpm is not None:
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (enable_secure_boot is not None or enable_vtpm is not None):
         if vm.security_profile is None:
             vm.security_profile = SecurityProfile()
 
