@@ -230,6 +230,10 @@ from azure.cli.core.breaking_change import register_default_value_breaking_chang
 
 register_default_value_breaking_change('bar foo', '--type', 'TypeA', 'TypeB')
 # The default value of `--type` will be changed to `TypeB` from `TypeA` in next breaking change release(2.61.0).
+
+# azure-cli-extensions/src/ext/azext_ext/_breaking_change.py
+register_default_value_breaking_change('bar foo', '--type', 'TypeA', 'TypeB', target_version='3.x.x')
+# The default value of `--type` will be changed to `TypeB` from `TypeA` in 3.x.x.
 ```
 
 **Be Required**
@@ -247,6 +251,9 @@ from azure.cli.core.breaking_change import register_required_flag_breaking_chang
 
 register_required_flag_breaking_change('bar foo', '--type')
 # The argument `--type` will become required in next breaking change release(2.61.0).
+
+register_required_flag_breaking_change('bar foo', '--type', target_version='May 2024')
+# The argument `--type` will become required in May 2024.
 ```
 
 **Other Changes**
@@ -255,8 +262,8 @@ Declare other custom-breaking changes that do not fall into the predefined categ
 
 * `command`: REQUIRED: The name of the command.
 * `message`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
-* `arg`: REQUIRED: The name of the argument associated with the breaking change. If arg is not None, the warning message will only be displayed when the argument is used.
-* `target_version`: REQUIRED: The version in which the breaking change will occur. By default, this is set to the next breaking change window. This information is published in the [Azure CLI Breaking Changes](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes) article, but does NOT display in the warning message.
+* `arg`: The name of the argument associated with the breaking change. If arg is not None, the warning message will only be displayed when the argument is used.
+* `target_version`: REQUIRED: The version in which the breaking change will occur. By default, this is set to the next breaking change window. This information affect the visibility in the [Azure CLI Breaking Changes](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes) article, but does NOT display in the warning message.
 
 ```python
 from azure.cli.core.breaking_change import register_other_breaking_change
