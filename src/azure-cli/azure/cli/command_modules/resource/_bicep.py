@@ -30,6 +30,13 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.util import should_disable_connection_verify
 
+from ._bicep_config import (
+    get_check_version_config,
+    get_use_binary_from_path_config,
+    remove_use_binary_from_path_config,
+    set_use_binary_from_path_config
+)
+
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
 
@@ -47,7 +54,6 @@ _bicep_version_check_time_format = "%Y-%m-%dT%H:%M:%S.%f"
 _logger = get_logger(__name__)
 
 _requests_verify = not should_disable_connection_verify()
-
 
 def validate_bicep_target_scope(template_schema, deployment_scope):
     target_scope = _template_schema_to_target_scope(template_schema)
@@ -78,7 +84,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
     installed = os.path.isfile(installation_path)
     _logger.debug("Bicep CLI installed: %s.", installed)
 
-    check_version = cli_ctx.config.getboolean("bicep", "check_version", True)
+    check_version = get_check_version_config(cli_ctx)
 
     if not installed:
         if auto_install:
@@ -155,10 +161,10 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
 
         os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-        use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_found_in_ci").lower()
+        use_binary_from_path = get_use_binary_from_path_config(cli_ctx)
         if use_binary_from_path not in ["0", "no", "false", "off"]:
             _logger.warning("The configuration value of bicep.use_binary_from_path has been set to 'false'.")
-            cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
+            set_use_binary_from_path_config(cli_ctx, "false")
 
         if stdout:
             print(f'Successfully installed Bicep CLI to "{installation_path}".')
@@ -180,10 +186,10 @@ def remove_bicep_installation(cli_ctx):
     if os.path.exists(_bicep_version_check_file_path):
         os.remove(_bicep_version_check_file_path)
 
-    use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_found_in_ci").lower()
+    use_binary_from_path = get_use_binary_from_path_config(cli_ctx)
     if use_binary_from_path in ["0", "no", "false", "off"]:
         _logger.warning("The configuration value of bicep.use_binary_from_path has been reset")
-        cli_ctx.config.remove_option("bicep", "use_binary_from_path")
+        remove_use_binary_from_path_config(cli_ctx)
 
 
 def is_bicep_file(file_path):
@@ -233,7 +239,7 @@ def _bicep_installed_in_ci():
 
 
 def _use_binary_from_path(cli_ctx):
-    use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_found_in_ci").lower()
+    use_binary_from_path = get_use_binary_from_path_config(cli_ctx)
 
     _logger.debug('Current value of "use_binary_from_path": %s.', use_binary_from_path)
 
