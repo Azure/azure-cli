@@ -6237,7 +6237,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     template = master_template.build()
     parameters = master_template.build_parameters()
 
-    aux_subscriptions = _get_lb_create_aux_subscriptions(local_gateway2, vnet_gateway2)
+    aux_subscriptions = _get_vpn_connection_aux_subscriptions(local_gateway2, vnet_gateway2)
 
     # deploy ARM template
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
