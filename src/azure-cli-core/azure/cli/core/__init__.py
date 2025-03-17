@@ -503,7 +503,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 extension_command_loaders.append(loader)
             else:
                 module_command_loaders.append(loader)
-        
+
         # Sort name in each command loader list
         module_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
         extension_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
