@@ -8064,6 +8064,8 @@ class VMGalleryImage(ScenarioTest):
             'sig image-version create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --gallery-image-version {version} --managed-image {image_id} --replica-count 1',
             checks=self.check('name', self.kwargs['version']))
 
+    @live_only()
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2')
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2',
                            parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
@@ -8082,12 +8084,17 @@ class VMGalleryImage(ScenarioTest):
             'image2': 'image2',
             'version1': '0.1.0',
             'version2': '0.1.1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
         # Prepare sig in another tenant
         self.cmd(
-            'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 --generate-ssh-key '
-            '--subscription {aux_sub} --public-ip-sku Standard --nsg-rule NONE')
+            'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 '
+            '--generate-ssh-keys --subscription {aux_sub} --public-ip-sku Standard --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {another_rg} --subscription {aux_sub} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd(
             'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
