@@ -55,6 +55,7 @@ _logger = get_logger(__name__)
 
 _requests_verify = not should_disable_connection_verify()
 
+
 def validate_bicep_target_scope(template_schema, deployment_scope):
     target_scope = _template_schema_to_target_scope(template_schema)
     if target_scope != deployment_scope:
