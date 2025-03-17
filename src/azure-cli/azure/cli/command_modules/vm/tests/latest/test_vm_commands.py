@@ -8064,6 +8064,65 @@ class VMGalleryImage(ScenarioTest):
             'sig image-version create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --gallery-image-version {version} --managed-image {image_id} --replica-count 1',
             checks=self.check('name', self.kwargs['version']))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_sig_image_version_create_cross_tenant(self, resource_group, another_resource_group):
+        self.kwargs.update({
+            'location': 'westus2',
+            'rg': resource_group,
+            'another_rg': another_resource_group,
+            'vm': self.create_random_name('cli_test_image_version_', 40),
+            'image_name': self.create_random_name('cli_test_image_version_', 40),
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
+            'gallery1': self.create_random_name('cli_test_image_version_g1_', 40),
+            'gallery2': self.create_random_name('cli_test_image_version_g2_', 40),
+            'image1': 'image1',
+            'image2': 'image2',
+            'version1': '0.1.0',
+            'version2': '0.1.1',
+        })
+
+        # Prepare sig in another tenant
+        self.cmd(
+            'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 --generate-ssh-key '
+            '--subscription {aux_sub} --public-ip-sku Standard --nsg-rule NONE')
+
+        self.cmd(
+            'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {another_rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('vm generalize -g {another_rg} -n {vm} --subscription {aux_sub}')
+        res = self.cmd(
+            'image create -g {another_rg} -n {image_name} --source {vm} --subscription {aux_sub}').get_output_in_json()
+        self.kwargs.update({
+            'image_id': res['id']
+        })
+
+        self.cmd('sig create -g {another_rg} --gallery-name {gallery1} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['gallery1']))
+        res1 = self.cmd(
+            'sig image-definition create -g {another_rg} --gallery-name {gallery1} --gallery-image-definition {image1} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub} --hyper-v-generation v1',
+            checks=self.check('name', self.kwargs['image1'])).get_output_in_json()
+        image_version_id = self.cmd(
+            'sig image-version create -g {another_rg} --gallery-name {gallery1} --gallery-image-definition {image1} --gallery-image-version {version1} --managed-image {image_name} --replica-count 1 --subscription {aux_sub}',
+            checks=self.check('name', self.kwargs['version1'])).get_output_in_json()['id']
+        self.kwargs.update({"image_version_id": image_version_id})
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery2}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery2} --gallery-image-definition {image2} '
+                 '--os-type linux --os-state Generalized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
+
+        # test the result of creating image version for gallery image version source from different tenanta
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery2} --gallery-image-definition {image2} '
+                 '--gallery-image-version {version2} --image-version {image_version_id}',
+                 checks=[
+                     self.check('name', self.kwargs['version2']),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(location='westus')
     def test_create_vm_with_shared_gallery_image(self, resource_group, resource_group_location):
