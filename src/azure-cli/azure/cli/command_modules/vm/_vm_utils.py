@@ -149,10 +149,10 @@ def is_sku_available(cmd, sku_info, zone):
                 is_available = False
                 break
             if restriction['type'] == 'Zone' and not (
-                    set(sku_info['location_info'][0].get('zones', [])) - set(restriction['restriction_info'].get('zones', []))):
+                    set(sku_info['location_info'][0].get('zones', []) or []) - set(restriction['restriction_info'].get('zones', []) or [])):
                 is_restrict_zone = True
             if restriction['type'] == 'Location' and (
-                    sku_info['location_info'][0]['location'] in (restriction['restriction_info'].get('locations', []))):
+                    sku_info['location_info'][0]['location'] in (restriction['restriction_info'].get('locations', []) or [])):
                 is_restrict_location = True
 
             if is_restrict_location or (is_restrict_zone and zone):
