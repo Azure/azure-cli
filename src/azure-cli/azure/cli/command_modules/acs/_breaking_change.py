@@ -6,4 +6,4 @@
 from azure.cli.core.breaking_change import register_default_value_breaking_change
 
 register_default_value_breaking_change('aks create', '--node-vm-size', 'Standard_DS2_V2 (Linux), Standard_DS2_V3 (Windows)', 'Dynamically Selected By Azure')
-# The default value of `--node-vm-size` will be changed to `namically Selected By Azure` from `Standard_DS2_V2 (Linux), Standard_DS2_V3 (Windows)` in next breaking change release(2.xx.0).
+# The default value of `--node-vm-size` will be changed to `Dynamically Selected By Azure` from `Standard_DS2_V2 (Linux), Standard_DS2_V3 (Windows)` in next breaking change release(2.xx.0).
