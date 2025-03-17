@@ -490,7 +490,7 @@ class MainCommandsLoader(CLICommandsLoader):
         return self.command_table
 
     @staticmethod
-    def _sort_command_loaders(self, command_loaders):
+    def _sort_command_loaders(command_loaders):
         if len(command_loaders) == 1:
             return list(command_loaders)
 
