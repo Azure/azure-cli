@@ -118,7 +118,7 @@ def get_key_vault_base_url(cli_ctx, vault_name):
 
 
 def list_sku_info(cli_ctx, location=None):
-    from ..aaz.latest.vm import ListSkus as _ListSkus
+    _ListSkus = import_aaz_by_profile(cli_ctx.cloud.profile, 'vm').ListSkus
 
     def _match_location(loc, locations):
         return next((x for x in locations if x.lower() == loc.lower()), None)
