@@ -28,7 +28,7 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_check_resource_availability_with_location, \
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
     cf_postgres_flexible_private_endpoint_connections, \
-    cf_postgres_flexible_tuning_options
+    cf_postgres_flexible_tuning_options, cf_postgres_flexible_config
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
@@ -942,9 +942,14 @@ def flexible_server_identity_update(cmd, client, resource_group_name, server_nam
             # if user-assigned identity is enabled, then enable both system-assigned and user-assigned identity
             identity_type = 'SystemAssigned,UserAssigned'
     else:
+        # check if fabric is enabled
+        config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
+        fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
+        if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
+            raise CLIError("On servers for which Fabric mirroring is enabled, system assigned managed identity cannot be disabled.")
         if server.data_encryption.type == 'AzureKeyVault':
             # if data encryption is enabled, then system-assigned identity cannot be disabled
-            raise CLIError("Disabling system-assigned identity isn't supported on servers configured to use customer managed keys for data encryption.")
+            raise CLIError("On servers for which data encryption is based on customer managed key, system assigned managed identity cannot be disabled.")
         if identity_type == 'SystemAssigned,UserAssigned':
             # if both system-assigned and user-assigned identity is enabled, then disable system-assigned identity
             identity_type = 'UserAssigned'
@@ -1532,7 +1537,7 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
-    databases = ','.join(database_names[0].split())
+    databases = ','.join(database_names)
     user_confirmation("Are you sure you want to prepare and enable your server" +
                       " '{0}' in resource group '{1}' for mirroring of databases '{2}'.".format(server_name, resource_group_name, databases) +
                       " This requires restart.", yes=yes)
@@ -1540,10 +1545,6 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
     if (server.identity is None or 'SystemAssigned' not in server.identity.type):
         logger.warning('Enabling system assigned managed identity on the server.')
         flexible_server_identity_update(cmd, flexible_servers_client, resource_group_name, server_name, 'Enabled')
-
-    logger.warning('Restarting server.')
-    parameters = postgresql_flexibleservers.models.RestartParameter(restart_with_failover=False)
-    resolve_poller(flexible_servers_client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'PostgreSQL Server Restart')
 
     logger.warning('Updating necessary server parameters.')
     source = "user-override"
@@ -1588,7 +1589,7 @@ def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_grou
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
-    databases = ','.join(database_names[0].split())
+    databases = ','.join(database_names)
     user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
                       .format(server_name, resource_group_name, databases), yes=yes)
 
