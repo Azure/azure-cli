@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.70.0
+++++++
+* Resolve CVE-2024-12797 (#30816)
+* Drop Track 1 SDK authentication (#29631)
+* `aaz`: Add cross tenants control for `AAZResourceIdArgFormat` (#30817)
+* `aaz`: Support `Any` type with full value shorthand syntax allowed (#30868)
+
 2.69.0
 ++++++
 * `aaz`: Support simple type parsed from string value (#30623)

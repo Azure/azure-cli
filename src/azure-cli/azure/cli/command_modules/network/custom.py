@@ -4473,6 +4473,10 @@ class NICIPConfigCreate(_NICIPConfigCreate):
     def pre_operations(self):
         args = self.ctx.args
         args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
         args.asgs_obj = assign_aaz_list_arg(
             args.asgs_obj,
@@ -4614,6 +4618,11 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             else:
                 # if specific address provided, allocation is static
                 args.private_ip_allocation_method = "Static"
+
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
     def pre_instance_update(self, instance):
         args = self.ctx.args
@@ -6189,6 +6198,14 @@ class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
 
 # region VirtualNetworkGatewayConnections
 # pylint: disable=too-many-locals
+def _get_vpn_connection_aux_subscriptions(local_gateway, vnet_gateway):
+    aux_subscriptions = []
+    _add_aux_subscription(aux_subscriptions, local_gateway)
+    _add_aux_subscription(aux_subscriptions, vnet_gateway)
+
+    return aux_subscriptions
+
+
 def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gateway1,
                           location=None, tags=None, no_wait=False, validate=False,
                           vnet_gateway2=None, express_route_circuit2=None, local_gateway2=None,
@@ -6220,9 +6237,11 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     template = master_template.build()
     parameters = master_template.build_parameters()
 
+    aux_subscriptions = _get_vpn_connection_aux_subscriptions(local_gateway2, vnet_gateway2)
+
     # deploy ARM template
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     deployment = Deployment(properties=properties)

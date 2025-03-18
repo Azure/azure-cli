@@ -2053,19 +2053,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         nat_gateway_managed_outbound_ip_count = self.raw_param.get("nat_gateway_managed_outbound_ip_count")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if nat_gateway_managed_outbound_ip_count is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.nat_gateway_profile and
-                self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile and
-                self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile.count is not None
-            ):
-                nat_gateway_managed_outbound_ip_count = (
-                    self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile.count
-                )
-
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return nat_gateway_managed_outbound_ip_count
@@ -2079,17 +2066,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         nat_gateway_idle_timeout = self.raw_param.get("nat_gateway_idle_timeout")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if nat_gateway_idle_timeout is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.nat_gateway_profile and
-                self.mc.network_profile.nat_gateway_profile.idle_timeout_in_minutes is not None
-            ):
-                nat_gateway_idle_timeout = (
-                    self.mc.network_profile.nat_gateway_profile.idle_timeout_in_minutes
-                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -2171,15 +2147,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
 
         This function supports the option of enable_validation. When enabled, if the value of outbound_type is
-        CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY or
+        CONST_OUTBOUND_TYPE_LOAD_BALANCER,CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY or
         CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, the following checks will be performed. If load_balancer_sku is set
         to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not assigned,
         a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
-        load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
-        will be raised.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
-        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
-        parameters, the value in load_balancer_profile will be used for validation.
 
         :return: string or None
         """
@@ -2187,7 +2159,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         outbound_type = self.raw_param.get("outbound_type")
         # try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if outbound_type is None and self.decorator_mode != DecoratorMode.CREATE:
+        if outbound_type is None:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -2200,58 +2172,79 @@ class AKSManagedClusterContext(BaseAKSContext):
         if read_only:
             return outbound_type
 
+        isBasicSKULb = safe_lower(self._get_load_balancer_sku(enable_validation=False)) == CONST_LOAD_BALANCER_SKU_BASIC
         # dynamic completion
-        if (
-            self.decorator_mode == DecoratorMode.CREATE and
-            not read_from_mc and
-            outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY and
-            outbound_type != CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY and
-            outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-        ):
+        if not read_from_mc and not isBasicSKULb and outbound_type is None:
             outbound_type = CONST_OUTBOUND_TYPE_LOAD_BALANCER
 
         # validation
         # Note: The parameters involved in the validation are not verified in their own getters.
         if enable_validation:
-            if outbound_type in [
-                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+            if not read_from_mc and outbound_type is not None and outbound_type not in [
+                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                 CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
                 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                "none"
             ]:
-                if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == CONST_LOAD_BALANCER_SKU_BASIC:
+                raise InvalidArgumentValueError(
+                    "Invalid outbound type, supported values are loadBalancer, managedNATGateway, userAssignedNATGateway and "
+                    "userDefinedRouting. Please refer to "
+                    "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
+                    "for more details."
+                )
+            if isBasicSKULb:
+                if outbound_type is not None:
                     raise InvalidArgumentValueError(
-                        "userDefinedRouting doesn't support basic load balancer sku"
+                        "{outbound_type} doesn't support basic load balancer sku".format(outbound_type=outbound_type)
                     )
+                return outbound_type  # basic sku lb doesn't support outbound type
 
-                if outbound_type in [
-                    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
-                    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
-                ]:
-                    if self.get_vnet_subnet_id() in ["", None]:
-                        raise RequiredArgumentMissingError(
-                            "--vnet-subnet-id must be specified for userDefinedRouting and it must "
-                            "be pre-configured with a route table with egress rules"
-                        )
-
-                if outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
-                    if (
-                        self.get_load_balancer_managed_outbound_ip_count() or
-                        self.get_load_balancer_managed_outbound_ipv6_count() or
-                        self.get_load_balancer_outbound_ips() or
-                        self.get_load_balancer_outbound_ip_prefixes()
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            outbound_type + " doesn't support customizing "
-                            "a standard load balancer with IP addresses"
-                        )
-                if outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
-                    if (
-                        self.get_nat_gateway_managed_outbound_ip_count()
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            outbound_type + " doesn't support customizing "
-                            "a standard nat gateway with IP addresses"
-                        )
+            if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+                if self.get_vnet_subnet_id() in ["", None]:
+                    raise RequiredArgumentMissingError(
+                        "--vnet-subnet-id must be specified for userDefinedRouting and it must "
+                        "be pre-configured with a route table with egress rules"
+                    )
+            if outbound_type == CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY:
+                if self.get_vnet_subnet_id() in ["", None]:
+                    raise RequiredArgumentMissingError(
+                        "--vnet-subnet-id must be specified for userAssignedNATGateway and it must "
+                        "be pre-configured with a NAT gateway with outbound ips"
+                    )
+            if outbound_type == CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
+                if self.get_vnet_subnet_id() not in ["", None]:
+                    raise InvalidArgumentValueError(
+                        "--vnet-subnet-id cannot be specified for managedNATGateway"
+                    )
+            if outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
+                if (
+                    self.get_load_balancer_managed_outbound_ip_count() or
+                    self.get_load_balancer_managed_outbound_ipv6_count() or
+                    self.get_load_balancer_outbound_ips() or
+                    self.get_load_balancer_outbound_ip_prefixes()
+                ):
+                    raise MutuallyExclusiveArgumentError(
+                        outbound_type + " type doesn't support customizing "
+                        "the standard load balancer ips"
+                    )
+                if (
+                    self.get_load_balancer_idle_timeout() or
+                    self.get_load_balancer_outbound_ports()
+                ):
+                    raise MutuallyExclusiveArgumentError(
+                        outbound_type + " type doesn't support customizing "
+                        "the standard load balancer config"
+                    )
+            if outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
+                if (
+                    self.get_nat_gateway_managed_outbound_ip_count() or
+                    self.get_nat_gateway_idle_timeout()
+                ):
+                    raise MutuallyExclusiveArgumentError(
+                        outbound_type + " type doesn't support customizing "
+                        "the standard nat gateway ips"
+                    )
         return outbound_type
 
     def get_outbound_type(
@@ -2263,16 +2256,6 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
-
-        This function will verify the parameter by default. If the value of outbound_type is
-        CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, the following checks will be performed. If load_balancer_sku is set
-        to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not assigned,
-        a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
-        load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
-        will be raised.
-
-        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
-        parameters, the value in load_balancer_profile will be used for validation.
 
         :return: string or None
         """
@@ -7189,29 +7172,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         outboundType = self.context.get_outbound_type()
         if outboundType:
-            vnet_subnet_id = self.context.get_vnet_subnet_id()
-            if vnet_subnet_id is None and outboundType not in [
-                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
-                CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
-                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-            ]:
-                raise InvalidArgumentValueError(
-                    "Invalid outbound type, supported values are loadBalancer, managedNATGateway and "
-                    "userDefinedRouting. Please refer to "
-                    "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
-                    "for more details."
-                )
-            if vnet_subnet_id is not None and outboundType not in [
-                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
-                CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
-                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-            ]:
-                raise InvalidArgumentValueError(
-                    "Invalid outbound type, supported values are loadBalancer, userAssignedNATGateway and "
-                    "userDefinedRouting. Please refer to "
-                    "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
-                    "for more details."
-                )
             mc.network_profile.outbound_type = outboundType
         return mc
 
@@ -7262,9 +7222,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.network_profile.nat_gateway_profile = None
         else:
             mc.network_profile.nat_gateway_profile = _update_nat_gateway_profile(
-                self.context.get_nat_gateway_managed_outbound_ip_count(),
-                self.context.get_nat_gateway_idle_timeout(),
-                mc.network_profile.nat_gateway_profile,
+                managed_outbound_ip_count=self.context.get_nat_gateway_managed_outbound_ip_count(),
+                idle_timeout=self.context.get_nat_gateway_idle_timeout(),
+                profile=mc.network_profile.nat_gateway_profile,
                 models=self.models.nat_gateway_models,
             )
         return mc

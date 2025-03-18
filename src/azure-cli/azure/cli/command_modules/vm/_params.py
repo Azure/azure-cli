@@ -442,7 +442,7 @@ def load_arguments(self, _):
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                    help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
-        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"], default=None), min_api='2022-11-01', help='Specify the security type of the virtual machine.')
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"], default=None), min_api='2022-11-01', help='Specify the security type of the virtual machine.')
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -1486,21 +1486,7 @@ def load_arguments(self, _):
                    options_list=['--enable-auto-key-rotation', '--auto-rotation'],
                    help='Enable automatic rotation of keys.')
 
-    with self.argument_context('disk-encryption-set create', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
-        c.argument('mi_system_assigned', arg_group='Managed Identity', arg_type=get_three_state_flag(),
-                   help='Provide this flag to use system assigned identity. Check out help for more examples')
-        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+',
-                   help='User Assigned Identity ids to be used for disk encryption set. '
-                        'Check out help for more examples')
-
-    with self.argument_context('disk-encryption-set update', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
-
-    with self.argument_context('disk-encryption-set identity', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
+    with self.argument_context('disk-encryption-set identity', operation_group='disk_encryption_sets') as c:
         c.argument('mi_system_assigned', options_list=['--system-assigned'],
                    arg_group='Managed Identity', arg_type=get_three_state_flag(),
                    help='Provide this flag to use system assigned identity for disk encryption set. '
@@ -1509,13 +1495,6 @@ def load_arguments(self, _):
                    help='User Assigned Identity ids to be used for disk encryption set. '
                         'Check out help for more examples')
     # endregion
-
-    # region DiskAccess
-    with self.argument_context('disk-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disk_accesses') as c:
-        c.argument('disk_access_name', arg_type=name_arg_type, help='Name of the disk access resource.', id_part='name')
-        c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-    # endRegion
 
     # region Capacity
     with self.argument_context('capacity reservation group') as c:

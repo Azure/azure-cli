@@ -61,7 +61,6 @@ def load_arguments(self, _):
 
     extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
-    disk_encryption_set_name = CLIArgumentType(overrides=name_arg_type, help='Name of disk encryption set.', id_part='name')
     ephemeral_placement_type = CLIArgumentType(options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(self.get_models('DiffDiskPlacement')), min_api='2019-12-01')
 
     license_type = CLIArgumentType(
@@ -1474,50 +1473,6 @@ def load_arguments(self, _):
         c.extra('resource_group_name', required=True)
         c.argument('resource_uri', arg_type=existing_vm_name, help='Name or ID of a virtual machine', validator=validate_vm_name_for_monitor_metrics, id_part=None)
     # endregion
-
-    # region disk encryption set
-    with self.argument_context('disk-encryption-set') as c:
-        c.argument('disk_encryption_set_name', disk_encryption_set_name)
-        c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
-        c.argument('source_vault', help='Name or ID of the KeyVault containing the key or secret.')
-        c.argument('encryption_type', arg_type=get_enum_type(['EncryptionAtRestWithPlatformKey', 'EncryptionAtRestWithCustomerKey', 'EncryptionAtRestWithPlatformAndCustomerKeys', 'ConfidentialVmEncryptedWithCustomerKey']),
-                   help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed. ConfidentialVmEncryptedWithCustomerKey: An additional encryption type accepted for confidential VM. Disk is encrypted at rest with Customer managed key.')
-        c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-        c.argument('enable_auto_key_rotation', arg_type=get_three_state_flag(), min_api='2020-12-01',
-                   options_list=['--enable-auto-key-rotation', '--auto-rotation'],
-                   help='Enable automatic rotation of keys.')
-
-    with self.argument_context('disk-encryption-set create', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
-        c.argument('mi_system_assigned', arg_group='Managed Identity', arg_type=get_three_state_flag(),
-                   help='Provide this flag to use system assigned identity. Check out help for more examples')
-        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+',
-                   help='User Assigned Identity ids to be used for disk encryption set. '
-                        'Check out help for more examples')
-
-    with self.argument_context('disk-encryption-set update', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('federated_client_id', help='The federated client id used in cross tenant scenario.')
-
-    with self.argument_context('disk-encryption-set identity', operation_group='disk_encryption_sets',
-                               min_api='2022-03-02') as c:
-        c.argument('mi_system_assigned', options_list=['--system-assigned'],
-                   arg_group='Managed Identity', arg_type=get_three_state_flag(),
-                   help='Provide this flag to use system assigned identity for disk encryption set. '
-                        'Check out help for more examples')
-        c.argument('mi_user_assigned', options_list=['--user-assigned'], arg_group='Managed Identity', nargs='*',
-                   help='User Assigned Identity ids to be used for disk encryption set. '
-                        'Check out help for more examples')
-    # endregion
-
-    # region DiskAccess
-    with self.argument_context('disk-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disk_accesses') as c:
-        c.argument('disk_access_name', arg_type=name_arg_type, help='Name of the disk access resource.', id_part='name')
-        c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-    # endRegion
 
     # region Capacity
     with self.argument_context('capacity reservation group') as c:

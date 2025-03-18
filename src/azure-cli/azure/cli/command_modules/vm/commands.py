@@ -7,12 +7,11 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image, cf_vm_image_term, cf_usage,
                                                           cf_vmss, cf_disks, cf_snapshots,
-                                                          cf_disk_accesses, cf_images, cf_run_commands,
+                                                          cf_images, cf_run_commands,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
-                                                          cf_disk_encryption_set,
                                                           cf_shared_gallery_image,
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
@@ -75,12 +74,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#DisksOperations.{}',
         client_factory=cf_disks,
         operation_group='disks'
-    )
-
-    compute_disk_access_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#DiskAccessesOperations.{}',
-        client_factory=cf_disk_accesses,
-        operation_group='disk_accesses'
     )
 
     compute_image_sdk = CliCommandType(
@@ -181,9 +174,8 @@ def load_command_table(self, _):
         client_factory=cf_img_bldr_image_templates,
     )
 
-    compute_disk_encryption_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
-        client_factory=cf_disk_encryption_set
+    compute_disk_encryption_set_profile = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}'
     )
 
     monitor_custom = CliCommandType(
@@ -245,18 +237,20 @@ def load_command_table(self, _):
         self.command_table['disk list'] = DiskList(loader=self, table_transformer='[].' + transform_disk_show_table_output)
         self.command_table['disk show'] = DiskShow(loader=self, table_transformer=transform_disk_show_table_output)
 
-    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
-        g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
+    with self.command_group("disk config"):
+        from .operations.disk import DiskConfigUpdate
+        self.command_table["disk config update"] = DiskConfigUpdate(loader=self)
 
-    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2022-03-02') as g:
-        g.custom_command('assign', 'assign_disk_encryption_set_identity')
-        g.custom_command('remove', 'remove_disk_encryption_set_identity', confirmation=True)
+    with self.command_group('disk-encryption-set', compute_disk_encryption_set_profile, operation_group='disk_encryption_sets'):
+        from .operations.disk_encryption_set import DiskEncryptionSetCreate, DiskEncryptionSetUpdate
+        self.command_table['disk-encryption-set create'] = DiskEncryptionSetCreate(loader=self)
+        self.command_table['disk-encryption-set update'] = DiskEncryptionSetUpdate(loader=self)
+
+    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_profile, operation_group='disk_encryption_sets') as g:
+        from .operations.disk_encryption_set_identity import DiskEncryptionSetIdentityAssign, DiskEncryptionSetIdentityRemove
+        self.command_table['disk-encryption-set identity assign'] = DiskEncryptionSetIdentityAssign(loader=self)
+        self.command_table['disk-encryption-set identity remove'] = DiskEncryptionSetIdentityRemove(loader=self)
         g.custom_show_command('show', 'show_disk_encryption_set_identity')
-
-    with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
-        g.custom_command('create', 'create_disk_access', supports_no_wait=True)
-        g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom, supports_no_wait=True)
 
     with self.command_group('image', compute_image_sdk) as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)

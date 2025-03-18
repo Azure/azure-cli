@@ -421,29 +421,26 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     storage = storage_gib * 1.07374182
     # find min and max values for IOPS
     min_iops = sku_info[sku_tier]["supported_storageV2_iops"]
-    if sku_info[sku_tier]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
-        max_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
-    else:
-        max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
+    supported_max_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
+    calculated_max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
+    max_iops = min(supported_max_iops, calculated_max_iops)
 
     if not min_iops <= storage_iops <= max_iops:
         raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'
                        .format(min_iops, max_iops))
 
-    # find min and max values for throughout
-    min_throughout = sku_info[sku_tier]["supported_storageV2_throughput"]
+    # find min and max values for throughput
+    min_throughput = sku_info[sku_tier]["supported_storageV2_throughput"]
+    supported_max_throughput = sku_info[sku_tier]["supported_storageV2_throughput_max"]
     if storage > 6:
-        max_storage_throughout = math.floor(max(0.25 * storage_iops, min_throughout))
+        max_storage_throughput = math.floor(max(0.25 * storage_iops, min_throughput))
     else:
-        max_storage_throughout = min_throughout
-    if sku_info[sku_tier]["supported_storageV2_throughput_max"] < max_storage_throughout:
-        max_throughout = sku_info[sku_tier]["supported_storageV2_throughput_max"]
-    else:
-        max_throughout = max_storage_throughout
+        max_storage_throughput = min_throughput
+    max_throughput = min(supported_max_throughput, max_storage_throughput)
 
-    if not min_throughout <= storage_throughput <= max_throughout:
+    if not min_throughput <= storage_throughput <= max_throughput:
         raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'
-                       .format(min_throughout, max_throughout))
+                       .format(min_throughput, max_throughput))
 
 
 def _pg_tier_validator(tier, sku_info):
@@ -475,14 +472,18 @@ def compare_sku_names(sku_1, sku_2):
 
 
 def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
+    additional_error = ''
     if instance is not None:
         tier = instance.sku.tier if tier is None else tier
+    else:
+        additional_error = 'When --tier is not specified, it defaults to GeneralPurpose. '
     if sku_name:
         skus = [item.lower() for item in get_postgres_skus(sku_info, tier.lower())]
         if sku_name.lower() not in skus:
-            raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
-                           'Specify --tier if you did not. Or CLI will set GeneralPurpose as the default tier. '
-                           'Allowed values : {}'.format(tier, sorted(skus, key=cmp_to_key(compare_sku_names))))
+            raise CLIError('Incorrect value for --sku-name. The SKU name does not exist in {} tier. {}'
+                           'Provide a valid SKU name for this tier, or specify --tier with the right tier for the '
+                           'SKU name chosen. Allowed values : {}'
+                           .format(tier, additional_error, sorted(skus, key=cmp_to_key(compare_sku_names))))
 
 
 def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None, storage_size=None):
@@ -555,6 +556,11 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
                                  "Please provide --backup-identity and --backup-key together.")
 
+    if bool(byok_identity is not None) and bool(backup_byok_identity is not None) and \
+       byok_identity.lower() == backup_byok_identity.lower():
+        raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
+                                 "Please provide different identities for --identity and --backup-identity.")
+
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
        (byok_key or backup_byok_key):
@@ -569,6 +575,14 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         if instance is None and (bool(byok_key is not None) ^ bool(backup_byok_key is not None)):
             raise ArgumentUsageError("Please provide both primary as well as geo-back user assigned identity "
                                      "and keyvault key to enable Data encryption for geo-redundant backup.")
+        if instance is not None and (bool(byok_identity is None) ^ bool(backup_byok_identity is None)):
+            primary_user_assigned_identity_id = byok_identity if byok_identity else \
+                instance.data_encryption.primary_user_assigned_identity_id
+            geo_backup_user_assigned_identity_id = backup_byok_identity if backup_byok_identity else \
+                instance.data_encryption.geo_backup_user_assigned_identity_id
+            if primary_user_assigned_identity_id.lower() == geo_backup_user_assigned_identity_id.lower():
+                raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
+                                         "Please provide different identities for --identity and --backup-identity.")
 
 
 def _network_arg_validator(subnet, public_access):

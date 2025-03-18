@@ -39,23 +39,48 @@ def _build_test_jwt(claims):
     return '.'.join(base64.urlsafe_b64encode(p.encode('utf-8')).decode('utf-8').replace('=', '') for p in parts)
 
 
-class CredentialMock:
+def _now_timestamp_mock():
+    # 2021-09-06 08:55:23
+    return 1630918523
+
+
+class MsalCredentialStub:
 
     def __init__(self, *args, **kwargs):
-        # If get_token_scopes is checked, make sure to create a new instance of CredentialMock
+        # If acquire_token_scopes is checked, make sure to create a new instance of MsalCredentialStub
         # to avoid interference from other tests.
-        self.get_token_scopes = None
+        self.acquire_token_scopes = None
         super().__init__()
 
-    def get_token(self, *scopes, **kwargs):
-        self.get_token_scopes = scopes
-        return AccessToken(MOCK_ACCESS_TOKEN, MOCK_EXPIRES_ON_INT)
+    def acquire_token(self, scopes, **kwargs):
+        self.acquire_token_scopes = scopes
+        return {
+            'access_token': MOCK_ACCESS_TOKEN,
+            'token_type': 'Bearer',
+            'expires_in': 1800,
+            'token_source': 'cache'
+        }
 
 
 # Used as the return_value of azure.cli.core.auth.identity.Identity.get_user_credential
-# If we directly patch azure.cli.core.auth.msal_authentication.UserCredential with CredentialMock,
+# If we directly patch azure.cli.core.auth.msal_authentication.UserCredential with MsalCredentialStub,
 # get_user_credential will prepare MSAL token cache and HTTP cache which is time-consuming and unnecessary.
-credential_mock = CredentialMock()
+credential_mock = MsalCredentialStub()
+
+
+class CloudShellCredentialStub:
+    def __init__(self):
+        self.acquire_token_scopes = None
+        super().__init__()
+
+    def acquire_token(self, scopes, **kwargs):
+        self.acquire_token_scopes = scopes
+        return {
+            'access_token': TestProfile.test_cloud_shell_access_token,
+            'token_type': 'Bearer',
+            'expires_in': 1800,
+            'token_source': 'cache'
+        }
 
 
 class MSRestAzureAuthStub:
@@ -89,15 +114,6 @@ class MSRestAzureAuthStub:
     def get_token(self, *args, **kwargs):
         self.get_token_scopes = args
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
-
-
-class CloudShellCredentialStub:
-    def __init__(self):
-        self.get_token_scopes = None
-
-    def get_token(self, *scopes, **kwargs):
-        self.get_token_scopes = scopes
-        return AccessToken(TestProfile.test_cloud_shell_access_token, MOCK_EXPIRES_ON_INT)
 
 
 class TestProfile(unittest.TestCase):
@@ -485,7 +501,7 @@ class TestProfile(unittest.TestCase):
 
         # Verify correct scopes are passed to get_token
         credential_instance = create_subscription_client_mock.call_args.args[1]
-        assert credential_instance.get_token_scopes == ('https://management.core.windows.net//.default',)
+        assert credential_instance.acquire_token_scopes == ['https://management.core.windows.net//.default']
 
         self.assertEqual(len(subscriptions), 1)
         s = subscriptions[0]
@@ -1127,9 +1143,10 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.token_read_count)
         self.assertTrue(cred.msi_res_id, test_res_id)
 
+    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential')
     def test_get_raw_token(self, get_user_credential_mock):
-        credential_mock_temp = CredentialMock()
+        credential_mock_temp = MsalCredentialStub()
         get_user_credential_mock.return_value = credential_mock_temp
         cli = DummyCli()
         # setup
@@ -1163,7 +1180,7 @@ class TestProfile(unittest.TestCase):
         creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource, tenant=self.tenant_id)
 
         # verify
-        assert list(credential_mock_temp.get_token_scopes) == self.msal_scopes
+        assert credential_mock_temp.acquire_token_scopes == self.msal_scopes
 
         self.assertEqual(creds[0], 'Bearer')
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
@@ -1174,9 +1191,10 @@ class TestProfile(unittest.TestCase):
         self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
 
+    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_credential')
     def test_get_raw_token_for_sp(self, get_service_principal_credential_mock):
-        credential_mock_temp = CredentialMock()
+        credential_mock_temp = MsalCredentialStub()
         get_service_principal_credential_mock.return_value = credential_mock_temp
         cli = DummyCli()
         # setup
@@ -1190,7 +1208,7 @@ class TestProfile(unittest.TestCase):
         creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource)
 
         # verify
-        assert list(credential_mock_temp.get_token_scopes) == self.msal_scopes
+        assert credential_mock_temp.acquire_token_scopes == self.msal_scopes
 
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
@@ -1252,6 +1270,7 @@ class TestProfile(unittest.TestCase):
         with self.assertRaisesRegex(CLIError, "Tenant shouldn't be specified"):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
+    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.CloudShellCredential', autospec=True)
     def test_get_raw_token_in_cloud_shell(self, cloud_shell_credential_mock, mock_in_cloud_console):
@@ -1293,7 +1312,7 @@ class TestProfile(unittest.TestCase):
         # Verify only one credential is created
         assert len(credential_instances) == 1
         # Verify correct scopes are passed to get_token
-        assert list(credential_instances[0].get_token_scopes) == self.msal_scopes
+        assert credential_instances[0].acquire_token_scopes == self.msal_scopes
 
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(token_tuple[0], 'Bearer')

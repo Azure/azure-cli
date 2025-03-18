@@ -53,7 +53,7 @@ def aad_error_handler(error, **kwargs):
     raise AuthenticationError(error_description, msal_error=error, recommendation=recommendation)
 
 
-def _generate_login_command(scopes=None, claims=None):
+def _generate_login_command(scopes=None, claims_challenge=None):
     login_command = ['az login']
 
     # Rejected by Conditional Access policy, like MFA
@@ -61,7 +61,7 @@ def _generate_login_command(scopes=None, claims=None):
         login_command.append('--scope {}'.format(' '.join(scopes)))
 
     # Rejected by CAE
-    if claims:
+    if claims_challenge:
         # Explicit logout is needed: https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
         return 'az logout\n' + ' '.join(login_command)
 
@@ -140,9 +140,6 @@ def check_result(result, **kwargs):
 
 
 def build_sdk_access_token(token_entry):
-    import time
-    request_time = int(time.time())
-
     # MSAL token entry sample:
     # {
     #     'access_token': 'eyJ0eXAiOiJKV...',
@@ -153,7 +150,8 @@ def build_sdk_access_token(token_entry):
     # Importing azure.core.credentials.AccessToken is expensive.
     # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
     # So We define our own AccessToken.
-    return AccessToken(token_entry["access_token"], request_time + token_entry["expires_in"])
+    from .constants import ACCESS_TOKEN, EXPIRES_IN
+    return AccessToken(token_entry[ACCESS_TOKEN], _now_timestamp() + token_entry[EXPIRES_IN])
 
 
 def decode_access_token(access_token):
@@ -177,3 +175,8 @@ def read_response_templates():
         error_template = f.read()
 
     return success_template, error_template
+
+
+def _now_timestamp():
+    import time
+    return int(time.time())
