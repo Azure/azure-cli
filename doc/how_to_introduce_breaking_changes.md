@@ -234,18 +234,31 @@ register_other_breaking_change('bar foo', 'During May 2024, another Breaking Cha
 
 **Conditional Breaking Change**
 
-To enhance flexibility, the CLI supports using a designated tag to specify a Breaking Change Pre-announcement. This method avoids reliance on the default automatic warning display and allows the warning to be shown whenever `print_manual_breaking_change` is called.
+To enhance flexibility, the CLI supports using a designated tag to specify a Breaking Change Pre-announcement. This method avoids reliance on the default automatic warning display and allows the warning to be shown whenever `print_conditional_breaking_change` is called.
 
 **Note:** We strongly recommend using this method to display breaking change warnings under specific conditions instead of using `logger.warning` directly. This approach enables centralized documentation of breaking changes and assists in automating customer notifications.
+
+* Register
+  * `tag`: The tag of the conditional breaking change. Use the same tag to print.
+  * `breaking_change`: Breaking change item to be announced. This should be an instance of `BreakingChange` subclass or a string. You should provide `command_name` when it is a string.
+  * `command_name`: Used only when input str as a breaking change. This would restrict the scope of breaking change tag.
+* Print
+  * `cli_ctx`: Context object. Pass this as `None` only when specifying `command_name` manually.
+  * `tag` : The tag of the conditional breaking change. Use the same tag to print.
+  * `custom_logger`: The logger used to print the warning.
+  * `command_name`: Used only when `cli_ctx` is `None`.
 
 ```python
 # src/azure-cli/azure/cli/command_modules/vm/custom.py
 from azure.cli.core.breaking_change import register_conditional_breaking_change, AzCLIOtherChange
 
-register_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_change=(
+register_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_change=AzCLIOtherChange(
   'vm create', 'This is special Breaking Change Warning A. This breaking change is happend in "vm create" command.'))
-register_conditional_breaking_change(tag='SpecialBreakingChangeB', breaking_change=(
-  'vm', 'This is special Breaking Change Warning B. This breaking change is happend in "vm" command group.'))
+register_conditional_breaking_change(
+  tag='SpecialBreakingChangeB',
+  breaking_change='This is special Breaking Change Warning B. This breaking change is happend in "vm" command group.',
+  command_name='vm create'
+)
 
 
 # src/azure-cli/azure/cli/command_modules/vm/custom.py
