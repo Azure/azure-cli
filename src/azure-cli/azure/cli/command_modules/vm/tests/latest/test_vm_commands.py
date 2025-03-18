@@ -4925,8 +4925,11 @@ class VMSSUpdateTests(ScenarioTest):
             'img3': 'Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest',
             'vmss4': self.create_random_name('vmss', 10),
             'img4': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest',
+            'nsg': 'nsg1',
         })
-        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform --lb-sku Standard')
+
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -n {vmss2} -g {rg} --image {img2} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform --lb-sku Standard --nsg {nsg}')
         self.cmd('vmss update -g {rg} -n {vmss2} --set virtualMachineProfile.storageProfile.imageReference.sku={img2_sku_gen2} --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true', checks=[
             self.check('virtualMachineProfile.storageProfile.imageReference.offer', 'windowsserver'),
             self.check('virtualMachineProfile.storageProfile.imageReference.sku', '{img2_sku_gen2}'),
@@ -4935,7 +4938,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
         ])
 
-        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard', checks=[
+        self.cmd('vmss create -n {vmss3} -g {rg} --image {img3} --admin-username vmtest --generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard --nsg {nsg}', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
         ])
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type TrustedLaunch', checks=[
@@ -4955,7 +4958,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('securityProfile', None),
         ])
 
-        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 '
+        self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --nsg {nsg} '
                  '--security-type ConfidentialVM --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type VMGuestStateOnly --orchestration-mode Uniform --lb-sku Standard', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.securityType', 'ConfidentialVM'),
         ])
@@ -8060,6 +8063,72 @@ class VMGalleryImage(ScenarioTest):
         self.cmd(
             'sig image-version create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --gallery-image-version {version} --managed-image {image_id} --replica-count 1',
             checks=self.check('name', self.kwargs['version']))
+
+    @live_only()
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_sig_image_version_create_cross_tenant(self, resource_group, another_resource_group):
+        self.kwargs.update({
+            'location': 'westus2',
+            'rg': resource_group,
+            'another_rg': another_resource_group,
+            'vm': self.create_random_name('cli_test_image_version_', 40),
+            'image_name': self.create_random_name('cli_test_image_version_', 40),
+            'aux_sub': AUX_SUBSCRIPTION,
+            'aux_tenant': AUX_TENANT,
+            'gallery1': self.create_random_name('cli_test_image_version_g1_', 40),
+            'gallery2': self.create_random_name('cli_test_image_version_g2_', 40),
+            'image1': 'image1',
+            'image2': 'image2',
+            'version1': '0.1.0',
+            'version2': '0.1.1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
+
+        # Prepare sig in another tenant
+        self.cmd(
+            'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 '
+            '--generate-ssh-keys --subscription {aux_sub} --public-ip-sku Standard --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {another_rg} --subscription {aux_sub} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd(
+            'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {another_rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('vm generalize -g {another_rg} -n {vm} --subscription {aux_sub}')
+        res = self.cmd(
+            'image create -g {another_rg} -n {image_name} --source {vm} --subscription {aux_sub}').get_output_in_json()
+        self.kwargs.update({
+            'image_id': res['id']
+        })
+
+        self.cmd('sig create -g {another_rg} --gallery-name {gallery1} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['gallery1']))
+        res1 = self.cmd(
+            'sig image-definition create -g {another_rg} --gallery-name {gallery1} --gallery-image-definition {image1} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub} --hyper-v-generation v1',
+            checks=self.check('name', self.kwargs['image1'])).get_output_in_json()
+        image_version_id = self.cmd(
+            'sig image-version create -g {another_rg} --gallery-name {gallery1} --gallery-image-definition {image1} --gallery-image-version {version1} --managed-image {image_name} --replica-count 1 --subscription {aux_sub}',
+            checks=self.check('name', self.kwargs['version1'])).get_output_in_json()['id']
+        self.kwargs.update({"image_version_id": image_version_id})
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery2}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery2} --gallery-image-definition {image2} '
+                 '--os-type linux --os-state Generalized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
+
+        # test the result of creating image version for gallery image version source from different tenanta
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery2} --gallery-image-definition {image2} '
+                 '--gallery-image-version {version2} --image-version {image_version_id}',
+                 checks=[
+                     self.check('name', self.kwargs['version2']),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(location='westus')
