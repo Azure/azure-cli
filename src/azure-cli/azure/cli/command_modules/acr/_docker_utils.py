@@ -5,6 +5,7 @@
 
 from urllib.parse import urlencode, urlparse, urlunparse
 
+import jwt
 import time
 from json import loads
 from enum import Enum
@@ -55,7 +56,8 @@ class RepoAccessTokenPermission(Enum):
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
-    DELETED_READ_RESTORE = '{},{}'.format(DELETED_READ, DELETED_RESTORE)
+    DELETED_READ_RESTORE = '{},{}'.format(DELETED_READ, DELETED_RESTORE),
+    PULL_PUSH_META_WRITE_META_READ = '{},{},{},{}'.format(PULL, PUSH, METADATA_WRITE, METADATA_READ)
 
 
 class RegistryAccessTokenPermission(Enum):
@@ -134,7 +136,8 @@ def _get_aad_token_after_challenge(cli_ctx,
                                    artifact_repository,
                                    permission,
                                    is_diagnostics_context,
-                                   use_acr_audience):
+                                   use_acr_audience,
+                                   verify_user_permissions):
     authurl = urlparse(token_params['realm'])
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
 
@@ -165,19 +168,19 @@ def _get_aad_token_after_challenge(cli_ctx,
 
     if response.status_code == 429:
         if is_diagnostics_context:
-            return CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
+            return CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server), None
         raise AzureResponseError(CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
                                  .get_error_message())
     if response.status_code not in [200]:
         from ._errors import CONNECTIVITY_REFRESH_TOKEN_ERROR
         if is_diagnostics_context:
-            return CONNECTIVITY_REFRESH_TOKEN_ERROR.format_error_message(login_server, response.status_code)
+            return CONNECTIVITY_REFRESH_TOKEN_ERROR.format_error_message(login_server, response.status_code), None
         raise CLIError(CONNECTIVITY_REFRESH_TOKEN_ERROR.format_error_message(login_server, response.status_code)
                        .get_error_message())
 
     refresh_token = loads(response.content.decode("utf-8"))["refresh_token"]
     if only_refresh_token:
-        return refresh_token
+        return refresh_token, None
 
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/token', '', '', ''))
 
@@ -202,11 +205,28 @@ def _get_aad_token_after_challenge(cli_ctx,
     if response.status_code not in [200]:
         from ._errors import CONNECTIVITY_ACCESS_TOKEN_ERROR
         if is_diagnostics_context:
-            return CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)
+            return CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code), None
         raise CLIError(CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)
                        .get_error_message())
 
-    return loads(response.content.decode("utf-8"))["access_token"]
+    access_token = loads(response.content.decode("utf-8"))["access_token"]
+    allowed_actions = None
+
+    if verify_user_permissions:
+        decoded_token = jwt.decode(access_token, algorithms=['RS256'], options={"verify_signature": False})
+        access_value = decoded_token.get("access", [{}])[0]
+        actions_value = access_value.get('actions', [])
+
+        if len(actions_value) == 0 :
+            from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
+            if is_diagnostics_context:
+                return CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(repository), None
+            raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(repository)
+                           .get_error_message())
+        if isinstance(actions_value, list):
+            allowed_actions = ', '.join(actions_value)
+
+    return access_token, allowed_actions
 
 
 def _get_aad_token(cli_ctx,
@@ -216,13 +236,15 @@ def _get_aad_token(cli_ctx,
                    artifact_repository=None,
                    permission=None,
                    is_diagnostics_context=False,
-                   use_acr_audience=False):
-    """Obtains refresh and access tokens for an AAD-enabled registry.
+                   use_acr_audience=False,
+                   verify_user_permissions=False):
+    """Obtains refresh and access tokens for an AAD-enabled registry. Will return the allowed actions if verify_user_permissions is set to True.
     :param str login_server: The registry login server URL to log in to
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
     :param str repository: Repository for which the access token is requested
     :param str artifact_repository: Artifact repository for which the access token is requested
-    :param str permission: The requested permission on the repository, '*' or 'pull'
+    :param str permission: The requested permission on the repository
+    :param bool verify_user_permissions: Specifies whether to verify the allowed permissions in the access token. This is set to True when the --repository flag is used with the check-health command.
     """
     token_params = _handle_challenge_phase(
         login_server, repository, artifact_repository, permission, True, is_diagnostics_context
@@ -241,7 +263,8 @@ def _get_aad_token(cli_ctx,
                                           artifact_repository,
                                           permission,
                                           is_diagnostics_context,
-                                          use_acr_audience)
+                                          use_acr_audience,
+                                          verify_user_permissions)
 
 
 def _get_token_with_username_and_password(login_server,
@@ -403,13 +426,15 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                 aad_auth_policy = acr_config_authentication_as_arm_show(cmd, registry_name, resource_group_name)
                 use_acr_audience = (aad_auth_policy and aad_auth_policy.status == 'disabled')
 
-            return login_server, EMPTY_GUID, _get_aad_token(cli_ctx,
-                                                            login_server,
-                                                            only_refresh_token,
-                                                            repository,
-                                                            artifact_repository,
-                                                            permission,
-                                                            use_acr_audience=use_acr_audience)
+            token, _ = _get_aad_token(cli_ctx,
+                                      login_server,
+                                      only_refresh_token,
+                                      repository,
+                                      artifact_repository,
+                                      permission,
+                                      use_acr_audience=use_acr_audience)
+
+            return login_server, EMPTY_GUID, token
         except CLIError as e:
             raise_toomanyrequests_error(str(e))
             logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))

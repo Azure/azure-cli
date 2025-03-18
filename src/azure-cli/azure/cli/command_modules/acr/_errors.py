@@ -129,6 +129,10 @@ CONNECTIVITY_ACCESS_TOKEN_ERROR = ErrorClass(
     "Access to registry '{}' was denied. Response code: {}. Please try running 'az login' again to refresh permissions."
 )
 
+CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR = ErrorClass(
+    "CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR",
+    "Access to the repository '{}' was denied. You don't have the necessary permissions for this repository. Please try running 'az login' again to refresh permissions."
+)
 
 CONNECTIVITY_SSL_ERROR = ErrorClass(
     "CONNECTIVITY_SSL_ERROR",

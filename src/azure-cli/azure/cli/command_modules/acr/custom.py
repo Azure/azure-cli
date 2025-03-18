@@ -11,7 +11,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.util import user_confirmation
-from ._constants import get_managed_sku, get_premium_sku
+from ._constants import ABACRoleAssignmentMode, get_managed_sku, get_premium_sku
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -58,8 +58,8 @@ def acr_create(cmd,
                allow_trusted_services=None,
                allow_exports=None,
                tags=None,
-               allow_metadata_search=None):
-
+               allow_metadata_search=None,
+               role_assignment_mode=None):
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
@@ -86,6 +86,9 @@ def acr_create(cmd,
 
     if allow_metadata_search is not None:
         _configure_metadata_search(cmd, registry, allow_metadata_search)
+    
+    if role_assignment_mode is not None:
+        _configure_role_assignment_mode(cmd, registry, role_assignment_mode)
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
     _handle_export_policy(cmd, registry, allow_exports)
@@ -131,7 +134,8 @@ def acr_update_custom(cmd,
                       anonymous_pull_enabled=None,
                       allow_exports=None,
                       tags=None,
-                      allow_metadata_search=None):
+                      allow_metadata_search=None,
+                      role_assignment_mode=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
         instance.sku = Sku(name=sku)
@@ -156,6 +160,9 @@ def acr_update_custom(cmd,
 
     if allow_metadata_search is not None:
         _configure_metadata_search(cmd, instance, allow_metadata_search)
+
+    if role_assignment_mode is not None:
+        _configure_role_assignment_mode(cmd, instance, role_assignment_mode)
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
     _handle_export_policy(cmd, instance, allow_exports)
@@ -630,3 +637,11 @@ def list_private_link_resources(cmd, client, registry_name, resource_group_name=
 def _configure_metadata_search(cmd, registry, enabled):
     MetadataSearch = cmd.get_models('MetadataSearch')
     registry.metadata_search = (MetadataSearch.enabled if enabled else MetadataSearch.disabled)
+
+def _configure_role_assignment_mode(cmd, registry, role_assignment_mode):
+    RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
+    mode = RoleAssignmentMode.LEGACY_REGISTRY_PERMISSIONS
+    if role_assignment_mode == ABACRoleAssignmentMode.ABAC.value:
+        mode = RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+        logger.warning("Warning: You have successfully updated the registry authentication mode to enable RBAC Registry + ABAC Repository Permissions. ACR Tasks within the registry that do not have an assigned identity for source registry access will not have data plane access to the registry. To configure source registry data plane access for your existing Tasks, you must explicitly assign an Entra identity for accessing the source registry using the '--source-registry-auth-id' flag in 'az acr task update'. Please refer to https://aka.ms/acr/auth/abac for more details.")
+    registry.role_assignment_mode = mode

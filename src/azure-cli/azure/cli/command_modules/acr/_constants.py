@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.profiles import ResourceType
+from enum import Enum
 
 ACR_RESOURCE_PROVIDER = 'Microsoft.ContainerRegistry'
 REGISTRY_RESOURCE_TYPE = ACR_RESOURCE_PROVIDER + '/registries'
@@ -41,6 +42,9 @@ ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.
 # https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-referrers
 REF_KEY = "manifests"
 
+class ABACRoleAssignmentMode(Enum):
+    ABAC = "rbac-abac"
+    RBAC = "rbac"
 
 def get_classic_sku(cmd):
     SkuName = cmd.get_models('SkuName')

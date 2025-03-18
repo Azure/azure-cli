@@ -251,14 +251,21 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     return True
 
 
-def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
+def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, repository, ignore_errors):
     from ._errors import CONNECTIVITY_CHALLENGE_ERROR, CONNECTIVITY_AAD_LOGIN_ERROR, \
         CONNECTIVITY_REFRESH_TOKEN_ERROR, CONNECTIVITY_ACCESS_TOKEN_ERROR, \
-        CONNECTIVITY_TOOMANYREQUESTS_ERROR
+        CONNECTIVITY_TOOMANYREQUESTS_ERROR, CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
+
+    # Check user's allowed permissions to the repository if the repository name is specified
+    checked_permissions = None
+    if repository:
+        from ._docker_utils import RepoAccessTokenPermission
+        checked_permissions = RepoAccessTokenPermission.PULL_PUSH_META_WRITE_META_READ.value
+    verify_user_permissions = repository is not None
 
     # Check access to login endpoint
     url = 'https://' + login_server + '/v2/'
-    result_from_token = _get_aad_token(cmd.cli_ctx, login_server, False, is_diagnostics_context=True)
+    result_from_token, allowed_actions = _get_aad_token(cmd.cli_ctx, login_server, False, repository, permission=checked_permissions, is_diagnostics_context=True, verify_user_permissions=verify_user_permissions)
 
     if isinstance(result_from_token, ErrorClass):
         if result_from_token.error_title == CONNECTIVITY_CHALLENGE_ERROR.error_title:
@@ -287,6 +294,14 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
 
         print_pass("Fetch access token for registry '{}'".format(login_server))
 
+        if repository:
+            if result_from_token.error_title == CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.error_title:
+                _handle_error(result_from_token, ignore_errors)
+                return
+            logger.warning("You have the following permissions for the repository %s: %s", repository, allowed_actions)
+        elif repository is None and registry_abac_enabled:
+            logger.warning("Note: Please run the command with the '--repository' flag to check your read and write access to a specific repository.")
+
         return
 
     # If return is not of type ErrorClass, then it is the token
@@ -294,8 +309,12 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
     print_pass("Fetch refresh token for registry '{}'".format(login_server))
     print_pass("Fetch access token for registry '{}'".format(login_server))
 
+    if repository:
+        logger.warning("You have the following permissions for the repository %s: %s", repository, allowed_actions)
+    elif repository is None and registry_abac_enabled:
+        logger.warning("Note: Please run the command with the '--repository' flag to check your read and write access to a specific repository.")
 
-def _check_registry_health(cmd, registry_name, ignore_errors):
+def _check_registry_health(cmd, registry_name, repository, ignore_errors):
     from azure.cli.core.profiles import ResourceType
     if registry_name is None:
         logger.warning("Registry name must be provided to check connectivity.")
@@ -319,7 +338,9 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
 
     status_validated = _get_registry_status(login_server, registry_name, ignore_errors)
     if status_validated:
-        _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
+        RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
+        registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+        _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, repository, ignore_errors)
 
     if cmd.supported_api_version(min_api='2020-11-01-preview', resource_type=ResourceType.MGMT_CONTAINERREGISTRY):  # pylint: disable=too-many-nested-blocks
         # CMK settings
@@ -422,6 +443,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
                      vnet=None,
+                     repository=None,
                      ignore_errors=False,
                      yes=False,
                      registry_name=None):
@@ -433,7 +455,7 @@ def acr_check_health(cmd,  # pylint: disable useless-return
         _get_docker_status_and_version(ignore_errors, yes)
         _get_cli_version()
 
-    _check_registry_health(cmd, registry_name, ignore_errors)
+    _check_registry_health(cmd, registry_name, repository, ignore_errors)
 
     if vnet:
         _check_private_endpoint(cmd, registry_name, vnet)
