@@ -253,7 +253,8 @@ class Profile:
         # The old way of re-using the same --username for 3 types of ID
         elif identity_id:
             from azure.cli.core.breaking_change import print_conditional_breaking_change
-            print_conditional_breaking_change(None, 'MANAGED_IDENTITY_WITH_USERNAME', custom_logger=logger)
+            print_conditional_breaking_change(
+                None, 'MANAGED_IDENTITY_WITH_USERNAME', command_name='login', custom_logger=logger)
             if is_valid_resource_id(identity_id):
                 msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
