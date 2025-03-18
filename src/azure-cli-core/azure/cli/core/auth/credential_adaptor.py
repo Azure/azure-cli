@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
-from .util import build_sdk_access_token
 
 logger = get_logger(__name__)
 
