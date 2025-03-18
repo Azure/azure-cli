@@ -1380,7 +1380,7 @@ def load_arguments(self, _):
                             'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
             c.argument('block_deletion_before_end_of_life', arg_type=get_three_state_flag(), min_api='2024-03-03',
                        options_list=['--block-deletion-before-end-of-life', '--block-deletion'],
-                       help="Indicates whether or not the deletion is blocked for this gallery image version if its end of life has not expired")
+                       help="Indicate whether or not the deletion is blocked for this gallery image version if its end of life has not expired")
 
     for scope in ['sig image-version create', 'sig image-version update', 'sig image-version undelete']:
         with self.argument_context(scope, operation_group='gallery_image_versions') as c:
