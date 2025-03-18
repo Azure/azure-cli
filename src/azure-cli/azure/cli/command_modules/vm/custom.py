@@ -1830,6 +1830,8 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     from .aaz.latest.vm.availability_set import Show as _Show
     return _Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
                                                     'availability_set_name': availability_set_name})
+
+
 # endregion
 
 
