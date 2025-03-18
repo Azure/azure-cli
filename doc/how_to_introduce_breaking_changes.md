@@ -184,7 +184,7 @@ Declare breaking changes that affect the output of a command. This ensures users
 
 * `command`: REQUIRED: The name of the command group or command. If it is a command group, the warning would show in the execution of all commands in the group. 
 * `description`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
-* `target_version`: REQUIRED: The version when the deprecated item should be removed. The `target_version` is the next breaking change window by default.
+* `target_version`: REQUIRED: The version when the deprecated item should be removed. The `target_version` is the next breaking change window by default. Use either a specific version number or an approximate date in the format [DDth] MMM YYYY.
 * `guide`: REQUIRED: The migration guide that customers can follow to prepare for the future breaking change. Provide as much detail as possible to help our customers transition smoothly. 
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
@@ -202,7 +202,7 @@ Declare breaking changes in the logic of the command.
 
 * `command`: REQUIRED: The name of the command.
 * `summary`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
-* `target_version`: REQUIRED: The version when the breaking change should happen. The `target_version` is the next breaking change window by default.
+* `target_version`: REQUIRED: The version when the breaking change should happen. The `target_version` is the next breaking change window by default. Use either a specific version number or an approximate date in the format [DDth] MMM YYYY.
 * `detail`: A detailed description of the breaking change, including the actions customers should take. Provide as much detail as possible to help our customers transition smoothly.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
@@ -221,7 +221,7 @@ Declare breaking changes caused by changes in default values. This ensures users
 * `arg`: REQUIRED: The name of the argument or one of its options. The default change warning will display whether the argument is used or not.
 * `current_default`: REQUIRED: The current default value of the argument.
 * `new_default`: REQUIRED: The new default value of the argument.
-* `target_version`: REQUIRED: The version in which the breaking change should happen. By default, this is set to the next breaking change window.
+* `target_version`: REQUIRED: The version in which the breaking change should happen. By default, this is set to the next breaking change window. Use either a specific version number or an approximate date in the format [DDth] MMM YYYY.
 * `target`: Use this field to overwrite the argument display in warning messages.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
@@ -242,7 +242,7 @@ Declare breaking changes that will make an argument required in a future release
 
 * `command`: REQUIRED: The name of the command.
 * `arg`: REQUIRED: The name of the argument that will become required.
-* `target_version`: REQUIRED: The version in which the argument will become required. By default, this is set to the next breaking change window.
+* `target_version`: REQUIRED: The version in which the argument will become required. By default, this is set to the next breaking change window. Use either a specific version number or an approximate date in the format [DDth] MMM YYYY.
 * `target`: Use this field to overwrite the argument display in warning messages.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
