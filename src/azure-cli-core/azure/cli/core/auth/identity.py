@@ -41,7 +41,8 @@ logger = get_logger(__name__)
 
 
 class Identity:  # pylint: disable=too-many-instance-attributes
-    """Manage user and service principal identities."""
+    """Manage user or service principal identities and log into Microsoft identity platform.
+    """
 
     # MSAL token cache.
     # It follows singleton pattern so that all MSAL app instances share the same token cache.

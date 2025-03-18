@@ -1312,11 +1312,11 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
                 available_skus.append(sku_info)
         result = available_skus
     if resource_type:
-        result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
+        result = [x for x in result if x['resourceType'].lower() == resource_type.lower()]
     if size:
-        result = [x for x in result if x.resource_type == 'virtualMachines' and size.lower() in x.name.lower()]
+        result = [x for x in result if x['resourceType'] == 'virtualMachines' and size.lower() in x['name'].lower()]
     if zone:
-        result = [x for x in result if x.location_info and x.location_info[0].zones]
+        result = [x for x in result if x['locationInfo'] and x['locationInfo'][0]['zones']]
     return result
 
 
@@ -1597,6 +1597,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
 
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
     if security_type == "TrustedLaunch":
         from azure.cli.core.azclierror import InvalidArgumentValueError
         if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
@@ -1615,6 +1616,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             if vm.security_profile is None:
                 vm.security_profile = SecurityProfile()
             vm.security_profile.security_type = security_type
+    elif security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+        if vm.security_profile is None:
+            vm.security_profile = SecurityProfile()
+        vm.security_profile.security_type = security_type
+        vm.security_profile.uefi_settings = None
 
     if write_accelerator is not None:
         update_write_accelerator_settings(vm.storage_profile, write_accelerator)
@@ -1683,7 +1689,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if proximity_placement_group is not None:
         vm.proximity_placement_group = {'id': proximity_placement_group}
 
-    if enable_secure_boot is not None or enable_vtpm is not None:
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (enable_secure_boot is not None or enable_vtpm is not None):
         if vm.security_profile is None:
             vm.security_profile = SecurityProfile()
 
@@ -1785,7 +1791,7 @@ def _set_availset(cmd, resource_group_name, name, **kwargs):
     return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(resource_group_name, name, **kwargs)
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, line-too-long
 def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_name):
     av_set = _get_availset(cmd, resource_group_name, availability_set_name)
     if av_set.sku.name != 'Aligned':
@@ -1793,9 +1799,9 @@ def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_na
 
         # let us double check whether the existing FD number is supported
         skus = list_skus(cmd, av_set.location)
-        av_sku = next((s for s in skus if s.resource_type == 'availabilitySets' and s.name == 'Aligned'), None)
-        if av_sku and av_sku.capabilities:
-            max_fd = int(next((c.value for c in av_sku.capabilities if c.name == 'MaximumPlatformFaultDomainCount'),
+        av_sku = next((s for s in skus if s['resourceType'] == 'availabilitySets' and s['name'] == 'Aligned'), None)
+        if av_sku and av_sku['capabilities']:
+            max_fd = int(next((c['value'] for c in av_sku['capabilities'] if c['name'] == 'MaximumPlatformFaultDomainCount'),
                               '0'))
             if max_fd and max_fd < av_set.platform_fault_domain_count:
                 logger.warning("The fault domain count will be adjusted from %s to %s so to stay within region's "

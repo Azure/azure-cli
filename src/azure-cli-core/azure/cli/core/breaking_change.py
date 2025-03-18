@@ -24,7 +24,7 @@ def _get_action_class(cli_ctx, action):
     if isinstance(action, type) and issubclass(action, argparse.Action):
         action_class = action
     elif isinstance(action, str):
-        action_class = cli_ctx.invocation.command_loader.cli_ctx.invocation.parser._registries['action'][action]  # pylint: disable=protected-access
+        action_class = cli_ctx.invocation.parser._registries['action'][action]  # pylint: disable=protected-access
     return action_class
 
 

@@ -675,11 +675,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
     # after changing the default values to Trusted Launch VMs in the future.
-    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
-    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+    if security_type is not None:
         vm_properties['securityProfile']['securityType'] = security_type
 
-    if enable_secure_boot is not None or enable_vtpm is not None:
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (
+            enable_secure_boot is not None or enable_vtpm is not None):
         vm_properties['securityProfile']['uefiSettings'] = {
             'secureBootEnabled': enable_secure_boot,
             'vTpmEnabled': enable_vtpm
@@ -1506,11 +1507,12 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
     # after changing the default values to Trusted Launch VMs in the future.
-    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
-    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+    if security_type is not None:
         security_profile['securityType'] = security_type
 
-    if enable_secure_boot is not None or enable_vtpm is not None:
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (
+            enable_secure_boot is not None or enable_vtpm is not None):
         security_profile['uefiSettings'] = {
             'secureBootEnabled': enable_secure_boot,
             'vTpmEnabled': enable_vtpm

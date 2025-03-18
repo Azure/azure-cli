@@ -708,8 +708,8 @@ def process_certificate_policy(cmd, ns):
         raise CLIError('incorrect usage: policy should be a JSON encoded string '
                        'or can use @{file} to load from a file(e.g.@my_policy.json).')
 
-    secret_properties = policy.get('secret_properties')
-    if secret_properties and not secret_properties.get('content_type') \
+    secret_properties = policy.get('secret_properties') or {}
+    if not secret_properties.get('content_type') \
             and hasattr(ns, 'certificate_bytes') and ns.certificate_bytes:
         from OpenSSL import crypto
         try:
@@ -719,11 +719,13 @@ def process_certificate_policy(cmd, ns):
         except (ValueError, crypto.Error):
             # else it should be a pfx file
             secret_properties['content_type'] = 'application/x-pkcs12'
+        policy['secret_properties'] = secret_properties
 
     if hasattr(ns, 'validity'):
-        x509_certificate_properties = policy.get('x509_certificate_properties')
-        if x509_certificate_properties and ns.validity:
+        x509_certificate_properties = policy.get('x509_certificate_properties') or {}
+        if ns.validity:
             x509_certificate_properties['validity_in_months'] = ns.validity
+            policy['x509_certificate_properties'] = x509_certificate_properties
         del ns.validity
 
     policyObj = build_certificate_policy(cmd.cli_ctx, policy)

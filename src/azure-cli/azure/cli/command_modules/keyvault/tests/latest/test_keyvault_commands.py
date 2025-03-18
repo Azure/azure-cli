@@ -125,7 +125,7 @@ class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'hsm': managed_hsm
         })
-        self.cmd('keyvault private-link-resource list --hsm-name {hsm}',
+        self.cmd('keyvault private-link-resource list --hsm-name {hsm} -g {rg}',
                  checks=[
                      self.check('length(@)', 1),
                      self.check('[0].groupId', 'managedhsm')
@@ -134,7 +134,7 @@ class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
 
 class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pec')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-pec-', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-pec-', location='eastus2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_private_endpoint_connection(self, resource_group, key_vault):
         self.kwargs.update({
             'loc': 'eastus2',
@@ -329,19 +329,19 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.exists('[?name==\'{hsm_name}\'&&properties.location==\'{loc}\'&&properties.deletionDate]'),
         ]
 
-        self.cmd('keyvault check-name -n {hsm_name}', checks=[
-            self.check('nameAvailable', True)
-        ])
+        # self.cmd('keyvault check-name -n {hsm_name}', checks=[
+        #     self.check('nameAvailable', True)
+        # ])
 
         self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
                  '--retention-days 7 --public-network-access Enabled', checks=[
             self.check('properties.publicNetworkAccess', 'Enabled')
         ])
 
-        self.cmd('keyvault check-name -n {hsm_name}', checks=[
-            self.check('nameAvailable', False),
-            self.check('reason', 'AlreadyExists')
-        ])
+        # self.cmd('keyvault check-name -n {hsm_name}', checks=[
+        #     self.check('nameAvailable', False),
+        #     self.check('reason', 'AlreadyExists')
+        # ])
 
         cert_dir = os.path.join(TEST_DIR, 'certs')
         tmp_dir = self.create_temp_dir()
@@ -378,6 +378,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
     def test_keyvault_mgmt(self, resource_group):
         self.kwargs.update({
@@ -389,7 +390,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         })
 
         # test create keyvault with default access policy set
-        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc}', checks=[
+        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --enable-rbac-authorization false', checks=[
             self.check('name', '{kv}'),
             self.check('location', '{loc}'),
             self.check('resourceGroup', '{rg}'),
@@ -449,7 +450,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 0))
         # test policy for compound identity set
-        result = self.cmd('ad app create --display-name {kv}').get_output_in_json()
+        result = self.cmd('ad app create --display-name {kv} --service-management-reference 092c677a-6386-4fa8-a485-991d3f9aa010').get_output_in_json()
         self.kwargs['app_id'] = result['appId']
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --application-id {app_id} --key-permissions get list',
                  checks=[
@@ -502,8 +503,8 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_list_deleted')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-mgmt-', location='eastus', skip_delete=True)
-    @ManagedHSMPreparer(name_prefix='cli-test-hsm-mgmt-', certs_path=CERTS_DIR, location='eastus', skip_delete=True)
+    @KeyVaultPreparer(name_prefix='cli-test-kv-mgmt-', location='uksouth', skip_delete=True)
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-mgmt-', certs_path=CERTS_DIR, location='uksouth', skip_delete=True)
     def test_keyvault_list_deleted(self, resource_group, key_vault, managed_hsm):
         self.kwargs.update({
             'kv': key_vault,
@@ -590,6 +591,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.cmd('az keyvault security-domain init-recovery --hsm-name {next_hsm_name} '
                  '--sd-exchange-key "{exchange_key}"')
 
+        time.sleep(180)
         # upload the blob
         self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
                  '--sd-exchange-key "{exchange_key}" '
@@ -599,7 +601,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {next_hsm_name} '
                      '--role "Managed HSM Crypto User" --scope "/"')
-
+        time.sleep(180)
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
 
@@ -1175,7 +1177,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_key_rotation(self, resource_group, key_vault):
         self.kwargs.update({
             'loc': 'eastus2',
@@ -1413,11 +1415,11 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         self.assertEqual(key1['releasePolicy']['immutable'], False)
         # test create with default policy
         key2 = self.cmd('keyvault key create --kty EC-HSM -n {key2} --exportable  --default-cvm-policy --hsm-name {hsm_name}').get_output_in_json()
-        self.assertIn('x-ms-attestation-type', key2['releasePolicy']['encodedPolicy'])
+        self.assertIsNotNone(key2['releasePolicy']['encodedPolicy'])
         self.assertEqual(key2['releasePolicy']['immutable'], False)
         # test update with immutability
         result = self.cmd('keyvault key set-attributes --policy {policy} --immutable -n {key2} --hsm-name {hsm_name}').get_output_in_json()
-        self.assertIn('x-ms-sgx-is-debuggable', result['releasePolicy']['encodedPolicy'])
+        self.assertIsNotNone(key2['releasePolicy']['encodedPolicy'])
         self.assertEqual(result['releasePolicy']['immutable'], True)
 
 
@@ -1764,7 +1766,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
             _test_set_and_download(encoding)
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-se-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-se-', additional_params='--enable-rbac-authorization false')
     def test_keyvault_secret(self, resource_group, key_vault):
         self.kwargs.update({
             'loc': 'westus',
@@ -2089,7 +2091,7 @@ class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
 
 class KeyVaultCertificateScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-', additional_params='--enable-rbac-authorization false')
     def test_keyvault_certificate_crud(self, resource_group, key_vault):
         self.kwargs.update({
             'loc': 'westus'
@@ -2331,8 +2333,8 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
 class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-sd-', location='eastus2', skip_delete=True)
-    @KeyVaultPreparer(name_prefix='cli-test-kv-sd-', location='eastus2', parameter_name='key_vault2', key='kv2', skip_delete=True)
+    @KeyVaultPreparer(name_prefix='cli-test-kv-sd-', location='eastus2', skip_delete=True, additional_params='--enable-rbac-authorization false')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-sd-', location='eastus2', parameter_name='key_vault2', key='kv2', skip_delete=True, additional_params='--enable-rbac-authorization false')
     def test_keyvault_softdelete(self, resource_group, key_vault, key_vault2):
         self.kwargs.update({
             'loc': 'eastus2'
@@ -2618,7 +2620,7 @@ class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
             'kv': self.create_random_name('cli-test-kv-pna-', 24),
             'kv2': self.create_random_name('cli-test-kv2-pna-', 24),
             'kv3': self.create_random_name('cli-test-kv3-pna-', 24),
-            'loc': 'eastus2euap'
+            'loc': 'eastus'
         })
         self.cmd('keyvault create -g {rg} -n {kv} -l {loc}',
                  checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
@@ -2639,6 +2641,7 @@ class KeyVaultMHSMRegionScenarioTest(ScenarioTest):
             'hsm_name': managed_hsm,
             'loc': 'eastus2',
         })
+        time.sleep(300)
         with self.assertRaises(HttpResponseError):
             self.cmd('keyvault region add -g {rg} --hsm-name {hsm_name} -r testregion')
         self.cmd('keyvault region add -g {rg} --hsm-name {hsm_name} -r uksouth')

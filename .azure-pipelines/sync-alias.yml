@@ -14,10 +14,14 @@ resources:
     type: git
     name: internal.wiki
 
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+
 jobs:
 - job: UpdateYaml
   displayName: Update resourceManagement.yml
-  pool: pool-windows-2019
+  pool: 
+    name: ${{ variables.windows_pool }}
   uses:
     repositories:
     - ServiceContactList
