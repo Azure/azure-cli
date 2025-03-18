@@ -1280,11 +1280,11 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
                 available_skus.append(sku_info)
         result = available_skus
     if resource_type:
-        result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
+        result = [x for x in result if x['resourceType'].lower() == resource_type.lower()]
     if size:
-        result = [x for x in result if x.resource_type == 'virtualMachines' and size.lower() in x.name.lower()]
+        result = [x for x in result if x['resourceType'] == 'virtualMachines' and size.lower() in x['name'].lower()]
     if zone:
-        result = [x for x in result if x.location_info and x.location_info[0].zones]
+        result = [x for x in result if x['locationInfo'] and x['locationInfo'][0]['zones']]
     return result
 
 
@@ -1722,7 +1722,7 @@ def _set_availset(cmd, resource_group_name, name, **kwargs):
     return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(resource_group_name, name, **kwargs)
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, line-too-long
 def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_name):
     av_set = _get_availset(cmd, resource_group_name, availability_set_name)
     if av_set.sku.name != 'Aligned':
@@ -1730,9 +1730,9 @@ def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_na
 
         # let us double check whether the existing FD number is supported
         skus = list_skus(cmd, av_set.location)
-        av_sku = next((s for s in skus if s.resource_type == 'availabilitySets' and s.name == 'Aligned'), None)
-        if av_sku and av_sku.capabilities:
-            max_fd = int(next((c.value for c in av_sku.capabilities if c.name == 'MaximumPlatformFaultDomainCount'),
+        av_sku = next((s for s in skus if s['resourceType'] == 'availabilitySets' and s['name'] == 'Aligned'), None)
+        if av_sku and av_sku['capabilities']:
+            max_fd = int(next((c['value'] for c in av_sku['capabilities'] if c['name'] == 'MaximumPlatformFaultDomainCount'),
                               '0'))
             if max_fd and max_fd < av_set.platform_fault_domain_count:
                 logger.warning("The fault domain count will be adjusted from %s to %s so to stay within region's "
