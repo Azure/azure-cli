@@ -253,20 +253,20 @@ To enhance flexibility, the CLI supports using a designated tag to specify a Bre
 from azure.cli.core.breaking_change import register_conditional_breaking_change, AzCLIOtherChange
 
 register_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_change=AzCLIOtherChange(
-  'vm create', 'This is special Breaking Change Warning A. This breaking change is happend in "vm create" command.'))
+    'vm create', 'This is special Breaking Change Warning A. This breaking change is happend in "vm create" command.'))
 register_conditional_breaking_change(
-  tag='SpecialBreakingChangeB',
-  breaking_change='This is special Breaking Change Warning B. This breaking change is happend in "vm" command group.',
-  command_name='vm create'
+    tag='SpecialBreakingChangeB',
+    breaking_change='This is special Breaking Change Warning B. This breaking change is happend in "vm" command group.',
+    command_name='vm create'
 )
 
 
 # src/azure-cli/azure/cli/command_modules/vm/custom.py
 def create_vm(cmd, vm_name, **):
-  from azure.cli.core.breaking_change import print_conditional_breaking_change
-  if some_condition:
-    print_conditional_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeA', custom_logger=logger)
-    print_conditional_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeB', custom_logger=logger)
+    from azure.cli.core.breaking_change import print_conditional_breaking_change
+    if some_condition:
+        print_conditional_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeA', custom_logger=logger)
+        print_conditional_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeB', custom_logger=logger)
 ```
 
 This way, the pre-announcement wouldn't be displayed unless running into the branch, but still could be published in the [Azure CLI Breaking Changes]() article.
