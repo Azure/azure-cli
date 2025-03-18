@@ -249,7 +249,7 @@ To enhance flexibility, the CLI supports using a designated tag to specify a Bre
   * `command_name`: Used only when `cli_ctx` is `None`.
 
 ```python
-# src/azure-cli/azure/cli/command_modules/vm/custom.py
+# src/azure-cli/azure/cli/command_modules/vm/_breaking_change.py
 from azure.cli.core.breaking_change import register_conditional_breaking_change, AzCLIOtherChange
 
 register_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_change=AzCLIOtherChange(
