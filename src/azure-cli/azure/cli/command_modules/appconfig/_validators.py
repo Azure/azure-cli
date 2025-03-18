@@ -397,6 +397,16 @@ def validate_sku(namespace):
             namespace.no_replica = None
             namespace.enable_arm_private_network_access = None
             return
+    
+    if namespace.sku.lower() == 'developer':
+        if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica):  # pylint: disable=too-many-boolean-expressions
+            logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a dev store.")
+            namespace.retention_days = None
+            namespace.enable_purge_protection = None
+            namespace.replica_name = None
+            namespace.replica_location = None
+            namespace.no_replica = None
+            return
 
     if namespace.sku.lower() == 'premium' and not namespace.no_replica:
         if any(arg is None for arg in [namespace.replica_name, namespace.replica_location]):

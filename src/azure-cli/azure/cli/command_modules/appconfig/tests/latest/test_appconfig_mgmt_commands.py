@@ -25,9 +25,35 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_azconfig_mgmt(self, resource_group, location):
         mgmt_prefix = get_resource_name_prefix('MgmtTest')
-        config_store_name = self.create_random_name(prefix=mgmt_prefix, length=36)
 
+        # Create store with developer sku
+        developer_config_store_name = self.create_random_name(prefix=mgmt_prefix, length=36)
+        developer_sku = 'developer'
         location = 'eastus'
+
+        self.kwargs.update({
+            'config_store_name': developer_config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': developer_sku
+        })
+        
+        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}',
+                         checks=[self.check('name', '{config_store_name}'),
+                                 self.check('location', '{rg_loc}'),
+                                 self.check('resourceGroup', resource_group),
+                                 self.check('provisioningState', 'Succeeded'),
+                                 self.check('sku.name', developer_sku)]).get_output_in_json()
+
+
+        self.cmd('appconfig show -n {config_store_name} -g {rg}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', developer_sku)])
+
+        config_store_name = self.create_random_name(prefix=mgmt_prefix, length=36)
         standard_sku = 'standard'
         premium_sku = 'premium'
         tag_key = "key"
