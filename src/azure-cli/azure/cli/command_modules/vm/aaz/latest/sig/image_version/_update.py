@@ -395,12 +395,12 @@ class Update(AAZCommand):
             help="The resource Id of the source Community Gallery Image.  Only required when using Community Gallery Image as a source.",
             nullable=True,
         )
-        source.id = AAZStrArg(
+        source.id = AAZResourceIdArg(
             options=["id"],
             help="The id of the gallery artifact version source. Can specify a disk uri, snapshot uri, user image or storage account resource.",
             nullable=True,
         )
-        source.virtual_machine_id = AAZStrArg(
+        source.virtual_machine_id = AAZResourceIdArg(
             options=["virtual-machine-id"],
             help="The resource Id of the source virtual machine.  Only required when capturing a virtual machine to source this Gallery Image Version.",
             nullable=True,
@@ -491,7 +491,7 @@ class Update(AAZCommand):
         )
 
         gallery_disk_image_source_update = cls._args_gallery_disk_image_source_update
-        gallery_disk_image_source_update.id = AAZStrArg(
+        gallery_disk_image_source_update.id = AAZResourceIdArg(
             options=["id"],
             help="The id of the gallery artifact version source. Can specify a disk uri, snapshot uri, user image or storage account resource.",
             nullable=True,
