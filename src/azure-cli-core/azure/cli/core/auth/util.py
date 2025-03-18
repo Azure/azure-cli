@@ -11,6 +11,9 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
+AccessToken = namedtuple("AccessToken", ["token", "expires_on"])
+
+
 PASSWORD_CERTIFICATE_WARNING = (
     "The error may be caused by passing a service principal certificate with --password. "
     "Please note that --password no longer accepts a service principal certificate. "
@@ -136,6 +139,21 @@ def check_result(result, **kwargs):
     return None
 
 
+def build_sdk_access_token(token_entry):
+    # MSAL token entry sample:
+    # {
+    #     'access_token': 'eyJ0eXAiOiJKV...',
+    #     'token_type': 'Bearer',
+    #     'expires_in': 1618
+    # }
+
+    # Importing azure.core.credentials.AccessToken is expensive.
+    # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
+    # So We define our own AccessToken.
+    from .constants import ACCESS_TOKEN, EXPIRES_IN
+    return AccessToken(token_entry[ACCESS_TOKEN], _now_timestamp() + token_entry[EXPIRES_IN])
+
+
 def decode_access_token(access_token):
     # Decode the access token. We can do the same with https://jwt.ms
     from msal.oauth2cli.oidc import decode_part
@@ -157,3 +175,8 @@ def read_response_templates():
         error_template = f.read()
 
     return success_template, error_template
+
+
+def _now_timestamp():
+    import time
+    return int(time.time())
