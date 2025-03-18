@@ -526,7 +526,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                     raise CLIError('There is no latest image version exists for "{}"'.format(namespace.image))
                 image_version_info = sorted(image_version_infos,
                                             key=lambda x: x["publishingProfile"]["publishedDate"])[-1]
-                image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", [])
+                image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", []) or []
                 image_data_disks = [{'lun': disk["lun"]} for disk in image_data_disks]
             else:
                 SigImageVersionShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "sig.image_version").Show
@@ -536,7 +536,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                     "gallery_image_definition": res['child_name_1'],
                     "gallery_image_version_name": res['child_name_2'],
                 })
-                image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", [])
+                image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", []) or []
                 image_data_disks = [{'lun': disk["lun"]} for disk in image_data_disks]
 
         else:
