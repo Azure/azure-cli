@@ -587,16 +587,35 @@ def register_argument_deprecate(command, argument, redirect=None, hide=None,
     register_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
 
 
-def register_conditional_breaking_change(tag, breaking_change):
-    upcoming_breaking_changes[breaking_change.command_name + '.' + tag].append(breaking_change)
+def register_conditional_breaking_change(tag, breaking_change, *, command_name=None):
+    if isinstance(breaking_change, BreakingChange):
+        command_name = command_name or breaking_change.command_name
+        upcoming_breaking_changes[command_name + '.' + tag].append(breaking_change)
+    elif isinstance(breaking_change, str):
+        command_name = command_name or ''
+        upcoming_breaking_changes[command_name + '.' + tag].append(AzCLIOtherChange(
+            cmd=command_name,
+            message=breaking_change,
+        ))
 
 
-def print_conditional_breaking_change(cli_ctx, tag, custom_logger=None):
-    command = cli_ctx.invocation.commands_loader.command_name
+def print_conditional_breaking_change(cli_ctx, tag, *, custom_logger=None, command_name=None):
+    """
+    Print a breaking change warning message manually.
+    :param cli_ctx: By default, retrieve the command name from cli_ctx.
+    :param tag: Use the tag to distinguish different warning messages to be printed in the same command. Please note, all breaking change items with the same tag from the parent command group will also be printed.
+    :param custom_logger: Use a custom logger to replace the logger in azure.cli.core.breaking_change.
+    :param command_name: Specify the command name if not pass in the cli_ctx
+    """
+    command = cli_ctx.invocation.commands_loader.command_name if cli_ctx else command_name
+    command = command or ''
+    tag_suffix = '.' + tag if tag is not None else ''
     custom_logger = custom_logger or logger
 
     command_comps = command.split()
     while command_comps:
-        for breaking_change in upcoming_breaking_changes.get(' '.join(command_comps) + '.' + tag, []):
+        for breaking_change in upcoming_breaking_changes.get(' '.join(command_comps) + tag_suffix, []):
             custom_logger.warning(breaking_change.message)
         del command_comps[-1]
+    for breaking_change in upcoming_breaking_changes.get(tag_suffix, []):
+        custom_logger.warning(breaking_change.message)
