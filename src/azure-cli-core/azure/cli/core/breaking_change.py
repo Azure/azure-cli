@@ -511,6 +511,14 @@ class AzCLIOtherChange(BreakingChange):
 upcoming_breaking_changes = defaultdict(lambda: [])
 
 
+def import_core_breaking_changes():
+    try:
+        from importlib import import_module
+        import_module('azure.cli.core._breaking_change')
+    except ImportError:
+        pass
+
+
 def import_module_breaking_changes(mod):
     try:
         from importlib import import_module
