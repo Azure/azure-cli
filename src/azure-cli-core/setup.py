@@ -55,6 +55,7 @@ DEPENDENCIES = [
     'microsoft-security-utilities-secret-masker~=1.0.0b4',
     'msal-extensions==1.2.0',
     'msal[broker]==1.31.2b1',
+    'msrestazure~=0.6.4',
     'packaging>=20.9',
     'pkginfo>=1.5.0.1',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
