@@ -281,13 +281,17 @@ def get_custom_registry_credentials(cmd,
                                     username=None,
                                     password=None,
                                     identity=None,
-                                    is_remove=False):
+                                    is_remove=False,
+                                    source_registry_auth_id=None,
+                                    registry_abac_enabled=False):
     """Get the credential object from the input
     :param str auth_mode: The login mode for the source registry
     :param str login_server: The login server of custom registry
     :param str username: The username for custom registry (plain text or a key vault secret URI)
     :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
+    :param str source_registry_auth_id: the managed identity used for the source registry authentication
+    :param bool registry_abac_enabled: whether the registry is ABAC-enabled
     """
     Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, \
         SecretObjectType = cmd.get_models(
@@ -295,10 +299,19 @@ def get_custom_registry_credentials(cmd,
             'SecretObjectType',
             operation_group='tasks')
 
+    # "Default" and "None" are the allowed values for source registry auth mode.
+    # For a non-ABAC-enabled registry, "--source-registry-auth-id" will not take effect, and authentication
+    # will fail if the auth mode is "None". Therefore, we need to throw an error here.
+    if not registry_abac_enabled and auth_mode and auth_mode.lower() == "none" and source_registry_auth_id:
+        raise CLIError('Error: Conflicting Authentication Parameters for Task Access to Source Registry. Task authentication mode for source registry access is set to "None," but an identity was provided for authentication. Remove the identity or update the authentication mode to resolve this conflict.')
+
     source_registry_credentials = None
+    # Need to differentiate between the string "None" and the None value for auth_mode
     if auth_mode:
         source_registry_credentials = SourceRegistryCredentials(
-            login_mode=auth_mode)
+            login_mode=auth_mode, identity=source_registry_auth_id)
+    elif source_registry_auth_id: # auth_mode is None at this point
+        source_registry_credentials = SourceRegistryCredentials(identity=source_registry_auth_id)
 
     custom_registries = None
     if login_server:
@@ -603,3 +616,7 @@ def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_n
     from ._client_factory import cf_acr_tasks
     client = cf_acr_tasks(cli_ctx)
     return client.get_details(resource_group_name, registry_name, task_name)
+
+def check_auth_mode_for_abac(registry_abac_enabled, auth_mode):
+    if registry_abac_enabled and auth_mode is not None:
+        logger.warning("The --auth-mode flag is deprecated for specifying access to an ABAC-enabled source registry. Please use --source-registry-auth-id to specify an Entra identity for use in accessing an ABAC-enabled source registry." )

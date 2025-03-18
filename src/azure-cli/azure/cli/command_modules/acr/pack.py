@@ -95,10 +95,10 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         agent_pool_name=agent_pool_name
     )
 
-    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.begin_schedule_run(
+    queued = client_registries.schedule_run(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
-        run_request=request))
+        run_request=request)
 
     run_id = queued.run_id
     logger.warning('Queued a run with ID: %s', run_id)
