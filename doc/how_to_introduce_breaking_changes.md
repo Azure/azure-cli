@@ -280,11 +280,11 @@ To enhance flexibility, the CLI supports using a designated tag to specify a Bre
 
 ```python
 # src/azure-cli/azure/cli/command_modules/vm/_breaking_change.py
-from azure.cli.core.breaking_change import register_conditional_breaking_change
+from azure.cli.core.breaking_change import AzCLIOtherChange, register_conditional_breaking_change
 
-register_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_change=(
+register_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_change=AzCLIOtherChange(
   'vm create', 'This is special Breaking Change Warning A. This breaking change is happend in "vm create" command.'))
-register_conditional_breaking_change(tag='SpecialBreakingChangeB', breaking_change=(
+register_conditional_breaking_change(tag='SpecialBreakingChangeB', breaking_change=AzCLIOtherChange(
   'vm', 'This is special Breaking Change Warning B. This breaking change is happend in "vm" command group.'))
 
 
