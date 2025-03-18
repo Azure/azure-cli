@@ -15,7 +15,16 @@ from azure.cli.core.aaz import *
     "vm availability-set update",
 )
 class Update(AAZCommand):
-    """Update an availability set.
+    """Update an Azure Availability Set.
+
+    :example: Update an availability set
+        az vm availability-set update -n MyAvSet -g MyResourceGroup
+
+    :example: Update an availability set tag.
+        az vm availability-set update -n MyAvSet -g MyResourceGroup --set tags.foo=value
+
+    :example: Remove an availability set tag.
+        az vm availability-set update -n MyAvSet -g MyResourceGroup --remove tags.foo
     """
 
     _aaz_info = {
