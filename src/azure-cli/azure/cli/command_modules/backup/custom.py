@@ -868,7 +868,7 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
-    logger.warning('Starting in May 2025, Trusted Launch virtual machines can be protected with both' 
+    logger.warning('Starting in May 2025, Trusted Launch virtual machines can be protected with both'
                    ' standard and enhanced policies via PS and CLI')
 
     # throw error if policy has more than 1000 protected VMs.
