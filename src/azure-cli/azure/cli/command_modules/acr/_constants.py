@@ -42,9 +42,11 @@ ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.
 # https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-referrers
 REF_KEY = "manifests"
 
-class ABACRoleAssignmentMode(Enum):
+
+class AbacRoleAssignmentMode(Enum):
     ABAC = "rbac-abac"
     RBAC = "rbac"
+
 
 def get_classic_sku(cmd):
     SkuName = cmd.get_models('SkuName')

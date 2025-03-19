@@ -11,7 +11,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.util import user_confirmation
-from ._constants import ABACRoleAssignmentMode, get_managed_sku, get_premium_sku
+from ._constants import AbacRoleAssignmentMode, get_managed_sku, get_premium_sku
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -86,7 +86,7 @@ def acr_create(cmd,
 
     if allow_metadata_search is not None:
         _configure_metadata_search(cmd, registry, allow_metadata_search)
-    
+
     if role_assignment_mode is not None:
         _configure_role_assignment_mode(cmd, registry, role_assignment_mode)
 
@@ -638,10 +638,18 @@ def _configure_metadata_search(cmd, registry, enabled):
     MetadataSearch = cmd.get_models('MetadataSearch')
     registry.metadata_search = (MetadataSearch.enabled if enabled else MetadataSearch.disabled)
 
+
 def _configure_role_assignment_mode(cmd, registry, role_assignment_mode):
     RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
     mode = RoleAssignmentMode.LEGACY_REGISTRY_PERMISSIONS
-    if role_assignment_mode == ABACRoleAssignmentMode.ABAC.value:
+    if role_assignment_mode == AbacRoleAssignmentMode.ABAC.value:
         mode = RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
-        logger.warning("Warning: You have successfully updated the registry authentication mode to enable RBAC Registry + ABAC Repository Permissions. ACR Tasks within the registry that do not have an assigned identity for source registry access will not have data plane access to the registry. To configure source registry data plane access for your existing Tasks, you must explicitly assign an Entra identity for accessing the source registry using the '--source-registry-auth-id' flag in 'az acr task update'. Please refer to https://aka.ms/acr/auth/abac for more details.")
+        logger.warning(
+            "Warning: You have successfully updated the registry authentication mode to enable RBAC "
+            "Registry + ABAC Repository Permissions. ACR Tasks within the registry that do not have "
+            "an assigned identity for source registry access will not have data plane access to the "
+            "registry. To configure source registry data plane access for your existing Tasks, you "
+            "must explicitly assign an Entra identity for accessing the source registry using the "
+            "'--source-registry-auth-id' flag in 'az acr task update'. Please refer to "
+            "https://aka.ms/acr/auth/abac for more details.")
     registry.role_assignment_mode = mode

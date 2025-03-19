@@ -1482,7 +1482,7 @@ examples:
         az acr update -n myregistry --admin-enabled true
   - name: Turn on ABAC-based Repository Permission on an existing registry.
     text: >
-        az acr update -n myregistry -role-assignment-mode rbac-abac
+        az acr update -n myregistry --role-assignment-mode rbac-abac
 """
 
 helps['acr webhook'] = """

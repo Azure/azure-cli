@@ -5,7 +5,6 @@
 
 from urllib.parse import urlencode, urlparse, urlunparse
 
-import jwt
 import time
 from json import loads
 from enum import Enum
@@ -56,7 +55,7 @@ class RepoAccessTokenPermission(Enum):
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
-    DELETED_READ_RESTORE = '{},{}'.format(DELETED_READ, DELETED_RESTORE),
+    DELETED_READ_RESTORE = '{},{}'.format(DELETED_READ, DELETED_RESTORE)
     PULL_PUSH_META_WRITE_META_READ = '{},{},{},{}'.format(PULL, PUSH, METADATA_WRITE, METADATA_READ)
 
 
@@ -150,8 +149,7 @@ def _get_aad_token_after_challenge(cli_ctx,
         scope = "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
 
     # this might be a cross tenant scenario, so pass subscription to get_raw_token
-    subscription = get_subscription_id(cli_ctx)
-    creds, _, tenant = profile.get_raw_token(subscription=subscription,
+    creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
                                              resource=scope)
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
@@ -210,23 +208,35 @@ def _get_aad_token_after_challenge(cli_ctx,
                        .get_error_message())
 
     access_token = loads(response.content.decode("utf-8"))["access_token"]
+    allowed_actions = (
+        _retrieve_allowed_actions(access_token, repository, is_diagnostics_context) if verify_user_permissions else None
+    )
+
+    return access_token, allowed_actions
+
+
+def _retrieve_allowed_actions(access_token, repository, is_diagnostics_context):
     allowed_actions = None
 
-    if verify_user_permissions:
+    try:
+        import jwt
         decoded_token = jwt.decode(access_token, algorithms=['RS256'], options={"verify_signature": False})
         access_value = decoded_token.get("access", [{}])[0]
         actions_value = access_value.get('actions', [])
+    except Exception as err:
+        raise CLIError("Failed to decode access token")
 
-        if len(actions_value) == 0 :
-            from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
-            if is_diagnostics_context:
-                return CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(repository), None
-            raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(repository)
-                           .get_error_message())
-        if isinstance(actions_value, list):
-            allowed_actions = ', '.join(actions_value)
+    if len(actions_value) == 0:
+        from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(repository), None
+        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(repository)
+                       .get_error_message())
 
-    return access_token, allowed_actions
+    if isinstance(actions_value, list):
+        allowed_actions = ', '.join(actions_value)
+
+    return allowed_actions
 
 
 def _get_aad_token(cli_ctx,
@@ -238,13 +248,15 @@ def _get_aad_token(cli_ctx,
                    is_diagnostics_context=False,
                    use_acr_audience=False,
                    verify_user_permissions=False):
-    """Obtains refresh and access tokens for an AAD-enabled registry. Will return the allowed actions if verify_user_permissions is set to True.
+    """Obtains refresh and access tokens for an AAD-enabled registry. Will return the allowed actions if
+    verify_user_permissions is set to True.
     :param str login_server: The registry login server URL to log in to
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
     :param str repository: Repository for which the access token is requested
     :param str artifact_repository: Artifact repository for which the access token is requested
     :param str permission: The requested permission on the repository
-    :param bool verify_user_permissions: Specifies whether to verify the allowed permissions in the access token. This is set to True when the --repository flag is used with the check-health command.
+    :param bool verify_user_permissions: Specifies whether to verify the allowed permissions in the access token.
+    This is set to True when the --repository flag is used with the check-health command.
     """
     token_params = _handle_challenge_phase(
         login_server, repository, artifact_repository, permission, True, is_diagnostics_context

@@ -265,7 +265,14 @@ def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, rep
 
     # Check access to login endpoint
     url = 'https://' + login_server + '/v2/'
-    result_from_token, allowed_actions = _get_aad_token(cmd.cli_ctx, login_server, False, repository, permission=checked_permissions, is_diagnostics_context=True, verify_user_permissions=verify_user_permissions)
+    result_from_token, allowed_actions = _get_aad_token(
+        cmd.cli_ctx,
+        login_server,
+        False,
+        repository,
+        permission=checked_permissions,
+        is_diagnostics_context=True,
+        verify_user_permissions=verify_user_permissions)
 
     if isinstance(result_from_token, ErrorClass):
         if result_from_token.error_title == CONNECTIVITY_CHALLENGE_ERROR.error_title:
@@ -274,15 +281,10 @@ def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, rep
 
         print_pass("Challenge endpoint {}".format(url))
 
-        if result_from_token.error_title == CONNECTIVITY_AAD_LOGIN_ERROR.error_title:
-            _handle_error(result_from_token, ignore_errors)
-            return
-
-        if result_from_token.error_title == CONNECTIVITY_REFRESH_TOKEN_ERROR.error_title:
-            _handle_error(result_from_token, ignore_errors)
-            return
-
-        if result_from_token.error_title == CONNECTIVITY_TOOMANYREQUESTS_ERROR.error_title:
+        if result_from_token.error_title in [
+                CONNECTIVITY_AAD_LOGIN_ERROR.error_title,
+                CONNECTIVITY_REFRESH_TOKEN_ERROR.error_title,
+                CONNECTIVITY_TOOMANYREQUESTS_ERROR.error_title]:
             _handle_error(result_from_token, ignore_errors)
             return
 
@@ -300,7 +302,9 @@ def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, rep
                 return
             logger.warning("You have the following permissions for the repository %s: %s", repository, allowed_actions)
         elif repository is None and registry_abac_enabled:
-            logger.warning("Note: Please run the command with the '--repository' flag to check your read and write access to a specific repository.")
+            logger.warning(
+                "Note: Please run the command with the '--repository' flag to check your read and write access "
+                "to a specific repository.")
 
         return
 
@@ -312,7 +316,10 @@ def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, rep
     if repository:
         logger.warning("You have the following permissions for the repository %s: %s", repository, allowed_actions)
     elif repository is None and registry_abac_enabled:
-        logger.warning("Note: Please run the command with the '--repository' flag to check your read and write access to a specific repository.")
+        logger.warning(
+            "Note: Please run the command with the '--repository' flag to check your read and write access "
+            "to a specific repository.")
+
 
 def _check_registry_health(cmd, registry_name, repository, ignore_errors):
     from azure.cli.core.profiles import ResourceType
