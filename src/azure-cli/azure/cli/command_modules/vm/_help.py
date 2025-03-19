@@ -1018,6 +1018,14 @@ examples:
     text: az vm auto-shutdown -g MyResourceGroup -n MyVm --off
 """
 
+helps['vm list-sizes'] = """
+type: command
+short-summary: List available sizes for VMs.
+examples:
+  - name: List the available VM sizes in the West US region.
+    text: az vm list-sizes -l westus
+"""
+
 helps['vm availability-set convert'] = """
 type: command
 short-summary: Convert an Azure Availability Set to contain VMs with managed disks.
