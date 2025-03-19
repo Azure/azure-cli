@@ -596,6 +596,8 @@ def register_argument_deprecate(command, argument, redirect=None, hide=None,
 
 
 def register_conditional_breaking_change(tag, breaking_change, *, command_name=None):
+    if command_name and command_name.startswith('az '):
+        command_name = command_name[3:].strip()
     if isinstance(breaking_change, BreakingChange):
         command_name = command_name or breaking_change.command_name
         upcoming_breaking_changes[command_name + '.' + tag].append(breaking_change)
@@ -611,7 +613,8 @@ def print_conditional_breaking_change(cli_ctx, tag, *, custom_logger=None, comma
     """
     Print a breaking change warning message manually.
     :param cli_ctx: By default, retrieve the command name from cli_ctx.
-    :param tag: Use the tag to distinguish different warning messages to be printed in the same command. Please note, all breaking change items with the same tag from the parent command group will also be printed.
+    :param tag: Use the tag to distinguish different warning messages to be printed in the same command.
+    Please note, all breaking change items with the same tag from the parent command group will also be printed.
     :param custom_logger: Use a custom logger to replace the logger in azure.cli.core.breaking_change.
     :param command_name: Specify the command name if not pass in the cli_ctx
     """
