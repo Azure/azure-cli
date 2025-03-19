@@ -5911,4 +5911,13 @@ def sig_community_image_version_list(client, location, public_gallery_name, gall
     generator = client.list(location=location, public_gallery_name=public_gallery_name,
                             gallery_image_name=gallery_image_name)
     return get_page_result(generator, marker, show_next_marker)
+
+
+def list_vm_sizes(cmd, location):
+    from .operations.vm import VMListSizes
+    return VMListSizes(cli_ctx=cmd.cli_ctx)(command_args={
+        "location": location,
+    })
+
+
 # endRegion

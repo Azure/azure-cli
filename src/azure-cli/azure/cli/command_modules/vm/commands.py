@@ -331,8 +331,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
-        from .operations.vm import VMListSizes
-        self.command_table['vm list-sizes'] = VMListSizes(loader=self)
+        g.custom_command('list-sizes', 'list_vm_sizes', deprecate_info=g.deprecate())
 
     with self.command_group('vm', compute_vm_sdk, client_factory=cf_vm) as g:
         g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')
