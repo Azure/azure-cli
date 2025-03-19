@@ -225,12 +225,12 @@ class AcrCommandsTests(ScenarioTest):
             'sku': 'Standard',
             'cr_name': 'test1',
             'cs_name': 'test1',
-            'source_repo': 'docker.io/library/ubuntu',
-            'target_repo': 'ubuntu',
+            'source_repo': 'mcr.microsoft.com/mcr/hello-world',
+            'target_repo': 'hello-world',
             'user_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPusername',
             'pass_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPpassword',
             'new_pass_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPusername',
-            'upstream': 'docker.io'
+            'upstream': 'mcr.microsoft.com'
 
         })
 
@@ -540,6 +540,7 @@ class AcrCommandsTests(ScenarioTest):
             self.check('metrics[0].category', 'AllMetrics'),
         ])
 
+    @live_only()
     @ResourceGroupPreparer()
     @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
