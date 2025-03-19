@@ -29,27 +29,56 @@ You could find the next Breaking Change Release plan in our [milestones](https:/
 > 
 > Please note that providing the required info for assessment does not mean it will be assured to be green-lighted for breaking changes. Team will still make the decision based on the overall impact.
 
-### Pre-announce Breaking Changes
+### Ahead-of-1-Month Pre-announcement Policy
 
-All breaking changes **must** be pre-announced two sprints ahead Release. It give users the buffer time ahead to mitigate for better command experience. There are two approaches to inform both interactive users and automatic users about the breaking changes.
+All breaking changes **must** be pre-announced **30** days(usually **2** sprints for modules in Core CLI) ahead Release. It gives users the buffer time ahead to mitigate for better command experience. There are two approaches to inform both interactive users and automatic users about the breaking changes.
 
 1. (**Mandatory**) Breaking Changes must be pre-announced through Warning Log while executing.
 2. (*Automatic*) Breaking Changes would be collected automatically and listed in [Upcoming Breaking Change](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes) Document.
 
+### Breaking Changes in Extensions
+
+All breaking changes in GA extensions **must** be pre-announced at least **30** days prior to their Release. 
+
+Extensions don't need to follow the breaking change window. However, we still strongly recommend releasing breaking changes only in breaking change windows along with Core Azure CLI.
+
+```text
+[GA Release with Breaking Change Pre-Announcement]
+│
+├─ Must include complete Breaking Change Information
+│
+└─┬─ [Minimum 30-day Announcement Period] ────────────────┐
+  │                                                       │
+  │  Allow releases during this period:                   │
+  │  - Other unrelated GA versions (vX.(Y+1), v(X+1).Y)   │
+  │  - Multiple preview releases (Beta)                   │
+  │                                                       │
+  ▼                                                       ▼
+[GA Release Containing Breaking Changes]
+(Must fulfill 30-day announcement requirement)
+```
+
 ## Workflow
 
-### Overview
+### CLI Workflow Overview
 
-* CLI Owned Module
-  * Service Team should create an Issue that requests CLI Team to create the pre-announcement several sprints ahead Breaking Change Window. The issue should include the label `Breaking Change`. The CLI team will look at the issue and evaluate if it will be accepted in the next breaking change release.
+* **CLI Owned Module**
+  * Service Team should create an Issue that requests CLI Team to create the pre-announcement at least **1** month(usually **2** sprints) ahead of Breaking Change Window. The issue should include the label `Breaking Change`. The CLI team will look at the issue and evaluate if it will be accepted in the next breaking change release.
     * Please ensure sufficient time for CLI Team to finish the pre-announcement.
-  * The pre-announcement should be released ahead of Breaking Change Window.
-* Service Owned Module
-  * Service Team should create a Pull Request that create the pre-announcement several sprints ahead Breaking Change Window.
-  * The pre-announcement should be released ahead of Breaking Change Window.
+  * The pre-announcement should be released at least **1** month(usually **2** sprints) ahead of Breaking Change Window.
+* **Service Owned Module**
+  * Service Team should create a Pull Request that adds the pre-announcement at least **1** month(usually **2** sprints) ahead of Breaking Change Window.
+  * The pre-announcement should be released at least **1** month(usually **2** sprints) ahead of Breaking Change Window.
 * After releasing the pre-announcement, a pipeline would be triggered, and the Upcoming Breaking Change Documentation would be updated.
 * At the start of Breaking Change window, the CLI team would notify Service Teams to adopt Breaking Changes.
 * Breaking Changes should be adopted within Breaking Change Window. Any unfinished pre-announcements of breaking changes targeting this release will be deleted by the CLI team.
+
+### Extensions Workflow Overview
+
+* Service Team should create a Pull Request that includes the pre-announcement.
+* The pre-announcement should be released after merged.
+* After releasing the pre-announcement, a pipeline would be triggered, and the Upcoming Breaking Change Documentation would be updated.
+* After 30 days, the Pull Request that contains the actual breaking changes could be merged and released.
 
 ### Pre-announce Breaking Changes
 
@@ -72,7 +101,7 @@ You can then pre-announce breaking changes for different command groups or comma
 from azure.cli.core.breaking_change import register_required_flag_breaking_change, register_default_value_breaking_change, register_other_breaking_change
 
 register_required_flag_breaking_change('bar foo', '--name')
-register_default_value_breaking_change('bar foo baz', '--foobar', 'A', 'B')
+register_default_value_breaking_change('bar foo baz', '--foobar', 'A', 'B', target_version='May 2025')
 register_other_breaking_change('bar foo baz', 'During May 2024, another Breaking Change would happen in Build Event.')
 ```
 
@@ -84,7 +113,7 @@ az bar foo baz
 
 # =====Warning output=====
 # The argument '--name' will become required in next breaking change release(2.61.0).
-# The default value of '--foobar' will be changed to 'B' from 'A' in next breaking change release(2.61.0).
+# The default value of '--foobar' will be changed to 'B' from 'A' in May 2025.
 # During May 2024, another Breaking Change would happen in Build Event.
 ```
 
@@ -132,6 +161,8 @@ from azure.cli.core.breaking_change import register_argument_deprecate
 
 register_argument_deprecate('bar foo', '--name', target_version='2.70.0')
 # Warning Message: Option `--name` has been deprecated and will be removed in 2.70.0.
+register_argument_deprecate('bar foo', '--name', target_version='May 2025')
+# Warning Message: Option `--name` has been deprecated and will be removed in May 2025.
 ```
 
 **Rename**
@@ -143,6 +174,8 @@ from azure.cli.core.breaking_change import register_argument_deprecate
 
 register_argument_deprecate('bar foo', '--name', '--new-name')
 # Warning Message: Option `--name` has been deprecated and will be removed in next breaking change release(2.67.0). Use `--new-name` instead.
+register_argument_deprecate('bar foo', '--name', '--new-name', target_version='May 2025')
+# Warning Message: Option `--name` has been deprecated and will be removed in May 2025. Use `--new-name` instead.
 ```
 
 **Output Change**
@@ -151,7 +184,7 @@ Declare breaking changes that affect the output of a command. This ensures users
 
 * `command`: REQUIRED: The name of the command group or command. If it is a command group, the warning would show in the execution of all commands in the group. 
 * `description`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
-* `target_version`: REQUIRED: The version when the deprecated item should be removed. The `target_version` is the next breaking change window by default.
+* `target_version`: REQUIRED: The version when the deprecated item should be removed. The `target_version` is the next breaking change window by default. Use either a specific version number or an approximate date in the format [DDth] MMM YYYY.
 * `guide`: REQUIRED: The migration guide that customers can follow to prepare for the future breaking change. Provide as much detail as possible to help our customers transition smoothly. 
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
@@ -169,7 +202,7 @@ Declare breaking changes in the logic of the command.
 
 * `command`: REQUIRED: The name of the command.
 * `summary`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
-* `target_version`: REQUIRED: The version when the breaking change should happen. The `target_version` is the next breaking change window by default.
+* `target_version`: REQUIRED: The version when the breaking change should happen. The `target_version` is the next breaking change window by default. Use either a specific version number or an approximate date in the format [DDth] MMM YYYY.
 * `detail`: A detailed description of the breaking change, including the actions customers should take. Provide as much detail as possible to help our customers transition smoothly.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
@@ -188,7 +221,7 @@ Declare breaking changes caused by changes in default values. This ensures users
 * `arg`: REQUIRED: The name of the argument or one of its options. The default change warning will display whether the argument is used or not.
 * `current_default`: REQUIRED: The current default value of the argument.
 * `new_default`: REQUIRED: The new default value of the argument.
-* `target_version`: REQUIRED: The version in which the breaking change should happen. By default, this is set to the next breaking change window.
+* `target_version`: REQUIRED: The version in which the breaking change should happen. By default, this is set to the next breaking change window. Use either a specific version number or an approximate date in the format [DDth] MMM YYYY.
 * `target`: Use this field to overwrite the argument display in warning messages.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
@@ -197,6 +230,10 @@ from azure.cli.core.breaking_change import register_default_value_breaking_chang
 
 register_default_value_breaking_change('bar foo', '--type', 'TypeA', 'TypeB')
 # The default value of `--type` will be changed to `TypeB` from `TypeA` in next breaking change release(2.61.0).
+
+# azure-cli-extensions/src/ext/azext_ext/_breaking_change.py
+register_default_value_breaking_change('bar foo', '--type', 'TypeA', 'TypeB', target_version='3.x.x')
+# The default value of `--type` will be changed to `TypeB` from `TypeA` in 3.x.x.
 ```
 
 **Be Required**
@@ -205,7 +242,7 @@ Declare breaking changes that will make an argument required in a future release
 
 * `command`: REQUIRED: The name of the command.
 * `arg`: REQUIRED: The name of the argument that will become required.
-* `target_version`: REQUIRED: The version in which the argument will become required. By default, this is set to the next breaking change window.
+* `target_version`: REQUIRED: The version in which the argument will become required. By default, this is set to the next breaking change window. Use either a specific version number or an approximate date in the format [DDth] MMM YYYY.
 * `target`: Use this field to overwrite the argument display in warning messages.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
@@ -214,6 +251,9 @@ from azure.cli.core.breaking_change import register_required_flag_breaking_chang
 
 register_required_flag_breaking_change('bar foo', '--type')
 # The argument `--type` will become required in next breaking change release(2.61.0).
+
+register_required_flag_breaking_change('bar foo', '--type', target_version='May 2024')
+# The argument `--type` will become required in May 2024.
 ```
 
 **Other Changes**
@@ -222,8 +262,8 @@ Declare other custom-breaking changes that do not fall into the predefined categ
 
 * `command`: REQUIRED: The name of the command.
 * `message`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
-* `arg`: REQUIRED: The name of the argument associated with the breaking change. If arg is not None, the warning message will only be displayed when the argument is used.
-* `target_version`: REQUIRED: The version in which the breaking change will occur. By default, this is set to the next breaking change window. This information is published in the [Azure CLI Breaking Changes](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes) article, but does NOT display in the warning message.
+* `arg`: The name of the argument associated with the breaking change. If arg is not None, the warning message will only be displayed when the argument is used.
+* `target_version`: REQUIRED: The version in which the breaking change will occur. By default, this is set to the next breaking change window. This information affect the visibility in the [Azure CLI Breaking Changes](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes) article, but does NOT display in the warning message.
 
 ```python
 from azure.cli.core.breaking_change import register_other_breaking_change
@@ -257,7 +297,7 @@ register_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_chan
 register_conditional_breaking_change(
     tag='SpecialBreakingChangeB',
     breaking_change='This is special Breaking Change Warning B. This breaking change is happend in "vm" command group.',
-    command_name='vm create'
+    command_name='vm'
 )
 
 
@@ -267,6 +307,9 @@ def create_vm(cmd, vm_name, **):
     if some_condition:
         print_conditional_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeA', custom_logger=logger)
         print_conditional_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeB', custom_logger=logger)
+
+# This is special Breaking Change Warning A. This breaking change is happend in "vm create" command.
+# This is special Breaking Change Warning B. This breaking change is happend in "vm" command group.
 ```
 
 This way, the pre-announcement wouldn't be displayed unless running into the branch, but still could be published in the [Azure CLI Breaking Changes]() article.
