@@ -165,7 +165,7 @@ AZURE_API_PROFILES = {
             'snapshots': '2023-10-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2023-07-03',
+            'gallery_image_versions': '2024-03-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
@@ -186,9 +186,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
-        ResourceType.MGMT_KEYVAULT: SDKProfile('2023-07-01', {
+        ResourceType.MGMT_KEYVAULT: SDKProfile('2024-11-01', {
             'vaults': '2023-02-01',
-            'managed_hsms': '2023-07-01'
+            'managed_hsms': '2024-11-01'
         }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
@@ -262,7 +262,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-10-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-01-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },
     '2020-09-01-hybrid': {
