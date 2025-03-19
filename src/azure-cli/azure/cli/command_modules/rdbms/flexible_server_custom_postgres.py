@@ -1537,7 +1537,7 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
-    databases = ','.join(database_names[0].split())
+    databases = ','.join(database_names)
     user_confirmation("Are you sure you want to prepare and enable your server" +
                       " '{0}' in resource group '{1}' for mirroring of databases '{2}'.".format(server_name, resource_group_name, databases) +
                       " This requires restart.", yes=yes)
@@ -1545,10 +1545,6 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
     if (server.identity is None or 'SystemAssigned' not in server.identity.type):
         logger.warning('Enabling system assigned managed identity on the server.')
         flexible_server_identity_update(cmd, flexible_servers_client, resource_group_name, server_name, 'Enabled')
-
-    logger.warning('Restarting server.')
-    parameters = postgresql_flexibleservers.models.RestartParameter(restart_with_failover=False)
-    resolve_poller(flexible_servers_client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'PostgreSQL Server Restart')
 
     logger.warning('Updating necessary server parameters.')
     source = "user-override"
@@ -1593,7 +1589,7 @@ def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_grou
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
-    databases = ','.join(database_names[0].split())
+    databases = ','.join(database_names)
     user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
                       .format(server_name, resource_group_name, databases), yes=yes)
 

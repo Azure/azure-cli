@@ -1312,11 +1312,11 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
                 available_skus.append(sku_info)
         result = available_skus
     if resource_type:
-        result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
+        result = [x for x in result if x['resourceType'].lower() == resource_type.lower()]
     if size:
-        result = [x for x in result if x.resource_type == 'virtualMachines' and size.lower() in x.name.lower()]
+        result = [x for x in result if x['resourceType'] == 'virtualMachines' and size.lower() in x['name'].lower()]
     if zone:
-        result = [x for x in result if x.location_info and x.location_info[0].zones]
+        result = [x for x in result if x['locationInfo'] and x['locationInfo'][0]['zones']]
     return result
 
 
@@ -1597,6 +1597,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
 
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
     if security_type == "TrustedLaunch":
         from azure.cli.core.azclierror import InvalidArgumentValueError
         if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
@@ -1615,6 +1616,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             if vm.security_profile is None:
                 vm.security_profile = SecurityProfile()
             vm.security_profile.security_type = security_type
+    elif security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
+        if vm.security_profile is None:
+            vm.security_profile = SecurityProfile()
+        vm.security_profile.security_type = security_type
+        vm.security_profile.uefi_settings = None
 
     if write_accelerator is not None:
         update_write_accelerator_settings(vm.storage_profile, write_accelerator)
@@ -1683,7 +1689,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if proximity_placement_group is not None:
         vm.proximity_placement_group = {'id': proximity_placement_group}
 
-    if enable_secure_boot is not None or enable_vtpm is not None:
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (enable_secure_boot is not None or enable_vtpm is not None):
         if vm.security_profile is None:
             vm.security_profile = SecurityProfile()
 
@@ -1785,7 +1791,7 @@ def _set_availset(cmd, resource_group_name, name, **kwargs):
     return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(resource_group_name, name, **kwargs)
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, line-too-long
 def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_name):
     av_set = _get_availset(cmd, resource_group_name, availability_set_name)
     if av_set.sku.name != 'Aligned':
@@ -1793,9 +1799,9 @@ def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_na
 
         # let us double check whether the existing FD number is supported
         skus = list_skus(cmd, av_set.location)
-        av_sku = next((s for s in skus if s.resource_type == 'availabilitySets' and s.name == 'Aligned'), None)
-        if av_sku and av_sku.capabilities:
-            max_fd = int(next((c.value for c in av_sku.capabilities if c.name == 'MaximumPlatformFaultDomainCount'),
+        av_sku = next((s for s in skus if s['resourceType'] == 'availabilitySets' and s['name'] == 'Aligned'), None)
+        if av_sku and av_sku['capabilities']:
+            max_fd = int(next((c['value'] for c in av_sku['capabilities'] if c['name'] == 'MaximumPlatformFaultDomainCount'),
                               '0'))
             if max_fd and max_fd < av_set.platform_fault_domain_count:
                 logger.warning("The fault domain count will be adjusted from %s to %s so to stay within region's "
@@ -4877,7 +4883,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
                          replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
                          image_version=None, target_zone_encryption=None, target_edge_zones=None,
-                         allow_replicated_location_deletion=None):
+                         allow_replicated_location_deletion=None, block_deletion_before_end_of_life=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -4988,6 +4994,11 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             args["safety_profile"] = {
                 "allow_deletion_of_replicated_locations": allow_replicated_location_deletion
             }
+        if block_deletion_before_end_of_life is not None:
+            if "safety_profile" not in args:
+                args["safety_profile"] = {}
+
+            args["safety_profile"]["block_deletion_before_end_of_life"] = block_deletion_before_end_of_life
     else:
         if managed_image is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
@@ -5050,8 +5061,8 @@ def fix_gallery_image_date_info(date_info):
 
 # pylint: disable=line-too-long
 def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
-    from .aaz.latest.sig.image_version import Show as _SigImageVersionShow
-    version = _SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
+    from .aaz.latest.sig.image_version import Show as SigImageVersionShow
+    version = SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "gallery_name": gallery_name,
         "gallery_image_definition": gallery_image_name,
@@ -5059,23 +5070,27 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
     })
 
     # To avoid unnecessary permission check of image
-    if "storage_profile" not in version:
-        version["storage_profile"] = {}
-    version["storage_profile"]["source"] = None
-    if version["storage_profile"].get("os_disk_image", None) and \
-            version["storage_profile"]["os_disk_image"].get("source", None):
-        version["storage_profile"]["os_disk_image"]["source"] = None
-    if version["storage_profile"].get("data_disk_images", None):
-        for v in version["storage_profile"]["data_disk_images"]:
+    if "storageProfile" not in version:
+        version["storageProfile"] = {}
+    version["storageProfile"]["source"] = None
+    if version["storageProfile"].get("osDiskImage", None) and \
+            version["storageProfile"]["osDiskImage"].get("source", None):
+        version["storageProfile"]["osDiskImage"]["source"] = None
+    if version["storageProfile"].get("dataDiskImages", None):
+        for v in version["storageProfile"]["dataDiskImages"]:
             if v.get("source", None):
                 v["source"] = None
+
     return version
 
 
 def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
                          target_regions=None, replica_count=None, allow_replicated_location_deletion=None,
-                         target_edge_zones=None, no_wait=False, **kwargs):
+                         target_edge_zones=None, block_deletion_before_end_of_life=None, no_wait=False, **kwargs):
     args = kwargs['gallery_image_version']
+
+    from .operations.sig_image_version import convert_show_result_to_sneak_case
+    args = convert_show_result_to_sneak_case(args)
 
     if target_regions:
         if "publishing_profile" not in args:
@@ -5097,14 +5112,18 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if "safety_profile" not in args:
             args["safety_profile"] = {}
         args["safety_profile"]["allow_deletion_of_replicated_locations"] = allow_replicated_location_deletion
+    if block_deletion_before_end_of_life is not None:
+        if "safety_profile" not in args:
+            args["safety_profile"] = {}
+        args["safety_profile"]["block_deletion_before_end_of_life"] = block_deletion_before_end_of_life
 
     args["resource_group"] = resource_group_name
     args["gallery_name"] = gallery_name
     args["gallery_image_definition"] = gallery_image_name
     args["gallery_image_version_name"] = gallery_image_version_name
 
-    from .aaz.latest.sig.image_version import Update
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
+    from .aaz.latest.sig.image_version import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 # endregion
 
 
@@ -5892,4 +5911,13 @@ def sig_community_image_version_list(client, location, public_gallery_name, gall
     generator = client.list(location=location, public_gallery_name=public_gallery_name,
                             gallery_image_name=gallery_image_name)
     return get_page_result(generator, marker, show_next_marker)
+
+
+def list_vm_sizes(cmd, location):
+    from .operations.vm import VMListSizes
+    return VMListSizes(cli_ctx=cmd.cli_ctx)(command_args={
+        "location": location,
+    })
+
+
 # endRegion
