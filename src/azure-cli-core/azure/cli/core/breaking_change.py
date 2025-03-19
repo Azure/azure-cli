@@ -5,6 +5,7 @@
 import abc
 import argparse
 import re
+import sys
 from collections import defaultdict
 
 from knack.log import get_logger
@@ -642,12 +643,17 @@ def print_conditional_breaking_change(cli_ctx, tag, *, custom_logger=None, comma
     command = cli_ctx.invocation.commands_loader.command_name if cli_ctx else command_name
     command = command or ''
     tag_suffix = '.' + tag if tag is not None else ''
-    custom_logger = custom_logger or logger
 
     command_comps = command.split()
     while command_comps:
         for breaking_change in upcoming_breaking_changes.get(' '.join(command_comps) + tag_suffix, []):
-            custom_logger.warning(breaking_change.message)
+            if custom_logger:
+                custom_logger.warning(breaking_change.message)
+            else:
+                print(breaking_change.message, file=sys.stderr)
         del command_comps[-1]
     for breaking_change in upcoming_breaking_changes.get(tag_suffix, []):
-        custom_logger.warning(breaking_change.message)
+        if custom_logger:
+            custom_logger.warning(breaking_change.message)
+        else:
+            print(breaking_change.message, file=sys.stderr)
