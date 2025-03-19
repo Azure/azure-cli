@@ -1778,6 +1778,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                          'default.')
         c.argument('quota', type=int, help='Specifies the maximum size of the share, in gigabytes. Must be greater '
                                            'than 0, and less than or equal to 5TB (5120).')
+        t_share_protocols_type = self.get_sdk('_models#ShareProtocols',
+                                              resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        c.extra('protocols', options_list=['--protocol'], arg_type=get_enum_type(t_share_protocols_type),
+                help='The protocol to enable for the share.')
 
     with self.argument_context('storage share url') as c:
         c.extra('unc', action='store_true', help='Output UNC network path.')
@@ -1941,6 +1945,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage directory create') as c:
         c.argument('fail_on_exist', help='Throw an exception if the directory already exists.')
+        c.extra('file_mode',
+                help='Only applicable to NFS Directory. The mode permissions to be set on the directory. '
+                     'Symbolic (rwxrw-rw-) is supported. The sticky bit is also supported and its represented '
+                     'either by the letter t or T in the final character-place depending on whether the execution '
+                     'bit for the others category is set or unset respectively, absence of t or T indicates sticky '
+                     'bit not set."')
+        c.extra('owner', help='Only applicable to NFS Directory. The owner user identifier (UID) to be set on the '
+                              'directory. The default value is 0 (root).')
+        c.extra('group', help='Only applicable to NFS Directory. The owner group identifier (GID) to be set on the '
+                              'directory. The default value is 0 (root group).')
 
     with self.argument_context('storage directory delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the directory does not exist.')
@@ -1969,6 +1983,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
                 validator=validate_metadata)
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.extra('file_mode',
+                help='The mode permissions to be set on the file. Only applicable to NFS Files. '
+                     'Only work together with parameter `--file-mode-copy-mode Override`. '
+                     'Symbolic (rwxrw-rw-) is supported. '
+                     'The sticky bit is also supported and its represented '
+                     'either by the letter t or T in the final character-place depending on whether the execution '
+                     'bit for the others category is set or unset respectively, absence of t or T indicates sticky '
+                     'bit not set."')
+        c.extra('owner', help='Only applicable to NFS Files. Only work together with parameter '
+                                               '`--owner-copy-mode Override`. The owner user identifier (UID) '
+                                               'to be set on the directory. The default value is 0 (root).')
+        c.extra('group', help='Only applicable to NFS Files. Only work together with parameter '
+                                               '`--owner-copy-mode Override`. The owner group identifier (GID) '
+                                               'to be set on the directory. The default value is 0 (root group).')
+        t_file_mode_copy_mode_type = self.get_sdk('_generated.models._azure_file_storage_enums#ModeCopyMode',
+                                                  resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        c.extra('file_mode_copy_mode',
+                arg_type=get_enum_type(t_file_mode_copy_mode_type),
+                help='Only applicable to NFS Files. Applicable only when the copy source is a File. '
+                     'Determines the copy behavior of the mode bits of the destination file. '
+                     'If not populated, the destination file will have the default File Mode.')
+        t_owner_copy_mode_type = self.get_sdk('_generated.models._azure_file_storage_enums#OwnerCopyMode',
+                                              resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        c.extra('owner_copy_mode', arg_type=get_enum_type(t_owner_copy_mode_type),
+                help='Only applicable to NFS Files. Applicable only when the copy source is a File. '
+                     'Determines the copy behavior of the owner and group of the destination file. '
+                     'If not populated, the destination file will have the default Owner and Group.')
 
     with self.argument_context('storage file copy cancel') as c:
         c.register_path_argument(options_list=('--destination-path', '-p'))
@@ -2115,6 +2156,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'for detecting bitflips on the wire if using http instead of https as https (the default) will '
                         'already validate. Note that this MD5 hash is not stored with the file.')
         c.extra('file_url', help='The full endpoint URL to the File, including SAS token if used.')
+
+    for cmd in ['file update', 'file upload']:
+        with self.argument_context(f'storage {cmd}') as c:
+            c.extra('file_mode',
+                    help='Only applicable to NFS Files. The mode permissions to be set on the file. '
+                         'Symbolic (rwxrw-rw-) is supported. The sticky bit is also supported and its represented '
+                         'either by the letter t or T in the final character-place depending on whether the execution '
+                         'bit for the others category is set or unset respectively, absence of t or T indicates sticky '
+                         'bit not set."')
+            c.extra('owner', help='Only applicable to NFS Files. The owner user identifier (UID) to be set on the '
+                                  'file. The default value is 0 (root).')
+            c.extra('group', help='Only applicable to NFS Files. The owner group identifier (GID) to be set on the '
+                                  'file. The default value is 0 (root group).')
 
     with self.argument_context('storage file url') as c:
         c.register_path_argument(fileshare=True)
@@ -2701,3 +2755,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('disallow_source_trailing_dot', arg_type=get_three_state_flag(), default=False,
                     options_list=["--disallow-source-trailing-dot", "--disallow-src-trailing"],
                     help="If true, the trailing dot will be trimmed from the source URI. Default to False")
+
+    with self.argument_context('storage file hard-link create') as c:
+        c.extra('share_name', share_name_type, required=True)
+        c.register_path_argument()
+        c.extra('target', required=True,
+                help='Specifies the path of the target file to which the link will be created, up to 2 KiB in length. '
+                     'It should be the full path of the target starting from the root. The target file must be in the '
+                     'same share and the same storage account.')
+        c.extra('lease',
+                help='Lease id, required if the file has an active lease.')
