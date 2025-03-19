@@ -4883,7 +4883,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
                          replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
                          image_version=None, target_zone_encryption=None, target_edge_zones=None,
-                         allow_replicated_location_deletion=None):
+                         allow_replicated_location_deletion=None, block_deletion_before_end_of_life=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -4994,6 +4994,11 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             args["safety_profile"] = {
                 "allow_deletion_of_replicated_locations": allow_replicated_location_deletion
             }
+        if block_deletion_before_end_of_life is not None:
+            if "safety_profile" not in args:
+                args["safety_profile"] = {}
+
+            args["safety_profile"]["block_deletion_before_end_of_life"] = block_deletion_before_end_of_life
     else:
         if managed_image is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
@@ -5056,8 +5061,8 @@ def fix_gallery_image_date_info(date_info):
 
 # pylint: disable=line-too-long
 def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
-    from .aaz.latest.sig.image_version import Show as _SigImageVersionShow
-    version = _SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
+    from .aaz.latest.sig.image_version import Show as SigImageVersionShow
+    version = SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "gallery_name": gallery_name,
         "gallery_image_definition": gallery_image_name,
@@ -5065,23 +5070,27 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
     })
 
     # To avoid unnecessary permission check of image
-    if "storage_profile" not in version:
-        version["storage_profile"] = {}
-    version["storage_profile"]["source"] = None
-    if version["storage_profile"].get("os_disk_image", None) and \
-            version["storage_profile"]["os_disk_image"].get("source", None):
-        version["storage_profile"]["os_disk_image"]["source"] = None
-    if version["storage_profile"].get("data_disk_images", None):
-        for v in version["storage_profile"]["data_disk_images"]:
+    if "storageProfile" not in version:
+        version["storageProfile"] = {}
+    version["storageProfile"]["source"] = None
+    if version["storageProfile"].get("osDiskImage", None) and \
+            version["storageProfile"]["osDiskImage"].get("source", None):
+        version["storageProfile"]["osDiskImage"]["source"] = None
+    if version["storageProfile"].get("dataDiskImages", None):
+        for v in version["storageProfile"]["dataDiskImages"]:
             if v.get("source", None):
                 v["source"] = None
+
     return version
 
 
 def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
                          target_regions=None, replica_count=None, allow_replicated_location_deletion=None,
-                         target_edge_zones=None, no_wait=False, **kwargs):
+                         target_edge_zones=None, block_deletion_before_end_of_life=None, no_wait=False, **kwargs):
     args = kwargs['gallery_image_version']
+
+    from .operations.sig_image_version import convert_show_result_to_sneak_case
+    args = convert_show_result_to_sneak_case(args)
 
     if target_regions:
         if "publishing_profile" not in args:
@@ -5103,14 +5112,18 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if "safety_profile" not in args:
             args["safety_profile"] = {}
         args["safety_profile"]["allow_deletion_of_replicated_locations"] = allow_replicated_location_deletion
+    if block_deletion_before_end_of_life is not None:
+        if "safety_profile" not in args:
+            args["safety_profile"] = {}
+        args["safety_profile"]["block_deletion_before_end_of_life"] = block_deletion_before_end_of_life
 
     args["resource_group"] = resource_group_name
     args["gallery_name"] = gallery_name
     args["gallery_image_definition"] = gallery_image_name
     args["gallery_image_version_name"] = gallery_image_version_name
 
-    from .aaz.latest.sig.image_version import Update
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
+    from .aaz.latest.sig.image_version import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 # endregion
 
 
