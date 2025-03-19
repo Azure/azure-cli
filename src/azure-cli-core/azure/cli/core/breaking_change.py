@@ -270,6 +270,8 @@ class BreakingChange(abc.ABC):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:
                 loader = self.find_suitable_command_loader(cli_ctx)
+                if not loader:
+                    return
                 command_group = loader.command_group(self.command_name)
                 cli_ctx.invocation.commands_loader.command_group_table[self.command_name] = command_group
             if command_group:
