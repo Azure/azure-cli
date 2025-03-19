@@ -9,13 +9,41 @@ import json
 import os
 import time
 
+from azure.cli.command_modules.appconfig._credential import AppConfigurationCliCredential
+from azure.cli.command_modules.appconfig._utils import get_appconfig_data_client
+from azure.cli.core._profile import Profile
+from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
+from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
+from azure.cli.core.cloud import get_active_cloud
+from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
+from unittest import mock
 from azure.cli.testsdk import (ResourceGroupPreparer, live_only, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+APPCONFIG_AUTH_TOKEN_AUDIENCE = "https://appconfig.azure.com"
+
+TEST_MI_SUBSCRIPTION = {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "name": "MSI subscription",
+        "isDefault": True,
+        "state": "Enabled",
+        "user": {
+            "name": "systemAssignedIdentity"
+        },
+        "tenantId": "00000000-0000-0000-0000-000000000000",
+        "environmentName": "AzureCloud",
+        "homeTenantId": "00000000-0000-0000-0000-000000000000",
+        "managedByTenants": []
+    }
+
+def mock_get_active_cloud(cli_ctx=None):
+    cloud = get_active_cloud(cli_ctx)
+    cloud.endpoints.appconfig_auth_token_audience = APPCONFIG_AUTH_TOKEN_AUDIENCE
+    return cloud
 
 class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
@@ -179,3 +207,113 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert expected_exported_kvs == exported_kvs
         os.remove(exported_file_path)
+
+
+    @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper.set_token')
+    @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper.get_token')
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription')
+    def test_azconfig_mi_token_override(self, get_subscriptions_mock, msi_get_token_mock, msi_set_token_mock):
+        # Mock the subscription list
+        get_subscriptions_mock.return_value = TEST_MI_SUBSCRIPTION
+
+        msi_get_token_mock.return_value = { "token": "mocked_token", "expires_on": 1234567890 }
+
+        mock_cmd = mock.MagicMock()
+        profile = Profile(cli_ctx=mock_cmd.cli_ctx)
+        cred, _, _ = profile.get_login_credentials()
+
+        appconfig_credential = AppConfigurationCliCredential(cred, APPCONFIG_AUTH_TOKEN_AUDIENCE)
+        
+        self.assertIsInstance(appconfig_credential._impl, MSIAuthenticationWrapper)
+        self.assertTrue(hasattr(appconfig_credential._impl, 'get_token'))
+        
+        # Call get_token with an arbitrary scope
+        _ = appconfig_credential.get_token("some_scope")
+
+        # Assert that get_token was called with the correct scope
+        appconfig_credential._impl.get_token.assert_called_once_with(f"{APPCONFIG_AUTH_TOKEN_AUDIENCE}/.default")
+
+
+    @mock.patch('azure.cli.core.auth.credential_adaptor.CredentialAdaptor.get_token')
+    def test_azconfig_credential_adaptor_token_override(self, get_token_mock):
+        # Mock the subscription list
+        get_token_mock.return_value = { "token": "mocked_token", "expires_on": 1234567890 }
+
+        profile = Profile(cli_ctx=DummyCli())
+        cred, _, _ = profile.get_login_credentials()
+
+        appconfig_credential = AppConfigurationCliCredential(cred, APPCONFIG_AUTH_TOKEN_AUDIENCE)
+        
+        self.assertIsInstance(appconfig_credential._impl, CredentialAdaptor)
+        self.assertTrue(hasattr(appconfig_credential._impl, 'get_token'))
+        
+        # Call get_token with an arbitrary scope
+        _ = appconfig_credential.get_token("some_scope")
+
+        # Assert that get_token was called with the correct scope
+        appconfig_credential._impl.get_token.assert_called_once_with(f"{APPCONFIG_AUTH_TOKEN_AUDIENCE}/.default")
+
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_user_token_audience(self, resource_group, location): #, resource_group, location):
+        aad_store_prefix = get_resource_name_prefix('AADStore')
+        config_store_name = self.create_random_name(prefix=aad_store_prefix, length=36)
+
+        location = 'eastus'
+        sku = 'standard'
+        entry_key = "Color"
+        entry_value = "Red"
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        create_config_store(self, self.kwargs)
+        
+        appconfig_id = self.cmd('appconfig show -n {config_store_name} -g {rg}').get_output_in_json()['id']
+        account_info = self.cmd('account show').get_output_in_json()
+        endpoint = "https://" + config_store_name + ".azconfig.io"
+        self.kwargs.update({
+            'appconfig_id': appconfig_id,
+            'user_id': account_info['user']['name'],
+            'endpoint': endpoint
+        })
+
+        # Assign data reader role to current user
+        self.cmd('role assignment create --assignee {user_id} --role "App Configuration Data Reader" --scope {appconfig_id}')
+
+        self.kwargs.update({
+            'entry_key': entry_key,
+            'entry_value': entry_value
+        })
+        
+        with mock.patch('azure.cli.command_modules.appconfig._credential.AppConfigurationCliCredential', wraps=AppConfigurationCliCredential) as impl_mock:
+            try:
+                # After asssigning data reader role, read operation should succeed
+                self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {entry_key} --value {entry_value} -y',
+                        checks=[self.check('key', entry_key),
+                                self.check('value', entry_value)])
+                
+            except:
+                # Might return 403 forbidden error if the role assignment is not propagated yet
+                # This is expected behavior, so we can ignore it
+                pass
+
+            # Assert that the ClientCredential was instantiated with the correct scope
+            impl_mock.assert_called_with(mock.ANY, None)
+
+            # Mock the get_active_cloud function to return a custom cloud with the desired token audience
+            with mock.patch('azure.cli.core.cloud.get_active_cloud', new=mock_get_active_cloud):
+                try:
+                    self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {entry_key} --value {entry_value} -y',
+                            checks=[self.check('key', entry_key),
+                                    self.check('value', entry_value)])
+                
+                except:
+                    pass
+
+                # Assert that the ClientCredential was instantiated with the correct scope
+                impl_mock.assert_called_with(mock.ANY, APPCONFIG_AUTH_TOKEN_AUDIENCE)
