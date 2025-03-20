@@ -56,7 +56,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
         aad_store_prefix = get_resource_name_prefix('AADStore')
-        config_store_name = self.create_random_name(prefix=aad_store_prefix, length=15)
+        config_store_name = self.create_random_name(prefix=aad_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -291,30 +291,31 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
             'entry_value': entry_value
         })
         
-        with mock.patch('azure.cli.command_modules.appconfig._credential.AppConfigurationCliCredential', wraps=AppConfigurationCliCredential) as impl_mock:
+        with mock.patch('azure.cli.command_modules.appconfig._credential.AppConfigurationCliCredential', wraps=AppConfigurationCliCredential) as cred_mock:
             try:
-                # After asssigning data reader role, read operation should succeed
                 self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {entry_key} --value {entry_value} -y',
                         checks=[self.check('key', entry_key),
                                 self.check('value', entry_value)])
-                
-            except:
-                # Might return 403 forbidden error if the role assignment is not propagated yet
-                # This is expected behavior, so we can ignore it
-                pass
+            
+            # Might return 403 forbidden error if the role assignment is not propagated yet
+            # This is expected behavior, so we can ignore it
+            except CLIError as e:
+                if "Operation returned an invalid status 'Forbidden'" not in str(e):
+                    raise e
 
-            # Assert that the ClientCredential was instantiated with the correct scope
-            impl_mock.assert_called_with(mock.ANY, None)
+            # Assert that the ClientCredential was instantiated with no custom scope
+            cred_mock.assert_called_with(mock.ANY, None)
 
-            # Mock the get_active_cloud function to return a custom cloud with the desired token audience
+            # Mock the get_active_cloud function to return a custom cloud with a custom token audience
             with mock.patch('azure.cli.core.cloud.get_active_cloud', new=mock_get_active_cloud):
                 try:
                     self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {entry_key} --value {entry_value} -y',
                             checks=[self.check('key', entry_key),
                                     self.check('value', entry_value)])
-                
-                except:
-                    pass
+            
+                except CLIError as e:
+                    if "Operation returned an invalid status 'Forbidden'" not in str(e):
+                        raise e
 
                 # Assert that the ClientCredential was instantiated with the correct scope
-                impl_mock.assert_called_with(mock.ANY, APPCONFIG_AUTH_TOKEN_AUDIENCE)
+                cred_mock.assert_called_with(mock.ANY, APPCONFIG_AUTH_TOKEN_AUDIENCE)
