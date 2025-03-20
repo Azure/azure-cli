@@ -260,12 +260,12 @@ def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, rep
     checked_permissions = None
     if repository:
         from ._docker_utils import RepoAccessTokenPermission
-        checked_permissions = RepoAccessTokenPermission.PULL_PUSH_META_WRITE_META_READ.value
+        checked_permissions = RepoAccessTokenPermission.PULL_PUSH_META_WRITE_META_READ_DELETE.value
     verify_user_permissions = repository is not None
 
     # Check access to login endpoint
     url = 'https://' + login_server + '/v2/'
-    result_from_token, allowed_actions = _get_aad_token(
+    result_from_token = _get_aad_token(
         cmd.cli_ctx,
         login_server,
         False,
@@ -290,35 +290,34 @@ def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, rep
 
         print_pass("Fetch refresh token for registry '{}'".format(login_server))
 
-        if result_from_token.error_title == CONNECTIVITY_ACCESS_TOKEN_ERROR.error_title:
+        if result_from_token.error_title in [
+                CONNECTIVITY_ACCESS_TOKEN_ERROR.error_title,
+                CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.error_title]:
             _handle_error(result_from_token, ignore_errors)
             return
 
-        print_pass("Fetch access token for registry '{}'".format(login_server))
-
         if repository:
-            if result_from_token.error_title == CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.error_title:
-                _handle_error(result_from_token, ignore_errors)
-                return
-            logger.warning("You have the following permissions for the repository %s: %s", repository, allowed_actions)
-        elif repository is None and registry_abac_enabled:
-            logger.warning(
-                "Note: Please run the command with the '--repository' flag to check your read and write access "
-                "to a specific repository.")
+            print_pass("Fetch access token for repository '{}' in registry '{}'".format(repository, login_server))
+        else:
+            print_pass("Fetch access token for registry '{}'".format(login_server))
+            if registry_abac_enabled:
+                logger.warning(
+                    "Note: Please run the command with the '--repository' flag to check your read and write access "
+                    "to a specific repository.")
 
         return
 
     # If return is not of type ErrorClass, then it is the token
     print_pass("Challenge endpoint {}".format(url))
     print_pass("Fetch refresh token for registry '{}'".format(login_server))
-    print_pass("Fetch access token for registry '{}'".format(login_server))
-
     if repository:
-        logger.warning("You have the following permissions for the repository %s: %s", repository, allowed_actions)
-    elif repository is None and registry_abac_enabled:
-        logger.warning(
-            "Note: Please run the command with the '--repository' flag to check your read and write access "
-            "to a specific repository.")
+        print_pass("Fetch access token for repository '{}' in registry '{}'".format(repository, login_server))
+    else:
+        print_pass("Fetch access token for registry '{}'".format(login_server))
+        if registry_abac_enabled:
+            logger.warning(
+                "Note: Please run the command with the '--repository' flag to check your read and write access "
+                "to a specific repository.")
 
 
 def _check_registry_health(cmd, registry_name, repository, ignore_errors):

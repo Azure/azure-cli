@@ -130,8 +130,8 @@ CONNECTIVITY_ACCESS_TOKEN_ERROR = ErrorClass(
 )
 
 CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR = ErrorClass(
-    "CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR",
-    "Access to the repository '{}' was denied. You don't have the necessary permissions for this repository. Please try running 'az login' again to refresh permissions."
+    "CONNECTIVITY_ACCESS_TOKEN_ERROR",
+    "You have {} permissions to the repository. You are lacking {} repository permissions. Please verify if you have full read, write, and delete permissions to the repository in the registry."
 )
 
 CONNECTIVITY_SSL_ERROR = ErrorClass(
