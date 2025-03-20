@@ -3088,6 +3088,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
 
 class DomainScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @AllowLargeResponse
     def test_domain_create(self, resource_group):
         contacts = os.path.join(TEST_DIR, 'domain-contact.json')
         self.cmd("appservice domain create -g {} --hostname {} --contact-info=@\'{}\' --dryrun".format(
