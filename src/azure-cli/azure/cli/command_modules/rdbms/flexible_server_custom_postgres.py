@@ -204,7 +204,7 @@ def flexible_server_create(cmd, client,
                        server_name, resource_group_name)
     logger.warning('Try using \'az postgres flexible-server connect\' command to test out connection.')
 
-    _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user)
+    _update_local_contexts(cmd, server_name, resource_group_name, db_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version, password,
                           _create_postgresql_connection_string(host, user, password, db_name),
