@@ -39,6 +39,7 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name
+from urllib.parse import quote
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -103,7 +104,7 @@ def flexible_server_create(cmd, client,
                            backup_byok_key=backup_byok_key,
                            performance_tier=performance_tier,
                            create_cluster=create_cluster,
-                           active_directory_auth=active_directory_auth,
+                           password_auth=password_auth, active_directory_auth=active_directory_auth,
                            admin_name=admin_name, admin_id=admin_id, admin_type=admin_type,)
 
     cluster = None
@@ -1788,11 +1789,11 @@ def _create_postgresql_connection_string(host, user, password, database):
 
 def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
     connection_kwargs = {
-        'user': admin,
+        'user': quote(admin),
         'host': host,
         'database': database,
     }
-    return 'postgresql://{user}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
+    return 'postgresql://{user}:<access-token>@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
 def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,
