@@ -17,11 +17,11 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_identity(self, resource_group, location):
         config_store_prefix = get_resource_name_prefix('IdentityTest')
-        config_store_name = self.create_random_name(prefix=config_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
-        identity_name = self.create_random_name(prefix='UserAssignedIdentity', length=36)
+        identity_name = self.create_random_name(prefix='UserAssignedIdentity', length=24)
 
         self.kwargs.update({
             'config_store_name': config_store_name,

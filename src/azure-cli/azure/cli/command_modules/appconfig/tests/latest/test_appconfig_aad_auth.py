@@ -56,7 +56,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
         aad_store_prefix = get_resource_name_prefix('AADStore')
-        config_store_name = self.create_random_name(prefix=aad_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=aad_store_prefix, length=15)
 
         location = 'eastus'
         sku = 'standard'
@@ -254,11 +254,12 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         appconfig_credential._impl.get_token.assert_called_once_with(f"{APPCONFIG_AUTH_TOKEN_AUDIENCE}/.default")
 
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_user_token_audience(self, resource_group, location): #, resource_group, location):
+    def test_azconfig_user_token_audience(self, resource_group, location):
         aad_store_prefix = get_resource_name_prefix('AADStore')
-        config_store_name = self.create_random_name(prefix=aad_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=aad_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
