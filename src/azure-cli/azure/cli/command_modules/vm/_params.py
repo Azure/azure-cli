@@ -984,6 +984,9 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
+    with self.argument_context('vm list-sizes') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+
     run_cmd_vmss_name = CLIArgumentType(options_list=['--vmss-name'], help='The name of the VM scale set.')
     for scope in ['create', 'update']:
         with self.argument_context('vmss run-command {}'.format(scope)) as c:
