@@ -11,11 +11,10 @@ from knack.util import CLIError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import user_confirmation
 from ._utils import (
-    check_auth_mode_for_abac,
     get_registry_by_name,
     validate_managed_registry,
     get_validate_platform,
-    get_custom_registry_credentials,
+    get_source_and_custom_registry_credentials,
     get_yaml_template,
     build_timers_info,
     remove_timer_trigger,
@@ -108,9 +107,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             is_system_task=is_system_task)
         try:
             return client.create(resource_group_name=resource_group_name,
-                                       registry_name=registry_name,
-                                       task_name=task_name,
-                                       task_create_parameters=task_create_parameters)
+                                 registry_name=registry_name,
+                                 task_name=task_name,
+                                 task_create_parameters=task_create_parameters)
         except ValidationError as e:
             raise CLIError(e)
 
@@ -203,26 +202,30 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     if assign_identity is not None:
         identity = _build_identities_info(cmd, assign_identity)
 
-    registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
-    check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
-
-    credentials = get_custom_registry_credentials(
-        cmd=cmd,
-        auth_mode=auth_mode,
-        source_registry_auth_id=source_registry_auth_id,
-        registry_abac_enabled=registry_abac_enabled
-    )
-
     if source_registry_auth_id:
         if source_registry_auth_id.lower() == "none":
             source_registry_auth_id = None
-        elif source_registry_auth_id == IDENTITY_LOCAL_ID and identity is None:
+        elif identity is None:
             identity = _build_identities_info(cmd, [source_registry_auth_id])
 
+    registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+
+    credentials = get_source_and_custom_registry_credentials(
+        cmd=cmd,
+        auth_mode=auth_mode,
+        source_registry_auth_id=source_registry_auth_id,
+        registry_abac_enabled=registry_abac_enabled,
+        deprecate_auth_mode=True
+    )
+
     if source_registry_auth_id:
-        logger.warning("The newly-created Task is configured to authenticate with the source registry '%s' using the identity '%s'. Please ensure the identity has proper role assignments for access to the registry.", registry_name, source_registry_auth_id)
+        logger.warning("The newly-created Task is configured to authenticate with the source registry '%s' using the "
+                       "identity '%s'. Please ensure the identity has proper role assignments for access to the "
+                       "registry.", registry_name, source_registry_auth_id)
     elif registry_abac_enabled:
-        logger.warning("The Task does not have permissions to the source registry. Please pass in an identity that the Task will use to authenticate with the source registry using the '--source-registry-auth-id' flag when running 'az acr task create' or 'az acr task update'.")
+        logger.warning("The Task does not have permissions to the source registry. Please pass in an identity that the "
+                       "Task will use to authenticate with the source registry using the '--source-registry-auth-id' "
+                       "flag when running 'az acr task create' or 'az acr task update'.")
 
     task_create_parameters = Task(
         identity=identity,
@@ -257,10 +260,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 return deserialized
             return pipeline_response
         return client.create(resource_group_name=resource_group_name,  # pylint: disable=protected-access
-                                      registry_name=registry_name,
-                                      task_name=task_name,
-                                      task_create_parameters=task_create_parameters,
-                                      cls=local_fix)
+                             registry_name=registry_name,
+                             task_name=task_name,
+                             task_create_parameters=task_create_parameters,
+                             cls=local_fix)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -524,7 +527,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
-    check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
 
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
@@ -542,11 +544,12 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
             source_triggers=source_trigger_update_params,
             base_image_trigger=base_image_trigger_update_params
         ),
-        credentials=get_custom_registry_credentials(
+        credentials=get_source_and_custom_registry_credentials(
             cmd=cmd,
             auth_mode=auth_mode,
             source_registry_auth_id=source_registry_auth_id,
-            registry_abac_enabled=registry_abac_enabled
+            registry_abac_enabled=registry_abac_enabled,
+            deprecate_auth_mode=True
         ),
         agent_pool_name=agent_pool_name,
         log_template=log_template
@@ -725,7 +728,7 @@ def acr_task_credential_add(cmd,
         raise CLIError("Login server '{}' already exists. You cannot add it again.".format(login_server))
 
     taskUpdateParameters = TaskUpdateParameters(
-        credentials=get_custom_registry_credentials(
+        credentials=get_source_and_custom_registry_credentials(
             cmd=cmd,
             login_server=login_server,
             username=username,
@@ -762,7 +765,7 @@ def acr_task_credential_update(cmd,
         raise CLIError("Login server '{}' not found.".format(login_server))
 
     taskUpdateParameters = TaskUpdateParameters(
-        credentials=get_custom_registry_credentials(
+        credentials=get_source_and_custom_registry_credentials(
             cmd=cmd,
             login_server=login_server,
             username=username,
@@ -787,7 +790,7 @@ def acr_task_credential_remove(cmd,
     TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
 
     taskUpdateParameters = TaskUpdateParameters(
-        credentials=get_custom_registry_credentials(
+        credentials=get_source_and_custom_registry_credentials(
             cmd=cmd,
             login_server=login_server,
             is_remove=True
@@ -899,9 +902,9 @@ def acr_task_timer_remove(cmd,
 
         try:
             return client.create(resource_group_name=resource_group_name,
-                                       registry_name=registry_name,
-                                       task_name=task_name,
-                                       task_create_parameters=existingTask)
+                                 registry_name=registry_name,
+                                 task_name=task_name,
+                                 task_create_parameters=existingTask)
         except ValidationError as e:
             raise CLIError(e)
 
@@ -934,9 +937,9 @@ def acr_task_update_run(cmd,
     run_update_parameters = {'is_archive_enabled': is_archive_enabled}
 
     return client.update(resource_group_name=resource_group_name,
-                               registry_name=registry_name,
-                               run_id=run_id,
-                               run_update_parameters=run_update_parameters)
+                         registry_name=registry_name,
+                         run_id=run_id,
+                         run_update_parameters=run_update_parameters)
 
 
 def acr_task_run(cmd,  # pylint: disable=too-many-locals

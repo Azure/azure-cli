@@ -37,7 +37,7 @@ examples:
   - name: Queue a local context as a Linux build on arm/v7 architecture, tag it, and push it to the registry.
     text: >
         az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry . --platform linux/arm/v7
-  - name: Queue a local context as a Linux build, tag it, and push it to the ABAC-based Repository Permission enabled registry and use the caller's Entra identity to authenticate with the source registry.  
+  - name: Queue a local context as a Linux build, tag it, and push it to the ABAC-based Repository Permission enabled registry and use the caller's Entra identity to authenticate with the source registry.
     text: >
         az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry . --source-registry-auth-id [caller]
 """
@@ -809,7 +809,7 @@ examples:
   - name: Queue a remote OCI Artifact context and runs the task.
     text: >
         az acr run -r myregistry oci://myregistry.azurecr.io/myartifact:mytag -f hello-world.yaml
-  - name: Queue a run to execute a container command in an ABAC-based Repository Permission enabled registry and use the caller's Entra identity to authenticate with the source registry.  
+  - name: Queue a run to execute a container command in an ABAC-based Repository Permission enabled registry and use the caller's Entra identity to authenticate with the source registry.
     text: >
         az acr run -r myregistry --cmd '$Registry/myimage' /dev/null --source-registry-auth-id [caller]
 """

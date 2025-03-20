@@ -275,15 +275,16 @@ def get_yaml_template(cmd_value, timeout, file):
     return yaml_template
 
 
-def get_custom_registry_credentials(cmd,
-                                    auth_mode=None,
-                                    login_server=None,
-                                    username=None,
-                                    password=None,
-                                    identity=None,
-                                    is_remove=False,
-                                    source_registry_auth_id=None,
-                                    registry_abac_enabled=False):
+def get_source_and_custom_registry_credentials(cmd,
+                                               auth_mode=None,
+                                               login_server=None,
+                                               username=None,
+                                               password=None,
+                                               identity=None,
+                                               is_remove=False,
+                                               source_registry_auth_id=None,
+                                               registry_abac_enabled=False,
+                                               deprecate_auth_mode=False):
     """Get the credential object from the input
     :param str auth_mode: The login mode for the source registry
     :param str login_server: The login server of custom registry
@@ -292,6 +293,7 @@ def get_custom_registry_credentials(cmd,
     :param str identity: The task managed identity used for the credential
     :param str source_registry_auth_id: the managed identity used for the source registry authentication
     :param bool registry_abac_enabled: whether the registry is ABAC-enabled
+    :param bool deprecate_auth_mode: whether to print the auth mode deprecation warning
     """
     Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, \
         SecretObjectType = cmd.get_models(
@@ -299,19 +301,26 @@ def get_custom_registry_credentials(cmd,
             'SecretObjectType',
             operation_group='tasks')
 
+    if deprecate_auth_mode:
+        check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
+
     # "Default" and "None" are the allowed values for source registry auth mode.
     # For a non-ABAC-enabled registry, "--source-registry-auth-id" will not take effect, and authentication
     # will fail if the auth mode is "None". Therefore, we need to throw an error here.
     if not registry_abac_enabled and auth_mode and auth_mode.lower() == "none" and source_registry_auth_id:
-        raise CLIError('Error: Conflicting Authentication Parameters for Task Access to Source Registry. Task authentication mode for source registry access is set to "None," but an identity was provided for authentication. Remove the identity or update the authentication mode to resolve this conflict.')
+        raise CLIError('Error: Conflicting Authentication Parameters for Task Access to Source Registry. Task '
+                       'authentication mode for source registry access is set to "None", but an identity was provided '
+                       'for authentication. Remove the identity or update the authentication mode to resolve this '
+                       'conflict.')
+
+    source_registry_identity = source_registry_auth_id
+    if source_registry_auth_id and source_registry_auth_id.startswith('/subscriptions/'):
+        source_registry_identity = resolve_identity_client_id(cmd.cli_ctx, source_registry_auth_id)
 
     source_registry_credentials = None
-    # Need to differentiate between the string "None" and the None value for auth_mode
-    if auth_mode:
+    if auth_mode or source_registry_identity:
         source_registry_credentials = SourceRegistryCredentials(
-            login_mode=auth_mode, identity=source_registry_auth_id)
-    elif source_registry_auth_id: # auth_mode is None at this point
-        source_registry_credentials = SourceRegistryCredentials(identity=source_registry_auth_id)
+            login_mode=auth_mode, identity=source_registry_identity)
 
     custom_registries = None
     if login_server:
@@ -617,6 +626,9 @@ def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_n
     client = cf_acr_tasks(cli_ctx)
     return client.get_details(resource_group_name, registry_name, task_name)
 
+
 def check_auth_mode_for_abac(registry_abac_enabled, auth_mode):
     if registry_abac_enabled and auth_mode is not None:
-        logger.warning("The --auth-mode flag is deprecated for specifying access to an ABAC-enabled source registry. Please use --source-registry-auth-id to specify an Entra identity for use in accessing an ABAC-enabled source registry." )
+        logger.warning("The --auth-mode flag is deprecated for specifying access to an ABAC-enabled source registry. "
+                       "Please use --source-registry-auth-id to specify an Entra identity for use in accessing an "
+                       "ABAC-enabled source registry.")

@@ -5,15 +5,13 @@
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.commands import LongRunningOperation
 
 from ._constants import ACR_TASK_YAML_DEFAULT_NAME
 from ._stream_utils import stream_logs
 from ._utils import (
-    check_auth_mode_for_abac,
     validate_managed_registry,
     get_validate_platform,
-    get_custom_registry_credentials,
+    get_source_and_custom_registry_credentials,
     get_yaml_template,
     prepare_source_location
 )
@@ -60,10 +58,17 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties, RoleAssignmentMode = cmd.get_models(
-        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties', 'RoleAssignmentMode', operation_group='runs')
+        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties', 'RoleAssignmentMode',
+        operation_group='runs')
 
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
-    check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
+    credentials = get_source_and_custom_registry_credentials(
+        cmd=cmd,
+        auth_mode=auth_mode,
+        source_registry_auth_id=source_registry_auth_id,
+        registry_abac_enabled=registry_abac_enabled,
+        deprecate_auth_mode=True
+    )
 
     if source_location:
         request = FileTaskRunRequest(
@@ -77,12 +82,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
                 architecture=platform_arch,
                 variant=platform_variant
             ),
-            credentials=get_custom_registry_credentials(
-                cmd=cmd,
-                auth_mode=auth_mode,
-                source_registry_auth_id=source_registry_auth_id,
-                registry_abac_enabled=registry_abac_enabled
-            ),
+            credentials=credentials,
             agent_pool_name=agent_pool_name,
             log_template=log_template
         )
@@ -99,12 +99,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
                 architecture=platform_arch,
                 variant=platform_variant
             ),
-            credentials=get_custom_registry_credentials(
-                cmd=cmd,
-                auth_mode=auth_mode,
-                source_registry_auth_id=source_registry_auth_id,
-                registry_abac_enabled=registry_abac_enabled
-            ),
+            credentials=credentials,
             agent_pool_name=agent_pool_name,
             log_template=log_template
         )

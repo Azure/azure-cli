@@ -6,14 +6,13 @@
 import base64
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.commands import LongRunningOperation
 
 from ._constants import ACR_CACHED_BUILDER_IMAGES
 from ._stream_utils import stream_logs
 from ._utils import (
     get_registry_by_name,
     get_validate_platform,
-    get_custom_registry_credentials
+    get_source_and_custom_registry_credentials
 )
 from ._client_factory import cf_acr_registries_tasks
 from .run import prepare_source_location
@@ -88,7 +87,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
             architecture=platform_arch,
             variant=platform_variant
         ),
-        credentials=get_custom_registry_credentials(
+        credentials=get_source_and_custom_registry_credentials(
             cmd=cmd,
             auth_mode=auth_mode
         ),
