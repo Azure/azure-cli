@@ -814,7 +814,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
         if app_is_linux_webapp and not app_is_function_app and enable_kudu_warmup:
             try:
-                logger.info("Warming up Kudu before deployment.")
+                logger.warning("Warming up Kudu before deployment.")
                 cookies = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie. Deployment "
