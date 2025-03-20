@@ -108,7 +108,7 @@ from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand, LongRunningOperation
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json
+from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json, read_file_content
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
@@ -883,6 +883,30 @@ class AKSManagedClusterContext(BaseAKSContext):
                 )
 
         return disable_keda
+
+    def get_custom_ca_trust_certificates(self) -> Union[List[bytes], None]:
+        """Obtain the value of custom ca trust certificates.
+        :return: List[str] or None
+        """
+        custom_ca_certs_file_path = self.raw_param.get("custom_ca_trust_certificates")
+        if not custom_ca_certs_file_path:
+            return None
+        if not os.path.isfile(custom_ca_certs_file_path):
+            raise InvalidArgumentValueError(
+                "{} is not valid file, or not accessible.".format(
+                    custom_ca_certs_file_path
+                )
+            )
+        # CAs are supposed to be separated with a new line, we filter out empty strings (e.g. some stray new line). We only allow up to 10 CAs
+        file_content = read_file_content(custom_ca_certs_file_path).split(os.linesep + os.linesep)
+        certs = [str.encode(x) for x in file_content if len(x) > 1]
+        if len(certs) > 10:
+            raise InvalidArgumentValueError(
+                "Only up to 10 new-line separated CAs can be passed, got {} instead.".format(
+                    len(certs)
+                )
+            )
+        return certs
 
     def get_snapshot_controller(self) -> Optional[ManagedClusterStorageProfileSnapshotController]:
         """Obtain the value of storage_profile.snapshot_controller
