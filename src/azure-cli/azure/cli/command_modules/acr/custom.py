@@ -276,12 +276,16 @@ def acr_login(cmd,
             password=password,
             resource_group_name=resource_group_name)
 
+        logger.warning("Note: The token in both the accessToken and refreshToken fields is an ACR Refresh Token, not an ACR Access Token. This ACR Refresh Token must be used to obtain an ACR Access Token when performing data plane operations, such as pushing or pulling images.")
+
         logger.warning("You can perform manual login using the provided access token below, "
                        "for example: 'docker login loginServer -u %s -p accessToken'", EMPTY_GUID)
 
         token_info = {
             "loginServer": login_server,
-            "accessToken": password
+            "username":  EMPTY_GUID,
+            "accessToken": password,
+            "refreshToken": password
         }
 
         return token_info
