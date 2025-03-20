@@ -44,6 +44,7 @@ from .validators import pg_arguments_validator, validate_server_name, validate_a
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
+POSTGRES_DB_NAME = 'postgres'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
@@ -180,10 +181,12 @@ def flexible_server_create(cmd, client,
     if start_ip != -1 and end_ip != -1:
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
-    # Create mysql database if it does not exist
+    # Create database if it does not exist
     if (database_name is not None or (create_default_db and create_default_db.lower() == 'enabled') and create_cluster != 'ElasticCluster'):
         db_name = database_name if database_name else DEFAULT_DB_NAME
         _create_database(db_context, cmd, resource_group_name, server_name, db_name)
+    else:
+        db_name = POSTGRES_DB_NAME
 
     user = server_result.administrator_login if is_password_auth_enabled else '<user>'
     password = administrator_login_password if is_password_auth_enabled else '<password>'
