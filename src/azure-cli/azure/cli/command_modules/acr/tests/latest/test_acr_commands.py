@@ -6,6 +6,7 @@
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
+import time
 
 
 class AcrCommandsTests(ScenarioTest):
@@ -68,11 +69,11 @@ class AcrCommandsTests(ScenarioTest):
         assert username and password and password2
 
         # renew password
-        credential = self.cmd('acr credential renew -n {} -g {} --password-name {}'.format(
+        credential1 = self.cmd('acr credential renew -n {} -g {} --password-name {}'.format(
             registry_name, resource_group, 'password')).get_output_in_json()
-        renewed_username = credential['username']
-        renewed_password = credential['passwords'][0]['value']
-        renewed_password2 = credential['passwords'][1]['value']
+        renewed_username = credential1['username']
+        renewed_password = credential1['passwords'][0]['value']
+        renewed_password2 = credential1['passwords'][1]['value']
         assert renewed_username and renewed_password and renewed_password2
         assert username == renewed_username
         assert password != renewed_password
@@ -110,22 +111,9 @@ class AcrCommandsTests(ScenarioTest):
             'name': name
         })
 
-        self.cmd('acr check-name -n {name} --dnlscope noreuse', checks=[
+        self.cmd('acr check-name -n {name} --dnl-scope noreuse', checks=[
             self.check('nameAvailable', True),
-            self.check_pattern('availableLoginServerName','{registry_name}-[a-zA-Z0-9]+\.*')
-        ])
-        
-        
-    def test_check_name_availability_dnl_scope(self):
-        # the chance of this randomly generated name has a duplication is rare
-        name = self.create_random_name('clireg', 20)
-        self.kwargs.update({
-            'name': name
-        })
-
-        self.cmd('acr check-name -n {name} --dnlscope noreuse', checks=[
-            self.check('nameAvailable', True),
-            self.check_pattern('availableLoginServerName','{registry_name}-[a-zA-Z0-9]+\.*')
+            self.check_pattern('availableLoginServerName','{name}-[a-zA-Z0-9]+\.*')
         ])
         
     @ResourceGroupPreparer()
@@ -540,7 +528,6 @@ class AcrCommandsTests(ScenarioTest):
             self.check('metrics[0].category', 'AllMetrics'),
         ])
 
-    @live_only()
     @ResourceGroupPreparer()
     @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
@@ -552,19 +539,19 @@ class AcrCommandsTests(ScenarioTest):
             'identity_permissions': "get unwrapkey wrapkey",
             'registry_name': self.create_random_name('testreg', 20),
         })
-
         # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
         self.kwargs['key_id'] = result.get_output_in_json()['key']['kid']
-
+        
         # create a user-assigned identity and give it access to the key
         result = self.cmd('identity create --name {identity_name} -g {rg}')
         self.kwargs['principal_id'] = result.get_output_in_json()['principalId']
         self.kwargs['identity_id'] = result.get_output_in_json()['id']
         self.kwargs['client_id'] = result.get_output_in_json()['clientId']
-
-        self.cmd('keyvault set-policy --object-id {principal_id} --name {key_vault} --key-permissions {identity_permissions}')
-
+        
+        time.sleep(10) # wait for ARM cache to populate 
+        self.cmd('role assignment create --role "Key Vault Crypto Service Encryption User" --assignee {principal_id} --scope /subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourceGroups/{rg}/providers/Microsoft.KeyVault/vaults/{key_vault}')
+     
         # create the registry with CMK encryption enabled using the user-assigned identity
         result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium --identity {identity_id} --key-encryption-key {key_id}', checks=[
             self.check('identity.type', 'userAssigned'),
