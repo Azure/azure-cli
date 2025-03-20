@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2024-07-01"],
         ]
     }
 
@@ -524,7 +524,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -623,7 +623,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -992,6 +992,9 @@ class _UpdateHelper:
         properties.enable_dns_forwarding = AAZBoolType(
             serialized_name="enableDnsForwarding",
         )
+        properties.enable_high_bandwidth_vpn_gateway = AAZBoolType(
+            serialized_name="enableHighBandwidthVpnGateway",
+        )
         properties.enable_private_ip_address = AAZBoolType(
             serialized_name="enablePrivateIpAddress",
         )
@@ -1026,6 +1029,9 @@ class _UpdateHelper:
         properties.sku = AAZObjectType()
         properties.v_net_extended_location_resource_id = AAZStrType(
             serialized_name="vNetExtendedLocationResourceId",
+        )
+        properties.virtual_network_gateway_migration_status = AAZObjectType(
+            serialized_name="virtualNetworkGatewayMigrationStatus",
         )
         properties.virtual_network_gateway_policy_groups = AAZListType(
             serialized_name="virtualNetworkGatewayPolicyGroups",
@@ -1166,6 +1172,13 @@ class _UpdateHelper:
         )
         sku.name = AAZStrType()
         sku.tier = AAZStrType()
+
+        virtual_network_gateway_migration_status = _schema_virtual_network_gateway_read.properties.virtual_network_gateway_migration_status
+        virtual_network_gateway_migration_status.error_message = AAZStrType(
+            serialized_name="errorMessage",
+        )
+        virtual_network_gateway_migration_status.phase = AAZStrType()
+        virtual_network_gateway_migration_status.state = AAZStrType()
 
         virtual_network_gateway_policy_groups = _schema_virtual_network_gateway_read.properties.virtual_network_gateway_policy_groups
         virtual_network_gateway_policy_groups.Element = AAZObjectType()
