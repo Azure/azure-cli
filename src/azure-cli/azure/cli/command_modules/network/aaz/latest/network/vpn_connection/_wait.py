@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/connections/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/connections/{}", "2024-07-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -177,6 +177,7 @@ class Wait(AAZWaitCommand):
             )
             properties.connection_status = AAZStrType(
                 serialized_name="connectionStatus",
+                flags={"read_only": True},
             )
             properties.connection_type = AAZStrType(
                 serialized_name="connectionType",
@@ -194,6 +195,9 @@ class Wait(AAZWaitCommand):
             )
             properties.enable_bgp = AAZBoolType(
                 serialized_name="enableBgp",
+            )
+            properties.enable_private_link_fast_path = AAZBoolType(
+                serialized_name="enablePrivateLinkFastPath",
             )
             properties.express_route_gateway_bypass = AAZBoolType(
                 serialized_name="expressRouteGatewayBypass",
@@ -236,6 +240,9 @@ class Wait(AAZWaitCommand):
             properties.tunnel_connection_status = AAZListType(
                 serialized_name="tunnelConnectionStatus",
                 flags={"read_only": True},
+            )
+            properties.tunnel_properties = AAZListType(
+                serialized_name="tunnelProperties",
             )
             properties.use_local_azure_ip_address = AAZBoolType(
                 serialized_name="useLocalAzureIpAddress",
@@ -345,6 +352,7 @@ class Wait(AAZWaitCommand):
             _element = cls._schema_on_200.properties.tunnel_connection_status.Element
             _element.connection_status = AAZStrType(
                 serialized_name="connectionStatus",
+                flags={"read_only": True},
             )
             _element.egress_bytes_transferred = AAZIntType(
                 serialized_name="egressBytesTransferred",
@@ -360,6 +368,17 @@ class Wait(AAZWaitCommand):
             )
             _element.tunnel = AAZStrType(
                 flags={"read_only": True},
+            )
+
+            tunnel_properties = cls._schema_on_200.properties.tunnel_properties
+            tunnel_properties.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.tunnel_properties.Element
+            _element.bgp_peering_address = AAZStrType(
+                serialized_name="bgpPeeringAddress",
+            )
+            _element.tunnel_ip_address = AAZStrType(
+                serialized_name="tunnelIpAddress",
             )
 
             tags = cls._schema_on_200.tags
@@ -532,6 +551,7 @@ class _WaitHelper:
             _schema.etag = cls._schema_virtual_network_gateway_read.etag
             _schema.extended_location = cls._schema_virtual_network_gateway_read.extended_location
             _schema.id = cls._schema_virtual_network_gateway_read.id
+            _schema.identity = cls._schema_virtual_network_gateway_read.identity
             _schema.location = cls._schema_virtual_network_gateway_read.location
             _schema.name = cls._schema_virtual_network_gateway_read.name
             _schema.properties = cls._schema_virtual_network_gateway_read.properties
@@ -549,6 +569,7 @@ class _WaitHelper:
             serialized_name="extendedLocation",
         )
         virtual_network_gateway_read.id = AAZStrType()
+        virtual_network_gateway_read.identity = AAZIdentityObjectType()
         virtual_network_gateway_read.location = AAZStrType()
         virtual_network_gateway_read.name = AAZStrType(
             flags={"read_only": True},
@@ -565,9 +586,48 @@ class _WaitHelper:
         extended_location.name = AAZStrType()
         extended_location.type = AAZStrType()
 
+        identity = _schema_virtual_network_gateway_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType()
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_virtual_network_gateway_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_virtual_network_gateway_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
         properties = _schema_virtual_network_gateway_read.properties
         properties.active_active = AAZBoolType(
             serialized_name="activeActive",
+        )
+        properties.admin_state = AAZStrType(
+            serialized_name="adminState",
+        )
+        properties.allow_remote_vnet_traffic = AAZBoolType(
+            serialized_name="allowRemoteVnetTraffic",
+        )
+        properties.allow_virtual_wan_traffic = AAZBoolType(
+            serialized_name="allowVirtualWanTraffic",
+        )
+        properties.auto_scale_configuration = AAZObjectType(
+            serialized_name="autoScaleConfiguration",
         )
         properties.bgp_settings = AAZObjectType(
             serialized_name="bgpSettings",
@@ -588,6 +648,9 @@ class _WaitHelper:
         )
         properties.enable_dns_forwarding = AAZBoolType(
             serialized_name="enableDnsForwarding",
+        )
+        properties.enable_high_bandwidth_vpn_gateway = AAZBoolType(
+            serialized_name="enableHighBandwidthVpnGateway",
         )
         properties.enable_private_ip_address = AAZBoolType(
             serialized_name="enablePrivateIpAddress",
@@ -613,6 +676,9 @@ class _WaitHelper:
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+        properties.resiliency_model = AAZStrType(
+            serialized_name="resiliencyModel",
+        )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
@@ -620,6 +686,12 @@ class _WaitHelper:
         properties.sku = AAZObjectType()
         properties.v_net_extended_location_resource_id = AAZStrType(
             serialized_name="vNetExtendedLocationResourceId",
+        )
+        properties.virtual_network_gateway_migration_status = AAZObjectType(
+            serialized_name="virtualNetworkGatewayMigrationStatus",
+        )
+        properties.virtual_network_gateway_policy_groups = AAZListType(
+            serialized_name="virtualNetworkGatewayPolicyGroups",
         )
         properties.vpn_client_configuration = AAZObjectType(
             serialized_name="vpnClientConfiguration",
@@ -630,6 +702,13 @@ class _WaitHelper:
         properties.vpn_type = AAZStrType(
             serialized_name="vpnType",
         )
+
+        auto_scale_configuration = _schema_virtual_network_gateway_read.properties.auto_scale_configuration
+        auto_scale_configuration.bounds = AAZObjectType()
+
+        bounds = _schema_virtual_network_gateway_read.properties.auto_scale_configuration.bounds
+        bounds.max = AAZIntType()
+        bounds.min = AAZIntType()
 
         ip_configurations = _schema_virtual_network_gateway_read.properties.ip_configurations
         ip_configurations.Element = AAZObjectType()
@@ -711,6 +790,63 @@ class _WaitHelper:
         sku.name = AAZStrType()
         sku.tier = AAZStrType()
 
+        virtual_network_gateway_migration_status = _schema_virtual_network_gateway_read.properties.virtual_network_gateway_migration_status
+        virtual_network_gateway_migration_status.error_message = AAZStrType(
+            serialized_name="errorMessage",
+        )
+        virtual_network_gateway_migration_status.phase = AAZStrType()
+        virtual_network_gateway_migration_status.state = AAZStrType()
+
+        virtual_network_gateway_policy_groups = _schema_virtual_network_gateway_read.properties.virtual_network_gateway_policy_groups
+        virtual_network_gateway_policy_groups.Element = AAZObjectType()
+
+        _element = _schema_virtual_network_gateway_read.properties.virtual_network_gateway_policy_groups.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        properties = _schema_virtual_network_gateway_read.properties.virtual_network_gateway_policy_groups.Element.properties
+        properties.is_default = AAZBoolType(
+            serialized_name="isDefault",
+            flags={"required": True},
+        )
+        properties.policy_members = AAZListType(
+            serialized_name="policyMembers",
+            flags={"required": True},
+        )
+        properties.priority = AAZIntType(
+            flags={"required": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.vng_client_connection_configurations = AAZListType(
+            serialized_name="vngClientConnectionConfigurations",
+            flags={"read_only": True},
+        )
+
+        policy_members = _schema_virtual_network_gateway_read.properties.virtual_network_gateway_policy_groups.Element.properties.policy_members
+        policy_members.Element = AAZObjectType()
+
+        _element = _schema_virtual_network_gateway_read.properties.virtual_network_gateway_policy_groups.Element.properties.policy_members.Element
+        _element.attribute_type = AAZStrType(
+            serialized_name="attributeType",
+        )
+        _element.attribute_value = AAZStrType(
+            serialized_name="attributeValue",
+        )
+        _element.name = AAZStrType()
+
+        vng_client_connection_configurations = _schema_virtual_network_gateway_read.properties.virtual_network_gateway_policy_groups.Element.properties.vng_client_connection_configurations
+        vng_client_connection_configurations.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(vng_client_connection_configurations.Element)
+
         vpn_client_configuration = _schema_virtual_network_gateway_read.properties.vpn_client_configuration
         vpn_client_configuration.aad_audience = AAZStrType(
             serialized_name="aadAudience",
@@ -729,6 +865,9 @@ class _WaitHelper:
         )
         vpn_client_configuration.radius_servers = AAZListType(
             serialized_name="radiusServers",
+        )
+        vpn_client_configuration.vng_client_connection_configurations = AAZListType(
+            serialized_name="vngClientConnectionConfigurations",
         )
         vpn_client_configuration.vpn_authentication_types = AAZListType(
             serialized_name="vpnAuthenticationTypes",
@@ -764,6 +903,38 @@ class _WaitHelper:
         _element.radius_server_secret = AAZStrType(
             serialized_name="radiusServerSecret",
         )
+
+        vng_client_connection_configurations = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vng_client_connection_configurations
+        vng_client_connection_configurations.Element = AAZObjectType()
+
+        _element = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vng_client_connection_configurations.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        properties = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vng_client_connection_configurations.Element.properties
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.virtual_network_gateway_policy_groups = AAZListType(
+            serialized_name="virtualNetworkGatewayPolicyGroups",
+            flags={"required": True},
+        )
+        properties.vpn_client_address_pool = AAZObjectType(
+            serialized_name="vpnClientAddressPool",
+            flags={"required": True},
+        )
+        cls._build_schema_address_space_read(properties.vpn_client_address_pool)
+
+        virtual_network_gateway_policy_groups = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vng_client_connection_configurations.Element.properties.virtual_network_gateway_policy_groups
+        virtual_network_gateway_policy_groups.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(virtual_network_gateway_policy_groups.Element)
 
         vpn_authentication_types = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vpn_authentication_types
         vpn_authentication_types.Element = AAZStrType()
@@ -824,6 +995,7 @@ class _WaitHelper:
         _schema.etag = cls._schema_virtual_network_gateway_read.etag
         _schema.extended_location = cls._schema_virtual_network_gateway_read.extended_location
         _schema.id = cls._schema_virtual_network_gateway_read.id
+        _schema.identity = cls._schema_virtual_network_gateway_read.identity
         _schema.location = cls._schema_virtual_network_gateway_read.location
         _schema.name = cls._schema_virtual_network_gateway_read.name
         _schema.properties = cls._schema_virtual_network_gateway_read.properties
