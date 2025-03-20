@@ -9,6 +9,7 @@ import os
 import json
 from importlib import import_module
 import re
+from urllib.parse import quote
 from urllib.request import urlretrieve
 from dateutil.tz import tzutc   # pylint: disable=import-error
 import uuid
@@ -40,7 +41,6 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name
-from urllib.parse import quote
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
