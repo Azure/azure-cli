@@ -1803,7 +1803,7 @@ short-summary: Create a new directory under the specified share or parent direct
 examples:
   - name: Create a new directory under the specified NFS share with file-mode, owner, group
     text: |
-        az storage directory create --account-name mystorageaccount --name dir --share-name myshare 
+        az storage directory create --account-name mystorageaccount --name dir --share-name myshare
         --file-mode rwxr--r-- --owner 1 --group 2
 """
 
@@ -1954,13 +1954,10 @@ examples:
         az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --file-snapshot "2020-03-02T13:51:54.0000000Z" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destination-sas>
     - name: Copy a file with the source file-mode, group, owner.
       text: |
-        az storage file copy start --source-account-name srcaccount --source-path srcpath --source-share srcshare 
-        --destination-path dstpath --destination-share dstshare --owner-copy-mode Source --file-mode-copy-mode Source
+        az storage file copy start --source-account-name srcaccount --source-path srcpath --source-share srcshare --destination-path dstpath --destination-share dstshare --owner-copy-mode Source --file-mode-copy-mode Source
     - name: Copy a file with the overridden file-mode, group, owner.
       text: |
-        az storage file copy start --source-account-name srcaccount --source-path srcpath --source-share srcshare 
-        --destination-path dstpath --destination-share dstshare --owner-copy-mode Override 
-        --file-mode-copy-mode Override --file-mode rw-rw-rw- --owner 4 --group 5    
+        az storage file copy start --source-account-name srcaccount --source-path srcpath --source-share srcshare --destination-path dstpath --destination-share dstshare --owner-copy-mode Override --file-mode-copy-mode Override --file-mode rw-rw-rw- --owner 4 --group 5
 """
 
 helps['storage file copy start-batch'] = """
@@ -3188,8 +3185,7 @@ helps['storage file hard-link create'] = """
     type: command
     short-summary: NFS only. Create a hard link to the file specified by path.
     examples:
-      - name: Create a hard link to an NFS file specified by path. 
+      - name: Create a hard link to an NFS file specified by path.
         text: |
-            az storage file hard-link create --account-name MyAccount --share-name share 
-            --path link_path --target original_path
+            az storage file hard-link create --account-name MyAccount --share-name share --path link_path --target original_path
 """

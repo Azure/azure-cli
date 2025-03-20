@@ -1992,11 +1992,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                      'bit for the others category is set or unset respectively, absence of t or T indicates sticky '
                      'bit not set."')
         c.extra('owner', help='Only applicable to NFS Files. Only work together with parameter '
-                                               '`--owner-copy-mode Override`. The owner user identifier (UID) '
-                                               'to be set on the directory. The default value is 0 (root).')
+                              '`--owner-copy-mode Override`. The owner user identifier (UID) '
+                              'to be set on the directory. The default value is 0 (root).')
         c.extra('group', help='Only applicable to NFS Files. Only work together with parameter '
-                                               '`--owner-copy-mode Override`. The owner group identifier (GID) '
-                                               'to be set on the directory. The default value is 0 (root group).')
+                              '`--owner-copy-mode Override`. The owner group identifier (GID) '
+                              'to be set on the directory. The default value is 0 (root group).')
         t_file_mode_copy_mode_type = self.get_sdk('_generated.models._azure_file_storage_enums#ModeCopyMode',
                                                   resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('file_mode_copy_mode',
