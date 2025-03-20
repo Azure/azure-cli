@@ -185,6 +185,13 @@ jobs:
   - bash: |
       set -ev
       . env/bin/activate
+      pip show packaging
+      pip show setuptools
+      pip uninstall setuptools -y
+      # setuptools: version < 77.0.0
+      pip install setuptools==76.1.0
+      pip show packaging
+      pip show setuptools
       azdev verify history
 
     displayName: 'Verify History'
@@ -1068,6 +1075,13 @@ jobs:
   - bash: |
       set -ev
       . env/bin/activate
+      pip show packaging
+      pip show setuptools
+      pip uninstall setuptools -y
+      # setuptools: version < 77.0.0
+      pip install setuptools==76.1.0
+      pip show packaging
+      pip show setuptools
       azdev verify license
       azdev verify history
       azdev verify document-map
