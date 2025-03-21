@@ -1551,13 +1551,14 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self.raw_param.get("if_none_match")
     
-    def _get_gpu_driver(self) -> str:
+    def _get_gpu_driver(self) -> Union[str, None]:
         """Obtain the value of gpu_driver.
 
         :return: string
         """
         # read the original value passed by the command
         gpu_driver = self.raw_param.get("gpu_driver")
+
         # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
@@ -1954,9 +1955,8 @@ class AKSAgentPoolAddDecorator:
 
         # Construct AgentPoolGPUProfile if one of the fields has been set
         if gpu_driver:
-            agentpool.gpu_profile = self.models.GPUProfile(  # pylint: disable=no-member
-                driver=gpu_driver
-            )
+            agentpool.gpu_profile = self.models.GPUProfile()
+            agentpool.gpu_profile.driver = gpu_driver
 
         return agentpool
 

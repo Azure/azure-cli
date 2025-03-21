@@ -429,6 +429,7 @@ def load_arguments(self, _):
         c.argument('host_group_id', validator=validate_host_group_id)
         c.argument('crg_id', validator=validate_crg_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
+        c.argument('gpu_driver', arg_type=get_enum_type(gpu_driver_install_modes))
         c.argument('nodepool_allowed_host_ports', nargs='+', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
         c.argument('nodepool_asg_ids', nargs='+', validator=validate_application_security_groups, help="application security groups for agentpool")
         c.argument("message_of_the_day")
