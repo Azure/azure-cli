@@ -6174,6 +6174,22 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
         return mc
 
+    def set_up_custom_ca_trust_certificates(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up Custom CA Trust Certificates for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ca_certs = self.context.get_custom_ca_trust_certificates()
+        if ca_certs:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
+
+            mc.security_profile.custom_ca_trust_certificates = ca_certs
+
+        return mc
+
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up api server access profile and fqdn subdomain for the ManagedCluster object.
 
@@ -6631,6 +6647,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_workload_auto_scaler_profile(mc)
         # set up app routing profile
         mc = self.set_up_ingress_web_app_routing(mc)
+        # set up custom ca trust certificates
+        mc = self.set_up_custom_ca_trust_certificates(mc)
 
         # setup k8s support plan
         mc = self.set_up_k8s_support_plan(mc)
@@ -8089,6 +8107,22 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = False
 
         return mc
+    
+    def update_custom_ca_trust_certificates(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update Custom CA Trust Certificates for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ca_certs = self.context.get_custom_ca_trust_certificates()
+        if ca_certs:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
+
+            mc.security_profile.custom_ca_trust_certificates = ca_certs
+
+        return mc 
 
     def update_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update azure monitor profile for the ManagedCluster object.
@@ -8472,6 +8506,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_oidc_issuer_profile(mc)
         # update auto upgrade profile
         mc = self.update_auto_upgrade_profile(mc)
+        # update custom ca trust certificates
+        mc = self.update_custom_ca_trust_certificates(mc)
         # update identity
         mc = self.update_identity(mc)
         # update addon profiles
