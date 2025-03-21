@@ -814,7 +814,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
         if app_is_linux_webapp and not app_is_function_app and enable_kudu_warmup:
             try:
-                logger.info("Warming up Kudu before deployment.")
+                logger.warning("Warming up Kudu before deployment.")
                 cookies = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie. Deployment "
@@ -7379,9 +7379,9 @@ class OneDeployParams:
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
-def _build_onedeploy_url(params):
+def _build_onedeploy_url(params, instance_id=None):
     if params.src_url:
-        return _build_onedeploy_arm_url(params)
+        return _build_onedeploy_arm_url(params, instance_id)
     return _build_onedeploy_scm_url(params)
 
 
@@ -7407,19 +7407,20 @@ def _build_onedeploy_scm_url(params):
     return deploy_url
 
 
-def _build_onedeploy_arm_url(params):
+def _build_onedeploy_arm_url(params, instance_id):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(params.cmd.cli_ctx)
     sub_id = get_subscription_id(params.cmd.cli_ctx)
+    instances_param = f"/instances/{instance_id}" if instance_id is not None else ""
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
+            f"{params.webapp_name}{instances_param}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
         )
     else:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/slots/{params.slot}/extensions/onedeploy"
+            f"{params.webapp_name}/slots/{params.slot}{instances_param}/extensions/onedeploy"
             f"?api-version={client.DEFAULT_API_VERSION}"
         )
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
@@ -7618,7 +7619,24 @@ def _make_onedeploy_request(params):
                                      verify=not should_disable_connection_verify())
         poll_async_deployment_for_debugging = True
     else:
-        response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+        if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
+            try:
+                logger.warning("Warming up Kudu before deployment.")
+                cookies = _warmup_kudu_and_get_cookie_internal(params.cmd, params.resource_group_name,
+                                                               params.webapp_name, params.slot)
+                if cookies is None:
+                    logger.info("Failed to fetch affinity cookie for Kudu. "
+                                "Deployment will proceed without pre-warming a Kudu instance.")
+                    response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+                else:
+                    deploy_arm_url = _build_onedeploy_url(params, cookies.get("ARRAffinity"))
+                    response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_arm_url, body=body)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info("Failed to deploy using instances endpoint. "
+                            "Deployment will proceed without pre-warming a Kudu instance. Ex: %s", ex)
+                response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+        else:
+            response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
         poll_async_deployment_for_debugging = False
 
     # check the status of deployment

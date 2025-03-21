@@ -59,9 +59,9 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                outbound_type='Loadbalancer',
                disk_encryption_set=None,
                master_encryption_at_host=False,
-               master_vm_size='Standard_D8s_v3',
+               master_vm_size='Standard_D8s_v5',
                worker_encryption_at_host=False,
-               worker_vm_size='Standard_D4s_v3',
+               worker_vm_size='Standard_D4s_v5',
                worker_vm_disk_size_gb='128',
                worker_count='3',
                apiserver_visibility='Public',
@@ -115,7 +115,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
     if not rp_client_sp_id:
         raise ResourceNotFoundError("RP service principal not found.")
 
-    worker_vm_size = worker_vm_size or 'Standard_D4s_v3'
+    worker_vm_size = worker_vm_size or 'Standard_D4s_v5'
 
     if apiserver_visibility is not None:
         apiserver_visibility = apiserver_visibility.capitalize()
@@ -152,7 +152,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
             preconfigured_nsg='Enabled' if enable_preconfigured_nsg else 'Disabled',
         ),
         master_profile=openshiftcluster.MasterProfile(
-            vm_size=master_vm_size or 'Standard_D8s_v3',
+            vm_size=master_vm_size or 'Standard_D8s_v5',
             subnet_id=master_subnet,
             encryption_at_host='Enabled' if master_encryption_at_host else 'Disabled',
             disk_encryption_set_id=disk_encryption_set,
