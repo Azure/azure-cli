@@ -1816,13 +1816,12 @@ def list_flex_function_app_runtimes(cmd, location, runtime, ignore_error=False):
         runtimes = [r for r in runtime_helper.stacks if runtime == r.name]
         if not runtimes:
             raise ValidationError("Runtime '{}' not supported for function apps on the Flex Consumption plan."
-                                .format(runtime))
+                                  .format(runtime))
         return runtime_helper.stacks
-    except Exception as e:
+    except Exception:
         if ignore_error:
             return []
-        else:
-            raise  # Rethrow the caught exception 
+        raise  # Rethrow the caught exception
 
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
@@ -6136,11 +6135,11 @@ def list_flexconsumption_locations(cmd, zone_redundant=False, details=False, run
 
     if runtime and not details:
         raise ArgumentUsageError(
-                '--runtime is only valid with --details parameter. '
-                'Please try again without the --details parameter.')
+            '--runtime is only valid with --details parameter. '
+            'Please try again without the --details parameter.')
 
     regions = client.list_geo_regions(sku="FlexConsumption")
-    
+
     if zone_redundant:
         regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
 
@@ -6155,17 +6154,21 @@ def list_flexconsumption_locations(cmd, zone_redundant=False, details=False, run
 
 
 def list_flex_function_app_all_runtimes(cmd, location, runtime=None):
-    runtimes = ["dotnet-isolated", "node", "python", "java",  "powershell"]
+    runtimes = ["dotnet-isolated", "node", "python", "java", "powershell"]
     if runtime:
         runtimes = [runtime]
 
-    return [{'runtime': x, 'runtime-details': list_flex_function_app_runtimes(cmd, location, x, True)} for x in runtimes]
+    return [{'runtime': x,
+             'runtime-details': list_flex_function_app_runtimes(cmd, location, x, True)}
+            for x in runtimes]
+
 
 def list_flexconsumption_zone_redundant_locations(cmd):
     client = web_client_factory(cmd.cli_ctx)
     regions = client.list_geo_regions(sku="FlexConsumption")
     regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
     web_client = web_client_factory(cmd.cli_ctx)

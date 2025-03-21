@@ -818,6 +818,13 @@ class FunctionAppFlex(LiveScenarioTest):
         locations = self.cmd('functionapp list-flexconsumption-locations --zone-redundant').get_output_in_json()
         self.assertTrue(len(locations) > 0)
 
+    def test_functionapp_list_flexconsumption_locations_details(self):
+        locations = self.cmd('functionapp list-flexconsumption-locations --details --runtime java').get_output_in_json()
+        self.assertTrue(len(locations) > 0)
+        self.assertTrue(locations[0]['name'] is not None)
+        self.assertTrue(locations[0]['details'][0]['runtime'] is not None)
+        self.assertTrue(locations[0]['details'][0]['runtime'] == 'java') 
+
     def test_functionapp_list_flexconsumption_runtimes(self):
         runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
         self.assertTrue(len(runtimes) == 2)
