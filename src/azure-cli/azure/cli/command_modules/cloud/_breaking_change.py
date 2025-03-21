@@ -1,0 +1,17 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
+
+from azure.cli.core.breaking_change import AzCLIOtherChange, register_conditional_breaking_change
+
+register_conditional_breaking_change(tag='CloudRegisterOutputBreakingChange',
+                                     breaking_change=AzCLIOtherChange(cmd='cloud register',
+                                                                      message='In the near future, no gallery endpoint will be returned if use endpoint discovery with --endpoint-resource-manager, please manually set with --endpoint-gallery')
+                                     )
+
+register_conditional_breaking_change(tag='CloudUpdateOutputBreakingChange',
+                                     breaking_change=AzCLIOtherChange(cmd='cloud update',
+                                                                      message='In the near future, no gallery endpoint will be returned if use endpoint discovery with --endpoint-resource-manager, please manually set with --endpoint-gallery')
+                                     )
