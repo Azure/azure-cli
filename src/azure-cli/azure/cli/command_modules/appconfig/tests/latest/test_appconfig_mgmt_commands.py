@@ -94,7 +94,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', premium_sku)])
 
         keyvault_prefix = get_resource_name_prefix('cmk-test-keyvault')
-        keyvault_name = self.create_random_name(prefix=keyvault_prefix, length=36)
+        keyvault_name = self.create_random_name(prefix=keyvault_prefix, length=24)
         encryption_key = 'key'
         system_assigned_identity_id = store['identity']['principalId']
         self.kwargs.update({
@@ -178,8 +178,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         # create store in premium tier with replica
         premium_store_prefix = get_resource_name_prefix('MgmtTestPremiumSku')
         replica_prefix = get_resource_name_prefix('MgmtTestReplica')
-        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=36)
-        replica_name = self.create_random_name(prefix=replica_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=24)
+        replica_name = self.create_random_name(prefix=replica_prefix, length=24)
         tag_key = "key"
         tag_value = "value"
         tag = tag_key + '=' + tag_value

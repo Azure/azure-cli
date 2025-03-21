@@ -21,7 +21,7 @@ class AppconfigReplicaLiveScenarioTest(ScenarioTest):
     def test_azconfig_replica_mgmt(self, resource_group, location):
         store_name_prefix = get_resource_name_prefix('ReplicaStore')
         replica_name_prefix = get_resource_name_prefix('Replica')
-        config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
         replica_name = self.create_random_name(prefix=replica_name_prefix, length=24)
 
         store_location = 'eastus'

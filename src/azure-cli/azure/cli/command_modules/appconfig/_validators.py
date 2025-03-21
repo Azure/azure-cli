@@ -364,6 +364,10 @@ def validate_snapshot_filters(namespace):
                 if parsed_filter.get("label", None) and not isinstance(parsed_filter["label"], str):
                     raise InvalidArgumentValueError("Label filter must be a string if specified.")
 
+                if parsed_filter.get("tags", None):
+                    if not isinstance(parsed_filter["tags"], list) or not all(isinstance(tag, str) for tag in parsed_filter["tags"]):
+                        raise InvalidArgumentValueError("Tags filter must be a list of strings if specified.")
+
                 filter_parameters.append(parsed_filter)
 
             except ValueError:
@@ -411,3 +415,27 @@ def validate_sku(namespace):
     else:
         if namespace.replica_location is not None:
             raise RequiredArgumentMissingError("To create a replica, '--replica-name' is required.")
+
+
+def validate_tag_filters(namespace):
+    if namespace.tags and isinstance(namespace.tags, list):
+        if len(namespace.tags) > 5:
+            raise InvalidArgumentValueError("Too many tag filters provided. Maximum allowed is 5.")
+
+        for tag in namespace.tags:
+            if tag:
+                comps = tag.split('=', 1)
+                if comps[0] == "":
+                    raise InvalidArgumentValueError("Tag filter name cannot be empty.")
+
+
+def validate_import_tag_filters(namespace):
+    if namespace.src_tags and isinstance(namespace.src_tags, list):
+        if len(namespace.src_tags) > 5:
+            raise InvalidArgumentValueError("Too many tag filters provided. Maximum allowed is 5.")
+
+        for tag in namespace.src_tags:
+            if tag:
+                comps = tag.split('=', 1)
+                if comps[0] == "":
+                    raise InvalidArgumentValueError("Tag filter name cannot be empty.")
