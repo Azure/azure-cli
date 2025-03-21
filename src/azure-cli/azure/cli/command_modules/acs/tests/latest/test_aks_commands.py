@@ -12046,10 +12046,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "--cluster-name={name} "
             "--name={node_pool_name} "
             "--os-type Linux "
-            "--gpu-driver none",
+            "--gpu-driver None",
             checks=[
                 self.check("provisioningState", "Succeeded"),
-                self.check("gpuProfile.driver", "none"),
+                self.check("gpuProfile.driver", "None"),
             ],
         )
 
@@ -12060,10 +12060,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "--cluster-name={name} "
             "--name={node_pool_name_second} "
             "--os-type Linux "
-            "--gpu-driver install",
+            "--gpu-driver Install",
             checks=[
                 self.check("provisioningState", "Succeeded"),
-                self.check("gpuProfile.driver", "install"),
+                self.check("gpuProfile.driver", "Install"),
             ],
         )
 

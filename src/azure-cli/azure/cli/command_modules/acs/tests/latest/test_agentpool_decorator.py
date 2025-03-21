@@ -701,11 +701,11 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_gpu_driver(), None)
         agentpool = self.create_initialized_agentpool_instance(            
             gpu_profile=self.models.GPUProfile(
-                driver="install"
+                driver="Install"
             )
         )
         ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_gpu_driver(), "install")
+        self.assertEqual(ctx_1.get_gpu_driver(), "Install")
 
     def common_get_node_count_and_enable_cluster_autoscaler_min_max_count(
         self,
@@ -2455,7 +2455,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
             self.client,
-            {"gpu_driver": "install"},
+            {"gpu_driver": "Install"},
             self.resource_type,
             self.agentpool_decorator_mode,
         )
@@ -2468,7 +2468,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             gpu_profile=self.models.GPUProfile(
-                driver="install",
+                driver="Install",
             )
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)

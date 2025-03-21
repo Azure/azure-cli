@@ -53,8 +53,8 @@ CONST_GPU_INSTANCE_PROFILE_MIG4_G = "MIG4g"
 CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
 
 # gpu driver install
-CONST_GPU_DRIVER_INSTALL = "install"
-CONST_GPU_DRIVER_NONE = "none"
+CONST_GPU_DRIVER_INSTALL = "Install"
+CONST_GPU_DRIVER_NONE = "None"
 
 # consts for ManagedCluster
 # load balancer sku
