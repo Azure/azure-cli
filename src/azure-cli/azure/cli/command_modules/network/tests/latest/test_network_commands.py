@@ -6122,9 +6122,9 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.cmd(
                 'network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --gateway-type ExpressRoute --vpn-gateway-generation Generation1')
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --sku Standard --no-wait')
-        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
-        self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --sku VpnGw1 --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --sku VpnGw1 --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku VpnGw1 --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
 
         self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
         self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
@@ -6133,7 +6133,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway show -g {rg} -n {gw1}', checks=[
             self.check('gatewayType', 'Vpn'),
             self.check('sku.capacity', 2),
-            self.check('sku.name', 'Standard'),
+            self.check('sku.name', 'VpnGw1'),
             self.check('vpnType', 'RouteBased'),
             self.check('vpnGatewayGeneration', 'Generation1'),
             self.check('enableBgp', False),
@@ -6147,16 +6147,17 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway show -g {rg} -n {gw2}', checks=[
             self.check('gatewayType', 'Vpn'),
             self.check('sku.capacity', 2),
-            self.check('sku.name', 'Basic'),
+            self.check('sku.name', 'VpnGw1'),
             self.check('vpnType', 'RouteBased'),
             self.check('enableBgp', False)
         ])
         self.cmd('network vnet-gateway show -g {rg} -n {gw3}', checks=[
-            self.check('sku.name', 'Standard'),
+            self.check('sku.name', 'VpnGw1'),
             self.check('enableBgp', True),
             self.check('bgpSettings.asn', 12345),
             self.check('bgpSettings.bgpPeeringAddress', '10.2.250.250'),
-            self.check('bgpSettings.peerWeight', 50)
+            self.check('bgpSettings.peerWeight', 50),
+            self.check('enableHighBandwidthVpnGateway', False)
         ])
 
         self.kwargs.update({
