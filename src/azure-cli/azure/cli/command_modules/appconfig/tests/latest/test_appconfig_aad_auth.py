@@ -27,18 +27,33 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 APPCONFIG_AUTH_TOKEN_AUDIENCE = "https://appconfig.azure.com"
 
 TEST_MI_SUBSCRIPTION = {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "name": "MSI subscription",
-        "isDefault": True,
-        "state": "Enabled",
-        "user": {
-            "name": "systemAssignedIdentity"
-        },
-        "tenantId": "00000000-0000-0000-0000-000000000000",
-        "environmentName": "AzureCloud",
-        "homeTenantId": "00000000-0000-0000-0000-000000000000",
-        "managedByTenants": []
-    }
+    "id": "00000000-0000-0000-0000-000000000000",
+    "name": "MSI subscription",
+    "isDefault": True,
+    "state": "Enabled",
+    "user": {
+        "name": "systemAssignedIdentity"
+    },
+    "tenantId": "00000000-0000-0000-0000-000000000000",
+    "environmentName": "AzureCloud",
+    "homeTenantId": "00000000-0000-0000-0000-000000000000",
+    "managedByTenants": []
+}
+
+TEST_USER_SUBSCRIPTION = {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "name": "Service Principal Subscription",
+    "state": "Enabled",
+    "isDefault": True,
+     "user": {
+    "name": "tst_user@microsoft.com",
+    "type": "user"
+  },
+    "tenantId": "00000000-0000-0000-0000-000000000000",
+    "environmentName": "AzureCloud",
+    "homeTenantId": "00000000-0000-0000-0000-000000000000",
+    "managedByTenants": []
+}
 
 def mock_get_active_cloud(cli_ctx=None):
     cloud = get_active_cloud(cli_ctx)
@@ -213,9 +228,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper.get_token')
     @mock.patch('azure.cli.core._profile.Profile.get_subscription')
     def test_azconfig_mi_token_override(self, get_subscriptions_mock, msi_get_token_mock, msi_set_token_mock):
-        # Mock the subscription list
         get_subscriptions_mock.return_value = TEST_MI_SUBSCRIPTION
-
         msi_get_token_mock.return_value = { "token": "mocked_token", "expires_on": 1234567890 }
 
         mock_cmd = mock.MagicMock()
@@ -234,9 +247,11 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         appconfig_credential._impl.get_token.assert_called_once_with(f"{APPCONFIG_AUTH_TOKEN_AUDIENCE}/.default")
 
 
+    @mock.patch('azure.cli.core.auth.msal_credentials.UserCredential')
     @mock.patch('azure.cli.core.auth.credential_adaptor.CredentialAdaptor.get_token')
-    def test_azconfig_credential_adaptor_token_override(self, get_token_mock):
-        # Mock the subscription list
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription')
+    def test_azconfig_credential_adaptor_token_override(self, get_subscription_mock, get_token_mock, user_cred_mock):
+        get_subscription_mock.return_value = TEST_USER_SUBSCRIPTION
         get_token_mock.return_value = { "token": "mocked_token", "expires_on": 1234567890 }
 
         profile = Profile(cli_ctx=DummyCli())
