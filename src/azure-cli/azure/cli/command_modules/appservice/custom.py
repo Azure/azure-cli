@@ -1810,18 +1810,13 @@ def list_function_app_runtimes(cmd, os_type=None):
     return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
 
-def list_flex_function_app_runtimes(cmd, location, runtime, ignore_error=False):
-    try:
-        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
-        runtimes = [r for r in runtime_helper.stacks if runtime == r.name]
-        if not runtimes:
-            raise ValidationError("Runtime '{}' not supported for function apps on the Flex Consumption plan."
-                                  .format(runtime))
-        return runtime_helper.stacks
-    except Exception:
-        if ignore_error:
-            return []
-        raise  # Rethrow the caught exception
+def list_flex_function_app_runtimes(cmd, location, runtime):
+    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
+    runtimes = [r for r in runtime_helper.stacks if runtime == r.name]
+    if not runtimes:
+        raise ValidationError("Runtime '{}' not supported for function apps on the Flex Consumption plan."
+                              .format(runtime))
+    return runtime_helper.stacks
 
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
@@ -6159,8 +6154,16 @@ def list_flex_function_app_all_runtimes(cmd, location, runtime=None):
         runtimes = [runtime]
 
     return [{'runtime': x,
-             'runtime-details': list_flex_function_app_runtimes(cmd, location, x, True)}
+             'runtime-details': get_runtime_details_ignore_error(cmd, location, x)}
             for x in runtimes]
+
+
+def get_runtime_details_ignore_error(cmd, location, runtime):
+    try:
+        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
+        return runtime_helper.stacks
+    except Exception:  # pylint: disable=broad-except
+        return None
 
 
 def list_flexconsumption_zone_redundant_locations(cmd):
