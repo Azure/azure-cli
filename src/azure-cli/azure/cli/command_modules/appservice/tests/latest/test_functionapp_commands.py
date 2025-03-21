@@ -1517,7 +1517,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~20')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~22')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
