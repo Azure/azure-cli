@@ -12026,6 +12026,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 "node_pool_name": node_pool_name,
                 "node_pool_name_second": node_pool_name_second,
                 "ssh_key_value": self.generate_ssh_keys(),
+                "node_vm_size": "standard_nd96asr_v4"
             }
         )
 
@@ -12045,6 +12046,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "--resource-group={resource_group} "
             "--cluster-name={name} "
             "--name={node_pool_name} "
+            "--node-vm-size={node_vm_size} "
             "--os-type Linux "
             "--gpu-driver None",
             checks=[
@@ -12059,6 +12061,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "--resource-group={resource_group} "
             "--cluster-name={name} "
             "--name={node_pool_name_second} "
+            "--node-vm-size={node_vm_size} "
             "--os-type Linux "
             "--gpu-driver Install",
             checks=[
