@@ -690,6 +690,24 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_node_public_ip_prefix_id(), "test_node_public_ip_prefix_id")
 
+    def common_get_gpu_driver(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"gpu_driver": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_gpu_driver(), None)
+        agentpool = self.create_initialized_agentpool_instance(gpu_driver="install")
+        ctx_1.attach_agentpool(agentpool)
+        self.assertEqual(ctx_1.get_gpu_driver(), "install")
+
+        agentpool2 = self.create_initialized_agentpool_instance(gpu_driver="none")
+        ctx_1.attach_agentpool(agentpool2)
+        self.assertEqual(ctx_1.get_gpu_driver(), "none")
+
     def common_get_node_count_and_enable_cluster_autoscaler_min_max_count(
         self,
     ):
@@ -1788,6 +1806,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_if_none_match(self):
         self.get_if_none_match()
 
+    def test_get_gpu_driver(self):
+        self.test_get_gpu_driver()
+
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -2427,6 +2448,28 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             security_profile=self.models.AgentPoolSecurityProfile(
                 enable_secure_boot=True,
                 enable_vtpm=True,
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+    def common_set_up_gpu_profile(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"gpu_driver": "install"},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_gpu_profile(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_gpu_profile(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            gpu_profile=self.models.GPUProfile(
+                gpu_driver="install",
             )
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
