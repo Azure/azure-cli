@@ -12056,6 +12056,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             ],
         )
 
+        # nodepool delete the second
+        self.cmd(
+            "aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={node_pool_name}",
+            checks=[self.is_empty()],
+        )
+
         # 3. add nodepool with --gpu-driver install
         self.cmd(
             "aks nodepool add "
