@@ -12008,7 +12008,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
-        random_name_length=17, name_prefix="clitest", location="westcentralus"
+        random_name_length=17, name_prefix="clitest", location="westus2"
     )
     def test_aks_create_gpu_driver_flow(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
@@ -12035,6 +12035,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "--enable-managed-identity "
             "--ssh-key-value={ssh_key_value} "
         )
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
         
         # 2. add nodepool with --gpu-driver none
         self.cmd(
