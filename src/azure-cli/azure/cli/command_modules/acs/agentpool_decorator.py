@@ -1552,7 +1552,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         return self.raw_param.get("if_none_match")
     
     def _get_gpu_driver(self) -> str:
-        """Obtain the value of gpu_driver, default value is CONST_GPU_DRIVER_INSTALL.
+        """Obtain the value of gpu_driver.
 
         :return: string
         """

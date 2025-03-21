@@ -1807,7 +1807,7 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
         self.get_if_none_match()
 
     def test_get_gpu_driver(self):
-        self.test_get_gpu_driver()
+        self.common_get_gpu_driver()
 
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
@@ -2524,6 +2524,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
     def test_set_up_agentpool_security_profile(self):
         self.common_set_up_agentpool_security_profile()
+    
+    def test_set_up_gpu_profile(self):
+        self.common_set_up_gpu_profile()
 
     def test_construct_agentpool_profile_default(self):
         import inspect

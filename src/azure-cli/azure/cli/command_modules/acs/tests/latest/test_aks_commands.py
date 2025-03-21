@@ -12005,3 +12005,63 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="westcentralus"
+    )
+    def test_aks_create_gpu_driver_flow(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        aks_name = self.create_random_name("cliakstest", 16)
+        node_pool_name = self.create_random_name("c", 6)
+        node_pool_name_second = self.create_random_name("c", 6)
+        node_pool_name_third = self.create_random_name("c", 6)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "dns_name_prefix": self.create_random_name("cliaksdns", 16),
+                "location": resource_group_location,
+                "resource_type": "Microsoft.ContainerService/ManagedClusters",
+                "node_pool_name": node_pool_name,
+                "node_pool_name_second": node_pool_name_second,
+                "node_pool_name_third": node_pool_name_third,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # 1. create
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--nodepool-name {node_pool_name} -c 1 --enable-managed-identity "
+            "--ssh-key-value={ssh_key_value} "
+            "--gpu-driver install"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("agentPoolProfiles[0].gpuProfile.driver", "install"),
+            ],
+        )
+
+        # 2. add nodepool
+        self.cmd(
+            "aks nodepool add "
+            "--resource-group={resource_group} "
+            "--cluster-name={name} "
+            "--name={node_pool_name_second} "
+            "--os-type Linux "
+            "--gpu-driver none",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("gpuProfile.driver", "none"),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
