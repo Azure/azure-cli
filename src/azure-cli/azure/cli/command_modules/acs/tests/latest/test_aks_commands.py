@@ -12032,29 +12032,35 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # 1. create
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} --location={location} "
-            "--nodepool-name {node_pool_name} -c 1 --enable-managed-identity "
+            "--enable-managed-identity "
             "--ssh-key-value={ssh_key_value} "
-            "--gpu-driver install"
         )
+        
+        # 2. add nodepool with --gpu-driver none
         self.cmd(
-            create_cmd,
+            "aks nodepool add "
+            "--resource-group={resource_group} "
+            "--cluster-name={name} "
+            "--name={node_pool_name} "
+            "--os-type Linux "
+            "--gpu-driver none",
             checks=[
                 self.check("provisioningState", "Succeeded"),
-                self.check("agentPoolProfiles[0].gpuProfile.driver", "install"),
+                self.check("gpuProfile.driver", "none"),
             ],
         )
 
-        # 2. add nodepool
+        # 3. add nodepool with --gpu-driver install
         self.cmd(
             "aks nodepool add "
             "--resource-group={resource_group} "
             "--cluster-name={name} "
             "--name={node_pool_name_second} "
             "--os-type Linux "
-            "--gpu-driver none",
+            "--gpu-driver install",
             checks=[
                 self.check("provisioningState", "Succeeded"),
-                self.check("gpuProfile.driver", "none"),
+                self.check("gpuProfile.driver", "install"),
             ],
         )
 
