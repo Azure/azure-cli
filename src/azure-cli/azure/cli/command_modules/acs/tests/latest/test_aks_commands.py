@@ -12008,7 +12008,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
-        random_name_length=17, name_prefix="clitest", location="westus2"
+        random_name_length=17, name_prefix="clitest", location="westus3"
     )
     def test_aks_create_gpu_driver_flow(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
@@ -12026,7 +12026,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 "node_pool_name": node_pool_name,
                 "node_pool_name_second": node_pool_name_second,
                 "ssh_key_value": self.generate_ssh_keys(),
-                "node_vm_size": "standard_nd96asr_v4"
+                "node_vm_size": "standard_nc6s_v3"
             }
         )
 
@@ -12047,6 +12047,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "--cluster-name={name} "
             "--name={node_pool_name} "
             "--node-vm-size={node_vm_size} "
+            "-c 1 "
             "--os-type Linux "
             "--gpu-driver None",
             checks=[
@@ -12062,6 +12063,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "--cluster-name={name} "
             "--name={node_pool_name_second} "
             "--node-vm-size={node_vm_size} "
+            "-c 1 "
             "--os-type Linux "
             "--gpu-driver Install",
             checks=[
