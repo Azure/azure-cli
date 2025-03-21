@@ -88,8 +88,8 @@ class Create(AAZCommand):
             options=["--min-scale-unit"],
             help="Minimum scale units for auto-scale configuration.",
         )
-        _args_schema.enable_high_bandwidth_vpn_gateway = AAZBoolArg(
-            options=["--enable-high-bandwidth", "--enable-high-bandwidth-vpn-gateway"],
+        _args_schema.enable_advanced_connectivity = AAZBoolArg(
+            options=["--enable-advanced-connectivity"],
             help="To enable Advanced Connectivity feature for VPN gateway",
         )
         _args_schema.enable_private_ip = AAZBoolArg(
@@ -570,7 +570,7 @@ class Create(AAZCommand):
                 properties.set_prop("bgpSettings", AAZObjectType)
                 properties.set_prop("customRoutes", AAZObjectType)
                 properties.set_prop("enableBgp", AAZBoolType, ".enable_bgp")
-                properties.set_prop("enableHighBandwidthVpnGateway", AAZBoolType, ".enable_high_bandwidth_vpn_gateway")
+                properties.set_prop("enableHighBandwidthVpnGateway", AAZBoolType, ".enable_advanced_connectivity")
                 properties.set_prop("enablePrivateIpAddress", AAZBoolType, ".enable_private_ip")
                 properties.set_prop("gatewayDefaultSite", AAZObjectType)
                 properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
