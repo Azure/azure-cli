@@ -24,7 +24,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature(self, resource_group, location):
         feature_test_store_prefix = get_resource_name_prefix('FeatureTest')
-        config_store_name = self.create_random_name(prefix=feature_test_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=feature_test_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -340,7 +340,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_namespacing(self, resource_group, location):
         feature_namespace_store_prefix = get_resource_name_prefix('FeatureNamespaceTest')
-        config_store_name = self.create_random_name(prefix=feature_namespace_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=feature_namespace_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -447,7 +447,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_filter(self, resource_group, location):
         feature_filter_store_prefix = get_resource_name_prefix('FeatureFilterTest')
-        config_store_name = self.create_random_name(prefix=feature_filter_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=feature_filter_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
