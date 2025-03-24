@@ -845,6 +845,7 @@ def validate_bootstrap_container_registry_resource_id(namespace):
     if not is_valid_resource_id(container_registry_resource_id):
         raise InvalidArgumentValueError("--bootstrap-container-registry-resource-id is not a valid Azure resource ID.")
 
+
 def validate_custom_ca_trust_certificates(namespace):
     """Validates Custom CA Trust Certificates can only be used on Linux."""
     if namespace.custom_ca_trust_certificates is not None and namespace.custom_ca_trust_certificates != "":
