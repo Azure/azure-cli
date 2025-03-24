@@ -1782,6 +1782,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                               resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('protocols', options_list=['--protocol'], arg_type=get_enum_type(t_share_protocols_type),
                 help='The protocol to enable for the share.')
+        c.extra('enable_snapshot_virtual_directory_access',
+                options_list=('--enable-snapshot-virtual-directory-access', '--virtual-dir-access'),
+                arg_type=get_three_state_flag(),
+                help='Specifies whether the snapshot virtual directory should be accessible at the root of the '
+                     'share mount point when NFS is enabled. If not specified, it will be accessible.')
 
     with self.argument_context('storage share url') as c:
         c.extra('unc', action='store_true', help='Output UNC network path.')
