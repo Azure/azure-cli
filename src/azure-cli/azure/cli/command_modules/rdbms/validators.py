@@ -736,7 +736,7 @@ def validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name):
     resource_type = 'Microsoft.DBforPostgreSQL/flexibleServers/virtualendpoints'
     result = client.execute(name_availability_request={'name': virtual_endpoint_name, 'type': resource_type})
     if result and result.name_available is False:
-        raise ValidationError("Virtual endpoints base name is not available.")
+        raise ValidationError("Virtual endpoint's base name is not available.")
 
 
 def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_resource_group_name, target_server_name):
