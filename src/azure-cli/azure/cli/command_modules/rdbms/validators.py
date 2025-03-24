@@ -310,8 +310,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
-                           password_auth=None, active_directory_auth=None, admin_name=None, admin_id=None,
-                           admin_type=None):
+                           password_auth=None, active_directory_auth=None, microsoft_entra_auth=None,
+                           admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     is_create = not instance
     if is_create:
@@ -351,7 +351,10 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
-    _pg_authentication_validator(password_auth, active_directory_auth, admin_name, admin_id, admin_type, instance)
+    is_microsoft_entra_auth = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled') \
+        or bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
+                                 admin_name, admin_id, admin_type, instance)
 
 
 def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
@@ -925,15 +928,14 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
 
 
-def _pg_authentication_validator(password_auth, active_directory_auth, admin_name, admin_id, admin_type, instance):
+def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,
+                                 admin_name, admin_id, admin_type, instance):
     if instance is None:
-        if (password_auth is not None and password_auth.lower() == 'disabled') and \
-           (active_directory_auth is not None and active_directory_auth.lower() == 'disabled'):
+        if (password_auth is not None and password_auth.lower() == 'disabled') and not is_microsoft_entra_auth_enabled:
             raise CLIError('Need to have an authentication method enabled, please set --active-directory-auth '
                            'to "Enabled" or --password-auth to "Enabled".')
 
-        is_microsoft_entra = active_directory_auth is not None and active_directory_auth.lower() == 'enabled'
-        if not is_microsoft_entra and (admin_name or admin_id or admin_type):
+        if not is_microsoft_entra_auth_enabled and (admin_name or admin_id or admin_type):
             raise CLIError('To provide values for --admin-object-id, --admin-display-name, and --admin-type '
                            'please set --active-directory-auth to "Enabled".')
         if (admin_name is not None or admin_id is not None or admin_type is not None) and \

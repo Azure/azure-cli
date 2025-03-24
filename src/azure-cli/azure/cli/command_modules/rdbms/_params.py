@@ -1009,7 +1009,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
             c.argument('identity', help='Name or ID of identity used for Microsoft Entra Authentication.', validator=validate_identity)
 
-
         # server advanced threat protection settings
         for scope in ['update', 'show']:
             argument_context_string = '{} flexible-server advanced-threat-protection-setting {}'.format(command_group, scope)
