@@ -29,6 +29,7 @@ from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from knack.log import get_logger
 
+
 logger = get_logger(__name__)
 
 
