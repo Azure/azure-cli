@@ -12062,7 +12062,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--custom-ca-trust-certificates={custom_ca_trust_certificates}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('securityProfile.customCaTrustCertificates', [CONST_CUSTOM_CA_TEST_CERT for _ in range(2)]),
+            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)]),
         ])
 
         # delete
