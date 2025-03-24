@@ -3298,13 +3298,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap')
     def test_aks_nodepool_add_with_ossku_ubuntu2204(self, resource_group, resource_group_location):
+        resource_group_location = 'eastus2euap'
         aks_name = self.create_random_name('cliakstest', 16)
         node_pool_name = self.create_random_name('c', 6)
         node_pool_name_second = self.create_random_name('c', 6)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'location': "eastus2euap",
             'node_pool_name': node_pool_name,
             'node_pool_name_second': node_pool_name_second,
             'ssh_key_value': self.generate_ssh_keys()
