@@ -5,6 +5,8 @@
 
 from azure.cli.command_modules.rdbms.validators import validate_private_endpoint_connection_id
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.breaking_change import register_command_group_deprecate, register_default_value_breaking_change,\
+register_argument_deprecate, register_other_breaking_change, register_logic_breaking_change
 
 from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_servers,
@@ -36,6 +38,16 @@ from ._transformers import (
 # from .transformers import table_transform_connection_string
 # from .validators import db_up_namespace_processor
 
+
+register_logic_breaking_change('postgres flexible-server create', 'Update default value of "--sku-name"', target_version='May 2025',
+                               detail='The default value will be changed from "Standard_D2s_v3" to a supported sku based on regional capabilities.')
+register_default_value_breaking_change('postgres flexible-server create', '--version', '16', '17', target_version='May 2025')
+register_default_value_breaking_change('postgres flexible-server create', '--create-default-database', 'Enabled', 'Disabled', target_version='May 2025')
+register_argument_deprecate('postgres flexible-server create', '--active-directory-auth', '--microsoft-entra-auth', target_version='May 2025')
+register_argument_deprecate('postgres flexible-server update', '--active-directory-auth', '--microsoft-entra-auth', target_version='May 2025')
+register_command_group_deprecate('postgres flexible-server ad-admin', redirect='microsoft-entra-admin', target_version='May 2025')
+register_other_breaking_change('postgres flexible-server update', target_version='May 2025',
+                               message='User confirmation will be needed for compute and storage updates that trigger a restart of the VM.')
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_flexibleserver_command_table(self, _):
@@ -251,6 +263,15 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('list', 'flexible_server_identity_list')
 
     with self.command_group('postgres flexible-server ad-admin', postgres_flexible_adadmin_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_adadmin) as g:
+        g.custom_command('create', 'flexible_server_ad_admin_set', supports_no_wait=True)
+        g.custom_command('delete', 'flexible_server_ad_admin_delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('list', 'flexible_server_ad_admin_list')
+        g.custom_show_command('show', 'flexible_server_ad_admin_show')
+        g.custom_wait_command('wait', 'flexible_server_ad_admin_show')
+
+    with self.command_group('postgres flexible-server microsoft-entra-admin', postgres_flexible_adadmin_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_adadmin) as g:
         g.custom_command('create', 'flexible_server_ad_admin_set', supports_no_wait=True)
