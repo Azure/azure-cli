@@ -53,6 +53,7 @@ class RESOURCE(Enum):
     FabricSql = 'fabric-sql'
     AppInsights = 'app-insights'
     CognitiveServices = 'cognitiveservices'
+    NeonPostgres = 'neon-postgres'
 
     @classmethod
     def value_of(cls, value):
@@ -155,7 +156,9 @@ TARGET_RESOURCES = {
 
     RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.App/containerApps/{target_app_name}',
 
-    RESOURCE.FabricSql: 'https://api.fabric.microsoft.com/v1/workspaces/{workspace_id}/SqlDatabases/{sql_id}'
+    RESOURCE.FabricSql: 'https://api.fabric.microsoft.com/v1/workspaces/{fabric_workspace_uuid}/SqlDatabases/{fabric_sql_db_uuid}',
+    RESOURCE.NeonPostgres: '/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/testrg/providers/Neon.Postgres/organizations/neontest'
+
 }
 
 
@@ -670,6 +673,29 @@ TARGET_RESOURCES_PARAMS = {
         }
     },
     RESOURCE.FabricSql: {
+        'fabric_workspace_uuid': {
+            'options': ['--fabric-workspace-uuid'],
+            'help': 'UUID of Fabric workspace which contains the target SQL database',
+            'placeholder': 'TargetFabricWorkspaceUUID'
+        },
+        'fabric_sql_db_uuid': {
+            'options': ['--fabric-sql-db-uuid'],
+            'help': 'UUID of the target Fabric SQL database',
+            'placeholder': 'TargetFabricSQLDatabaseUUID'
+        },
+    },
+    RESOURCE.NeonPostgres: {
+        'server': {
+            'configured_default': 'sql-server',
+            'options': ['--server'],
+            'help': 'Name of the sql server',
+            'placeholder': 'MyServer'
+        },
+        'database': {
+            'options': ['--database'],
+            'help': 'Name of the sql database',
+            'placeholder': 'MyDB'
+        }
     }
 }
 
@@ -835,7 +861,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.FabricSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.NeonPostgres: [AUTH_TYPE.Secret]
     },
     RESOURCE.SpringCloud: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -867,7 +894,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.FabricSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.NeonPostgres: [AUTH_TYPE.Secret]
     },
     RESOURCE.KubernetesCluster: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret],
@@ -898,7 +926,8 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CognitiveServices: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.CognitiveServices: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.NeonPostgres: [AUTH_TYPE.Secret]
     },
     RESOURCE.ContainerApp: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -906,7 +935,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -931,6 +960,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.NeonPostgres: [AUTH_TYPE.Secret],
 
         RESOURCE.ContainerApp: [AUTH_TYPE.Null]
     },
@@ -957,6 +987,19 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Blank
         ],
         RESOURCE.PostgresFlexible: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.Php,
+            CLIENT_TYPE.Ruby,
+            CLIENT_TYPE.Django,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.NeonPostgres: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,

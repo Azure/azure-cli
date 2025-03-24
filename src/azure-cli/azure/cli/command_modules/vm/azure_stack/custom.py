@@ -37,7 +37,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
-from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
+from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 from ._vm_diagnostics_templates import get_default_diag_config
 from ._vm_utils import read_content_if_is_file, import_aaz_by_profile
 from ..aaz.latest.vm.disk import AttachDetachDataDisk
@@ -1161,19 +1161,23 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
 def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
                      location=None):
+    from ...lab.aaz.latest.lab.global_schedule import Delete as DeleteSchedule, Create as CreateSchedule
     from azure.mgmt.core.tools import resource_id
-    from azure.mgmt.devtestlabs.models import Schedule
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    client = _dev_test_labs_client_factory(cmd.cli_ctx, subscription_id)
     name = 'shutdown-computevm-' + vm_name
-    vm_id = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+    vm_id = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                         namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
+
+    schedule = {
+        'name': name,
+        'resource_group': resource_group_name
+    }
     if off:
         if email is not None or webhook is not None or time is not None:
             # I don't want to disrupt users. So I warn instead of raising an error.
             logger.warning('If --off, other parameters will be ignored.')
-        return client.global_schedules.delete(resource_group_name, name)
+        return DeleteSchedule(cli_ctx=cmd.cli_ctx)(command_args=schedule)
 
     if time is None:
         raise CLIError('usage error: --time is a required parameter')
@@ -1189,14 +1193,16 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         if webhook:
             notification_settings['webhookUrl'] = webhook
 
-    schedule = Schedule(status='Enabled',
-                        target_resource_id=vm_id,
-                        daily_recurrence=daily_recurrence,
-                        notification_settings=notification_settings,
-                        time_zone_id='UTC',
-                        task_type='ComputeVmShutdownTask',
-                        location=location)
-    return client.global_schedules.create_or_update(resource_group_name, name, schedule)
+    schedule.update({
+        'status': 'Enabled',
+        'target_resource_id': vm_id,
+        'daily_recurrence': daily_recurrence,
+        'notification_settings': notification_settings,
+        'time_zone_id': 'UTC',
+        'task_type': 'ComputeVmShutdownTask',
+        'location': location
+    })
+    return CreateSchedule(cli_ctx=cmd.cli_ctx)(command_args=schedule)
 
 
 def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False):
@@ -4971,43 +4977,6 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 # endregion
 
 
-# region proximity placement groups
-def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
-                                     ppg_type=None, location=None, tags=None, zone=None, intent_vm_sizes=None):
-    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    ProximityPlacementGroup = cmd.get_models('ProximityPlacementGroup')
-
-    ppg_params = ProximityPlacementGroup(name=proximity_placement_group_name, proximity_placement_group_type=ppg_type,
-                                         location=location, tags=(tags or {}), zones=zone)
-
-    if intent_vm_sizes:
-        Intent = cmd.get_models('ProximityPlacementGroupPropertiesIntent')
-        intent = Intent(vm_sizes=intent_vm_sizes)
-        ppg_params.intent = intent
-
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   proximity_placement_group_name=proximity_placement_group_name, parameters=ppg_params)
-
-
-def update_ppg(cmd, instance, intent_vm_sizes=None, ppg_type=None):
-    if intent_vm_sizes:
-        Intent = cmd.get_models('ProximityPlacementGroupPropertiesIntent')
-        intent = Intent(vm_sizes=intent_vm_sizes)
-        instance.intent = intent
-    if ppg_type:
-        instance.proximity_placement_group_type = ppg_type
-    return instance
-
-
-def list_proximity_placement_groups(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
-    return client.list_by_subscription()
-
-
-# endregion
-
-
 # region dedicated host
 def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count,
                                 automatic_placement=None, location=None, zones=None, tags=None, ultra_ssd_enabled=None):
@@ -5279,27 +5248,6 @@ def remove_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
 def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_set_name):
     client = _compute_client_factory(cmd.cli_ctx)
     return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name).identity
-
-
-# endregion
-
-
-# region Disk Access
-def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
-    DiskAccess = cmd.get_models('DiskAccess')
-    disk_access = DiskAccess(location=location, tags=tags)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access)
-
-
-def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
-    location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    DiskAccess = cmd.get_models('DiskAccess')
-    disk_access = DiskAccess(location=location, tags=tags)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access)
-
-
 # endregion
 
 
@@ -5384,100 +5332,6 @@ def sig_shared_image_version_list(client, location, gallery_unique_name, gallery
     generator = client.list(location=location, gallery_unique_name=gallery_unique_name,
                             gallery_image_name=gallery_image_name, shared_to=shared_to)
     return get_page_result(generator, marker, show_next_marker)
-
-
-def gallery_application_version_create(client,
-                                       resource_group_name,
-                                       gallery_name,
-                                       gallery_application_name,
-                                       gallery_application_version_name,
-                                       location,
-                                       package_file_link,
-                                       install_command,
-                                       remove_command,
-                                       tags=None,
-                                       update_command=None,
-                                       target_regions=None,
-                                       default_file_link=None,
-                                       end_of_life_date=None,
-                                       package_file_name=None,
-                                       config_file_name=None,
-                                       exclude_from=None,
-                                       no_wait=False):
-    gallery_application_version = {}
-    gallery_application_version['publishing_profile'] = {}
-    gallery_application_version['location'] = location
-    if tags is not None:
-        gallery_application_version['tags'] = tags
-    source = {}
-    source['media_link'] = package_file_link
-    if default_file_link is not None:
-        source['default_configuration_link'] = default_file_link
-    gallery_application_version['publishing_profile']['source'] = source
-    manage_actions = {}
-    manage_actions['install'] = install_command
-    manage_actions['remove'] = remove_command
-    if update_command is not None:
-        manage_actions['update'] = update_command
-    gallery_application_version['publishing_profile']['manage_actions'] = manage_actions
-    if target_regions is not None:
-        gallery_application_version['publishing_profile']['target_regions'] = target_regions
-    if exclude_from is not None:
-        gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
-    if end_of_life_date is not None:
-        gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
-    settings = {}
-    if package_file_name is not None:
-        settings['package_file_name'] = package_file_name
-    if config_file_name is not None:
-        settings['config_file_name'] = config_file_name
-    if settings:
-        gallery_application_version['publishing_profile']['settings'] = settings
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_group_name=resource_group_name,
-                       gallery_name=gallery_name,
-                       gallery_application_name=gallery_application_name,
-                       gallery_application_version_name=gallery_application_version_name,
-                       gallery_application_version=gallery_application_version)
-
-
-def gallery_application_version_update(client,
-                                       resource_group_name,
-                                       gallery_name,
-                                       gallery_application_name,
-                                       gallery_application_version_name,
-                                       location,
-                                       package_file_link,
-                                       tags=None,
-                                       target_regions=None,
-                                       default_file_link=None,
-                                       end_of_life_date=None,
-                                       exclude_from=None,
-                                       no_wait=False):
-    gallery_application_version = {}
-    gallery_application_version['publishing_profile'] = {}
-    gallery_application_version['location'] = location
-    if tags is not None:
-        gallery_application_version['tags'] = tags
-    source = {}
-    source['media_link'] = package_file_link
-    if default_file_link is not None:
-        source['default_configuration_link'] = default_file_link
-    gallery_application_version['publishing_profile']['source'] = source
-    if target_regions is not None:
-        gallery_application_version['publishing_profile']['target_regions'] = [target_regions]
-    if exclude_from is not None:
-        gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
-    if end_of_life_date is not None:
-        gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_group_name=resource_group_name,
-                       gallery_name=gallery_name,
-                       gallery_application_name=gallery_application_name,
-                       gallery_application_version_name=gallery_application_version_name,
-                       gallery_application_version=gallery_application_version)
 
 
 def create_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, location=None,

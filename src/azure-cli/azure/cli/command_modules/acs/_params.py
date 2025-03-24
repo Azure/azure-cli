@@ -99,7 +99,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_node_public_ip_tags,
     validate_disable_windows_outbound_nat,
     validate_crg_id,
-    validate_azure_service_mesh_revision)
+    validate_azure_service_mesh_revision,
+    validate_message_of_the_day)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -424,6 +425,8 @@ def load_arguments(self, _):
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('nodepool_allowed_host_ports', nargs='+', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
         c.argument('nodepool_asg_ids', nargs='+', validator=validate_application_security_groups, help="application security groups for agentpool")
+        c.argument("message_of_the_day")
+
         # azure monitor profile
         c.argument('enable_azure_monitor_metrics', action='store_true')
         c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid)
@@ -701,6 +704,13 @@ def load_arguments(self, _):
         c.argument('acr', validator=validate_registry_name)
         c.argument('node_name')
 
+    with self.argument_context('aks machine') as c:
+        c.argument('cluster_name')
+        c.argument('nodepool_name', validator=validate_nodepool_name)
+
+    with self.argument_context('aks machine show') as c:
+        c.argument('machine_name')
+
     with self.argument_context('aks maintenanceconfiguration') as c:
         c.argument('cluster_name', help='The cluster name.')
 
@@ -784,6 +794,7 @@ def load_arguments(self, _):
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
+        c.argument("message_of_the_day", validator=validate_message_of_the_day)
         c.argument('enable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
         c.argument("if_match")
@@ -939,6 +950,7 @@ def load_arguments(self, _):
         c.argument('attach_zones')
 
     with self.argument_context('aks nodepool delete') as c:
+        c.argument('ignore_pdb', options_list=['--ignore-pdb', '-i'], action='store_true')
         c.argument("if_match")
 
     with self.argument_context("aks nodepool delete-machines") as c:

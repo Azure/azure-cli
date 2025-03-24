@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.68.0"
+VERSION = "2.70.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -56,7 +56,7 @@ DEPENDENCIES = [
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
-    'azure-datalake-store~=0.0.53',
+    'azure-datalake-store~=1.0.0a0',
     'azure-keyvault-administration==4.4.0b2',
     'azure-keyvault-certificates==4.7.0',
     'azure-keyvault-keys==4.9.0b3',
@@ -76,12 +76,11 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=33.0.0',
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==10.3.0',
-    'azure-mgmt-containerservice~=33.0.0',
+    'azure-mgmt-containerservice~=34.1.0',
     'azure-mgmt-cosmosdb==9.7.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
-    'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
     'azure-mgmt-eventgrid==10.2.0b2',
     'azure-mgmt-eventhub~=10.1.0',
@@ -119,17 +118,17 @@ DEPENDENCIES = [
     'azure-mgmt-signalr==2.0.0b2',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b20',
-    'azure-mgmt-storage==21.2.0',
+    'azure-mgmt-storage==22.1.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
-    'azure-mgmt-web==7.2.0',
+    'azure-mgmt-web==7.3.1',
     'azure-monitor-query==1.2.0',
     'azure-multiapi-storage~=1.3.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.19.0',
+    'azure-synapse-artifacts~=0.20.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
-    'azure-synapse-spark~=0.2.0',
+    'azure-synapse-spark~=0.7.0',
     'chardet~=5.2.0',
     'colorama~=0.4.4',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are checked for `az feedback`

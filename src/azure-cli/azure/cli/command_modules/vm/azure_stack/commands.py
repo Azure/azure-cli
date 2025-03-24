@@ -7,19 +7,17 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_vm_ext, cf_vm_ext_image,
                                                                       cf_vm_image, cf_vm_image_term, cf_usage,
                                                                       cf_vmss, cf_disks, cf_snapshots,
-                                                                      cf_disk_accesses, cf_images, cf_run_commands,
+                                                                      cf_images, cf_run_commands,
                                                                       cf_gallery_images,
                                                                       cf_gallery_image_versions,
-                                                                      cf_proximity_placement_groups,
                                                                       cf_dedicated_hosts, cf_dedicated_host_groups,
                                                                       cf_log_analytics_data_plane,
-                                                                      cf_disk_encryption_set,
                                                                       cf_shared_gallery_image,
                                                                       cf_shared_gallery_image_version,
                                                                       cf_capacity_reservation_groups,
                                                                       cf_capacity_reservations,
                                                                       cf_vmss_run_commands,
-                                                                      cf_gallery_application_version, cf_restore_point,
+                                                                      cf_restore_point,
                                                                       cf_restore_point_collection,
                                                                       cf_community_gallery_image,
                                                                       cf_community_gallery_image_version)
@@ -35,7 +33,7 @@ from azure.cli.command_modules.vm.azure_stack._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_ppg_create_namespace, process_vm_disk_detach_namespace)
+    process_image_version_undelete_namespace, process_vm_disk_detach_namespace)
 
 from azure.cli.command_modules.vm.azure_stack._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -75,12 +73,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#DisksOperations.{}',
         client_factory=cf_disks,
         operation_group='disks'
-    )
-
-    compute_disk_access_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#DiskAccessesOperations.{}',
-        client_factory=cf_disk_accesses,
-        operation_group='disk_accesses'
     )
 
     compute_image_sdk = CliCommandType(
@@ -149,15 +141,6 @@ def load_command_table(self, _):
         client_factory=cf_gallery_image_versions,
     )
 
-    compute_gallery_application_version_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationVersionsOperations.{}',
-        client_factory=cf_gallery_application_version,
-    )
-
-    compute_proximity_placement_groups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}',
-    )
-
     compute_dedicated_host_sdk = CliCommandType(
         operations_tmpl="azure.mgmt.compute.operations#DedicatedHostsOperations.{}",
         client_factory=cf_dedicated_hosts,
@@ -171,11 +154,6 @@ def load_command_table(self, _):
     image_builder_image_templates_sdk = CliCommandType(
         operations_tmpl="azure.mgmt.imagebuilder.operations#VirtualMachineImageTemplatesOperations.{}",
         client_factory=cf_img_bldr_image_templates,
-    )
-
-    compute_disk_encryption_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
-        client_factory=cf_disk_encryption_set
     )
 
     monitor_custom = CliCommandType(
@@ -221,19 +199,6 @@ def load_command_table(self, _):
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
-
-    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
-        g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
-
-    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2022-03-02') as g:
-        g.custom_command('assign', 'assign_disk_encryption_set_identity')
-        g.custom_command('remove', 'remove_disk_encryption_set_identity', confirmation=True)
-        g.custom_show_command('show', 'show_disk_encryption_set_identity')
-
-    with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
-        g.custom_command('create', 'create_disk_access', supports_no_wait=True)
-        g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom, supports_no_wait=True)
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
@@ -292,9 +257,6 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_show_command('identity show', 'show_vm_identity')
-
-        g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
-        g.custom_command('application list', 'list_vm_applications', min_api='2021-07-01')
 
         g.custom_command('capture', 'capture_vm')
         g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
@@ -491,15 +453,6 @@ def load_command_table(self, _):
                             operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list')
-
-    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
-        g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
-        g.custom_command('update', 'gallery_application_version_update', supports_no_wait=True)
-
-    with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
-        g.custom_command('create', 'create_proximity_placement_group', validator=process_ppg_create_namespace)
-        g.custom_command('list', 'list_proximity_placement_groups')
-        g.generic_update_command('update', setter_name='create_or_update', custom_func_name='update_ppg')
 
     with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:
         g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)  # pylint: disable=show-command
