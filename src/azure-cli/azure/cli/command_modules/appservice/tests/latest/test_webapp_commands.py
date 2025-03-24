@@ -430,7 +430,42 @@ class BackupRestoreTest(ScenarioTest):
             JMESPathCheck('length(@)', 0),
         ])
 
+    @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(name_prefix='backup', length=24, location=WINDOWS_ASP_LOCATION_WEBAPP, sku='Standard_LRS')
+    def test_webapp_backup_update(self, resource_group, storage_account_info):
+        plan = self.create_random_name(prefix='plan-backup', length=24)
+        webapp = self.create_random_name(prefix='backup-webapp', length=24)
+        container = self.create_random_name(prefix='backupcontainer', length=24)
+        backup_name = self.create_random_name(prefix='backup-name', length=24)
 
+        expirydate = (datetime.datetime.now() + datetime.timedelta(days=1, hours=3)).strftime("\"%Y-%m-%dT%H:%MZ\"")
+        slot_name = "slot"
+
+        storage_account, account_key = storage_account_info
+        self.cmd(f'storage container create --account-name {storage_account} --name {container} --account-key {account_key}')
+        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv --account-key {account_key}').output.strip()
+        sasurl = f'https://{storage_account}.blob.core.windows.net/{container}?{sastoken}'
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp} --plan {plan}')
+        self.cmd(f"webapp deployment slot create -g {resource_group} -n {webapp} -s {slot_name}")
+
+        # Create a webapp backup
+        self.cmd(f"webapp config backup create -g {resource_group} --webapp-name {webapp} --backup-name {backup_name} --container-url {sasurl}")
+        time.sleep(240)
+
+        # Update the webapp backup configuration
+        self.cmd(f"webapp config backup update -g {resource_group} --webapp-name {webapp} --backup-name {backup_name} --retention 60 --frequency 5d --retain-one true --container-url {sasurl}", checks=[
+            JMESPathCheck('backupSchedule.retentionPeriodInDays', 60),
+            JMESPathCheck('backupSchedule.frequencyInterval', 5),
+            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
+            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
+        ])
+
+        # Verify the updated backup configuration
+        self.cmd(f"webapp config backup list -g {resource_group} --webapp-name {webapp}", checks=[
+            JMESPathCheck('[0].namePropertiesName', backup_name)
+        ])
 
 
 # Test Framework is not able to handle binary file format, hence, only run live
