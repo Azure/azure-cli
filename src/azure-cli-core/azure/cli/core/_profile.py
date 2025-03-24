@@ -61,11 +61,6 @@ _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
 
-MANAGED_IDENTITY_ID_WARNING = (
-    "Passing the managed identity ID with --username is deprecated and will be removed in a future release. "
-    "Please use --client-id, --object-id or --resource-id instead."
-)
-
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     profile = Profile(cli_ctx=cli_ctx)
@@ -257,7 +252,6 @@ class Profile:
             msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=resource_id)
         # The old way of re-using the same --username for 3 types of ID
         elif identity_id:
-            logger.warning(MANAGED_IDENTITY_ID_WARNING)
             if is_valid_resource_id(identity_id):
                 msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
@@ -926,7 +920,10 @@ class SubscriptionFinder:
             raise CLIInternalError("Unable to get '{}' in profile '{}'"
                                    .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, self.cli_ctx.cloud.profile))
         api_version = get_api_version(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-        sdk_cred = CredentialAdaptor(credential)
+
+        # MSIAuthenticationWrapper already implements get_token, so no need to wrap it with CredentialAdaptor
+        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
+        sdk_cred = credential if isinstance(credential, MSIAuthenticationWrapper) else CredentialAdaptor(credential)
         client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, sdk_cred)
         client = client_type(sdk_cred, api_version=api_version,
                              base_url=self.cli_ctx.cloud.endpoints.resource_manager,
