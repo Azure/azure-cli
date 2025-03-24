@@ -1055,9 +1055,9 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                     # some pollers do not have a status method (eg. AAZLROPoller)
                     try:
                         status = poller.status()
-                    except Exception:
+                    except AttributeError:
                         pass
-                    self.progress_bar.update_progress(status)
+                    self.progress_bar.update_progress_with_msg(status)
                 self._delay()
             except KeyboardInterrupt:
                 if self.progress_bar:
