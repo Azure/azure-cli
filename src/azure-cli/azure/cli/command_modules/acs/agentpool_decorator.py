@@ -1550,7 +1550,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: string
         """
         return self.raw_param.get("if_none_match")
-    
+
     def _get_gpu_driver(self) -> Union[str, None]:
         """Obtain the value of gpu_driver.
 

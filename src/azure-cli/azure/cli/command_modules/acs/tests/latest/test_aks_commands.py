@@ -12006,7 +12006,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-
     # live only due to role assignment is not mocked
     @live_only()
     @AllowLargeResponse()
