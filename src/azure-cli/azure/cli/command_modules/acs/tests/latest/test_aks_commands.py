@@ -3304,6 +3304,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
+            'location': "eastus2euap",
             'node_pool_name': node_pool_name,
             'node_pool_name_second': node_pool_name_second,
             'ssh_key_value': self.generate_ssh_keys()
