@@ -943,6 +943,7 @@ def load_arguments(self, _):
         c.argument('description', help='The integration runtime description.')
         c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
                    'which it should match existing entity or can be * for unconditional update.')
+        c.argument('enableselfcontainedia', options_list=['--enable-self-contained-interactive-authoring', '--enable-scia'], help='An alternative option to ensure interactive authoring function when your self-hosted integration runtime is unable to establish a connection with Azure Relay.')
 
     with self.argument_context('synapse integration-runtime update') as c:
         c.argument('auto_update', arg_type=get_enum_type(['On', 'Off']), help='Enable or disable the self-hosted integration runtime auto-update.')

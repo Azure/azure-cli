@@ -46,10 +46,11 @@ def Managed_Create(cmd, client, resource_group_name, workspace_name, integration
 
 
 def Selfhosted_Create(cmd, client, resource_group_name, workspace_name, integration_runtime_name,
-                      description=None, if_match=None, no_wait=False):
+                      description=None, if_match=None, no_wait=False, enableselfcontainedia=None):
     property_files = {}
     property_files['type'] = 'SelfHosted'
     property_files['description'] = description
+    property_files['selfContainedInteractiveAuthoringEnabled'] = enableselfcontainedia
     properties = IntegrationRuntimeResource(type='SelfHosted', properties=property_files)
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, workspace_name,
                        integration_runtime_name, properties, if_match)
