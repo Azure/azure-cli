@@ -932,12 +932,12 @@ def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,
                                  admin_name, admin_id, admin_type, instance):
     if instance is None:
         if (password_auth is not None and password_auth.lower() == 'disabled') and not is_microsoft_entra_auth_enabled:
-            raise CLIError('Need to have an authentication method enabled, please set --active-directory-auth '
+            raise CLIError('Need to have an authentication method enabled, please set --microsoft-entra-auth '
                            'to "Enabled" or --password-auth to "Enabled".')
 
         if not is_microsoft_entra_auth_enabled and (admin_name or admin_id or admin_type):
             raise CLIError('To provide values for --admin-object-id, --admin-display-name, and --admin-type '
-                           'please set --active-directory-auth to "Enabled".')
+                           'please set --microsoft-entra-auth to "Enabled".')
         if (admin_name is not None or admin_id is not None or admin_type is not None) and \
            not (admin_name is not None and admin_id is not None and admin_type is not None):
             raise CLIError('To add Microsoft Entra admin, please provide values for --admin-object-id, '

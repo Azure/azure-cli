@@ -191,7 +191,7 @@ def flexible_server_create(cmd, client,
 
     user = server_result.administrator_login if is_password_auth_enabled else '<user>'
     password = administrator_login_password if is_password_auth_enabled else '<password>'
-    admin = admin_name if admin_name else '<admin>'
+    admin = quote(admin_name) if admin_name else '<admin>'
     server_id = server_result.id
     loc = server_result.location
     version = server_result.version
@@ -1791,7 +1791,7 @@ def _create_postgresql_connection_string(host, user, password, database):
 
 def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
     connection_kwargs = {
-        'user': quote(admin),
+        'user': admin,
         'host': host,
         'database': database,
     }

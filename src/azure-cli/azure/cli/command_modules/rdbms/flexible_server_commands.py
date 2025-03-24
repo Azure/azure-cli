@@ -40,20 +40,20 @@ from ._transformers import (
 
 
 register_logic_breaking_change('postgres flexible-server create', 'Update default value of "--sku-name"',
-                               target_version='May 2025',
+                               target_version='2.73.0',
                                detail='The default value will be changed from "Standard_D2s_v3" to a '
                                'supported sku based on regional capabilities.')
 register_default_value_breaking_change('postgres flexible-server create', '--version', '16', '17',
-                                       target_version='May 2025')
+                                       target_version='2.73.0')
 register_default_value_breaking_change('postgres flexible-server create', '--create-default-database', 'Enabled',
-                                       'Disabled', target_version='May 2025')
+                                       'Disabled', target_version='2.73.0')
 register_argument_deprecate('postgres flexible-server create', '--active-directory-auth', '--microsoft-entra-auth',
-                            target_version='May 2025')
+                            target_version='2.73.0')
 register_argument_deprecate('postgres flexible-server update', '--active-directory-auth', '--microsoft-entra-auth',
-                            target_version='May 2025')
+                            target_version='2.73.0')
 register_command_group_deprecate('postgres flexible-server ad-admin', redirect='microsoft-entra-admin',
-                                 target_version='May 2025')
-register_other_breaking_change('postgres flexible-server update', target_version='May 2025',
+                                 target_version='2.73.0')
+register_other_breaking_change('postgres flexible-server update', target_version='2.73.0',
                                message='User confirmation will be needed for compute and storage updates '
                                'that trigger a restart of the VM.')
 
