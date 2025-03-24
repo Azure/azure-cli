@@ -1943,7 +1943,7 @@ class AKSAgentPoolAddDecorator:
             )
 
         return agentpool
-    
+
     def set_up_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
         """Set up gpu profile for the AgentPool object.
 
