@@ -38,7 +38,8 @@ from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
-    validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name
+    validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
+    validate_virtual_endpoint_name_availability
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -1375,6 +1376,7 @@ def migration_check_name_availability(cmd, client, resource_group_name, server_n
 def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
+    validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name)
 
     parameters = {
         'name': virtual_endpoint_name,
