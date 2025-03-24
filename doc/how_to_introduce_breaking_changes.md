@@ -263,13 +263,13 @@ This way, the pre-announcement wouldn't be displayed unless running into the bra
 Before you publish the breaking changes, you need to make sure that the announcement is ready for the Upcoming Breaking Change Documentation. To do that, run this command:
 
 ```commandline
-azdev genereate-breaking-change-report
+azdev generate-breaking-change-report
 ```
 
 If your breaking change is not for the next breaking change window, you can see all the announcements by using `--target-version None` like this:
 
 ```commandline
-azdev genereate-breaking-change-report --target-version None
+azdev generate-breaking-change-report --target-version None
 ```
 
 The output should be a JSON object including the pre-announcement you made.
@@ -291,5 +291,5 @@ The Upcoming Breaking Change Documentation includes:
 The documentation is generated through `azdev` tool. You can preview the documentation locally through the following command.
 
 ```commandline
-azdev genereate-breaking-change-report CLI --output-format markdown
+azdev generate-breaking-change-report CLI --output-format markdown
 ```
