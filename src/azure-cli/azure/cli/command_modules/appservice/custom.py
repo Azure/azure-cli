@@ -2869,6 +2869,17 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
 
+    # Do not clone site config when cloning from production
+    if configuration_source and configuration_source.lower() == webapp.lower():
+        slot_def.site_config = None
+
+    # Match cloned site settings from Azure portal
+    slot_def.https_only = site.https_only
+    slot_def.client_cert_enabled = site.client_cert_enabled
+    slot_def.client_cert_mode = site.client_cert_mode
+    slot_def.client_cert_exclusion_paths = site.client_cert_exclusion_paths
+    slot_def.public_network_access = site.public_network_access
+
     # if it is a Windows Container site, at least pass the necessary
     # app settings to perform the container image validation:
     if configuration_source and site_config.windows_fx_version:
