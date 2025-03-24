@@ -57,9 +57,6 @@ class AvailabilitySetConvert(_AvailabilitySet.Update):
         args_schema.sku._registered = False
         args_schema.platform_fault_domain_count._registered = False
         args_schema.proximity_placement_group._registered = False
-        args_schema.additional_scheduled_events._registered = False
-        args_schema.enable_user_reboot_scheduled_events._registered = False
-        args_schema.enable_user_redeploy_scheduled_events._registered = False
         return args_schema
 
     def _execute_operations(self):
