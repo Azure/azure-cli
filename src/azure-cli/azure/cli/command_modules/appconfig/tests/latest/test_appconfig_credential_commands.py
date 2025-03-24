@@ -19,7 +19,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_credential(self, resource_group, location):
         credential_store_prefix = get_resource_name_prefix('CredentialTest')
-        config_store_name = self.create_random_name(prefix=credential_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=credential_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'

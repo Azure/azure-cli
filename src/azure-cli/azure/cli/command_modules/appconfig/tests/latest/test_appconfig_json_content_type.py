@@ -28,8 +28,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
     def test_azconfig_json_content_type(self, resource_group, location):
         src_config_store_prefix = get_resource_name_prefix('Source')
         dest_config_store_prefix = get_resource_name_prefix('Destination')
-        src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=36)
-        dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=36)
+        src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=24)
+        dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
