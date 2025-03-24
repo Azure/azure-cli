@@ -6125,10 +6125,10 @@ def get_subscription_locations(cli_ctx):
     return [item.name for item in result]
 
 
-def list_flexconsumption_locations(cmd, zone_redundant=False, details=False, runtime=None):
+def list_flexconsumption_locations(cmd, zone_redundant=False, show_details=False, runtime=None):
     client = web_client_factory(cmd.cli_ctx)
 
-    if runtime and not details:
+    if runtime and not show_details:
         raise ArgumentUsageError(
             '--runtime is only valid with --details parameter. '
             'Please try again without the --details parameter.')
@@ -6142,7 +6142,7 @@ def list_flexconsumption_locations(cmd, zone_redundant=False, details=False, run
     sub_regions_list = get_subscription_locations(cmd.cli_ctx)
     regions = [x for x in regions if x in sub_regions_list]
 
-    if not details:
+    if not show_details:
         return [{'name': x} for x in regions]
 
     return [{'name': x, 'details': list_flex_function_app_all_runtimes(cmd, x, runtime)} for x in regions]

@@ -819,7 +819,7 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(len(locations) > 0)
 
     def test_functionapp_list_flexconsumption_locations_details(self):
-        locations = self.cmd('functionapp list-flexconsumption-locations --details --runtime java').get_output_in_json()
+        locations = self.cmd('functionapp list-flexconsumption-locations --show-details --runtime java').get_output_in_json()
         self.assertTrue(len(locations) > 0)
         self.assertTrue(locations[0]['name'] is not None)
         self.assertTrue(locations[0]['details'][0]['runtime'] is not None)
