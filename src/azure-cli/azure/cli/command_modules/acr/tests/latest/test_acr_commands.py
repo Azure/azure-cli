@@ -7,6 +7,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
 
+from acr._docker_utils import EMPTY_GUID
 
 class AcrCommandsTests(ScenarioTest):
 
@@ -33,6 +34,15 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('tags', {'cat': '', 'foo': 'bar'}),
                          self.check('adminUserEnabled', True),
                          self.check('provisioningState', 'Succeeded')])
+        
+        # test acr login --expose-token
+        tokens = self.cmd('acr login -n {} --expose-token'.format(registry_name), checks=[
+            self.exists('accessToken'),
+            self.exists('refreshToken'),
+            self.exists('loginServer'),
+            self.check('username', EMPTY_GUID)])
+        
+        self.assertEqual(tokens['accessToken'], tokens['refreshToken'])
 
         # test retention
         self.cmd('acr config retention update -r {} --status enabled --days 30 --type UntaggedManifests'.format(registry_name),
