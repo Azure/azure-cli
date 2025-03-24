@@ -34,8 +34,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
-    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_PATCH_UPGRADE_CHANNEL,
-    CONST_RAPID_UPGRADE_CHANNEL, CONST_SCALE_DOWN_MODE_DEALLOCATE,
+    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_NONE,
+    CONST_PATCH_UPGRADE_CHANNEL, CONST_RAPID_UPGRADE_CHANNEL, CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL,
@@ -49,7 +49,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL,
     CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_READONLY,
-    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_UNRESTRICTED)
+    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_UNRESTRICTED,
+    CONST_ARTIFACT_SOURCE_DIRECT,
+    CONST_ARTIFACT_SOURCE_CACHE)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -101,7 +103,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_disable_windows_outbound_nat,
     validate_crg_id,
     validate_azure_service_mesh_revision,
-    validate_message_of_the_day)
+    validate_message_of_the_day,
+    validate_bootstrap_container_registry_resource_id)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -162,7 +165,7 @@ network_plugins = [CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_AZURE, CON
 network_plugin_modes = [CONST_NETWORK_PLUGIN_MODE_OVERLAY]
 network_dataplanes = [CONST_NETWORK_DATAPLANE_AZURE, CONST_NETWORK_DATAPLANE_CILIUM]
 network_policies = [CONST_NETWORK_POLICY_AZURE, CONST_NETWORK_POLICY_CALICO, CONST_NETWORK_POLICY_CILIUM, CONST_NETWORK_POLICY_NONE]
-outbound_types = [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY]
+outbound_types = [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_NONE]
 auto_upgrade_channels = [
     CONST_RAPID_UPGRADE_CHANNEL,
     CONST_STABLE_UPGRADE_CHANNEL,
@@ -273,6 +276,11 @@ ephemeral_disk_nvme_perf_tiers = [
     CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
 ]
 
+bootstrap_artifact_source_types = [
+    CONST_ARTIFACT_SOURCE_DIRECT,
+    CONST_ARTIFACT_SOURCE_CACHE,
+]
+
 
 def load_arguments(self, _):
 
@@ -378,6 +386,15 @@ def load_arguments(self, _):
                    options_list=["--enable-azure-service-mesh", "--enable-asm"],
                    action='store_true')
         c.argument("revision", validator=validate_azure_service_mesh_revision)
+        c.argument(
+            "bootstrap_artifact_source",
+            arg_type=get_enum_type(bootstrap_artifact_source_types),
+            default=CONST_ARTIFACT_SOURCE_DIRECT,
+        )
+        c.argument(
+            "bootstrap_container_registry_resource_id",
+            validator=validate_bootstrap_container_registry_resource_id,
+        )
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
@@ -569,6 +586,14 @@ def load_arguments(self, _):
         c.argument('enable_force_upgrade', action='store_true')
         c.argument('disable_force_upgrade', action='store_true', validator=validate_force_upgrade_disable_and_enable_parameters)
         c.argument('upgrade_override_until')
+        c.argument(
+            "bootstrap_artifact_source",
+            arg_type=get_enum_type(bootstrap_artifact_source_types),
+        )
+        c.argument(
+            "bootstrap_container_registry_resource_id",
+            validator=validate_bootstrap_container_registry_resource_id,
+        )
         # addons
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('disable_secret_rotation', action='store_true', validator=validate_keyvault_secrets_provider_disable_and_enable_parameters)

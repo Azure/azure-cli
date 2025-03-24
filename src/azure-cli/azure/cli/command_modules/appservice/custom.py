@@ -580,6 +580,14 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
                               share_name, access_key, mount_path=None, slot=None, slot_setting=False):
     AzureStorageInfoValue = cmd.get_models('AzureStorageInfoValue')
+    storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
+
+    # Check if the file share exists
+    try:
+        storage_client.file_shares.get(resource_group_name, account_name, share_name)
+    except:
+        raise ValidationError(f"The share '{share_name}' does not exist in the storage account '{account_name}'.")
+
     azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                                      'list_azure_storage_accounts', slot)
 
@@ -814,7 +822,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
         if app_is_linux_webapp and not app_is_function_app and enable_kudu_warmup:
             try:
-                logger.info("Warming up Kudu before deployment.")
+                logger.warning("Warming up Kudu before deployment.")
                 cookies = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie. Deployment "
@@ -2498,8 +2506,10 @@ def _build_app_settings_output(app_settings, slot_cfg_names, redact=False):
 
 
 def _redact_appsettings(settings):
-    logger.warning('App settings have been redacted. '
-                   'Use `az webapp/logicapp/functionapp config appsettings list` to view.')
+    # Removing the redaction message as it's breaking people's pipelines
+    # Addresses https://github.com/Azure/azure-cli/issues/27724
+    # logger.warning('App settings have been redacted. '
+    #                'Use `az webapp/logicapp/functionapp config appsettings list` to view.')
     for x in settings:
         settings[x] = None
     return settings
@@ -2595,8 +2605,10 @@ def delete_connection_strings(cmd, resource_group_name, name, setting_names, slo
 
 
 def _redact_connection_strings(properties):
-    logger.warning('Connection string values have been redacted. '
-                   'Use `az webapp config connection-string list` to view.')
+    # Removing the redaction message as it's breaking people's pipelines
+    # Addresses https://github.com/Azure/azure-cli/issues/27724
+    # logger.warning('Connection string values have been redacted. '
+    #                'Use `az webapp config connection-string list` to view.')
     for setting in properties:
         properties[setting].value = None
     return properties
@@ -2864,6 +2876,17 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
+
+    # Do not clone site config when cloning from production
+    if configuration_source and configuration_source.lower() == webapp.lower():
+        slot_def.site_config = None
+
+    # Match cloned site settings from Azure portal
+    slot_def.https_only = site.https_only
+    slot_def.client_cert_enabled = site.client_cert_enabled
+    slot_def.client_cert_mode = site.client_cert_mode
+    slot_def.client_cert_exclusion_paths = site.client_cert_exclusion_paths
+    slot_def.public_network_access = site.public_network_access
 
     # if it is a Windows Container site, at least pass the necessary
     # app settings to perform the container image validation:
@@ -3296,10 +3319,10 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
 
     db_setting = _create_db_setting(cmd, db_name, db_type=db_type, db_connection_string=db_connection_string)
 
-    backup_schedule = BackupSchedule(frequency_interval=frequency_num, frequency_unit=frequency_unit.name,
+    backup_schedule = BackupSchedule(frequency_interval=frequency_num, frequency_unit=frequency_unit,
                                      keep_at_least_one_backup=keep_at_least_one_backup,
                                      retention_period_in_days=retention_period_in_days)
-    backup_request = BackupRequest(backup_request_name=backup_name, backup_schedule=backup_schedule,
+    backup_request = BackupRequest(backup_name=backup_name, backup_schedule=backup_schedule,
                                    enabled=True, storage_account_url=storage_account_url,
                                    databases=db_setting)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'update_backup_configuration',
@@ -3339,18 +3362,14 @@ def list_snapshots(cmd, resource_group_name, name, slot=None):
 
 def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_content_only=False,  # pylint: disable=redefined-outer-name
                      source_resource_group=None, source_name=None, source_slot=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     SnapshotRecoverySource, SnapshotRestoreRequest = cmd.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
     client = web_client_factory(cmd.cli_ctx)
     recover_config = not restore_content_only
     if all([source_resource_group, source_name]):
         # Restore from source app to target app
-        sub_id = get_subscription_id(cmd.cli_ctx)
-        source_id = "/subscriptions/" + sub_id + "/resourceGroups/" + source_resource_group + \
-            "/providers/Microsoft.Web/sites/" + source_name
-        if source_slot:
-            source_id = source_id + "/slots/" + source_slot
-        source = SnapshotRecoverySource(id=source_id)
+        src_webapp = _generic_site_operation(cmd.cli_ctx, source_resource_group, source_name, 'get', source_slot)
+
+        source = SnapshotRecoverySource(id=src_webapp.id, location=src_webapp.location)
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
                                          recover_configuration=recover_config)
         if slot:
@@ -7379,9 +7398,9 @@ class OneDeployParams:
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
-def _build_onedeploy_url(params):
+def _build_onedeploy_url(params, instance_id=None):
     if params.src_url:
-        return _build_onedeploy_arm_url(params)
+        return _build_onedeploy_arm_url(params, instance_id)
     return _build_onedeploy_scm_url(params)
 
 
@@ -7407,19 +7426,20 @@ def _build_onedeploy_scm_url(params):
     return deploy_url
 
 
-def _build_onedeploy_arm_url(params):
+def _build_onedeploy_arm_url(params, instance_id):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(params.cmd.cli_ctx)
     sub_id = get_subscription_id(params.cmd.cli_ctx)
+    instances_param = f"/instances/{instance_id}" if instance_id is not None else ""
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
+            f"{params.webapp_name}{instances_param}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
         )
     else:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/slots/{params.slot}/extensions/onedeploy"
+            f"{params.webapp_name}/slots/{params.slot}{instances_param}/extensions/onedeploy"
             f"?api-version={client.DEFAULT_API_VERSION}"
         )
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
@@ -7618,7 +7638,24 @@ def _make_onedeploy_request(params):
                                      verify=not should_disable_connection_verify())
         poll_async_deployment_for_debugging = True
     else:
-        response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+        if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
+            try:
+                logger.warning("Warming up Kudu before deployment.")
+                cookies = _warmup_kudu_and_get_cookie_internal(params.cmd, params.resource_group_name,
+                                                               params.webapp_name, params.slot)
+                if cookies is None:
+                    logger.info("Failed to fetch affinity cookie for Kudu. "
+                                "Deployment will proceed without pre-warming a Kudu instance.")
+                    response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+                else:
+                    deploy_arm_url = _build_onedeploy_url(params, cookies.get("ARRAffinity"))
+                    response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_arm_url, body=body)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info("Failed to deploy using instances endpoint. "
+                            "Deployment will proceed without pre-warming a Kudu instance. Ex: %s", ex)
+                response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+        else:
+            response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
         poll_async_deployment_for_debugging = False
 
     # check the status of deployment

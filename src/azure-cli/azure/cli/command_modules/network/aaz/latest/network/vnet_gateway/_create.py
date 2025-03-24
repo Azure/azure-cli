@@ -31,9 +31,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2024-03-01"],
         ]
     }
 
@@ -87,10 +87,6 @@ class Create(AAZCommand):
         _args_schema.min_scale_unit = AAZIntArg(
             options=["--min-scale-unit"],
             help="Minimum scale units for auto-scale configuration.",
-        )
-        _args_schema.enable_high_bandwidth_vpn_gateway = AAZBoolArg(
-            options=["--enable-high-bandwidth", "--enable-high-bandwidth-vpn-gateway"],
-            help="To enable Advanced Connectivity feature for VPN gateway",
         )
         _args_schema.enable_private_ip = AAZBoolArg(
             options=["--enable-private-ip"],
@@ -516,7 +512,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -570,7 +566,6 @@ class Create(AAZCommand):
                 properties.set_prop("bgpSettings", AAZObjectType)
                 properties.set_prop("customRoutes", AAZObjectType)
                 properties.set_prop("enableBgp", AAZBoolType, ".enable_bgp")
-                properties.set_prop("enableHighBandwidthVpnGateway", AAZBoolType, ".enable_high_bandwidth_vpn_gateway")
                 properties.set_prop("enablePrivateIpAddress", AAZBoolType, ".enable_private_ip")
                 properties.set_prop("gatewayDefaultSite", AAZObjectType)
                 properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
@@ -823,9 +818,6 @@ class Create(AAZCommand):
             properties.enable_dns_forwarding = AAZBoolType(
                 serialized_name="enableDnsForwarding",
             )
-            properties.enable_high_bandwidth_vpn_gateway = AAZBoolType(
-                serialized_name="enableHighBandwidthVpnGateway",
-            )
             properties.enable_private_ip_address = AAZBoolType(
                 serialized_name="enablePrivateIpAddress",
             )
@@ -860,9 +852,6 @@ class Create(AAZCommand):
             properties.sku = AAZObjectType()
             properties.v_net_extended_location_resource_id = AAZStrType(
                 serialized_name="vNetExtendedLocationResourceId",
-            )
-            properties.virtual_network_gateway_migration_status = AAZObjectType(
-                serialized_name="virtualNetworkGatewayMigrationStatus",
             )
             properties.virtual_network_gateway_policy_groups = AAZListType(
                 serialized_name="virtualNetworkGatewayPolicyGroups",
@@ -1003,13 +992,6 @@ class Create(AAZCommand):
             )
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
-
-            virtual_network_gateway_migration_status = cls._schema_on_200_201.properties.virtual_network_gateway_migration_status
-            virtual_network_gateway_migration_status.error_message = AAZStrType(
-                serialized_name="errorMessage",
-            )
-            virtual_network_gateway_migration_status.phase = AAZStrType()
-            virtual_network_gateway_migration_status.state = AAZStrType()
 
             virtual_network_gateway_policy_groups = cls._schema_on_200_201.properties.virtual_network_gateway_policy_groups
             virtual_network_gateway_policy_groups.Element = AAZObjectType()

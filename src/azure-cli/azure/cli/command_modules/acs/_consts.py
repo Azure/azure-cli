@@ -71,6 +71,7 @@ CONST_OUTBOUND_TYPE_LOAD_BALANCER = "loadBalancer"
 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING = "userDefinedRouting"
 CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY = "managedNATGateway"
 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY = "userAssignedNATGateway"
+CONST_OUTBOUND_TYPE_NONE = "none"
 
 # load balancer backend pool type
 CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP = "nodeIP"
@@ -209,6 +210,10 @@ CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK = "Rollback"
 # Dns zone contributor role
 CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE = "Private DNS Zone Contributor"
 CONST_DNS_ZONE_CONTRIBUTOR_ROLE = "DNS Zone Contributor"
+
+# consts for network isolated cluster
+CONST_ARTIFACT_SOURCE_DIRECT = "Direct"
+CONST_ARTIFACT_SOURCE_CACHE = "Cache"
 
 
 # consts for decorator pattern
