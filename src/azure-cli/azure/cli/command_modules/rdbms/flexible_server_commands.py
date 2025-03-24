@@ -6,7 +6,8 @@
 from azure.cli.command_modules.rdbms.validators import validate_private_endpoint_connection_id
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.breaking_change import register_command_group_deprecate, register_default_value_breaking_change, \
-    register_argument_deprecate, register_other_breaking_change, register_logic_breaking_change
+    register_argument_deprecate, register_other_breaking_change, register_logic_breaking_change, \
+    register_command_deprecate
 
 from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_servers,
@@ -40,20 +41,17 @@ from ._transformers import (
 
 
 register_logic_breaking_change('postgres flexible-server create', 'Update default value of "--sku-name"',
-                               target_version='2.73.0',
                                detail='The default value will be changed from "Standard_D2s_v3" to a '
                                'supported sku based on regional capabilities.')
-register_default_value_breaking_change('postgres flexible-server create', '--version', '16', '17',
-                                       target_version='2.73.0')
+register_default_value_breaking_change('postgres flexible-server create', '--version', '16', '17')
 register_default_value_breaking_change('postgres flexible-server create', '--create-default-database', 'Enabled',
-                                       'Disabled', target_version='2.73.0')
-register_argument_deprecate('postgres flexible-server create', '--active-directory-auth', '--microsoft-entra-auth',
-                            target_version='2.73.0')
-register_argument_deprecate('postgres flexible-server update', '--active-directory-auth', '--microsoft-entra-auth',
-                            target_version='2.73.0')
-register_command_group_deprecate('postgres flexible-server ad-admin', redirect='microsoft-entra-admin',
-                                 target_version='2.73.0')
-register_other_breaking_change('postgres flexible-server update', target_version='2.73.0',
+                                       'Disabled')
+register_argument_deprecate('postgres flexible-server create', '--active-directory-auth', '--microsoft-entra-auth')
+register_argument_deprecate('postgres flexible-server update', '--active-directory-auth', '--microsoft-entra-auth')
+register_command_group_deprecate('postgres flexible-server ad-admin', redirect='microsoft-entra-admin')
+register_command_deprecate('postgres flexible-server replica stop-replication',
+                           redirect='postgres flexible-server replica promote', hide=True)
+register_other_breaking_change('postgres flexible-server update',
                                message='User confirmation will be needed for compute and storage updates '
                                'that trigger a restart of the VM.')
 
@@ -259,7 +257,7 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_servers) as g:
         g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
-        g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True, deprecate_info=g.deprecate(redirect='postgres flexible-server replica promote', hide=True))
+        g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
         g.custom_command('promote', 'flexible_replica_promote', confirmation=True)
 
     with self.command_group('postgres flexible-server identity', postgres_flexible_servers_sdk,
