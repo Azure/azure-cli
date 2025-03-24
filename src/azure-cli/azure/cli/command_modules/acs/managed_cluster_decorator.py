@@ -8107,7 +8107,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = False
 
         return mc
-    
+
     def update_custom_ca_trust_certificates(self, mc: ManagedCluster) -> ManagedCluster:
         """Update Custom CA Trust Certificates for the ManagedCluster object.
 
@@ -8122,7 +8122,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
             mc.security_profile.custom_ca_trust_certificates = ca_certs
 
-        return mc 
+        return mc
 
     def update_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update azure monitor profile for the ManagedCluster object.
