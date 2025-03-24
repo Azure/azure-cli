@@ -135,19 +135,20 @@ examples:
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
         --key $keyIdentifier --identity testIdentity
   - name: >
-      Create a PostgreSQL flexible server with active directory auth as well as password auth.
+      Create a PostgreSQL flexible server with Microsoft Entra auth as well as password auth.
     text: >
       # create flexible server with aad auth and password auth enabled
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
         --microsoft-entra-auth Enabled
   - name: >
-      Create a PostgreSQL flexible server with active directory auth only.
+      Create a PostgreSQL flexible server with Microsoft Entra auth only and primary administrator specified.
     text: >
-      # create flexible server with aad only auth and password auth disabled
+      # create flexible server with aad only auth and password auth disabled with primary administrator specified
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
-        --microsoft-entra-auth Enabled --password-auth Disabled
+        --microsoft-entra-auth Enabled --password-auth Disabled \\
+        --admin-object-id 00000000-0000-0000-0000-000000000000 --admin-display-name john@contoso.com --admin-type User
   - name: >
       Create a PostgreSQL flexible server with public access, geo-redundant backup enabled and add the range of IP address to have access to this server.
       The --public-access parameter can be 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
@@ -256,7 +257,7 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --tags "k1=v1" "k2=v2"
   - name: Reset password
     text: az postgres flexible-server update --resource-group testGroup --name testserver -p password123
-  - name: Update a flexible server to enable active directory auth for password auth enabled server
+  - name: Update a flexible server to enable Microsoft Entra auth for password auth enabled server
     text: az postgres flexible-server update --resource-group testGroup --name testserver --microsoft-entra-auth Enabled
   - name: Change key/identity for data encryption. Data encryption cannot be enabled post server creation, this will only update the key/identity.
     text: >
@@ -959,48 +960,48 @@ examples:
 
 helps['postgres flexible-server ad-admin'] = """
 type: group
-short-summary: Manage server Active Directory administrators.
+short-summary: Manage server Microsoft Entra administrators.
 """
 
 helps['postgres flexible-server ad-admin create'] = """
 type: command
-short-summary: Create an Active Directory administrator.
+short-summary: Create a Microsoft Entra administrator.
 examples:
-  - name: Create Active Directory administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and type User.
+  - name: Create Microsoft Entra administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and type User.
     text: az postgres flexible-server ad-admin create -g testgroup -s testsvr -u john@contoso.com -i 00000000-0000-0000-0000-000000000000 -t User
 """
 
 helps['postgres flexible-server ad-admin delete'] = """
 type: command
-short-summary: Delete an Active Directory administrator.
+short-summary: Delete a Microsoft Entra administrator.
 examples:
-  - name: Delete Active Directory administrator with ID '00000000-0000-0000-0000-000000000000'.
+  - name: Delete Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
     text: az postgres flexible-server ad-admin delete -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
 """
 
 helps['postgres flexible-server ad-admin list'] = """
 type: command
-short-summary: List all Active Directory administrators.
+short-summary: List all Microsoft Entra administrators.
 examples:
-  - name: List Active Directory administrators.
+  - name: List Microsoft Entra administrators.
     text: az postgres flexible-server ad-admin list -g testgroup -s testsvr
 """
 
 helps['postgres flexible-server ad-admin show'] = """
 type: command
-short-summary: Get an Active Directory administrator.
+short-summary: Get a Microsoft Entra administrator.
 examples:
-  - name: Get Active Directory administrator with ID '00000000-0000-0000-0000-000000000000'.
+  - name: Get Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
     text: az postgres flexible-server ad-admin show -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
 """
 
 helps['postgres flexible-server ad-admin wait'] = """
 type: command
-short-summary: Wait for an Active Directory administrator to satisfy certain conditions.
+short-summary: Wait for a Microsoft Entra administrator to satisfy certain conditions.
 examples:
-  - name: Wait until an Active Directory administrator exists.
+  - name: Wait until a Microsoft Entra administrator exists.
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --exists
-  - name: Wait for an Active Directory administrator to be deleted.
+  - name: Wait for a Microsoft Entra administrator to be deleted.
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
 """
 
