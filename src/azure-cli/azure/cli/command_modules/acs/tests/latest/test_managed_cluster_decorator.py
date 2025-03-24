@@ -59,6 +59,7 @@ from azure.cli.command_modules.acs.managed_cluster_decorator import (
     AKSManagedClusterParamDict,
     AKSManagedClusterUpdateDecorator,
 )
+from azure.cli.command_modules.acs.tests.latest.data.certs import CUSTOM_CA_TEST_CERT_STR
 from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockCLI,
     MockClient,
@@ -11808,7 +11809,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_1.context.attach_mc(mc_1)
         dec_mc_1 = dec_1.set_up_custom_ca_trust_certificates(mc_1)
         sec_profile = self.models.ManagedClusterSecurityProfile(
-            custom_ca_trust_certificates=[str.encode(CONST_CUSTOM_CA_TEST_CERT) for _ in range(2)]
+            custom_ca_trust_certificates=[str.encode(CUSTOM_CA_TEST_CERT_STR) for _ in range(2)]
         )
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location", security_profile=sec_profile)
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
@@ -12061,7 +12062,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
             security_profile=self.models.ManagedClusterSecurityProfile(
-                custom_ca_trust_certificates=[str.encode(CONST_CUSTOM_CA_TEST_CERT) for _ in range(2)]
+                custom_ca_trust_certificates=[str.encode(CUSTOM_CA_TEST_CERT_STR) for _ in range(2)]
             ),
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)

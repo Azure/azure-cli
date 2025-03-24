@@ -21,12 +21,10 @@ from azure.cli.command_modules.acs._helpers import (
     sort_asm_revisions,
     use_shared_identity,
 )
-from azure.cli.command_modules.acs._consts import (
-    CONST_CUSTOM_CA_TEST_CERT,
-)
 from azure.cli.command_modules.acs.tests.latest.custom_preparers import (
     AKSCustomResourceGroupPreparer, AKSCustomRoleBasedServicePrincipalPreparer,
     AKSCustomVirtualNetworkPreparer)
+from azure.cli.command_modules.acs.tests.latest.data.certs import CUSTOM_CA_TEST_CERT_STR
 from azure.cli.command_modules.acs.tests.latest.recording_processors import \
     KeyReplacer
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
@@ -12033,7 +12031,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--custom-ca-trust-certificates={custom_ca_trust_certificates}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('securityProfile.customCaTrustCertificates', [CONST_CUSTOM_CA_TEST_CERT for _ in range(2)]),
+            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)]),
         ])
 
         # delete
