@@ -8388,8 +8388,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         bootstrap_artifact_source = self.context.get_bootstrap_artifact_source()
         bootstrap_container_registry_resource_id = self.context.get_bootstrap_container_registry_resource_id()
-        if hasattr(mc, "bootstrap_profile") and bootstrap_artifact_source is not None:
-            if bootstrap_artifact_source != CONST_ARTIFACT_SOURCE_CACHE and bootstrap_container_registry_resource_id:
+        if hasattr(mc, "bootstrap_profile"):
+            if bootstrap_artifact_source is None and mc.bootstrap_profile is not None:
+                bootstrap_artifact_source = mc.bootstrap_profile.artifact_source # backfill from existing mc
+            if (bootstrap_artifact_source is None or bootstrap_artifact_source != CONST_ARTIFACT_SOURCE_CACHE) and bootstrap_container_registry_resource_id:
                 raise MutuallyExclusiveArgumentError(
                     "Cannot specify --bootstrap-container-registry-resource-id when "
                     "--bootstrap-artifact-source is not Cache."
