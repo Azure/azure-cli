@@ -53,7 +53,7 @@ register_command_deprecate('postgres flexible-server replica stop-replication',
                            redirect='postgres flexible-server replica promote', hide=True)
 register_other_breaking_change('postgres flexible-server update',
                                message='User confirmation will be needed for compute and storage updates '
-                               'that trigger a restart of the VM.')
+                               'that trigger a restart of the server.')
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
