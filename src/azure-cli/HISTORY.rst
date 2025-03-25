@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* `az acr create`: Fixed a bug where creating cache rule without credential set would fail (#30984)
+* `az acr create`: Fix a bug where creating cache rule without credential set would fail (#30984)
 
 **AKS**
 
@@ -20,22 +20,22 @@ Release History
 
 **App Config**
 
-* `az appconfig`: Fix MSI auth for `--auth-mode login` parameter (#30983)
+* `az appconfig`: Fix managed identity auth for `--auth-mode login` parameter (#30983)
 
 **App Service**
 
 * `az webapp deploy`: Add `--enable-kudu-warmup` parameter to support warm-up Kudu before making deployment (#31083)
-* Fix: #27724: `az webapp config appsettings set`: Remove redaction warning message from output (#31006)
+* Fix #27724: `az webapp config appsettings set`: Remove redaction warning message from output (#31006)
 * Fix #26920: `az webapp deployment slot create`: Make the created new slot has same VNet integration settings of source slot as Portal behavior (#30836)
 * Fix #30908: `az webapp snapshot restore`: Fix the error "no resource group found" when trying to restore a snapshot backup to a paired region (#30364)
 * Fix #29512: `az webapp config backup update`: Fix `str` object has no attribute `name` (#30986)
-* Fix: #21721: `az webapp config storage-account add`: Add validation for non-existent FileShare (#30990)
+* Fix #21721: `az webapp config storage-account add`: Add validation for non-existent FileShare (#30990)
 * `az functionapp list-flexconsumption-locations`: Add `--details` and `--runtime` parameters to provide more details (#31019)
 
 **ARM**
 
-* Fix #29809: `az deployment` / `az stack` / `az bicep`: Fix an issue where the commands mistakenly check for the latest Bicep version, even when `use_binary_from_path` is `true` and `check_version` is `false` (#31041)
-* Fix #29435: `az bicep install / upgrade`: Fix an issue where the command downloads the x64 binary instead of the ARM binary on aarch64 machines (#31041)
+* Fix #29809: `az deployment/stack/bicep`: Fix an issue where the commands mistakenly check for the latest Bicep version, even when `use_binary_from_path` is `true` and `check_version` is `false` (#31041)
+* Fix #29435: `az bicep install/upgrade`: Fix an issue where the command downloads the x64 binary instead of the ARM binary on aarch64 machines (#31041)
 
 **ARO**
 
@@ -53,9 +53,9 @@ Release History
 
 * `az sig image-definition list-shared`: Mark `--marker` and `--show-next-marker` as deprecated and will be removed in the upcoming breaking change window (#31081)
 * `az sig image-version list-shared`: Mark `--marker` and `--show-next-marker` as deprecated and will be removed in the upcoming breaking change window (#31081)
-* `az sig image-definition list-community`: Mark `--marker` and `--show-next-marker` as and will be removed in the upcoming breaking change windowdeprecated (#31081)
+* `az sig image-definition list-community`: Mark `--marker` and `--show-next-marker` as deprecated and will be removed in the upcoming breaking change window (#31081)
 * `az sig image-version list-community`: Mark `--marker` and `--show-next-marker` as deprecated and will be removed in the upcoming breaking change window (#31081)
-* `az disk`: Add new command `config update` to support updating disk size gb by PATCH method (#30961)
+* `az disk config update`: Add new command to support updating disk size gb by PATCH method (#30961)
 * `az vm/vmss create/update`: Add support for setting security type to `Standard` (#31002)
 * Fix #30976: `az sig image-version create`: Fix missing auxiliary tokens (#30977)
 * `az sig image-version create/update`: Add new parameter `--block-deletion-before-end-of-life` to support blocking deletion if the end of life has not expired (#31013)
@@ -97,7 +97,7 @@ Release History
 
 **Service Connector**
 
-* `az {} connection create neon-postgres`: Add command for Neon Postgres Serverless (#30938)
+* `az * connection create neon-postgres`: Add command for Neon Postgres Serverless (#30938)
 
 **Storage**
 
