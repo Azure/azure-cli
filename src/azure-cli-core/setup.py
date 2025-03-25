@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.70.0"
+VERSION = "2.71.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -52,7 +52,7 @@ DEPENDENCIES = [
     'humanfriendly~=10.0',
     'jmespath',
     'knack~=0.11.0',
-    'microsoft-security-utilities-secret-masker~=1.0.0b2',
+    'microsoft-security-utilities-secret-masker~=1.0.0b4',
     'msal-extensions==1.2.0',
     'msal[broker]==1.31.2b1',
     'msrestazure~=0.6.4',

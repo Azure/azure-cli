@@ -12,7 +12,6 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
-                                                          cf_disk_encryption_set,
                                                           cf_shared_gallery_image,
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
@@ -175,9 +174,8 @@ def load_command_table(self, _):
         client_factory=cf_img_bldr_image_templates,
     )
 
-    compute_disk_encryption_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
-        client_factory=cf_disk_encryption_set
+    compute_disk_encryption_set_profile = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}'
     )
 
     monitor_custom = CliCommandType(
@@ -239,13 +237,19 @@ def load_command_table(self, _):
         self.command_table['disk list'] = DiskList(loader=self, table_transformer='[].' + transform_disk_show_table_output)
         self.command_table['disk show'] = DiskShow(loader=self, table_transformer=transform_disk_show_table_output)
 
-    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
-        g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
+    with self.command_group("disk config"):
+        from .operations.disk import DiskConfigUpdate
+        self.command_table["disk config update"] = DiskConfigUpdate(loader=self)
 
-    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2022-03-02') as g:
-        g.custom_command('assign', 'assign_disk_encryption_set_identity')
-        g.custom_command('remove', 'remove_disk_encryption_set_identity', confirmation=True)
+    with self.command_group('disk-encryption-set', compute_disk_encryption_set_profile, operation_group='disk_encryption_sets'):
+        from .operations.disk_encryption_set import DiskEncryptionSetCreate, DiskEncryptionSetUpdate
+        self.command_table['disk-encryption-set create'] = DiskEncryptionSetCreate(loader=self)
+        self.command_table['disk-encryption-set update'] = DiskEncryptionSetUpdate(loader=self)
+
+    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_profile, operation_group='disk_encryption_sets') as g:
+        from .operations.disk_encryption_set_identity import DiskEncryptionSetIdentityAssign, DiskEncryptionSetIdentityRemove
+        self.command_table['disk-encryption-set identity assign'] = DiskEncryptionSetIdentityAssign(loader=self)
+        self.command_table['disk-encryption-set identity remove'] = DiskEncryptionSetIdentityRemove(loader=self)
         g.custom_show_command('show', 'show_disk_encryption_set_identity')
 
     with self.command_group('image', compute_image_sdk) as g:
@@ -327,8 +331,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
-        from .operations.vm import VMListSizes
-        self.command_table['vm list-sizes'] = VMListSizes(loader=self)
+        g.custom_command('list-sizes', 'list_vm_sizes', deprecate_info=g.deprecate(redirect='az vm list-skus'))
 
     with self.command_group('vm', compute_vm_sdk, client_factory=cf_vm) as g:
         g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')

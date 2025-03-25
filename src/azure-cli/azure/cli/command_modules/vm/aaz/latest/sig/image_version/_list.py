@@ -19,9 +19,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-07-03",
+        "version": "2024-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions", "2023-07-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions", "2024-03-03"],
         ]
     }
 
@@ -127,7 +127,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-03",
+                    "api-version", "2024-03-03",
                     required=True,
                 ),
             }
@@ -200,6 +200,7 @@ class List(AAZCommand):
                 serialized_name="replicationStatus",
                 flags={"read_only": True},
             )
+            properties.restore = AAZBoolType()
             properties.safety_profile = AAZObjectType(
                 serialized_name="safetyProfile",
             )
@@ -209,6 +210,10 @@ class List(AAZCommand):
             properties.storage_profile = AAZObjectType(
                 serialized_name="storageProfile",
                 flags={"required": True},
+            )
+            properties.validations_profile = AAZObjectType(
+                serialized_name="validationsProfile",
+                flags={"read_only": True},
             )
 
             publishing_profile = cls._schema_on_200.value.Element.properties.publishing_profile
@@ -263,6 +268,9 @@ class List(AAZCommand):
             target_regions.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.publishing_profile.target_regions.Element
+            _element.additional_replica_sets = AAZListType(
+                serialized_name="additionalReplicaSets",
+            )
             _element.encryption = AAZObjectType()
             _ListHelper._build_schema_encryption_images_read(_element.encryption)
             _element.exclude_from_latest = AAZBoolType(
@@ -271,6 +279,17 @@ class List(AAZCommand):
             _element.name = AAZStrType(
                 flags={"required": True},
             )
+            _element.regional_replica_count = AAZIntType(
+                serialized_name="regionalReplicaCount",
+            )
+            _element.storage_account_type = AAZStrType(
+                serialized_name="storageAccountType",
+            )
+
+            additional_replica_sets = cls._schema_on_200.value.Element.properties.publishing_profile.target_regions.Element.additional_replica_sets
+            additional_replica_sets.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.publishing_profile.target_regions.Element.additional_replica_sets.Element
             _element.regional_replica_count = AAZIntType(
                 serialized_name="regionalReplicaCount",
             )
@@ -307,6 +326,9 @@ class List(AAZCommand):
             safety_profile = cls._schema_on_200.value.Element.properties.safety_profile
             safety_profile.allow_deletion_of_replicated_locations = AAZBoolType(
                 serialized_name="allowDeletionOfReplicatedLocations",
+            )
+            safety_profile.block_deletion_before_end_of_life = AAZBoolType(
+                serialized_name="blockDeletionBeforeEndOfLife",
             )
             safety_profile.policy_violations = AAZListType(
                 serialized_name="policyViolations",
@@ -403,6 +425,39 @@ class List(AAZCommand):
             source.id = AAZStrType()
             source.virtual_machine_id = AAZStrType(
                 serialized_name="virtualMachineId",
+            )
+
+            validations_profile = cls._schema_on_200.value.Element.properties.validations_profile
+            validations_profile.executed_validations = AAZListType(
+                serialized_name="executedValidations",
+            )
+            validations_profile.platform_attributes = AAZListType(
+                serialized_name="platformAttributes",
+            )
+            validations_profile.validation_etag = AAZStrType(
+                serialized_name="validationEtag",
+            )
+
+            executed_validations = cls._schema_on_200.value.Element.properties.validations_profile.executed_validations
+            executed_validations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.validations_profile.executed_validations.Element
+            _element.execution_time = AAZStrType(
+                serialized_name="executionTime",
+            )
+            _element.status = AAZStrType()
+            _element.type = AAZStrType()
+            _element.version = AAZStrType()
+
+            platform_attributes = cls._schema_on_200.value.Element.properties.validations_profile.platform_attributes
+            platform_attributes.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.validations_profile.platform_attributes.Element
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.value = AAZStrType(
+                flags={"read_only": True},
             )
 
             tags = cls._schema_on_200.value.Element.tags

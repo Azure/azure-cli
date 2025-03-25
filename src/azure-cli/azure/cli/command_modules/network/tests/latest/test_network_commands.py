@@ -950,7 +950,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_cert_name_')
-    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
+    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium', additional_params='--enable-rbac-authorization false')
     def test_network_app_gateway_with_cert_name(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
@@ -1987,7 +1987,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  checks=(self.check('length(@)', 0)))
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_listener_with_host_names')
-    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
+    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium', additional_params='--enable-rbac-authorization false')
     def test_network_ag_listener_with_host_names(self, resource_group):
         self.kwargs.update({
             'appgw': 'appgw',
@@ -3400,7 +3400,7 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_port', location='eastus')
-    @KeyVaultPreparer(name_prefix='test-er-port-kv', location='eastus')
+    @KeyVaultPreparer(name_prefix='test-er-port-kv', location='eastus', additional_params='--enable-rbac-authorization false')
     def test_network_express_route_port(self, resource_group, key_vault):
         self.kwargs.update({
             'rg': resource_group,
@@ -5322,6 +5322,55 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
 
 
 class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_vpn_connection_aux_', location='westus')
+    @ResourceGroupPreparer(name_prefix='test_vpn_connection_aux_', location='westus',
+                           parameter_name='aux_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_vpn_connection_aux(self, resource_group, aux_resource_group, resource_group_location,):
+        self.kwargs.update({
+            'rg': resource_group,
+            'rg2': aux_resource_group,
+            'location': resource_group_location,
+            'aux_sub': AUX_SUBSCRIPTION,
+            'vnet1': 'vnet1',
+            'vnet_prefix1': '10.11.0.0/16',
+            'vnet_prefix2': '10.12.0.0/16',
+            'fe_sub1': 'FrontEnd',
+            'fe_sub_prefix1': '10.11.0.0/24',
+            'be_sub1': 'BackEnd',
+            'be_sub_prefix1': '10.12.0.0/24',
+            'gw_sub1': 'GatewaySubnet',
+            'gw_sub_prefix1': '10.12.255.0/27',
+            'gw1ip': 'pip1',
+            'gw1': 'gw1',
+            'gw1_sku': 'VpnGw1',
+            'lgw1': 'lgw1',
+            'lgw1ip': '131.107.72.22',
+            'lgw1_prefix1': '10.61.0.0/16',
+            'lgw1_prefix2': '10.62.0.0/16',
+            'conn1': 'conn1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet_prefix1} {vnet_prefix2}')
+        self.cmd(
+            'network vnet subnet create -g {rg} --vnet-name {vnet1} -n {fe_sub1} --address-prefix {fe_sub_prefix1} --default-outbound false')
+        self.cmd(
+            'network vnet subnet create -g {rg} --vnet-name {vnet1} -n {be_sub1} --address-prefix {be_sub_prefix1} --default-outbound false')
+        self.cmd(
+            'network vnet subnet create -g {rg} --vnet-name {vnet1} -n {gw_sub1} --address-prefix {gw_sub_prefix1} --default-outbound false')
+        self.cmd('network public-ip create -g {rg} -n {gw1ip}')
+
+        self.cmd(
+            'network vnet-gateway create -g {rg} -l {location} -n {gw1} --public-ip-address {gw1ip} --vnet {vnet1} --sku {gw1_sku}')
+        self.kwargs["local_gateway_id"] = self.cmd(
+            'network local-gateway create -g {rg2} -l {location} -n {lgw1} --gateway-ip-address {lgw1ip} --local-address-prefixes {lgw1_prefix1} {lgw1_prefix2} --subscription {aux_sub}').get_output_in_json()["id"]
+
+        self.cmd(
+            'network vpn-connection create -g {rg} -l {location} -n {conn1} --vnet-gateway1 {gw1} --local-gateway2 {local_gateway_id} --shared-key AzureA1b2C3',
+            checks=[
+                self.check("resource.localNetworkGateway2.id", "{local_gateway_id}"),
+            ]
+        )
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_connection_ipsec')
     def test_network_vpn_connection_ipsec(self, resource_group):
@@ -6853,6 +6902,8 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
+
+
 class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_identity')
@@ -7037,7 +7088,13 @@ class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
             self.check('length(properties.routingConfiguration.propagatedRouteTables.labels)', 2),
             self.check('properties.routingConfiguration.propagatedRouteTables.labels[0]', 'label1')
-        ]) 
+        ])
+
+    @record_only()
+    def test_get_boot(self):
+        self.cmd('network virtual-appliance get-boot-diagnostic-log -n chkptbd1031 -g nashoktest --scs-sas-url "https://stonashoktest.blob.core.windows.net/testcontainer/example.txt?sp=rw&st=2025-03-07T03:47:49Z&se=2025-03-08T11:47:49Z&skoid=7f5b7efd-fa3f-4fbd-9430-8cf0f0ca6822&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-03-07T03:47:49Z&ske=2025-03-08T11:47:49Z&sks=b&skv=2022-11-02&spr=https&sv=2022-11-02&sr=b&sig=TOSsTfWx3e6ti7YLmeYms%2B3hAwMUSTlilE%2F08iht%2BUc%3D" --css-sas-url "https://stonashoktest.blob.core.windows.net/testcontainer/pstestscreenshot.png?sp=rw&st=2025-03-07T03:48:23Z&se=2025-03-08T11:48:23Z&skoid=7f5b7efd-fa3f-4fbd-9430-8cf0f0ca6822&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-03-07T03:48:23Z&ske=2025-03-08T11:48:23Z&sks=b&skv=2022-11-02&spr=https&sv=2022-11-02&sr=b&sig=4rU9xYe4T6t8GDUI0SVOhywiQWxIEtRSytpzq0xKwWY%3D"')
+
+
 class NetworkVirtualApplianceReimageScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(location='eastus2euap', name_prefix='test_network_virtual_appliance_reimage')

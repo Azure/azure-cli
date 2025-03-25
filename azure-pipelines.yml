@@ -27,7 +27,7 @@ parameters:
   default:
   - name: AMD64
     value: amd64
-    pool: pool-ubuntu-2004-multi-core
+    pool: pool-ubuntu-latest-multi-core
   - name: ARM64
     value: arm64
     pool: ubuntu-arm64-2004-pool
@@ -1056,7 +1056,7 @@ jobs:
 
 - job: CheckHeaders
   displayName: "Check License, History, and DocMap"
-
+  condition: and(not(contains(variables['Build.SourceBranch'], 'lts')), not(contains(variables['System.PullRequest.TargetBranch'], 'lts')))
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:

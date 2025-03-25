@@ -3,6 +3,108 @@
 Release History
 ===============
 
+2.71.0
+++++++
+
+**ACR**
+
+* `az acr create`: Fix a bug where creating cache rule without credential set would fail (#30984)
+
+**AKS**
+
+* `az aks`: Fix error message when outbound type validation failed (#30886)
+* `az aks create/update`: Update recording rule group create logic for managed prometheus addon (#30857)
+* `az aks create/update`: Add `--bootstrap-artifact-source` parameter to configure artifact source when bootstraping the cluster (#31095)
+* `az aks create/update`: Add `--bootstrap-container-registry-resource-id` parameter to configure container registry resource ID (#31095)
+* `az aks create/update`: Add new option `none` for `--outbound-type` parameter (#31095)
+
+**App Config**
+
+* `az appconfig`: Fix managed identity auth for `--auth-mode login` parameter (#30983)
+
+**App Service**
+
+* `az webapp deploy`: Add `--enable-kudu-warmup` parameter to support warm-up Kudu before making deployment (#31083)
+* Fix #27724: `az webapp config appsettings set`: Remove redaction warning message from output (#31006)
+* Fix #26920: `az webapp deployment slot create`: Make the created new slot has same VNet integration settings of source slot as Portal behavior (#30836)
+* Fix #30908: `az webapp snapshot restore`: Fix the error "no resource group found" when trying to restore a snapshot backup to a paired region (#30364)
+* Fix #29512: `az webapp config backup update`: Fix `str` object has no attribute `name` (#30986)
+* Fix #21721: `az webapp config storage-account add`: Add validation for non-existent FileShare (#30990)
+* `az functionapp list-flexconsumption-locations`: Add `--details` and `--runtime` parameters to provide more details (#31019)
+
+**ARM**
+
+* Fix #29809: `az deployment/stack/bicep`: Fix an issue where the commands mistakenly check for the latest Bicep version, even when `use_binary_from_path` is `true` and `check_version` is `false` (#31041)
+* Fix #29435: `az bicep install/upgrade`: Fix an issue where the command downloads the x64 binary instead of the ARM binary on aarch64 machines (#31041)
+
+**ARO**
+
+* `az aro create`: Update VM SKU to align with best practices (#31074)
+
+**Backup**
+
+* `az backup protection enable-for-vm`: Update in warning message while protecting Trusted Launch virtual machines (#31062)
+
+**Cloud**
+
+* `az cloud register/update`: Add upcoming breaking change announcement (#31097)
+
+**Compute**
+
+* `az sig image-definition list-shared`: Mark `--marker` and `--show-next-marker` as deprecated and will be removed in the upcoming breaking change window (#31081)
+* `az sig image-version list-shared`: Mark `--marker` and `--show-next-marker` as deprecated and will be removed in the upcoming breaking change window (#31081)
+* `az sig image-definition list-community`: Mark `--marker` and `--show-next-marker` as deprecated and will be removed in the upcoming breaking change window (#31081)
+* `az sig image-version list-community`: Mark `--marker` and `--show-next-marker` as deprecated and will be removed in the upcoming breaking change window (#31081)
+* `az disk config update`: Add new command to support updating disk size gb by PATCH method (#30961)
+* `az vm/vmss create/update`: Add support for setting security type to `Standard` (#31002)
+* Fix #30976: `az sig image-version create`: Fix missing auxiliary tokens (#30977)
+* `az sig image-version create/update`: Add new parameter `--block-deletion-before-end-of-life` to support blocking deletion if the end of life has not expired (#31013)
+* `az vm list-sizes`: Mark the command as deprecated (#31080)
+
+**Container app**
+
+* Fix #30828: `az containerapp job stop`: Fix `TypeError` when `--job-execution-name` is not specified (#30941)
+
+**Key Vault**
+
+* `az keyvault create`: Support C SKU family for MHSM creation (#31025)
+
+**MySQL**
+
+* [BREAKING CHANGE] `az mysql flexible-server create`: Change default values for `--auto-scale-iops`, `--version` for MySQL (#30852)
+
+**Network**
+
+* `az network virtual-appliance`: Add command `get-boot-diagnostic-log` to support getting boot diagnostic logs (#30924)
+* Fix #31003: `az network vpn-connection create`: Pass auxiliary authorization header for referenced resource IDs (#31045)
+* `az network vnet-gateway create`: Add `--enable-high-bandwith-vpn-gateway` parameter (#31088)
+* `az network vpn-connection show`: Support new properties with virtual network gateway (#31088)
+
+**Profile**
+
+* `az login`: Add upcoming breaking change announcement for `--username` (#31061)
+
+**RDBMS**
+
+* `az postgres flexible-server update`: Fix bug for not updating geo backup data encryption properties (#30948)
+* `az postgres flexible-server fabric-mirroring`: Fix for space separated list of databases during `start` and `update-databases` (#31000)
+* `az postgres flexible-server create`: Support adding admin during creation if `--active-directory-auth` is Enabled and no longer generate password when `--password-auth` is Disabled (#30999)
+
+**Role**
+
+* `az role assignment list`: Add upcoming breaking change announcement for `--include-classic-administrators` (#31048)
+* `az role assignment list`: Include role assignments inherited from management groups (#30841)
+
+**Service Connector**
+
+* `az * connection create neon-postgres`: Add command for Neon Postgres Serverless (#30938)
+
+**Storage**
+
+* `az storage share/directory/file`: Support NFS FileShares (#31050)
+* `az storage file hard-link create`: Support creating hard-links for NFS files (#31050)
+* `az storage share create`: Support `--enable-snapshot-virtual-directory-access` (#31114)
+
 2.70.0
 ++++++
 
