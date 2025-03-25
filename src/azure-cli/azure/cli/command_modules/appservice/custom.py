@@ -1824,7 +1824,7 @@ def list_flex_function_app_runtimes(cmd, location, runtime):
     if not runtimes:
         raise ValidationError("Runtime '{}' not supported for function apps on the Flex Consumption plan."
                               .format(runtime))
-    return runtimes
+    return runtime_helper.stacks
 
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
@@ -5144,13 +5144,6 @@ def is_exactly_one_true(*args):
     return found
 
 
-def list_flexconsumption_zone_redundant_locations(cmd):
-    client = web_client_factory(cmd.cli_ctx)
-    regions = client.list_geo_regions(sku="FlexConsumption")
-    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
-    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
-
-
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -6151,18 +6144,52 @@ def get_subscription_locations(cli_ctx):
     return [item.name for item in result]
 
 
-def list_flexconsumption_locations(cmd, zone_redundant=False):
-    if zone_redundant:
-        return list_flexconsumption_zone_redundant_locations(cmd)
+def list_flexconsumption_locations(cmd, zone_redundant=False, show_details=False, runtime=None):
+    client = web_client_factory(cmd.cli_ctx)
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    sub_id = get_subscription_id(cmd.cli_ctx)
-    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
-    flex_regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
-    flex_regions_list = [{'name': x['name'].lower().replace(' ', '')} for x in flex_regions]
+    if runtime and not show_details:
+        raise ArgumentUsageError(
+            '--runtime is only valid with --details parameter. '
+            'Please try again without the --details parameter.')
+
+    regions = client.list_geo_regions(sku="FlexConsumption")
+
+    if zone_redundant:
+        regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
+
+    regions = [x.name.lower().replace(' ', '') for x in regions]
     sub_regions_list = get_subscription_locations(cmd.cli_ctx)
-    return [x for x in flex_regions_list if x['name'] in sub_regions_list]
+    regions = [x for x in regions if x in sub_regions_list]
+
+    if not show_details:
+        return [{'name': x} for x in regions]
+
+    return [{'name': x, 'details': list_flex_function_app_all_runtimes(cmd, x, runtime)} for x in regions]
+
+
+def list_flex_function_app_all_runtimes(cmd, location, runtime=None):
+    runtimes = ["dotnet-isolated", "node", "python", "java", "powershell"]
+    if runtime:
+        runtimes = [runtime]
+
+    return [{'runtime': x,
+             'runtime-details': get_runtime_details_ignore_error(cmd, location, x)}
+            for x in runtimes]
+
+
+def get_runtime_details_ignore_error(cmd, location, runtime):
+    try:
+        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
+        return runtime_helper.stacks
+    except Exception:  # pylint: disable=broad-except
+        return None
+
+
+def list_flexconsumption_zone_redundant_locations(cmd):
+    client = web_client_factory(cmd.cli_ctx)
+    regions = client.list_geo_regions(sku="FlexConsumption")
+    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
