@@ -58,7 +58,7 @@ def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
                            sku_name=None, tier=None,
-                           storage_gb=None, version=None, active_directory_auth=None,
+                           storage_gb=None, version=None, active_directory_auth=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None,
                            password_auth=None, administrator_login=None, administrator_login_password=None,
                            tags=None, database_name=None,
@@ -106,7 +106,7 @@ def flexible_server_create(cmd, client,
                            backup_byok_key=backup_byok_key,
                            performance_tier=performance_tier,
                            create_cluster=create_cluster,
-                           password_auth=password_auth, active_directory_auth=active_directory_auth,
+                           password_auth=password_auth, active_directory_auth=active_directory_auth, microsoft_entra_auth=microsoft_entra_auth,
                            admin_name=admin_name, admin_id=admin_id, admin_type=admin_type,)
 
     cluster = None
@@ -140,7 +140,8 @@ def flexible_server_create(cmd, client,
                                                                            standby_availability_zone=standby_availability_zone)
 
     is_password_auth_enabled = bool(password_auth is not None and password_auth.lower() == 'enabled')
-    is_microsoft_entra_auth_enabled = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled')
+    is_microsoft_entra_auth_enabled = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled') or \
+        bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     if is_password_auth_enabled:
         administrator_login_password = generate_password(administrator_login_password)
 
@@ -150,7 +151,7 @@ def flexible_server_create(cmd, client,
                                                                    backup_byok_identity=backup_byok_identity,
                                                                    backup_byok_key=backup_byok_key)
 
-    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth=active_directory_auth,
+    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth='Enabled' if is_microsoft_entra_auth_enabled else 'Disabled',
                                                                password_auth=password_auth)
 
     # Create postgresql
@@ -191,7 +192,7 @@ def flexible_server_create(cmd, client,
 
     user = server_result.administrator_login if is_password_auth_enabled else '<user>'
     password = administrator_login_password if is_password_auth_enabled else '<password>'
-    admin = admin_name if admin_name else '<admin>'
+    admin = quote(admin_name) if admin_name else '<admin>'
     server_id = server_result.id
     loc = server_result.location
     version = server_result.version
@@ -310,7 +311,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
                                        backup_byok_identity=None, backup_byok_key=None,
-                                       active_directory_auth=None, password_auth=None,
+                                       active_directory_auth=None, microsoft_entra_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
                                        public_access=None,
                                        tags=None,
@@ -424,8 +425,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     auth_config = instance.auth_config
     administrator_login = instance.administrator_login if instance.administrator_login else None
-    if active_directory_auth:
-        auth_config.active_directory_auth = active_directory_auth
+    if active_directory_auth or microsoft_entra_auth:
+        auth_config.active_directory_auth = active_directory_auth if active_directory_auth else microsoft_entra_auth
     if password_auth:
         administrator_login, administrator_login_password = _update_login(server_name, resource_group_name, auth_config,
                                                                           password_auth, administrator_login, administrator_login_password)
@@ -1792,7 +1793,7 @@ def _create_postgresql_connection_string(host, user, password, database):
 
 def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
     connection_kwargs = {
-        'user': quote(admin),
+        'user': admin,
         'host': host,
         'database': database,
     }

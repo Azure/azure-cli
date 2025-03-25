@@ -140,14 +140,14 @@ examples:
       # create flexible server with aad auth and password auth enabled
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
-        --active-directory-auth Enabled
+        --microsoft-entra-auth Enabled
   - name: >
       Create a PostgreSQL flexible server with Microsoft Entra auth only and primary administrator specified.
     text: >
       # create flexible server with aad only auth and password auth disabled with primary administrator specified
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
-        --active-directory-auth Enabled --password-auth Disabled \\
+        --microsoft-entra-auth Enabled --password-auth Disabled \\
         --admin-object-id 00000000-0000-0000-0000-000000000000 --admin-display-name john@contoso.com --admin-type User
   - name: >
       Create a PostgreSQL flexible server with public access, geo-redundant backup enabled and add the range of IP address to have access to this server.
@@ -258,7 +258,7 @@ examples:
   - name: Reset password
     text: az postgres flexible-server update --resource-group testGroup --name testserver -p password123
   - name: Update a flexible server to enable Microsoft Entra auth for password auth enabled server
-    text: az postgres flexible-server update --resource-group testGroup --name testserver --active-directory-auth Enabled
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --microsoft-entra-auth Enabled
   - name: Change key/identity for data encryption. Data encryption cannot be enabled post server creation, this will only update the key/identity.
     text: >
       # get key identifier of the existing key
@@ -1003,6 +1003,53 @@ examples:
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --exists
   - name: Wait for a Microsoft Entra administrator to be deleted.
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
+"""
+
+helps['postgres flexible-server microsoft-entra-admin'] = """
+type: group
+short-summary: Manage server Microsoft Entra administrators.
+"""
+
+helps['postgres flexible-server microsoft-entra-admin create'] = """
+type: command
+short-summary: Create a Microsoft Entra administrator.
+examples:
+  - name: Create Microsoft Entra administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and type User.
+    text: az postgres flexible-server microsoft-entra-admin create -g testgroup -s testsvr -u john@contoso.com -i 00000000-0000-0000-0000-000000000000 -t User
+"""
+
+helps['postgres flexible-server microsoft-entra-admin delete'] = """
+type: command
+short-summary: Delete a Microsoft Entra administrator.
+examples:
+  - name: Delete Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
+    text: az postgres flexible-server microsoft-entra-admin delete -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
+"""
+
+helps['postgres flexible-server microsoft-entra-admin list'] = """
+type: command
+short-summary: List all Microsoft Entra administrators.
+examples:
+  - name: List Microsoft Entra administrators.
+    text: az postgres flexible-server microsoft-entra-admin list -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server microsoft-entra-admin show'] = """
+type: command
+short-summary: Get a Microsoft Entra administrator.
+examples:
+  - name: Get Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
+    text: az postgres flexible-server microsoft-entra-admin show -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
+"""
+
+helps['postgres flexible-server microsoft-entra-admin wait'] = """
+type: command
+short-summary: Wait for a Microsoft Entra administrator to satisfy certain conditions.
+examples:
+  - name: Wait until a Microsoft Entra administrator exists.
+    text: az postgres flexible-server microsoft-entra-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --exists
+  - name: Wait for a Microsoft Entra administrator to be deleted.
+    text: az postgres flexible-server microsoft-entra-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
 """
 
 helps['postgres flexible-server advanced-threat-protection-setting'] = """
