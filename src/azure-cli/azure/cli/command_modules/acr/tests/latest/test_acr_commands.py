@@ -5,9 +5,7 @@
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
-from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
-
-from acr._docker_utils import EMPTY_GUID
+from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE, EMPTY_GUID
 
 class AcrCommandsTests(ScenarioTest):
 
@@ -34,15 +32,6 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('tags', {'cat': '', 'foo': 'bar'}),
                          self.check('adminUserEnabled', True),
                          self.check('provisioningState', 'Succeeded')])
-        
-        # test acr login --expose-token
-        tokens = self.cmd('acr login -n {} --expose-token'.format(registry_name), checks=[
-            self.exists('accessToken'),
-            self.exists('refreshToken'),
-            self.exists('loginServer'),
-            self.check('username', EMPTY_GUID)])
-        
-        self.assertEqual(tokens['accessToken'], tokens['refreshToken'])
 
         # test retention
         self.cmd('acr config retention update -r {} --status enabled --days 30 --type UntaggedManifests'.format(registry_name),
@@ -113,6 +102,28 @@ class AcrCommandsTests(ScenarioTest):
             self.check('nameAvailable', True)
         ])
 
+    @ResourceGroupPreparer()
+    def test_acr_login_expose_token(self, resource_group):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg': resource_group,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+        
+        tokens = self.cmd('acr login -n {} --expose-token'.format(registry_name), checks=[
+            self.exists('accessToken'),
+            self.exists('refreshToken'),
+            self.exists('loginServer'),
+            self.check('username', EMPTY_GUID)]).get_output_in_json()
+        
+        self.assertEqual(tokens['accessToken'], tokens['refreshToken'])
+        
     @ResourceGroupPreparer()
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
