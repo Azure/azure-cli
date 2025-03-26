@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import os
 import json
 from importlib import import_module
+from functools import cmp_to_key
 import re
 from urllib.parse import quote
 from urllib.request import urlretrieve
@@ -33,7 +34,8 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_flexible_config, cf_postgres_flexible_adadmin
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
-    _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
+    _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false, \
+    get_postgres_tiers, get_postgres_skus
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
 from ._util import get_index_tuning_settings_map
 from .flexible_server_custom_common import create_firewall_rule
@@ -41,7 +43,7 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
-    validate_virtual_endpoint_name_availability
+    validate_virtual_endpoint_name_availability, compare_sku_names
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -84,6 +86,18 @@ def flexible_server_create(cmd, client,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     server_name = server_name.lower()
+    
+    if sku_name is None:
+        # set sku_name from capability API
+        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+        tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
+        try:
+            sku_info = list_location_capability_info['sku_info']
+            skus = [item for item in get_postgres_skus(sku_info, tier.lower())]
+            skus = sorted(skus, key=cmp_to_key(compare_sku_names))
+            sku_name = skus[0]
+        except:
+            raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
