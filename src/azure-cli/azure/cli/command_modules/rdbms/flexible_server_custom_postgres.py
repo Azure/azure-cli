@@ -86,7 +86,7 @@ def flexible_server_create(cmd, client,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     server_name = server_name.lower()
-    
+
     if sku_name is None:
         # set sku_name from capability API
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
