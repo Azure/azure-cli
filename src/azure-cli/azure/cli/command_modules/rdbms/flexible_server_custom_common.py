@@ -310,14 +310,13 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     if version not in eligible_versions:
         error_message = ""
         if len(eligible_versions) > 0:
-            error_message = "The version to upgrade to must be one of the supported versions for the current server version from this list: {}. ".format(eligible_versions)
+            error_message = "Server is running version {}. It can only be upgraded to the following versions: {} ".format(str(current_version), eligible_versions)
         else:
-            error_message = "Your server is up-to-date with the latest version. "
+            error_message = "Server is running version {}. It cannot be upgraded to any higher version. ".format(str(current_version))
 
         if "17" in eligible_versions:
             error_message += "Note that version 17 is still in preview."
         raise CLIError(error_message)
-    
 
     replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
     version_mapped = version
