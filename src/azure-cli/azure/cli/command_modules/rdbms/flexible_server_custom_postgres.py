@@ -93,7 +93,7 @@ def flexible_server_create(cmd, client,
         tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
         try:
             sku_info = list_location_capability_info['sku_info']
-            skus = [item for item in get_postgres_skus(sku_info, tier.lower())]
+            skus = list(get_postgres_skus(sku_info, tier.lower()))
             skus = sorted(skus, key=cmp_to_key(compare_sku_names))
             sku_name = skus[0]
         except:
