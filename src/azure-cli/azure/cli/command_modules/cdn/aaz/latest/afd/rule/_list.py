@@ -18,7 +18,7 @@ class List(AAZCommand):
     """List all of the existing delivery rules within a rule set.
 
     :example: List all the routes within the specified endpoint.
-        az afd rule condition list -g group --rule-set-name ruleSetName --profile-name profile --name rule1
+        az afd route list -g group --profile-name profile --endpoint-name endpoint1
     """
 
     _aaz_info = {

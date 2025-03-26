@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_OUTBOUND_TYPE_NONE,
     CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
@@ -39,6 +40,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
     CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_DNS_ZONE_CONTRIBUTOR_ROLE,
+    CONST_ARTIFACT_SOURCE_CACHE,
 )
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
@@ -2147,8 +2149,8 @@ class AKSManagedClusterContext(BaseAKSContext):
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
 
         This function supports the option of enable_validation. When enabled, if the value of outbound_type is
-        CONST_OUTBOUND_TYPE_LOAD_BALANCER,CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY or
-        CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, the following checks will be performed. If load_balancer_sku is set
+        CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY
+        CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING or CONST_OUTBOUND_TYPE_NONE, the following checks will be performed. If load_balancer_sku is set
         to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not assigned,
         a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
@@ -2185,11 +2187,11 @@ class AKSManagedClusterContext(BaseAKSContext):
                 CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
                 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
                 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
-                "none"
+                CONST_OUTBOUND_TYPE_NONE,
             ]:
                 raise InvalidArgumentValueError(
-                    "Invalid outbound type, supported values are loadBalancer, managedNATGateway, userAssignedNATGateway and "
-                    "userDefinedRouting. Please refer to "
+                    "Invalid outbound type, supported values are loadBalancer, managedNATGateway, userAssignedNATGateway, "
+                    "userDefinedRouting and none. Please refer to "
                     "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
                     "for more details."
                 )
@@ -5248,6 +5250,16 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return self.raw_param.get("if_none_match")
 
+    def get_bootstrap_artifact_source(self) -> Union[str, None]:
+        """Obtain the value of bootstrap_artifact_source.
+        """
+        return self.raw_param.get("bootstrap_artifact_source")
+
+    def get_bootstrap_container_registry_resource_id(self) -> Union[str, None]:
+        """Obtain the value of bootstrap_container_registry_resource_id.
+        """
+        return self.raw_param.get("bootstrap_container_registry_resource_id")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -6510,6 +6522,24 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.node_resource_group_profile = node_resource_group_profile
         return mc
 
+    def set_up_bootstrap_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        bootstrap_artifact_source = self.context.get_bootstrap_artifact_source()
+        bootstrap_container_registry_resource_id = self.context.get_bootstrap_container_registry_resource_id()
+        if hasattr(mc, "bootstrap_profile") and bootstrap_artifact_source is not None:
+            if bootstrap_artifact_source != CONST_ARTIFACT_SOURCE_CACHE and bootstrap_container_registry_resource_id:
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --bootstrap-container-registry-resource-id when "
+                    "--bootstrap-artifact-source is not Cache."
+                )
+            if mc.bootstrap_profile is None:
+                mc.bootstrap_profile = self.models.ManagedClusterBootstrapProfile()  # pylint: disable=no-member
+            mc.bootstrap_profile.artifact_source = bootstrap_artifact_source
+            mc.bootstrap_profile.container_registry_id = bootstrap_container_registry_resource_id
+
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -6590,6 +6620,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_metrics_profile(mc)
         # set up node resource group profile
         mc = self.set_up_node_resource_group_profile(mc)
+        # set up bootstrap profile
+        mc = self.set_up_bootstrap_profile(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -8351,6 +8383,24 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_bootstrap_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        bootstrap_artifact_source = self.context.get_bootstrap_artifact_source()
+        bootstrap_container_registry_resource_id = self.context.get_bootstrap_container_registry_resource_id()
+        if hasattr(mc, "bootstrap_profile") and bootstrap_artifact_source is not None:
+            if bootstrap_artifact_source != CONST_ARTIFACT_SOURCE_CACHE and bootstrap_container_registry_resource_id:
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --bootstrap-container-registry-resource-id when "
+                    "--bootstrap-artifact-source is not Cache."
+                )
+            if mc.bootstrap_profile is None:
+                mc.bootstrap_profile = self.models.ManagedClusterBootstrapProfile()  # pylint: disable=no-member
+            mc.bootstrap_profile.artifact_source = bootstrap_artifact_source
+            mc.bootstrap_profile.container_registry_id = bootstrap_container_registry_resource_id
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -8430,6 +8480,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_metrics_profile(mc)
         # update node resource group profile
         mc = self.update_node_resource_group_profile(mc)
+        # update bootstrap profile
+        mc = self.update_bootstrap_profile(mc)
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:

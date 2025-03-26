@@ -10,7 +10,7 @@ Credentials to acquire tokens from MSAL.
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import (PublicClientApplication, ConfidentialClientApplication,
-                  ManagedIdentityClient, SystemAssignedManagedIdentity)
+                  ManagedIdentityClient, SystemAssignedManagedIdentity, UserAssignedManagedIdentity)
 
 from .constants import AZURE_CLI_CLIENT_ID
 from .util import check_result
@@ -43,22 +43,23 @@ class UserCredential:  # pylint: disable=too-few-public-methods
 
         self._account = accounts[0]
 
-    def acquire_token(self, scopes, claims=None, **kwargs):
+    def acquire_token(self, scopes, claims_challenge=None, **kwargs):
         # scopes must be a list.
         # For acquiring SSH certificate, scopes is ['https://pas.windows.net/CheckMyAccess/Linux/.default']
         # kwargs is already sanitized by CredentialAdaptor, so it can be safely passed to MSAL
-        logger.debug("UserCredential.acquire_token: scopes=%r, claims=%r, kwargs=%r", scopes, claims, kwargs)
+        logger.debug("UserCredential.acquire_token: scopes=%r, claims_challenge=%r, kwargs=%r",
+                     scopes, claims_challenge, kwargs)
 
-        if claims:
+        if claims_challenge:
             logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
-                           self._msal_app.authority.tenant, claims)
-        result = self._msal_app.acquire_token_silent_with_error(scopes, self._account, claims_challenge=claims,
-                                                                **kwargs)
+                           self._msal_app.authority.tenant, claims_challenge)
+        result = self._msal_app.acquire_token_silent_with_error(
+            scopes, self._account, claims_challenge=claims_challenge, **kwargs)
 
         from azure.cli.core.azclierror import AuthenticationError
         try:
             # Check if an access token is returned.
-            check_result(result, scopes=scopes, claims=claims)
+            check_result(result, scopes=scopes, claims_challenge=claims_challenge)
         except AuthenticationError as ex:
             # For VM SSH ('data' is passed), if getting access token fails because
             # Conditional Access MFA step-up or compliance check is required, re-launch
@@ -130,9 +131,14 @@ class ManagedIdentityCredential:  # pylint: disable=too-few-public-methods
     Currently, only Azure Arc's system-assigned managed identity is supported.
     """
 
-    def __init__(self):
+    def __init__(self, client_id=None, resource_id=None, object_id=None):
         import requests
-        self._msal_client = ManagedIdentityClient(SystemAssignedManagedIdentity(), http_client=requests.Session())
+        if client_id or resource_id or object_id:
+            managed_identity = UserAssignedManagedIdentity(
+                client_id=client_id, resource_id=resource_id, object_id=object_id)
+        else:
+            managed_identity = SystemAssignedManagedIdentity()
+        self._msal_client = ManagedIdentityClient(managed_identity, http_client=requests.Session())
 
     def acquire_token(self, scopes, **kwargs):
         logger.debug("ManagedIdentityCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)
