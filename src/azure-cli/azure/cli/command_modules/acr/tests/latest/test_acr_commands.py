@@ -6,6 +6,7 @@
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
+from azure.cli.core.commands.client_factory import get_subscription_id
 import time
 
 
@@ -542,6 +543,7 @@ class AcrCommandsTests(ScenarioTest):
         # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
         self.kwargs['key_id'] = result.get_output_in_json()['key']['kid']
+        self.kwargs['subscription_id'] = get_subscription_id(self.cli_ctx)
         
         # create a user-assigned identity and give it access to the key
         result = self.cmd('identity create --name {identity_name} -g {rg}')
