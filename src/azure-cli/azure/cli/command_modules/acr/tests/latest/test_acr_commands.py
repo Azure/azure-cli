@@ -551,8 +551,8 @@ class AcrCommandsTests(ScenarioTest):
         self.kwargs['identity_id'] = result.get_output_in_json()['id']
         self.kwargs['client_id'] = result.get_output_in_json()['clientId']
         
-        time.sleep(10) # wait for ARM cache to populate 
-        self.cmd('role assignment create --role "Key Vault Crypto Service Encryption User" --assignee {principal_id} --scope /subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourceGroups/{rg}/providers/Microsoft.KeyVault/vaults/{key_vault}')
+        time.sleep(15) # wait for ARM cache to populate 
+        self.cmd('role assignment create --role "Key Vault Crypto Service Encryption User" --assignee {principal_id} --scope /subscriptions/{subscription_id}/resourceGroups/{rg}/providers/Microsoft.KeyVault/vaults/{key_vault}')
      
         # create the registry with CMK encryption enabled using the user-assigned identity
         result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium --identity {identity_id} --key-encryption-key {key_id}', checks=[
