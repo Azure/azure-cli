@@ -94,7 +94,7 @@ def transform_usage_output(result):
     from dateutil import parser
     usageStart = result.get('usageStart', None)
     usageEnd = result.get('usageEnd', None)
-    if usageStart and usageEnd:    
+    if usageStart or usageEnd:    
         usageStart = parser.parse(usageStart).strftime("%Y-%m-%dT%H:%M:%SZ") if usageStart else 'None'
         usageEnd = parser.parse(usageEnd).strftime("%Y-%m-%dT%H:%M:%SZ") if usageEnd else 'None'
     else:
