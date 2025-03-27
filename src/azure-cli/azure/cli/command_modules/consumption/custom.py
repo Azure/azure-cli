@@ -101,7 +101,7 @@ def transform_usage_output(result):
         return None
     result['usageStart'] = usageStart
     result['usageEnd'] = usageEnd
-    result['usageQuantity'] = str(result.get('usageQuantity', 'None'))
+    result['usageQuantity'] = str(result.get('usageQuantity', None))
     result['billableQuantity'] = str(result.get('billableQuantity', 'None'))
     result['pretaxCost'] = str(result.get('pretaxCost', 'None'))
     if 'meterDetails' in result:
