@@ -9,6 +9,7 @@ from azure.core.paging import ItemPaged
 from ._client_factory import cf_postgres_flexible_location_capabilities, cf_postgres_flexible_server_capabilities
 from collections import defaultdict
 
+
 def get_postgres_location_capability_info(cmd, location):
     list_location_capability_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
     list_location_capability_result = list_location_capability_client.execute(location)
@@ -98,7 +99,7 @@ def _postgres_parse_list_capability(result):
     versions = set()
     for version in result[0].supported_server_versions:
         versions.add(version.name)
-    
+
     supported_server_versions = defaultdict(list)
     for version in result[0].supported_server_versions:
         supported_server_versions[version.name] = version.supported_versions_to_upgrade
