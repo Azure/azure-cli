@@ -1906,32 +1906,44 @@ def list_av_sets(cmd, resource_group_name=None):
 
 # region VirtualMachines BootDiagnostics
 def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    diag_profile = vm.diagnostics_profile
-    if not (diag_profile and diag_profile.boot_diagnostics and diag_profile.boot_diagnostics.enabled):
+    from .aaz.latest.vm import Update as UpdateVM, Show as GetVM
+    vm = GetVM(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name
+    })
+    diag_profile = False if 'diagnosticsProfile' not in vm else vm['diagnosticsProfile']
+    if not (diag_profile and diag_profile['bootDiagnostics'] and diag_profile['bootDiagnostics']['enabled']):
         return
 
-    diag_profile.boot_diagnostics.enabled = False
-    diag_profile.boot_diagnostics.storage_uri = None
-    set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'disabling boot diagnostics', 'done'))
+    boot_diag = {'enabled': False, 'storageUri': None}
+    ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done')(
+        UpdateVM(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            'vm_name': vm_name,
+            'diagnostics_profile': {
+                'bootDiagnostics': boot_diag
+            }
+        })
+    )
 
 
 def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage=None):
     from azure.cli.command_modules.vm._vm_utils import get_storage_blob_uri
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    from .aaz.latest.vm import Update as UpdateVM
     storage_uri = None
     if storage:
         storage_uri = get_storage_blob_uri(cmd.cli_ctx, storage)
 
-    DiagnosticsProfile, BootDiagnostics = cmd.get_models('DiagnosticsProfile', 'BootDiagnostics')
-
-    boot_diag = BootDiagnostics(enabled=True, storage_uri=storage_uri)
-    if vm.diagnostics_profile is None:
-        vm.diagnostics_profile = DiagnosticsProfile(boot_diagnostics=boot_diag)
-    else:
-        vm.diagnostics_profile.boot_diagnostics = boot_diag
-
-    set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
+    boot_diag = {'enabled': True, 'storageUri': storage_uri}
+    ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done')(
+        UpdateVM(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            'vm_name': vm_name,
+            'diagnostics_profile': {
+                'bootDiagnostics': boot_diag
+            }
+        })
+    )
 
 
 class BootLogStreamWriter:  # pylint: disable=too-few-public-methods
