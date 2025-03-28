@@ -450,7 +450,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()
-    if high_availability:
+    if high_availability:  # pylint: disable=too-many-branches
         high_availability_param.mode = high_availability
 
         if high_availability.lower() != "disabled" and standby_availability_zone:
