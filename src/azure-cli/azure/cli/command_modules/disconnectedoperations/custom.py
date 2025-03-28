@@ -26,6 +26,7 @@ def _get_management_endpoint(cli_ctx):
 
     return cloud.endpoints.resource_manager
 
+
 def _handle_directory_cleanup(version_level_path, logger):
     """Helper function to clean up existing directory."""
     import os
@@ -74,7 +75,7 @@ def _download_icons(icon_uris, icon_path, logger):
             logger.error("Error downloading %s logo: %s", size, str(e))
 
 
-def _prepare_paths_and_metadata(output_folder, publisher_id, offer_id, sku, version_id, data, logger):
+def _prepare_paths_and_metadata(output_folder, publisher_id, offer_id, sku, version_id, data, catalog_content, logger):
     """Helper function to prepare directories and save metadata."""
     import json
     import os
@@ -95,7 +96,7 @@ def _prepare_paths_and_metadata(output_folder, publisher_id, offer_id, sku, vers
     # Save metadata.json
     metadata_path = os.path.join(base_path, "metadata.json")
     with open(metadata_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+        json.dump(catalog_content, f, indent=2)
         logger.info("Saved metadata to %s", metadata_path)
 
     return None, version_level_path, icon_path
@@ -142,7 +143,7 @@ def package_offer(cmd, resource_group_name, resource_name, publisher_name,
     logger = get_logger(__name__)
     management_endpoint = _get_management_endpoint(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-
+    catalog_api_version = "2021-06-01"
     # Construct URL with parameters
     url = (
         f"{management_endpoint}"
@@ -151,6 +152,12 @@ def package_offer(cmd, resource_group_name, resource_name, publisher_name,
         f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
         f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
         f"?api-version={api_version}"
+    )
+
+    catalog_url = (
+        f"https://catalogapi.azure.com"
+        f"/offers/{publisher_name}.{offer_name}"
+        f"?api-version={catalog_api_version}"
     )
 
     try:
@@ -165,8 +172,20 @@ def package_offer(cmd, resource_group_name, resource_name, publisher_name,
                 "resource_group_name": resource_group_name,
                 "response": response.text,
             }
+        
+        catalog_content =  requests.get(catalog_url)
+
+        if catalog_content.status_code != 200:
+            error_message = f"Catalog request failed with status code: {catalog_content.status_code}"
+            logger.error(error_message)
+            return {
+                "error": error_message,
+                "status": "failed",
+                "response": catalog_content.text,
+            }
 
         data = response.json()
+        catalog_data = catalog_content.json()
         offer_content = data.get("properties", {}).get("offerContent", {})
         icon_uris = offer_content.get("iconFileUris", {})
 
@@ -184,7 +203,7 @@ def package_offer(cmd, resource_group_name, resource_name, publisher_name,
 
             # Prepare directories and save metadata
             result, version_level_path, icon_path = _prepare_paths_and_metadata(
-                output_folder, publisher_id, offer_id, sku, version_id, data, logger
+                output_folder, publisher_id, offer_id, sku, version_id, data, catalog_data, logger
             )
 
             if result:  # Error occurred
@@ -419,7 +438,7 @@ def download_vhd(cmd, resource_group_name, resource_name, publisher_name,
 
     # Request body
     body = {
-        "edgeMarketPlaceRegion": "westus",
+        "edgeMarketPlaceRegion": "eastus",
         "hypervGeneration": generation,
         "marketPlaceSku": sku,
         "marketPlaceSkuVersion": version,
@@ -536,7 +555,7 @@ def list_offers(cmd, resource_group_name, resource_name):
 
 
 def get_offer(cmd, resource_group_name, resource_name, publisher_name, offer_name):
-    """List all offers for disconnected operations."""
+    """Get a specific for disconnected operations given its publisher and offer name"""
     import requests
     from knack.log import get_logger
 
