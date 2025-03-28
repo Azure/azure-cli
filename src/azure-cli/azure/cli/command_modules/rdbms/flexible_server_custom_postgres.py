@@ -301,6 +301,7 @@ def flexible_server_restore(cmd, client,
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
+# pylint: disable=too-many-branches
 def flexible_server_update_custom_func(cmd, client, instance,
                                        sku_name=None, tier=None,
                                        storage_gb=None,
@@ -450,7 +451,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()
-    if high_availability:  # pylint: disable=too-many-branches
+    if high_availability:
         high_availability_param.mode = high_availability
 
         if high_availability.lower() != "disabled" and standby_availability_zone:
