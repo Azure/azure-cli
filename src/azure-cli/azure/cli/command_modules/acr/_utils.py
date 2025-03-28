@@ -248,8 +248,9 @@ def get_yaml_template(cmd_value, timeout, file):
     :param str timeout: The timeout for each step
     :param str file: The task definition
     """
-    yaml_template = "version: v1.1.0\n"
+    yaml_template = ""
     if cmd_value:
+        yaml_template += "version: v1.1.0\n"
         yaml_template += "steps: \n  - cmd: {0}\n    disableWorkingDirectoryOverride: true\n".format(cmd_value)
         if timeout:
             yaml_template += "    timeout: {0}\n".format(timeout)
