@@ -461,7 +461,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
             config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
             fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
             if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
-                raise CLIError("High availability cannot be enabled while Fabric mirroring is Active. Please disable Fabric mirroring to enable HA.")
+                raise CLIError("High availability cannot be enabled while Fabric mirroring is Active. Please disable Fabric mirroring to enable high availability.")
 
         params.high_availability = high_availability_param
 
