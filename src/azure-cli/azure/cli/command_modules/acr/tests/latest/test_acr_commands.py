@@ -530,6 +530,7 @@ class AcrCommandsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
+    @live_only()
     @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
         self.kwargs.update({
