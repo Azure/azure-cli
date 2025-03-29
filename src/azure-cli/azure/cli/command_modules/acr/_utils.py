@@ -249,6 +249,8 @@ def get_yaml_template(cmd_value, timeout, file):
     :param str file: The task definition
     """
     yaml_template = ""
+    # The default version is required to be added to cmd source Task.
+    # The version is expeced to be included in the file for file source Task.
     if cmd_value:
         yaml_template += "version: v1.1.0\n"
         yaml_template += "steps: \n  - cmd: {0}\n    disableWorkingDirectoryOverride: true\n".format(cmd_value)
