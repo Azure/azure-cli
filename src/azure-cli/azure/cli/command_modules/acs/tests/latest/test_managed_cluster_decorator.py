@@ -49,6 +49,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
     CONST_AZURE_SERVICE_MESH_MODE_DISABLED,
+    CONST_ARTIFACT_SOURCE_DIRECT,
 )
 from azure.cli.command_modules.acs.agentpool_decorator import AKSAgentPoolContext, AKSAgentPoolParamDict
 from azure.cli.command_modules.acs.managed_cluster_decorator import (
@@ -7447,6 +7448,79 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
 
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
+    def test_set_up_bootstrap_profile(self):
+        acr_id = (
+            "/subscriptions/86a571c4-f67a-4e9d-a38d-0e7bdf981a57/resourceGroups/orpmM/providers/Microsoft.ContainerRegistry/registries/network-isolated-cache-acr-01"
+        )
+
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_bootstrap_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "bootstrap_artifact_source": "Cache",
+                "bootstrap_container_registry_resource_id": acr_id,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_bootstrap_profile(mc_2)
+        ground_truth_bootstrap_profile_2 = self.models.ManagedClusterBootstrapProfile(
+            artifact_source="Cache",
+            container_registry_id=acr_id,
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=ground_truth_bootstrap_profile_2,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        dec_3 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "bootstrap_artifact_source": "Direct",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.set_up_bootstrap_profile(mc_3)
+        ground_truth_bootstrap_profile_3 = self.models.ManagedClusterBootstrapProfile(
+            artifact_source="Direct",
+        )
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=ground_truth_bootstrap_profile_3,
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        dec_4 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "bootstrap_artifact_source": "Direct",
+                "bootstrap_container_registry_resource_id": acr_id,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(location="test_location")
+        dec_4.context.attach_mc(mc_4)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_mc_4 = dec_4.set_up_bootstrap_profile(mc_4)
+
     def test_construct_mc_profile_default(self):
         import inspect
 
@@ -7531,6 +7605,9 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             blob_csi_driver=None,
             snapshot_controller=None,
         )
+        bootstrap_profile_1 = self.models.ManagedClusterBootstrapProfile(
+            artifact_source=CONST_ARTIFACT_SOURCE_DIRECT,
+        )
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
             dns_prefix="testname-testrgname-1234-5",
@@ -7543,6 +7620,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             identity=identity_1,
             storage_profile=storage_profile_1,
             disable_local_accounts=False,
+            bootstrap_profile=bootstrap_profile_1,
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -10892,6 +10970,146 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_6.update_metrics_profile(mc_6)
 
+    def test_update_bootstrap_profile(self):
+        acr_id_1 = (
+            "/subscriptions/86a571c4-f67a-4e9d-a38d-0e7bdf981a57/resourceGroups/orpmM/providers/Microsoft.ContainerRegistry/registries/network-isolated-cache-acr-01"
+        )
+        acr_id_2 = (
+            "/subscriptions/86a571c4-f67a-4e9d-a38d-0e7bdf981a57/resourceGroups/orpmM/providers/Microsoft.ContainerRegistry/registries/network-isolated-cache-acr-02"
+        )
+
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "bootstrap_artifact_source": "Cache",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_bootstrap_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=self.models.ManagedClusterBootstrapProfile(
+                artifact_source="Cache",
+                container_registry_id=None,
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "bootstrap_artifact_source": "Cache",
+                "bootstrap_container_registry_resource_id": acr_id_1,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_bootstrap_profile(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=self.models.ManagedClusterBootstrapProfile(
+                artifact_source="Cache",
+                container_registry_id=acr_id_1,
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "bootstrap_artifact_source": "Cache",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=self.models.ManagedClusterBootstrapProfile(
+                artifact_source="Direct",
+            ),
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_bootstrap_profile(mc_3)
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=self.models.ManagedClusterBootstrapProfile(
+                artifact_source="Cache",
+                container_registry_id=None,
+            ),
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        dec_4 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "bootstrap_artifact_source": "Cache",
+                "bootstrap_container_registry_resource_id": acr_id_1,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=self.models.ManagedClusterBootstrapProfile(
+                artifact_source="Direct",
+            ),
+        )
+        dec_4.context.attach_mc(mc_4)
+        dec_mc_4 = dec_4.update_bootstrap_profile(mc_4)
+        ground_truth_mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=self.models.ManagedClusterBootstrapProfile(
+                artifact_source="Cache",
+                container_registry_id=acr_id_1,
+            ),
+        )
+        self.assertEqual(dec_mc_4, ground_truth_mc_4)
+
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "bootstrap_artifact_source": "Cache",
+                "bootstrap_container_registry_resource_id": acr_id_2,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=self.models.ManagedClusterBootstrapProfile(
+                artifact_source="Cache",
+                container_registry_id=acr_id_1,
+            ),
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_mc_5 = dec_5.update_bootstrap_profile(mc_5)
+        ground_truth_mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            bootstrap_profile=self.models.ManagedClusterBootstrapProfile(
+                artifact_source="Cache",
+                container_registry_id=acr_id_2,
+            ),
+        )
+        self.assertEqual(dec_mc_5, ground_truth_mc_5)
+
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "bootstrap_artifact_source": "Direct",
+                "bootstrap_container_registry_resource_id": acr_id_1,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_6 = self.models.ManagedCluster(location="test_location")
+        dec_6.context.attach_mc(mc_6)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_mc_6 = dec_6.update_bootstrap_profile(mc_6)
 
     def test_update_mc_profile_default(self):
         import inspect

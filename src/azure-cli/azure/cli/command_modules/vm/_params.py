@@ -403,17 +403,9 @@ def load_arguments(self, _):
         c.argument('platform_fault_domain_count', type=int, help='Fault Domain count.')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('unmanaged', action='store_true', min_api='2016-04-30-preview', help='contained VMs should use unmanaged disks')
-
-    with self.argument_context('vm availability-set update') as c:
-        if self.supported_api_version(max_api='2016-04-30-preview', operation_group='virtual_machines'):
-            c.argument('name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
-            c.argument('availability_set_name', options_list=['--availability-set-name'])
-
-    for scope in ['vm availability-set create', 'vm availability-set update']:
-        with self.argument_context(scope) as c:
-            c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
-            c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
-            c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
+        c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
+        c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
+        c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
     # endregion
 
     # region VirtualMachines
@@ -442,7 +434,7 @@ def load_arguments(self, _):
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                    help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
-        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"], default=None), min_api='2022-11-01', help='Specify the security type of the virtual machine.')
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"], default=None), min_api='2022-11-01', help='Specify the security type of the virtual machine.')
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -984,6 +976,9 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
+    with self.argument_context('vm list-sizes') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+
     run_cmd_vmss_name = CLIArgumentType(options_list=['--vmss-name'], help='The name of the VM scale set.')
     for scope in ['create', 'update']:
         with self.argument_context('vmss run-command {}'.format(scope)) as c:
@@ -1378,6 +1373,9 @@ def load_arguments(self, _):
                        help='Space-separated list of regions, edge zones, replica counts and storage types. Use `<region>=<edge zone>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
                             'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
+            c.argument('block_deletion_before_end_of_life', arg_type=get_three_state_flag(), min_api='2024-03-03',
+                       options_list=['--block-deletion-before-end-of-life', '--block-deletion'],
+                       help="Indicate whether or not the deletion is blocked for this gallery image version if its end of life has not expired")
 
     for scope in ['sig image-version create', 'sig image-version update', 'sig image-version undelete']:
         with self.argument_context(scope, operation_group='gallery_image_versions') as c:

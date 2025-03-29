@@ -69,6 +69,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
     CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
     CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
+    CONST_ARTIFACT_SOURCE_DIRECT,
 )
 from azure.cli.command_modules.acs._polling import RunCommandLocationPolling
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
@@ -578,6 +579,9 @@ def aks_create(
     enable_acns=None,
     disable_acns_observability=None,
     disable_acns_security=None,
+    # network isoalted cluster
+    bootstrap_artifact_source=CONST_ARTIFACT_SOURCE_DIRECT,
+    bootstrap_container_registry_resource_id=None,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -782,6 +786,9 @@ def aks_update(
     enable_acns=None,
     disable_acns_observability=None,
     disable_acns_security=None,
+    # network isoalted cluster
+    bootstrap_artifact_source=None,
+    bootstrap_container_registry_resource_id=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
