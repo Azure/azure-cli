@@ -11211,10 +11211,13 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
 
     def test_update_kubernetes_version_and_orchestrator_version(self):
         # First test case
+        raw_param_dict = {
+            "auto_upgrade_channel": "none",
+        }
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
-            {},
+            raw_param_dict,
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(
@@ -11239,7 +11242,11 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_1.agent_pool_profiles[1].current_orchestrator_version = "1.21.2"
 
         dec_1.context.attach_mc(mc_1)
-        updated_mc_1 = dec_1.update_kubernetes_version_and_orchestrator_version(mc_1)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ):
+            updated_mc_1 = dec_1.update_kubernetes_version_and_orchestrator_version(mc_1)
 
         # Check if kubernetes_version is updated
         self.assertEqual(updated_mc_1.kubernetes_version, "1.21.2")
@@ -11251,7 +11258,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
-            {},
+            raw_param_dict,
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(
@@ -11274,12 +11281,50 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_2.agent_pool_profiles[1].current_orchestrator_version = None
 
         dec_2.context.attach_mc(mc_2)
-        updated_mc_2 = dec_2.update_kubernetes_version_and_orchestrator_version(mc_2)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ):
+            updated_mc_2 = dec_2.update_kubernetes_version_and_orchestrator_version(mc_2)
 
         # Check if kubernetes_version and orchestrator_version remain unchanged
         self.assertEqual(updated_mc_2.kubernetes_version, "1.18.14")
         self.assertEqual(updated_mc_2.agent_pool_profiles[0].orchestrator_version, "1.18.14")
         self.assertEqual(updated_mc_2.agent_pool_profiles[1].orchestrator_version, "1.19.7")
+
+        # Third test case with both current_kubernetes_version and current_orchestrator_version as None
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            kubernetes_version="1.18.14",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="agentpool1",
+                    orchestrator_version="1.18.14"
+                ),
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="agentpool2",
+                    orchestrator_version="1.19.7"
+                )
+            ]
+        )
+        # Set current kubernetes version and orchestrator version to 1.21.2
+        mc_3.current_kubernetes_version = "1.21.2"
+        mc_3.agent_pool_profiles[0].current_orchestrator_version = "1.21.2"
+        mc_3.agent_pool_profiles[1].current_orchestrator_version = "1.21.2"
+
+        dec_3.context.attach_mc(mc_3) # no prompt 
+        updated_mc_3 = dec_3.update_kubernetes_version_and_orchestrator_version(mc_3)
+
+        # Check if kubernetes_version and orchestrator_version remain unchanged
+        self.assertEqual(updated_mc_3.kubernetes_version, "1.18.14")
+        self.assertEqual(updated_mc_3.agent_pool_profiles[0].orchestrator_version, "1.18.14")
+        self.assertEqual(updated_mc_3.agent_pool_profiles[1].orchestrator_version, "1.19.7")
 
     def test_check_is_postprocessing_required(self):
         dec_1 = AKSManagedClusterUpdateDecorator(

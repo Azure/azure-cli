@@ -8492,14 +8492,25 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        # Set kubernetes version to match the current kubernetes version if it has a value
-        if mc.current_kubernetes_version:
-            mc.kubernetes_version = mc.current_kubernetes_version
+        # Check if auto_upgrade_channel is set to "none"
+        auto_upgrade_channel = self.context.get_auto_upgrade_channel()
+        if auto_upgrade_channel == "none":
+            warning_message = (
+                "Since auto-upgrade-channel is set to none, cluster kubernetesVersion will be set to the value of "
+                "currentKubernetesVersion, all agent pools orchestratorVersion will be set to the value of "
+                "currentOrchestratorVersion respectively. Continue?"
+            )
+            if not prompt_y_n(warning_message, default="n"):
+                raise CLIError("Operation cancelled by user.")
 
-        # Set orchestrator version for each agent pool to match the current orchestrator version if it has a value
-        for agent_pool in mc.agent_pool_profiles:
-            if agent_pool.current_orchestrator_version:
-                agent_pool.orchestrator_version = agent_pool.current_orchestrator_version
+            # Set kubernetes version to match the current kubernetes version if it has a value
+            if mc.current_kubernetes_version:
+                mc.kubernetes_version = mc.current_kubernetes_version
+
+            # Set orchestrator version for each agent pool to match the current orchestrator version if it has a value
+            for agent_pool in mc.agent_pool_profiles:
+                if agent_pool.current_orchestrator_version:
+                    agent_pool.orchestrator_version = agent_pool.current_orchestrator_version
 
         return mc
 
