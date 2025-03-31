@@ -487,7 +487,7 @@ class ContainerappScenarioTest(ScenarioTest):
         self.cmd(f'containerapp env logs show -n {env_name} -g {env_rg} --tail 15 --follow false')
 
     @ResourceGroupPreparer(location="northeurope")
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=99999)
     def test_containerapp_registry_msi(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 

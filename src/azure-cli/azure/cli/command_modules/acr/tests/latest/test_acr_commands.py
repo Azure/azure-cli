@@ -118,6 +118,7 @@ class AcrCommandsTests(ScenarioTest):
         ])
         
     @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
@@ -842,6 +843,7 @@ class AcrCommandsTests(ScenarioTest):
         self.assertEqual(sorted(result_identities), sorted(query_identities))
 
     @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_metadata_search_enabled(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
@@ -873,6 +875,7 @@ class AcrCommandsTests(ScenarioTest):
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
 
     @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_metadata_search_disabled(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
@@ -899,6 +902,7 @@ class AcrCommandsTests(ScenarioTest):
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
         
     @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_domain_name_label_scope_tenant_reuse(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
@@ -922,7 +926,7 @@ class AcrCommandsTests(ScenarioTest):
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
 
     @ResourceGroupPreparer()
-    @AllowLargeResponse
+    @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_domain_name_label_scope_name_in_use(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
