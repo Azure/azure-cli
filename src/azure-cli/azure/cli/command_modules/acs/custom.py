@@ -843,8 +843,6 @@ def aks_update(
     try:
         # update mc profile
         mc = aks_update_decorator.update_mc_profile_default()
-        # Update kubernetes_version and orchestrator_version based on auto_upgrade_channel
-        mc = aks_update_decorator.update_kubernetes_version_and_orchestrator_version(mc)
     except DecoratorEarlyExitException:
         # exit gracefully
         return None

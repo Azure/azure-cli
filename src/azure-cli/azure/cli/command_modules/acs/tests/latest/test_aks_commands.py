@@ -5914,6 +5914,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('autoUpgradeProfile.upgradeChannel', 'stable')
         ])
 
+        # update upgrade channel to none, need to answer prompt
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--auto-upgrade-channel none --yes'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoUpgradeProfile.upgradeChannel', 'none')
+        ])
+
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])

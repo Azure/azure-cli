@@ -22,7 +22,6 @@ from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
     aks_stop,
-    aks_update,
     k8s_install_kubectl,
     k8s_install_kubelogin,
     merge_kubernetes_configurations,
@@ -821,43 +820,6 @@ class TestAKSCommand(unittest.TestCase):
         )
         self.assertEqual(aks_stop(self.cmd, self.client, "rg", "name", False), None)
 
-    @mock.patch('azure.cli.command_modules.acs.custom.prompt_y_n', return_value=True)
-    @mock.patch('azure.cli.command_modules.acs.custom.get_subscription_id', return_value='00000000-0000-0000-0000-000000000000')
-    @mock.patch('azure.cli.command_modules.acs.custom.cf_agent_pools')
-    @mock.patch('azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterUpdateDecorator.update_mc_profile_default')
-    @mock.patch('azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterUpdateDecorator.update_kubernetes_version_and_orchestrator_version')
-    @mock.patch('azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterUpdateDecorator.update_mc')
-    def test_aks_update_auto_upgrade_channel_none(self, mock_update_mc, mock_update_kubernetes_version_and_orchestrator_version, mock_update_mc_profile_default, mock_cf_agent_pools, mock_get_subscription_id, mock_prompt_y_n):
-        resource_group_name = 'test_rg'
-        name = 'test_cluster'
-        auto_upgrade_channel = 'none'
-
-        # Create a ManagedCluster object
-        mc = mock.Mock()
-        mc.kubernetes_version = '1.18.14'
-        mc.agent_pool_profiles = [
-            mock.Mock(orchestrator_version='1.18.14'),
-            mock.Mock(orchestrator_version='1.19.7')
-        ]
-        mc.current_kubernetes_version = '1.21.2'
-        mc.agent_pool_profiles[0].current_orchestrator_version = '1.21.2'
-        mc.agent_pool_profiles[1].current_orchestrator_version = '1.21.2'
-
-        mock_update_mc_profile_default.return_value = mc
-        mock_update_kubernetes_version_and_orchestrator_version.return_value = mc
-
-        aks_update(
-            cmd=self.cmd,
-            client=self.client,
-            resource_group_name=resource_group_name,
-            name=name,
-            auto_upgrade_channel=auto_upgrade_channel
-        )
-
-        # Check if update_kubernetes_version_and_orchestrator_version was called
-        mock_update_kubernetes_version_and_orchestrator_version.assert_called_once_with(mc)
-        # Check if update_mc was called
-        mock_update_mc.assert_called_once_with(mc)
 
 class TestRunCommand(unittest.TestCase):
     def test_get_command_context_invalid_file(self):

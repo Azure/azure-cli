@@ -41,6 +41,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_ARTIFACT_SOURCE_CACHE,
+    CONST_NONE_UPGRADE_CHANNEL,
 )
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
@@ -8482,6 +8483,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_node_resource_group_profile(mc)
         # update bootstrap profile
         mc = self.update_bootstrap_profile(mc)
+        # update kubernetes version and orchestrator version
+        mc = self.update_kubernetes_version_and_orchestrator_version(mc)
         return mc
 
     def update_kubernetes_version_and_orchestrator_version(self, mc: ManagedCluster) -> ManagedCluster:
@@ -8494,14 +8497,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         # Check if auto_upgrade_channel is set to "none"
         auto_upgrade_channel = self.context.get_auto_upgrade_channel()
-        if auto_upgrade_channel == "none":
+        if auto_upgrade_channel == CONST_NONE_UPGRADE_CHANNEL:
             warning_message = (
                 "Since auto-upgrade-channel is set to none, cluster kubernetesVersion will be set to the value of "
                 "currentKubernetesVersion, all agent pools orchestratorVersion will be set to the value of "
                 "currentOrchestratorVersion respectively. Continue?"
             )
-            if not prompt_y_n(warning_message, default="n"):
-                raise CLIError("Operation cancelled by user.")
+            if not self.context.get_yes() and not prompt_y_n(warning_message, default="n"):
+                raise DecoratorEarlyExitException()
 
             # Set kubernetes version to match the current kubernetes version if it has a value
             if mc.current_kubernetes_version:
