@@ -1462,7 +1462,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk4': 'd4',
             'disk5': 'd5',
             'disk6': 'd6',
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202403080',
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202502280',
             'image2': 'image2',
             'g1': self.create_random_name('g1', 20),
             'vm': 'vm1'
@@ -7449,6 +7449,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ])
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(location='eastus2')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_gallery_e2e(self, resource_group, resource_group_location, key_vault):
@@ -7779,6 +7780,41 @@ class VMGalleryImage(ScenarioTest):
             self.check('safetyProfile.allowDeletionOfReplicatedLocations', False)
         ])
 
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_end_of_life_date_', location='CentralUSEUAP')
+    def test_image_version_end_of_life_date(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm', 10),
+            'gallery': self.create_random_name('gallery_', 20),
+            'image': self.create_random_name('image', 15),
+            'version': '1.1.1',
+            'captured': self.create_random_name('captured', 15),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --features SecurityType=Standard '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1', checks=[
+            self.check('name', '{image}'),
+            self.check('features', None),
+        ])
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+                 '--gallery-image-version {version} --managed-image {captured} --end-of-life-date "2025-12-31" --block-deletion-before-end-of-life true', checks=[
+            self.check('safetyProfile.blockDeletionBeforeEndOfLife', True)
+        ])
+        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --block-deletion-before-end-of-life False', checks=[
+            self.check('safetyProfile.blockDeletionBeforeEndOfLife', False)
+        ])
+
     @unittest.skip("The value of Edge Zone name 'attdallas1' and 'microsoftlosangeles1' are invalid.")
     @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations', location='southcentralus')
     def test_image_version_with_target_extended_locations(self):
@@ -7994,7 +8030,8 @@ class VMGalleryImage(ScenarioTest):
             'vmss1': 'vmss1',
             'vmss2': 'vmss2',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'nsg': 'nsg1',
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux '
@@ -8018,7 +8055,10 @@ class VMGalleryImage(ScenarioTest):
             'image_version': image_version
         })
         self.cmd('vm create -g {rg} -n {vm2} --image {image_version} --specialized --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet}')
-        self.cmd('vmss create -g {rg} -n {vmss1} --image {image_version} --specialized --admin-username azureuser --admin-password testPassword0 --authentication-type password --orchestration-mode Flexible')
+
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image_version} --specialized --admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --orchestration-mode Flexible --nsg {nsg}')
         with self.assertRaises(CLIError):
             self.cmd('vm create -g {rg} -n {vm3} --specialized')
         with self.assertRaises(CLIError):
@@ -8147,7 +8187,8 @@ class VMGalleryImage(ScenarioTest):
             'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',  # share the gallery to tester's subscription, so the tester can get shared galleries
             'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'nsg': 'nsg1',
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups')
@@ -8182,7 +8223,9 @@ class VMGalleryImage(ScenarioTest):
         with self.assertRaises(ArgumentUsageError):
             self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version2} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None --os-type windows')
 
-        self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} --generate-ssh-keys --admin-username clitest1 --orchestration-mode Flexible')
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} '
+                 '--generate-ssh-keys --admin-username clitest1 --orchestration-mode Flexible --nsg {nsg}')
 
         self.cmd('vmss show -g {rg} -n {vmss_with_shared_gallery_version}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -8423,7 +8466,8 @@ class VMGalleryImage(ScenarioTest):
             'version': '1.1.2',
             'captured': 'managedImage1',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'nsg': 'nsg1',
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions Community --publisher-uri puburi --publisher-email abc@123.com --eula eula --public-name-prefix pubname')
@@ -8459,8 +8503,9 @@ class VMGalleryImage(ScenarioTest):
             self.check('storageProfile.imageReference.communityGalleryImageId', '{community_gallery_image_version}')
         ])
 
+        self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('vmss create -g {rg} -n {vmss_with_community_gallery_version} --admin-username gallerytest --generate-ssh-keys '
-                 '--image {community_gallery_image_version} --accept-term --orchestration-mode Flexible')
+                 '--image {community_gallery_image_version} --accept-term --orchestration-mode Flexible --nsg {nsg}')
 
         self.cmd('vmss show -g {rg} -n {vmss_with_community_gallery_version}', checks=[
             self.check('virtualMachineProfile.storageProfile.imageReference.communityGalleryImageId', '{community_gallery_image_version}')

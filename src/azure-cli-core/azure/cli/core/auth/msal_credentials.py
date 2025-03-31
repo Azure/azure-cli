@@ -10,7 +10,7 @@ Credentials to acquire tokens from MSAL.
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import (PublicClientApplication, ConfidentialClientApplication,
-                  ManagedIdentityClient, SystemAssignedManagedIdentity)
+                  ManagedIdentityClient, SystemAssignedManagedIdentity, UserAssignedManagedIdentity)
 
 from .constants import AZURE_CLI_CLIENT_ID
 from .util import check_result
@@ -131,9 +131,14 @@ class ManagedIdentityCredential:  # pylint: disable=too-few-public-methods
     Currently, only Azure Arc's system-assigned managed identity is supported.
     """
 
-    def __init__(self):
+    def __init__(self, client_id=None, resource_id=None, object_id=None):
         import requests
-        self._msal_client = ManagedIdentityClient(SystemAssignedManagedIdentity(), http_client=requests.Session())
+        if client_id or resource_id or object_id:
+            managed_identity = UserAssignedManagedIdentity(
+                client_id=client_id, resource_id=resource_id, object_id=object_id)
+        else:
+            managed_identity = SystemAssignedManagedIdentity()
+        self._msal_client = ManagedIdentityClient(managed_identity, http_client=requests.Session())
 
     def acquire_token(self, scopes, **kwargs):
         logger.debug("ManagedIdentityCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)

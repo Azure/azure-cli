@@ -23,7 +23,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
         store_name_prefix = get_resource_name_prefix('SnapshotStore') 
-        config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
         snapshot_name = "TestSnapshot"
         store_location = 'francecentral'
         sku = 'standard'
@@ -143,7 +143,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}')
 
         # Test snapshot import/export
-        config_store_2_name = self.create_random_name(prefix=store_name_prefix, length=36)
+        config_store_2_name = self.create_random_name(prefix=store_name_prefix, length=24)
 
         self.kwargs.update({
             'config_store_name': config_store_2_name,
