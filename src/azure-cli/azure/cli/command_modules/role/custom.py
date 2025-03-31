@@ -234,7 +234,8 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
                           scope=None, include_inherited=False,
-                          show_all=False, include_groups=False, include_classic_administrators=False):
+                          show_all=False, include_groups=False, include_classic_administrators=False,
+                          fill_principal_name=True):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively).
@@ -282,22 +283,23 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                 i['roleDefinitionName'] = None  # the role definition might have been deleted
 
     # fill in principal names
-    principal_ids = set(worker.get_role_property(i, 'principalId')
-                        for i in results if worker.get_role_property(i, 'principalId'))
+    if fill_principal_name:
+        principal_ids = set(worker.get_role_property(i, 'principalId')
+                            for i in results if worker.get_role_property(i, 'principalId'))
 
-    if principal_ids:
-        try:
-            principals = _get_object_stubs(graph_client, principal_ids)
-            principal_dics = {i[ID]: _get_displayable_name(i) for i in principals}
+        if principal_ids:
+            try:
+                principals = _get_object_stubs(graph_client, principal_ids)
+                principal_dics = {i[ID]: _get_displayable_name(i) for i in principals}
 
-            for i in [r for r in results if not r.get('principalName')]:
-                i['principalName'] = ''
-                if principal_dics.get(worker.get_role_property(i, 'principalId')):
-                    worker.set_role_property(i, 'principalName',
-                                             principal_dics[worker.get_role_property(i, 'principalId')])
-        except (HttpResponseError, GraphError) as ex:
-            # failure on resolving principal due to graph permission should not fail the whole thing
-            logger.info("Failed to resolve graph object information per error '%s'", ex)
+                for i in [r for r in results if not r.get('principalName')]:
+                    i['principalName'] = ''
+                    if principal_dics.get(worker.get_role_property(i, 'principalId')):
+                        worker.set_role_property(i, 'principalName',
+                                                 principal_dics[worker.get_role_property(i, 'principalId')])
+            except (HttpResponseError, GraphError) as ex:
+                # failure on resolving principal due to graph permission should not fail the whole thing
+                logger.info("Failed to resolve graph object information per error '%s'", ex)
 
     for r in results:
         if not r.get('additionalProperties'):  # remove the useless "additionalProperties"
