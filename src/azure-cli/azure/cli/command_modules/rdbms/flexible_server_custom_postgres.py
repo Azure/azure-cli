@@ -9,6 +9,7 @@ import os
 import json
 from importlib import import_module
 import re
+from urllib.parse import quote
 from urllib.request import urlretrieve
 from dateutil.tz import tzutc   # pylint: disable=import-error
 import uuid
@@ -28,7 +29,8 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_check_resource_availability_with_location, \
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
     cf_postgres_flexible_private_endpoint_connections, \
-    cf_postgres_flexible_tuning_options, cf_postgres_flexible_config
+    cf_postgres_flexible_tuning_options, \
+    cf_postgres_flexible_config, cf_postgres_flexible_adadmin
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
@@ -38,10 +40,12 @@ from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
-    validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name
+    validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
+    validate_virtual_endpoint_name_availability
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
+POSTGRES_DB_NAME = 'postgres'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
@@ -54,14 +58,15 @@ def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
                            sku_name=None, tier=None,
-                           storage_gb=None, administrator_login=None,
-                           administrator_login_password=None, version=None,
+                           storage_gb=None, version=None, active_directory_auth=None, microsoft_entra_auth=None,
+                           admin_name=None, admin_id=None, admin_type=None,
+                           password_auth=None, administrator_login=None, administrator_login_password=None,
                            tags=None, database_name=None,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
+                           auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_default_db='Enabled', create_cluster=None, cluster_size=None, yes=False):
 
     if not check_resource_group(resource_group_name):
@@ -100,7 +105,9 @@ def flexible_server_create(cmd, client,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
                            performance_tier=performance_tier,
-                           create_cluster=create_cluster)
+                           create_cluster=create_cluster,
+                           password_auth=password_auth, active_directory_auth=active_directory_auth, microsoft_entra_auth=microsoft_entra_auth,
+                           admin_name=admin_name, admin_id=admin_id, admin_type=admin_type,)
 
     cluster = None
     if create_cluster == 'ElasticCluster':
@@ -132,7 +139,11 @@ def flexible_server_create(cmd, client,
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
-    administrator_login_password = generate_password(administrator_login_password)
+    is_password_auth_enabled = bool(password_auth is not None and password_auth.lower() == 'enabled')
+    is_microsoft_entra_auth_enabled = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled') or \
+        bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    if is_password_auth_enabled:
+        administrator_login_password = generate_password(administrator_login_password)
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
@@ -140,7 +151,7 @@ def flexible_server_create(cmd, client,
                                                                    backup_byok_identity=backup_byok_identity,
                                                                    backup_byok_key=backup_byok_key)
 
-    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth=active_directory_auth,
+    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth='Enabled' if is_microsoft_entra_auth_enabled else 'Disabled',
                                                                password_auth=password_auth)
 
     # Create postgresql
@@ -162,16 +173,26 @@ def flexible_server_create(cmd, client,
                                    auth_config=auth_config,
                                    cluster=cluster)
 
+    # Add Microsoft Entra Admin
+    if is_microsoft_entra_auth_enabled and admin_name is not None or admin_id is not None:
+        server_admin_client = cf_postgres_flexible_adadmin(cmd.cli_ctx, '_')
+        logger.warning("Add Microsoft Entra Admin '%s'.", admin_name)
+        _create_admin(server_admin_client, resource_group_name, server_name, admin_name, admin_id, admin_type)
+
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
-    # Create mysql database if it does not exist
+    # Create database if it does not exist
     if (database_name is not None or (create_default_db and create_default_db.lower() == 'enabled') and create_cluster != 'ElasticCluster'):
         db_name = database_name if database_name else DEFAULT_DB_NAME
         _create_database(db_context, cmd, resource_group_name, server_name, db_name)
+    else:
+        db_name = POSTGRES_DB_NAME
 
-    user = server_result.administrator_login
+    user = server_result.administrator_login if is_password_auth_enabled else '<user>'
+    password = administrator_login_password if is_password_auth_enabled else '<password>'
+    admin = quote(admin_name) if admin_name else '<admin>'
     server_id = server_result.id
     loc = server_result.location
     version = server_result.version
@@ -179,17 +200,18 @@ def flexible_server_create(cmd, client,
     host = server_result.fully_qualified_domain_name
     subnet_id = None if network is None else network.delegated_subnet_resource_id
 
-    logger.warning('Make a note of your password. If you forget, you would have to '
-                   'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
-                   server_name, resource_group_name)
+    if is_password_auth_enabled:
+        logger.warning('Make a note of your password. If you forget, you would have to '
+                       'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                       server_name, resource_group_name)
     logger.warning('Try using \'az postgres flexible-server connect\' command to test out connection.')
 
-    _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user)
+    _update_local_contexts(cmd, server_name, resource_group_name, db_name, location, user)
 
-    return _form_response(user, sku, loc, server_id, host, version,
-                          administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_postgresql_connection_string(host, user, administrator_login_password, database_name), database_name, firewall_id,
-                          subnet_id)
+    return _form_response(user, sku, loc, server_id, host, version, password,
+                          _create_postgresql_connection_string(host, user, password, db_name),
+                          db_name, firewall_id, subnet_id, is_password_auth_enabled, is_microsoft_entra_auth_enabled, admin_name,
+                          _create_microsoft_entra_connection_string(host, db_name, admin))
 # endregion create without args
 
 
@@ -279,6 +301,7 @@ def flexible_server_restore(cmd, client,
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
+# pylint: disable=too-many-branches
 def flexible_server_update_custom_func(cmd, client, instance,
                                        sku_name=None, tier=None,
                                        storage_gb=None,
@@ -289,7 +312,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
                                        backup_byok_identity=None, backup_byok_key=None,
-                                       active_directory_auth=None, password_auth=None,
+                                       active_directory_auth=None, microsoft_entra_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
                                        public_access=None,
                                        tags=None,
@@ -403,8 +426,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     auth_config = instance.auth_config
     administrator_login = instance.administrator_login if instance.administrator_login else None
-    if active_directory_auth:
-        auth_config.active_directory_auth = active_directory_auth
+    if active_directory_auth or microsoft_entra_auth:
+        auth_config.active_directory_auth = active_directory_auth if active_directory_auth else microsoft_entra_auth
     if password_auth:
         administrator_login, administrator_login_password = _update_login(server_name, resource_group_name, auth_config,
                                                                           password_auth, administrator_login, administrator_login_password)
@@ -433,6 +456,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
         if high_availability.lower() != "disabled" and standby_availability_zone:
             high_availability_param.standby_availability_zone = standby_availability_zone
+
+        if high_availability.lower() != "disabled":
+            config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
+            fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
+            if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
+                raise CLIError("High availability cannot be enabled while Fabric mirroring is Active. Please disable Fabric mirroring to enable high availability.")
 
         params.high_availability = high_availability_param
 
@@ -1088,10 +1117,15 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
     instance = server_operations_client.get(resource_group_name, server_name)
 
     if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
+        raise CLIError("Cannot create a Microsoft Entra admin on a server with replication role. Use the primary server instead.")
 
+    return _create_admin(client, resource_group_name, server_name, login, sid, principal_type, no_wait)
+
+
+# Create Microsoft Entra admin
+def _create_admin(client, resource_group_name, server_name, principal_name, sid, principal_type=None, no_wait=False):
     parameters = {
-        'principal_name': login,
+        'principal_name': principal_name,
         'tenant_id': get_tenant_id(),
         'principal_type': principal_type
     }
@@ -1107,7 +1141,7 @@ def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_nam
     instance = server_operations_client.get(resource_group_name, server_name)
 
     if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
+        raise CLIError("Cannot delete an Microsoft Entra admin on a server with replication role. Use the primary server instead.")
 
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, server_name, sid)
 
@@ -1375,6 +1409,7 @@ def migration_check_name_availability(cmd, client, resource_group_name, server_n
 def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
+    validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name)
 
     parameters = {
         'name': virtual_endpoint_name,
@@ -1755,7 +1790,7 @@ def _create_postgresql_connection_strings(host, user, password, database, port):
 
 def _create_postgresql_connection_string(host, user, password, database):
     connection_kwargs = {
-        'user': user,
+        'user': user if user is not None else '{user}',
         'host': host,
         'password': password if password is not None else '{password}',
         'database': database,
@@ -1763,13 +1798,22 @@ def _create_postgresql_connection_string(host, user, password, database):
     return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
+def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
+    connection_kwargs = {
+        'user': admin,
+        'host': host,
+        'database': database,
+    }
+    return 'postgresql://{user}:<access-token>@{host}/{database}?sslmode=require'.format(**connection_kwargs)
+
+
 def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,
-                   subnet_id=None):
+                   subnet_id=None, is_password_auth=True, is_microsoft_entra_auth_enabled=False, microsoft_admin=None, connection_string_microsoft_entra=None):
 
     output = {
         'host': host,
-        'username': username,
-        'password': password,
+        'username': username if is_password_auth else None,
+        'password': password if is_password_auth else None,
         'skuname': sku,
         'location': location,
         'id': server_id,
@@ -1777,6 +1821,9 @@ def _form_response(username, sku, location, server_id, host, version, password, 
         'databaseName': database_name,
         'connectionString': connection_string
     }
+    if is_microsoft_entra_auth_enabled:
+        output['admin'] = microsoft_admin
+        output['connectionStringMicrosoftEntra'] = connection_string_microsoft_entra
     if firewall_id is not None:
         output['firewallName'] = firewall_id
     if subnet_id is not None:

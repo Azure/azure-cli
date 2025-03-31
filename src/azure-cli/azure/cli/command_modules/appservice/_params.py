@@ -232,6 +232,9 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp list-flexconsumption-locations') as c:
         c.argument('zone_redundant', arg_type=get_three_state_flag(),
                    help='Filter the list to return only locations which support zone redundancy.', is_preview=True)
+        c.argument('show_details', options_list=['--show-details'], arg_type=get_three_state_flag(),
+                   help='Include the runtime details of the regions.', is_preview=True)
+        c.argument('runtime', help="limit the output to just the specified runtime", is_preview=True)
 
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -324,6 +327,7 @@ subscription than the app service environment, please use the resource ID for --
         with self.argument_context(scope + ' config ssl import') as c:
             c.argument('key_vault', help='The name or resource ID of the Key Vault')
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
+            c.argument('name', help='Name of the web app. This is used to set the location of the webspace for the certificate import. If not specified, the location of the resource group will be used. If you have apps in multiple regions/webspaces, you must specify the name of the app to set the location of the webspace for the certificate import.')
         with self.argument_context(scope + ' config ssl create') as c:
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
@@ -631,7 +635,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container',
                    options_list=['--container-url'])
-        c.argument('webapp_name', help='The name of the web app',
+        c.argument('webapp_name', help='The name of the web app', options_list=['--webapp-name', '-n'],
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
         c.argument('db_name', help='Name of the database in the backup', arg_group='Database')
         c.argument('db_connection_string', help='Connection string for the database in the backup',
