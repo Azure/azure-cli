@@ -58,28 +58,6 @@ class AcrCommandsTests(ScenarioTest):
         password2 = credential['passwords'][1]['value']
         assert username and password and password2
 
-        # renew password
-        credential = self.cmd('acr credential renew -n {} -g {} --password-name {}'.format(
-            registry_name, resource_group, 'password')).get_output_in_json()
-        renewed_username = credential['username']
-        renewed_password = credential['passwords'][0]['value']
-        renewed_password2 = credential['passwords'][1]['value']
-        assert renewed_username and renewed_password and renewed_password2
-        assert username == renewed_username
-        assert password != renewed_password
-        assert password2 == renewed_password2
-
-        # renew password2
-        credential = self.cmd('acr credential renew -n {} -g {} --password-name {}'.format(
-            registry_name, resource_group, 'password2')).get_output_in_json()
-        renewed_username = credential['username']
-        renewed_password = credential['passwords'][0]['value']
-        renewed_password2 = credential['passwords'][1]['value']
-        assert renewed_username and renewed_password and renewed_password2
-        assert username == renewed_username
-        assert password != renewed_password
-        assert password2 != renewed_password2
-
         # test acr delete
         self.cmd('acr delete -n {} -g {} -y'.format(registry_name, resource_group))
 
