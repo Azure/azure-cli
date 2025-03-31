@@ -29,7 +29,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export(self, resource_group, location):
         store_name_prefix = get_resource_name_prefix('ImportTest')
-        config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -285,7 +285,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
 
         new_fm_store_prefix = get_resource_name_prefix('NewFmImport')
-        config_store_name = self.create_random_name(prefix=new_fm_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=new_fm_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -390,7 +390,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_kvset(self, resource_group, location):
         kvset_store_prefix = get_resource_name_prefix('KVSetImportTest')
-        config_store_name = self.create_random_name(prefix=kvset_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=kvset_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -443,7 +443,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_strict_import(self, resource_group, location):
         strict_store_prefix = get_resource_name_prefix('StrictImportTest')
-        config_store_name = self.create_random_name(prefix=strict_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=strict_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -487,7 +487,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appservice_import_export(self, resource_group, location):
         import_export_store_prefix = get_resource_name_prefix('ImportExportTest')
-        config_store_name = self.create_random_name(prefix=import_export_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=import_export_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -508,16 +508,16 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
         # Create AppService plan and webapp
         web_app_prefix = get_resource_name_prefix('WebApp')
-        webapp_name = self.create_random_name(prefix=web_app_prefix, length=36)
+        webapp_name = self.create_random_name(prefix=web_app_prefix, length=24)
         plan_prefix = get_resource_name_prefix('Plan')
-        plan = self.create_random_name(prefix=plan_prefix, length=36)
+        plan = self.create_random_name(prefix=plan_prefix, length=24)
         # Require a standard sku to allow for deployment slots
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} -p {}'.format(resource_group, webapp_name, plan))
 
         # Create deployment slot
         slot_prefix = get_resource_name_prefix('Slot')
-        slot = self.create_random_name(prefix=slot_prefix, length=36)
+        slot = self.create_random_name(prefix=slot_prefix, length=24)
         self.cmd('webapp deployment slot create -g {} -n {} -s {}'.format(resource_group, webapp_name, slot))
 
         # App configuration reference tests
@@ -751,7 +751,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_naming_conventions(self, resource_group, location):
         naming_convention_store_prefix = get_resource_name_prefix('NamingConventionTest')
-        config_store_name = self.create_random_name(prefix=naming_convention_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=naming_convention_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -835,7 +835,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
     def test_azconfig_import_export_respect_both_schemas_naming_conventions(self, resource_group, location):
         # Respect both fm schemas in file
         both_schema_test_prefix = get_resource_name_prefix('BothSchemaTest')
-        config_store_name = self.create_random_name(prefix=both_schema_test_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=both_schema_test_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -989,8 +989,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
     def test_appconfig_to_appconfig_import_export(self, resource_group, location):
         src_config_store_prefix = get_resource_name_prefix('Source')
         dest_config_store_prefix = get_resource_name_prefix('Destination')
-        src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=36)
-        dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=36)
+        src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=24)
+        dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'

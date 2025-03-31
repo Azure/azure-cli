@@ -835,3 +835,12 @@ def validate_message_of_the_day(namespace):
         if namespace.os_type is not None and namespace.os_type != "Linux":
             raise ArgumentUsageError(
                 '--message-of-the-day can only be set for linux nodepools')
+
+
+def validate_bootstrap_container_registry_resource_id(namespace):
+    container_registry_resource_id = namespace.bootstrap_container_registry_resource_id
+    if container_registry_resource_id is None or container_registry_resource_id == '':
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(container_registry_resource_id):
+        raise InvalidArgumentValueError("--bootstrap-container-registry-resource-id is not a valid Azure resource ID.")

@@ -352,7 +352,8 @@ class TestWebappMocked(unittest.TestCase):
         site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_snapshots', None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    def test_restore_snapshot(self, client_factory_mock):
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_restore_snapshot(self, generic_site_op_mock, client_factory_mock):
         cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
         cli_ctx_mock.data = {'subscription_id': 'sub1'}
@@ -361,11 +362,22 @@ class TestWebappMocked(unittest.TestCase):
         client = mock.MagicMock()
         client.web_apps.restore_snapshot_slot = mock.MagicMock()
         client.web_apps.restore_snapshot = mock.MagicMock()
+
+        Site = cmd_mock.get_models('Site')
+        site = Site(name='src_web', location='location')
+        site.slot_name = 'src_slot'
+        site.resouce_group = 'src_rg'
+        site.id = '/subscriptions/sub1/resourceGroups/src_rg/providers/Microsoft.Web/sites/src_web/slots/src_slot'
+
+        generic_site_op_mock.return_value = site
+
         client_factory_mock.return_value = client
+        
+
 
         SnapshotRecoverySource, SnapshotRestoreRequest = \
             cmd_mock.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
-        source = SnapshotRecoverySource(id='/subscriptions/sub1/resourceGroups/src_rg/providers/Microsoft.Web/sites/src_web/slots/src_slot')
+        source = SnapshotRecoverySource(id='/subscriptions/sub1/resourceGroups/src_rg/providers/Microsoft.Web/sites/src_web/slots/src_slot', location='location')
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time='2018-12-07T02:01:31.4708832Z',
                                          recovery_source=source, recover_configuration=False)
         overwrite_request = SnapshotRestoreRequest(overwrite=True, snapshot_time='2018-12-07T02:01:31.4708832Z', recover_configuration=True)

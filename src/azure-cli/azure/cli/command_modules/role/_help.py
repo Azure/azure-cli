@@ -800,6 +800,8 @@ examples:
     text: az role assignment list --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000
   - name: List all role assignments of an assignee at the subscription scope.
     text: az role assignment list --assignee 00000000-0000-0000-0000-000000000000 --scope /subscriptions/00000000-0000-0000-0000-000000000000
+  - name: List all role assignments with "Reader" role at the subscription scope, without filling principalName property
+    text: az role assignment list --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000 --fill-principal-name false
 """
 
 helps['role assignment list-changelogs'] = """
