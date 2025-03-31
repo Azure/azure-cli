@@ -630,7 +630,7 @@ def get_active_cloud(cli_ctx=None):
         _set_active_cloud(cli_ctx, default_cloud_name)
         cloud = get_cloud(cli_ctx, default_cloud_name)
     if cloud.profile != 'latest':
-        logger.warning("Cloud profile '%s' will be deprecated in 2.73.0, please use the 'latest' profile or the CLI 2.66.* (LTS) version instead.", cloud.profile)
+        logger.warning("Cloud profile '%s' will be deprecated starting from 2.73.0. Please use the 'latest' profile or the CLI 2.66.* (LTS) version instead.", cloud.profile)
     return cloud
 
 
