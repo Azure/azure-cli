@@ -9,7 +9,7 @@
 # pylint: disable=too-many-statements
 
 provider_namespace = "Microsoft.Edge"
-sub_provider = "Microsoft.EdgeMarketPlace"
+sub_provider = "Microsoft.EdgeMarketplace"
 api_version = "2023-08-01-preview"
 
 
@@ -131,7 +131,7 @@ def _find_sku_and_version(skus, sku, version, logger):
 
 
 def package_offer(cmd, resource_group_name, resource_name, publisher_name,
-                  offer_name, sku, version, output_folder):
+                  offer_id, sku, version, output_folder):
     """Get details of a specific marketplace offer and download its logos."""
 
     import requests
@@ -150,13 +150,13 @@ def package_offer(cmd, resource_group_name, resource_name, publisher_name,
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
         f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
-        f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
+        f"/providers/{sub_provider}/offers/{publisher_name}:{offer_id}"
         f"?api-version={api_version}"
     )
 
     catalog_url = (
         f"https://catalogapi.azure.com"
-        f"/offers/{publisher_name}.{offer_name}"
+        f"/offers/{publisher_name}.{offer_id}"
         f"?api-version={catalog_api_version}"
     )
 
@@ -219,7 +219,7 @@ def package_offer(cmd, resource_group_name, resource_name, publisher_name,
             # Downloading VM image
             return download_vhd(
                 cmd, resource_group_name, resource_name, publisher_name,
-                offer_name, sku, version, generation, version_level_path
+                offer_id, sku, version, generation, version_level_path
             )
 
     except requests.RequestException as e:
@@ -250,18 +250,10 @@ def _check_azcopy_available():
 
 def _handle_token_response(token_response, output_folder, logger):
     """Helper function to handle token response and download."""
-    import os
     import platform
+    import subprocess
 
-    if token_response.status_code != 200:
-        logger.error("Failed to get access token: %s", token_response.status_code)
-        return {
-            "error": f"Failed to get access token: {token_response.status_code}",
-            "status": "failed",
-        }
-
-    token_data = token_response.json()
-    download_url = token_data.get("accessToken")
+    download_url = token_response.get("accessToken")
 
     # Check if azcopy is available
     if not _check_azcopy_available():
@@ -293,194 +285,217 @@ def _handle_token_response(token_response, output_folder, logger):
         }
 
     # Construct and execute azcopy command
-    command = f'azcopy copy "{download_url}" "{output_folder}" --check-md5 NoCheck'
-    print(command)
+        
+    print(f"Executing: azcopy copy [URL] {output_folder} --check-md5 NoCheck")
     print("Executing command...")
-    os.system(command)
-    print("Download completed successfully.")
 
-    return {
-        "status": "succeeded",
-        "message": "Download completed successfully.",
-    }
-
-
-def _get_token_url(management_endpoint, subscription_id, resource_group_name,
-                   resource_name, publisher_name, offer_name):
-    """Helper function to construct token URL."""
-    return (
-        f"{management_endpoint}"
-        f"/subscriptions/{subscription_id}"
-        f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
-        f"/providers/Microsoft.EdgeMarketPlace/offers/{publisher_name}:{offer_name}"
-        f"/getAccessToken?api-version={api_version}"
+    # This will display output in real-time (just like os.system)
+    result = subprocess.run(
+        ["azcopy", "copy", download_url, output_folder, "--check-md5", "NoCheck"],
+        check=False  # Don't raise exception on non-zero exit
     )
 
+    if result.returncode == 0:
+        print("Download completed successfully.")
+        return {
+            "status": "succeeded",
+            "message": "Download completed successfully.",
+        }
+    else:
+        error_msg = f"AzCopy failed with return code: {result.returncode}"
+        logger.error(error_msg)
+        return {
+            "error": error_msg,
+            "status": "failed",
+        }
 
-def _process_async_operation(cmd, async_operation_url, logger, resource_group_name,
-                             output_folder, subscription_id, resource_name, publisher_name, offer_name):
+
+def _process_download_operation(cmd, async_operation_url, logger, resource_group_name,
+                             output_folder, subscription_id, resource_name, publisher_name, offer_id):
     """Process async operation and monitor status."""
-    import json
-    import time
-    from datetime import datetime
-
     import requests
 
+    from azure.cli.command_modules.disconnectedoperations.aaz.latest.edge_marketplace.offer import (
+        GetAccessToken,
+    )
     from azure.cli.core.util import send_raw_request
 
-    max_retries = 10
-    base_delay = 2  # seconds
-    timeout = 300  # 5 minutes timeout
-    start_time = datetime.now()
+    try:        
+        # Get operation status - has to be raw request because this is an async operation - no swagger listing for this
+        status_response = send_raw_request(
+            cmd.cli_ctx, "get", async_operation_url,
+            resource="https://management.azure.com"
+        )
 
-    # Package parameters needed for token handling
-    management_endpoint = _get_management_endpoint(cmd.cli_ctx)
+        if status_response.status_code not in (200, 202):
+            logger.error("Failed to get operation status: %s", status_response.status_code)
+            return {
+                "error": f"Status check failed: {status_response.status_code}",
+                "status": "failed",
+            }
 
-    print("Hitting async operation URL...")
-    for attempt in range(max_retries):
-        print("Attempt %s of %s..." % (attempt + 1, max_retries))
-        try:
-            # Check timeout
-            if (datetime.now() - start_time).total_seconds() > timeout:
-                logger.error("Operation timed out after 5 minutes")
-                return {"error": "Operation timed out", "status": "failed"}
+        status_data = status_response.json()
+        status = status_data.get("status", "").lower()
+        print("Current status:", status)
 
-            # Get operation status
-            status_response = send_raw_request(
-                cmd.cli_ctx, "get", async_operation_url,
-                resource="https://management.azure.com"
+        # Handle successful completion
+        if status == "succeeded":
+            logger.info("VHD download URL generation succeeded")
+            print(status_response)
+            requestId = status_data.get("properties", {}).get("requestId")
+
+            if not requestId:
+                logger.error("Download URL not found in response")
+                return {"error": "Download URL not found", "status": "failed"}
+
+            print(f"Fetched request Id for VHD Download: {requestId}")
+
+            # Obtaining SAS token using request Id
+            resource_uri = (
+                f"/subscriptions/{subscription_id}"
+                f"/resourceGroups/{resource_group_name}"
+                f"/providers/Microsoft.Edge/disconnectedOperations/{resource_name}"
             )
+            
+            # Create command arguments dictionary
+            command_args = {
+                "resource_uri": resource_uri,
+                "offer_id": offer_id,
+                "request_id": requestId
+            }
 
-            if status_response.status_code not in (200, 202):
-                logger.error("Failed to get operation status: %s", status_response.status_code)
-                return {
-                    "error": f"Status check failed: {status_response.status_code}",
-                    "status": "failed",
-                }
+            token_command = GetAccessToken(cmd)
+            result = token_command(command_args=command_args)
+            return _handle_token_response(result, output_folder, logger)
 
-            status_data = status_response.json()
-            status = status_data.get("status", "").lower()
-            print("Current status:", status)
-
-            # Handle successful completion
-            if status == "succeeded":
-                logger.info("VHD download URL generation succeeded")
-                print(status_response)
-                requestId = status_data.get("properties", {}).get("requestId")
-
-                if not requestId:
-                    logger.error("Download URL not found in response")
-                    return {"error": "Download URL not found", "status": "failed"}
-
-                print(f"Fetched request Id for VHD Download: {requestId}")
-
-                # Obtaining SAS token using request Id
-                token_url = _get_token_url(
-                    management_endpoint, subscription_id, resource_group_name,
-                    resource_name, publisher_name, offer_name
-                )
-                token_body = {"requestId": requestId}
-
-                token_response = send_raw_request(
-                    cmd.cli_ctx, "post", token_url,
-                    resource="https://management.azure.com",
-                    body=json.dumps(token_body)
-                )
-
-                return _handle_token_response(token_response, output_folder, logger)
-
-            # Handle failure
-            if status == "failed":
-                error_message = status_data.get("error", {}).get("message", "Unknown error")
-                logger.error("Operation failed: %s", error_message)
-                return {"error": error_message, "status": "failed"}
-
-            # Still in progress, wait and retry
-            logger.info("Operation in progress... (attempt %s/%s)", attempt + 1, max_retries)
-            delay = base_delay * (2**attempt)  # Exponential backoff
-            time.sleep(delay)
-
-        except (requests.RequestException, ValueError) as e:
-            logger.error("Error checking operation status: %s", str(e))
-            delay = base_delay * (2**attempt)
-            time.sleep(delay)
-
-    # Exhausted all retries
-    logger.error("Maximum retry attempts reached")
-    return {"error": "Maximum retry attempts reached", "status": "failed"}
+        # Handle failure
+        if status == "failed":
+            error_message = status_data.get("error", {}).get("message", "Unknown error")
+            logger.error("Operation failed: %s", error_message)
+            return {"error": error_message, "status": "failed"}
+        
+    except requests.RequestException as e:
+        logger.error("Failed to process async operation: %s", str(e))
+        return {
+            "error": str(e),
+            "status": "failed",
+        }
 
 
 def download_vhd(cmd, resource_group_name, resource_name, publisher_name,
-                 offer_name, sku, version, generation, output_folder):
+                 offer_id, sku, version, generation, output_folder):
     """Generate access token for VHD download."""
-    import json
 
     import requests
     from knack.log import get_logger
 
+    from azure.cli.command_modules.disconnectedoperations.aaz.latest.edge_marketplace.offer import (
+        GenerateAccessToken,
+    )
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core.util import send_raw_request
+
+    class CustomGenerateAccessToken(GenerateAccessToken):
+        """Extended version of GenerateAccessToken that captures headers properly"""
+        
+        def _output(self, *args, **kwargs):
+            # Get the original result
+            result = super()._output(*args, **kwargs)
+            # Convert to dict if not already
+            if not isinstance(result, dict):
+                result = {}
+            # Add headers if they were captured in the ctx
+            if hasattr(self.ctx, 'captured_headers'):
+                result['_headers'] = self.ctx.captured_headers
+            return result
+        
+        class OffersGenerateAccessToken(GenerateAccessToken.OffersGenerateAccessToken):
+            def __init__(self, ctx):
+                super().__init__(ctx)
+                # Initialize headers on context
+                if not hasattr(ctx, 'captured_headers'):
+                    ctx.captured_headers = {}
+            
+            def __call__(self, *args, **kwargs):
+                # Override the send_request method to capture headers
+                original_send_request = self.client.send_request
+                
+                def intercepted_send_request(request, **kwargs):
+                    # Call the original method
+                    response = original_send_request(request, **kwargs)
+                    # Capture headers from the response
+                    if hasattr(response, 'http_response') and hasattr(response.http_response, 'headers'):
+                        headers = dict(response.http_response.headers)
+                        # Store headers on the context object
+                        self.ctx.captured_headers.update(headers)
+                        
+                        # Check for the specific header
+                        if 'Azure-AsyncOperation' in headers:
+                            print("✅ Captured Azure-AsyncOperation header")
+                    return response
+                
+                # Replace the send_request method
+                self.client.send_request = intercepted_send_request
+                
+                try:
+                    # Call the original method to get the poller
+                    return super().__call__(*args, **kwargs)
+                finally:
+                    # Restore the original send_request method
+                    self.client.send_request = original_send_request
 
     logger = get_logger(__name__)
-    management_endpoint = _get_management_endpoint(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    # API endpoint construction
-    url = (
-        f"{management_endpoint}"
+    # Construct URL with parameters
+    # Create resource URI
+    resource_uri = (
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
-        f"/providers/Microsoft.EdgeMarketPlace/offers/{publisher_name}:{offer_name}"
-        f"/generateAccessToken?api-version=2023-08-01-preview"
+        f"/providers/Microsoft.Edge/disconnectedOperations/{resource_name}"
     )
 
-    # Request body
-    body = {
-        "edgeMarketPlaceRegion": "eastus",
-        "hypervGeneration": generation,
-        "marketPlaceSku": sku,
-        "marketPlaceSkuVersion": version,
+
+    command_args = {
+    # Required URL parameters
+    "resource_uri": resource_uri,
+    "offer_id": publisher_name + ":" + offer_id,  # Format required by the API
+    
+    # Required body parameters
+    "edge_market_place_region": "eastus",  # Required in the body
+    
+    # Optional body parameters as needed
+    "hyperv_generation": generation,
+    "market_place_sku": sku,
+    "market_place_sku_version": version,
+    "publisher_name": publisher_name,
+    
+    # For long-running operations, you can set no_wait
+    "no_wait": False  # Set to True if you don't want to wait for completion
     }
-
+    
     try:
-        print("Generating access token for VHD download...")
-        response = send_raw_request(
-            cmd.cli_ctx, "post", url,
-            resource="https://management.azure.com",
-            body=json.dumps(body)
-        )
+        # Create and call the command
+        generate_token_command = CustomGenerateAccessToken(cmd)        
+        poller = generate_token_command(command_args=command_args)
 
-        print("Checking status of VHD download URL generation...")
+        print("Generating VHD download SAS token...")
+        # Wait for completion and get the result
+        result = poller.result()
 
-        # Check if the request was successful
-        if response.status_code not in (200, 202):
-            error_message = f"Request failed with status code: {response.status_code}"
-            logger.error(error_message)
-            return {
-                "error": error_message,
-                "status": "failed",
-                "resource_group_name": resource_group_name,
-                "response": response.text,
-            }
+        # Try to get headers from either the result or command object
+        headers = result.get('_headers') if isinstance(result, dict) else None
+        if not headers and hasattr(generate_token_command, '_headers'):
+            headers = generate_token_command._headers
 
-        # Get async operation URL from headers
-        async_operation_url = response.headers.get("Azure-AsyncOperation")
-
-        if not async_operation_url:
-            logger.error("Async operation URL not found in response")
-            return {
-                "error": "Async operation URL not found",
-                "status": "failed",
-            }
-
-        # Process the async operation
-        return _process_async_operation(
-            cmd, async_operation_url, logger, resource_group_name,
-            output_folder, subscription_id, resource_name,
-            publisher_name, offer_name
-        )
+        if headers:
+            async_op_url = headers.get('Azure-AsyncOperation')
+            if async_op_url:
+                # Process the async operation
+                return _process_download_operation(
+                    cmd, async_op_url, logger, resource_group_name,
+                    output_folder, subscription_id, resource_name,
+                    publisher_name, offer_id
+                )
 
     except requests.RequestException as e:
         logger.error("Failed to generate access token: %s", str(e))
@@ -496,54 +511,46 @@ def list_offers(cmd, resource_group_name, resource_name):
     import requests
     from knack.log import get_logger
 
+    from azure.cli.command_modules.disconnectedoperations.aaz.latest.edge_marketplace.offer import (
+        List,
+    )
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core.util import send_raw_request
 
     logger = get_logger(__name__)
-    management_endpoint = _get_management_endpoint(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     # Construct URL with parameters
-    url = (
-        f"{management_endpoint}"
+    resource_uri = (
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
         f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
-        f"/providers/{sub_provider}/offers"
-        f"?api-version={api_version}"
     )
+    command_args = {
+    "resource_uri": resource_uri,
+    }
     try:
-        response = send_raw_request(cmd.cli_ctx, "get", url, resource="https://management.azure.com")
+        list_command = List(cmd)
+        result_items_iterator = list_command(command_args=command_args)
 
-        if response.status_code == 200:
-            data = response.json()
-            result = []
+        result_items = list(result_items_iterator)
 
-            for offer in data.get("value", []):
-                offer_content = offer.get("properties", {}).get("offerContent", {})
-                skus = offer.get("properties", {}).get("marketplaceSkus", [])
+        result = []
+        for offer in result_items:
+            offer_content = offer.get("offerContent", {})
+            skus = offer.get("marketplaceSkus", [])
 
-                for sku in skus:
-                    versions = sku.get("marketplaceSkuVersions", [])[:]
-                    row = {
-                        "Publisher": offer_content.get("offerPublisher", {}).get("publisherId"),
-                        "Offer": offer_content.get("offerId"),
-                        "SKU": sku.get("marketplaceSkuId"),
-                        "Versions": f"{len(versions)} {'version' if len(versions) == 1 else 'versions'} available",
-                        "OS_Type": sku.get("operatingSystem", {}).get("type"),
-                    }
-                    result.append(row)
+            for sku in skus:
+                versions = sku.get("marketplaceSkuVersions", [])[:]
+                row = {
+                    "Publisher": offer_content.get("offerPublisher", {}).get("publisherId"),
+                    "Offer": offer_content.get("offerId"),
+                    "SKU": sku.get("marketplaceSkuId"),
+                    "Versions": f"{len(versions)} {'version' if len(versions) == 1 else 'versions'} available",
+                    "OS_Type": sku.get("operatingSystem", {}).get("type"),
+                }
+                result.append(row)
 
-            return result
-
-        error_message = f"Request failed with status code: {response.status_code}"
-        logger.error(error_message)
-        return {
-            "error": error_message,
-            "status": "failed",
-            "resource_group_name": resource_group_name,
-            "response": response.text,
-        }
+        return result
 
     except requests.RequestException as e:
         logger.error("Failed to retrieve offers: %s", str(e))
@@ -554,67 +561,59 @@ def list_offers(cmd, resource_group_name, resource_name):
         }
 
 
-def get_offer(cmd, resource_group_name, resource_name, publisher_name, offer_name):
+def get_offer(cmd, resource_group_name, resource_name, publisher_name, offer_id):
     """Get a specific for disconnected operations given its publisher and offer name"""
     import requests
     from knack.log import get_logger
 
+    from azure.cli.command_modules.disconnectedoperations.aaz.latest.edge_marketplace.offer import (
+        Show,
+    )
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core.util import send_raw_request
-
+    
     logger = get_logger(__name__)
-    management_endpoint = _get_management_endpoint(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     # Construct URL with parameters
-    url = (
-        f"{management_endpoint}"
+    # Create resource URI
+    resource_uri = (
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/disconnectedOperations/{resource_name}"
-        f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
-        f"?api-version={api_version}"
+        f"/providers/Microsoft.Edge/disconnectedOperations/{resource_name}"
     )
 
+    # Set up command arguments
+    command_args = {
+        "resource_uri": resource_uri,
+        "offer_id": publisher_name + ":" + offer_id  # Format required by the API
+    }
     try:
-        response = send_raw_request(cmd.cli_ctx, "get", url, resource="https://management.azure.com")
+        # Create and call the Show command
+        show_command = Show(cmd)  # Pass the cmd object directly
+        show_result = show_command(command_args=command_args)  # Returns the deserialized result
+        result = []
+        offer_content = show_result.get("offerContent", {})
+        skus = show_result.get("marketplaceSkus", [])
 
-        if response.status_code == 200:
-            data = response.json()
-            result = []
+        for sku in skus:
+            # Get all versions for this SKU
+            versions = sku.get("marketplaceSkuVersions", [])[:]
 
-            offer_content = data.get("properties", {}).get("offerContent", {})
-            skus = data.get("properties", {}).get("marketplaceSkus", [])
+            # transform versions and size array into a multi-line string
+            version_str = ", ".join(
+                f"{v.get('name')}({v.get('minimumDownloadSizeInMb')}MB)" for v in versions
+            )
 
-            for sku in skus:
-                # Get all versions for this SKU
-                versions = sku.get("marketplaceSkuVersions", [])[:]
-
-                # transform versions and size array into a multi-line string
-                version_str = ", ".join(
-                    f"{v.get('name')}({v.get('minimumDownloadSizeInMb')}MB)" for v in versions
-                )
-
-                # Create a single row with flattened version info
-                row = {
-                    "Publisher": offer_content.get("offerPublisher", {}).get("publisherId"),
-                    "Offer": offer_content.get("offerId"),
-                    "SKU": sku.get("marketplaceSkuId"),
-                    "Versions": version_str,
-                    "OS_Type": sku.get("operatingSystem", {}).get("type"),
-                }
-                result.append(row)
-            return result
-
-        error_message = f"Request failed with status code: {response.status_code}"
-        logger.error(error_message)
-        return {
-            "error": error_message,
-            "status": "failed",
-            "resource_group_name": resource_group_name,
-            "response": response.text,
-        }
-
+            # Create a single row with flattened version info
+            row = {
+                "Publisher": offer_content.get("offerPublisher", {}).get("publisherId"),
+                "Offer": offer_content.get("offerId"),
+                "SKU": sku.get("marketplaceSkuId"),
+                "Versions": version_str,
+                "OS_Type": sku.get("operatingSystem", {}).get("type"),
+            }
+            result.append(row)
+        return result
     except requests.RequestException as e:
         logger.error("Failed to retrieve offers: %s", str(e))
         return {

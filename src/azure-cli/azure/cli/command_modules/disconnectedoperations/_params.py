@@ -22,7 +22,7 @@ def load_arguments(self, _):
         c.argument(
             "resource_name", type=str, help="Name of the resource to list offers for"
         )
-        c.argument("offer_name", type=str, help="Name of the offer")
+        c.argument("offer_id", type=str, help="Name of the offer")
         c.argument("publisher_name", type=str, help="Name of the publisher")
 
     with self.argument_context(
@@ -33,7 +33,7 @@ def load_arguments(self, _):
             "resource_name", type=str, help="Name of the resource to list offers for"
         )
         c.argument("publisher_name", type=str, help="Name of the publisher")
-        c.argument("offer_name", type=str, help="Name of the offer to package")
+        c.argument("offer_id", type=str, help="Name of the offer to package")
         c.argument("sku", type=str, help="SKU of the product")
         c.argument("version", type=str, help="Version of the product")
         c.argument(
