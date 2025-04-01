@@ -7,5 +7,6 @@ if [[ $(dpkg --print-architecture) == "amd64" ]]; then
 fi
 
 # https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
-curl -fsSL https://get.docker.com/ | sh
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh ./get-docker.sh
 sudo chmod 666 /var/run/docker.sock
