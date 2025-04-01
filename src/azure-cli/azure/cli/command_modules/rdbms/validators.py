@@ -19,7 +19,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations \
     as MySqlFirewallRulesOperations
-from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
+from ._client_factory import (cf_mysql_flexible_servers, cf_postgres_flexible_servers,
+                              cf_postgres_check_resource_availability)
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
@@ -309,7 +310,9 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None):
+                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
+                           password_auth=None, active_directory_auth=None, microsoft_entra_auth=None,
+                           admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     is_create = not instance
     if is_create:
@@ -349,6 +352,10 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+    is_microsoft_entra_auth = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled') \
+        or bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
+                                 admin_name, admin_id, admin_type, instance)
 
 
 def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
@@ -556,6 +563,11 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
                                  "Please provide --backup-identity and --backup-key together.")
 
+    if bool(byok_identity is not None) and bool(backup_byok_identity is not None) and \
+       byok_identity.lower() == backup_byok_identity.lower():
+        raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
+                                 "Please provide different identities for --identity and --backup-identity.")
+
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
        (byok_key or backup_byok_key):
@@ -570,6 +582,14 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         if instance is None and (bool(byok_key is not None) ^ bool(backup_byok_key is not None)):
             raise ArgumentUsageError("Please provide both primary as well as geo-back user assigned identity "
                                      "and keyvault key to enable Data encryption for geo-redundant backup.")
+        if instance is not None and (bool(byok_identity is None) ^ bool(backup_byok_identity is None)):
+            primary_user_assigned_identity_id = byok_identity if byok_identity else \
+                instance.data_encryption.primary_user_assigned_identity_id
+            geo_backup_user_assigned_identity_id = backup_byok_identity if backup_byok_identity else \
+                instance.data_encryption.geo_backup_user_assigned_identity_id
+            if primary_user_assigned_identity_id.lower() == geo_backup_user_assigned_identity_id.lower():
+                raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
+                                         "Please provide different identities for --identity and --backup-identity.")
 
 
 def _network_arg_validator(subnet, public_access):
@@ -715,6 +735,14 @@ def validate_server_name(db_context, server_name, type_):
 
     if not result.name_available:
         raise ValidationError(result.message)
+
+
+def validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name):
+    client = cf_postgres_check_resource_availability(cmd.cli_ctx, '_')
+    resource_type = 'Microsoft.DBforPostgreSQL/flexibleServers/virtualendpoints'
+    result = client.execute(name_availability_request={'name': virtual_endpoint_name, 'type': resource_type})
+    if result and result.name_available is False:
+        raise ValidationError("Virtual endpoint's base name is not available.")
 
 
 def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_resource_group_name, target_server_name):
@@ -907,6 +935,22 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise CLIError('Updating throughput is only capable for server created with Premium SSD v2.')
         if iops is not None:
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
+
+
+def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,
+                                 admin_name, admin_id, admin_type, instance):
+    if instance is None:
+        if (password_auth is not None and password_auth.lower() == 'disabled') and not is_microsoft_entra_auth_enabled:
+            raise CLIError('Need to have an authentication method enabled, please set --microsoft-entra-auth '
+                           'to "Enabled" or --password-auth to "Enabled".')
+
+        if not is_microsoft_entra_auth_enabled and (admin_name or admin_id or admin_type):
+            raise CLIError('To provide values for --admin-object-id, --admin-display-name, and --admin-type '
+                           'please set --microsoft-entra-auth to "Enabled".')
+        if (admin_name is not None or admin_id is not None or admin_type is not None) and \
+           not (admin_name is not None and admin_id is not None and admin_type is not None):
+            raise CLIError('To add Microsoft Entra admin, please provide values for --admin-object-id, '
+                           '--admin-display-name, and --admin-type.')
 
 
 def check_resource_group(resource_group_name):

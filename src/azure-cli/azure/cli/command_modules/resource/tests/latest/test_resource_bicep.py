@@ -37,6 +37,10 @@ class TestBicep(unittest.TestCase):
         with self.assertRaisesRegex(CLIError, 'Bicep CLI not found. Install it now by running "az bicep install".'):
             run_bicep_command(self.cli_ctx, ["--version"], auto_install=False)
 
+
+    @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
+    @mock.patch("azure.cli.command_modules.resource._bicep.set_use_binary_from_path_config")
+    @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
     @mock.patch("os.chmod")
     @mock.patch("os.stat")
     @mock.patch("io.BufferedWriter")
@@ -45,7 +49,21 @@ class TestBicep(unittest.TestCase):
     @mock.patch("os.path.exists")
     @mock.patch("os.path.dirname")
     @mock.patch("os.path.isfile")
-    def test_use_bicep_cli_from_path_false_after_install(self, isfile_stub, dirname_stub, exists_stub, urlopen_stub, open_stub, buffered_writer_stub, stat_stub, chmod_stub):
+    def test_use_bicep_cli_from_path_false_after_install(
+        self,
+        isfile_stub,
+        dirname_stub,
+        exists_stub,
+        urlopen_stub,
+        open_stub,
+        buffered_writer_stub,
+        stat_stub,
+        chmod_stub,
+        get_use_binary_from_path_config_stub,
+        set_use_binary_from_path_config_mock,
+        user_binary_from_path_stub,
+    ):
+        # Arrange
         isfile_stub.return_value = False
         dirname_stub.return_value = "tmp"
         exists_stub.return_value = True
@@ -61,32 +79,39 @@ class TestBicep(unittest.TestCase):
         response.getcode.return_value = 200
         response.read.return_value = b"test"
         urlopen_stub.return_value = response
+        
+        user_binary_from_path_stub.return_value = False
+        get_use_binary_from_path_config_stub.return_value = "if_found_in_ci"
 
+        # Act
         ensure_bicep_installation(self.cli_ctx, release_tag="v0.14.85", stdout=False)
 
-        self.assertTrue(self.cli_ctx.config.get("bicep", "use_binary_from_path") == "false")
+        # Assert
+        set_use_binary_from_path_config_mock.assert_called_once_with(self.cli_ctx, "false")
+        
 
+    @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
     @mock.patch("shutil.which")
-    def test_run_bicep_command_raise_error_if_bicep_cli_not_found_when_use_binary_from_path_is_true(self, which_stub):
+    def test_run_bicep_command_raise_error_if_bicep_cli_not_found_when_use_binary_from_path_is_true(self, which_stub, get_use_binary_from_path_config_stub):
         which_stub.return_value = None
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "true")
+        get_use_binary_from_path_config_stub.return_value = "true"
 
         with self.assertRaisesRegex(
             CLIError,
             'Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".',
         ):
             run_bicep_command(self.cli_ctx, ["--version"], auto_install=False)
-
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
+            
 
     @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True)
+    @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
     @mock.patch("azure.cli.command_modules.resource._bicep._logger.debug")
     @mock.patch("azure.cli.command_modules.resource._bicep._run_command")
     @mock.patch("shutil.which")
-    def test_run_bicep_command_use_bicep_cli_from_path_in_ci(self, which_stub, run_command_stub, debug_mock):
+    def test_run_bicep_command_use_bicep_cli_from_path_in_ci(self, which_stub, run_command_stub, debug_mock, get_use_binary_from_path_config_stub):
         which_stub.return_value = True
         run_command_stub.return_value = "Bicep CLI version 0.13.1 (e3ac80d678)"
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "if_found_in_ci")
+        get_use_binary_from_path_config_stub.return_value = "if_found_in_ci"
 
         run_bicep_command(self.cli_ctx, ["--version"], auto_install=False)
 
@@ -94,7 +119,10 @@ class TestBicep(unittest.TestCase):
             "Using Bicep CLI from PATH. %s",
             "Bicep CLI version 0.13.1 (e3ac80d678)",
         )
+        
 
+    @mock.patch("azure.cli.command_modules.resource._bicep.get_check_version_config")
+    @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
     @mock.patch("azure.cli.command_modules.resource._bicep._logger.warning")
     @mock.patch("azure.cli.command_modules.resource._bicep._run_command")
     @mock.patch("azure.cli.command_modules.resource._bicep.ensure_bicep_installation")
@@ -109,19 +137,22 @@ class TestBicep(unittest.TestCase):
         ensure_bicep_installation_mock,
         _run_command_mock,
         warning_mock,
+        get_use_binary_from_path_config_stub,
+        get_check_version_config_stub,
     ):
         isfile_stub.return_value = True
         _get_bicep_installed_version_stub.return_value = semver.VersionInfo.parse("1.0.0")
         get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
+        get_check_version_config_stub.return_value = "true"
+        get_use_binary_from_path_config_stub.return_value = "false"
 
-        self.cli_ctx.config.set_value("bicep", "check_version", "True")
-        self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
         run_bicep_command(self.cli_ctx, ["--version"])
 
         warning_mock.assert_called_once_with(
             'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
             "v2.0.0",
         )
+
 
     @mock.patch("azure.cli.command_modules.resource._bicep._logger.warning")
     @mock.patch("azure.cli.command_modules.resource._bicep._run_command")
@@ -151,18 +182,36 @@ class TestBicep(unittest.TestCase):
         finally:
             self._remove_bicep_version_check_file()
 
+
+    @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
     @mock.patch("os.path.isfile")
     @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installed_version")
     @mock.patch("os.path.dirname")
     def test_ensure_bicep_installation_skip_download_if_installed_version_matches_release_tag(
-        self, dirname_mock, _get_bicep_installed_version_stub, isfile_stub
+        self, dirname_mock, _get_bicep_installed_version_stub, isfile_stub, user_binary_from_path_stub
     ):
         _get_bicep_installed_version_stub.return_value = semver.VersionInfo.parse("0.1.0")
         isfile_stub.return_value = True
+        user_binary_from_path_stub.return_value = False
 
         ensure_bicep_installation(self.cli_ctx, release_tag="v0.1.0")
 
         dirname_mock.assert_not_called()
+
+            
+    @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
+    @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installation_path")
+    @mock.patch("shutil.which")
+    def test_ensure_bicep_installation_skip_download_if_use_binary_from_path_is_true(
+        self, which_stub, _get_bicep_installation_path_mock, get_use_binary_from_path_config_stub
+    ):
+        which_stub.return_value = True
+        get_use_binary_from_path_config_stub.return_value = "true"
+
+        ensure_bicep_installation(self.cli_ctx, release_tag="v0.1.0")
+
+        _get_bicep_installation_path_mock.assert_not_called()
+
 
     def test_validate_target_scope_raise_error_if_target_scope_does_not_match_deployment_scope(self):
         with self.assertRaisesRegex(
@@ -206,6 +255,9 @@ class TestBicep(unittest.TestCase):
         self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-win-x64.exe")
 
         download_url = _get_bicep_download_url("Linux", "arm64", "v0.26.54")
+        self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-linux-arm64")
+
+        download_url = _get_bicep_download_url("Linux", "aarch64", "v0.26.54")
         self.assertEqual(download_url, "https://downloads.bicep.azure.com/v0.26.54/bicep-linux-arm64")
 
         download_url = _get_bicep_download_url("Linux", "x64", "v0.26.54")

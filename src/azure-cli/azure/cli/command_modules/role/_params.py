@@ -23,13 +23,13 @@ JSON_PROPERTY_HELP = "Should be JSON file path or in-line JSON string. See examp
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
     with self.argument_context('ad') as c:
-        c.ignore('_subscription')  # hide global subscription param
         c.argument('owner_object_id', help="owner's object id")
         c.argument('show_mine', action='store_true', help='list entities owned by the current user')
         c.argument('include_all', options_list='--all', action='store_true',
                    help='list all entities, expect long delay if under a big organization')
 
     with self.argument_context('ad app') as c:
+        c.ignore('_subscription')
         # https://learn.microsoft.com/en-us/graph/api/resources/application?view=graph-rest-1.0
         c.argument('app_id', help='application id')
         c.argument('application_object_id', options_list=('--object-id',))
@@ -176,6 +176,7 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
 
     with self.argument_context('ad sp') as c:
+        c.ignore('_subscription')
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id')
 
     with self.argument_context('ad sp create') as c:
@@ -253,6 +254,7 @@ def load_arguments(self, _):
         c.argument('query_filter', options_list=['--filter'], help='OData filter, e.g. --filter "displayname eq \'test\' and servicePrincipalType eq \'Application\'"')
 
     with self.argument_context('ad user') as c:
+        c.ignore('_subscription')
         c.argument('mail_nickname', help='mail alias. Defaults to user principal name')
         c.argument('force_change_password_next_login', arg_type=get_three_state_flag(), help='Require the user to change their password the next time they log in. Only valid when --password is specified')
         c.argument('account_enabled', arg_type=get_three_state_flag(), help='enable the user account')
@@ -280,6 +282,7 @@ def load_arguments(self, _):
 
     group_help_msg = "group's object id or display name(prefix also works if there is a unique match)"
     with self.argument_context('ad group') as c:
+        c.ignore('_subscription')
         for arg in VARIANT_GROUP_ID_ARGS:
             c.argument(arg, options_list=['--group', '-g'], validator=validate_group, help=group_help_msg)
 
@@ -311,6 +314,7 @@ def load_arguments(self, _):
         c.argument('member_object_id', options_list='--member-id', help=member_id_help_msg)
 
     with self.argument_context('ad signed-in-user') as c:
+        c.ignore('_subscription')
         c.argument('object_type', options_list=['--type', '-t'], help='object type filter, e.g. "application", "servicePrincipal"  "group", etc')
 
     with self.argument_context('role') as c:
@@ -329,13 +333,20 @@ def load_arguments(self, _):
                    "use the object id and not the app id.")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('include_classic_administrators', arg_type=get_three_state_flag(),
-                   help='list default role assignments for subscription classic administrators, aka co-admins',
-                   deprecate_info=c.deprecate(target='--include-classic-administrators'))
+                   help='list default role assignments for subscription classic administrators, aka co-admins')
         c.argument('description', is_preview=True, min_api='2020-04-01-preview', help='Description of role assignment.')
         c.argument('condition', is_preview=True, min_api='2020-04-01-preview', help='Condition under which the user can be granted permission.')
         c.argument('condition_version', is_preview=True, min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
         c.argument('assignment_name', name_arg_type,
                    help='A GUID for the role assignment. It must be unique and different for each role assignment. If omitted, a new GUID is generated.')
+
+    with self.argument_context('role assignment list') as c:
+        c.argument('fill_principal_name', arg_type=get_three_state_flag(),
+                   help="Query Microsoft Graph to get the assignee's userPrincipalName (for user), "
+                        "servicePrincipalNames (for service principal) or displayName (for group), then fill "
+                        "principalName property with it. "
+                        "If the logged-in account has no permission or the machine has no network access to query "
+                        "Microsoft Graph, set this flag to false to avoid warning or error.")
 
     time_help = 'The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}'
     with self.argument_context('role assignment list-changelogs') as c:

@@ -689,6 +689,31 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             finally:
                 self.cmd('ad user delete --id {upn}')
 
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
+    def test_role_assignment_no_graph(self, resource_group):
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.kwargs.update({
+                'uami': self.create_random_name('clitest', 15),  # user-assigned managed identity
+                # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+                'role_reader_guid': 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+            })
+            self._prepare_scope_kwargs()
+
+            uami = self.cmd('identity create -g {rg} -n {uami} --location westus').get_output_in_json()
+            self.kwargs['uami_object_id'] = uami['principalId']
+
+            self.cmd('role assignment create '
+                     '--assignee-object-id {uami_object_id} --assignee-principal-type ServicePrincipal '
+                     '--role {role_reader_guid} --scope {rg_id}')
+            # Verify '--fill-principal-name false' skips the Graph query for filling principalName.
+            self.cmd('role assignment list --scope {rg_id} --fill-principal-name false',
+                     checks=[
+                         self.check("length([])", 1),
+                         self.not_exists("[0].principalName")
+                     ])
+            # Manually verify the recording file that no HTTP request to https://graph.microsoft.com is made
+
 
 class RoleAssignmentWithConfigScenarioTest(RoleScenarioTestBase):
 

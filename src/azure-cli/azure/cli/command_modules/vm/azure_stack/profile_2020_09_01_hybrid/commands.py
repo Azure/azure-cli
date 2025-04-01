@@ -26,6 +26,10 @@ def load_command_table(self, _):
     from .operations.snapshot import SnapshotUpdate
     self.command_table['snapshot update'] = SnapshotUpdate(loader=self)
 
+    from .operations.vm_availability_set import AvailabilitySetUpdate, AvailabilitySetConvert
+    self.command_table['vm availability-set update'] = AvailabilitySetUpdate(loader=self)
+    self.command_table['vm availability-set convert'] = AvailabilitySetConvert(loader=self)
+
     VMSS = import_aaz_by_profile("vmss")
     self.command_table['vmss list'] = VMSS.List(loader=self,
                                                 table_transformer=transform_vmss_list_with_zones_table_output)
@@ -38,6 +42,10 @@ def load_command_table(self, _):
 
     from .operations.vm import VMListSizes
     self.command_table['vm list-sizes'] = VMListSizes(loader=self)
+
+    from .operations.disk_encryption_set import DiskEncryptionSetCreate, DiskEncryptionSetUpdate
+    self.command_table["disk-encryption-set create"] = DiskEncryptionSetCreate(loader=self)
+    self.command_table["disk-encryption-set update"] = DiskEncryptionSetUpdate(loader=self)
 
     # pylint: disable=line-too-long
     SigImageVersion = import_aaz_by_profile("sig.image_version")
