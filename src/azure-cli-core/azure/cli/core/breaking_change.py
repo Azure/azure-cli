@@ -317,8 +317,9 @@ class BreakingChange(abc.ABC):
 
 
 class AzCLIDeprecate(BreakingChange):
-    def __init__(self, cmd, arg=None, target_version=NextBreakingChangeWindow(), **kwargs):
+    def __init__(self, cmd, arg=None, target_version=NextBreakingChangeWindow(), message=None, **kwargs):
         super().__init__(cmd, arg, None, target_version)
+        self._message = message
         self.kwargs = kwargs
 
     @staticmethod
@@ -336,8 +337,8 @@ class AzCLIDeprecate(BreakingChange):
 
     @property
     def message(self):
-        return self._build_message(self.kwargs.get('object_type'), self.target, self.target_version,
-                                   self.kwargs.get('redirect'))
+        return self._message or self._build_message(self.kwargs.get('object_type'), self.target, self.target_version,
+                                                    self.kwargs.get('redirect'))
 
     def to_tag(self, cli_ctx, **kwargs):
         if self.args:
@@ -348,7 +349,7 @@ class AzCLIDeprecate(BreakingChange):
             object_type = 'command'
         tag_kwargs = {
             'object_type': object_type,
-            'message_func': lambda depr: self._build_message(
+            'message_func': lambda depr: self._message or self._build_message(
                 depr.object_type, depr.target, self.target_version, depr.redirect),
             'target': self.target
         }
@@ -571,8 +572,8 @@ def register_upcoming_breaking_change_info(cli_ctx):
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, update_breaking_change_info)
 
 
-def register_deprecate_info(command_name, arg=None, target_version=NextBreakingChangeWindow(), **kwargs):
-    upcoming_breaking_changes[command_name].append(AzCLIDeprecate(command_name, arg, target_version, **kwargs))
+def register_deprecate_info(command_name, arg=None, target_version=NextBreakingChangeWindow(), message=None, **kwargs):
+    upcoming_breaking_changes[command_name].append(AzCLIDeprecate(command_name, arg, target_version, message, **kwargs))
 
 
 def register_output_breaking_change(command_name, description, target_version=NextBreakingChangeWindow(), guide=None,
@@ -603,18 +604,21 @@ def register_other_breaking_change(command_name, message, arg=None, target_versi
 
 
 def register_command_group_deprecate(command_group, redirect=None, hide=None,
-                                     target_version=NextBreakingChangeWindow(), **kwargs):
-    register_deprecate_info(command_group, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+                                     target_version=NextBreakingChangeWindow(), message=None, **kwargs):
+    register_deprecate_info(command_group, redirect=redirect, hide=hide, target_version=target_version,
+                            message=message, **kwargs)
 
 
 def register_command_deprecate(command, redirect=None, hide=None,
-                               target_version=NextBreakingChangeWindow(), **kwargs):
-    register_deprecate_info(command, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+                               target_version=NextBreakingChangeWindow(), message=None, **kwargs):
+    register_deprecate_info(command, redirect=redirect, hide=hide, target_version=target_version,
+                            message=message, **kwargs)
 
 
 def register_argument_deprecate(command, argument, redirect=None, hide=None,
-                                target_version=NextBreakingChangeWindow(), **kwargs):
-    register_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+                                target_version=NextBreakingChangeWindow(), message=None, **kwargs):
+    register_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version,
+                            message=message, **kwargs)
 
 
 def register_conditional_breaking_change(tag, breaking_change, *, command_name=None):
