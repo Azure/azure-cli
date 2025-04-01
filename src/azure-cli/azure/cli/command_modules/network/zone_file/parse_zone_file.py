@@ -293,8 +293,6 @@ def _add_record_names(text):
     Go through each line of the text and ensure that
     a name is defined.  Use previous record name if there is none.
     """
-    global SUPPORTED_RECORDS
-
     lines = text.split("\n")
     ret = []
     previous_record_name = None
