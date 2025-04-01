@@ -719,6 +719,7 @@ class AuthenticationType(str, Enum):
 
     sql = "SQL"
     ad_password = "ADPassword"
+    managed_identity = "ManagedIdentity"
 
 
 def _get_server_dns_suffx(cli_ctx):
