@@ -202,11 +202,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     if assign_identity is not None:
         identity = _build_identities_info(cmd, assign_identity)
 
-    if source_registry_auth_id:
-        if source_registry_auth_id.lower() == "none":
-            source_registry_auth_id = None
-        elif identity is None:
-            identity = _build_identities_info(cmd, [source_registry_auth_id])
+    if source_registry_auth_id and source_registry_auth_id.lower() != "none":
+        identity, _ = _update_identities_info(cmd, source_registry_auth_id, identity)
 
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
 
@@ -218,14 +215,15 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         deprecate_auth_mode=True
     )
 
-    if source_registry_auth_id:
+    if source_registry_auth_id and source_registry_auth_id.lower() != "none":
         logger.warning("The newly-created Task is configured to authenticate with the source registry '%s' using the "
                        "identity '%s'. Please ensure the identity has proper role assignments for access to the "
                        "registry.", registry_name, source_registry_auth_id)
     elif registry_abac_enabled:
-        logger.warning("The Task does not have permissions to the source registry. Please pass in an identity that the "
-                       "Task will use to authenticate with the source registry using the '--source-registry-auth-id' "
-                       "flag when running 'az acr task create' or 'az acr task update'.")
+        logger.warning("Warning: The newly-created Task does not have data plane permissions to the source registry "
+                       "'%s' to perform image push, pull, or delete. If you would like the Task to have such "
+                       "permissions, please specify '--source-registry-auth-id' when invoking 'az acr task create' or "
+                       "'az acr task update'", registry_name)
 
     task_create_parameters = Task(
         identity=identity,
@@ -526,7 +524,25 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     if platform:
         platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
+    if source_registry_auth_id and source_registry_auth_id.lower() != "none":
+        identity = client.get_details(resource_group_name, registry_name, task_name).identity
+        identity, update_identity = _update_identities_info(cmd, source_registry_auth_id, identity)
+
+        if update_identity:
+            taskUpdateParameters = TaskUpdateParameters(
+                identity=identity
+            )
+            client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+
+    credentials = get_source_and_custom_registry_credentials(
+        cmd=cmd,
+        auth_mode=auth_mode,
+        source_registry_auth_id=source_registry_auth_id,
+        registry_abac_enabled=registry_abac_enabled,
+        deprecate_auth_mode=True
+    )
 
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
@@ -544,13 +560,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
             source_triggers=source_trigger_update_params,
             base_image_trigger=base_image_trigger_update_params
         ),
-        credentials=get_source_and_custom_registry_credentials(
-            cmd=cmd,
-            auth_mode=auth_mode,
-            source_registry_auth_id=source_registry_auth_id,
-            registry_abac_enabled=registry_abac_enabled,
-            deprecate_auth_mode=True
-        ),
+        credentials=credentials,
         agent_pool_name=agent_pool_name,
         log_template=log_template
     )
@@ -1131,6 +1141,37 @@ def _get_all_override_arguments(argument=None, secret_argument=None):
     else:
         arguments = (argument if argument else []) + (secret_argument if secret_argument else [])
     return arguments
+
+
+def _update_identities_info(cmd, new_identity, identity):
+    update_identity = False
+
+    if identity is None:
+        update_identity = True
+        return _build_identities_info(cmd, [new_identity]), update_identity
+
+    ResourceIdentityType, UserIdentityProperties = cmd.get_models(
+        'ResourceIdentityType',
+        'UserIdentityProperties',
+        operation_group='tasks')
+
+    assign_system_identity = IDENTITY_LOCAL_ID == new_identity
+    if assign_system_identity:
+        if ResourceIdentityType.system_assigned.value not in identity.type:
+            update_identity = True
+            identity.type = (ResourceIdentityType.system_assigned.value
+                             if identity.type == ResourceIdentityType.none.value
+                             else ResourceIdentityType.system_assigned_user_assigned.value)
+    else:
+        if not (ResourceIdentityType.user_assigned.value in identity.type and
+                new_identity.lower() in map(str.lower, identity.user_assigned_identities.keys())):
+            update_identity = True
+            identity.type = (ResourceIdentityType.user_assigned.value
+                             if identity.type == ResourceIdentityType.none.value
+                             else ResourceIdentityType.system_assigned_user_assigned.value)
+            identity.user_assigned_identities = {new_identity: UserIdentityProperties()}
+
+    return identity, update_identity
 
 
 def _build_identities_info(cmd, identities, is_remove=False):

@@ -945,11 +945,11 @@ examples:
             -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
             --assign-identity [system] "/subscriptions/<subscriptionId>/resourcegroups/<myResourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<myUserAssignedIdentitiy>"
   - name: Create a task without the source location in an ABAC-based Repository Permission registry and specify a system-assigned MI used for auth with the source registry.
-      text: >
-          az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-registry-auth-id [system]
+    text: >
+        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-registry-auth-id [system]
   - name: Create a task without the source location in an ABAC-based Repository Permission registry and specify a user-assigned MI used for auth with the source registry.
-      text: >
-          az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-registry-auth-id 00000000-0000-0000-0000-000000000000
+    text: >
+        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-registry-auth-id 00000000-0000-0000-0000-000000000000
 """
 
 helps['acr task credential'] = """

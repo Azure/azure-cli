@@ -304,21 +304,26 @@ def get_source_and_custom_registry_credentials(cmd,
     if deprecate_auth_mode:
         check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
 
-    # "Default" and "None" are the allowed values for source registry auth mode.
-    # For a non-ABAC-enabled registry, "--source-registry-auth-id" will not take effect, and authentication
-    # will fail if the auth mode is "None". Therefore, we need to throw an error here.
-    if not registry_abac_enabled and auth_mode and auth_mode.lower() == "none" and source_registry_auth_id:
-        raise CLIError('Error: Conflicting Authentication Parameters for Task Access to Source Registry. Task '
-                       'authentication mode for source registry access is set to "None", but an identity was provided '
-                       'for authentication. Remove the identity or update the authentication mode to resolve this '
-                       'conflict.')
+    source_registry_identity = None
+    if source_registry_auth_id:
+        # "Default" and "None" are the allowed values for source registry auth mode.
+        # For a non-ABAC-enabled registry, "--source-registry-auth-id" will not take effect, and authentication
+        # will fail if the auth mode is "None". Therefore, we need to throw an error here.
+        if not registry_abac_enabled and auth_mode and auth_mode.lower() == "none":
+            raise CLIError('Error: Conflicting Authentication Parameters for Task Access to Source Registry. Task '
+                           'authentication mode for source registry access is set to "None", but an identity was '
+                           'provided for authentication. Remove the identity or update the authentication mode to '
+                           'resolve this conflict.')
 
-    source_registry_identity = source_registry_auth_id
-    if source_registry_auth_id and source_registry_auth_id.startswith('/subscriptions/'):
-        source_registry_identity = resolve_identity_client_id(cmd.cli_ctx, source_registry_auth_id)
+        if source_registry_auth_id.lower() == "none":
+            source_registry_identity = None
+        elif source_registry_auth_id.startswith('/subscriptions/'):  # user-assigned MI resource ID
+            source_registry_identity = resolve_identity_client_id(cmd.cli_ctx, source_registry_auth_id)
+        else:
+            source_registry_identity = source_registry_auth_id  # The value could be either [caller] or [system]
 
     source_registry_credentials = None
-    if auth_mode or source_registry_identity:
+    if auth_mode or source_registry_auth_id:
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode, identity=source_registry_identity)
 
