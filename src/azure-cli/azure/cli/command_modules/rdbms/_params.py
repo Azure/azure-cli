@@ -459,7 +459,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         pg_version_upgrade_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['12', '13', '14', '15', '16']),
+            arg_type=get_enum_type(['12', '13', '14', '15', '16', '17']),
             options_list=['--version', '-v'],
             help='Server major version.'
         )
@@ -532,6 +532,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Whether Microsoft Entra authentication is enabled.'
         )
 
+        microsoft_entra_auth_arg_type = CLIArgumentType(
+            options_list=['--microsoft-entra-auth'],
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            help='Whether Microsoft Entra authentication is enabled.'
+        )
+
         password_auth_arg_type = CLIArgumentType(
             options_list=['--password-auth'],
             arg_type=get_enum_type(['Enabled', 'Disabled']),
@@ -594,6 +600,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('version', default='16', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
+                c.argument('microsoft_entra_auth', default='Disabled', arg_type=microsoft_entra_auth_arg_type)
                 c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
                 c.argument('admin_name', options_list=['--admin-display-name', '-m'], help='Display name of the Microsoft Entra administrator user or group.')
                 c.argument('admin_type', options_list=['--admin-type', '-t'],
@@ -747,6 +754,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
+                c.argument('microsoft_entra_auth', arg_type=microsoft_entra_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
                 c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
                 c.argument('cluster_size', default=None, arg_type=update_node_count_arg_type)
@@ -975,7 +983,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('database_names', options_list=['--database-names', '-d'], nargs='+',
                                help='Space-separated list of the database names to be mirrored. Required if --mirroring is enabled.')
 
-        # ad-admin
+        # ad-admin - Rename and deprecate group
         with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
@@ -987,6 +995,19 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Microsoft Entra administrator user or group.')
             c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
             c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
+
+        # microsoft-entra-admin
+        with self.argument_context('{} flexible-server microsoft-entra-admin'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+        for scope in ['create', 'show', 'delete', 'wait']:
+            with self.argument_context('{} flexible-server microsoft-entra-admin {}'.format(command_group, scope)) as c:
+                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
+
+        with self.argument_context('{} flexible-server microsoft-entra-admin create'.format(command_group)) as c:
+            c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Microsoft Entra administrator user or group.')
+            c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
+            c.argument('identity', help='Name or ID of identity used for Microsoft Entra Authentication.', validator=validate_identity)
 
         # server advanced threat protection settings
         for scope in ['update', 'show']:
