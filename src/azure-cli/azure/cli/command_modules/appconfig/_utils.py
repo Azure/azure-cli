@@ -188,7 +188,7 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
             token_audience = current_cloud.endpoints.appconfig_auth_token_audience
 
         try:
-            azconfig_client = AzureAppConfigurationClient(credential=AppConfigurationCliCredential(cred, token_audience),  # pylint: disable=protected-access
+            azconfig_client = AzureAppConfigurationClient(credential=AppConfigurationCliCredential(cred, token_audience),
                                                           base_url=endpoint,
                                                           user_agent=HttpHeaders.USER_AGENT)
         except (ValueError, TypeError) as ex:
