@@ -3958,11 +3958,18 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if not vmss.protection_policy:
             vmss.protection_policy = VMProtectionPolicy()
 
-        if protect_from_scale_in is not None:
-            vmss.protection_policy.protect_from_scale_in = protect_from_scale_in
-
         if protect_from_scale_set_actions is not None:
             vmss.protection_policy.protect_from_scale_set_actions = protect_from_scale_set_actions
+
+        if protect_from_scale_in is not None:
+            vmss.protection_policy.protect_from_scale_in = protect_from_scale_in
+            VirtualMachineScaleSetVM = cmd.get_models('VirtualMachineScaleSetVM')
+            kwargs['parameters'] = VirtualMachineScaleSetVM(protection_policy=kwargs['parameters'].protection_policy,
+                                                            location=kwargs['parameters'].location,
+                                                            license_type=kwargs['parameters'].license_type,
+                                                            user_data=kwargs['parameters'].user_data)
+            return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_update,
+                               resource_group_name, name, instance_id, **kwargs)
 
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_update,
                            resource_group_name, name, instance_id, **kwargs)
