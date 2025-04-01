@@ -58,7 +58,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     _service_principal_store_instance = None
 
     def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False, use_msal_http_cache=True,
-                 enable_broker_on_windows=None, instance_discovery=None):
+                 enable_broker_on_windows=None, enable_broker_on_wsl=None,
+                 instance_discovery=None):
         """
         :param authority: Authentication authority endpoint. For example,
             - AAD: https://login.microsoftonline.com
@@ -74,6 +75,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self._encrypt = encrypt
         self._use_msal_http_cache = use_msal_http_cache
         self._enable_broker_on_windows = enable_broker_on_windows
+        self._enable_broker_on_wsl = enable_broker_on_wsl
         self._instance_discovery = instance_discovery
 
         # Build the authority in MSAL style
@@ -112,7 +114,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def _msal_public_app_kwargs(self):
         """kwargs for creating PublicClientApplication."""
         # enable_broker_on_windows can only be used on PublicClientApplication.
-        return {**self._msal_app_kwargs, "enable_broker_on_windows": self._enable_broker_on_windows}
+        return {**self._msal_app_kwargs,
+                "enable_broker_on_windows": self._enable_broker_on_windows,
+                "enable_broker_on_wsl": self._enable_broker_on_wsl
+                }
 
     @property
     def _msal_app(self):
