@@ -909,8 +909,8 @@ helps['postgres flexible-server upgrade'] = """
 type: command
 short-summary: Upgrade the major version of a flexible server.
 examples:
-  - name: Upgrade server 'testsvr' to PostgreSQL major version 16.
-    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 16
+  - name: Upgrade server 'testsvr' to PostgreSQL major version 17.
+    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 17
 """
 
 helps['postgres flexible-server identity'] = """
