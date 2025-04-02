@@ -236,7 +236,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                           scope=None, include_inherited=False,
                           include_groups=False, include_classic_administrators=False,
                           fill_principal_name=True,
-                          at_scope=False,
+                          at_scope=True,
                           show_all=None):  # pylint: disable=unused-argument
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
