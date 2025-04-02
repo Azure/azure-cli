@@ -589,8 +589,11 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
             if assignee_object_id and include_groups:
                 filters.append("assignedTo('{}')".format(assignee_object_id))
         else:
-            if assignee_object_id and not include_groups:
-                filters.append("principalId eq '{}'".format(assignee_object_id))
+            if assignee_object_id:
+                if include_groups:
+                    filters.append("assignedTo('{}')".format(assignee_object_id))
+                else:
+                    filters.append("principalId eq '{}'".format(assignee_object_id))
         f = ' and '.join(filters) if filters else None
         assignments = list(assignments_client.list_for_scope(scope, filter=f))
     else:
