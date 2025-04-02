@@ -323,7 +323,8 @@ def load_arguments(self, _):
 
     with self.argument_context('role assignment') as c:
         c.argument('role', help='role name or id', completer=get_role_definition_name_completion_list)
-        c.argument('show_all', options_list=['--all'], action='store_true', help='show all assignments under the current subscription')
+        c.argument('show_all', options_list=['--all'], action='store_true',
+                   deprecate_info=c.deprecate(target='--all', hide=True), help="No-op.")
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
         c.argument('can_delegate', action='store_true', help='when set, the assignee will be able to create further role assignments to the same role')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
@@ -339,6 +340,9 @@ def load_arguments(self, _):
         c.argument('condition_version', is_preview=True, min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
         c.argument('assignment_name', name_arg_type,
                    help='A GUID for the role assignment. It must be unique and different for each role assignment. If omitted, a new GUID is generated.')
+        c.argument('at_scope', arg_type=get_three_state_flag(),
+                   help='Include role assignments for only the specified scope, not including the role assignments at '
+                        'subscopes.')
 
     with self.argument_context('role assignment list') as c:
         c.argument('fill_principal_name', arg_type=get_three_state_flag(),
