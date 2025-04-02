@@ -234,12 +234,15 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
                           scope=None, include_inherited=False,
-                          show_all=False, include_groups=False, include_classic_administrators=False,
-                          fill_principal_name=True):
+                          include_groups=False, include_classic_administrators=False,
+                          fill_principal_name=True,
+                          at_scope=True,
+                          show_all=None):  # pylint: disable=unused-argument
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively).
     '''
+    # show_all is now a no-op
     if include_classic_administrators:
         logger.warning(CLASSIC_ADMINISTRATOR_WARNING)
 
@@ -248,17 +251,11 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     assignments_client = authorization_client.role_assignments
     definitions_client = authorization_client.role_definitions
 
-    if show_all:
-        if resource_group_name or scope:
-            raise CLIError('group or scope are not required when --all is used')
-        scope = None
-    else:
-        scope = _build_role_scope(resource_group_name, scope,
-                                  definitions_client._config.subscription_id)
-
+    scope = _build_role_scope(resource_group_name, scope, definitions_client._config.subscription_id)
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role,
-                                           include_inherited, include_groups)
+                                           include_inherited, include_groups,
+                                           at_scope=at_scope)
 
     results = todict(assignments) if assignments else []
     if include_classic_administrators:
@@ -561,7 +558,7 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
                               assignments_client._config.subscription_id)
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role, include_inherited,
-                                           include_groups=False)
+                                           include_groups=False, at_scope=True)
 
     if assignments:
         for a in assignments:
@@ -571,39 +568,33 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
 
 
 def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
-                             scope, assignee, role, include_inherited, include_groups):
+                             scope, assignee, role, include_inherited, include_groups,
+                             at_scope=None):
     assignee_object_id = None
     if assignee:
         assignee_object_id = _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
 
     # https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-list-rest
+    # https://learn.microsoft.com/en-us/rest/api/authorization/role-assignments/list-for-scope
     # "atScope()" and "principalId eq '{value}'" query cannot be used together (API limitation).
-    # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
-    if scope:
-        f = 'atScope()'  # atScope() excludes role assignments at subscopes
-        if assignee_object_id and include_groups:
-            f = f + " and assignedTo('{}')".format(assignee_object_id)
-        assignments = list(assignments_client.list_for_scope(scope=scope, filter=f))
-    elif assignee_object_id:
-        if include_groups:
-            f = "assignedTo('{}')".format(assignee_object_id)
-        else:
-            f = "principalId eq '{}'".format(assignee_object_id)
-        assignments = list(assignments_client.list_for_subscription(filter=f))
-    else:
-        assignments = list(assignments_client.list_for_subscription())
+    filters = []
+    if at_scope:
+        filters.append('atScope()')  # atScope() excludes role assignments at subscopes
+    elif assignee_object_id and not include_groups:
+        filters.append("principalId eq '{}'".format(assignee_object_id))
+
+    if assignee_object_id and include_groups:
+        filters.append("assignedTo('{}')".format(assignee_object_id))
+    f = ' and '.join(filters) if filters else None
+    assignments = list(assignments_client.list_for_scope(scope, filter=f))
 
     worker = MultiAPIAdaptor(cli_ctx)
     if assignments:
-        assignments = [a for a in assignments if (
-            # If no scope, list all assignments
-            not scope or
-            # If scope is provided with include_inherited, list assignments at and above the scope.
-            # Note that assignments below the scope are already excluded by atScope()
-            include_inherited or
-            # If scope is provided, list assignments at the scope
-            worker.get_role_property(a, 'scope').lower() == scope.lower()
-        )]
+        # Limitation: If scope is a management group, the filtering cannot keep subscope assignments,
+        # because a subscope assignment's scope doesn't start with management group scope.
+        if scope and not include_inherited:
+            assignments = [a for a in assignments if (
+                worker.get_role_property(a, 'scope').lower().startswith(scope.lower()))]
 
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
