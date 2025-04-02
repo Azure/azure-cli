@@ -586,16 +586,13 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
         filters = []
         if at_scope:
             filters.append('atScope()')  # atScope() excludes role assignments at subscopes
-        if assignee_object_id and include_groups:
-            filters.append("assignedTo('{}')".format(assignee_object_id))
-        f = ' and '.join(filters) if filters else None
-        assignments = list(assignments_client.list_for_scope(scope=scope, filter=f))
-    elif assignee_object_id:
-        if include_groups:
-            f = "assignedTo('{}')".format(assignee_object_id)
+            if assignee_object_id and include_groups:
+                filters.append("assignedTo('{}')".format(assignee_object_id))
         else:
-            f = "principalId eq '{}'".format(assignee_object_id)
-        assignments = list(assignments_client.list_for_subscription(filter=f))
+            if assignee_object_id and not include_groups:
+                filters.append("principalId eq '{}'".format(assignee_object_id))
+        f = ' and '.join(filters) if filters else None
+        assignments = list(assignments_client.list_for_scope(scope, filter=f))
     else:
         assignments = list(assignments_client.list_for_subscription())
 
