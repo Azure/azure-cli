@@ -999,6 +999,8 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
     """Lazily import and create Identity instance to avoid unnecessary imports."""
     from .auth.identity import Identity
     from .util import should_encrypt_token_cache
+    from .telemetry import set_broker_info
+
     encrypt = should_encrypt_token_cache(cli_ctx)
 
     # EXPERIMENTAL: Use core.use_msal_http_cache=False to turn off MSAL HTTP cache.
@@ -1006,8 +1008,11 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
 
     # On Windows, use core.enable_broker_on_windows=false to disable broker (WAM) for authentication.
     enable_broker_on_windows = cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
-    from .telemetry import set_broker_info
     set_broker_info(enable_broker_on_windows)
+
+    # On WSL, use core.enable_broker_on_wsl=true to use broker (WAM)
+    enable_broker_on_wsl = cli_ctx.config.getboolean('core', 'enable_broker_on_wsl', fallback=False)
+    set_broker_info(enable_broker_on_wsl)
 
     # PREVIEW: In Azure Stack environment, use core.instance_discovery=false to disable MSAL's instance discovery.
     instance_discovery = cli_ctx.config.getboolean('core', 'instance_discovery', True)
@@ -1016,6 +1021,7 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
                     encrypt=encrypt,
                     use_msal_http_cache=use_msal_http_cache,
                     enable_broker_on_windows=enable_broker_on_windows,
+                    enable_broker_on_wsl=enable_broker_on_wsl,
                     instance_discovery=instance_discovery)
 
 
