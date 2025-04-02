@@ -563,7 +563,7 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
                               assignments_client._config.subscription_id)
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role, include_inherited,
-                                           include_groups=False)
+                                           include_groups=False, at_scope=True)
 
     if assignments:
         for a in assignments:

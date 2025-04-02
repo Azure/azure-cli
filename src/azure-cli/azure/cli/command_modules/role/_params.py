@@ -343,7 +343,7 @@ def load_arguments(self, _):
         c.argument('assignment_name', name_arg_type,
                    help='A GUID for the role assignment. It must be unique and different for each role assignment. If omitted, a new GUID is generated.')
         c.argument('at_scope', arg_type=get_three_state_flag(),
-                   help='Lists role assignments for only the specified scope, not including the role assignments at '
+                   help='Include role assignments for only the specified scope, not including the role assignments at '
                         'subscopes.')
 
     with self.argument_context('role assignment list') as c:
