@@ -586,26 +586,32 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
         filters = []
         if at_scope:
             filters.append('atScope()')  # atScope() excludes role assignments at subscopes
-            if assignee_object_id and include_groups:
-                filters.append("assignedTo('{}')".format(assignee_object_id))
-        else:
-            if assignee_object_id:
-                if include_groups:
-                    filters.append("assignedTo('{}')".format(assignee_object_id))
-                else:
-                    filters.append("principalId eq '{}'".format(assignee_object_id))
+        if assignee_object_id and include_groups:
+            filters.append("assignedTo('{}')".format(assignee_object_id))
         f = ' and '.join(filters) if filters else None
-        assignments = list(assignments_client.list_for_scope(scope, filter=f))
+        assignments = list(assignments_client.list_for_scope(scope=scope, filter=f))
+    elif assignee_object_id:
+        if include_groups:
+            f = "assignedTo('{}')".format(assignee_object_id)
+        else:
+            f = "principalId eq '{}'".format(assignee_object_id)
+        assignments = list(assignments_client.list_for_subscription(filter=f))
     else:
         assignments = list(assignments_client.list_for_subscription())
 
     worker = MultiAPIAdaptor(cli_ctx)
     if assignments:
-        # Limitation: If scope is a management group, the filtering cannot keep subscope assignments,
-        # because a subscope assignment's scope doesn't start with management group scope.
-        if scope and not include_inherited:
-            assignments = [a for a in assignments if (
-                worker.get_role_property(a, 'scope').lower().startswith(scope.lower()))]
+        assignments = [a for a in assignments if (
+            # If no scope (--all), list all assignments
+            not scope or
+            # If --at-scope false, list all assignments
+            not at_scope or
+            # If scope is provided with include_inherited, list assignments at and above the scope.
+            # Note that assignments below the scope are already excluded by atScope()
+            include_inherited or
+            # If scope is provided, list assignments at the scope
+            worker.get_role_property(a, 'scope').lower() == scope.lower()
+        )]
 
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
