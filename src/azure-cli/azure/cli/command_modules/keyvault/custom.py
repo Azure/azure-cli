@@ -229,7 +229,7 @@ def get_deleted_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_na
     return hsm_client.get_deleted(name=hsm_name, location=location)
 
 
-def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None,  # pylint: disable=unused-argument
+def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None,
                        no_wait=False):
     if is_azure_stack_profile(cmd) or vault_name:
         return sdk_no_wait(
@@ -320,7 +320,7 @@ def _create_network_rule_set(cmd, bypass=None, default_action=None):
 
 
 # region KeyVault Vault
-def get_default_policy(cmd, scaffold=False):  # pylint: disable=unused-argument
+def get_default_policy(cmd, scaffold=False):
     """
     Get a default certificate policy to be used with `az keyvault certificate create`
     :param bool scaffold: create a fully formed policy structure with default values
@@ -1480,7 +1480,7 @@ def update_key_rotation_policy(cmd, client, value, key_name=None):
 
 
 # region KeyVault Secret
-def download_secret(client, file_path, name=None, encoding=None, version=''):  # pylint: disable=unused-argument
+def download_secret(client, file_path, name=None, encoding=None, version=''):
     """ Download a secret from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -1511,7 +1511,7 @@ def download_secret(client, file_path, name=None, encoding=None, version=''):  #
         raise ex
 
 
-def backup_secret(client, file_path, name=None):  # pylint: disable=unused-argument
+def backup_secret(client, file_path, name=None):
     backup = client.backup_secret(name)
     with open(file_path, 'wb') as output:
         output.write(backup)
@@ -1714,8 +1714,7 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
     if no_wait:
         return retval
 
-    new_retval = \
-        _wait_private_link_operation(client, resource_group_name, name, private_endpoint_connection_name)
+    new_retval = _wait_private_link_operation(client, resource_group_name, name, private_endpoint_connection_name)
 
     if new_retval:
         return new_retval
