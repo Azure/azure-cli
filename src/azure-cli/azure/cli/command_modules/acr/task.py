@@ -76,7 +76,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     auth_mode=None,
                     log_template=None,
                     is_system_task=False,
-                    source_registry_auth_id=None):
+                    source_acr_auth_id=None):
 
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
@@ -202,27 +202,27 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     if assign_identity is not None:
         identity = _build_identities_info(cmd, assign_identity)
 
-    if source_registry_auth_id and source_registry_auth_id.lower() != "none":
-        identity, _ = _update_identities_info(cmd, source_registry_auth_id, identity)
+    if source_acr_auth_id and source_acr_auth_id.lower() != "none":
+        identity, _ = _update_identities_info(cmd, source_acr_auth_id, identity)
 
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
 
     credentials = get_source_and_custom_registry_credentials(
         cmd=cmd,
         auth_mode=auth_mode,
-        source_registry_auth_id=source_registry_auth_id,
+        source_acr_auth_id=source_acr_auth_id,
         registry_abac_enabled=registry_abac_enabled,
         deprecate_auth_mode=True
     )
 
-    if source_registry_auth_id and source_registry_auth_id.lower() != "none":
+    if source_acr_auth_id and source_acr_auth_id.lower() != "none":
         logger.warning("The newly-created Task is configured to authenticate with the source registry '%s' using the "
                        "identity '%s'. Please ensure the identity has proper role assignments for access to the "
-                       "registry.", registry_name, source_registry_auth_id)
+                       "registry.", registry_name, source_acr_auth_id)
     elif registry_abac_enabled:
         logger.warning("Warning: The newly-created Task does not have data plane permissions to the source registry "
                        "'%s' to perform image push, pull, or delete. If you would like the Task to have such "
-                       "permissions, please specify '--source-registry-auth-id' when invoking 'az acr task create' or "
+                       "permissions, please specify '--source-acr-auth-id' when invoking 'az acr task create' or "
                        "'az acr task update'", registry_name)
 
     task_create_parameters = Task(
@@ -391,7 +391,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
                     auth_mode=None,
                     log_template=None,
                     cmd_value=None,
-                    source_registry_auth_id=None):
+                    source_acr_auth_id=None):
     registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
@@ -524,9 +524,9 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     if platform:
         platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
-    if source_registry_auth_id and source_registry_auth_id.lower() != "none":
+    if source_acr_auth_id and source_acr_auth_id.lower() != "none":
         identity = client.get_details(resource_group_name, registry_name, task_name).identity
-        identity, update_identity = _update_identities_info(cmd, source_registry_auth_id, identity)
+        identity, update_identity = _update_identities_info(cmd, source_acr_auth_id, identity)
 
         if update_identity:
             taskUpdateParameters = TaskUpdateParameters(
@@ -539,7 +539,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     credentials = get_source_and_custom_registry_credentials(
         cmd=cmd,
         auth_mode=auth_mode,
-        source_registry_auth_id=source_registry_auth_id,
+        source_acr_auth_id=source_acr_auth_id,
         registry_abac_enabled=registry_abac_enabled,
         deprecate_auth_mode=True
     )
@@ -1144,6 +1144,17 @@ def _get_all_override_arguments(argument=None, secret_argument=None):
 
 
 def _update_identities_info(cmd, new_identity, identity):
+    """
+    Add the new identity information to the existing IdentityProperties provided.
+
+    Args:
+        cmd (Any): The command context.
+        new_identity (str): The new identity to be added.
+        identity (IdentityProperties): The provided IdentityProperties.
+
+    Returns:
+        Tuple[IdentityProperties, bool]: The updated IdentityProperties and a boolean indicating if an update was made.
+    """
     update_identity = False
 
     if identity is None:
@@ -1157,19 +1168,25 @@ def _update_identities_info(cmd, new_identity, identity):
 
     assign_system_identity = IDENTITY_LOCAL_ID == new_identity
     if assign_system_identity:
-        if ResourceIdentityType.system_assigned.value not in identity.type:
+        if identity.type not in {ResourceIdentityType.system_assigned.value,
+                                 ResourceIdentityType.system_assigned_user_assigned.value}:
             update_identity = True
             identity.type = (ResourceIdentityType.system_assigned.value
                              if identity.type == ResourceIdentityType.none.value
                              else ResourceIdentityType.system_assigned_user_assigned.value)
     else:
-        if not (ResourceIdentityType.user_assigned.value in identity.type and
-                new_identity.lower() in map(str.lower, identity.user_assigned_identities.keys())):
+        if identity.user_assigned_identities is None or \
+                new_identity.lower() not in map(str.lower, identity.user_assigned_identities.keys()):
             update_identity = True
-            identity.type = (ResourceIdentityType.user_assigned.value
-                             if identity.type == ResourceIdentityType.none.value
-                             else ResourceIdentityType.system_assigned_user_assigned.value)
-            identity.user_assigned_identities = {new_identity: UserIdentityProperties()}
+
+            # Update identity type if it is not already user-assigned
+            if identity.type == ResourceIdentityType.none.value:
+                identity.type = ResourceIdentityType.user_assigned.value
+            elif identity.type != ResourceIdentityType.user_assigned.value:
+                identity.type = ResourceIdentityType.system_assigned_user_assigned.value
+
+            identity.user_assigned_identities = identity.user_assigned_identities or {}
+            identity.user_assigned_identities[new_identity] = UserIdentityProperties()
 
     return identity, update_identity
 

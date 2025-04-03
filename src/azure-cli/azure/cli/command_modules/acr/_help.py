@@ -39,7 +39,7 @@ examples:
         az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry . --platform linux/arm/v7
   - name: Queue a local context as a Linux build, tag it, and push it to the ABAC-based Repository Permission enabled registry and use the caller's Entra identity to authenticate with the source registry.
     text: >
-        az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry . --source-registry-auth-id [caller]
+        az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry . --source-acr-auth-id [caller]
 """
 
 helps['acr check-health'] = """
@@ -811,7 +811,7 @@ examples:
         az acr run -r myregistry oci://myregistry.azurecr.io/myartifact:mytag -f hello-world.yaml
   - name: Queue a run to execute a container command in an ABAC-based Repository Permission enabled registry and use the caller's Entra identity to authenticate with the source registry.
     text: >
-        az acr run -r myregistry --cmd '$Registry/myimage' /dev/null --source-registry-auth-id [caller]
+        az acr run -r myregistry --cmd '$Registry/myimage' /dev/null --source-acr-auth-id [caller]
 """
 
 helps['acr scope-map'] = """
@@ -946,10 +946,10 @@ examples:
             --assign-identity [system] "/subscriptions/<subscriptionId>/resourcegroups/<myResourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<myUserAssignedIdentitiy>"
   - name: Create a task without the source location in an ABAC-based Repository Permission registry and specify a system-assigned MI used for auth with the source registry.
     text: >
-        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-registry-auth-id [system]
+        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-acr-auth-id [system]
   - name: Create a task without the source location in an ABAC-based Repository Permission registry and specify a user-assigned MI used for auth with the source registry.
     text: >
-        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-registry-auth-id 00000000-0000-0000-0000-000000000000
+        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-acr-auth-id 00000000-0000-0000-0000-000000000000
 """
 
 helps['acr task credential'] = """

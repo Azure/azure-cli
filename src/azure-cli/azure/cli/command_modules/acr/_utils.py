@@ -32,6 +32,9 @@ from ._validators import validate_docker_file_path
 
 from ._archive_utils import upload_source_code, check_remote_source_code
 
+CALLER_IDENTITY_ALIAS = '[caller]'
+SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
+
 logger = get_logger(__name__)
 
 
@@ -282,7 +285,7 @@ def get_source_and_custom_registry_credentials(cmd,
                                                password=None,
                                                identity=None,
                                                is_remove=False,
-                                               source_registry_auth_id=None,
+                                               source_acr_auth_id=None,
                                                registry_abac_enabled=False,
                                                deprecate_auth_mode=False):
     """Get the credential object from the input
@@ -291,7 +294,7 @@ def get_source_and_custom_registry_credentials(cmd,
     :param str username: The username for custom registry (plain text or a key vault secret URI)
     :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
-    :param str source_registry_auth_id: the managed identity used for the source registry authentication
+    :param str source_acr_auth_id: the managed identity used for the source registry authentication
     :param bool registry_abac_enabled: whether the registry is ABAC-enabled
     :param bool deprecate_auth_mode: whether to print the auth mode deprecation warning
     """
@@ -305,9 +308,9 @@ def get_source_and_custom_registry_credentials(cmd,
         check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
 
     source_registry_identity = None
-    if source_registry_auth_id:
+    if source_acr_auth_id:
         # "Default" and "None" are the allowed values for source registry auth mode.
-        # For a non-ABAC-enabled registry, "--source-registry-auth-id" will not take effect, and authentication
+        # For a non-ABAC-enabled registry, "--source-acr-auth-id" will not take effect, and authentication
         # will fail if the auth mode is "None". Therefore, we need to throw an error here.
         if not registry_abac_enabled and auth_mode and auth_mode.lower() == "none":
             raise CLIError('Error: Conflicting Authentication Parameters for Task Access to Source Registry. Task '
@@ -315,15 +318,17 @@ def get_source_and_custom_registry_credentials(cmd,
                            'provided for authentication. Remove the identity or update the authentication mode to '
                            'resolve this conflict.')
 
-        if source_registry_auth_id.lower() == "none":
+        if source_acr_auth_id.lower() == "none":
             source_registry_identity = None
-        elif source_registry_auth_id.startswith('/subscriptions/'):  # user-assigned MI resource ID
-            source_registry_identity = resolve_identity_client_id(cmd.cli_ctx, source_registry_auth_id)
+        elif source_acr_auth_id.startswith('/subscriptions/'):  # user-assigned MI resource ID
+            source_registry_identity = resolve_identity_client_id(cmd.cli_ctx, source_acr_auth_id)
+        elif source_acr_auth_id == CALLER_IDENTITY_ALIAS or source_acr_auth_id == SYSTEM_ASSIGNED_IDENTITY_ALIAS:
+            source_registry_identity = source_acr_auth_id
         else:
-            source_registry_identity = source_registry_auth_id  # The value could be either [caller] or [system]
+            raise CLIError('Error: Invalid value for --source-acr-auth-id.')
 
     source_registry_credentials = None
-    if auth_mode or source_registry_auth_id:
+    if auth_mode or source_acr_auth_id:
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode, identity=source_registry_identity)
 
@@ -635,5 +640,5 @@ def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_n
 def check_auth_mode_for_abac(registry_abac_enabled, auth_mode):
     if registry_abac_enabled and auth_mode is not None:
         logger.warning("The --auth-mode flag is deprecated for specifying access to an ABAC-enabled source registry. "
-                       "Please use --source-registry-auth-id to specify an Entra identity for use in accessing an "
+                       "Please use --source-acr-auth-id to specify an Entra identity for use in accessing an "
                        "ABAC-enabled source registry.")

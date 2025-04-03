@@ -40,7 +40,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               target=None,
               auth_mode=None,
               log_template=None,
-              source_registry_auth_id=None):
+              source_acr_auth_id=None):
     registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
@@ -122,7 +122,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         credentials=get_source_and_custom_registry_credentials(
             cmd=cmd,
             auth_mode=auth_mode,
-            source_registry_auth_id=source_registry_auth_id,
+            source_acr_auth_id=source_acr_auth_id,
             registry_abac_enabled=registry_abac_enabled,
             deprecate_auth_mode=True
         ),
