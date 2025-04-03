@@ -327,10 +327,11 @@ def load_arguments(self, _):
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
         c.argument('can_delegate', action='store_true', help='when set, the assignee will be able to create further role assignments to the same role')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
-        c.argument('assignee_object_id', help="Use this parameter instead of '--assignee' to bypass Graph API invocation in case of insufficient privileges. "
-                   "This parameter only works with object ids for users, groups, service principals, and "
-                   "managed identities. For managed identities use the principal id. For service principals, "
-                   "use the object id and not the app id.")
+        c.argument('assignee_object_id',
+                   help="The assignee's object ID (also known as principal ID). "
+                        "Use this argument instead of '--assignee' to bypass Microsoft Graph query in case "
+                        "the logged-in account has no permission or the machine has no network access to query "
+                        "Microsoft Graph.")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('include_classic_administrators', arg_type=get_three_state_flag(),
                    help='list default role assignments for subscription classic administrators, aka co-admins')
@@ -350,6 +351,8 @@ def load_arguments(self, _):
         c.argument('fill_role_definition_name', arg_type=get_three_state_flag(),
                    help="Fill roleDefinitionName property in addition to roleDefinitionId. This operation is "
                         "expensive. If you encounter performance issue, set this flag to false.")
+        c.argument('include_groups', action='store_true',
+                   help='Include extra assignments to the groups of which the user is a member (transitively).')
 
     time_help = 'The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}'
     with self.argument_context('role assignment list-changelogs') as c:

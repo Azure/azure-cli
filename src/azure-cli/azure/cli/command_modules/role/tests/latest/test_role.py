@@ -706,6 +706,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
     def test_role_assignment_no_graph(self, resource_group):
+        # After live testing, manually verify the recording file that no HTTP request to
+        # https://graph.microsoft.com is made
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.kwargs.update({
                 'uami': self.create_random_name('clitest', 15),  # user-assigned managed identity
@@ -720,15 +722,19 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             self.cmd('role assignment create '
                      '--assignee-object-id {uami_object_id} --assignee-principal-type ServicePrincipal '
                      '--role {role_reader_guid} --scope {rg_id}')
-            # Verify '--fill-principal-name false' skips the Graph query for filling principalName.
-            self.cmd('role assignment list --scope {rg_id} --fill-principal-name false '
-                     '--fill-role-definition-name false',
+            # --assignee-object-id bypasses Graph query for resolving assignee object ID
+            # '--fill-role-definition-name false' bypasses role definitions query for filling roleDefinitionName
+            # '--fill-principal-name false' bypasses Graph query for filling principalName
+            self.cmd('role assignment list --all --assignee-object-id {uami_object_id} '
+                     '--fill-role-definition-name false --fill-principal-name false',
                      checks=[
                          self.check("length([])", 1),
-                         self.not_exists("[0].principalName"),
-                         self.not_exists("[0].roleDefinitionName")
+                         self.not_exists("[0].roleDefinitionName"),
+                         self.not_exists("[0].principalName")
                      ])
-            # Manually verify the recording file that no HTTP request to https://graph.microsoft.com is made
+            self.cmd('role assignment delete --scope {rg_id} --assignee-object-id {uami_object_id}')
+            self.cmd('role assignment list --all --assignee-object-id {uami_object_id}',
+                     checks=self.check("length([])", 0))
 
 
 class RoleAssignmentWithConfigScenarioTest(RoleScenarioTestBase):
