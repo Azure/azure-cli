@@ -720,6 +720,11 @@ class AuthenticationType(str, Enum):
     ad_password = "ADPassword"
     managed_identity = "ManagedIdentity"
 
+class FreemiumType(str, Enum):
+
+    Regular = "Regular"
+    Freemium = "Freemium"
+
 
 def _get_server_dns_suffx(cli_ctx):
     '''
