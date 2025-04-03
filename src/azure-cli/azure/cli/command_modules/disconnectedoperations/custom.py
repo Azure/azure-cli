@@ -35,25 +35,36 @@ from azure.cli.core.util import send_raw_request
 logger = get_logger(__name__)
 
 
-def _download_icons(icon_uris: Dict[str, str], icon_path: str) -> None:
+def _download_icons(
+    icon_uris: Dict[str, str],
+    icon_path: str,
+    file_downloader=download_file,  # Inject file_downloader
+    path_exists=os.path.exists,  # Inject os.path.exists
+    file_extension: str = "png",  # Added file_extension parameter
+) -> None:
     """Download icons from URIs to specified directory.
 
     Args:
         icon_uris: Dictionary mapping size to icon URI
         icon_path: Path to save icons
+        file_downloader: Function to download files (for mocking)
+        path_exists: Function to check if path exists (for mocking)
     """
     for size, uri in icon_uris.items():
-        file_extension = "png"
         file_path = os.path.join(icon_path, f"{size}.{file_extension}")
 
         # Skip if icon already exists
-        if os.path.exists(file_path):
+        if path_exists(file_path):
             logger.info(
                 "Icon %s already exists at %s, skipping download", size, file_path
             )
             continue
 
-        download_file(uri, file_path)
+        try:
+            file_downloader(uri, file_path)
+        except requests.RequestException as e:
+            logger.error(f"Failed to download icon from {uri}: {e}")
+            # Consider raising the exception or returning an error status
 
 
 # pylint: disable=too-many-arguments, too-many-locals
@@ -64,6 +75,8 @@ def _prepare_paths_and_metadata(
     sku: str,
     version_id: str,
     catalog_content: Dict[str, Any],
+    makedirs=os.makedirs,  # Inject os.makedirs
+    file_open=open,  # Inject open
 ) -> Tuple[Optional[OperationResult], Optional[str], Optional[str]]:
     """Prepare directories and save metadata.
 
@@ -75,6 +88,8 @@ def _prepare_paths_and_metadata(
         version_id: Version ID
         data: Offer data
         catalog_content: Catalog content data
+        makedirs: Function to create directories (for mocking)
+        file_open: Function to open files (for mocking)
 
     Returns:
         Tuple of (error_result, version_path, icon_path)
@@ -91,14 +106,24 @@ def _prepare_paths_and_metadata(
     if cleanup_result:
         return cleanup_result, None, None
 
-    os.makedirs(icon_path, exist_ok=True)
-    os.makedirs(version_level_path, exist_ok=True)
+    try:
+        makedirs(icon_path, exist_ok=True)
+        makedirs(version_level_path, exist_ok=True)
+    except OSError as e:
+        error_message = f"Failed to create directories: {e}"
+        logger.error(error_message)
+        return OperationResult(success=False, error=error_message), None, None
 
     # Save metadata.json
     metadata_path = os.path.join(base_path, "metadata.json")
-    with open(metadata_path, "w", encoding="utf-8") as f:
-        json.dump(catalog_content, f, indent=2)
-        logger.info("Saved metadata to %s", metadata_path)
+    try:
+        with file_open(metadata_path, "w", encoding="utf-8") as f:
+            json.dump(catalog_content, f, indent=2)
+            logger.info("Saved metadata to %s", metadata_path)
+    except OSError as e:
+        error_message = f"Failed to write metadata file: {e}"
+        logger.error(error_message)
+        return OperationResult(success=False, error=error_message), None, None
 
     return None, version_level_path, icon_path
 
@@ -143,13 +168,20 @@ def _find_sku_and_version(
 
 
 def _handle_token_response(
-    token_response: Dict[str, Any], output_folder: str
+    token_response: Dict[str, Any],
+    output_folder: str,
+    subprocess_run=subprocess.run,  # Inject subprocess.run
+    is_azcopy_available_func=is_azcopy_available,  # Inject is_azcopy_available
+    get_azcopy_install_info_func=get_azcopy_install_info,  # Inject get_azcopy_install_info
 ) -> Dict[str, Any]:
     """Handle token response and download content.
 
     Args:
         token_response: Token response containing access token
         output_folder: Folder to save downloaded content
+        subprocess_run: Function to run subprocesses (for mocking)
+        is_azcopy_available_func: Function to check AzCopy availability (for mocking)
+        get_azcopy_install_info_func: Function to get AzCopy install info (for mocking)
 
     Returns:
         Operation result dictionary
@@ -157,8 +189,8 @@ def _handle_token_response(
     download_url = token_response.get("accessToken")
 
     # Check if azcopy is available
-    if not is_azcopy_available():
-        azcopy_info = get_azcopy_install_info()
+    if not is_azcopy_available_func():
+        azcopy_info = get_azcopy_install_info_func()
 
         error_message = (
             f"AzCopy tool not found. Please install AzCopy and make sure it's available in your PATH.\n"
@@ -176,20 +208,25 @@ def _handle_token_response(
     print(f"Executing: azcopy copy [URL] {output_folder} --check-md5 NoCheck")
 
     # This will display output in real-time
-    result = subprocess.run(
-        ["azcopy", "copy", download_url, output_folder, "--check-md5", "NoCheck"],
-        check=False,  # Don't raise exception on non-zero exit
-    )
+    try:
+        result = subprocess_run(
+            ["azcopy", "copy", download_url, output_folder, "--check-md5", "NoCheck"],
+            check=False,  # Don't raise exception on non-zero exit
+        )
 
-    if result.returncode == 0:
-        print("Download completed successfully.")
-        return OperationResult(
-            success=True, message="Download completed successfully."
-        ).to_dict()
+        if result.returncode == 0:
+            print("Download completed successfully.")
+            return OperationResult(
+                success=True, message="Download completed successfully."
+            ).to_dict()
 
-    error_msg = f"AzCopy failed with return code: {result.returncode}"
-    logger.error(error_msg)
-    return OperationResult(success=False, error=error_msg).to_dict()
+        error_msg = f"AzCopy failed with return code: {result.returncode}"
+        logger.error(error_msg)
+        return OperationResult(success=False, error=error_msg).to_dict()
+    except OSError as e:
+        error_msg = f"Failed to execute AzCopy: {e}"
+        logger.error(error_msg)
+        return OperationResult(success=False, error=error_msg).to_dict()
 
 
 # pylint: disable=too-many-arguments, too-many-locals
@@ -201,6 +238,7 @@ def _process_download_operation(
     subscription_id: str,
     resource_name: str,
     offer_id: str,
+    send_raw_request_func=send_raw_request,  # Inject send_raw_request
 ) -> Dict[str, Any]:
     """Process async operation and monitor status.
 
@@ -213,6 +251,7 @@ def _process_download_operation(
         resource_name: Name of the disconnected operations resource
         publisher_name: Marketplace publisher name
         offer_id: Marketplace offer ID
+        send_raw_request_func: Function to send raw requests (for mocking)
 
     Returns:
         Operation result dictionary
@@ -223,7 +262,7 @@ def _process_download_operation(
 
     try:
         # Get operation status - has to be raw request because this is an async operation
-        status_response = send_raw_request(
+        status_response = send_raw_request_func(
             cmd.cli_ctx,
             "get",
             async_operation_url,
@@ -321,6 +360,8 @@ def package_offer(
     version: str,
     output_folder: str,
     region: Optional[str] = None,
+    send_raw_request_func=send_raw_request,  # Inject send_raw_request
+    requests_get=requests.get,  # Inject requests.get
 ) -> Dict[str, Any]:
     """Get details of a specific marketplace offer and download its logos.
 
@@ -334,6 +375,8 @@ def package_offer(
         version: SKU version
         output_folder: Folder to save downloaded content
         region: Optional. Azure region to use for marketplace access
+        send_raw_request_func: Function to send raw requests (for mocking)
+        requests_get: Function to perform GET requests (for mocking)
 
     Returns:
         Operation result dictionary
@@ -358,7 +401,7 @@ def package_offer(
     )
 
     try:
-        response = send_raw_request(
+        response = send_raw_request_func(
             cmd.cli_ctx, "get", url, resource="https://management.azure.com"
         )
 
@@ -374,7 +417,7 @@ def package_offer(
                 },
             ).to_dict()
 
-        catalog_content = requests.get(catalog_url)
+        catalog_content = requests_get(catalog_url)
 
         if catalog_content.status_code != 200:
             error_message = f"Catalog request failed with status code: {catalog_content.status_code}"

@@ -41,3 +41,9 @@ def load_arguments(self, _):
             type=str,
             help="Drive and directory to save the package to. Example: E:\\ or D:\\packages\\",
         )
+        c.argument(
+            "region",
+            type=str,
+            help="Azure region to use for marketplace access. If not specified, the current cloud's primary region will be used.",
+            required=False,
+        )
