@@ -151,6 +151,7 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
 
     ARM_METADATA_INDEX = {
         "acr_login_server_endpoint": "suffixes.acrLoginServer",
+        "acr_service_fabrik_endpoint": "suffixes.acrServiceFabrikEndpoint",
         "attestation_endpoint": "suffixes.attestationEndpoint",
         "azure_datalake_analytics_catalog_and_job_endpoint": "suffixes.azureDataLakeAnalyticsCatalogAndJob",
         "azure_datalake_store_file_system_endpoint": "suffixes.azureDataLakeStoreFileSystem",
@@ -167,6 +168,7 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
 
     def __init__(self,  # pylint: disable=unused-argument
                  acr_login_server_endpoint=None,
+                 acr_service_fabrik_endpoint=None,
                  attestation_endpoint=None,
                  azure_datalake_analytics_catalog_and_job_endpoint=None,
                  azure_datalake_store_file_system_endpoint=None,
@@ -182,6 +184,7 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
                  **kwargs):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.acr_login_server_endpoint = acr_login_server_endpoint
+        self.acr_service_fabrik_endpoint = acr_service_fabrik_endpoint
         self.attestation_endpoint = attestation_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
@@ -294,6 +297,7 @@ def _arm_to_cli_mapper(arm_dict):
         ),  # Please keep the endpoints in alphabetical order
         suffixes=CloudSuffixes(
             acr_login_server_endpoint=get_suffix('acrLoginServer', add_dot=True),
+            acr_service_fabrik_endpoint=get_suffix('acrServiceFabrikEndpoint', add_dot=True),
             attestation_endpoint=get_suffix('attestationEndpoint', add_dot=True,
                                             fallback_value=get_suffix_fallback_value('attestation_endpoint')),
             azure_datalake_analytics_catalog_and_job_endpoint=get_suffix('azureDataLakeAnalyticsCatalogAndJob'),
@@ -390,6 +394,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         azure_datalake_store_file_system_endpoint='azuredatalakestore.net',
         azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net',
         acr_login_server_endpoint='.azurecr.io',
+        acr_service_fabrik_endpoint='.cloudapp.azure.com',
         synapse_analytics_endpoint='.dev.azuresynapse.net',
         attestation_endpoint='.attest.azure.net'))
 
@@ -422,6 +427,7 @@ AZURE_CHINA_CLOUD = Cloud(
         postgresql_server_endpoint='.postgres.database.chinacloudapi.cn',
         mariadb_server_endpoint='.mariadb.database.chinacloudapi.cn',
         acr_login_server_endpoint='.azurecr.cn',
+        acr_service_fabrik_endpoint='.chinaeast.chinacloudapp.cn',
         synapse_analytics_endpoint='.dev.azuresynapse.azure.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
@@ -454,6 +460,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         postgresql_server_endpoint='.postgres.database.usgovcloudapi.net',
         mariadb_server_endpoint='.mariadb.database.usgovcloudapi.net',
         acr_login_server_endpoint='.azurecr.us',
+        acr_service_fabrik_endpoint='.cloudapp.usgovcloudapi.net',
         synapse_analytics_endpoint='.dev.azuresynapse.usgovcloudapi.net'))
 
 AZURE_GERMAN_CLOUD = Cloud(
