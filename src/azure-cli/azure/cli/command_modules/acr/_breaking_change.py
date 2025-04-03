@@ -23,5 +23,5 @@ helm_bc_msg = 'In November 2020, Helm 2 reached end of life. ' \
               'then it is stored in a legacy Helm repository and is at risk of deletion.\n' \
               'For more information on managing and deploying applications for Kubernetes, ' \
               'see https://aka.ms/acr/helm.'
-register_command_group_deprecate(command='acr helm', redirect='Helm v3 commands', message=helm_bc_msg,
+register_command_group_deprecate(command_group='acr helm', redirect='Helm v3 commands', message=helm_bc_msg,
                                  target_version='Sept 30th, 2025')
