@@ -1022,6 +1022,8 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
 def _use_msal_managed_identity(cli_ctx):
     # This indicates an Azure Arc-enabled server
     from msal.managed_identity import get_managed_identity_source, AZURE_ARC
+    from azure.cli.core.telemetry import set_use_msal_managed_identity
     # PREVIEW: Use core.use_msal_managed_identity=true to enable managed identity authentication with MSAL
     use_msal_managed_identity = cli_ctx.config.getboolean('core', 'use_msal_managed_identity', fallback=False)
+    set_use_msal_managed_identity(use_msal_managed_identity)
     return use_msal_managed_identity or get_managed_identity_source() == AZURE_ARC
