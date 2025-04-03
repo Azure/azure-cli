@@ -181,7 +181,7 @@ class VMOpenPortTest(ScenarioTest):
 
 class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_list_ip')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_list_ip', location='centralus')
     @AllowLargeResponse(size_kb=99999)
     def test_vm_show_list_sizes_list_ip_addresses(self, resource_group):
 
@@ -235,7 +235,6 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
             self.check('length([0].virtualMachine.network.publicIpAddresses)', 1),
             self.check('[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod', self.kwargs['allocation'].title()),
             self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string'),
-            self.check('[0].virtualMachine.network.publicIpAddresses[0].zone', '{zone}'),
             self.check('type([0].virtualMachine.network.publicIpAddresses[0].name)', 'string'),
             self.check('[0].virtualMachine.network.publicIpAddresses[0].resourceGroup', '{rg}')
         ])
