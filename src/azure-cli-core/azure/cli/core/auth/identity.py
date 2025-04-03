@@ -112,7 +112,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def _msal_public_app_kwargs(self):
         """kwargs for creating PublicClientApplication."""
         # enable_broker_on_windows can only be used on PublicClientApplication.
-        return {**self._msal_app_kwargs, "enable_broker_on_windows": self._enable_broker_on_windows}
+        return {**self._msal_app_kwargs,
+                "enable_broker_on_windows": self._enable_broker_on_windows,
+                "enable_pii_log": True}
 
     @property
     def _msal_app(self):
