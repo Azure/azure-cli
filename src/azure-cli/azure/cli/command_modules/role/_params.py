@@ -343,8 +343,10 @@ def load_arguments(self, _):
         c.argument('assignment_name', name_arg_type,
                    help='A GUID for the role assignment. It must be unique and different for each role assignment. If omitted, a new GUID is generated.')
         c.argument('at_scope', arg_type=get_three_state_flag(),
-                   help='Include role assignments for only the specified scope, not including the role assignments at '
-                        'subscopes.')
+                   help='If true, only assignments exactly at the scope are included, not including role assignments '
+                        'at parent scopes or sub-scopes. Specify --include-inherited to include assignments at '
+                        'parent scopes. '
+                        'If false, assignments on parent scopes and sub-scopes are included.')
 
     with self.argument_context('role assignment list') as c:
         c.argument('fill_principal_name', arg_type=get_three_state_flag(),
