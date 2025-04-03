@@ -336,7 +336,7 @@ def load_arguments(self, _):
         c.argument('fields', arg_type=feature_fields_arg_type)
 
     with self.argument_context('appconfig feature set') as c:
-        c.argument('feature', validator=validate_feature, help="Name of the feature flag to be set. Feature name cannot contain the '%' character.")
+        c.argument('feature', validator=validate_feature, help="Name of the feature flag to be set. Feature name cannot contain the '%' or ':' characters.")
         c.argument('label', help="If no label specified, set the feature flag with null label by default")
         c.argument('description', help='Description of the feature flag to be set.')
         c.argument('key', validator=validate_feature_key, help='Key of the feature flag. Key must start with the ".appconfig.featureflag/" prefix. Key cannot contain the "%" character. Default key is the reserved prefix ".appconfig.featureflag/" + feature name.')
