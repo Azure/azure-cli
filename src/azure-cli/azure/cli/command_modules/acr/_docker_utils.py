@@ -220,7 +220,7 @@ def _verify_allowed_actions(access_token, permission, is_diagnostics_context):
         import jwt
         decoded_token = jwt.decode(access_token, options={"verify_signature": False})
         access_list = decoded_token.get("access", [])
-        if access_list and isinstance(access_list, list):
+        if isinstance(access_list, list):
             access_value = access_list[0] if access_list else {}
             actions_value = access_value.get('actions', [])
     except Exception as err:
@@ -228,7 +228,7 @@ def _verify_allowed_actions(access_token, permission, is_diagnostics_context):
 
     required_actions = permission.split(',')
 
-    if not actions_value:
+    if not actions_value or not isinstance(actions_value, list):
         missing_actions_value_str = _convert_action_list_to_str(required_actions)
         from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
 
@@ -237,18 +237,17 @@ def _verify_allowed_actions(access_token, permission, is_diagnostics_context):
         raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message("no", missing_actions_value_str)
                        .get_error_message())
 
-    if isinstance(actions_value, list):
-        missing_actions_value = [action for action in required_actions if action not in actions_value]
-        if missing_actions_value:
-            missing_actions_value_str = _convert_action_list_to_str(missing_actions_value)
-            allowed_actions_value_str = _convert_action_list_to_str(actions_value)
-            from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
+    missing_actions_value = [action for action in required_actions if action not in actions_value]
+    if missing_actions_value:
+        missing_actions_value_str = _convert_action_list_to_str(missing_actions_value)
+        allowed_actions_value_str = _convert_action_list_to_str(actions_value)
+        from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
 
-            if is_diagnostics_context:
-                return CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(
-                    allowed_actions_value_str, missing_actions_value_str)
-            raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(
-                allowed_actions_value_str, missing_actions_value_str).get_error_message())
+        if is_diagnostics_context:
+            return CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(
+                allowed_actions_value_str, missing_actions_value_str)
+        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(
+            allowed_actions_value_str, missing_actions_value_str).get_error_message())
 
     return access_token
 
