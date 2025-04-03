@@ -82,7 +82,7 @@ class ConsumptionUsageList(_ConsumptionUsageList):
     def _output(self, *args, **kwargs):
         args = self.ctx.args
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        result = list([transform_usage_output(item) for item in result])
+        result = list(filter(None, [transform_usage_output(item) for item in result]))
         if has_value(args.top):
             next_link = None
         else:
@@ -92,13 +92,18 @@ class ConsumptionUsageList(_ConsumptionUsageList):
 
 def transform_usage_output(result):
     from dateutil import parser
-    usageStart = parser.parse(result['usageStart'])
-    usageEnd = parser.parse(result['usageEnd'])
-    result['usageStart'] = usageStart.strftime("%Y-%m-%dT%H:%M:%SZ")
-    result['usageEnd'] = usageEnd.strftime("%Y-%m-%dT%H:%M:%SZ")
-    result['usageQuantity'] = str(result['usageQuantity'])
-    result['billableQuantity'] = str(result.get('billableQuantity', 'None'))
-    result['pretaxCost'] = str(result['pretaxCost'])
+    usageStart = result.get('usageStart', None)
+    usageEnd = result.get('usageEnd', None)
+    if usageStart or usageEnd:
+        usageStart = parser.parse(usageStart).strftime("%Y-%m-%dT%H:%M:%SZ") if usageStart else 'None'
+        usageEnd = parser.parse(usageEnd).strftime("%Y-%m-%dT%H:%M:%SZ") if usageEnd else 'None'
+    else:
+        return None
+    result['usageStart'] = usageStart
+    result['usageEnd'] = usageEnd
+    result['usageQuantity'] = str(result.get('usageQuantity', None))
+    result['billableQuantity'] = str(result.get('billableQuantity', None))
+    result['pretaxCost'] = str(result.get('pretaxCost', None))
     if 'meterDetails' in result:
         result['meterDetails']['totalIncludedQuantity'] = str(result['meterDetails'].get('pretaxStandardRate', None))
         result['meterDetails']['pretaxStandardRate'] = str(result['meterDetails'].get('pretaxStandardRate', None))
