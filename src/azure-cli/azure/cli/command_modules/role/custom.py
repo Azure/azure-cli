@@ -586,6 +586,8 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
         filters = []
         if at_scope:
             filters.append('atScope()')  # atScope() excludes role assignments at subscopes
+        if assignee_object_id and not include_groups and not at_scope:
+            filters.append("principalId eq '{}'".format(assignee_object_id))
         if assignee_object_id and include_groups:
             filters.append("assignedTo('{}')".format(assignee_object_id))
         f = ' and '.join(filters) if filters else None
