@@ -59,6 +59,7 @@ from azure.cli.command_modules.acs.managed_cluster_decorator import (
     AKSManagedClusterParamDict,
     AKSManagedClusterUpdateDecorator,
 )
+from azure.cli.command_modules.acs.tests.latest.data.certs import CUSTOM_CA_TEST_CERT_STR
 from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockCLI,
     MockClient,
@@ -11914,6 +11915,22 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(nonLTSClusterCalculated, expectedNonLTSCluster)
 
+    def test_set_up_custom_ca_trust_certificates(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"custom_ca_trust_certificates": get_test_data_file_path("certs.txt")},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_custom_ca_trust_certificates(mc_1)
+        sec_profile = self.models.ManagedClusterSecurityProfile(
+            custom_ca_trust_certificates=[str.encode(CUSTOM_CA_TEST_CERT_STR) for _ in range(2)]
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(location="test_location", security_profile=sec_profile)
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
     def test_update_supportPlan(self):
         # default value in `aks_create`
         noopDecorator = AKSManagedClusterUpdateDecorator(
@@ -12140,6 +12157,60 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
+    
+    def test_update_custom_ca_certificates(self):
+        # set to non-empty
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "custom_ca_trust_certificates": get_test_data_file_path("certs.txt"),
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_1.context.set_intermediate(
+            "subscription_id", "test_subscription_id"
+        )
+
+        dec_mc_1 = dec_1.update_custom_ca_trust_certificates(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=[str.encode(CUSTOM_CA_TEST_CERT_STR) for _ in range(2)]
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # set to empty
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"custom_ca_trust_certificates": None},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=None
+            ),
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_2.context.set_intermediate(
+            "subscription_id", "test_subscription_id"
+        )
+
+        dec_mc_2 = dec_2.update_custom_ca_trust_certificates(mc_2)
+
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=None
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
 if __name__ == "__main__":
     unittest.main()
