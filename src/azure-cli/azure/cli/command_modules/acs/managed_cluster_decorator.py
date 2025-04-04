@@ -6282,6 +6282,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         cluster_autoscaler_profile = self.context.get_cluster_autoscaler_profile()
+        if cluster_autoscaler_profile is not None:
+            from azure.cli.core.breaking_change import print_conditional_breaking_change
+            print_conditional_breaking_change(
+                self.cmd.cli_ctx,
+                tag="aks_create_cluster_autoscaler_profile",
+                custom_logger=logger
+            )
         mc.auto_scaler_profile = cluster_autoscaler_profile
         return mc
 
@@ -7076,6 +7083,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         cluster_autoscaler_profile = self.context.get_cluster_autoscaler_profile()
         if cluster_autoscaler_profile is not None:
             # update profile (may clear profile with empty dictionary)
+            from azure.cli.core.breaking_change import print_conditional_breaking_change
+            print_conditional_breaking_change(
+                self.cmd.cli_ctx,
+                tag="aks_update_cluster_autoscaler_profile",
+                custom_logger=logger
+            )
             mc.auto_scaler_profile = cluster_autoscaler_profile
         return mc
 
