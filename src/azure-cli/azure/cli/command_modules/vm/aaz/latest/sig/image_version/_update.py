@@ -16,9 +16,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-07-03",
+        "version": "2024-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions/{}", "2023-07-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions/{}", "2024-03-03"],
         ]
     }
 
@@ -94,6 +94,12 @@ class Update(AAZCommand):
             help="The publishing profile of a gallery image Version.",
             nullable=True,
         )
+        _args_schema.restore = AAZBoolArg(
+            options=["--restore"],
+            arg_group="Properties",
+            help="Indicates if this is a soft-delete resource restoration request.",
+            nullable=True,
+        )
         _args_schema.safety_profile = AAZObjectArg(
             options=["--safety-profile"],
             arg_group="Properties",
@@ -138,7 +144,7 @@ class Update(AAZCommand):
             options=["storage-account-type"],
             help="Specifies the storage account type to be used to store the image. This property is not updatable.",
             nullable=True,
-            enum={"Premium_LRS": "Premium_LRS", "Standard_LRS": "Standard_LRS", "Standard_ZRS": "Standard_ZRS"},
+            enum={"PremiumV2_LRS": "PremiumV2_LRS", "Premium_LRS": "Premium_LRS", "Standard_LRS": "Standard_LRS", "Standard_ZRS": "Standard_ZRS"},
         )
         publishing_profile.target_extended_locations = AAZListArg(
             options=["target-extended-locations"],
@@ -202,6 +208,11 @@ class Update(AAZCommand):
         )
 
         _element = cls._args_schema.publishing_profile.target_regions.Element
+        _element.additional_replica_sets = AAZListArg(
+            options=["additional-replica-sets"],
+            help="List of storage sku with replica count to create direct drive replicas.",
+            nullable=True,
+        )
         _element.encryption = AAZObjectArg(
             options=["encryption"],
             help="Optional. Allows users to provide customer managed keys for encrypting the OS and data disks in the gallery artifact.",
@@ -226,13 +237,36 @@ class Update(AAZCommand):
             options=["storage-account-type"],
             help="Specifies the storage account type to be used to store the image. This property is not updatable.",
             nullable=True,
-            enum={"Premium_LRS": "Premium_LRS", "Standard_LRS": "Standard_LRS", "Standard_ZRS": "Standard_ZRS"},
+            enum={"PremiumV2_LRS": "PremiumV2_LRS", "Premium_LRS": "Premium_LRS", "Standard_LRS": "Standard_LRS", "Standard_ZRS": "Standard_ZRS"},
+        )
+
+        additional_replica_sets = cls._args_schema.publishing_profile.target_regions.Element.additional_replica_sets
+        additional_replica_sets.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.publishing_profile.target_regions.Element.additional_replica_sets.Element
+        _element.regional_replica_count = AAZIntArg(
+            options=["regional-replica-count"],
+            help="The number of direct drive replicas of the Image Version to be created.This Property is updatable",
+            nullable=True,
+        )
+        _element.storage_account_type = AAZStrArg(
+            options=["storage-account-type"],
+            help="Specifies the storage account type to be used to create the direct drive replicas",
+            nullable=True,
+            enum={"PremiumV2_LRS": "PremiumV2_LRS", "Premium_LRS": "Premium_LRS", "Standard_LRS": "Standard_LRS", "Standard_ZRS": "Standard_ZRS"},
         )
 
         safety_profile = cls._args_schema.safety_profile
         safety_profile.allow_deletion_of_replicated_locations = AAZBoolArg(
             options=["allow-deletion-of-replicated-locations"],
             help="Indicates whether or not removing this Gallery Image Version from replicated regions is allowed.",
+            nullable=True,
+        )
+        safety_profile.block_deletion_before_end_of_life = AAZBoolArg(
+            options=["block-deletion-before-end-of-life"],
+            help="Indicates whether or not the deletion is blocked for this Gallery Image Version if its End Of Life has not expired.",
             nullable=True,
         )
 
@@ -597,7 +631,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-03",
+                    "api-version", "2024-03-03",
                     required=True,
                 ),
             }
@@ -704,7 +738,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-03",
+                    "api-version", "2024-03-03",
                     required=True,
                 ),
             }
@@ -769,6 +803,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("publishingProfile", AAZObjectType, ".publishing_profile")
+                properties.set_prop("restore", AAZBoolType, ".restore")
                 properties.set_prop("safetyProfile", AAZObjectType, ".safety_profile")
                 properties.set_prop("securityProfile", AAZObjectType, ".security_profile")
                 properties.set_prop("storageProfile", AAZObjectType, ".storage_profile", typ_kwargs={"flags": {"required": True}})
@@ -806,15 +841,26 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".properties.publishingProfile.targetRegions[]")
             if _elements is not None:
+                _elements.set_prop("additionalReplicaSets", AAZListType, ".additional_replica_sets")
                 _UpdateHelper._build_schema_encryption_images_update(_elements.set_prop("encryption", AAZObjectType, ".encryption"))
                 _elements.set_prop("excludeFromLatest", AAZBoolType, ".exclude_from_latest")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("regionalReplicaCount", AAZIntType, ".regional_replica_count")
                 _elements.set_prop("storageAccountType", AAZStrType, ".storage_account_type")
 
+            additional_replica_sets = _builder.get(".properties.publishingProfile.targetRegions[].additionalReplicaSets")
+            if additional_replica_sets is not None:
+                additional_replica_sets.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.publishingProfile.targetRegions[].additionalReplicaSets[]")
+            if _elements is not None:
+                _elements.set_prop("regionalReplicaCount", AAZIntType, ".regional_replica_count")
+                _elements.set_prop("storageAccountType", AAZStrType, ".storage_account_type")
+
             safety_profile = _builder.get(".properties.safetyProfile")
             if safety_profile is not None:
                 safety_profile.set_prop("allowDeletionOfReplicatedLocations", AAZBoolType, ".allow_deletion_of_replicated_locations")
+                safety_profile.set_prop("blockDeletionBeforeEndOfLife", AAZBoolType, ".block_deletion_before_end_of_life")
 
             security_profile = _builder.get(".properties.securityProfile")
             if security_profile is not None:
@@ -1055,6 +1101,7 @@ class _UpdateHelper:
             serialized_name="replicationStatus",
             flags={"read_only": True},
         )
+        properties.restore = AAZBoolType()
         properties.safety_profile = AAZObjectType(
             serialized_name="safetyProfile",
         )
@@ -1064,6 +1111,10 @@ class _UpdateHelper:
         properties.storage_profile = AAZObjectType(
             serialized_name="storageProfile",
             flags={"required": True},
+        )
+        properties.validations_profile = AAZObjectType(
+            serialized_name="validationsProfile",
+            flags={"read_only": True},
         )
 
         publishing_profile = _schema_gallery_image_version_read.properties.publishing_profile
@@ -1118,6 +1169,9 @@ class _UpdateHelper:
         target_regions.Element = AAZObjectType()
 
         _element = _schema_gallery_image_version_read.properties.publishing_profile.target_regions.Element
+        _element.additional_replica_sets = AAZListType(
+            serialized_name="additionalReplicaSets",
+        )
         _element.encryption = AAZObjectType()
         cls._build_schema_encryption_images_read(_element.encryption)
         _element.exclude_from_latest = AAZBoolType(
@@ -1126,6 +1180,17 @@ class _UpdateHelper:
         _element.name = AAZStrType(
             flags={"required": True},
         )
+        _element.regional_replica_count = AAZIntType(
+            serialized_name="regionalReplicaCount",
+        )
+        _element.storage_account_type = AAZStrType(
+            serialized_name="storageAccountType",
+        )
+
+        additional_replica_sets = _schema_gallery_image_version_read.properties.publishing_profile.target_regions.Element.additional_replica_sets
+        additional_replica_sets.Element = AAZObjectType()
+
+        _element = _schema_gallery_image_version_read.properties.publishing_profile.target_regions.Element.additional_replica_sets.Element
         _element.regional_replica_count = AAZIntType(
             serialized_name="regionalReplicaCount",
         )
@@ -1162,6 +1227,9 @@ class _UpdateHelper:
         safety_profile = _schema_gallery_image_version_read.properties.safety_profile
         safety_profile.allow_deletion_of_replicated_locations = AAZBoolType(
             serialized_name="allowDeletionOfReplicatedLocations",
+        )
+        safety_profile.block_deletion_before_end_of_life = AAZBoolType(
+            serialized_name="blockDeletionBeforeEndOfLife",
         )
         safety_profile.policy_violations = AAZListType(
             serialized_name="policyViolations",
@@ -1258,6 +1326,39 @@ class _UpdateHelper:
         source.id = AAZStrType()
         source.virtual_machine_id = AAZStrType(
             serialized_name="virtualMachineId",
+        )
+
+        validations_profile = _schema_gallery_image_version_read.properties.validations_profile
+        validations_profile.executed_validations = AAZListType(
+            serialized_name="executedValidations",
+        )
+        validations_profile.platform_attributes = AAZListType(
+            serialized_name="platformAttributes",
+        )
+        validations_profile.validation_etag = AAZStrType(
+            serialized_name="validationEtag",
+        )
+
+        executed_validations = _schema_gallery_image_version_read.properties.validations_profile.executed_validations
+        executed_validations.Element = AAZObjectType()
+
+        _element = _schema_gallery_image_version_read.properties.validations_profile.executed_validations.Element
+        _element.execution_time = AAZStrType(
+            serialized_name="executionTime",
+        )
+        _element.status = AAZStrType()
+        _element.type = AAZStrType()
+        _element.version = AAZStrType()
+
+        platform_attributes = _schema_gallery_image_version_read.properties.validations_profile.platform_attributes
+        platform_attributes.Element = AAZObjectType()
+
+        _element = _schema_gallery_image_version_read.properties.validations_profile.platform_attributes.Element
+        _element.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.value = AAZStrType(
+            flags={"read_only": True},
         )
 
         tags = _schema_gallery_image_version_read.tags

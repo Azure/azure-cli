@@ -27,7 +27,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         mgmt_prefix = get_resource_name_prefix('MgmtTest')
 
         # Create store with developer sku
-        developer_config_store_name = self.create_random_name(prefix=mgmt_prefix, length=36)
+        developer_config_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
         developer_sku = 'developer'
         location = 'eastus'
 
@@ -53,7 +53,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', developer_sku)])
 
-        config_store_name = self.create_random_name(prefix=mgmt_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
         standard_sku = 'standard'
         premium_sku = 'premium'
         tag_key = "key"
@@ -120,7 +120,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', premium_sku)])
 
         keyvault_prefix = get_resource_name_prefix('cmk-test-keyvault')
-        keyvault_name = self.create_random_name(prefix=keyvault_prefix, length=36)
+        keyvault_name = self.create_random_name(prefix=keyvault_prefix, length=24)
         encryption_key = 'key'
         system_assigned_identity_id = store['identity']['principalId']
         self.kwargs.update({
@@ -204,8 +204,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         # create store in premium tier with replica
         premium_store_prefix = get_resource_name_prefix('MgmtTestPremiumSku')
         replica_prefix = get_resource_name_prefix('MgmtTestReplica')
-        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=36)
-        replica_name = self.create_random_name(prefix=replica_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=24)
+        replica_name = self.create_random_name(prefix=replica_prefix, length=24)
         tag_key = "key"
         tag_value = "value"
         tag = tag_key + '=' + tag_value
@@ -269,7 +269,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         # create store in premium tier without replica
 
-        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=24)
         
         self.kwargs.update({
             "premium_sku": premium_sku,
@@ -308,7 +308,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
         test_del_prefix = get_resource_name_prefix('MgmtTestdel')
-        config_store_name = self.create_random_name(prefix=test_del_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=test_del_prefix, length=24)
 
         self.kwargs.update({
             'config_store_name': config_store_name
@@ -349,7 +349,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_local_auth(self, resource_group, location):
         disable_local_auth_prefix = get_resource_name_prefix('DisableLocalAuth')
-        config_store_name = self.create_random_name(prefix=disable_local_auth_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=disable_local_auth_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -393,7 +393,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_public_network_access(self, resource_group, location):
         pub_network_prefix = get_resource_name_prefix('PubNetworkTrue')
-        config_store_name = self.create_random_name(prefix=pub_network_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=pub_network_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -416,7 +416,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('publicNetworkAccess', 'Enabled')])
 
         pub_network_null_prefix = get_resource_name_prefix('PubNetworkNull')
-        config_store_name = self.create_random_name(prefix=pub_network_null_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=pub_network_null_prefix, length=24)
 
         self.kwargs.update({
             'config_store_name': config_store_name

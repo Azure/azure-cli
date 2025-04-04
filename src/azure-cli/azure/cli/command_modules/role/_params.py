@@ -340,6 +340,17 @@ def load_arguments(self, _):
         c.argument('assignment_name', name_arg_type,
                    help='A GUID for the role assignment. It must be unique and different for each role assignment. If omitted, a new GUID is generated.')
 
+    with self.argument_context('role assignment list') as c:
+        c.argument('fill_principal_name', arg_type=get_three_state_flag(),
+                   help="Query Microsoft Graph to get the assignee's userPrincipalName (for user), "
+                        "servicePrincipalNames (for service principal) or displayName (for group), then fill "
+                        "principalName property with it. "
+                        "If the logged-in account has no permission or the machine has no network access to query "
+                        "Microsoft Graph, set this flag to false to avoid warning or error.")
+        c.argument('fill_role_definition_name', arg_type=get_three_state_flag(),
+                   help="Fill roleDefinitionName property in addition to roleDefinitionId. This operation is "
+                        "expensive. If you encounter performance issue, set this flag to false.")
+
     time_help = 'The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}'
     with self.argument_context('role assignment list-changelogs') as c:
         c.argument('start_time', help=time_help.format('start time', '1 Hour prior to the current time'))

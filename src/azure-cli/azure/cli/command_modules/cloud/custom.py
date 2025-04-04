@@ -67,7 +67,7 @@ def _populate_from_metadata_endpoint(cloud, arm_endpoint, session=None):
         raise CLIError(error_msg_fmt.format(msg))
 
 
-def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
+def _build_cloud(cli_ctx, cloud_name, cloud_config=None, is_update=False, cloud_args=None):
     from azure.cli.core.cloud import CloudEndpointNotSetException
     if cloud_config:
         # Using JSON format so convert the keys to snake case
@@ -97,6 +97,12 @@ def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
         arm_endpoint = c.endpoints.resource_manager
     except CloudEndpointNotSetException:
         arm_endpoint = None
+
+    from azure.cli.core.breaking_change import print_conditional_breaking_change
+    if arm_endpoint and is_update:
+        print_conditional_breaking_change(cli_ctx, tag='CloudUpdateOutputBreakingChange')
+    elif arm_endpoint:
+        print_conditional_breaking_change(cli_ctx, tag='CloudRegisterOutputBreakingChange')
 
     _populate_from_metadata_endpoint(c, arm_endpoint)
     required_endpoints = {'resource_manager': '--endpoint-resource-manager',
@@ -132,7 +138,7 @@ def register_cloud(cmd,
                    suffix_azure_datalake_store_file_system_endpoint=None,
                    suffix_azure_datalake_analytics_catalog_and_job_endpoint=None,
                    suffix_acr_login_server_endpoint=None):
-    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,
+    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config, is_update=False,
                      cloud_args=locals())
     try:
         add_cloud(cmd.cli_ctx, c)
@@ -161,7 +167,7 @@ def modify_cloud(cmd,
                  suffix_acr_login_server_endpoint=None):
     if not cloud_name:
         cloud_name = cmd.cli_ctx.cloud.name
-    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,
+    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config, is_update=True,
                      cloud_args=locals())
     try:
         update_cloud(cmd.cli_ctx, c)
