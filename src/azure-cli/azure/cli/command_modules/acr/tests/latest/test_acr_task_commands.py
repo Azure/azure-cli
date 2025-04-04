@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only, live_only
 
 
 class AcrTaskCommandsTests(ScenarioTest):
 
-    # @unittest.skip("task.py line 250, BUG: Discriminator type is absent or null, use base class TaskStepProperties.")
+    @live_only()
     @ResourceGroupPreparer()
     def test_acr_task(self, resource_group):
         self.kwargs.update({
@@ -49,7 +49,7 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('step.isPushEnabled', True),
                          self.check('step.noCache', False),
                          self.check('step.type', 'Docker'),
-                         self.check('identity.type', 'SystemAssigned')]),
+                         self.check('identity.type', 'SystemAssigned')])
 
         # Create a contextless task.
         self.cmd('acr task create -n {task_no_context} -r {registry_name} --cmd {existing_image} -c {no_context}',
