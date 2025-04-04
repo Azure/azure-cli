@@ -671,8 +671,8 @@ class TestFormatBicepFile(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
-            mock.call("0.12.1"),
-            mock.call("0.26.54"),
+            mock.call(cmd.cli_ctx, "0.12.1"),
+            mock.call(cmd.cli_ctx, "0.26.54"),
         ])
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])
 
@@ -689,7 +689,7 @@ class TestPublishWithSource(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
-            mock.call("0.4.1008"), # Min version for 'bicep publish'
+            mock.call(cmd.cli_ctx, "0.4.1008"), # Min version for 'bicep publish'
         ])
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1'])
 
@@ -705,9 +705,9 @@ class TestPublishWithSource(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
-            mock.call("0.4.1008"), # Min version for 'bicep publish'
-            mock.call('0.26.54'),
-            mock.call("0.23.1") # Min version for 'bicep publish --with-source'
+            mock.call(cmd.cli_ctx, "0.4.1008"), # Min version for 'bicep publish'
+            mock.call(cmd.cli_ctx, '0.26.54'),
+            mock.call(cmd.cli_ctx, "0.23.1") # Min version for 'bicep publish --with-source'
         ])
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1', '--with-source'])
 
