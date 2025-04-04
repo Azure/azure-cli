@@ -720,6 +720,7 @@ class AuthenticationType(str, Enum):
     ad_password = "ADPassword"
     managed_identity = "ManagedIdentity"
 
+
 class FreemiumType(str, Enum):
 
     Regular = "Regular"
