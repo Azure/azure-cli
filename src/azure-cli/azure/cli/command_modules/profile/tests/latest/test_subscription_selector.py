@@ -40,17 +40,7 @@ DUMMY_SUBSCRIPTIONS = [
         "environmentName": "AzureCloud",
         "isDefault": False
     },
-    # 3: sub 4 without tenantDisplayName
-    {
-        "id": "00000000-0000-0000-0000-444444444444",
-        "name": "Sub 4 without tenantDisplayName",
-        "tenantDefaultDomain": "tenant1.onmicrosoft.com",
-        "tenantDisplayName": None,
-        "tenantId": "00000000-0000-0000-1111-111111111111",
-        "environmentName": "AzureCloud",
-        "isDefault": False
-    },
-    # 4: tenant account
+    # 3: tenant account
     {
         "id": "00000000-0000-0000-1111-222222222222",
         "name": "N/A(tenant level account)",
@@ -64,12 +54,11 @@ DUMMY_SUBSCRIPTIONS = [
 
 EXPECTED_SUBSCRIPTION_TABLE = """\
 No     Subscription name                     Subscription ID                       Tenant
------  ------------------------------------  ------------------------------------  ------------------------------------
+-----  ------------------------------------  ------------------------------------  --------
 [1]    N/A(tenant level account)             00000000-0000-0000-1111-222222222222  Tenant 2
 [2]    SUB 1                                 00000000-0000-0000-0000-111111111111  Tenant 1
 \x1b[96m[3]\x1b[0m *  \x1b[96msub 2\x1b[0m                                 \x1b[96m00000000-0000-0000-0000-222222222222\x1b[0m  \x1b[96mTenant 1\x1b[0m
-[4]    Sub 3 with long long long long lo...  00000000-0000-0000-0000-333333333333  Tenant 1
-[5]    Sub 4 without tenantDisplayName       00000000-0000-0000-0000-444444444444  00000000-0000-0000-1111-111111111111"""
+[4]    Sub 3 with long long long long lo...  00000000-0000-0000-0000-333333333333  Tenant 1"""
 
 DUMMY_SUBSCRIPTIONS_NO_TENANT_INFO = [
     {
@@ -114,12 +103,10 @@ class TestSubscriptionSelection(unittest.TestCase):
         with mock.patch.object(format_styled_text, 'theme', 'dark', create=True):
             selector = SubscriptionSelector(sub)
             assert (selector._index_to_subscription_map == {
-                '1': sub[4],
+                '1': sub[3],
                 '2': sub[1],
                 '3': sub[0],
-                '4': sub[2],
-                '5': sub[3],
-            })
+                '4': sub[2]})
             assert selector._table_str == EXPECTED_SUBSCRIPTION_TABLE
 
             selector = SubscriptionSelector(DUMMY_SUBSCRIPTIONS_NO_TENANT_INFO)
