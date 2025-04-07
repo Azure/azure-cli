@@ -430,7 +430,42 @@ class BackupRestoreTest(ScenarioTest):
             JMESPathCheck('length(@)', 0),
         ])
 
+    @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(name_prefix='backup', length=24, location=WINDOWS_ASP_LOCATION_WEBAPP, sku='Standard_LRS')
+    def test_webapp_backup_update(self, resource_group, storage_account_info):
+        plan = self.create_random_name(prefix='plan-backup', length=24)
+        webapp = self.create_random_name(prefix='backup-webapp', length=24)
+        container = self.create_random_name(prefix='backupcontainer', length=24)
+        backup_name = self.create_random_name(prefix='backup-name', length=24)
 
+        expirydate = (datetime.datetime.now() + datetime.timedelta(days=1, hours=3)).strftime("\"%Y-%m-%dT%H:%MZ\"")
+        slot_name = "slot"
+
+        storage_account, account_key = storage_account_info
+        self.cmd(f'storage container create --account-name {storage_account} --name {container} --account-key {account_key}')
+        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv --account-key {account_key}').output.strip()
+        sasurl = f'https://{storage_account}.blob.core.windows.net/{container}?{sastoken}'
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp} --plan {plan}')
+        self.cmd(f"webapp deployment slot create -g {resource_group} -n {webapp} -s {slot_name}")
+
+        # Create a webapp backup
+        self.cmd(f"webapp config backup create -g {resource_group} --webapp-name {webapp} --backup-name {backup_name} --container-url {sasurl}")
+        time.sleep(240)
+
+        # Update the webapp backup configuration
+        self.cmd(f"webapp config backup update -g {resource_group} --webapp-name {webapp} --backup-name {backup_name} --retention 60 --frequency 5d --retain-one true --container-url {sasurl}", checks=[
+            JMESPathCheck('backupSchedule.retentionPeriodInDays', 60),
+            JMESPathCheck('backupSchedule.frequencyInterval', 5),
+            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
+            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
+        ])
+
+        # Verify the updated backup configuration
+        self.cmd(f"webapp config backup list -g {resource_group} --webapp-name {webapp}", checks=[
+            JMESPathCheck('[0].namePropertiesName', backup_name)
+        ])
 
 
 # Test Framework is not able to handle binary file format, hence, only run live
@@ -725,6 +760,10 @@ class WebappConfigureTest(ScenarioTest):
             prefix='webapp-linux-plan', length=24)
         linux_webapp = self.create_random_name(
             prefix='webapp-linux', length=24)
+        storage_account = self.create_random_name(
+            prefix='webappstorage', length=24).lower()
+        file_share_name = self.create_random_name(
+            prefix='webappfileshare', length=24).lower()
         self.cmd('appservice plan create -g {} -n {} -l eastus2 --sku S1 --is-linux'.format(resource_group, linux_plan),
                  checks=[
                      # this weird field means it is a linux
@@ -736,14 +775,21 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('name', linux_webapp),
         ])
         # add
-        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
-                  '--share-name sharename --access-key key --mount-path /path/to/mount')
-                  .format(resource_group, linux_webapp)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
+        self.cmd('storage account create -n {} -g {} --public-network-access Disabled --allow-blob-public-access false'.format(storage_account, resource_group)).assert_with_checks([
+            JMESPathCheck('name', storage_account)
+        ])
+        time.sleep(60)
+        self.cmd('storage share-rm create -g {} --storage-account {} --name {}'.format(resource_group, storage_account, file_share_name)).assert_with_checks([
+            JMESPathCheck('name', file_share_name)
+        ])
+        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name {} '
+                '--share-name {} --access-key key --mount-path /path/to/mount')
+                .format(resource_group, linux_webapp, storage_account, file_share_name)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck('length(@)', 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
-            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
-            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", storage_account),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", file_share_name),
             JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
         # update
@@ -752,8 +798,8 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("length(@)", 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
-            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
-            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", storage_account),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", file_share_name),
             JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
         # list
@@ -1518,6 +1564,42 @@ class WebappSlotScenarioTest(ScenarioTest):
         # try another way to delete a slot and exercise all options
         self.cmd('webapp delete -g {} -n {} --slot {} --keep-dns-registration --keep-empty-plan --keep-metrics'.format(resource_group, webapp, slot2))
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_slot_clone(self, resource_group):
+        plan_name = self.create_random_name(prefix='slot-test-plan', length=24)
+        webapp_name = self.create_random_name(prefix='slot-test-web', length=24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+        
+        plan_result = self.cmd(
+            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name)).get_output_in_json()
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_result['name']))
+        self.cmd('webapp update -g {} -n {} --https-only {}'.format(resource_group, webapp_name, True))
+        subnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()["newVNet"]["subnets"][0]["id"]
+        
+        self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, webapp_name, vnet_name, subnet_name))
+
+        slot_from_prod = 'staging'
+        slot_from_nonprod = 'test'
+
+        # verify we can clone from prod slot and https-only + vnet integration is cloned
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(
+            resource_group, webapp_name, slot_from_prod, webapp_name))
+        self.cmd('webapp show -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_from_prod), checks=[
+            JMESPathCheck('httpsOnly', True),
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # verify we can clone from non-prod slot and only have https-only cloned
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(
+            resource_group, webapp_name, slot_from_nonprod, slot_from_prod))
+        self.cmd('webapp show -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_from_nonprod), checks=[
+            JMESPathCheck('httpsOnly', True),
+            JMESPathCheck('virtualNetworkSubnetId', None)
+        ])
+
 
 class WebappSlotTrafficRouting(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -1773,6 +1855,26 @@ class WebappSSLImportCertTest(ScenarioTest):
                 webapp_name), 'SniEnabled'),
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
                 webapp_name), cert_thumbprint)
+        ])
+
+    @unittest.skip("Flaky Test")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @KeyVaultPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, name_prefix='kv-ssl-test', name_len=20)
+    def test_webapp_ssl_import_no_app(self, resource_group, key_vault):
+        # Cert Generated using
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-cert'
+        self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(
+            resource_group, key_vault, 'Microsoft.Azure.WebSites'))
+        self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
+            cert_name, key_vault, pfx_file, cert_password))
+
+        self.cmd('webapp config ssl import --resource-group {}  --key-vault {} --key-vault-certificate-name {} --certificate-name {}'.format(resource_group, key_vault, cert_name, "test123"), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+			JMESPathCheck('test123')
         ])
 
     @unittest.skip("Flaky Test")

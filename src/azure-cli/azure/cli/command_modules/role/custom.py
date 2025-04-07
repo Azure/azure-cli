@@ -232,9 +232,10 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
                                          condition=condition, condition_version=condition_version)
 
 
-def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
+def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,  # pylint: disable=too-many-locals
                           scope=None, include_inherited=False,
-                          show_all=False, include_groups=False, include_classic_administrators=False):
+                          show_all=False, include_groups=False, include_classic_administrators=False,
+                          fill_role_definition_name=True, fill_principal_name=True):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively).
@@ -266,38 +267,39 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     if not results:
         return []
 
-    # 1. fill in logic names to get things understandable.
-    # (it's possible that associated roles and principals were deleted, and we just do nothing.)
-    # 2. fill in role names
-    role_defs = list(definitions_client.list(
-        scope=scope or ('/subscriptions/' + definitions_client._config.subscription_id)))
-    worker = MultiAPIAdaptor(cmd.cli_ctx)
-    role_dics = {i.id: worker.get_role_property(i, 'role_name') for i in role_defs}
-    for i in results:
-        if not i.get('roleDefinitionName'):
-            if role_dics.get(worker.get_role_property(i, 'roleDefinitionId')):
-                worker.set_role_property(i, 'roleDefinitionName',
-                                         role_dics[worker.get_role_property(i, 'roleDefinitionId')])
-            else:
-                i['roleDefinitionName'] = None  # the role definition might have been deleted
+    # Fill in role definition names
+    if fill_role_definition_name:
+        worker = MultiAPIAdaptor(cmd.cli_ctx)
+        role_defs = list(definitions_client.list(
+            scope=scope or ('/subscriptions/' + definitions_client._config.subscription_id)))
+        role_dics = {i.id: worker.get_role_property(i, 'role_name') for i in role_defs}
+        for i in results:
+            if not i.get('roleDefinitionName'):
+                if role_dics.get(worker.get_role_property(i, 'roleDefinitionId')):
+                    worker.set_role_property(i, 'roleDefinitionName',
+                                             role_dics[worker.get_role_property(i, 'roleDefinitionId')])
+                else:
+                    i['roleDefinitionName'] = None  # the role definition might have been deleted
 
-    # fill in principal names
-    principal_ids = set(worker.get_role_property(i, 'principalId')
-                        for i in results if worker.get_role_property(i, 'principalId'))
+    # Fill in principal names
+    if fill_principal_name:
+        worker = MultiAPIAdaptor(cmd.cli_ctx)
+        principal_ids = set(worker.get_role_property(i, 'principalId')
+                            for i in results if worker.get_role_property(i, 'principalId'))
 
-    if principal_ids:
-        try:
-            principals = _get_object_stubs(graph_client, principal_ids)
-            principal_dics = {i[ID]: _get_displayable_name(i) for i in principals}
+        if principal_ids:
+            try:
+                principals = _get_object_stubs(graph_client, principal_ids)
+                principal_dics = {i[ID]: _get_displayable_name(i) for i in principals}
 
-            for i in [r for r in results if not r.get('principalName')]:
-                i['principalName'] = ''
-                if principal_dics.get(worker.get_role_property(i, 'principalId')):
-                    worker.set_role_property(i, 'principalName',
-                                             principal_dics[worker.get_role_property(i, 'principalId')])
-        except (HttpResponseError, GraphError) as ex:
-            # failure on resolving principal due to graph permission should not fail the whole thing
-            logger.info("Failed to resolve graph object information per error '%s'", ex)
+                for i in [r for r in results if not r.get('principalName')]:
+                    i['principalName'] = ''
+                    if principal_dics.get(worker.get_role_property(i, 'principalId')):
+                        worker.set_role_property(i, 'principalName',
+                                                 principal_dics[worker.get_role_property(i, 'principalId')])
+            except (HttpResponseError, GraphError) as ex:
+                # failure on resolving principal due to graph permission should not fail the whole thing
+                logger.info("Failed to resolve graph object information per error '%s'", ex)
 
     for r in results:
         if not r.get('additionalProperties'):  # remove the useless "additionalProperties"
