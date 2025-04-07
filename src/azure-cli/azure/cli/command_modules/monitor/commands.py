@@ -94,6 +94,11 @@ def load_command_table(self, _):
     self.command_table['monitor action-group test-notifications create'] = \
         ActionGroupTestNotificationCreate(loader=self, table_transformer=action_group_list_table)
 
+    from .operations.action_groups_identity import ActionGroupIdentityRemove, ActionGroupIdentityShow, ActionGroupIdentityAssign
+    self.command_table['monitor action-group identity assign'] = ActionGroupIdentityAssign(loader=self)
+    self.command_table['monitor action-group identity remove'] = ActionGroupIdentityRemove(loader=self)
+    self.command_table['monitor action-group identity show'] = ActionGroupIdentityShow(loader=self)
+
     with self.command_group('monitor activity-log', activity_log_sdk) as g:
         g.custom_command('list', 'list_activity_log')
 

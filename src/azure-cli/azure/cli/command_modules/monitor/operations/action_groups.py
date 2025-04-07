@@ -223,6 +223,8 @@ class ActionGroupUpdate(_ActionGroupUpdate):
         args_schema.sms_receivers._registered = False
         args_schema.voice_receivers._registered = False
         args_schema.webhook_receivers._registered = False
+        args_schema.type._registered = False
+        args_schema.user_assigned_identities._registered = False
         args_schema.receiver_actions = AAZCustomListArg(
             options=["--add-actions"],
             singular_options=["--add-action", "-a"],
@@ -291,6 +293,10 @@ class ActionGroupUpdate(_ActionGroupUpdate):
 
         def filter_receivers(collection):
             return [item for item in collection if item.name.to_serialized_data() not in receiver_remove_list]
+
+        instance.properties.incident_receivers = filter_receivers(instance.properties.incident_receivers)
+        instance.properties.incident_receivers.extend(args.incident_receivers)
+        args.incident_receivers = instance.properties.incident_receivers
 
         instance.properties.email_receivers = filter_receivers(instance.properties.email_receivers)
         instance.properties.email_receivers.extend(args.email_receivers)
