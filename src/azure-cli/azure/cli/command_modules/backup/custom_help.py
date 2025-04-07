@@ -73,6 +73,8 @@ def is_sql(resource_type):
 def is_hana(resource_type):
     return resource_type.lower() == 'saphanadatabase'
 
+def is_sapase(resource_type):
+    return resource_type.lower() == 'sapasedatabase'
 
 def is_sapase(resource_type):
     return resource_type.lower() == 'sapasedatabase'
