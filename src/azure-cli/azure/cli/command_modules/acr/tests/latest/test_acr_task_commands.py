@@ -28,7 +28,7 @@ class AcrTaskCommandsTests(ScenarioTest):
             'trigger_enabled': 'False',
             'identity': '[system]',
             'loginServer': 'test.acr.com',
-            'file_path': os.path.join(curr_dir, 'taskfilesample.yaml').replace('\\', '\\\\')
+            'file_path': os.path.join(curr_dir, 'data//taskfilesample.yaml').replace('\\', '\\\\')
         })
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
