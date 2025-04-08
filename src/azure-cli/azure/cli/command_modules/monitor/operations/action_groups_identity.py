@@ -5,7 +5,7 @@
 # pylint: disable=protected-access
 from knack.log import get_logger
 
-from azure.cli.core.aaz import register_command ,has_value, AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+from azure.cli.core.aaz import register_command, has_value, AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
 from ..aaz.latest.monitor.action_group import Update as _ActionGroupUpdate, Show as _ActionGroupShow
 
 logger = get_logger(__name__)
@@ -220,4 +220,3 @@ class ActionGroupIdentityShow(_ActionGroupShow):
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result.get('identity', {})
-    
