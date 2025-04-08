@@ -17,7 +17,6 @@ steps:
       . env/bin/activate
       python -m pip install -U pip
       pip install --trusted-host azurecliprod.blob.core.windows.net "https://azurecliprod.blob.core.windows.net/beta/azdev-0.2.3b1-py3-none-any.whl"
-      azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then
         azdev setup -c $CLI_REPO_PATH --debug
@@ -33,6 +32,7 @@ steps:
       fi
 
       # Verify installation and build command index
+      azdev --version
       az --version
     displayName: 'azdev setup'
     env:
