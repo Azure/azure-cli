@@ -283,7 +283,7 @@ def acr_login(cmd,
 
         token_info = {
             "loginServer": login_server,
-            "username":  EMPTY_GUID,
+            "username": EMPTY_GUID,
             "accessToken": password,
             "refreshToken": password
         }
