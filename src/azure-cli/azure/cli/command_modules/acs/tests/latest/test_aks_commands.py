@@ -3296,6 +3296,43 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap')
+    def test_aks_nodepool_add_with_ossku_ubuntu2204(self, resource_group, resource_group_location):
+        resource_group_location = 'eastus2euap'
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        node_pool_name_second = self.create_random_name('c', 6)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'node_pool_name_second': node_pool_name_second,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--nodepool-name {node_pool_name} -c 1 ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # nodepool get-upgrades
+        self.cmd('aks nodepool add '
+                 '--resource-group={resource_group} '
+                 '--cluster-name={name} '
+                 '--name={node_pool_name_second} '
+                 '--os-sku Ubuntu2204',
+                 checks=[
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('osSku', 'Ubuntu2204'),
+                 ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_nodepool_add_with_ossku_windows2022(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
@@ -5912,6 +5949,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoUpgradeProfile.upgradeChannel', 'stable')
+        ])
+
+        # update upgrade channel to none, need to answer prompt
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--auto-upgrade-channel none --yes'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoUpgradeProfile.upgradeChannel', 'none')
         ])
 
         # delete
@@ -12005,3 +12050,262 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # live only due to role assignment is not mocked
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus2euap",
+    )
+    def test_aks_network_isolated_cluster(self, resource_group, resource_group_location):
+        vnet_name = self.create_random_name("clitest", 16)
+        aks_subnet_name = "aks-subnet"
+        acr_subnet_name = "acr-subnet"
+        cluster_identity_name = self.create_random_name("clitest", 16)
+        kubelet_identity_name = self.create_random_name("clitest", 16)
+        acr_name = self.create_random_name("clitest", 16)
+        aks_name_1 = self.create_random_name('cliakstest', 16)
+        aks_name_2 = self.create_random_name('cliakstest', 16)
+        aks_name_3 = self.create_random_name('cliakstest', 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                'location': resource_group_location,
+                "aks_name_1": aks_name_1,
+                "aks_name_2": aks_name_2,
+                "aks_name_3": aks_name_3,
+                "vnet_name": vnet_name,
+                "aks_subnet_name": aks_subnet_name,
+                "acr_subnet_name": acr_subnet_name,
+                "cluster_identity_name": cluster_identity_name,
+                "kubelet_identity_name": kubelet_identity_name,
+                "acr_name": acr_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create virtual network and subnets
+        create_vnet = (
+            "network vnet create --resource-group {resource_group} --name {vnet_name} "
+            "--address-prefixes 192.168.0.0/16 -o json"
+        )
+        vnet = self.cmd(
+            create_vnet, checks=[self.check("newVNet.provisioningState", "Succeeded")]
+        ).get_output_in_json()
+        vnet_id = vnet["newVNet"]["id"]
+        assert vnet_id is not None
+        self.kwargs.update(
+            {
+                "vnet_id": vnet_id,
+            }
+        )
+        create_aks_subnet = (
+            "network vnet subnet create -n {aks_subnet_name} --resource-group {resource_group} --vnet-name {vnet_name} "
+            "--default-outbound-access false "
+            "--address-prefixes 192.168.1.0/24 -o json"
+        )
+        self.cmd(create_aks_subnet, checks=[self.check("provisioningState", "Succeeded")])
+        create_acr_subnet = (
+            "network vnet subnet create -n {acr_subnet_name} --resource-group {resource_group} --vnet-name {vnet_name} "
+            "--address-prefixes 192.168.2.0/24 --private-endpoint-network-policies Disabled -o json"
+        )
+        self.cmd(create_acr_subnet, checks=[self.check("provisioningState", "Succeeded")])
+
+        # create ACR
+        create_acr_cmd = (
+            "acr create --resource-group {resource_group} --name {acr_name} "
+            "--sku Premium --public-network-enabled false -o json"
+        )
+        acr = self.cmd(
+            create_acr_cmd, checks=[self.check("provisioningState", "Succeeded")]
+        ).get_output_in_json()
+        acr_id = acr["id"]
+        assert acr_id is not None
+        self.kwargs.update(
+            {
+                "acr_id": acr_id,
+            }
+        )
+
+        # enable acr artifact cache
+        enable_acr_artifact_cache_cmd = (
+            "acr cache create -n aks-managed-mcr -r {acr_name} "
+            "--source-repo \"mcr.microsoft.com/*\" --target-repo \"aks-managed-repository/*\" -o json"
+        )
+        self.cmd(enable_acr_artifact_cache_cmd, checks=[self.check("provisioningState", "Succeeded")])
+
+        # create private endpoint
+        create_private_endpoint_cmd = (
+            "network private-endpoint create --resource-group {resource_group} --name myPrivateEndpoint "
+            "--vnet-name {vnet_name} --subnet {acr_subnet_name} "
+            "--private-connection-resource-id {acr_id} --group-id registry --connection-name myConnection -o json"
+        )
+        private_endpoint = self.cmd(
+            create_private_endpoint_cmd, checks=[self.check("provisioningState", "Succeeded")]
+        ).get_output_in_json()
+        nic_id = private_endpoint["networkInterfaces"][0]["id"]
+        assert nic_id is not None
+        self.kwargs.update(
+            {
+                "nic_id": nic_id,
+            }
+        )
+        get_acr_private_ip_cmd = (
+            "network nic show --ids {nic_id} "
+            "--query \"ipConfigurations[?privateLinkConnectionProperties.requiredMemberName=='registry'].privateIPAddress\" "
+            "-o tsv"
+        )
+        acr_private_ip = self.cmd(get_acr_private_ip_cmd).output.strip()
+        assert acr_private_ip is not None
+        self.kwargs.update(
+            {
+                "acr_private_ip": acr_private_ip,
+            }
+        )
+        get_acr_data_endpoint_private_ip_cmd = (
+            "network nic show --ids {nic_id} "
+            "--query \"ipConfigurations[?privateLinkConnectionProperties.requiredMemberName=='registry_data_{location}'].privateIPAddress\" "
+            "-o tsv"
+        )
+        acr_data_endpoint_private_ip = self.cmd(get_acr_data_endpoint_private_ip_cmd).output.strip()
+        assert acr_data_endpoint_private_ip is not None
+        self.kwargs.update(
+            {
+                "acr_data_endpoint_private_ip": acr_data_endpoint_private_ip,
+            }
+        )
+
+        # create private dns zone
+        create_private_dns_zone_cmd = (
+            "network private-dns zone create --resource-group {resource_group} "
+            "--name privatelink.azurecr.io -o json"
+        )
+        self.cmd(
+            create_private_dns_zone_cmd, checks=[self.check("provisioningState", "Succeeded")]
+        ).get_output_in_json()
+        create_private_dns_link_vnet_cmd = (
+            "network private-dns link vnet create --resource-group {resource_group} "
+            "--zone-name privatelink.azurecr.io "
+            "--name MyDNSLink --virtual-network {vnet_name} --registration-enabled false -o json"
+        )
+        self.cmd(create_private_dns_link_vnet_cmd, checks=[self.check("provisioningState", "Succeeded")])
+
+        # create record for ACR
+        create_record_set_cmd = (
+            "network private-dns record-set a create --resource-group {resource_group} --zone-name privatelink.azurecr.io "
+            "--name {acr_name} -o json"
+        )
+        self.cmd(create_record_set_cmd)
+        create_dns_record_cmd = (
+            "network private-dns record-set a add-record --resource-group {resource_group} --zone-name privatelink.azurecr.io "
+            "--record-set-name {acr_name} --ipv4-address {acr_private_ip} -o json"
+        )
+        self.cmd(create_dns_record_cmd)
+
+        # create record for ACR data endpoint
+        create_record_set_cmd = (
+            "network private-dns record-set a create --resource-group {resource_group} --zone-name privatelink.azurecr.io "
+            "--name {acr_name}.{location}.data -o json"
+        )
+        self.cmd(create_record_set_cmd)
+        create_dns_record_cmd = (
+            "network private-dns record-set a add-record --resource-group {resource_group} --zone-name privatelink.azurecr.io "
+            "--record-set-name {acr_name}.{location}.data --ipv4-address {acr_data_endpoint_private_ip} -o json"
+        )
+        self.cmd(create_dns_record_cmd)
+
+        # create identity
+        cluster_identity_id = self._get_user_assigned_identity(resource_group)
+        assert cluster_identity_id is not None
+        self.kwargs.update(
+            {
+                "cluster_identity_id": cluster_identity_id,
+            }
+        )
+        kubelet_identity_id = self._get_user_assigned_identity(resource_group, use_for_kubelet=True, paired_control_plane_identity=cluster_identity_id)
+        kubelet_identity_principal_id = self._get_principal_id_of_user_assigned_identity(kubelet_identity_id)
+        assert kubelet_identity_id is not None
+        assert kubelet_identity_principal_id is not None
+        self.kwargs.update(
+            {
+                "kubelet_identity_id": kubelet_identity_id,
+                "kubelet_identity_principal_id": kubelet_identity_principal_id,
+            }
+        )
+
+        # create role assignment
+        create_role_assignment_cmd = (
+            "role assignment create --role AcrPull --scope {acr_id} --assignee-object-id {kubelet_identity_principal_id} "
+            "--assignee-principal-type ServicePrincipal -o json"
+        )
+        self.cmd(create_role_assignment_cmd)
+
+        # create AKS cluster to enable network isolated cluster with BYO ACR and outbound type none
+        create_cmd_1 = (
+            "aks create --resource-group {resource_group} --name {aks_name_1} -c 1 --ssh-key-value={ssh_key_value} "
+            "-k 1.30 "
+            "--enable-private-cluster "
+            "--network-plugin azure --vnet-subnet-id {vnet_id}/subnets/{aks_subnet_name} "
+            "--assign-identity {cluster_identity_id} "
+            "--assign-kubelet-identity {kubelet_identity_id} "
+            "--outbound-type=none "
+            "--bootstrap-artifact-source Cache --bootstrap-container-registry-resource-id {acr_id} "
+            "-o json"
+        )
+        self.cmd(create_cmd_1, checks=[
+            self.check("provisioningState", "Succeeded"),
+            self.check("networkProfile.outboundType", "none"),
+            self.check("bootstrapProfile.artifactSource", "Cache"),
+            self.check("bootstrapProfile.containerRegistryId", acr_id),
+        ])
+
+        # create AKS cluster to use Direct as artifact source
+        create_cmd_2 = (
+            "aks create --resource-group {resource_group} --name {aks_name_2} -c 1 --ssh-key-value={ssh_key_value} "
+            "-k 1.30 "
+            "--enable-private-cluster "
+            "--network-plugin azure --vnet-subnet-id {vnet_id}/subnets/{aks_subnet_name} "
+            "--assign-identity {cluster_identity_id} "
+            "--assign-kubelet-identity {kubelet_identity_id} "
+            "-o json"
+        )
+        self.cmd(create_cmd_2, checks=[
+            self.check("provisioningState", "Succeeded"),
+        ])
+
+        # update AKS cluster to use Cache as artifact source
+        update_cmd = (
+            "aks update --resource-group {resource_group} --name {aks_name_2} "
+            "--outbound-type=none "
+            "--bootstrap-artifact-source Cache --bootstrap-container-registry-resource-id {acr_id} "
+            "-o json"
+        )
+        self.cmd(update_cmd, checks=[
+            self.check("provisioningState", "Succeeded"),
+            self.check("networkProfile.outboundType", "none"),
+            self.check("bootstrapProfile.artifactSource", "Cache"),
+            self.check("bootstrapProfile.containerRegistryId", acr_id),
+        ])
+
+        # create AKS cluster to enable network isolated cluster with managed ACR and outbound type none
+        create_cmd_3 = (
+            "aks create --resource-group {resource_group} --name {aks_name_3} -c 1 --ssh-key-value={ssh_key_value} "
+            "-k 1.30 "
+            "--enable-private-cluster "
+            "--network-plugin azure "
+            "--outbound-type=none "
+            "--bootstrap-artifact-source Cache "
+            "-o json"
+        )
+        self.cmd(create_cmd_3, checks=[
+            self.check("provisioningState", "Succeeded"),
+            self.check("networkProfile.outboundType", "none"),
+            self.check("bootstrapProfile.artifactSource", "Cache"),
+        ])
+
+        # delete
+        self.cmd("aks delete -g {resource_group} -n {aks_name_1} --yes --no-wait", checks=[self.is_empty()])
+        self.cmd("aks delete -g {resource_group} -n {aks_name_2} --yes --no-wait", checks=[self.is_empty()])
+        self.cmd("aks delete -g {resource_group} -n {aks_name_3} --yes --no-wait", checks=[self.is_empty()])

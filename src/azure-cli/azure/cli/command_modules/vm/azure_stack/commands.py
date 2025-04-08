@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_avail_set,
+from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm,
                                                                       cf_vm_ext, cf_vm_ext_image,
                                                                       cf_vm_image, cf_vm_image_term, cf_usage,
                                                                       cf_vmss, cf_disks, cf_snapshots,
@@ -63,9 +63,8 @@ def load_command_table(self, _):
         client_factory=image_builder_client_factory
     )
 
-    compute_availset_sdk = CliCommandType(
+    compute_availset_profile = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#AvailabilitySetsOperations.{}',
-        client_factory=cf_avail_set,
         operation_group='availability_sets'
     )
 
@@ -278,11 +277,8 @@ def load_command_table(self, _):
     with self.command_group('vm', compute_vm_sdk, client_factory=cf_vm) as g:
         g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')
 
-    with self.command_group('vm availability-set', compute_availset_sdk) as g:
-        g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
+    with self.command_group('vm availability-set', compute_availset_profile) as g:
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
-        g.custom_command('list', 'list_av_sets')
-        g.generic_update_command('update', custom_func_name='update_av_set')
 
     with self.command_group('vm boot-diagnostics', compute_vm_sdk) as g:
         g.custom_command('disable', 'disable_boot_diagnostics')

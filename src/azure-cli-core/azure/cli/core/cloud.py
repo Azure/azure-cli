@@ -622,13 +622,16 @@ def get_active_cloud(cli_ctx=None):
         from azure.cli.core import get_default_cli
         cli_ctx = get_default_cli()
     try:
-        return get_cloud(cli_ctx, get_active_cloud_name(cli_ctx))
+        cloud = get_cloud(cli_ctx, get_active_cloud_name(cli_ctx))
     except CloudNotRegisteredException as err:
         logger.warning(err)
         default_cloud_name = get_default_cloud_name()
         logger.warning("Resetting active cloud to'%s'.", default_cloud_name)
         _set_active_cloud(cli_ctx, default_cloud_name)
-        return get_cloud(cli_ctx, default_cloud_name)
+        cloud = get_cloud(cli_ctx, default_cloud_name)
+    if cloud.profile != 'latest':
+        logger.warning("Cloud profile '%s' will be deprecated starting from 2.73.0. Please use the 'latest' profile or the CLI 2.66.* (LTS) version instead.", cloud.profile)
+    return cloud
 
 
 def get_cloud_subscription(cloud_name):

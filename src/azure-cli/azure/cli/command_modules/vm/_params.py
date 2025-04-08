@@ -403,17 +403,9 @@ def load_arguments(self, _):
         c.argument('platform_fault_domain_count', type=int, help='Fault Domain count.')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('unmanaged', action='store_true', min_api='2016-04-30-preview', help='contained VMs should use unmanaged disks')
-
-    with self.argument_context('vm availability-set update') as c:
-        if self.supported_api_version(max_api='2016-04-30-preview', operation_group='virtual_machines'):
-            c.argument('name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
-            c.argument('availability_set_name', options_list=['--availability-set-name'])
-
-    for scope in ['vm availability-set create', 'vm availability-set update']:
-        with self.argument_context(scope) as c:
-            c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
-            c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
-            c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
+        c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
+        c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
+        c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
     # endregion
 
     # region VirtualMachines
@@ -983,6 +975,9 @@ def load_arguments(self, _):
         c.argument('instance_view', action='store_true', help='The instance view of a run command.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
+
+    with self.argument_context('vm list-sizes') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
     run_cmd_vmss_name = CLIArgumentType(options_list=['--vmss-name'], help='The name of the VM scale set.')
     for scope in ['create', 'update']:
