@@ -44,6 +44,6 @@ def load_arguments(self, _):
         c.argument(
             "region",
             type=str,
-            help="Azure region to use for marketplace access. If not specified, the current cloud's primary region will be used.",
+            help="Azure region to use for marketplace access. If not specified, the current cloud's primary region will be used.",  # pylint: disable=line-too-long
             required=False,
         )

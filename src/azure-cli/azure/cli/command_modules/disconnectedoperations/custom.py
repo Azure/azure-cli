@@ -63,7 +63,7 @@ def _download_icons(
         try:
             file_downloader(uri, file_path)
         except requests.RequestException as e:
-            logger.error(f"Failed to download icon from {uri}: {e}")
+            logger.error("Failed to download icon from %s: %s", uri, str(e))
             # Consider raising the exception or returning an error status
 
 
@@ -237,8 +237,7 @@ def _process_download_operation(
     output_folder: str,
     subscription_id: str,
     resource_name: str,
-    offer_id: str,
-    send_raw_request_func=send_raw_request,  # Inject send_raw_request
+    offer_id: str
 ) -> Dict[str, Any]:
     """Process async operation and monitor status.
 
@@ -251,7 +250,6 @@ def _process_download_operation(
         resource_name: Name of the disconnected operations resource
         publisher_name: Marketplace publisher name
         offer_id: Marketplace offer ID
-        send_raw_request_func: Function to send raw requests (for mocking)
 
     Returns:
         Operation result dictionary
@@ -262,7 +260,7 @@ def _process_download_operation(
 
     try:
         # Get operation status - has to be raw request because this is an async operation
-        status_response = send_raw_request_func(
+        status_response = send_raw_request(
             cmd.cli_ctx,
             "get",
             async_operation_url,
@@ -359,9 +357,7 @@ def package_offer(
     sku: str,
     version: str,
     output_folder: str,
-    region: Optional[str] = None,
-    send_raw_request_func=send_raw_request,  # Inject send_raw_request
-    requests_get=requests.get,  # Inject requests.get
+    region: Optional[str] = None
 ) -> Dict[str, Any]:
     """Get details of a specific marketplace offer and download its logos.
 
@@ -375,8 +371,6 @@ def package_offer(
         version: SKU version
         output_folder: Folder to save downloaded content
         region: Optional. Azure region to use for marketplace access
-        send_raw_request_func: Function to send raw requests (for mocking)
-        requests_get: Function to perform GET requests (for mocking)
 
     Returns:
         Operation result dictionary
@@ -401,7 +395,7 @@ def package_offer(
     )
 
     try:
-        response = send_raw_request_func(
+        response = send_raw_request(
             cmd.cli_ctx, "get", url, resource="https://management.azure.com"
         )
 
@@ -417,7 +411,7 @@ def package_offer(
                 },
             ).to_dict()
 
-        catalog_content = requests_get(catalog_url)
+        catalog_content = requests.get(catalog_url)
 
         if catalog_content.status_code != 200:
             error_message = f"Catalog request failed with status code: {catalog_content.status_code}"
