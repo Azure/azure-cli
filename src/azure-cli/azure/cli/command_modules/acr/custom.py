@@ -276,7 +276,11 @@ def acr_login(cmd,
             password=password,
             resource_group_name=resource_group_name)
 
-        logger.warning("Note: The token in both the accessToken and refreshToken fields is an ACR Refresh Token, not an ACR Access Token. This ACR Refresh Token cannot be used directly to authenticate with registry APIs such as pushing/pulling images and listing repositories/tags. This ACR Refresh Token must be subsequently exchanged for an ACR Access. Please see https://aka.ms/acr/auth/oauth")
+        logger.warning("Note: The token in both the accessToken and refreshToken fields is "\
+        "an ACR Refresh Token, not an ACR Access Token. This ACR Refresh Token cannot be used "\
+        "directly to authenticate with registry APIs such as pushing/pulling images and listing "\
+        "repositories/tags. This ACR Refresh Token must be subsequently exchanged for an ACR Access. "\
+        "Please see https://aka.ms/acr/auth/oauth")
 
         logger.warning("You can perform manual login using the provided refresh token below, "
                        "for example: 'docker login loginServer -u %s -p refreshToken'", EMPTY_GUID)
