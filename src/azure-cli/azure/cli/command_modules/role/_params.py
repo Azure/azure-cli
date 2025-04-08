@@ -347,6 +347,9 @@ def load_arguments(self, _):
                         "principalName property with it. "
                         "If the logged-in account has no permission or the machine has no network access to query "
                         "Microsoft Graph, set this flag to false to avoid warning or error.")
+        c.argument('fill_role_definition_name', arg_type=get_three_state_flag(),
+                   help="Fill roleDefinitionName property in addition to roleDefinitionId. This operation is "
+                        "expensive. If you encounter performance issue, set this flag to false.")
 
     time_help = 'The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}'
     with self.argument_context('role assignment list-changelogs') as c:

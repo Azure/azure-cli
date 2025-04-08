@@ -7602,6 +7602,8 @@ class VMGalleryImage(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
     def test_gallery_image_version_vhd(self, resource_group):
+        from azure.mgmt.core.tools import resource_id
+
         self.kwargs.update({
             'gallery': self.create_random_name(prefix='gallery_', length=20),
             'subnet': 'subnet1',
@@ -7616,6 +7618,9 @@ class VMGalleryImage(ScenarioTest):
 
         vhd_uri = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
         storage_account_os = vhd_uri.split('.')[0].split('/')[-1]
+        subscription_id = self.get_subscription_id()
+        account_id = resource_id(subscription=subscription_id, resource_group=resource_group, namespace='Microsoft.Storage', type='storageAccounts', name=storage_account_os)
+
         self.kwargs.update({
             'vhd': vhd_uri,
             'stac': storage_account_os
@@ -7636,6 +7641,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('storageProfile.dataDiskImages[0].source.id', s2_id),
                      self.check('storageProfile.dataDiskImages[0].lun', 0),
                      self.check('storageProfile.dataDiskImages[1].source.uri', vhd_uri),
+                     self.check('storageProfile.dataDiskImages[1].source.storageAccountId', account_id),
                      self.check('storageProfile.dataDiskImages[1].lun', 1)])
 
     @AllowLargeResponse()
@@ -7645,7 +7651,7 @@ class VMGalleryImage(ScenarioTest):
 
         self.kwargs.update({
             'vm': 'myvm',
-            'gallery': 'gallery',
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
             'image': 'image',
             'subnet': 'subnet1',
             'vnet': 'vnet1'
@@ -7677,7 +7683,7 @@ class VMGalleryImage(ScenarioTest):
                  '--gallery-image-definition {image} --gallery-image-version 1.0.0 '
                  '--os-vhd-storage-account {account_id} --os-vhd-uri {vhd_uri}', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('storageProfile.osDiskImage.source.id', '{account_id}'),
+            self.check('storageProfile.osDiskImage.source.storageAccountId', '{account_id}'),
             self.check('storageProfile.osDiskImage.source.uri', '{vhd_uri}')
         ])
 
