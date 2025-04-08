@@ -542,7 +542,7 @@ class VMCustomImageTest(ScenarioTest):
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
-        self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo $0 $1" --parameters hello world')
         time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm1}')
         self.cmd('vm generalize -g {rg} -n {vm1}')
@@ -562,7 +562,7 @@ class VMCustomImageTest(ScenarioTest):
 
         self.cmd('vm show -g {rg} -n {vm2}', checks=self.check("length(storageProfile.dataDisks)", 2))
 
-        self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "echo $0 $1"')
+        self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "echo $0 $1" --parameters hello world')
         time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm2}')
         self.cmd('vm generalize -g {rg} -n {vm2}')
