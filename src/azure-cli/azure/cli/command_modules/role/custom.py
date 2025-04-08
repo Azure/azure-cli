@@ -1205,7 +1205,9 @@ def list_service_principal_owners(client, identifier):
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
-        cmd, display_name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
+        cmd, display_name=None,
+        service_management_reference=None,
+        years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_in_json=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1249,6 +1251,7 @@ def create_service_principal_for_rbac(
     aad_application = create_application(cmd,
                                          graph_client,
                                          app_display_name,
+                                         service_management_reference=service_management_reference,
                                          key_value=public_cert_string,
                                          start_date=app_start_date,
                                          end_date=app_end_date)

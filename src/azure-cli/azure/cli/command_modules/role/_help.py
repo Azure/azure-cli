@@ -516,7 +516,9 @@ examples:
 
 helps['ad sp create-for-rbac'] = """
 type: command
-short-summary: Create a service principal and configure its access to Azure resources.
+short-summary: >
+    Create an application and its associated service principal, optionally configure the service principal's
+    RBAC role assignments.
 long-summary: >-
     The output includes credentials that you must protect. Be sure that you do not include these credentials
     in your code or check the credentials into your source control. As an alternative, consider using
