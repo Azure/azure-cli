@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=protected-access
+# pylint: disable=protected-access, line-too-long, unused-argument
 from knack.log import get_logger
 
 from azure.cli.core.aaz import register_command, has_value, AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
