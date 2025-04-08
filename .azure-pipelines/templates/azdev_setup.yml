@@ -17,6 +17,7 @@ steps:
       . env/bin/activate
       python -m pip install -U pip
       pip install azdev
+      pip uninstall wheel -y
       azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then
@@ -33,6 +34,7 @@ steps:
       fi
 
       # Verify installation and build command index
+      pip install wheel==0.30.0
       az --version
     displayName: 'azdev setup'
     env:
