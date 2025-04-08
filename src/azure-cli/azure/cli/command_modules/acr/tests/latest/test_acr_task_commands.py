@@ -11,10 +11,12 @@ class AcrTaskCommandsTests(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer()
     def test_acr_task(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'registry_name': self.create_random_name('clireg', 20),
             'task_name': 'testTask',
-            'task_no_context': 'contextlessTask',
+            'task_no_context_cmd': 'contextlessTaskCmd',
+            'task_no_context_file': 'contextlessTaskfile',
             'rg_loc': 'westus',
             'sku': 'Standard',
             'no_context': '/dev/null',
@@ -25,6 +27,7 @@ class AcrTaskCommandsTests(ScenarioTest):
             'trigger_enabled': 'False',
             'identity': '[system]',
             'loginServer': 'test.acr.com',
+            'file_path': os.path.join(curr_dir, 'taskfilesample.yaml').replace('\\', '\\\\')
         })
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
@@ -51,9 +54,9 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('step.type', 'Docker'),
                          self.check('identity.type', 'SystemAssigned')])
 
-        # Create a contextless task.
-        self.cmd('acr task create -n {task_no_context} -r {registry_name} --cmd {existing_image} -c {no_context}',
-                 checks=[self.check('name', '{task_no_context}'),
+        # Create a contextless task using cmd.
+        self.cmd('acr task create -n {task_no_context_cmd} -r {registry_name} --cmd {existing_image} -c {no_context}',
+                 checks=[self.check('name', '{task_no_context_cmd}'),
                          self.check('location', '{rg_loc}'),
                          self.check('platform.os', 'linux'),
                          self.check('agentConfiguration.cpu', 2),
@@ -61,12 +64,34 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('status', 'Enabled'),
                          self.check('timeout', 3600),
                          self.check('step.type', 'EncodedTask')])
+
+        # Show version is correctly added to cmd created encoded task.
+        # cannot decode the encodedTaskContent in check, compare the base64 encoded value directly.
+        self.cmd('acr task show -n {task_no_context_cmd} -r {registry_name}',
+                checks=[self.check('step.encodedTaskContent', 'dmVyc2lvbjogdjEuMS4wCnN0ZXBzOiAKICAtIGNtZDogYmFzaAogICAgZGlzYWJsZVdvcmtpbmdEaXJlY3RvcnlPdmVycmlkZTogdHJ1ZQogICAgdGltZW91dDogMzYwMAo=')])
+        
+        # Create a contextless task using file.
+        self.cmd('acr task create -n {task_no_context_file} -r {registry_name} -f {file_path} -c {no_context}',
+                 checks=[self.check('name', '{task_no_context_file}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('platform.os', 'linux'),
+                         self.check('agentConfiguration.cpu', 2),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('status', 'Enabled'),
+                         self.check('timeout', 3600),
+                         self.check('step.type', 'EncodedTask')])
+
+        # Show version is not added to file created encoded task.
+        # cannot decode the encodedTaskContent in check, compare the base64 encoded value directly.
+        self.cmd('acr task show -n {task_no_context_file} -r {registry_name}',
+                checks=[self.check('step.encodedTaskContent', 'c3RlcHM6CiAgLSBidWlsZDo=')])
+
         # list tasks
         self.cmd('acr task list -r {registry_name}',
                  checks=[self.check('[0].name', '{task_name}')])
 
         # trigger a run for the contextless task
-        response = self.cmd('acr task run -n {task_no_context} -r {registry_name} --no-logs',
+        response = self.cmd('acr task run -n {task_no_context_cmd} -r {registry_name} --no-logs',
                             checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
                                     self.check('status', 'Succeeded')]).get_output_in_json()
 
