@@ -10593,6 +10593,16 @@ class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
             self.check('orchestrationServices[0].serviceState', 'Suspended')
         ])
 
+        instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs.update({
+            'instance_id': instances[0]['instanceId']
+        })
+        self.cmd('vmss update -g {rg} -n {vmss} --instance-id {instance_id} --protect-from-scale-in true', checks=[
+            self.check('modelDefinitionApplied', 'VirtualMachineScaleSet'),
+            self.check('latestModelApplied', True),
+            self.exists('networkProfileConfiguration.healthProbe')
+        ])
+
 
 class VMAutoShutdownScenarioTest(ScenarioTest):
 
