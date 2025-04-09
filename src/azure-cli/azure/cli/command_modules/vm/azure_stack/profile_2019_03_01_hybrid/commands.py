@@ -23,6 +23,10 @@ def load_command_table(self, _):
     self.command_table['vmss list'] = VMSS.List(loader=self,
                                                 table_transformer=transform_vmss_list_with_zones_table_output)
 
+    from .operations.vm_availability_set import AvailabilitySetUpdate, AvailabilitySetConvert
+    self.command_table['vm availability-set update'] = AvailabilitySetUpdate(loader=self)
+    self.command_table['vm availability-set convert'] = AvailabilitySetConvert(loader=self)
+
     from .operations.capacity_reservation_group import CapacityReservationGroupList
     self.command_table['capacity reservation group list'] = CapacityReservationGroupList(loader=self)
 

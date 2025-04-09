@@ -1312,11 +1312,11 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
                 available_skus.append(sku_info)
         result = available_skus
     if resource_type:
-        result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
+        result = [x for x in result if x['resourceType'].lower() == resource_type.lower()]
     if size:
-        result = [x for x in result if x.resource_type == 'virtualMachines' and size.lower() in x.name.lower()]
+        result = [x for x in result if x['resourceType'] == 'virtualMachines' and size.lower() in x['name'].lower()]
     if zone:
-        result = [x for x in result if x.location_info and x.location_info[0].zones]
+        result = [x for x in result if x['locationInfo'] and x['locationInfo'][0]['zones']]
     return result
 
 
@@ -1783,36 +1783,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
 
 # region VirtualMachines AvailabilitySets
-def _get_availset(cmd, resource_group_name, name):
-    return _compute_client_factory(cmd.cli_ctx).availability_sets.get(resource_group_name, name)
-
-
-def _set_availset(cmd, resource_group_name, name, **kwargs):
-    return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(resource_group_name, name, **kwargs)
-
-
-# pylint: disable=inconsistent-return-statements
-def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_name):
-    av_set = _get_availset(cmd, resource_group_name, availability_set_name)
-    if av_set.sku.name != 'Aligned':
-        av_set.sku.name = 'Aligned'
-
-        # let us double check whether the existing FD number is supported
-        skus = list_skus(cmd, av_set.location)
-        av_sku = next((s for s in skus if s.resource_type == 'availabilitySets' and s.name == 'Aligned'), None)
-        if av_sku and av_sku.capabilities:
-            max_fd = int(next((c.value for c in av_sku.capabilities if c.name == 'MaximumPlatformFaultDomainCount'),
-                              '0'))
-            if max_fd and max_fd < av_set.platform_fault_domain_count:
-                logger.warning("The fault domain count will be adjusted from %s to %s so to stay within region's "
-                               "limitation", av_set.platform_fault_domain_count, max_fd)
-                av_set.platform_fault_domain_count = max_fd
-
-        return _set_availset(cmd, resource_group_name=resource_group_name, name=availability_set_name,
-                             parameters=av_set)
-    logger.warning('Availability set %s is already configured for managed disks.', availability_set_name)
-
-
 def create_av_set(cmd, availability_set_name, resource_group_name, platform_fault_domain_count=2,
                   platform_update_domain_count=None, location=None, proximity_placement_group=None, unmanaged=False,
                   no_wait=False, tags=None, validate=False, additional_scheduled_events=None,
@@ -1857,50 +1827,11 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.begin_create_or_update,
                                                   resource_group_name, deployment_name, deployment))
 
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+    from .aaz.latest.vm.availability_set import Show as _Show
+    return _Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
+                                                    'availability_set_name': availability_set_name})
 
 
-def update_av_set(cmd, instance, resource_group_name, proximity_placement_group=None,
-                  additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                  enable_user_redeploy_scheduled_events=None):
-    if proximity_placement_group is not None:
-        instance.proximity_placement_group = cmd.get_models('SubResource')(id=proximity_placement_group)
-
-    if instance.scheduled_events_policy is None and (
-            additional_scheduled_events is not None or enable_user_reboot_scheduled_events is not None or
-            enable_user_redeploy_scheduled_events is not None):
-        ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
-        instance.scheduled_events_policy = ScheduledEventsPolicy()
-
-    if additional_scheduled_events is not None:
-        ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
-        EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
-        instance.scheduled_events_policy.scheduled_events_additional_publishing_targets = \
-            ScheduledEventsAdditionalPublishingTargets(
-                event_grid_and_resource_graph=EventGridAndResourceGraph(enable=additional_scheduled_events)
-            )
-
-    if enable_user_reboot_scheduled_events is not None:
-        UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
-        instance.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot(
-            automatically_approve=enable_user_reboot_scheduled_events
-        )
-
-    if enable_user_redeploy_scheduled_events is not None:
-        UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
-        instance.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy(
-            automatically_approve=enable_user_redeploy_scheduled_events
-        )
-
-    return instance
-
-
-def list_av_sets(cmd, resource_group_name=None):
-    op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
-    if resource_group_name:
-        return op_group.list(resource_group_name)
-    return op_group.list_by_subscription(expand='virtualMachines/$ref')
 # endregion
 
 
@@ -4889,7 +4820,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
                          replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
                          image_version=None, target_zone_encryption=None, target_edge_zones=None,
-                         allow_replicated_location_deletion=None):
+                         allow_replicated_location_deletion=None, block_deletion_before_end_of_life=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -4958,7 +4889,12 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     os_vhd_storage_account = resource_id(
                         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                         namespace='Microsoft.Storage', type='storageAccounts', name=os_vhd_storage_account)
-                os_disk_image = {"source": {"id": os_vhd_storage_account, "uri": os_vhd_uri}}
+                os_disk_image = {
+                    "source": {
+                        "storage_account_id": os_vhd_storage_account,
+                        "uri": os_vhd_uri
+                    }
+                }
 
             # Data disks
             if data_vhds_uris and data_vhds_storage_accounts is None or \
@@ -4987,7 +4923,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 if data_disk_images is None:
                     data_disk_images = []
                 for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
-                    data_disk_images.append({"source": {"id": account, "uri": uri}, "lun": lun})
+                    data_disk_images.append({
+                        "source": {"storage_account_id": account, "uri": uri},
+                        "lun": lun
+                    })
 
         storage_profile = {"source": source, "os_disk_image": os_disk_image, "data_disk_images": data_disk_images}
         args = {
@@ -5000,6 +4939,11 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             args["safety_profile"] = {
                 "allow_deletion_of_replicated_locations": allow_replicated_location_deletion
             }
+        if block_deletion_before_end_of_life is not None:
+            if "safety_profile" not in args:
+                args["safety_profile"] = {}
+
+            args["safety_profile"]["block_deletion_before_end_of_life"] = block_deletion_before_end_of_life
     else:
         if managed_image is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
@@ -5062,8 +5006,8 @@ def fix_gallery_image_date_info(date_info):
 
 # pylint: disable=line-too-long
 def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
-    from .aaz.latest.sig.image_version import Show as _SigImageVersionShow
-    version = _SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
+    from .aaz.latest.sig.image_version import Show as SigImageVersionShow
+    version = SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "gallery_name": gallery_name,
         "gallery_image_definition": gallery_image_name,
@@ -5071,23 +5015,27 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
     })
 
     # To avoid unnecessary permission check of image
-    if "storage_profile" not in version:
-        version["storage_profile"] = {}
-    version["storage_profile"]["source"] = None
-    if version["storage_profile"].get("os_disk_image", None) and \
-            version["storage_profile"]["os_disk_image"].get("source", None):
-        version["storage_profile"]["os_disk_image"]["source"] = None
-    if version["storage_profile"].get("data_disk_images", None):
-        for v in version["storage_profile"]["data_disk_images"]:
+    if "storageProfile" not in version:
+        version["storageProfile"] = {}
+    version["storageProfile"]["source"] = None
+    if version["storageProfile"].get("osDiskImage", None) and \
+            version["storageProfile"]["osDiskImage"].get("source", None):
+        version["storageProfile"]["osDiskImage"]["source"] = None
+    if version["storageProfile"].get("dataDiskImages", None):
+        for v in version["storageProfile"]["dataDiskImages"]:
             if v.get("source", None):
                 v["source"] = None
+
     return version
 
 
 def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
                          target_regions=None, replica_count=None, allow_replicated_location_deletion=None,
-                         target_edge_zones=None, no_wait=False, **kwargs):
+                         target_edge_zones=None, block_deletion_before_end_of_life=None, no_wait=False, **kwargs):
     args = kwargs['gallery_image_version']
+
+    from .operations.sig_image_version import convert_show_result_to_sneak_case
+    args = convert_show_result_to_sneak_case(args)
 
     if target_regions:
         if "publishing_profile" not in args:
@@ -5109,14 +5057,18 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if "safety_profile" not in args:
             args["safety_profile"] = {}
         args["safety_profile"]["allow_deletion_of_replicated_locations"] = allow_replicated_location_deletion
+    if block_deletion_before_end_of_life is not None:
+        if "safety_profile" not in args:
+            args["safety_profile"] = {}
+        args["safety_profile"]["block_deletion_before_end_of_life"] = block_deletion_before_end_of_life
 
     args["resource_group"] = resource_group_name
     args["gallery_name"] = gallery_name
     args["gallery_image_definition"] = gallery_image_name
     args["gallery_image_version_name"] = gallery_image_version_name
 
-    from .aaz.latest.sig.image_version import Update
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
+    from .aaz.latest.sig.image_version import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 # endregion
 
 
@@ -5904,4 +5856,13 @@ def sig_community_image_version_list(client, location, public_gallery_name, gall
     generator = client.list(location=location, public_gallery_name=public_gallery_name,
                             gallery_image_name=gallery_image_name)
     return get_page_result(generator, marker, show_next_marker)
+
+
+def list_vm_sizes(cmd, location):
+    from .operations.vm import VMListSizes
+    return VMListSizes(cli_ctx=cmd.cli_ctx)(command_args={
+        "location": location,
+    })
+
+
 # endRegion

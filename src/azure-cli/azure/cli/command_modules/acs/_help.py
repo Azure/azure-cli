@@ -182,7 +182,7 @@ parameters:
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
-    long-summary: Select between loadBalancer, userDefinedRouting, managedNATGateway and userAssignedNATGateway. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
+    long-summary: Select between loadBalancer, userDefinedRouting, managedNATGateway, userAssignedNATGateway and none. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
@@ -563,6 +563,14 @@ parameters:
   - name: --if-none-match
     type: string
     short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
+  - name: --bootstrap-artifact-source
+    type: string
+    short-summary: Configure artifact source when bootstraping the cluster.
+    long-summary: |
+        The artifacts include the addon image. Use "Direct" to download artifacts from MCR, "Cache" to downalod artifacts from Azure Container Registry.
+  - name: --bootstrap-container-registry-resource-id
+    type: string
+    short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -732,7 +740,7 @@ parameters:
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
-    long-summary: This option will change the way how the outbound connections are managed in the AKS cluster. Available options are loadbalancer, managedNATGateway, userAssignedNATGateway, userDefinedRouting. For custom vnet, loadbalancer, userAssignedNATGateway and userDefinedRouting are supported. For aks managed vnet, loadbalancer, managedNATGateway and userDefinedRouting are supported.
+    long-summary: This option will change the way how the outbound connections are managed in the AKS cluster. Available options are loadbalancer, managedNATGateway, userAssignedNATGateway, userDefinedRouting and none. For custom vnet, loadbalancer, userAssignedNATGateway and userDefinedRouting are supported. For aks managed vnet, loadbalancer, managedNATGateway and userDefinedRouting are supported.
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
@@ -991,6 +999,14 @@ parameters:
   - name: --if-none-match
     type: string
     short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
+  - name: --bootstrap-artifact-source
+    type: string
+    short-summary: Configure artifact source when bootstraping the cluster.
+    long-summary: |
+        The artifacts include the addon image. Use "Direct" to download artifacts from MCR, "Cache" to downalod artifacts from Azure Container Registry.
+  - name: --bootstrap-container-registry-resource-id
+    type: string
+    short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
@@ -1550,7 +1566,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner for Linux. Windows2019 or Windows2022 for Windows.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, AzureLinux or Ubuntu2204 for Linux. Windows2019 or Windows2022 for Windows.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
