@@ -83,7 +83,7 @@ class Update(AAZCommand):
         )
         _args_schema.default_outbound_access = AAZBoolArg(
             options=["--default-outbound", "--default-outbound-access"],
-            help="Set this property to false to disable default outbound connectivity for all VMs in the subnet. This property can only be set at the time of subnet creation and cannot be updated for an existing subnet.",
+            help="Set this property to false to disable default outbound connectivity for all VMs in the subnet.",
             nullable=True,
         )
         _args_schema.delegated_services = AAZListArg(
@@ -191,9 +191,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         _element.contextual_service_endpoint_policies = AAZListArg(
             options=["contextual-service-endpoint-policies"],
@@ -325,9 +322,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         application_security_group_update.tags = AAZDictArg(
             options=["tags"],
@@ -1749,7 +1743,7 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
-        _element.identity = AAZObjectType()
+        _element.identity = AAZIdentityObjectType()
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -2682,6 +2676,7 @@ class _UpdateHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",

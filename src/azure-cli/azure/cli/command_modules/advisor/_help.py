@@ -49,7 +49,7 @@ short-summary: Review Azure Advisor recommendations.
 
 helps['advisor recommendation disable'] = """
 type: command
-short-summary: Disable Azure Advisor recommendations.
+short-summary: Dismiss Azure Advisor recommendations.
 """
 
 helps['advisor recommendation enable'] = """

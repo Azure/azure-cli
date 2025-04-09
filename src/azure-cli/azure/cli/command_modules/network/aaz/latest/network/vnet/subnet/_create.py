@@ -71,7 +71,7 @@ class Create(AAZCommand):
         )
         _args_schema.default_outbound_access = AAZBoolArg(
             options=["--default-outbound", "--default-outbound-access"],
-            help="Set this property to false to disable default outbound connectivity for all VMs in the subnet. This property can only be set at the time of subnet creation and cannot be updated for an existing subnet.",
+            help="Set this property to false to disable default outbound connectivity for all VMs in the subnet.",
         )
         _args_schema.delegated_services = AAZListArg(
             options=["--delegated-services"],
@@ -1562,7 +1562,7 @@ class _CreateHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
-        _element.identity = AAZObjectType()
+        _element.identity = AAZIdentityObjectType()
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -2495,6 +2495,7 @@ class _CreateHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",

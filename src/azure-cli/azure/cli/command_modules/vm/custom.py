@@ -4883,7 +4883,12 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     os_vhd_storage_account = resource_id(
                         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                         namespace='Microsoft.Storage', type='storageAccounts', name=os_vhd_storage_account)
-                os_disk_image = {"source": {"id": os_vhd_storage_account, "uri": os_vhd_uri}}
+                os_disk_image = {
+                    "source": {
+                        "storage_account_id": os_vhd_storage_account,
+                        "uri": os_vhd_uri
+                    }
+                }
 
             # Data disks
             if data_vhds_uris and data_vhds_storage_accounts is None or \
@@ -4912,7 +4917,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 if data_disk_images is None:
                     data_disk_images = []
                 for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
-                    data_disk_images.append({"source": {"id": account, "uri": uri}, "lun": lun})
+                    data_disk_images.append({
+                        "source": {"storage_account_id": account, "uri": uri},
+                        "lun": lun
+                    })
 
         storage_profile = {"source": source, "os_disk_image": os_disk_image, "data_disk_images": data_disk_images}
         args = {

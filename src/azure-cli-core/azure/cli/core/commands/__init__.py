@@ -830,6 +830,9 @@ class AzCliCommandInvoker(CommandInvoker):
                 experimentals.append(ImplicitExperimentalItem(cli_ctx=self.cli_ctx, **experimental_kwargs))
 
         if not self.cli_ctx.only_show_errors:
+            from azure.cli.core.breaking_change import upcoming_breaking_changes
+            for bc in upcoming_breaking_changes.get('', []):
+                print(bc.message, file=sys.stderr)
             for d in deprecations:
                 print(d.message, file=sys.stderr)
             for p in previews:
