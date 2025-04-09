@@ -55,6 +55,4 @@ class AAZJsonSelector(AAZSelector):
 
     def required(self):
         value = self.get()
-        if not has_value(value):
-            raise UserFault("ResourceNotFoundError")
         return value
