@@ -158,7 +158,7 @@ def get_serializer(level):
             # State property doesn't make sense in feature flag version 2 schema beacuse of the added properties - variants, allocation, telemetry
             # The State property only exists in the CLI, we should move to showing enabled property instead as the other clients
             # As we move to showing the enabled property, we will show the state property in the CLI only if compatibility mode is true
-            env_compatibility_mode = os.environ.get("AZURE_APPCONFIG_FM_COMPATIBLE", True)
+            env_compatibility_mode = os.environ.get("AZURE_APPCONFIG_FM_COMPATIBLE", False)
             compatibility_mode = str(env_compatibility_mode).lower() == "true"
 
             feature = map_keyvalue_to_featureflag(obj, hide_enabled=compatibility_mode)
