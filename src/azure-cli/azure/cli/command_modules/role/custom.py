@@ -209,7 +209,7 @@ def create_role_assignment(cmd, role, scope,
                                        assignment_name=assignment_name)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
-            return list_role_assignments(cmd, assignee=assignee, role=role, scope=scope)[0]
+            return list_role_assignments(cmd, assignee_object_id=object_id, role=role, scope=scope)[0]
         raise
 
 
@@ -232,14 +232,19 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
                                          condition=condition, condition_version=condition_version)
 
 
-def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,  # pylint: disable=too-many-locals
-                          scope=None, include_inherited=False,
+def list_role_assignments(cmd,  # pylint: disable=too-many-locals, too-many-branches
+                          assignee=None, assignee_object_id=None,
+                          role=None,
+                          resource_group_name=None, scope=None,
+                          include_inherited=False,
                           show_all=False, include_groups=False, include_classic_administrators=False,
                           fill_role_definition_name=True, fill_principal_name=True):
-    '''
-    :param include_groups: include extra assignments to the groups of which the user is a
-    member(transitively).
-    '''
+    if assignee and assignee_object_id:
+        raise CLIError('Usage error: Provide only one of --assignee or --assignee-object-id.')
+    if assignee_object_id and include_classic_administrators:
+        raise CLIError('Usage error: --assignee-object-id cannot be used with --include-classic-administrators. '
+                       'Use --assignee instead.')
+
     if include_classic_administrators:
         logger.warning(CLASSIC_ADMINISTRATOR_WARNING)
 
@@ -256,8 +261,10 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
         scope = _build_role_scope(resource_group_name, scope,
                                   definitions_client._config.subscription_id)
 
+    if assignee and not assignee_object_id:
+        assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee, fallback_to_object_id=True)
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
-                                           scope, assignee, role,
+                                           scope, assignee_object_id, role,
                                            include_inherited, include_groups)
 
     results = todict(assignments) if assignments else []
@@ -522,13 +529,19 @@ def _get_displayable_name(graph_object):
     return graph_object['displayName'] or ''
 
 
-def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_group_name=None,
-                            scope=None, include_inherited=False,
+def delete_role_assignments(cmd, ids=None,
+                            assignee=None, assignee_object_id=None,
+                            role=None,
+                            resource_group_name=None, scope=None,
+                            include_inherited=False,
                             yes=None):  # pylint: disable=unused-argument
     # yes is currently a no-op
-    if not any((ids, assignee, role, resource_group_name, scope)):
+    if not any((ids, assignee, assignee_object_id, role, resource_group_name, scope)):
         raise ArgumentUsageError('Please provide at least one of these arguments: '
-                                 '--ids, --assignee, --role, --resource-group, --scope')
+                                 '--ids, --assignee, --assignee-object-id, --role, --resource-group, --scope')
+
+    if assignee and assignee_object_id:
+        raise CLIError('Usage error: Provide only one of --assignee or --assignee-object-id.')
 
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
@@ -559,8 +572,11 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
 
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client._config.subscription_id)
+    # Delay resolving object ID, because if ids are provided, no need to resolve
+    if assignee and not assignee_object_id:
+        assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee, fallback_to_object_id=True)
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
-                                           scope, assignee, role, include_inherited,
+                                           scope, assignee_object_id, role, include_inherited,
                                            include_groups=False)
 
     if assignments:
@@ -571,11 +587,7 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
 
 
 def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
-                             scope, assignee, role, include_inherited, include_groups):
-    assignee_object_id = None
-    if assignee:
-        assignee_object_id = _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
-
+                             scope, assignee_object_id, role, include_inherited, include_groups):
     # https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-list-rest
     # "atScope()" and "principalId eq '{value}'" query cannot be used together (API limitation).
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
@@ -1205,7 +1217,9 @@ def list_service_principal_owners(client, identifier):
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
-        cmd, display_name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
+        cmd, display_name=None,
+        service_management_reference=None,
+        years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_in_json=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1249,6 +1263,7 @@ def create_service_principal_for_rbac(
     aad_application = create_application(cmd,
                                          graph_client,
                                          app_display_name,
+                                         service_management_reference=service_management_reference,
                                          key_value=public_cert_string,
                                          start_date=app_start_date,
                                          end_date=app_end_date)
