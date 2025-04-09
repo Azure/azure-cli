@@ -186,6 +186,9 @@ def load_arguments(self, _):
         c.argument('display_name', options_list=['--display-name', '--name', '-n'],
                    help='Display name of the service principal. If not present, default to azure-cli-%Y-%m-%d-%H-%M-%S '
                         'where the suffix is the time of creation.')
+        c.argument('create_password', arg_type=get_three_state_flag(), arg_group='Credential',
+                   help='Create a password credential (secret) on the the application. This is the default behavior. '
+                        'Set this argument to false to disable creating password credential.')
         c.argument('scopes', nargs='+',
                    help="Space-separated list of scopes the service principal's role assignment applies to. e.g., "
                         "subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, "
