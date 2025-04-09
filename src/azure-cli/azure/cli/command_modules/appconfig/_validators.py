@@ -397,7 +397,7 @@ def validate_sku(namespace):
             namespace.no_replica = None
             namespace.enable_arm_private_network_access = None
             return
-    
+
     if namespace.sku.lower() == 'developer':
         if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica):  # pylint: disable=too-many-boolean-expressions
             logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a developer store.")
