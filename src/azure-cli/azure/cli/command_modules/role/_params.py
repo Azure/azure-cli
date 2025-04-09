@@ -198,6 +198,10 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--sdk-auth'),
                    help='Output service principal credential along with cloud endpoints in JSON format. ',
                    arg_type=get_three_state_flag())
+        c.argument('service_management_reference',
+                   help='Set the serviceManagementReference property of the created application. '
+                        'Reference application or service contact information from a Service or Asset Management '
+                        'database.')
 
     with self.argument_context('ad sp owner list') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')

@@ -195,6 +195,18 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
         with self.assertRaisesRegex(ArgumentUsageError, 'both'):
             self.cmd('ad sp create-for-rbac --role {role}')
 
+    def test_create_for_rbac_service_management_reference(self):
+        self.kwargs.update({
+            'display_name': self.create_random_name('azure-cli-test-', 30),
+            'service_management_reference': '96524024-75b0-497b-ab38-0381399a6a9d'
+        })
+        result = self.cmd('ad sp create-for-rbac --display-name {display_name} '
+                          '--service-management-reference {service_management_reference}',
+                          checks=self.check('displayName', '{display_name}')).get_output_in_json()
+        self.kwargs['app_id'] = result['appId']
+        self.cmd('ad app show --id {app_id}',
+                 checks=self.check('serviceManagementReference', '{service_management_reference}'))
+
 
 class RoleDefinitionScenarioTest(RoleScenarioTestBase):
 
