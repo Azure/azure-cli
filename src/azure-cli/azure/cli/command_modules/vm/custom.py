@@ -47,6 +47,7 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
 from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
+from .aaz.latest.vm import Update as UpdateVM
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -1836,43 +1837,55 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
 
 
 # region VirtualMachines BootDiagnostics
-def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
-    from .aaz.latest.vm import Update as UpdateVM, Show as GetVM
-    vm = GetVM(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'vm_name': vm_name
-    })
-    diag_profile = False if 'diagnosticsProfile' not in vm else vm['diagnosticsProfile']
-    if not (diag_profile and diag_profile['bootDiagnostics'] and diag_profile['bootDiagnostics']['enabled']):
-        return
+class DisableBootDiagnostics(UpdateVM):
+    def pre_instance_update(self, instance):
+        from azure.cli.core.aaz import has_value
+        diag_profile = False if not has_value(instance.properties.diagnostics_profile) else (
+            instance.properties.diagnostics_profile)
+        if not (diag_profile and has_value(diag_profile.boot_diagnostics) and
+                diag_profile.boot_diagnostics.enabled.to_serialized_data()):
+            return
+        boot_diag = {'enabled': False, 'storage_uri': None}
+        instance.properties.diagnostics_profile = {'boot_diagnostics': boot_diag}
 
-    boot_diag = {'enabled': False, 'storageUri': None}
+
+def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
     ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done')(
-        UpdateVM(cli_ctx=cmd.cli_ctx)(command_args={
+        DisableBootDiagnostics(cli_ctx=cmd.cli_ctx)(command_args={
             'resource_group': resource_group_name,
-            'vm_name': vm_name,
-            'diagnostics_profile': {
-                'bootDiagnostics': boot_diag
-            }
+            'vm_name': vm_name
         })
     )
 
 
-def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage=None):
-    from azure.cli.command_modules.vm._vm_utils import get_storage_blob_uri
-    from .aaz.latest.vm import Update as UpdateVM
-    storage_uri = None
-    if storage:
-        storage_uri = get_storage_blob_uri(cmd.cli_ctx, storage)
+class EnableBootDiagnostics(UpdateVM):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.storage = AAZStrArg(
+            options=["--storage"],
+            help="Storage account"
+        )
+        return args_schema
 
-    boot_diag = {'enabled': True, 'storageUri': storage_uri}
+    def pre_instance_update(self, instance):
+        from azure.cli.core.aaz import has_value
+        from azure.cli.command_modules.vm._vm_utils import get_storage_blob_uri
+        args = self.ctx.args
+        storage_uri = None
+        if has_value(args.storage):
+            storage_uri = get_storage_blob_uri(self.cli_ctx, args.storage.to_serialized_data())
+        boot_diag = {'enabled': True, 'storage_uri': storage_uri}
+        instance.properties.diagnostics_profile = {'boot_diagnostics': boot_diag}
+
+
+def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage=None):
     ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done')(
-        UpdateVM(cli_ctx=cmd.cli_ctx)(command_args={
+        EnableBootDiagnostics(cli_ctx=cmd.cli_ctx)(command_args={
             'resource_group': resource_group_name,
             'vm_name': vm_name,
-            'diagnostics_profile': {
-                'bootDiagnostics': boot_diag
-            }
+            'storage': storage
         })
     )
 
