@@ -31,7 +31,7 @@ class Delete(AAZCommand):
     def _handler(self, command_args):
         super()._handler(command_args)
         self._execute_operations()
-        return self._output()
+        return None
 
     _args_schema = None
 
@@ -67,10 +67,6 @@ class Delete(AAZCommand):
     @register_callback
     def post_operations(self):
         pass
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 
     class AvailabilitySetsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -159,7 +155,9 @@ class Delete(AAZCommand):
                 serialized_name="endTime",
                 flags={"read_only": True},
             )
-            _schema_on_200.error = AAZObjectType()
+            _schema_on_200.error = AAZObjectType(
+                flags={"read_only": True},
+            )
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )

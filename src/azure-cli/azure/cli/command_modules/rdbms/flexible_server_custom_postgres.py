@@ -301,6 +301,7 @@ def flexible_server_restore(cmd, client,
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
+# pylint: disable=too-many-branches
 def flexible_server_update_custom_func(cmd, client, instance,
                                        sku_name=None, tier=None,
                                        storage_gb=None,
@@ -455,6 +456,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
         if high_availability.lower() != "disabled" and standby_availability_zone:
             high_availability_param.standby_availability_zone = standby_availability_zone
+
+        if high_availability.lower() != "disabled":
+            config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
+            fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
+            if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
+                raise CLIError("High availability cannot be enabled while Fabric mirroring is Active. Please disable Fabric mirroring to enable high availability.")
 
         params.high_availability = high_availability_param
 

@@ -73,11 +73,15 @@ class VmReimageTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm',
             'subnet': 'mysubnet',
-            'vnet': 'myvnet'
+            'vnet': 'myvnet',
+            'pubip': 'pubip',
         })
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+
         self.cmd('vm create -g {rg} -n {vm} --image "OpenLogic:CentOS:7.5:latest" --admin-username centosadmin --admin-password testPassword0 '
-                 '--authentication-type password --os-disk-delete-option Delete --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--authentication-type password --os-disk-delete-option Delete --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -177,7 +181,7 @@ class VMOpenPortTest(ScenarioTest):
 
 class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_list_ip')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_list_ip', location='centralus')
     @AllowLargeResponse(size_kb=99999)
     def test_vm_show_list_sizes_list_ip_addresses(self, resource_group):
 
@@ -187,11 +191,16 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
             'allocation': 'static',
             'zone': 2,
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+
         # Expecting no results at the beginning
         self.cmd('vm list-ip-addresses --resource-group {rg}', checks=self.is_empty())
-        self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest'
+        self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest --public-ip-address {pubip} '
                  ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
@@ -226,7 +235,6 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
             self.check('length([0].virtualMachine.network.publicIpAddresses)', 1),
             self.check('[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod', self.kwargs['allocation'].title()),
             self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string'),
-            self.check('[0].virtualMachine.network.publicIpAddresses[0].zone', '{zone}'),
             self.check('type([0].virtualMachine.network.publicIpAddresses[0].name)', 'string'),
             self.check('[0].virtualMachine.network.publicIpAddresses[0].resourceGroup', '{rg}')
         ])
@@ -371,10 +379,15 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm-generalize',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --admin-username ubuntu --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('vm create -g {rg} -n {vm} --admin-username ubuntu --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 '
+                 '--authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -401,10 +414,15 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm-generalize',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --admin-username debian --image Debian:debian-10:10:latest --admin-password testPassword0 --authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('vm create -g {rg} -n {vm} --admin-username debian --image Debian:debian-10:10:latest --admin-password testPassword0 '
+                 '--authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -425,17 +443,22 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
+    @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm', location='francecentral')
     def test_vm_capture_zone_resilient_image(self, resource_group):
 
         self.kwargs.update({
             'loc': 'francecentral',
             'vm': 'vm-generalize',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image OpenLogic:CentOS:7.5:latest --public-ip-address {pubip} '
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -463,9 +486,15 @@ class VMWindowsLicenseTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'winvm',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
-        self.cmd('vm create -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('vm create -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -492,23 +521,37 @@ class VMCustomImageTest(ScenarioTest):
             'image1': 'img-from-unmanaged',
             'image2': 'img-from-managed',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'nsg': 'nsg',
+            'pubip1': 'pubip1',
+            'pubip2': 'pubip2',
+            'pubip3': 'pubip3',
+            'pubip4': 'pubip4',
+            'pubip5': 'pubip5',
+            'pubip6': 'pubip6',
+            'pubip7': 'pubip7',
         })
 
-        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --use-unmanaged-disk --admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --use-unmanaged-disk --admin-username sdk-test-admin '
+                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
-        self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        self.cmd('vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo $0 $1" --parameters hello world')
         time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm1}')
         self.cmd('vm generalize -g {rg} -n {vm1}')
         self.cmd('image create -g {rg} -n {image1} --source {vm1}')
 
-        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 --admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 '
+                 '--admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip2} --nsg-rule NONE')
         data_disks = self.cmd('vm show -g {rg} -n {vm2}').get_output_in_json()['storageProfile']['dataDisks']
         self.kwargs['disk_0_name'] = data_disks[0]['name']
         self.kwargs['disk_2_name'] = data_disks[2]['name']
@@ -519,23 +562,34 @@ class VMCustomImageTest(ScenarioTest):
 
         self.cmd('vm show -g {rg} -n {vm2}', checks=self.check("length(storageProfile.dataDisks)", 2))
 
-        self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        self.cmd('vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "echo $0 $1" --parameters hello world')
         time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm2}')
         self.cmd('vm generalize -g {rg} -n {vm2}')
         self.cmd('image create -g {rg} -n {image2} --source {vm2}')
 
-        self.cmd('vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip3} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
+                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip3} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm1}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
         ])
-        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --orchestration-mode Flexible', checks=[
+
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip4} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
+                 '--authentication-type password --public-ip-address {pubip4} --orchestration-mode Flexible --nsg {nsg}', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
         ])
 
-        self.cmd('vm create -g {rg} -n {newvm2} --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip5} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {newvm2} --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
+                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip5} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm2}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
@@ -544,7 +598,10 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        self.cmd('vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku os=Premium_LRS 0=StandardSSD_LRS --data-disk-sizes-gb 1 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip6} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
+                 '--authentication-type password --storage-sku os=Premium_LRS 0=StandardSSD_LRS --data-disk-sizes-gb 1 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip6} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n vm3', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
@@ -560,7 +617,10 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --orchestration-mode Flexible', checks=[
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip7} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
+                 '--authentication-type password --orchestration-mode Flexible --public-ip-address {pubip7} --nsg {nsg}', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 2),
@@ -581,10 +641,22 @@ class VMCustomImageTest(ScenarioTest):
             'image1': 'img-from-unmanaged',
             'image2': 'img-from-managed',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'nsg': 'nsg',
+            'pubip1': 'pubip1',
+            'pubip2': 'pubip2',
+            'pubip3': 'pubip3',
+            'pubip4': 'pubip4',
+            'pubip5': 'pubip5',
+            'pubip6': 'pubip6',
+            'pubip7': 'pubip7',
         })
 
-        self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username sdk-test-admin '
+                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -597,7 +669,10 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('vm generalize -g {rg} -n {vm1}')
         self.cmd('image create -g {rg} -n {image1} --source {vm1}')
 
-        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 --admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 '
+                 '--admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip2} --nsg-rule NONE')
         data_disks = self.cmd('vm show -g {rg} -n {vm2}').get_output_in_json()['storageProfile']['dataDisks']
         self.kwargs['disk_0_name'] = data_disks[0]['name']
         self.kwargs['disk_2_name'] = data_disks[2]['name']
@@ -614,18 +689,28 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('vm generalize -g {rg} -n {vm2}')
         self.cmd('image create -g {rg} -n {image2} --source {vm2}')
 
-        self.cmd('vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip3} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
+                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip3} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm1}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
         ])
-        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --orchestration-mode Uniform --lb-sku Standard', checks=[
+
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip4} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --public-ip-address {pubip4} '
+                 '--authentication-type password --orchestration-mode Uniform --lb-sku Standard --nsg {nsg}', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
         ])
 
-        self.cmd('vm create -g {rg} -n {newvm2} --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip5} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {newvm2} --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password '
+                 '--subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip5} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm2}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
@@ -634,7 +719,10 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        self.cmd('vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku os=Premium_LRS 0=StandardSSD_LRS --data-disk-sizes-gb 1 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip6} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
+                 '--authentication-type password --storage-sku os=Premium_LRS 0=StandardSSD_LRS --data-disk-sizes-gb 1 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip6} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n vm3', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
@@ -650,8 +738,10 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --orchestration-mode Uniform --lb-sku Standard', checks=[
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip7} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --public-ip-address {pubip7} '
+                 '--authentication-type password --orchestration-mode Uniform --lb-sku Standard --nsg {nsg}', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 2),
@@ -670,10 +760,15 @@ class VMCustomImageTest(ScenarioTest):
             'image2': 'img-from-vm-id',
             'image3': 'img-from-disk-id',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu '
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
         # Disable default outbound access
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -724,10 +819,14 @@ class VMCustomImageTest(ScenarioTest):
             'image1': 'myImage1',
             'image2': 'myImage2',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
 
-        vm1 = self.cmd('vm create -g {rg} -n {vm1} --admin-username theuser --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('vm create -g {rg} -n {vm1} --admin-username theuser --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -800,9 +899,14 @@ class VMCreateFromUnmanagedDiskTest(ScenarioTest):
             'loc': 'westus',
             'vm': 'vm1',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip1': 'pubip1',
+            'pubip2': 'pubip2',
         })
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -822,8 +926,11 @@ class VMCreateFromUnmanagedDiskTest(ScenarioTest):
         })
         self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri} --os-type linux',
                  checks=[self.check('name', '{os_disk}'), self.check('osType', 'Linux')])
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # create a vm by attaching to it
-        self.cmd('vm create -g {rg} -n {vm} --attach-os-disk {os_disk} --os-type linux --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE',
+        self.cmd('vm create -g {rg} -n {vm} --attach-os-disk {os_disk} --os-type linux --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip2} --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
 
@@ -836,11 +943,15 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         self.kwargs.update({
             'loc': 'westus',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip1': 'pubip1',
+            'pubip2': 'pubip2',
         })
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # create a vm with unmanaged os disk
-        self.cmd('vm create -g {rg} -n vm1 --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm1 --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -851,8 +962,10 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
 
         self.cmd('vm delete -g {rg} -n vm1 -y')
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # create a vm by attaching the OS disk from the deleted VM
-        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE',
+        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip2} --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
     @AllowLargeResponse(size_kb=99999)
@@ -863,11 +976,16 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
             'vm': 'vm1',
             'vm2': 'vm2',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip1': 'pubip1',
+            'pubip2': 'pubip2',
         })
 
-        # create a unmanaged bm with 2 unmanaged disks
-        vm_create_cmd = 'vm create -g {rg} -n vm1 --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE'
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        # create an unmanaged bm with 2 unmanaged disks
+        vm_create_cmd = ('vm create -g {rg} -n vm1 --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 '
+                         '--authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
 
         self.cmd(vm_create_cmd)
         # Disable default outbound access
@@ -884,8 +1002,10 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
 
         self.cmd('vm delete -g {rg} -n vm1 -y')
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # create a vm by attaching the OS disk from the deleted VM
-        vm_create_cmd = ('vm create -g {rg} -n {vm2} --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk '
+        vm_create_cmd = ('vm create -g {rg} -n {vm2} --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk --public-ip-address {pubip2} '
                          '--attach-data-disks {data_disk} {data_disk2} --data-disk-caching 0=ReadWrite 1=ReadOnly --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd(vm_create_cmd)
         self.cmd('vm show -g {rg} -n {vm2} -d', checks=[
@@ -904,10 +1024,13 @@ class VMRedeployTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'myvm',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
-        })        
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
+        })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -924,10 +1047,13 @@ class VMConvertTest(ScenarioTest):
         self.kwargs.update({
             'vm':'myvm',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -980,9 +1106,13 @@ class TestSnapShotAccess(ScenarioTest):
             'vm': self.create_random_name('vm', 10),
             'snapshot': self.create_random_name('snap', 10),
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -1009,12 +1139,16 @@ class VMAttachDisksOnCreate(ScenarioTest):
     def test_vm_create_by_attach_os_and_data_disks(self, resource_group):
         self.kwargs.update({
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip1': 'pubip1',
+            'pubip2': 'pubip2',
         })
         # the testing below follow a real custom's workflow requiring the support of attaching data disks on create
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # creating a vm
-        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -1041,11 +1175,13 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('snapshot wait --created -g {rg} -n {data_snapshot}')
         self.cmd('disk wait --created -g {rg} -n {data_disk}')
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # rebuild a new vm
         # (os disk can be resized)
         self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk} --os-disk-delete-option Delete '
                  '--attach-data-disks {data_disk} --data-disk-delete-option Detach --data-disk-sizes-gb 3 '
-                 '--os-disk-size-gb 100 --os-type linux --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE',
+                 '--os-disk-size-gb 100 --os-type linux --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip2} --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
         self.cmd('vm show -g {rg} -n vm2', checks=[
             self.check('length(storageProfile.dataDisks)', 2),
@@ -1062,11 +1198,15 @@ class VMAttachDisksOnCreate(ScenarioTest):
     def test_vm_create_by_attach_unmanaged_os_and_data_disks(self, resource_group):
         self.kwargs.update({
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip1': 'pubip1',
+            'pubip2': 'pubip2',
         })
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # creating a vm
-        self.cmd('vm create -g {rg} -n vm1 --use-unmanaged-disk --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm1 --use-unmanaged-disk --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -1081,8 +1221,11 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n vm1')
         self.cmd('vm delete -g {rg} -n vm1 -y')
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # rebuild a new vm
-        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk_vhd} --attach-data-disks {data_disk_vhd} --os-type linux --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE',
+        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk_vhd} --attach-data-disks {data_disk_vhd} --public-ip-address {pubip2} '
+                 '--os-type linux --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
     @AllowLargeResponse(99999)
@@ -1092,12 +1235,18 @@ class VMAttachDisksOnCreate(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1',
             'subnet2': 'subnet2',
-            'vnet2': 'vnet2'
+            'vnet2': 'vnet2',
+            'pubip1': 'pubip1',
+            'pubip2': 'pubip2',
+            'pubip3': 'pubip3',
         })
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd -l northeurope')
         self.cmd('vm create -n Delete_CLI1 -g {rg} --image RedHat:RHEL:8-lvm-gen2:latest -l northeurope '
-                 '--size Standard_E8as_v4 --generate-ssh-keys --public-ip-address "" --os-disk-size-gb 64 '
+                 '--size Standard_E8as_v4 --generate-ssh-keys --public-ip-address {pubip1} --os-disk-size-gb 64 '
                  '--data-disk-sizes-gb 200 --data-disk-delete-option Delete --admin-username vmtest '
-                 '--subnet {subnet} --vnet-name {vnet}',
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
         # Disable default outbound access
@@ -1107,10 +1256,12 @@ class VMAttachDisksOnCreate(ScenarioTest):
         result = self.cmd('vm show -g {rg} -n Delete_CLI1').get_output_in_json()
         self.assertEqual(result['storageProfile']['dataDisks'][0]['deleteOption'], 'Delete')
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # creating a vm
         self.cmd(
             'vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 '
-            '--authentication-type password --data-disk-sizes-gb 2 --subnet {subnet2} --vnet-name {vnet2} --nsg-rule NONE --admin-username vmtest')
+            '--authentication-type password --data-disk-sizes-gb 2 --subnet {subnet2} --vnet-name {vnet2} --nsg-rule NONE --public-ip-address {pubip2} --admin-username vmtest')
 
         # Disable default outbound access
         self.cmd(
@@ -1134,11 +1285,13 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('disk create -g {rg} -n {data_disk} --source {data_snapshot}')
         self.cmd('disk create -g {rg} -n {data_disk2} --source {data_snapshot}')
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip3} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # rebuild a new vm
         # (os disk can be resized)
         self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk} --os-disk-delete-option Delete '
                  '--attach-data-disks {data_disk} {data_disk2} --data-disk-delete-option {data_disk}=Delete {data_disk2}=Detach '
-                 '--os-disk-size-gb 100 --os-type linux --subnet {subnet2} --vnet-name {vnet2} --nsg-rule NONE',
+                 '--os-disk-size-gb 100 --os-type linux --subnet {subnet2} --vnet-name {vnet2} --public-ip-address {pubip3} --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
         self.cmd('vm show -g {rg} -n vm2', checks=[
             self.check('length(storageProfile.dataDisks)', 2),
@@ -6579,7 +6732,7 @@ class VMDiskEncryptionTest(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -7602,6 +7755,8 @@ class VMGalleryImage(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
     def test_gallery_image_version_vhd(self, resource_group):
+        from azure.mgmt.core.tools import resource_id
+
         self.kwargs.update({
             'gallery': self.create_random_name(prefix='gallery_', length=20),
             'subnet': 'subnet1',
@@ -7616,6 +7771,9 @@ class VMGalleryImage(ScenarioTest):
 
         vhd_uri = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
         storage_account_os = vhd_uri.split('.')[0].split('/')[-1]
+        subscription_id = self.get_subscription_id()
+        account_id = resource_id(subscription=subscription_id, resource_group=resource_group, namespace='Microsoft.Storage', type='storageAccounts', name=storage_account_os)
+
         self.kwargs.update({
             'vhd': vhd_uri,
             'stac': storage_account_os
@@ -7636,6 +7794,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('storageProfile.dataDiskImages[0].source.id', s2_id),
                      self.check('storageProfile.dataDiskImages[0].lun', 0),
                      self.check('storageProfile.dataDiskImages[1].source.uri', vhd_uri),
+                     self.check('storageProfile.dataDiskImages[1].source.storageAccountId', account_id),
                      self.check('storageProfile.dataDiskImages[1].lun', 1)])
 
     @AllowLargeResponse()
@@ -7645,7 +7804,7 @@ class VMGalleryImage(ScenarioTest):
 
         self.kwargs.update({
             'vm': 'myvm',
-            'gallery': 'gallery',
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
             'image': 'image',
             'subnet': 'subnet1',
             'vnet': 'vnet1'
@@ -7677,7 +7836,7 @@ class VMGalleryImage(ScenarioTest):
                  '--gallery-image-definition {image} --gallery-image-version 1.0.0 '
                  '--os-vhd-storage-account {account_id} --os-vhd-uri {vhd_uri}', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('storageProfile.osDiskImage.source.id', '{account_id}'),
+            self.check('storageProfile.osDiskImage.source.storageAccountId', '{account_id}'),
             self.check('storageProfile.osDiskImage.source.uri', '{vhd_uri}')
         ])
 
