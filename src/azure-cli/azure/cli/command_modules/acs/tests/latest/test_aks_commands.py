@@ -24,6 +24,7 @@ from azure.cli.command_modules.acs._helpers import (
 from azure.cli.command_modules.acs.tests.latest.custom_preparers import (
     AKSCustomResourceGroupPreparer, AKSCustomRoleBasedServicePrincipalPreparer,
     AKSCustomVirtualNetworkPreparer)
+from azure.cli.command_modules.acs.tests.latest.data.certs import CUSTOM_CA_TEST_CERT_STR
 from azure.cli.command_modules.acs.tests.latest.recording_processors import \
     KeyReplacer
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
@@ -32,6 +33,7 @@ from azure.cli.testsdk import ScenarioTest, live_only
 from azure.cli.testsdk.checkers import (StringCheck, StringContainCheck,
                                         StringContainCheckIgnoreCase)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from knack.util import CLIError
 
 # flake8: noqa
@@ -12046,6 +12048,68 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                     self.check('provisioningState', 'Succeeded'),
                     self.check('messageOfTheDay', 'VU5BVVRIT1JJWkVEIEFDQ0VTUyBUTyBUSElTIERFVklDRSBJUyBQUk9ISUJJVEVECgpZb3UgbXVzdCBoYXZlIGV4cGxpY2l0LCBhdXRob3JpemVkIHBlcm1pc3Npb24gdG8gYWNjZXNzIG9yIGNvbmZpZ3VyZSB0aGlzIGRldmljZS4gVW5hdXRob3JpemVkIGF0dGVtcHRzIGFuZCBhY3Rpb25zIHRvIGFjY2VzcyBvciB1c2UgdGhpcyBzeXN0ZW0gbWF5IHJlc3VsdCBpbiBjaXZpbCBhbmQvb3IgY3JpbWluYWwgcGVuYWx0aWVzLiBBbGwgYWN0aXZpdGllcyBwZXJmb3JtZWQgb24gdGhpcyBkZXZpY2UgYXJlIGxvZ2dlZCBhbmQgbW9uaXRvcmVkLgo=')
                  ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_add_nodepool_with_custom_ca_trust_certificates(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        node_pool_name_second = self.create_random_name('c', 6)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'node_pool_name_second': node_pool_name_second,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'custom_ca_trust_certificates': get_test_data_file_path("certs.txt")
+        })
+
+        # 1. create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--nodepool-name {node_pool_name} -c 1 ' \
+                     '--ssh-key-value={ssh_key_value} ' \
+                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomCATrustPreview ' \
+                     '--custom-ca-trust-certificates={custom_ca_trust_certificates}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)]),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_add_nodepool_with_custom_ca_trust_certificates(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        node_pool_name_second = self.create_random_name('c', 6)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'node_pool_name_second': node_pool_name_second,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'custom_ca_trust_certificates': get_test_data_file_path("certs.txt")
+        })
+
+        # 1. create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--nodepool-name {node_pool_name} -c 1 ' \
+                     '--ssh-key-value={ssh_key_value} ' \
+                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomCATrustPreview ' \
+                     '--custom-ca-trust-certificates={custom_ca_trust_certificates}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)] if os.environ.get(ENV_LIVE_TEST, False) else ["testcert"]*2 ),
+        ])
 
         # delete
         self.cmd(
