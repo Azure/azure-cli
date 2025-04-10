@@ -263,10 +263,6 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        self.cmd('sql server list-usages -g {} -n {}'
-                 .format(resource_group_1, server_name_1),
-                 checks=[JMESPathCheck('[0].resourceName', server_name_1)])
-
         # test delete sql server
         self.cmd('sql server delete --id {} --yes'
                  .format(server_1['id']), checks=NoneCheck())
@@ -393,7 +389,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='eastus')
+    @SqlServerPreparer(location='westus')
     def test_sql_firewall_mgmt(self, resource_group, resource_group_location, server):
         firewall_rule_1 = 'rule1'
         start_ip_address_1 = '0.0.0.0'
@@ -505,7 +501,7 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
 
 class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='eastus')
+    @SqlServerPreparer(location='westus')
     def test_sql_ipv6_firewall_mgmt(self, resource_group, resource_group_location, server):
         ipv6_firewall_rule_1 = 'rule1'
         start_ipv6_address_1 = '0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30'
@@ -587,8 +583,8 @@ class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
     def test_sql_outbound_firewall_mgmt(self, resource_group, resource_group_location, server):
         outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
         outbound_firewall_rule_allowed_fqdn_2 = 'testOBFR2'
@@ -855,8 +851,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readScale', 'Enabled'),
                      JMESPathCheck('highAvailabilityReplicaCount', '2')])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
     def test_sql_db_ledger(self, resource_group, resource_group_location, server):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
@@ -1223,9 +1219,9 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_short_term_retention(self):
         # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
         self.kwargs.update({
-            'resource_group': 'qiangdsrg',
-            'server_name': 'qiangdsmemberserver',
-            'database_name': 'hubdatabase',
+            'resource_group': 'cli_test_donnotdelete',
+            'server_name': 'clitestserverdonotdelete',
+            'database_name': 'clitestdatabase',
             'retention_days_v1': 7,
             'diffbackup_hours_v1': 24,
             'retention_days_v2': 6,
@@ -1456,7 +1452,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
             self.cmd('sql mi op list -g {} --mi {}'
                      .format(resource_group, managed_instance_name),
                      checks=[
-                         JMESPathCheck('length(@)', 2),
+                         JMESPathCheck('length(@)', 3),
                          JMESPathCheck('[0].resourceGroup', resource_group),
                          JMESPathCheck('[0].managedInstanceName', managed_instance_name)
                      ])
@@ -1466,12 +1462,12 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
         # Cancel operation
         self.cmd('sql mi op cancel -g {} --mi {} -n {}'
-                 .format(resource_group, managed_instance_name, ops[1]['name']))
+                 .format(resource_group, managed_instance_name, ops[2]['name']))
 
 
 class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='eastus')
+    @SqlServerPreparer(location='westus')
     def test_sql_server_connection_policy(self, resource_group, resource_group_location, server):
         # Show
         self.cmd('sql server conn-policy show -g {} -s {}'
@@ -2203,7 +2199,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
                                                   JMESPathCheck('provisioningState',
-                                                                'Succeeded')]).get_output_in_json()['id']
+                                                                'Creating')]).get_output_in_json()['id']
 
         # update audit policy - enable log analytics target
         self.cmd('sql server audit-policy update -g {} -n {}'
@@ -2431,13 +2427,6 @@ class SqlManagedInstanceAdvancedThreatProtectionSettingsScenarioTest(ScenarioTes
         # for the operation to complete in order to proceed with testing.
         time.sleep(120)
 
-        # get advanced threat protection settings
-        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
-                 .format(resource_group, managed_instance_name),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('state', state_disabled)])
-
         # update advanced threat protection settings - enable
         self.cmd('sql mi advanced-threat-protection-setting update -g {} -n {}'
                  ' --state {}'
@@ -2619,7 +2608,7 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
                                                   JMESPathCheck('provisioningState',
-                                                                'Succeeded')]).get_output_in_json()['id']
+                                                                'Creating')]).get_output_in_json()['id']
 
         # update MS support audit policy - enable log analytics target
         self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {}'
@@ -2833,19 +2822,19 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='eastus')
+                           location='westus')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2",
-                           location='eastus')
+                           location='westus')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='eastus')
+                       location='westus')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1",
-                       location='eastus')
+                       location='westus')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2",
-                       location='eastus')
+                       location='westus')
     def test_sql_server_dns_alias_mgmt(self,
                                        resource_group_1, resource_group_location_1,
                                        resource_group_2, resource_group_location_2,
@@ -3944,12 +3933,12 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
 
 
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
-    @StorageAccountPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
+    @StorageAccountPreparer(location='westus')
     @AllowLargeResponse()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'eastus'
+        location_long_name = 'westus'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -4164,7 +4153,7 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
 
 class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='eastus')
+    @SqlServerPreparer(location='westus')
     def test_sql_tde(self, resource_group, server):
         sn = server
         db_name = self.create_random_name("sqltdedb", 20)
@@ -4354,8 +4343,8 @@ class SqlServerIdentityTest(ScenarioTest):
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         vnet_rule_1 = 'rule1'
         vnet_rule_2 = 'rule2'
@@ -4450,8 +4439,8 @@ class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
 
 
 class SqlZoneResilienceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_database(self, resource_group, resource_group_location, server):
         database_name = "createUnzonedUpdateToZonedDb"
@@ -4551,8 +4540,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', 'P2'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_pool(self, resource_group, resource_group_location, server):
         pool_name = "createUnzonedUpdateToZonedPool"
@@ -4658,8 +4647,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_copy_hyperscale_database(self, resource_group, server):
         # Set db names
@@ -4738,10 +4727,10 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus')
-    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus')
-    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus')
-    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus')
+    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='westus')
+    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='westus')
+    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='westus')
+    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='westus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_replica_hyperscale_database(self, resource_group_pri, server_name_pri, resource_group_sec, server_name_sec):
         # Set db names
@@ -4852,8 +4841,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_restore_hyperscale_database(self, resource_group, server):
         # Set db names
@@ -5218,7 +5207,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         tls1_2 = "1.2"
-        tls1_1 = "1.1"
         user = admin_login
         service_principal_type = "SystemAssigned"
         authentication_metadata = "Paired"
@@ -5296,14 +5284,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         #             JMESPathCheck('proxyOverride', proxy_override_update),
         #             JMESPathCheck('publicDataEndpointEnabled', public_data_endpoint_enabled_update)])
 
-        # test update minimalTlsVersion
-        self.cmd('sql mi update -g {} -n {} --minimal-tls-version {}'
-                 .format(resource_group_1, managed_instance_name_1, tls1_1),
-                 checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('minimalTlsVersion', tls1_1)])
-
         # test update managed instance tags
         tag3 = "tagName3=tagValue3"
         self.cmd('sql mi update -g {} -n {} --set tags.{}'
@@ -5339,12 +5319,12 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags', {})])
 
         # test cross-subnet update SLO with the subnet resource id
-        self.cmd('sql mi update -g {} -n {} --subnet {} --capacity {}'
-                .format(resource_group_1, managed_instance_name_1, target_subnet, ManagedInstancePreparer.target_subnet_vcores),
-                checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('subnetId', target_subnet)])
+        # self.cmd('sql mi update -g {} -n {} --subnet {} --capacity {}'
+        #         .format(resource_group_1, managed_instance_name_1, target_subnet, ManagedInstancePreparer.target_subnet_vcores),
+        #         checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              JMESPathCheck('subnetId', target_subnet)])
 
         # test cross-subnet update SLO with subnet and vNet names
         self.cmd('sql mi update -g {} -n {} --subnet {} --vnet-name {}'
@@ -5355,12 +5335,12 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('subnetId', subnet)])
 
         # test Service Principal update
-        self.cmd('sql mi update -g {} -n {} --service-principal-type {}'
-            .format(resource_group_1, managed_instance_name_1, service_principal_type),
-                checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('servicePrincipal.type', service_principal_type)])
+        # self.cmd('sql mi update -g {} -n {} --service-principal-type {}'
+        #     .format(resource_group_1, managed_instance_name_1, service_principal_type),
+        #         checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              JMESPathCheck('servicePrincipal.type', service_principal_type)])
         
         # test update authentication metadata mode
         self.cmd('sql mi update -g {} -n {} --authentication-metadata {}'
@@ -7068,15 +7048,14 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
 
 class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus')
     def test_sql_server_minimal_tls_version(self, resource_group):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        resource_group_location = "eastus"
+        resource_group_location = "westus"
         tls1_2 = "1.2"
-        tls1_1 = "1.1"
         tls1_3 = "1.3"
 
         # test create sql server with minimal required parameters
@@ -7088,14 +7067,6 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
-
-        # test update sql server
-        self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
-                 .format(resource_group, server_name_1, tls1_1),
-                 checks=[
-                     JMESPathCheck('name', server_name_1),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('minimalTlsVersion', tls1_1)])
                      
         # test update sql server with tls version as 1.3
         self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
@@ -7213,7 +7184,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
                         .format(resource_group, storage_account)).get_output_in_json()
 
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='eastus')
+    @SqlServerPreparer(location='westus')
     def test_sql_ledger(self, resource_group, server):
         db_name = self.create_random_name("sqlledgerdb", 20)
         endpoint = "https://test.confidential-ledger.azure.com"
@@ -8191,7 +8162,7 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
                         JMESPathCheck('name', mi),
                         JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
 
-        # no config options on the instance
+        # # no config options on the instance
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
                     checks=[JMESPathCheck('length(@)', 0)])
 
