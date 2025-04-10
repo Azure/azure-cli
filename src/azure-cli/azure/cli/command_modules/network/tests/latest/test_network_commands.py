@@ -3855,6 +3855,8 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
             self.check('newVNet.name', '{vnet}'),
         ]).get_output_in_json()
 
+        self.cmd('network vnet subnet update -n {subnet} -g {rg2} --vnet-name {vnet} --default-outbound-access false --subscription {aux_sub}')
+
         self.kwargs['vnet_id'] = vnet['newVNet']['id']
         self.kwargs['subnet_id'] = vnet['newVNet']['subnets'][0]['id']
 
@@ -3862,7 +3864,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
             self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
         ])
 
-        public_ip_address_id = self.cmd('network public-ip create -g {rg2} -n {publicip} --subscription {aux_sub}', checks=[
+        public_ip_address_id = self.cmd('network public-ip create -g {rg2} -n {publicip} --subscription {aux_sub} --ip-tags FirstPartyUsage=/NonProd', checks=[
             self.check('publicIp.name', '{publicip}')
         ]).get_output_in_json()['publicIp']['id']
 
