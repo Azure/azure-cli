@@ -234,8 +234,9 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
 def list_role_assignments(cmd,  # pylint: disable=too-many-locals, too-many-branches
                           assignee=None, assignee_object_id=None,
-                          role=None, at_scope=True,
-                          resource_group_name=None, scope=None,
+                          role=None,
+                          scope=None, at_scope=True,
+                          resource_group_name=None,
                           include_inherited=False,
                           show_all=False, include_groups=False, include_classic_administrators=False,
                           fill_role_definition_name=True, fill_principal_name=True):
