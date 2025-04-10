@@ -6,13 +6,12 @@
 import datetime
 import unittest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 
 class AcrTokenCommandsTests(ScenarioTest):
 
     @AllowLargeResponse(size_kb=99999)
-    @live_only()
     @ResourceGroupPreparer()
     def test_repository_token_create(self):
         self.kwargs.update({
