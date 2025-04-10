@@ -5,7 +5,6 @@
 # from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 from azure.cli.core.azclierror import UserFault
 
-from ._base import has_value
 from .exceptions import AAZUnknownFieldError
 
 
