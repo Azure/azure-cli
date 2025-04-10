@@ -41,6 +41,15 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
         # Make sure no role assignment is created by default
         self.cmd('role assignment list --assignee {app_id} --all', checks=self.check('length(@)', 0))
 
+    def test_create_for_rbac_no_password(self):
+        self.kwargs['display_name'] = self.create_random_name('azure-cli-test-', 30)
+        result = self.cmd('ad sp create-for-rbac --display-name {display_name} --create-password false',
+                          checks=[
+                              self.check('displayName', '{display_name}'),
+                              self.check('password', None)
+                          ]).get_output_in_json()
+        self.kwargs['app_id'] = result['appId']
+
     def test_create_for_rbac_create_cert(self):
 
         self.kwargs['display_name'] = self.create_random_name('azure-cli-test-', 30)
