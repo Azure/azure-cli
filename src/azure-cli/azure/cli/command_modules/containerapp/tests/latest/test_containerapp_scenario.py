@@ -488,6 +488,7 @@ class ContainerappScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location="northeurope")
     @AllowLargeResponse(size_kb=99999)
+    @live_only()
     def test_containerapp_registry_msi(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
