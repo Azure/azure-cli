@@ -11,6 +11,7 @@ from unittest import mock
 
 from knack.util import CLIError
 from azure.cli.command_modules.resource._bicep import (
+    bicep_version_greater_than_or_equal_to,
     ensure_bicep_installation,
     remove_bicep_installation,
     run_bicep_command,
@@ -274,3 +275,28 @@ class TestBicep(unittest.TestCase):
         
         with self.assertRaises(CLIError):
             _get_bicep_download_url("Made Up", "x64", "v0.26.54")
+            
+    @mock.patch("azure.cli.command_modules.resource._bicep._run_command")
+    @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
+    def test_bicep_version_greater_than_or_equal_to_use_binary_from_path(self, use_binary_from_path_mock, run_command_mock):
+        use_binary_from_path_mock.return_value = True
+        run_command_mock.return_value = "Bicep CLI version 0.13.1 (e3ac80d678)"
+        
+        result = bicep_version_greater_than_or_equal_to(self.cli_ctx, "0.13.1")
+        
+        self.assertTrue(result)
+        run_command_mock.assert_called_once_with("bicep", ["--version"])
+
+
+    @mock.patch("azure.cli.command_modules.resource._bicep._run_command")
+    @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installation_path")
+    @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
+    def test_bicep_version_greater_than_or_equal_to_use_cli_managed_binary(self, use_binary_from_path_mock, get_bicep_installation_path_mock, run_command_mock):
+        use_binary_from_path_mock.return_value = False
+        get_bicep_installation_path_mock.return_value = ".azure/bin/bicep"
+        run_command_mock.return_value = "Bicep CLI version 0.13.1 (e3ac80d678)"
+        
+        result = bicep_version_greater_than_or_equal_to(self.cli_ctx, "0.13.2")
+        
+        self.assertFalse(result)
+        run_command_mock.assert_called_once_with(".azure/bin/bicep", ["--version"])

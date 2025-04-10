@@ -41,6 +41,15 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
         # Make sure no role assignment is created by default
         self.cmd('role assignment list --assignee {app_id} --all', checks=self.check('length(@)', 0))
 
+    def test_create_for_rbac_no_password(self):
+        self.kwargs['display_name'] = self.create_random_name('azure-cli-test-', 30)
+        result = self.cmd('ad sp create-for-rbac --display-name {display_name} --create-password false',
+                          checks=[
+                              self.check('displayName', '{display_name}'),
+                              self.check('password', None)
+                          ]).get_output_in_json()
+        self.kwargs['app_id'] = result['appId']
+
     def test_create_for_rbac_create_cert(self):
 
         self.kwargs['display_name'] = self.create_random_name('azure-cli-test-', 30)
@@ -194,6 +203,18 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
         # Missing --scopes
         with self.assertRaisesRegex(ArgumentUsageError, 'both'):
             self.cmd('ad sp create-for-rbac --role {role}')
+
+    def test_create_for_rbac_service_management_reference(self):
+        self.kwargs.update({
+            'display_name': self.create_random_name('azure-cli-test-', 30),
+            'service_management_reference': '96524024-75b0-497b-ab38-0381399a6a9d'
+        })
+        result = self.cmd('ad sp create-for-rbac --display-name {display_name} '
+                          '--service-management-reference {service_management_reference}',
+                          checks=self.check('displayName', '{display_name}')).get_output_in_json()
+        self.kwargs['app_id'] = result['appId']
+        self.cmd('ad app show --id {app_id}',
+                 checks=self.check('serviceManagementReference', '{service_management_reference}'))
 
 
 class RoleDefinitionScenarioTest(RoleScenarioTestBase):
@@ -706,6 +727,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
     def test_role_assignment_no_graph(self, resource_group):
+        # After live testing, manually verify the recording file that no HTTP request to
+        # https://graph.microsoft.com is made
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.kwargs.update({
                 'uami': self.create_random_name('clitest', 15),  # user-assigned managed identity
@@ -720,15 +743,19 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             self.cmd('role assignment create '
                      '--assignee-object-id {uami_object_id} --assignee-principal-type ServicePrincipal '
                      '--role {role_reader_guid} --scope {rg_id}')
-            # Verify '--fill-principal-name false' skips the Graph query for filling principalName.
-            self.cmd('role assignment list --scope {rg_id} --fill-principal-name false '
-                     '--fill-role-definition-name false',
+            # --assignee-object-id bypasses Graph query for resolving assignee object ID
+            # '--fill-role-definition-name false' bypasses role definitions query for filling roleDefinitionName
+            # '--fill-principal-name false' bypasses Graph query for filling principalName
+            self.cmd('role assignment list --all --assignee-object-id {uami_object_id} '
+                     '--fill-role-definition-name false --fill-principal-name false',
                      checks=[
                          self.check("length([])", 1),
-                         self.not_exists("[0].principalName"),
-                         self.not_exists("[0].roleDefinitionName")
+                         self.not_exists("[0].roleDefinitionName"),
+                         self.not_exists("[0].principalName")
                      ])
-            # Manually verify the recording file that no HTTP request to https://graph.microsoft.com is made
+            self.cmd('role assignment delete --scope {rg_id} --assignee-object-id {uami_object_id}')
+            self.cmd('role assignment list --all --assignee-object-id {uami_object_id}',
+                     checks=self.check("length([])", 0))
 
 
 class RoleAssignmentWithConfigScenarioTest(RoleScenarioTestBase):

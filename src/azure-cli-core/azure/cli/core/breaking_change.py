@@ -5,6 +5,7 @@
 import abc
 import argparse
 import re
+import sys
 from collections import defaultdict
 
 from knack.log import get_logger
@@ -270,6 +271,8 @@ class BreakingChange(abc.ABC):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:
                 loader = self.find_suitable_command_loader(cli_ctx)
+                if not loader:
+                    return
                 command_group = loader.command_group(self.command_name)
                 cli_ctx.invocation.commands_loader.command_group_table[self.command_name] = command_group
             if command_group:
@@ -314,8 +317,9 @@ class BreakingChange(abc.ABC):
 
 
 class AzCLIDeprecate(BreakingChange):
-    def __init__(self, cmd, arg=None, target_version=NextBreakingChangeWindow(), **kwargs):
+    def __init__(self, cmd, arg=None, target_version=NextBreakingChangeWindow(), message=None, **kwargs):
         super().__init__(cmd, arg, None, target_version)
+        self._message = message
         self.kwargs = kwargs
 
     @staticmethod
@@ -333,8 +337,8 @@ class AzCLIDeprecate(BreakingChange):
 
     @property
     def message(self):
-        return self._build_message(self.kwargs.get('object_type'), self.target, self.target_version,
-                                   self.kwargs.get('redirect'))
+        return self._message or self._build_message(self.kwargs.get('object_type'), self.target, self.target_version,
+                                                    self.kwargs.get('redirect'))
 
     def to_tag(self, cli_ctx, **kwargs):
         if self.args:
@@ -345,7 +349,7 @@ class AzCLIDeprecate(BreakingChange):
             object_type = 'command'
         tag_kwargs = {
             'object_type': object_type,
-            'message_func': lambda depr: self._build_message(
+            'message_func': lambda depr: self._message or self._build_message(
                 depr.object_type, depr.target, self.target_version, depr.redirect),
             'target': self.target
         }
@@ -530,6 +534,14 @@ class AzCLIOtherChange(BreakingChange):
 upcoming_breaking_changes = defaultdict(lambda: [])
 
 
+def import_core_breaking_changes():
+    try:
+        from importlib import import_module
+        import_module('azure.cli.core._breaking_change')
+    except ImportError:
+        pass
+
+
 def import_module_breaking_changes(mod):
     try:
         from importlib import import_module
@@ -560,8 +572,8 @@ def register_upcoming_breaking_change_info(cli_ctx):
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, update_breaking_change_info)
 
 
-def register_deprecate_info(command_name, arg=None, target_version=NextBreakingChangeWindow(), **kwargs):
-    upcoming_breaking_changes[command_name].append(AzCLIDeprecate(command_name, arg, target_version, **kwargs))
+def register_deprecate_info(command_name, arg=None, target_version=NextBreakingChangeWindow(), message=None, **kwargs):
+    upcoming_breaking_changes[command_name].append(AzCLIDeprecate(command_name, arg, target_version, message, **kwargs))
 
 
 def register_output_breaking_change(command_name, description, target_version=NextBreakingChangeWindow(), guide=None,
@@ -592,30 +604,60 @@ def register_other_breaking_change(command_name, message, arg=None, target_versi
 
 
 def register_command_group_deprecate(command_group, redirect=None, hide=None,
-                                     target_version=NextBreakingChangeWindow(), **kwargs):
-    register_deprecate_info(command_group, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+                                     target_version=NextBreakingChangeWindow(), message=None, **kwargs):
+    register_deprecate_info(command_group, redirect=redirect, hide=hide, target_version=target_version,
+                            message=message, **kwargs)
 
 
 def register_command_deprecate(command, redirect=None, hide=None,
-                               target_version=NextBreakingChangeWindow(), **kwargs):
-    register_deprecate_info(command, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+                               target_version=NextBreakingChangeWindow(), message=None, **kwargs):
+    register_deprecate_info(command, redirect=redirect, hide=hide, target_version=target_version,
+                            message=message, **kwargs)
 
 
 def register_argument_deprecate(command, argument, redirect=None, hide=None,
-                                target_version=NextBreakingChangeWindow(), **kwargs):
-    register_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+                                target_version=NextBreakingChangeWindow(), message=None, **kwargs):
+    register_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version,
+                            message=message, **kwargs)
 
 
-def register_conditional_breaking_change(tag, breaking_change):
-    upcoming_breaking_changes[breaking_change.command_name + '.' + tag].append(breaking_change)
+def register_conditional_breaking_change(tag, breaking_change, *, command_name=None):
+    if command_name and command_name.startswith('az '):
+        command_name = command_name[3:].strip()
+    if isinstance(breaking_change, BreakingChange):
+        command_name = command_name or breaking_change.command_name
+        upcoming_breaking_changes[command_name + '.' + tag].append(breaking_change)
+    elif isinstance(breaking_change, str):
+        command_name = command_name or ''
+        upcoming_breaking_changes[command_name + '.' + tag].append(AzCLIOtherChange(
+            cmd=command_name,
+            message=breaking_change,
+        ))
 
 
-def print_conditional_breaking_change(cli_ctx, tag, custom_logger=None):
-    command = cli_ctx.invocation.commands_loader.command_name
-    custom_logger = custom_logger or logger
+def print_conditional_breaking_change(cli_ctx, tag, *, custom_logger=None, command_name=None):
+    """
+    Print a breaking change warning message manually.
+    :param cli_ctx: By default, retrieve the command name from cli_ctx.
+    :param tag: Use the tag to distinguish different warning messages to be printed in the same command.
+    Please note, all breaking change items with the same tag from the parent command group will also be printed.
+    :param custom_logger: Use a custom logger to replace the logger in azure.cli.core.breaking_change.
+    :param command_name: Specify the command name if not pass in the cli_ctx
+    """
+    command = cli_ctx.invocation.commands_loader.command_name if cli_ctx else command_name
+    command = command or ''
+    tag_suffix = '.' + tag if tag is not None else ''
 
     command_comps = command.split()
     while command_comps:
-        for breaking_change in upcoming_breaking_changes.get(' '.join(command_comps) + '.' + tag, []):
-            custom_logger.warning(breaking_change.message)
+        for breaking_change in upcoming_breaking_changes.get(' '.join(command_comps) + tag_suffix, []):
+            if custom_logger:
+                custom_logger.warning(breaking_change.message)
+            else:
+                print(breaking_change.message, file=sys.stderr)
         del command_comps[-1]
+    for breaking_change in upcoming_breaking_changes.get(tag_suffix, []):
+        if custom_logger:
+            custom_logger.warning(breaking_change.message)
+        else:
+            print(breaking_change.message, file=sys.stderr)
