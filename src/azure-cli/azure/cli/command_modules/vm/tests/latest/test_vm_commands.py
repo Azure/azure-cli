@@ -1679,12 +1679,15 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
             'tenantId': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.kwargs['vm_id'] = \
             self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --data-disk-sizes-gb 10 --admin-username clitest1 '
-                     '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
+                     '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE').get_output_in_json()['id']
 
         # Disable default outbound access
         self.cmd(
@@ -7428,15 +7431,19 @@ class VMGalleryImage(ScenarioTest):
             'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
             'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
         self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 '
-                 '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -7535,15 +7542,19 @@ class VMGalleryImage(ScenarioTest):
             'captured': 'managedImage1',
             'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
             # share the gallery to tester's subscription, so the tester can get shared galleries
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image1} '
                  '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         vm_id = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1'
-                         ' --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
+                         ' --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE').get_output_in_json()['id']
 
         # Disable default outbound access
         self.cmd(
@@ -8224,6 +8235,7 @@ class VMGalleryImage(ScenarioTest):
             self.cmd('vmss create -g {rg} -n {vmss2} --specialized')
 
     @live_only()
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2')
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_', location='westus2',
                            parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
@@ -8238,12 +8250,21 @@ class VMGalleryImage(ScenarioTest):
             'aux_tenant': AUX_TENANT,
             'sig_name': self.create_random_name('cli_test_image_version_', 40),
             'image_definition_name': self.create_random_name('cli_test_image_version_', 40),
-            'version': '0.1.0'
+            'version': '0.1.0',
+            'pubip': 'pubip',
+            'vnet': 'vnet',
+            'subnet': 'subnet',
         })
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {another_rg} --ip-tags FirstPartyUsage=/NonProd --subscription {aux_sub}')
         # Prepare image in another tenant
         self.cmd(
-            'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+            'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 '
+            '--generate-ssh-key --subscription {aux_sub} --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {another_rg} --vnet-name {vnet} -n {subnet} --subscription {aux_sub} --default-outbound-access false')
+
         self.cmd(
             'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
         time.sleep(70)
@@ -8257,7 +8278,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig create -g {rg} --gallery-name {sig_name}',
                  checks=self.check('name', self.kwargs['sig_name']))
         self.cmd(
-            'sig image-definition create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --os-type linux -p publisher1 -f offer1 -s sku1',
+            'sig image-definition create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1',
             checks=self.check('name', self.kwargs['image_definition_name']))
         self.cmd(
             'sig image-version create -g {rg} --gallery-name {sig_name} --gallery-image-definition {image_definition_name} --gallery-image-version {version} --managed-image {image_id} --replica-count 1',
@@ -8284,12 +8305,15 @@ class VMGalleryImage(ScenarioTest):
             'version1': '0.1.0',
             'version2': '0.1.1',
             'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'pubip': 'pubip',
         })
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {another_rg} --ip-tags FirstPartyUsage=/NonProd --subscription {aux_sub}')
         # Prepare sig in another tenant
         self.cmd(
-            'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 '
+            'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 --public-ip-address {pubip} '
             '--generate-ssh-keys --subscription {aux_sub} --public-ip-sku Standard --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         # Disable default outbound access
         self.cmd(
@@ -8348,11 +8372,15 @@ class VMGalleryImage(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1',
             'nsg': 'nsg1',
+            'pubip': 'pubip',
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery} --permissions groups')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule None')
 
         # Disable default outbound access
         self.cmd(
