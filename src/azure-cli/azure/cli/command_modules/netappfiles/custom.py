@@ -12,7 +12,7 @@ from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.aaz import has_value, AAZJsonSelector
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
-from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
+#from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
 from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List as _ActiveDirectoryList, Update as _ActiveDirectoryUpdate
 from .aaz.latest.netappfiles.volume import Create as _VolumeCreate, Update as _VolumeUpdate, BreakFileLocks as _BreakFileLocks
 from .aaz.latest.netappfiles.volume_group import Create as _VolumeGroupCreate
@@ -57,70 +57,70 @@ class UpdateNetworkSiblingSet(_UpdateNetworkSiblingSet):
 
 
 # region account
-class AccountCreate(_AccountCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        # args_schema.user_assigned_identity = AAZStrArg(
-        #     options=["--user-assigned-identity u"],
-        #     arg_group="Identity",
-        #     help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
-        #     required=False
-        # )
+# class AccountCreate(_AccountCreate):
+#     @classmethod
+#     def _build_arguments_schema(cls, *args, **kwargs):
+#         from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+#         args_schema = super()._build_arguments_schema(*args, **kwargs)
+#         # args_schema.user_assigned_identity = AAZStrArg(
+#         #     options=["--user-assigned-identity u"],
+#         #     arg_group="Identity",
+#         #     help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
+#         #     required=False
+#         # )
 
-        args_schema.user_assigned_identity = AAZResourceIdArg(
-            options=["--user-assigned-identity", "-u"],
-            help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
-            required=False,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
-                         "/userAssignedIdentities/{}",
-            ),
-        )
+#         args_schema.user_assigned_identity = AAZResourceIdArg(
+#             options=["--user-assigned-identity", "-u"],
+#             help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
+#             required=False,
+#             fmt=AAZResourceIdArgFormat(
+#                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
+#                          "/userAssignedIdentities/{}",
+#             ),
+#         )
 
-        args_schema.user_assigned_identities._registered = False
-        args_schema.encryption_identity._registered = False
-        return args_schema
+#         args_schema.user_assigned_identities._registered = False
+#         args_schema.encryption_identity._registered = False
+#         return args_schema
 
-    def pre_operations(self):
-        args = self.ctx.args
-        logger.debug("ANF log: AccountCreate.pre_operations user_assigned_identity: %s", args.user_assigned_identity)
-        if has_value(args.user_assigned_identity):
-            # args.user_assigned_identities[args.user_assigned_identity.to_serialized_data()] = "None"
-            args.user_assigned_identities = {args.user_assigned_identity.to_serialized_data(): {}}
-            logger.debug("ANF log: AccountCreate.pre_operations setting user_assigned_identities: %s", args.user_assigned_identities.to_serialized_data())
-            args.encryption_identity.user_assigned_identity = args.user_assigned_identity.to_serialized_data()
+#     def pre_operations(self):
+#         args = self.ctx.args
+#         logger.debug("ANF log: AccountCreate.pre_operations user_assigned_identity: %s", args.user_assigned_identity)
+#         if has_value(args.user_assigned_identity):
+#             # args.user_assigned_identities[args.user_assigned_identity.to_serialized_data()] = "None"
+#             args.user_assigned_identities = {args.user_assigned_identity.to_serialized_data(): {}}
+#             logger.debug("ANF log: AccountCreate.pre_operations setting user_assigned_identities: %s", args.user_assigned_identities.to_serialized_data())
+#             args.encryption_identity.user_assigned_identity = args.user_assigned_identity.to_serialized_data()
 
 
-class AccountUpdate(_AccountUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
+# class AccountUpdate(_AccountUpdate):
+#     @classmethod
+#     def _build_arguments_schema(cls, *args, **kwargs):
+#         from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+#         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
-        args_schema.user_assigned_identity = AAZResourceIdArg(
-            options=["--user-assigned-identity", "-u"],
-            help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
-            required=False,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
-                         "/userAssignedIdentities/{}",
-            ),
-        )
+#         args_schema.user_assigned_identity = AAZResourceIdArg(
+#             options=["--user-assigned-identity", "-u"],
+#             help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
+#             required=False,
+#             fmt=AAZResourceIdArgFormat(
+#                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
+#                          "/userAssignedIdentities/{}",
+#             ),
+#         )
 
-        args_schema.user_assigned_identities._registered = False
-        args_schema.encryption_identity._registered = False
-        return args_schema
+#         args_schema.user_assigned_identities._registered = False
+#         args_schema.encryption_identity._registered = False
+#         return args_schema
 
-    def pre_operations(self):
-        args = self.ctx.args
-        logger.debug("ANF log: AccountCreate.pre_operations user_assigned_identity: %s", args.user_assigned_identity)
-        if has_value(args.user_assigned_identity):
-            # args.user_assigned_identities[args.user_assigned_identity.to_serialized_data()] = "None"
-            args.user_assigned_identities = {args.user_assigned_identity.to_serialized_data(): {}}
-            logger.debug("ANF log: AccountCreate.pre_operations setting user_assigned_identities: %s", args.user_assigned_identities.to_serialized_data())
-            args.encryption_identity.user_assigned_identity = args.user_assigned_identity.to_serialized_data()
+#     def pre_operations(self):
+#         args = self.ctx.args
+#         logger.debug("ANF log: AccountCreate.pre_operations user_assigned_identity: %s", args.user_assigned_identity)
+#         if has_value(args.user_assigned_identity):
+#             # args.user_assigned_identities[args.user_assigned_identity.to_serialized_data()] = "None"
+#             args.user_assigned_identities = {args.user_assigned_identity.to_serialized_data(): {}}
+#             logger.debug("ANF log: AccountCreate.pre_operations setting user_assigned_identities: %s", args.user_assigned_identities.to_serialized_data())
+#             args.encryption_identity.user_assigned_identity = args.user_assigned_identity.to_serialized_data()
 # endregion
 
 
@@ -632,7 +632,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             options=["--proximity-placement-group", "--ppg"],
             arg_group="Volumes",
             help="The resource id of the Proximity Placement Group for volume placement.",
-            required=True
+            required=False
         )
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],

@@ -12,25 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles check-quota-availability",
+    "netappfiles usage list",
 )
-class CheckQuotaAvailability(AAZCommand):
-    """Check if a quota is available.
-
-    Check if a quota is available
+class List(AAZCommand):
+    """List current subscription usages
     """
 
     _aaz_info = {
         "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checkquotaavailability", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/usages", "2025-01-01"],
         ]
     }
 
+    AZ_SUPPORT_PAGINATION = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_paging(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -45,36 +44,12 @@ class CheckQuotaAvailability(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
             required=True,
-            id_part="name",
-        )
-
-        # define Arg Group "Body"
-
-        _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["--name"],
-            arg_group="Body",
-            help="Name of the resource to verify.",
-            required=True,
-        )
-        _args_schema.resource_group = AAZStrArg(
-            options=["-g", "--resource-group"],
-            arg_group="Body",
-            help="Resource group name.",
-            required=True,
-        )
-        _args_schema.type = AAZStrArg(
-            options=["--type"],
-            arg_group="Body",
-            help="Resource type used for verification.",
-            required=True,
-            enum={"Microsoft.NetApp/netAppAccounts": "Microsoft.NetApp/netAppAccounts", "Microsoft.NetApp/netAppAccounts/capacityPools": "Microsoft.NetApp/netAppAccounts/capacityPools", "Microsoft.NetApp/netAppAccounts/capacityPools/volumes": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes", "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.NetAppResourceCheckQuotaAvailability(ctx=self.ctx)()
+        self.NetAppResourceUsagesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -86,10 +61,11 @@ class CheckQuotaAvailability(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
 
-    class NetAppResourceCheckQuotaAvailability(AAZHttpOperation):
+    class NetAppResourceUsagesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -103,13 +79,13 @@ class CheckQuotaAvailability(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.NetApp/locations/{location}/checkQuotaAvailability",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.NetApp/locations/{location}/usages",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "POST"
+            return "GET"
 
         @property
         def error_format(self):
@@ -143,26 +119,10 @@ class CheckQuotaAvailability(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("resourceGroup", AAZStrType, ".resource_group", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("type", AAZStrType, ".type", typ_kwargs={"flags": {"required": True}})
-
-            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -182,17 +142,48 @@ class CheckQuotaAvailability(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.is_available = AAZBoolType(
-                serialized_name="isAvailable",
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
             )
-            _schema_on_200.message = AAZStrType()
-            _schema_on_200.reason = AAZStrType()
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.name = AAZObjectType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+
+            name = cls._schema_on_200.value.Element.name
+            name.localized_value = AAZStrType(
+                serialized_name="localizedValue",
+            )
+            name.value = AAZStrType()
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.current_value = AAZIntType(
+                serialized_name="currentValue",
+                flags={"read_only": True},
+            )
+            properties.limit = AAZIntType(
+                flags={"read_only": True},
+            )
+            properties.unit = AAZStrType(
+                flags={"read_only": True},
+            )
 
             return cls._schema_on_200
 
 
-class _CheckQuotaAvailabilityHelper:
-    """Helper class for CheckQuotaAvailability"""
+class _ListHelper:
+    """Helper class for List"""
 
 
-__all__ = ["CheckQuotaAvailability"]
+__all__ = ["List"]
