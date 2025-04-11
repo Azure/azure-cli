@@ -3185,7 +3185,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
+                enable_user_redeploy_scheduled_events=None, 
+                skuprofile_vmsizes=None, skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -3500,7 +3501,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             additional_scheduled_events=additional_scheduled_events,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
-            skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
+            skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat, skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
             zone_balance=zone_balance)
 
@@ -3951,7 +3952,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
-                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, zone_balance=None, **kwargs):
+                skuprofile_allostrat=None, skuprofile_rank=None, security_posture_reference_is_overridable=None, zone_balance=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4197,6 +4198,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 }
                 sku_profile_vmsizes_list.append(vmsize_obj)
             sku_profile['vmSizes'] = sku_profile_vmsizes_list
+
+            if skuprofile_rank:
+                for vm_size, rank in zip(sku_profile_vmsizes_list, skuprofile_rank):
+                    vm_size['rank'] = rank
+
         if skuprofile_allostrat is not None:
             sku_profile['allocationStrategy'] = skuprofile_allostrat
         vmss.sku_profile = sku_profile
