@@ -11050,8 +11050,10 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('[0].type', 'Microsoft.Network/loadBalancers/inboundNatRules')
         ])
 
-class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
+class VMCrossTenantUpdateScenarioTest(ScenarioTest):
 
+    @live_only()
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_', location='westus2')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2',
                            parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
@@ -11064,13 +11066,23 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
             'image_name': self.create_random_name('cli_test_vm_cross_tenant_', 40),
             'aux_sub': AUX_SUBSCRIPTION,
             'aux_tenant': AUX_TENANT,
-            'vm': self.create_random_name('cli_test_vm_cross_tenant_', 40)
+            'vm': self.create_random_name('cli_test_vm_cross_tenant_', 40),
+            'pubip': 'pubip',
+            'vnet': 'vnet',
+            'subnet': 'subnet',
+            'pubip2': 'pubip2',
+            'vnet2': 'vnet2',
+            'subnet2': 'subnet2',
         })
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {another_rg} --subscription {aux_sub} --ip-tags FirstPartyUsage=/NonProd')
         # Prepare sig in another tenant
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 '
-            '--generate-ssh-keys --subscription {aux_sub} --public-ip-sku Standard --nsg-rule NONE')
+            '--generate-ssh-keys --subscription {aux_sub} --public-ip-sku Standard --vnet-name {vnet} --subnet {subnet} --public-ip-address {pubip} --nsg-rule NONE')
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {another_rg} --subscription {aux_sub} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd(
             'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
@@ -11083,15 +11095,23 @@ class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
             'image_id': res['id']
         })
 
+        # Create a public IP resource with service tag
         self.cmd(
-            'vm create -g {rg} -n {vm} --image {image_id} --admin-username clitest1 --generate-ssh-key --public-ip-sku Standard --nsg-rule NONE')
+            'network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd(
+            'vm create -g {rg} -n {vm} --image {image_id} --admin-username clitest1 --generate-ssh-key --public-ip-sku Standard --vnet-name {vnet2} --subnet {subnet2} --public-ip-address {pubip2} --nsg-rule NONE')
         self.cmd('vm update -g {rg} -n {vm} --set tags.tagName=tagValue', checks=[
             self.check('tags.tagName', 'tagValue')
         ])
+        # Disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet2} -n {subnet2} --default-outbound-access false')
 
 
-class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
+class VMSSCrossTenantUpdateScenarioTest(ScenarioTest):
 
+    @live_only()
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2',
                            parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
@@ -11109,12 +11129,20 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
             'image_definition_name_2': self.create_random_name('cli_test_vmss_update_', 40),
             'version': '0.1.0',
             'vmss': 'cross_tenant_vmss',
+            'pubip': 'pubip',
+            'pubip2': 'pubip2',
+            'vnet': 'vnet',
+            'subnet': 'subnet',
         })
 
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {another_rg} --subscription {aux_sub} --ip-tags FirstPartyUsage=/NonProd')
         # Prepare sig in another tenant
         self.cmd(
             'vm create -g {another_rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 --generate-ssh-key '
-            '--subscription {aux_sub} --public-ip-sku Standard --nsg-rule NONE')
+            '--subscription {aux_sub} --public-ip-sku Standard --vnet-name {vnet} --subnet {subnet} --public-ip-address {pubip} --nsg-rule NONE')
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {another_rg} --subscription {aux_sub} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd(
             'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
@@ -11148,7 +11176,10 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
             'image_2_id': res2['id']
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image {image_1_id} --orchestration-mode Uniform --lb-sku Standard')
+        # Create a public IP resource with service tag
+        self.cmd(
+            'network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image_1_id} --orchestration-mode Uniform --lb-sku Standard --public-ip-address {pubip2}')
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('name', self.kwargs['vmss']),
             self.check('virtualMachineProfile.storageProfile.imageReference.id', self.kwargs['image_1_id'])
@@ -11165,7 +11196,10 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
         ])
 
 
-class VMCreateFromACGToOtherSubScenarioTest(LiveScenarioTest):
+class VMCreateFromACGToOtherSubScenarioTest(ScenarioTest):
+
+    @live_only()
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_sub')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_sub',
                            parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
@@ -11180,8 +11214,20 @@ class VMCreateFromACGToOtherSubScenarioTest(LiveScenarioTest):
             'image_def': self.create_random_name('imgdef', 15),
             'version': '0.1.0',
             'vm2': self.create_random_name('vm', 10),
+            'pubip': 'pubip',
+            'vnet': 'vnet',
+            'subnet': 'subnet',
+            'pubip2': 'pubip2',
+            'vnet2': 'vnet2',
+            'subnet2': 'subnet2',
         })
-        self.cmd('vm create -g {rg2} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --subscription {sub_id} --public-ip-sku Standard --nsg-rule NONE')
+
+        # Create a public IP resource with service tag
+        self.cmd('network public-ip create --name {pubip} -g {rg2} --subscription {sub_id} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg2} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --subscription {sub_id} '
+                 '--public-ip-sku Standard --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg2} --subscription {sub_id} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm deallocate -g {rg2} -n {vm} --subscription {sub_id}')
         self.cmd('vm generalize -g {rg2} -n {vm} --subscription {sub_id}')
@@ -11193,7 +11239,15 @@ class VMCreateFromACGToOtherSubScenarioTest(LiveScenarioTest):
         self.kwargs.update({
             'image_version': res['id']
         })
-        self.cmd('vm create -g {rg} -n {vm2} --image {image_version} --public-ip-sku Standard --nsg-rule NONE')
+
+        # Create a public IP resource with service tag
+        self.cmd(
+            'network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('vm create -g {rg} -n {vm2} --image {image_version} --public-ip-sku Standard '
+                 '--public-ip-address {pubip2} --vnet-name {vnet2} --subnet {subnet2} --nsg-rule NONE')
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet2} -n {subnet2} --default-outbound-access false')
+
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('storageProfile.imageReference.id', '{image_version}')
         ])
