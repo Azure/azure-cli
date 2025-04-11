@@ -666,9 +666,6 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
 def validate_image_trusted_launch(namespace):
     from ._constants import UPGRADE_SECURITY_HINT
 
-    # set securityType to Standard by default if no inputs by end user
-    if namespace.security_type is None:
-        namespace.security_type = 'Standard'
     if namespace.security_type.lower() != 'trustedlaunch':
         logger.warning(UPGRADE_SECURITY_HINT)
 
