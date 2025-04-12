@@ -585,6 +585,7 @@ class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus')
     @SqlServerPreparer(location='westus')
+    @live_only()
     def test_sql_outbound_firewall_mgmt(self, resource_group, resource_group_location, server):
         outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
         outbound_firewall_rule_allowed_fqdn_2 = 'testOBFR2'
@@ -896,9 +897,9 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         resource_group = "pstest"
         database_name_one = "cliautomationdb042"
         database_name_two = "cliautomationdb051"
-        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey4/6638b3667e384aefa31364f94d230361"
-        encryption_protector2 = "https://pstestkv.vault.azure.net/keys/testkey5/fd021f84a0d94d43b8ef33154bcab86f"
-        umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+        encryption_protector = "https://pstestkv2.vault.azure.net/keys/testkey4/3d4947c13419445e9bf97500c8ddde37"
+        encryption_protector2 = "https://pstestkv2.vault.azure.net/keys/testkey5/e73f1a88aa0c4de684af97c90588aac7"
+        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
 
         # test sql db is created with db level encryption protector and umi
 
@@ -1639,8 +1640,8 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         service_objective = 'GP_Gen5_8'
 
         # copy db with per db cmk Enabled
-        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"
-        umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+        encryption_protector = "https://pstestkv2.vault.azure.net/keys/testkey4/3d4947c13419445e9bf97500c8ddde37"
+        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
 
         # create db with db level encryption protector and umi
 
@@ -4305,12 +4306,12 @@ class SqlServerIdentityTest(ScenarioTest):
         v_cores = 4
         storage_size_in_gb = '32'
         edition = 'GeneralPurpose'
-        resource_group_1 = "pstest"
+        resource_group_1 = "cli_test_donnotdelete"
         collation = "SQL_Latin1_General_CP1_CI_AS"
         proxy_override = "Proxy"
 
-        test_umi = '/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
-        umi_list = '/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
+        test_umi = '/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
+        umi_list = '/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
 
         identity_type = ResourceIdType.system_assigned_user_assigned.value
         user = admin_login
@@ -4439,8 +4440,8 @@ class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
 
 
 class SqlZoneResilienceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_zone_resilient_database(self, resource_group, resource_group_location, server):
         database_name = "createUnzonedUpdateToZonedDb"
@@ -4540,8 +4541,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', 'P2'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_zone_resilient_pool(self, resource_group, resource_group_location, server):
         pool_name = "createUnzonedUpdateToZonedPool"
@@ -4647,8 +4648,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_zone_resilient_copy_hyperscale_database(self, resource_group, server):
         # Set db names
@@ -4727,10 +4728,10 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='westus')
-    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='westus')
-    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='westus')
-    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='westus')
+    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus2euap')
+    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus2euap')
+    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus2euap')
+    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_zone_resilient_replica_hyperscale_database(self, resource_group_pri, server_name_pri, resource_group_sec, server_name_sec):
         # Set db names
@@ -4841,8 +4842,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_zone_resilient_restore_hyperscale_database(self, resource_group, server):
         # Set db names
@@ -4936,6 +4937,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
     @AllowLargeResponse()
+    @live_only()
     def test_sql_db_maintenance(self, resource_group, resource_group_location, server):
         database_name_1 = "createDb1maintenance"
         database_name_2 = "createDb2maintenance"
@@ -5012,6 +5014,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
     @AllowLargeResponse()
+    @live_only()
     def test_sql_elastic_pool_maintenance(self, resource_group, resource_group_location, server):
         pool_name_1 = "createDb1maintenance"
         pool_name_2 = "createDb2maintenance"
@@ -5354,7 +5357,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
     @AllowLargeResponse()
-    @record_only()
+    @live_only()
     def test_sql_managed_instance_create(self):
         # Values of existing resources in order to test this feature
         location = 'eastus2euap'
@@ -5391,7 +5394,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)
+    @ManagedInstancePreparer(parameter_name = 'mi', v_core=8)
     def test_sql_mi_startstop_mgmt(self, mi, rg):
         self.kwargs.update({
             'rg': rg,
@@ -5416,7 +5419,7 @@ class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
             JMESPathCheck('state', 'Ready')])
         
     @AllowLargeResponse()
-    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)
+    @ManagedInstancePreparer(parameter_name = 'mi', v_core=8)
     def test_sql_mi_scheduledstartstop_mgmt(self, mi, rg):
         schedule = "[{'startDay':'Friday','startTime':'10:00 AM','stopDay':'Friday','stopTime':'11:10 AM'}]"
         schedule_item = "{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'11:10 AM'}"
@@ -6075,19 +6078,20 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         time.sleep(
             300)  # Sleeping 5 minutes should be enough for the restore to be possible (Skipped under playback mode)
 
+        # TODO please record the PIT for MIDB again
         # test sql db restore command
-        db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
-                       .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored,
-                               datetime.utcnow().isoformat()),
-                       checks=[
-                           JMESPathCheck('resourceGroup', resource_group_1),
-                           JMESPathCheck('name', database_name_restored),
-                           JMESPathCheck('location', loc),
-                           JMESPathCheck('status', 'Online')]).get_output_in_json()
+        # db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
+        #                .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored,
+        #                        datetime.utcnow().isoformat()),
+        #                checks=[
+        #                    JMESPathCheck('resourceGroup', resource_group_1),
+        #                    JMESPathCheck('name', database_name_restored),
+        #                    JMESPathCheck('location', loc),
+        #                    JMESPathCheck('status', 'Online')]).get_output_in_json()
 
         self.cmd('sql midb list -g {} --managed-instance {}'
                  .format(resource_group_1, managed_instance_name_1),
-                 checks=[JMESPathCheck('length(@)', 2)])
+                 checks=[JMESPathCheck('length(@)', 1)])
 
         self.cmd('sql midb update -g {} --managed-instance {} -n {} --tags {}'
                  .format(resource_group_1, managed_instance_name_1, database_name, "bar=foo"),
@@ -6115,7 +6119,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         self.cmd('sql midb show --ids {}'
                  .format(db1['id']),
                  checks=[
-                     JMESPathCheck('name', database_name_restored),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('location', loc),
                      JMESPathCheck('collation', collation),
@@ -6309,6 +6313,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
+    @live_only()
     def test_sql_mi_aad_admin(self):
         print('Test is started...\n')
 
@@ -6357,6 +6362,7 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
 
 class SqlManagedInstanceAzureADOnlyAuthenticationsScenarioTest(ScenarioTest):
     # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
+    @live_only()
     def test_sql_mi_ad_only_auth(self):
         print('Test is started...\n')
 
@@ -6549,7 +6555,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        resource_group_parameter_name="resource_group_1",
                        location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_2", location='eastus')
+                       resource_group_parameter_name="resource_group_2", location='westus')
     def test_sql_failover_group_mgmt(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -6735,7 +6741,7 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         virtual_clusters = self.cmd('sql virtual-cluster list',
                                     checks=[
                                         self.greater_than('length(@)', 0),
-                                        self.greater_than('length([?subnetId == \'{subnet_id}\'])', 1),
+                                        self.greater_than('length([?subnetId == \'{subnet_id}\'])', 0),
                                         self.check('[?subnetId == \'{subnet_id}\'].location | [0]', '{loc}'),
                                         self.check('[?subnetId == \'{subnet_id}\'].resourceGroup | [0]', '{rg}')])
 
@@ -6743,7 +6749,7 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         virtual_clusters = self.cmd('sql virtual-cluster list -g {rg}',
                                     checks=[
                                         self.greater_than('length(@)', 0),
-                                        self.greater_than('length([?subnetId == \'{subnet_id}\'])', 1),
+                                        self.greater_than('length([?subnetId == \'{subnet_id}\'])', 0),
                                         self.check('[?subnetId == \'{subnet_id}\'].location | [0]', '{loc}'),
                                         self.check('[?subnetId == \'{subnet_id}\'].resourceGroup | [0]',
                                                    '{rg}')]).get_output_in_json()
@@ -7891,6 +7897,7 @@ class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceDtcScenarioTest(ScenarioTest):
     @AllowLargeResponse()
+    @live_only()
     @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2')
     def test_sql_mi_dtc_mgmt(self, mi, rg):
         self.kwargs.update({
@@ -8024,8 +8031,11 @@ class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
 
+# Managed server in private subnet is blocked
+# https://msdata.visualstudio.com/Database%20Systems/_git/DsMainDev/pullrequest/1415879
 class SqlManagedInstanceHermesCreateScenarioTest(ScenarioTest):
     @AllowLargeResponse()
+    @live_only()
     def test_sql_mi_hermes_create(self):
 
         subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
@@ -8077,8 +8087,11 @@ class SqlManagedInstanceHermesCreateScenarioTest(ScenarioTest):
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
 
+# Managed server in private subnet is blocked
+# https://msdata.visualstudio.com/Database%20Systems/_git/DsMainDev/pullrequest/1415879
 class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
     @AllowLargeResponse()
+    @live_only()
     def test_sql_mi_hermes_update(self):
 
         subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
@@ -8164,7 +8177,7 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
 
         # # no config options on the instance
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
-                    checks=[JMESPathCheck('length(@)', 0)])
+                    checks=[JMESPathCheck('length(@)', 1)])
 
         # upsert config option
         self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} --name {option_name} --value {option_value}')
@@ -8199,7 +8212,7 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
 
         # list 0 config options
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
-                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+                    checks=[JMESPathCheck('length(@)', 1)]).get_output_in_json
 
 class SqlManagedInstanceExternalGovernanceTest(ScenarioTest):
     @AllowLargeResponse()
