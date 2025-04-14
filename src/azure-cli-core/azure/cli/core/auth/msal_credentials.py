@@ -94,6 +94,7 @@ class UserCredential:  # pylint: disable=too-few-public-methods
         check_result(result)
         return result
 
+
 class ServicePrincipalCredential:  # pylint: disable=too-few-public-methods
 
     def __init__(self, client_id, client_credential, **kwargs):
