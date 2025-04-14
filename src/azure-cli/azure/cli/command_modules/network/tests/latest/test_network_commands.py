@@ -1452,8 +1452,8 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
-        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Basic --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('network public-ip create -g {rg} -n {ip2} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Basic')
+        self.cmd('network public-ip create -g {rg} -n {ip2}')
 
         self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --public-ip-address {ip1}')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
