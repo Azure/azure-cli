@@ -2426,6 +2426,8 @@ def aks_agentpool_add(
     # etag headers
     if_match=None,
     if_none_match=None,
+    # gpu driver
+    gpu_driver=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
