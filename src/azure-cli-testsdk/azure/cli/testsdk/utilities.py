@@ -239,7 +239,7 @@ class EmailAddressReplacer(RecordingProcessor):
     def process_response(self, response):
         if response['body']['string']:
             body = _byte_to_str(response['body']['string'])
-            response['body']['string'] = _replace_email_address(body)
+            response['body']['string'] = self._replace_email_address(body)
         return response
 
 
