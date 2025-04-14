@@ -135,7 +135,7 @@ class TestActionGroupScenarios(ScenarioTest):
             self.check('length(userAssignedIdentities)', 1),
         ])
 
-        self.cmd('monitor action-group identity remove -n {ag} -g {rg} --user-assigned -y')
+        self.cmd('monitor action-group identity remove -n {ag} -g {rg} --user-assigned {identity} -y')
         self.cmd('monitor action-group identity show -n {ag} -g {rg}', checks=[
             self.check('type', 'None')
         ])
