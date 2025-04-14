@@ -3501,7 +3501,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             additional_scheduled_events=additional_scheduled_events,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
-            skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat, skuprofile_rank=skuprofile_rank,
+            skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
+            skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
             zone_balance=zone_balance)
 
@@ -3952,7 +3953,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
-                skuprofile_allostrat=None, skuprofile_rank=None, security_posture_reference_is_overridable=None, zone_balance=None, **kwargs):
+                skuprofile_allostrat=None, skuprofile_rank=None,
+                security_posture_reference_is_overridable=None, zone_balance=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
