@@ -1,0 +1,216 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -v -g --backup-management-type
+      User-Agent:
+      - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupProtectionContainers?api-version=2024-04-01&%24filter=backupManagementType+eq+%27AzureWorkload%27+and+status+eq+%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm","name":"VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm","lastUpdatedTime":"2025-04-10T05:04:41.0882861Z","extendedInfo":{"hostServerName":"ase-ccy-vm","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPAse","itemCount":11,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"ase-ccy-vm","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm2","name":"VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm2","lastUpdatedTime":"2025-04-10T10:37:38.4313136Z","extendedInfo":{"hostServerName":"ase-ccy-vm2","inquiryInfo":{"status":"Failed","errorDetail":{"code":"UserErrorOperationFailedForSAPASEDatabase","message":"Operation
+        failed for SAP ASE (Sybase) database.","recommendations":["Please refer to
+        additional details for inner error code. To resolve issues associated with
+        the inner error code, see https://aka.ms/AB-sapaseerrors. If the issue persists,
+        please contact Microsoft support."]},"inquiryDetails":[{"type":"SAPAse","itemCount":11,"inquiryValidation":{"status":"Failed","errorDetail":{"code":"UserErrorOperationFailedForSAPASEDatabase","message":"Operation
+        failed for SAP ASE (Sybase) database.","recommendations":["Please refer to
+        additional details for inner error code. To resolve issues associated with
+        the inner error code, see https://aka.ms/AB-sapaseerrors. If the issue persists,
+        please contact Microsoft support."]},"additionalDetail":"UserErrorOperationFailedForSAPASEDatabase"}}]}},"friendlyName":"ase-ccy-vm2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2855'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Apr 2025 06:24:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/southindia/4b2a9553-5a74-4099-a27e-91482cfd4a3f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-msedge-ref:
+      - 'Ref A: F46F652A57504F028EC74E74FCC8E8A6 Ref B: MAA201060515011 Ref C: 2025-04-14T06:24:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-management-type -v -g
+      User-Agent:
+      - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupProtectionContainers?api-version=2024-04-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+status+eq+%27Registered%27
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Apr 2025 06:24:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/southindia/669ebaaf-5fcc-41af-895e-90fce8b14e4f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-msedge-ref:
+      - 'Ref A: BECC957295C44E6FAAE83FAC755FD341 Ref B: MAA201060516049 Ref C: 2025-04-14T06:24:08Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-management-type -g -v -c -n
+      User-Agent:
+      - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupProtectedItems?api-version=2024-04-01&%24filter=backupManagementType+eq+%27AzureWorkload%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm2/protectedItems/SAPAseDatabase;ab4;asetestdb2","name":"SAPAseDatabase;ab4;asetestdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb2","serverName":"ase-ccy-vm2","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-04-14T06:00:24.3566737Z","lastBackupErrorDetail":{"code":"UserErrorOperationFailedForSAPASEDatabase","message":"Operation
+        failed for SAP ASE (Sybase) database.","recommendations":["Please refer to
+        additional details for inner error code. To resolve issues associated with
+        the inner error code, see https://aka.ms/AB-sapaseerrors. If the issue persists,
+        please contact Microsoft support."],"dynamicErrorMessage":"Inner Error Code:
+        DatabaseQueryExecutionError\n{\n  \"ErrorCode\": \"DatabaseQueryExecutionError\",\n  \"Message\":
+        \"An ASE exception occurred while running query on database. There is no server
+        listening at 10.5.0.6:4901..\"\n}"},"protectedItemDataSourceId":"422213111410429","protectedItemHealthStatus":"Unhealthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupPolicies/DailyPolicy-m9aya1dh","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm2/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm2","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"IRPending","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-04-14T06:00:24.3250609Z","lastBackupErrorDetail":{"code":"UserErrorOperationFailedForSAPASEDatabase","message":"Operation
+        failed for SAP ASE (Sybase) database.","recommendations":["Please refer to
+        additional details for inner error code. To resolve issues associated with
+        the inner error code, see https://aka.ms/AB-sapaseerrors. If the issue persists,
+        please contact Microsoft support."],"dynamicErrorMessage":"Inner Error Code:
+        DatabaseQueryExecutionError\n{\n  \"ErrorCode\": \"DatabaseQueryExecutionError\",\n  \"Message\":
+        \"An ASE exception occurred while running query on database. There is no server
+        listening at 10.5.0.6:4901..\"\n}"},"protectedItemDataSourceId":"422214131635443","protectedItemHealthStatus":"Unhealthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupPolicies/DailyPolicy-m9aya1dh","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4287'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Apr 2025 06:24:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/southindia/e7eca424-da86-43f7-bafa-6db6550e785c
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-msedge-ref:
+      - 'Ref A: 046810CD4DE349DF901502BA6B7266C5 Ref B: MAA201060514045 Ref C: 2025-04-14T06:24:09Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v
+      User-Agent:
+      - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupPolicies?api-version=2024-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2025-04-07T21:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2025-04-07T21:30:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","policyType":"V1","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2025-04-07T21:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2025-04-07T21:30:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupPolicies/DailyPolicy-m9aya1dh","name":"DailyPolicy-m9aya1dh","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPAseDatabase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2020-09-30T19:30:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2020-09-30T19:30:00Z"],"retentionDuration":{"count":180,"durationType":"Days"}},"weeklySchedule":{"daysOfTheWeek":["Sunday"],"retentionTimes":["2020-09-30T19:30:00Z"],"retentionDuration":{"count":104,"durationType":"Weeks"}},"monthlySchedule":{"retentionScheduleFormatType":"Weekly","retentionScheduleWeekly":{"daysOfTheWeek":["Sunday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-09-30T19:30:00Z"],"retentionDuration":{"count":60,"durationType":"Months"}},"yearlySchedule":{"retentionScheduleFormatType":"Weekly","monthsOfYear":["January"],"retentionScheduleWeekly":{"daysOfTheWeek":["Sunday"],"weeksOfTheMonth":["First"]},"retentionTimes":["2020-09-30T19:30:00Z"],"retentionDuration":{"count":10,"durationType":"Years"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":120},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":15,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-ccy/backupPolicies/EnhancedPolicy","name":"EnhancedPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","policyType":"V2","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicyV2","scheduleRunFrequency":"Hourly","hourlySchedule":{"interval":4,"scheduleWindowStartTime":"2025-04-07T08:00:00Z","scheduleWindowDuration":12}},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2025-04-07T08:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4392'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Apr 2025 06:24:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/southindia/e8ec92a7-4321-4945-8580-638481f3a842
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-msedge-ref:
+      - 'Ref A: 7AB6992C8E1E46A99673BBD7EB5CBB4D Ref B: MAA201060516053 Ref C: 2025-04-14T06:24:10Z'
+    status:
+      code: 200
+      message: OK
+version: 1

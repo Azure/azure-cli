@@ -49,7 +49,7 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SQLDataBase': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
-                     'SAPASE': 'SAPAseDatabase'}
+                     'SAPAseDatabase': 'SAPAseDatabase'}
 
 # Mapping of module name
 module_map = {'sqldatabase': 'sql_database',
