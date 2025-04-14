@@ -9,14 +9,19 @@ import datetime
 import isodate
 from unittest import mock
 
-from azure.batch import models, operations, BatchServiceClient
-from azure.batch.batch_auth import SharedKeyCredentials
+import importlib
+import inspect
+import azure.batch
+from azure.core import MatchConditions
+#from azure.batch._client import BatchClientOperationsMixin
+from azure.batch import models, BatchClient
+from azure.core.credentials import AzureNamedKeyCredential
 
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
 
 
-class TestObj(object):  # pylint: disable=too-few-public-methods
+class TestObj:  # pylint: disable=too-few-public-methods
     pass
 
 
@@ -24,7 +29,7 @@ class TestBatchValidators(unittest.TestCase):
     # pylint: disable=protected-access
 
     def __init__(self, methodName):
-        super(TestBatchValidators, self).__init__(methodName)
+        super().__init__(methodName)
 
     def test_batch_datetime_format(self):
         obj = _validators.datetime_format("2017-01-24T15:47:24Z")
@@ -74,29 +79,24 @@ class TestBatchValidators(unittest.TestCase):
             _validators.environment_setting_format("name=value=other")
 
     def test_batch_application_package_reference_format(self):
-        ref = _validators.application_package_reference_format("app_1")
-        self.assertEqual(ref, {'application_id': 'app_1'})
+        ref = _validators.batch_application_package_reference_format("app_1")
+        self.assertEqual(ref, {'applicationId': 'app_1'})
 
-        ref = _validators.application_package_reference_format("app#1")
-        self.assertEqual(ref, {'application_id': 'app', 'version': '1'})
+        ref = _validators.batch_application_package_reference_format("app#1")
+        self.assertEqual(ref, {'applicationId': 'app', 'version': '1'})
 
-        ref = _validators.application_package_reference_format("app#1#RC")
-        self.assertEqual(ref, {'application_id': 'app', 'version': '1#RC'})
-
-    def test_batch_certificate_reference_format(self):
-        cert = _validators.certificate_reference_format("thumbprint_lkjsahakjg")
-        self.assertEqual(cert, {'thumbprint': 'thumbprint_lkjsahakjg',
-                                'thumbprint_algorithm': 'sha1'})
+        ref = _validators.batch_application_package_reference_format("app#1#RC")
+        self.assertEqual(ref, {'applicationId': 'app', 'version': '1#RC'})
 
     def test_batch_task_id_ranges_format(self):
-        id_range = _validators.task_id_ranges_format("5-10")
+        id_range = _validators.batch_task_id_ranges_format("5-10")
         self.assertEqual(id_range, {'start': 5, 'end': 10})
 
         with self.assertRaises(ValueError):
-            _validators.task_id_ranges_format("5")
+            _validators.batch_task_id_ranges_format("5")
 
         with self.assertRaises(ValueError):
-            _validators.task_id_ranges_format("test")
+            _validators.batch_task_id_ranges_format("test")
 
         with self.assertRaises(ValueError):
             _validators.environment_setting_format("5-")
@@ -109,14 +109,14 @@ class TestBatchValidators(unittest.TestCase):
 
     def test_batch_resource_file_format(self):
         meta = _validators.resource_file_format("file=source")
-        self.assertEqual(meta, {'file_path': 'file', 'http_url': 'source'})
+        self.assertEqual(meta, {'filePath': 'file', 'httpUrl': 'source'})
 
         meta = _validators.resource_file_format("TestData.zip=https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
                                                 "TestData.zip?sv=2015-04-05&sr=b&sig=lk72w%3D&se="
                                                 "2017-07-28T21%3A14%3A12Z&sp=rwd")
         self.assertEqual(meta, {
-            'file_path': 'TestData.zip',
-            'http_url': ("https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
+            'filePath': 'TestData.zip',
+            'httpUrl': ("https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
                          "TestData.zip?sv=2015-04-05&sr=b&sig=lk72w%3D&se=2017-07-28T21%3A14%3A12Z&sp=rwd")})
 
         with self.assertRaises(ValueError):
@@ -198,6 +198,22 @@ class TestBatchParser(unittest.TestCase):
     def test_batch_find_param_type(self):
         model = TestObj()
         model.__doc__ = """
+    :param job: The Job to be created. Required.
+    :type job: ~azure.batch.models.BatchJobCreateContent
+    :keyword time_out_in_seconds: The maximum time that the server can spend processing the
+    request, in seconds. The default is 30 seconds. If the value is larger than 30, the default
+    will be used instead.". Default value is None.
+    :paramtype time_out_in_seconds: int
+    :keyword ocpdate: The time the request was issued. Client libraries typically set this to the
+    current system clock time; set it explicitly if you are calling the REST API
+    directly. Default value is None.
+    :paramtype ocpdate: ~datetime.datetime
+    :return: None
+    :rtype: None
+"""
+        self.assertEqual(_command_type.find_param_type(model, 'job'), '~azure.batch.models.BatchJobCreateContent')
+
+        model.__doc__ = """
     :param name: The name of the environment variable.
     :type name: str
     :param value: The value of the environment variable.
@@ -231,10 +247,10 @@ class TestBatchParser(unittest.TestCase):
     def test_batch_find_param_help(self):
         model = TestObj()
         model.__doc__ = """
-        :param pool_id: The id of the pool to get.
-        :type pool_id: str
-        :param pool_get_options: Additional parameters for the operation
-        :type pool_get_options: ~azure.batch.models.PoolGetOptions
+        :ivar pool_id: The id of the pool to get.
+        :vartype pool_id: str
+        :ivar pool_get_options: Additional parameters for the operation
+        :vartype pool_get_options: ~azure.batch.models.PoolGetOptions
 """
         self.assertEqual(_command_type.find_param_help(model, 'pool_id'),
                          'The id of the pool to get.')
@@ -242,9 +258,9 @@ class TestBatchParser(unittest.TestCase):
                          'Additional parameters for the operation')
 
         model.__doc__ = """
-    :param node_fill_type: How tasks should be distributed across compute
+    :ivar node_fill_type: How tasks should be distributed across compute
      nodes. Possible values include: 'spread', 'pack'
-    :type node_fill_type: str or ~azure.batch.models.ComputeNodeFillType
+    :vartype node_fill_type: str or ~azure.batch.models.ComputeNodeFillType
 """
         self.assertEqual(_command_type.find_param_help(model, 'node_fill_type'),
                          "How tasks should be distributed across compute nodes. " +
@@ -269,13 +285,13 @@ class TestBatchParser(unittest.TestCase):
         self.assertEqual(_command_type.find_return_type(model), 'Generator')
 
     def test_batch_class_name(self):
-        type_str = "~azure.batch.models.ComputeNodeFillType"
+        type_str = "~azure.batch.models.BatchNodeFillType"
         self.assertEqual(_command_type.class_name(type_str),
-                         "azure.batch.models.ComputeNodeFillType")
+                         "azure.batch.models.BatchNodeFillType")
 
-        type_str = "str or ~azure.batch.models.ComputeNodeFillType"
+        type_str = "str or ~azure.batch.models.BatchNodeFillType"
         self.assertEqual(_command_type.class_name(type_str),
-                         "azure.batch.models.ComputeNodeFillType")
+                         "azure.batch.models.BatchNodeFillType")
 
     def test_batch_operations_name(self):
         op_str = "PythonTestCase"
@@ -398,46 +414,6 @@ class TestBatchParser(unittest.TestCase):
         ns.node_agent_sku_id = "sku id"
         tree.parse(ns)
 
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(ns, False, ['pool.id', 'pool.vm_size'])
-        ns.id = None
-        tree.parse_mutually_exclusive(ns, False, ['pool.id', 'pool.vm_size'])
-        ns.vm_size = None
-        tree.parse_mutually_exclusive(ns, False, ['pool.id', 'pool.vm_size'])
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(ns, True, ['pool.id', 'pool.vm_size'])
-
-        ns.id = None
-        tree.parse_mutually_exclusive(ns, False, ['pool.id', 'pool.cloud_service_configuration'])
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(
-                ns, True, ['pool.id', 'pool.cloud_service_configuration'])
-        ns.id = "id"
-        tree.parse_mutually_exclusive(
-            ns, True, ['pool.id', 'pool.cloud_service_configuration'])
-        ns.target_os_version = "4"
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(
-                ns, True, ['pool.id', 'pool.cloud_service_configuration'])
-
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(
-                ns, True, ['pool.virtual_machine_configuration',
-                           'pool.cloud_service_configuration'])
-        ns.target_os_version = None
-        tree.parse_mutually_exclusive(
-            ns, True, ['pool.virtual_machine_configuration',
-                       'pool.cloud_service_configuration'])
-        ns.publisher = None
-        ns.offer = None
-        ns.node_agent_sku_id = None
-        tree.parse_mutually_exclusive(
-            ns, False, ['pool.virtual_machine_configuration',
-                        'pool.cloud_service_configuration'])
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(ns, True, ['pool.virtual_machine_configuration',
-                                                     'pool.cloud_service_configuration'])
-
         siblings = tree._get_siblings("pool")
         self.assertEqual(sorted(siblings), ["id", "target_dedicated_nodes", "vm_size"])
         siblings = tree._get_siblings("pool.virtual_machine_configuration")
@@ -453,42 +429,42 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
 
     def setUp(self):
         def get_client(*_):
-            creds = SharedKeyCredentials('test1', 'ZmFrZV9hY29jdW50X2tleQ==')
-            return BatchServiceClient(creds, 'https://test1.westus.batch.azure.com/')
+            creds = AzureNamedKeyCredential('test1', 'ZmFrZV9hY29jdW50X2tleQ==')
+            return BatchClient(credential=creds,  endpoint='https://test1.westus.batch.azure.com/')
 
         self.command_pool = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations.pool_operations#PoolOperations.add',
-            operations._pool_operations.PoolOperations.add,
+            'azure.batch._client#BatchClient.create_pool',
+            azure.batch._client.BatchClient.create_pool,
             client_factory=get_client)
         self.command_node = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations._compute_node_operations#ComputeNodeOperations.reboot',
-            operations._compute_node_operations.ComputeNodeOperations.reboot,
+            'azure.batch._client#BatchClient.reboot_node',
+            azure.batch._client.BatchClient.reboot_node,
             client_factory=get_client)
         self.command_job = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations.job_operations#JobOperations.add',
-            operations._job_operations.JobOperations.add,
+            'azure.batch._client#BatchClient.create_job',
+            azure.batch._client.BatchClient.create_job,
             client_factory=get_client)
         self.command_task = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations.task_operations#TaskOperations.add',
-            operations._task_operations.TaskOperations.add,
+            'azure.batch._client#BatchClient.create_task',
+            azure.batch._client.BatchClient.create_task,
             client_factory=get_client, flatten=1)
         self.command_file = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations._file_operations#FileOperations.get_from_task',
-            operations._file_operations.FileOperations.get_from_task,
+            'azure.batch._client#BatchClient.get_task_file',
+            azure.batch._client.BatchClient.get_task_file,
             client_factory=get_client)
         self.command_list = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations._job_operations#JobOperations.list',
-            operations._job_operations.JobOperations.list,
+            'azure.batch._client#BatchClient.list_jobs',
+            azure.batch._client.BatchClient.list_jobs,
             client_factory=get_client)
         self.command_delete = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations._pool_operations#PoolOperations.delete',
-            operations._pool_operations.PoolOperations.delete,
+            'azure.batch._client#BatchClient.delete_pool',
+            azure.batch._client.BatchClient.delete_pool,
             client_factory=get_client)
         self.command_conflicts = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations._job_schedule_operations#JobScheduleOperations.add',
-            operations._job_schedule_operations.JobScheduleOperations.add,
+            'azure.batch._client#BatchClient.create_job_schedule',
+            azure.batch._client.BatchClient.create_job_schedule,
             client_factory=get_client, flatten=4)
-        return super(TestBatchLoader, self).setUp()
+        return super().setUp()
 
     def test_batch_build_parameters(self):
         kwargs = {
@@ -522,37 +498,6 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
                             'start_task': {'run_elevated': True, 'command_line': 'cmd'}}}
         self.assertEqual(kwargs, request)
 
-    def test_batch_options(self):
-        self.command_delete._load_options_model(
-            operations._pool_operations.PoolOperations.delete)
-        self.assertIsInstance(self.command_delete._options_model, models.PoolDeleteOptions)
-        self.assertEqual(sorted(self.command_delete._options_attrs),
-                         ['additional_properties',
-                          'client_request_id',
-                          'if_match',
-                          'if_modified_since',
-                          'if_none_match',
-                          'if_unmodified_since',
-                          'ocp_date',
-                          'return_client_request_id',
-                          'timeout'])
-        kwargs = {
-            'if_match': None,
-            'if_modified_since': 'abc',
-            'if_none_match': None,
-            'if_unmodified_since': 'def',
-            'client_request_id': 'ignored'
-        }
-        self.command_delete._build_options(kwargs)
-        self.assertIsInstance(kwargs['pool_delete_options'], models.PoolDeleteOptions)
-        self.assertEqual(kwargs['pool_delete_options'].if_modified_since, 'abc')
-        self.assertEqual(kwargs['pool_delete_options'].if_unmodified_since, 'def')
-        self.assertIsNone(kwargs['pool_delete_options'].client_request_id)
-        self.assertEqual(kwargs['pool_delete_options'].timeout, 30)
-        self.assertIsNone(kwargs['pool_delete_options'].ocp_date)
-        options = list(self.command_delete._process_options())
-        self.assertEqual(len(options), 4)
-
     def test_batch_should_flatten(self):
         self.assertFalse(self.command_task._should_flatten('task.depends_on'))
         self.assertTrue(self.command_task._should_flatten('task'))
@@ -560,65 +505,149 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
             'job.job_manager_task.constraints.something'))
         self.assertTrue(self.command_job._should_flatten('job.job_manager_task.constraints'))
 
+    def test_filter_args(self):
+        
+        # testing null removal
+        kwargs = {
+            'nullvalue': None,
+            'valid': '20'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'valid': '20'})
+
+        # testing range
+        # both start-range and end-range are present
+        kwargs = {
+            'start_range': '10',
+            'end_range': '20'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'ocp_range': 'bytes=10-20'})
+
+        # only start-range is present
+        kwargs = {
+            'end_range': '20'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'ocp_range': 'bytes=0-20'})
+
+        # only end-range is present
+        kwargs = {
+            'start_range': '10'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'ocp_range': 'bytes=10-'})
+
+        # testing match conditions
+
+        #testing if-match *
+        kwargs = {
+            'if_match': '*'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'match_condition': MatchConditions.IfPresent})
+
+        # testing if-match value
+        kwargs = {
+            'if_match': 'test'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'etag': 'test', 'match_condition': MatchConditions.IfNotModified})
+
+        # testing if-none-match value
+        kwargs = {
+            'if_none_match': 'test'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'etag': 'test', 'match_condition': MatchConditions.IfModified})
+        
+
+    def test_batch_attribute_map(self):
+        module = importlib.import_module("azure.batch.models")
+        classes = [obj for name, obj in inspect.getmembers(module, inspect.isclass)]
+        
+        # go through all classes in the module and get the attribute and validation maps
+        attribute_maps = {}
+        validations = {}
+        for classx in classes:
+            if not (classx.__module__ == 'azure.batch.models._enums' or classx.__module__ == 'azure.batch.models._patch'):
+              attribute_maps[classx.__name__] = self.command_delete.get_track1_attribute_map(classx)
+              validations[classx.__name__] = self.command_delete.get_track1_validations(classx)
+
+        # verify that every attribute_map has a key and type
+        for attribute_map in attribute_maps:
+            for key, value in attribute_maps[attribute_map].items():
+                self.assertTrue(attribute_maps[attribute_map][key] is not None)
+                self.assertTrue(value is not None)
+                self.assertTrue('key' in value and value['key'])
+                self.assertTrue('type' in value and value['type'])
+
+        # verify that every validation is one of three expected values
+        for validation in validations:
+            for key, value in validations[validation].items():
+                self.assertTrue(validations[validation][key] is not None)
+                self.assertTrue(value is not None)
+                self.assertTrue(value in [{'required': False}, {'required': True}, {'readonly': True}])
+
+        self.assertTrue(True)
+
     def test_batch_get_model_attrs(self):
         self.command_job.parser = mock.Mock(_request_param={'name': 'job'})
         attrs = list(self.command_job._get_attrs(models.ResourceFile, 'task.resource_files'))
         self.assertEqual(len(attrs), 7)
-        attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
-        self.assertEqual(len(attrs), 7)
-        attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
-        self.assertEqual(len(attrs), 10)
+        attrs = list(self.command_job._get_attrs(models.BatchJobManagerTask, 'job.job_manager_task'))
+        self.assertEqual(len(attrs), 8)
+        attrs = list(self.command_job._get_attrs(models.BatchJobCreateContent, 'job'))
+        self.assertEqual(len(attrs), 11)
 
     def test_batch_load_arguments(self):
         # pylint: disable=too-many-statements
-        handler = operations._pool_operations.PoolOperations.add
+        handler = azure.batch._client.BatchClient.create_pool
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 50)
+        self.assertEqual(len(args), 48)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         self.assertTrue('application_package_references' in [a for a, _ in args])
-        self.assertFalse('start_task_environment_settings' in [a for a, _ in args])
-        self.assertTrue('certificate_references' in [a for a, _ in args])
         self.assertTrue('metadata' in [a for a, _ in args])
         self.assertTrue('task_slots_per_node' in [a for a, _ in args])
         self.assertTrue('account_endpoint' in [a for a, _ in args])
-        handler = operations._job_operations.JobOperations.add
+        handler = azure.batch._client.BatchClient.create_job
         args = list(self.command_job._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 19)
+        self.assertEqual(len(args), 21)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         self.assertTrue('account_endpoint' in [a for a, _ in args])
-        handler = operations._task_operations.TaskOperations.add
+        handler = azure.batch._client.BatchClient.create_task
         args = list(self.command_task._load_transformed_arguments(handler))
         self.assertEqual(len(args), 12)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
-        handler = operations._file_operations.FileOperations.get_from_task
+        handler = azure.batch._client.BatchClient.get_task_file
         args = list(self.command_file._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 12)
+        self.assertEqual(len(args), 8)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertTrue('destination' in [a for a, _ in args])
-        handler = operations._job_operations.JobOperations.list
+        handler = azure.batch._client.BatchClient.list_jobs
         args = list(self.command_list._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 7)
+        self.assertEqual(len(args), 4)
         names = [a for a, _ in args]
-        self.assertEqual(set(names), set(['filter', 'select', 'expand', 'cmd', 'account_name', 'account_key', 'account_endpoint']))
+        self.assertEqual(set(names), set(['cmd', 'account_name', 'account_key', 'account_endpoint']))
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
-        handler = operations._pool_operations.PoolOperations.delete
+        handler = azure.batch._client.BatchClient.delete_pool
         args = list(self.command_delete._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 10)
+        self.assertEqual(len(args), 6)
         self.assertTrue('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
-        handler = operations._job_schedule_operations.JobScheduleOperations.add
+        handler =azure.batch._client.BatchClient.create_job_schedule
         args = [a for a, _ in self.command_conflicts._load_transformed_arguments(handler)]
-        self.assertEqual(len(args), 23)
+        self.assertEqual(len(args), 26)
         self.assertTrue('id' in args)
         self.assertTrue('job_manager_task_id' in args)
         self.assertFalse('job_manager_task_max_wall_clock_time' in args)
@@ -629,10 +658,11 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('destination' in args)
         self.assertTrue('required_slots' in args)
         self.assertTrue('account_endpoint' in args)
-        handler = operations._compute_node_operations.ComputeNodeOperations.reboot
+        handler = azure.batch._client.BatchClient.reboot_node
         args = list(self.command_node._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 7)
+        self.assertEqual(len(args), 8)
         self.assertTrue('node_reboot_option' in [a for a, _ in args])
-        option = [arg for (name, arg) in args if name == 'node_reboot_option'][0]
-        self.assertIsNotNone(option.choices)
-        self.assertFalse([a for a in option.choices if "'" in a])
+        # disabling check as this is a track1 logic and the track2 help lists out the options
+        # option = [arg for (name, arg) in args if name == 'node_reboot_option'][0]
+        # self.assertIsNotNone(option.choices)
+        # self.assertFalse([a for a in option.choices if "'" in a])

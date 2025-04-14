@@ -13,11 +13,10 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
+from .constants import AZURE_CLI_CLIENT_ID
 from .msal_credentials import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
 from .util import check_result
-
-AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
 # Service principal entry properties. Names are taken from OAuth 2.0 client credentials flow parameters:
 # https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow
@@ -42,10 +41,7 @@ logger = get_logger(__name__)
 
 
 class Identity:  # pylint: disable=too-many-instance-attributes
-    """Class to manage identities:
-        - user
-        - service principal
-        - TODO: managed identity
+    """Manage user or service principal identities and log into Microsoft identity platform.
     """
 
     # MSAL token cache.
@@ -116,7 +112,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def _msal_public_app_kwargs(self):
         """kwargs for creating PublicClientApplication."""
         # enable_broker_on_windows can only be used on PublicClientApplication.
-        return {**self._msal_app_kwargs, "enable_broker_on_windows": self._enable_broker_on_windows}
+        return {**self._msal_app_kwargs,
+                "enable_broker_on_windows": self._enable_broker_on_windows,
+                "enable_pii_log": True}
 
     @property
     def _msal_app(self):
@@ -193,19 +191,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
         client_credential = sp_auth.get_msal_client_credential()
-        cca = ConfidentialClientApplication(client_id, client_credential, **self._msal_app_kwargs)
-        result = cca.acquire_token_for_client(scopes)
-        check_result(result)
+        cred = ServicePrincipalCredential(client_id, client_credential, **self._msal_app_kwargs)
+        cred.acquire_token(scopes)
 
         # Only persist the service principal after a successful login
         entry = sp_auth.get_entry_to_persist()
         self._service_principal_store.save_entry(entry)
-
-    def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
-        raise NotImplementedError
-
-    def login_in_cloud_shell(self, scopes):
-        raise NotImplementedError
 
     def logout_user(self, username):
         # If username is an SP client ID, it is ignored
@@ -252,9 +243,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
         client_credential = ServicePrincipalAuth(entry).get_msal_client_credential()
         return ServicePrincipalCredential(client_id, client_credential, **self._msal_app_kwargs)
-
-    def get_managed_identity_credential(self, client_id=None):
-        raise NotImplementedError
 
 
 class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
@@ -304,7 +292,9 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         return ServicePrincipalAuth(entry)
 
     @classmethod
-    def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None):
+    def build_credential(cls, client_secret=None,
+                         certificate=None, use_cert_sn_issuer=None,
+                         client_assertion=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
@@ -313,14 +303,12 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         }
         """
         entry = {}
-        if secret_or_certificate:
-            user_expanded = os.path.expanduser(secret_or_certificate)
-            if os.path.isfile(user_expanded):
-                entry[_CERTIFICATE] = user_expanded
-                if use_cert_sn_issuer:
-                    entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
-            else:
-                entry[_CLIENT_SECRET] = secret_or_certificate
+        if client_secret:
+            entry[_CLIENT_SECRET] = client_secret
+        elif certificate:
+            entry[_CERTIFICATE] = os.path.expanduser(certificate)
+            if use_cert_sn_issuer:
+                entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
         return entry

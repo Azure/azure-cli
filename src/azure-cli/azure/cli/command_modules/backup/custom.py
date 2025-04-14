@@ -27,7 +27,7 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
     BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
-    UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource
+    UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
@@ -91,8 +91,13 @@ secondary_region_map = {
     "southafricanorth": "southafricawest",
     "southafricawest": "southafricanorth",
     "southcentralus": "northcentralus",
+    "southcentralus2": "westcentralus",
     "southeastasia": "eastasia",
+    "southeastus": "westus3",
+    "southeastus3": "westus3",
+    "southeastus5": "centralus",
     "southindia": "centralindia",
+    "southwestus": "centralus",
     "swedencentral": "swedensouth",
     "swedensouth": "swedencentral",
     "switzerlandnorth": "switzerlandwest",
@@ -455,7 +460,7 @@ def assign_identity(client, resource_group_name, vault_name, system_assigned=Non
 
     if user_assigned is not None:
         userid = UserIdentity()
-        user_assigned_identity = dict()
+        user_assigned_identity = {}
         for userMSI in user_assigned:
             user_assigned_identity[userMSI] = userid
         if system_assigned is not None or curr_identity_type in ["systemassigned", "systemassigned, userassigned"]:
@@ -498,7 +503,7 @@ def remove_identity(client, resource_group_name, vault_name, system_assigned=Non
         userid = None
         remove_count_of_userMSI = 0
         totaluserMSI = 0
-        user_assigned_identity = dict()
+        user_assigned_identity = {}
         for element in curr_identity_details.user_assigned_identities.keys():
             if element in user_assigned:
                 remove_count_of_userMSI += 1
@@ -867,11 +872,8 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
-    logger.warning('Ignite (November) 2023 onwards Virtual Machine deployments using PS and CLI will default to '
-                   'security type Trusted Launch. Please ensure Policy Name used with "az backup '
-                   'protection enable-for-vm" command is of type Enhanced Policy for Trusted Launch VMs. Non-Trusted '
-                   'Launch Virtual Machines will not be impacted by this change. To know more about default change '
-                   'and Trusted Launch, please visit https://aka.ms/TLaD.')
+    logger.warning('Starting in May 2025, Trusted Launch virtual machines can be protected with both'
+                   ' standard and enhanced policies via PS and CLI')
 
     # throw error if policy has more than 1000 protected VMs.
     if policy.properties.protected_items_count >= 1000:
@@ -1073,7 +1075,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             if not prompt_y_n(warning_prompt):
                 logger.warning('Cancelling policy update operation')
                 return None
-    except (AttributeError):
+    except AttributeError:
         logger.warning("Unable to fetch policy type for either existing or new policy. Proceeding with update.")
 
     # Update policy
@@ -1340,6 +1342,44 @@ def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource
         """)
 
 
+def _set_pe_restore_trigger_restore_properties(cmd, trigger_restore_properties, disk_access_option, target_disk_access_id,
+                                               recovery_point, use_secondary_region):
+    if not hasattr(recovery_point.properties, 'is_private_access_enabled_on_any_disk'):
+        return trigger_restore_properties
+    if recovery_point.properties.is_private_access_enabled_on_any_disk:
+        if disk_access_option is None:
+            raise InvalidArgumentValueError("--disk-access-option parameter must be provided since private access "
+                                            "is enabled in given recovery point")
+
+        if disk_access_option == "EnablePrivateAccessForAllDisks":
+            if target_disk_access_id is None:
+                raise InvalidArgumentValueError("--target-disk-access-id must be provided when --disk-access-option "
+                                                "is set to EnablePrivateAccessForAllDisks")
+
+        if disk_access_option == "SameAsOnSourceDisks":
+            if use_secondary_region:
+                raise InvalidArgumentValueError("Given --disk-access-option is not applicable to cross region restore")
+            if target_disk_access_id is not None:
+                raise InvalidArgumentValueError("--target-disk-access-id can't be provided for the "
+                                                "given --disk-access-option")
+
+        if disk_access_option == "EnablePublicAccessForAllDisks":
+            if target_disk_access_id is not None:
+                raise InvalidArgumentValueError("--target-disk-access-id can't be provided for the "
+                                                "given --disk-access-option")
+
+        trigger_restore_properties.target_disk_network_access_settings = TargetDiskNetworkAccessSettings(
+            target_disk_access_id=target_disk_access_id,
+            target_disk_network_access_option=disk_access_option
+        )
+    else:
+        if disk_access_option is not None or target_disk_access_id is not None:
+            raise InvalidArgumentValueError("--disk-access-option parameter can't be provided since private access "
+                                            "is not enabled in given recovery point")
+
+    return trigger_restore_properties
+
+
 def _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties, restore_to_edge_zone, recovery_point,
                                                target_subscription, use_secondary_region, restore_mode):
     # TODO: As the subscription we currently use does not have access to Edge Zones, no tests have been written for
@@ -1375,7 +1415,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
                   target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None,
-                  tenant_id=None):
+                  tenant_id=None, disk_access_option=None, target_disk_access_id=None):
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
     vault_identity = vault.identity
@@ -1480,6 +1520,10 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                                                             restore_to_edge_zone,
                                                                             recovery_point, target_subscription,
                                                                             use_secondary_region, restore_mode)
+
+    trigger_restore_properties = _set_pe_restore_trigger_restore_properties(cmd, trigger_restore_properties,
+                                                                            disk_access_option, target_disk_access_id,
+                                                                            recovery_point, use_secondary_region)
 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 

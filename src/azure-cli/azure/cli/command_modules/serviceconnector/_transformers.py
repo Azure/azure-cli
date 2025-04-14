@@ -48,6 +48,9 @@ def transform_linker_properties(result):
         get_aks_resource_name
     )
 
+    if result is None:
+        return result
+
     # manually polling if result is a poller
     if isinstance(result, LROPoller):
         result = result.result()
@@ -69,7 +72,8 @@ def transform_local_linker_properties(result):
     from ._utils import (
         run_cli_cmd
     )
-
+    if result is None:
+        return result
     # manually polling if result is a poller
     if isinstance(result, LROPoller):
         result = result.result()

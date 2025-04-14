@@ -2,10 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import copy
-
+# pylint: disable=protected-access
 from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
-from .exceptions import AAZInvalidValueError
 import abc
 
 
@@ -54,6 +52,11 @@ class AAZSimpleValue(AAZBaseValue):
         if processor:
             result = processor(self._schema, result)
         return result
+
+
+class AAZAnyValue(AAZSimpleValue):  # pylint: disable=too-few-public-methods
+    # TODO: may need to override the __getitem__, __setitem__, __delitem__, __getattr__, __setattr__, __delattr__,
+    pass
 
 
 class AAZObject(AAZBaseValue):
@@ -260,59 +263,12 @@ class AAZDict(AAZBaseDictValue):
         return result
 
 
-class AAZFreeFormDict(AAZBaseDictValue):
+class AAZFreeFormDict(AAZDict):
 
     def __init__(self, schema, data):
         from ._field_type import AAZFreeFormDictType
         assert isinstance(schema, AAZFreeFormDictType)
         super().__init__(schema, data)
-
-    def __getitem__(self, key) -> AAZBaseValue:
-        item_schema = self._schema[key]
-        if item_schema is None:
-            # free form
-            return self._data[key]
-        if key not in self._data:
-            self._data[key] = AAZValuePatch.build(item_schema)
-        return item_schema._ValueCls(item_schema, self._data[key])  # return as AAZValue
-
-    def __setitem__(self, key, data):
-        item_schema = self._schema[key]
-        if item_schema is None:
-            # free form
-            if isinstance(data, AAZValuePatch):
-                raise AAZInvalidValueError("Not support value patch for Free-Form dict key")
-            if isinstance(data, AAZBaseValue):
-                if data._is_patch:
-                    raise AAZInvalidValueError("Not support value patch for Free-Form dict key")
-                data = data._data
-            assert not isinstance(data, AAZBaseValue)
-            self._data[key] = copy.deepcopy(data)
-            return
-
-        # For fixed key properties usage
-        self._data[key] = item_schema.process_data(data, key=key)
-
-    def to_serialized_data(self, processor=None, **kwargs):
-        if self._data == AAZUndefined:
-            result = AAZUndefined
-        elif self._data is None:
-            result = None
-        else:
-            result = {}
-            for key, v in self.items():
-                if isinstance(v, AAZBaseValue):
-                    v = v.to_serialized_data(processor=processor, **kwargs)
-                    if v == AAZUndefined:
-                        continue
-                result[key] = v
-
-        if not result and self._is_patch:
-            result = AAZUndefined
-
-        if processor:
-            result = processor(self._schema, result)
-        return result
 
 
 class AAZList(AAZBaseValue):
@@ -443,4 +399,94 @@ class AAZList(AAZBaseValue):
 
         if processor:
             result = processor(self._schema, result)
+        return result
+
+
+class AAZIdentityObject(AAZObject):  # pylint: disable=too-few-public-methods
+    def to_serialized_data(self, processor=None, **kwargs):
+        calculate_data = {}
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+
+        elif self._data is None:
+            result = None
+
+        else:
+            result = {}
+            schema = self._schema
+
+            for name, field_schema in schema._fields.items():
+                if name in self._data:
+                    v = self[name].to_serialized_data(processor=processor, **kwargs)
+                    if v == AAZUndefined:
+                        continue
+
+                    if field_schema._serialized_name:
+                        name = field_schema._serialized_name
+
+                    if name in {"userAssigned", "systemAssigned"}:
+                        calculate_data[name] = v
+                        calculate_data["action"] = field_schema._flags.get("action", None)  # no action in GET operation
+
+                    else:
+                        result[name] = v
+
+        result = self._build_identity(calculate_data, result)
+
+        if not result and calculate_data.get("action", None) == "remove":
+            result = {"type": "None"}  # empty identity
+
+        if not result and self._is_patch:
+            result = AAZUndefined
+
+        if processor:
+            result = processor(self._schema, result)
+
+        return result
+
+    def _build_identity(self, calculate_data, result):
+        action = calculate_data.get("action", None)
+        if not action:
+            return result
+
+        user_assigned = calculate_data.get("userAssigned", None)
+        system_assigned = calculate_data.get("systemAssigned", None)
+
+        identities = set(result.pop("userAssignedIdentities", {}).keys())
+        has_system_identity = "systemassigned" in result.pop("type", "").lower()
+
+        if action == "remove":
+            if user_assigned is not None:
+                if len(user_assigned) > 1:  # remove each
+                    identities -= set(user_assigned)
+
+                else:  # remove all
+                    identities = {}
+
+            if identities:
+                result["userAssignedIdentities"] = {k: {} for k in identities}
+                if system_assigned or not has_system_identity:
+                    result["type"] = "UserAssigned"
+
+                else:
+                    result["type"] = "SystemAssigned,UserAssigned"
+
+            elif not system_assigned and has_system_identity:
+                result["type"] = "SystemAssigned"
+
+        else:  # assign or create
+            if user_assigned:
+                identities |= set(user_assigned)
+
+            if identities:
+                result["userAssignedIdentities"] = {k: {} for k in identities}
+                if system_assigned or has_system_identity:
+                    result["type"] = "SystemAssigned,UserAssigned"
+
+                else:
+                    result["type"] = "UserAssigned"
+
+            elif system_assigned or has_system_identity:
+                result["type"] = "SystemAssigned"
+
         return result

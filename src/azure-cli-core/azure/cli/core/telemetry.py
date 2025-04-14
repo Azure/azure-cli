@@ -78,6 +78,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.enable_broker_on_windows = None
         self.msal_telemetry = None
         self.login_experience_v2 = None
+        self.use_msal_managed_identity = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -158,6 +159,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'
             'Context.Default.VS.Core.Distro.Version': _get_distro_version(),  # eg. '8.4.2105'
             'Context.Dafault.VS.Core.Istty': str(sys.stdin.isatty()),
+            'Context.Default.VS.Core.DevDeviceId': _get_device_id(),
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -233,6 +235,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
         set_custom_properties(result, 'LoginExperienceV2', str(self.login_experience_v2))
+        set_custom_properties(result, 'UseMsalManagedIdentity', str(self.use_msal_managed_identity))
 
         return result
 
@@ -316,7 +319,7 @@ def flush():
     save(get_config_dir(), _session.generate_payload())
 
     # reset session fields, retaining correlation id and application
-    _session.__init__(correlation_id=_session.correlation_id, application=_session.application)
+    _session.__init__(correlation_id=_session.correlation_id, application=_session.application)  # pylint: disable=unnecessary-dunder-call
 
 
 @_user_agrees_to_telemetry
@@ -469,6 +472,7 @@ def set_region_identified(region_input, region_identified):
     _session.region_identified = region_identified
 
 
+# region authentication-related
 @decorators.suppress_all_exceptions()
 def set_broker_info(enable_broker_on_windows):
     # Log the value of `enable_broker_on_windows`
@@ -484,6 +488,12 @@ def set_msal_telemetry(msal_telemetry):
 @decorators.suppress_all_exceptions()
 def set_login_experience_v2(login_experience_v2):
     _session.login_experience_v2 = login_experience_v2
+
+
+@decorators.suppress_all_exceptions()
+def set_use_msal_managed_identity(use_msal_managed_identity):
+    _session.use_msal_managed_identity = use_msal_managed_identity
+# endregion
 
 
 @decorators.suppress_all_exceptions()
@@ -569,6 +579,13 @@ def _get_secrets_warning_config():
 def _get_core_version():
     from azure.cli.core import __version__ as core_version
     return core_version
+
+
+@decorators.suppress_all_exceptions(fallback_return=None)
+def _get_device_id():
+    # This is a shared id with VS code telemetry
+    from deviceid import get_device_id
+    return get_device_id()
 
 
 @decorators.suppress_all_exceptions(fallback_return=None)

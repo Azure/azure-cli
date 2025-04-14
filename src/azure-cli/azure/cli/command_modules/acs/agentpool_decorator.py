@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import base64
 from math import isnan
 from types import SimpleNamespace
 from typing import Dict, List, Tuple, TypeVar, Union
@@ -38,9 +39,10 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import get_file_json, sdk_no_wait
+from azure.cli.core.util import get_file_json, sdk_no_wait, read_file_content
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -388,6 +390,155 @@ class AKSAgentPoolContext(BaseAKSContext):
         else:
             crg_id = raw_value
         return crg_id
+
+    def get_message_of_the_day(self) -> Union[str, None]:
+        """Obtain the value of message_of_the_day.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        message_of_the_day = None
+        message_of_the_day_file_path = self.raw_param.get("message_of_the_day")
+
+        if message_of_the_day_file_path:
+            if not os.path.isfile(message_of_the_day_file_path):
+                raise InvalidArgumentValueError(
+                    f"{message_of_the_day_file_path} is not valid file, or not accessible."
+                )
+            message_of_the_day = read_file_content(
+                message_of_the_day_file_path)
+            message_of_the_day = base64.b64encode(
+                bytes(message_of_the_day, 'ascii')).decode('ascii')
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "message_of_the_day") and
+            self.agentpool.message_of_the_day is not None
+        ):
+            message_of_the_day = self.agentpool.message_of_the_day
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return message_of_the_day
+
+    def get_enable_vtpm(self) -> bool:
+        return self._get_enable_vtpm(enable_validation=True)
+
+    def _get_enable_vtpm(self, enable_validation: bool = False) -> bool:
+        """Obtain the value of enable_vtpm, default value is False.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_vtpm = self.raw_param.get("enable_vtpm", False)
+
+        # In create mode, try and read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            # try to read the property value corresponding to the parameter from the `agentpool` object
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "security_profile") and
+                self.agentpool.security_profile is not None and
+                self.agentpool.security_profile.enable_vtpm is not None
+            ):
+                enable_vtpm = self.agentpool.security_profile.enable_vtpm
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_vtpm and self._get_disable_vtpm(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vtpm and --disable-vtpm at the same time."
+                )
+
+        return enable_vtpm
+
+    def _get_disable_vtpm(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_vtpm.
+        This function supports the option of enable_vtpm.
+        When enabled, if both enable_vtpm and disable_vtpm are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_vtpm = self.raw_param.get("disable_vtpm")
+
+        # This option is not supported in create mode, hence we do not read the property value from the `mc` object.
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if disable_vtpm and self._get_enable_vtpm(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vtpm and --disable-vtpm at the same time."
+                )
+
+        return disable_vtpm
+
+    def get_disable_vtpm(self) -> bool:
+        """Obtain the value of disable_vtpm.
+        This function will verify the parameter by default.
+        If both enable_vtpm and disable_vtpm are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_vtpm(enable_validation=True)
+
+    def get_enable_secure_boot(self) -> bool:
+        return self._get_enable_secure_boot(enable_validation=True)
+
+    def _get_enable_secure_boot(self, enable_validation: bool = False) -> bool:
+        """Obtain the value of enable_secure_boot, default value is False.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_secure_boot = self.raw_param.get("enable_secure_boot", False)
+
+        # In create mode, try and read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            # try to read the property value corresponding to the parameter from the `agentpool` object
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "security_profile") and
+                self.agentpool.security_profile is not None and
+                self.agentpool.security_profile.enable_secure_boot is not None
+            ):
+                enable_secure_boot = self.agentpool.security_profile.enable_secure_boot
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_secure_boot and self._get_disable_secure_boot(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-secure-boot and --disable-secure-boot at the same time."
+                )
+
+        return enable_secure_boot
+
+    def _get_disable_secure_boot(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_secure_boot.
+        This function supports the option of enable_secure_boot.
+        When enabled, if both enable_secure_boot and disable_secure_boot are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_secure_boot = self.raw_param.get("disable_secure_boot")
+
+        # This option is not supported in create mode, hence we do not read the property value from the `mc` object.
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if disable_secure_boot and self._get_enable_secure_boot(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-secure-boot and --disable-secure-boot at the same time."
+                )
+
+        return disable_secure_boot
+
+    def get_disable_secure_boot(self) -> bool:
+        """Obtain the value of disable_secure_boot.
+        This function will verify the parameter by default.
+        If both enable_secure_boot and disable_secure_boot are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_secure_boot(enable_validation=True)
 
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
@@ -1386,6 +1537,49 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_disable_windows_outbound_nat()
 
+    def get_if_match(self) -> str:
+        """Obtain the value of if_match.
+
+        :return: string
+        """
+        return self.raw_param.get("if_match")
+
+    def get_if_none_match(self) -> str:
+        """Obtain the value of if_none_match.
+
+        :return: string
+        """
+        return self.raw_param.get("if_none_match")
+
+    def _get_gpu_driver(self) -> Union[str, None]:
+        """Obtain the value of gpu_driver.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        gpu_driver = self.raw_param.get("gpu_driver")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "gpu_profile") and      # backward compatibility
+                self.agentpool.gpu_profile and
+                self.agentpool.gpu_profile.driver is not None
+            ):
+                gpu_driver = self.agentpool.gpu_profile.driver
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return gpu_driver
+
+    def get_gpu_driver(self) -> Union[str, None]:
+        """Obtain the value of gpu_driver.
+
+        :return: string or None
+        """
+        return self._get_gpu_driver()
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1664,6 +1858,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
+    def set_up_motd(self, agentpool: AgentPool) -> AgentPool:
+        """Set up message of the day for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.message_of_the_day = self.context.get_message_of_the_day()
+        return agentpool
+
     def set_up_gpu_properties(self, agentpool: AgentPool) -> AgentPool:
         """Set up gpu related properties for the AgentPool object.
 
@@ -1681,6 +1885,28 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
         agentpool.capacity_reservation_group_id = self.context.get_crg_id()
+        return agentpool
+
+    def set_up_agentpool_security_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up security profile for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        enable_vtpm = self.context.get_enable_vtpm()
+        enable_secure_boot = self.context.get_enable_secure_boot()
+
+        # Construct AgentPoolSecurityProfile if one of the fields has been set
+        if enable_vtpm:
+            agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_vtpm = enable_vtpm
+
+        if enable_secure_boot:
+            if not agentpool.security_profile:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_secure_boot = enable_secure_boot
+
         return agentpool
 
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
@@ -1715,6 +1941,22 @@ class AKSAgentPoolAddDecorator:
             agentpool.windows_profile = self.models.AgentPoolWindowsProfile(  # pylint: disable=no-member
                 disable_outbound_nat=disable_windows_outbound_nat
             )
+
+        return agentpool
+
+    def set_up_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up gpu profile for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        gpu_driver = self.context.get_gpu_driver()
+
+        # Construct AgentPoolGPUProfile if one of the fields has been set
+        if gpu_driver:
+            agentpool.gpu_profile = self.models.GPUProfile()
+            agentpool.gpu_profile.driver = gpu_driver
 
         return agentpool
 
@@ -1758,6 +2000,12 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_agentpool_windows_profile(agentpool)
         # set up crg id
         agentpool = self.set_up_crg_id(agentpool)
+        # set up agentpool security profile
+        agentpool = self.set_up_agentpool_security_profile(agentpool)
+        # set up message of the day
+        agentpool = self.set_up_motd(agentpool)
+        # set up gpu profile
+        agentpool = self.set_up_gpu_profile(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -1774,6 +2022,18 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
 
+        active_cloud = get_active_cloud(self.cmd.cli_ctx)
+        if active_cloud.profile != "latest":
+            return sdk_no_wait(
+                self.context.get_no_wait(),
+                self.client.begin_create_or_update,
+                self.context.get_resource_group_name(),
+                self.context.get_cluster_name(),
+                self.context._get_nodepool_name(enable_validation=False),
+                agentpool,
+                headers=self.context.get_aks_custom_headers(),
+            )
+
         return sdk_no_wait(
             self.context.get_no_wait(),
             self.client.begin_create_or_update,
@@ -1782,6 +2042,8 @@ class AKSAgentPoolAddDecorator:
             # validated in "init_agentpool", skip to avoid duplicate api calls
             self.context._get_nodepool_name(enable_validation=False),
             agentpool,
+            if_match=self.context.get_if_match(),
+            if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )
 
@@ -2002,6 +2264,42 @@ class AKSAgentPoolUpdateDecorator:
 
         return agentpool
 
+    def update_secure_boot(self, agentpool: AgentPool) -> AgentPool:
+        """Update secure boot property for the AgentPool object.
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        if self.context.get_enable_secure_boot():
+            if agentpool.security_profile is None:
+                agentpool.secure_boot = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_secure_boot = True
+
+        if self.context.get_disable_secure_boot():
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_secure_boot = False
+
+        return agentpool
+
+    def update_vtpm(self, agentpool: AgentPool) -> AgentPool:
+        """Update vtpm property for the AgentPool object.
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        if self.context.get_enable_vtpm():
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_vtpm = True
+
+        if self.context.get_disable_vtpm():
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_vtpm = False
+
+        return agentpool
+
     def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """The overall controller used to update AgentPool profile by default.
 
@@ -2027,6 +2325,10 @@ class AKSAgentPoolUpdateDecorator:
         # update fips image
         agentpool = self.update_fips_image(agentpool)
 
+        # update vtpm
+        agentpool = self.update_vtpm(agentpool)
+        # update secure boot
+        agentpool = self.update_secure_boot(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:
@@ -2039,6 +2341,18 @@ class AKSAgentPoolUpdateDecorator:
         """
         self._ensure_agentpool(agentpool)
 
+        active_cloud = get_active_cloud(self.cmd.cli_ctx)
+        if active_cloud.profile != "latest":
+            return sdk_no_wait(
+                self.context.get_no_wait(),
+                self.client.begin_create_or_update,
+                self.context.get_resource_group_name(),
+                self.context.get_cluster_name(),
+                self.context.get_nodepool_name(),
+                agentpool,
+                headers=self.context.get_aks_custom_headers(),
+            )
+
         return sdk_no_wait(
             self.context.get_no_wait(),
             self.client.begin_create_or_update,
@@ -2046,5 +2360,7 @@ class AKSAgentPoolUpdateDecorator:
             self.context.get_cluster_name(),
             self.context.get_nodepool_name(),
             agentpool,
+            if_match=self.context.get_if_match(),
+            if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )

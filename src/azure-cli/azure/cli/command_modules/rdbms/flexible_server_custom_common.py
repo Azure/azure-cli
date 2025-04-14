@@ -11,13 +11,13 @@ from dateutil.tz import tzutc
 from knack.log import get_logger
 from knack.util import CLIError
 from urllib.request import urlretrieve
-from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.util import user_confirmation
+from azure.cli.core.util import sdk_no_wait, user_confirmation, run_cmd
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
 from ._client_factory import cf_postgres_flexible_replica
-from ._flexible_server_util import run_subprocess, run_subprocess_get_output, \
+from ._flexible_server_util import run_subprocess, \
     fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
-from .validators import validate_public_access_server
+from ._flexible_server_location_capabilities_util import get_postgres_server_capability_info
+from .validators import validate_public_access_server, validate_resource_group, check_resource_group, validate_citus_cluster
 
 logger = get_logger(__name__)
 # pylint: disable=raise-missing-from
@@ -25,10 +25,15 @@ logger = get_logger(__name__)
 
 # Common functions used by other providers
 def flexible_server_update_get(client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+
     return client.get(resource_group_name, server_name)
 
 
 def flexible_server_stop(client, resource_group_name=None, server_name=None, no_wait=False):
+    if not check_resource_group(resource_group_name):
+        resource_group_name = None
+
     days = 7
     logger.warning("Server will be automatically started after %d days "
                    "if you do not perform a manual start operation", days)
@@ -36,16 +41,30 @@ def flexible_server_stop(client, resource_group_name=None, server_name=None, no_
 
 
 def flexible_server_update_set(client, resource_group_name, server_name, parameters):
+    validate_resource_group(resource_group_name)
+
     return client.begin_update(resource_group_name, server_name, parameters)
 
 
-def server_list_custom_func(client, resource_group_name=None):
+def server_list_custom_func(client, resource_group_name=None, show_cluster=None):
+    if not check_resource_group(resource_group_name):
+        resource_group_name = None
+
+    servers = client.list()
+
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
+        servers = client.list_by_resource_group(resource_group_name)
+
+    if show_cluster:
+        servers = [s for s in servers if s.cluster is not None]
+    else:
+        servers = [s for s in servers if s.cluster is None]
+
+    return servers
 
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):
+    validate_resource_group(resource_group_name)
     validate_public_access_server(cmd, client, resource_group_name, server_name)
 
     result = None
@@ -61,13 +80,15 @@ def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, fir
 
 
 def firewall_rule_create_func(cmd, client, resource_group_name, server_name, firewall_rule_name=None, start_ip_address=None, end_ip_address=None):
-
+    validate_resource_group(resource_group_name)
     validate_public_access_server(cmd, client, resource_group_name, server_name)
 
     if end_ip_address is None and start_ip_address is not None:
         end_ip_address = start_ip_address
     elif start_ip_address is None and end_ip_address is not None:
         start_ip_address = end_ip_address
+    elif start_ip_address is None and end_ip_address is None:
+        raise CLIError("Incorrect Usage : Need to pass in value for either \'--start-ip-address\' or \'--end-ip-address\'.")
 
     if firewall_rule_name is None:
         now = datetime.now()
@@ -102,11 +123,14 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
 
 
 def flexible_firewall_rule_custom_getter(cmd, client, resource_group_name, server_name, firewall_rule_name):
+    validate_resource_group(resource_group_name)
     validate_public_access_server(cmd, client, resource_group_name, server_name)
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
 
 def flexible_firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
+    validate_resource_group(resource_group_name)
+
     return client.begin_create_or_update(
         resource_group_name,
         server_name,
@@ -123,16 +147,21 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
 
 
 def firewall_rule_get_func(cmd, client, resource_group_name, server_name, firewall_rule_name):
+    validate_resource_group(resource_group_name)
     validate_public_access_server(cmd, client, resource_group_name, server_name)
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
 
 def firewall_rule_list_func(cmd, client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
     validate_public_access_server(cmd, client, resource_group_name, server_name)
     return client.list_by_server(resource_group_name, server_name)
 
 
-def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
+def database_delete_func(cmd, client, resource_group_name=None, server_name=None, database_name=None, yes=None):
+    if not check_resource_group(resource_group_name):
+        resource_group_name = None
+
     result = None
     if resource_group_name is None or server_name is None or database_name is None:
         raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name. "
@@ -144,6 +173,7 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
             "Are you sure you want to delete the database '{0}' of server '{1}'".format(database_name,
                                                                                         server_name), yes=yes)
 
+    validate_citus_cluster(cmd, resource_group_name, server_name)
     try:
         result = client.begin_delete(resource_group_name, server_name, database_name)
     except Exception as ex:  # pylint: disable=broad-except
@@ -152,6 +182,8 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
 
 
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
+    validate_resource_group(resource_group_name)
+
     # allow access to azure ip addresses
     cf_firewall = db_context.cf_firewall  # NOQA pylint: disable=unused-variable
     firewall_client = cf_firewall(cmd.cli_ctx, None)
@@ -164,6 +196,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
 
 
 def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
+    validate_resource_group(resource_group_name)
 
     server = client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
@@ -206,17 +239,18 @@ def github_actions_run(action_name, branch):
 
 
 def gitcli_check_and_login():
-    output = run_subprocess_get_output("gh")
+    output = run_cmd(["gh"], capture_output=True)
     if output.returncode:
         raise ClientRequestError('Please install "Github CLI" to run this command.')
 
-    output = run_subprocess_get_output("gh auth status")
+    output = run_cmd(["gh", "auth", "status"], capture_output=True)
     if output.returncode:
         run_subprocess("gh auth login", stdout_show=True)
 
 
 # Custom functions for server logs
 def flexible_server_log_download(client, resource_group_name, server_name, file_name):
+    validate_resource_group(resource_group_name)
 
     files = client.list_by_server(resource_group_name, server_name)
 
@@ -227,6 +261,7 @@ def flexible_server_log_download(client, resource_group_name, server_name, file_
 
 def flexible_server_log_list(client, resource_group_name, server_name, filename_contains=None,
                              file_last_written=None, max_file_size=None):
+    validate_resource_group(resource_group_name)
 
     all_files = client.list_by_server(resource_group_name, server_name)
     files = []
@@ -250,6 +285,9 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
 
 
 def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
     if not yes:
         user_confirmation(
             "Upgrading major version in server {} is irreversible. The action you're about to take can't be undone. "
@@ -261,6 +299,24 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     current_version = int(instance.version.split('.')[0])
     if current_version >= int(version):
         raise CLIError("The version to upgrade to must be greater than the current version.")
+    if version == '12':
+        logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
+                       "the option to select version 12 will be removed in the near future. "
+                       "We recommend selecting PostgreSQL 13 or a later version for "
+                       "all future operations.")
+
+    list_server_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name)
+    eligible_versions = list_server_capability_info['supported_server_versions'][str(current_version)]
+
+    if version not in eligible_versions:
+        # version not supported
+        error_message = ""
+        if len(eligible_versions) > 0:
+            error_message = "Server is running version {}. It can only be upgraded to the following versions: {} ".format(str(current_version), eligible_versions)
+        else:
+            error_message = "Server is running version {}. It cannot be upgraded to any higher version. ".format(str(current_version))
+
+        raise CLIError(error_message)
 
     replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
     version_mapped = version

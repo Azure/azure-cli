@@ -6,7 +6,7 @@
 import os
 import time
 
-from msrestazure.tools import parse_resource_id
+from azure.mgmt.core.tools import parse_resource_id
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, LogAnalyticsWorkspacePreparer)
@@ -79,6 +79,17 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
             # check if the job execution name is in the response
             self.assertEqual(job in execution['name'], True)
 
+        # execute twice
+        execution2 = self.cmd(
+            "az containerapp job start --resource-group {} --name {}".format(resource_group, job)).get_output_in_json()
+        executionList = self.cmd(
+            "az containerapp job execution list --resource-group {} --name {}".format(resource_group, job), checks=[
+                JMESPathCheck('length(@)', 3),
+            ]).get_output_in_json()
+
+        for e in executionList:
+            self.assertEqual(e['properties']['status'], "Running")
+
         # stop the most recently started execution
         stopExecution = self.cmd("az containerapp job stop --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name']))
         # check if the stopExecution response contains the job execution name
@@ -89,6 +100,32 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
         singleExecution = self.cmd("az containerapp job execution show --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name'])).get_output_in_json()
         self.assertEqual(job in singleExecution['name'], True)
         self.assertEqual(singleExecution['properties']['status'], "Stopped")
+
+        executionList = self.cmd(
+            "az containerapp job execution list --resource-group {} --name {}".format(resource_group, job), checks=[
+                JMESPathCheck('length(@)', 3),
+            ]).get_output_in_json()
+
+        # The other one execution is still running
+        for e in executionList:
+            if e['name'] == singleExecution['name']:
+                self.assertEqual(e['properties']['status'], "Stopped")
+            else:
+                self.assertEqual(e['properties']['status'], "Running")
+
+        # self.cmd("az containerapp job execution show --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution2['name']), checks=[
+        #     JMESPathCheck('properties.status', 'Running'),
+        # ])
+        self.cmd("az containerapp job stop --resource-group {} --name {}".format(resource_group, job), expect_failure=False).get_output_in_json()
+
+        # get stopped execution for the job and check status after waiting for 5 seconds to ensure job has stopped
+        time.sleep(5)
+        executionList = self.cmd("az containerapp job execution list --resource-group {} --name {}".format(resource_group, job), checks=[
+            JMESPathCheck('length(@)', 3),
+        ]).get_output_in_json()
+
+        for e in executionList:
+            self.assertEqual(e['properties']['status'], "Stopped")
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")

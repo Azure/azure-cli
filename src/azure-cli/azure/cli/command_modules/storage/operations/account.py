@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
+
 """Custom operations for storage account commands"""
 
 import os
@@ -10,6 +12,8 @@ from ipaddress import ip_network
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item, user_confirmation
 from azure.cli.core.profiles import ResourceType, get_sdk
+from ..aaz.latest.storage.account.migration._start import Start as _AccountMigrationStart
+from ..aaz.latest.storage.account import FileServiceUsage as _FileServiceUsage
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -203,7 +207,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         if bypass and not default_action:
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         if subnet:
-            from msrestazure.tools import is_valid_resource_id
+            from azure.mgmt.core.tools import is_valid_resource_id
             if not is_valid_resource_id(subnet):
                 raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
             VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
@@ -365,7 +369,7 @@ def show_storage_account_usage_no_location(cmd):
 
 def get_storage_account_properties(cli_ctx, account_id):
     scf = storage_client_factory(cli_ctx)
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     result = parse_resource_id(account_id)
     return scf.storage_accounts.get_properties(result['resource_group'], result['name'])
 
@@ -689,7 +693,7 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
     if not subnet and not ip_address:
         logger.warning('No subnet or ip address supplied.')
     if subnet:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
             raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
         VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
@@ -993,7 +997,7 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                        object_replication_policy_id=policy_id, properties=or_policy)
     except HttpResponseError as ex:
         if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default':
-            from msrestazure.tools import parse_resource_id
+            from azure.mgmt.core.tools import parse_resource_id
             if account_name == parse_resource_id(or_policy.source_account)['name']:
                 raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
                                'destination account.')
@@ -1209,3 +1213,41 @@ def clear_blob_cors_rules(cmd, client, resource_group_name, account_name):
                                   account_name=account_name,
                                   parameters=blob_service_properties)
     return []
+
+
+class AccountMigrationStart(_AccountMigrationStart):
+    def pre_operations(self):
+        logger.warning('After your request to convert the account’s redundancy configuration is validated, the '
+                       'conversion will typically complete in a few days, but can take a few weeks depending on '
+                       'current resource demands in the region, account size, and other factors. The conversion can’t '
+                       'be stopped after being initiated, and for accounts with geo redundancy a failover can’t be '
+                       'initiated while conversion is in progress. The data within the storage account will continue '
+                       'to be accessible with no loss of durability or availability.')
+
+
+def _format_storage_account_id(args_schema):
+    from azure.cli.core.aaz import AAZResourceIdArgFormat
+    args_schema.account_name._fmt = AAZResourceIdArgFormat(
+        template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/"
+                 "storageAccounts/{}"
+    )
+    args_schema.resource_group._required = False
+
+
+class FileServiceUsage(_FileServiceUsage):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        args_schema.file_services_name._registered = False
+        args_schema.file_services_name._required = False
+        args_schema.file_service_usages_name._registered = False
+        args_schema.file_service_usages_name._required = False
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_account_name_aaz
+        args = self.ctx.args
+        parse_account_name_aaz(self, args)
+        args.file_services_name = 'default'
+        args.file_service_usages_name = 'default'

@@ -11,6 +11,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from ._validators import (
+    validate_connstr_props,
     validate_params,
     validate_kafka_params,
     validate_local_params,
@@ -34,10 +35,10 @@ from ._resource_config import (
 )
 from ._addon_factory import AddonFactory
 from knack.arguments import CLIArgumentType
-from .action import AddCustomizedKeys
+from .action import AddAdditionalConnectionStringProperties, AddCustomizedKeys
 
 
-def add_source_resource_block(context, source, enable_id=True):
+def add_source_resource_block(context, source, enable_id=True, target=None):
     source_args = SOURCE_RESOURCES_PARAMS.get(source)
     for resource, args in SOURCE_RESOURCES_PARAMS.items():
         if resource != source:
@@ -79,14 +80,22 @@ def add_source_resource_block(context, source, enable_id=True):
         context.argument('enable_csi', options_list=['--enable-csi'], arg_type=get_three_state_flag(),
                          help="Use keyvault as a secrets store via a CSI volume. "
                          "If specified, AuthType Arguments are not needed.")
+        if target == RESOURCE.AppConfig:
+            context.argument('enable_appconfig_extension', options_list=['--use-appconfig-extension', '-e'],
+                             arg_type=get_three_state_flag(),
+                             help="Install Azure App Configuration extension in the Kubernetes cluster.")
+        else:
+            context.ignore('enable_appconfig_extension')
     elif source == RESOURCE.ContainerApp:
         for arg, content in SOURCE_RESOURCES_CREATE_PARAMS.get(source).items():
             context.argument(arg, options_list=content.get(
                 'options'), type=str, help=content.get('help'))
         context.ignore('enable_csi')
+        context.ignore('enable_appconfig_extension')
     else:
         context.ignore('scope')
         context.ignore('enable_csi')
+        context.ignore('enable_appconfig_extension')
 
     # slot parameter
     for resource, args in SOURCE_RESOURCES_OPTIONAL_PARAMS.items():
@@ -145,10 +154,12 @@ def add_target_resource_block(context, target):
             context.argument(arg, options_list=content.get('options'), type=str,
                              help='{}. Required if \'--target-id\' is not specified.'.format(content.get('help')))
             required_args.append(content.get('options')[0])
-
-        context.argument('target_id', type=str,
-                         help='The resource id of target service. Required if {required_args} '
-                         'are not specified.'.format(required_args=str(required_args)))
+        if target == RESOURCE.NeonPostgres:
+            context.ignore('target_id')
+        else:
+            context.argument('target_id', type=str,
+                             help='The resource id of target service. Required if {required_args} '
+                             'are not specified.'.format(required_args=str(required_args)))
 
     if target != RESOURCE.KeyVault:
         context.ignore('enable_csi')
@@ -170,6 +181,14 @@ def add_customized_keys_argument(context):
     context.argument('customized_keys', options_list=['--customized-keys'], action=AddCustomizedKeys, nargs='*',
                      help='The customized keys used to change default configuration names. Key is the original '
                      'name, value is the customized name.')
+
+
+def add_connstr_props_argument(context):
+    # linter: length '--additional-connection-string-properties' longer than 22, so use abbreviation
+    context.argument('connstr_props', options_list=['--connstr-props'],
+                     action=AddAdditionalConnectionStringProperties, nargs='*',
+                     help='The additional connection string properties used to build connection string.',
+                     validator=validate_connstr_props)
 
 
 def add_target_type_argument(context, source):
@@ -291,7 +310,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             with self.argument_context('{} connection create {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
-                add_source_resource_block(c, source, enable_id=False)
+                add_source_resource_block(c, source, enable_id=False, target=target)
                 add_target_resource_block(c, target)
                 add_auth_block(c, source, target)
                 add_new_addon_argument(c, source, target)
@@ -301,10 +320,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
                 add_opt_out_argument(c)
+                add_connstr_props_argument(c)
+
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
-                add_source_resource_block(c, source)
+                add_source_resource_block(c, source, enable_id=True, target=target)
                 add_auth_block(c, source, target)
                 add_configuration_store_argument(c)
                 add_secret_store_argument(c, source)
@@ -312,6 +333,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_connection_string_argument(c, source, target)
                 add_customized_keys_argument(c)
                 add_opt_out_argument(c)
+                add_connstr_props_argument(c)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka

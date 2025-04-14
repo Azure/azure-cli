@@ -7,14 +7,13 @@
 import re
 from azure.cli.core.azclierror import (ValidationError, ResourceNotFoundError, InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError)
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
 
 from ._clients import ContainerAppClient, ManagedEnvironmentClient
 from ._ssh_utils import ping_container_app
 from ._utils import safe_get, is_registry_msi_system
-from ._constants import ACR_IMAGE_SUFFIX, LOG_TYPE_SYSTEM
-
+from ._constants import ACR_IMAGE_SUFFIX, LOG_TYPE_SYSTEM, MANAGED_ENVIRONMENT_RESOURCE_TYPE
 
 logger = get_logger(__name__)
 
@@ -75,7 +74,7 @@ def validate_cpu(namespace):
 
 def validate_managed_env_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if namespace.managed_env:
         if not is_valid_resource_id(namespace.managed_env):
@@ -90,7 +89,7 @@ def validate_managed_env_name_or_id(cmd, namespace):
 
 def validate_storage_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if namespace.storage_account:
         if not is_valid_resource_id(namespace.storage_account):
@@ -149,10 +148,11 @@ def _ping_containerapp_if_need(cmd, app) -> (bool, str):
     parsed_env = parse_resource_id(safe_get(app, "properties", "environmentId"))
     env_name = parsed_env['name']
     env_rg = parsed_env['resource_group']
-    env = ManagedEnvironmentClient.show(cmd, env_rg, env_name)
-    # if environment is internal, not need to ping
-    if safe_get(env, "properties", "vnetConfiguration", "internal") is True:
-        return False, None
+    if parsed_env["resource_type"].lower() == MANAGED_ENVIRONMENT_RESOURCE_TYPE.lower():
+        env = ManagedEnvironmentClient.show(cmd, env_rg, env_name)
+        # if environment is internal, not need to ping
+        if safe_get(env, "properties", "vnetConfiguration", "internal") is True:
+            return False, None
 
     try:
         # ping containerapp to activate its replica

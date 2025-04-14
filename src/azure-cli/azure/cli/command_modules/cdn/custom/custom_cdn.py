@@ -636,7 +636,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
             help='The name of the action for the delivery rule: '
-            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
+            'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
             required=True
         )
         args_schema.order = AAZIntArg(
@@ -655,7 +655,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. '
-            'Allowed format is [d.]hh:mm:ss.',
+            'Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],
@@ -700,7 +700,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
-            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
+            'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
             enum=['ClientPort', 'Cookies', 'HostName', 'HttpVersion', 'IsDevice', 'PostArgs', 'QueryString',
                   'RemoteAddress', 'RequestBody', 'RequestHeader', 'RequestMethod', 'RequestScheme', 'RequestUri',
                   'ServerPort', 'SocketAddr', 'SslProtocol', 'UrlFileExtension', 'UrlFileName', 'UrlPath']
@@ -871,7 +871,7 @@ class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
             help='The name of the action for the delivery rule: '
-            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
+            'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
             required=True
         )
         args_schema.cache_behavior = AAZStrArg(
@@ -882,7 +882,7 @@ class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. '
-            'Allowed format is [d.]hh:mm:ss.',
+            'Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],
@@ -1024,7 +1024,7 @@ class CDNEndpointRuleConditionAdd(_CDNEndpointUpdate):
         args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
-            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
+            'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
             enum=['ClientPort', 'Cookies', 'HostName', 'HttpVersion', 'IsDevice', 'PostArgs', 'QueryString',
                   'RemoteAddress', 'RequestBody', 'RequestHeader', 'RequestMethod', 'RequestScheme', 'RequestUri',
                   'ServerPort', 'SocketAddr', 'SslProtocol', 'UrlFileExtension', 'UrlFileName', 'UrlPath'],

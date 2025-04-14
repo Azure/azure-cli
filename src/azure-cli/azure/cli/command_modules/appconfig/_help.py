@@ -28,6 +28,10 @@ examples:
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
   - name: Create an App Configuration store with name, location and resource group with public network access enabled and local auth disabled.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network --disable-local-auth
+  - name: Create an App Configuration store with name, location and resource group with ARM authentication mode set to Pass-through.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through
+  - name: Create an App Configuration store with name, location and resource group with ARM authentication mode set to Pass-through and private network access via ARM Private Link enabled.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through --enable-arm-private-network-access true
 """
 
 helps['appconfig list-deleted'] = """
@@ -149,7 +153,7 @@ helps['appconfig kv export'] = """
 type: command
 short-summary: Export configurations to another place from your App Configuration store.
 examples:
-  - name: Export all keys and feature flags with label test to a json file.
+  - name: Export all keys and feature flags with label test to a json file. To use the Microsoft Feature Management schema when exporting feature flags to a file, set the environment variable AZURE_APPCONFIG_FM_COMPATIBLE to False.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
   - name: Export all keys with null label to an App Service application.
     text: az appconfig kv export -n MyAppConfiguration -d appservice --appservice-account MyAppService
@@ -369,6 +373,10 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
   - name: Update an App Configuration store to enable public network access and disable local auth.
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true --disable-local-auth true
+  - name: Update an App Configuration store to set ARM authentication mode set to Pass-through.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through
+  - name: Update an App Configuration store to set ARM authentication mode set to Pass-through and enable private network access via ARM Private Link.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through --enable-arm-private-network-access true
 """
 
 helps['appconfig feature'] = """

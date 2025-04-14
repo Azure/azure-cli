@@ -22,11 +22,11 @@ long-summary: >
 
     - Configure public access
 
-    https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-firewall-cli
+    https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
 
-    https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-virtual-network-cli
+    https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
   - name: >
@@ -35,7 +35,7 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 16 --high-availability ZoneRedundant --zone 1 \\
+          --tags "key=value" --version 17 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
   - name: >
       Create a PostgreSQL flexible server using Premium SSD v2 Disks.
@@ -52,7 +52,7 @@ examples:
         az postgres flexible-server create
   - name: >
       Create a PostgreSQL flexible server with public access and add the range of IP address to have access to this server.
-      The --public-access parameter can be 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
+      The --public-access parameter can be 'Disabled', 'Enabled', 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
     text: >
       az postgres flexible-server create --resource-group testGroup --name testserver --public-access 125.23.54.31-125.23.54.35
   - name: >
@@ -135,19 +135,20 @@ examples:
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
         --key $keyIdentifier --identity testIdentity
   - name: >
-      Create a PostgreSQL flexible server with active directory auth as well as password auth.
+      Create a PostgreSQL flexible server with Microsoft Entra auth as well as password auth.
     text: >
       # create flexible server with aad auth and password auth enabled
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
-        --active-directory-auth Enabled
+        --microsoft-entra-auth Enabled
   - name: >
-      Create a PostgreSQL flexible server with active directory auth only.
+      Create a PostgreSQL flexible server with Microsoft Entra auth only and primary administrator specified.
     text: >
-      # create flexible server with aad only auth and password auth disabled
+      # create flexible server with aad only auth and password auth disabled with primary administrator specified
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
-        --active-directory-auth Enabled --password-auth Disabled
+        --microsoft-entra-auth Enabled --password-auth Disabled \\
+        --admin-object-id 00000000-0000-0000-0000-000000000000 --admin-display-name john@contoso.com --admin-type User
   - name: >
       Create a PostgreSQL flexible server with public access, geo-redundant backup enabled and add the range of IP address to have access to this server.
       The --public-access parameter can be 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
@@ -216,9 +217,14 @@ examples:
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
 
   - name: >
-      create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+      Create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
     text: >
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
+
+  - name: >
+      Create elastic cluster with node count of 5. Default node count is 2 when --cluster-option is "ElasticCluster".
+    text: >
+      az postgres flexible-server create -g testGroup -n testCluster --location testLocation --cluster-option ElasticCluster --node-count 5
 """
 
 helps['postgres flexible-server show'] = """
@@ -251,8 +257,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --tags "k1=v1" "k2=v2"
   - name: Reset password
     text: az postgres flexible-server update --resource-group testGroup --name testserver -p password123
-  - name: Update a flexible server to enable active directory auth for password auth enabled server
-    text: az postgres flexible-server update --resource-group testGroup --name testserver --active-directory-auth Enabled
+  - name: Update a flexible server to enable Microsoft Entra auth for password auth enabled server
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --microsoft-entra-auth Enabled
   - name: Change key/identity for data encryption. Data encryption cannot be enabled post server creation, this will only update the key/identity.
     text: >
       # get key identifier of the existing key
@@ -277,6 +283,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --iops 3000
   - name: Update a flexible server's storage to set Throughput (MB/sec). Server must be using Premium SSD v2 Disks.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
+  - name: Update a flexible server's cluster size by scaling up node count. Must be an Elastic Cluster.
+    text: az postgres flexible-server update --resource-group testGroup --name testcluster --node-count 6
 """
 
 helps['postgres flexible-server restore'] = """
@@ -337,7 +345,7 @@ type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
 example:
   - name: Wait for the flexible server to satisfy certain conditions.
-    text: az postgres server wait --exists --resource-group testGroup --name testserver
+    text: az postgres flexible-server wait --exists --resource-group testGroup --name testserver
 """
 
 helps['postgres flexible-server delete'] = """
@@ -420,9 +428,9 @@ type: command
 short-summary: List all firewall rules for a flexible server.
 example:
   - name: List all firewall rules for a server.
-    text: az postgres server firewall-rule list --resource-group testGroup --name testserver
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver
   - name: List all firewall rules for a server in table format.
-    text: az postgres server firewall-rule list --resource-group testGroup --name testserver --output table
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver --output table
 """
 
 helps['postgres flexible-server firewall-rule show'] = """
@@ -674,7 +682,7 @@ helps['postgres flexible-server parameter show'] = """
 type: command
 short-summary: Get the parameter for a flexible server."
 examples:
-  - name: Get the parameter for a server.W
+  - name: Get the parameter for a server.
     text: az postgres flexible-server parameter show --resource-group testGroup --server-name servername --name parameterName
 """
 
@@ -724,6 +732,16 @@ type: group
 short-summary: Manage flexible server backups.
 """
 
+helps['postgres flexible-server backup create'] = """
+type: command
+short-summary: Create a new backup for a flexible server.
+examples:
+  - name: >
+      Create a backup.
+    text: >
+      az postgres flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
+"""
+
 helps['postgres flexible-server backup list'] = """
 type: command
 short-summary: List all the backups for a given server.
@@ -738,6 +756,51 @@ short-summary: Show the details of a specific backup for a given server.
 examples:
   - name: Show the details of backup 'testbackup' for 'testsvr'.
     text: az postgres flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['postgres flexible-server backup delete'] = """
+type: command
+short-summary: Delete a specific backup.
+examples:
+  - name: Delete a backup.
+    text: az postgres flexible-server backup delete -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['postgres flexible-server long-term-retention'] = """
+type: group
+short-summary: Manage flexible server long-term-retention backups.
+"""
+
+helps['postgres flexible-server long-term-retention pre-check'] = """
+type: command
+short-summary: Performs all the checks that are needed for the subsequent long-term-retention backup operation to succeed.
+examples:
+  - name: Precheck if we can perform long-term-retention command on server 'server-name' on resource group 'resource-group-name' with backup name 'backup-name'.
+    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name
+"""
+
+helps['postgres flexible-server long-term-retention start'] = """
+type: command
+short-summary: Start long-term-retention backup for a flexible server. SAS URL parameter refers to the container SAS URL, inside the storage account, where the backups will be uploaded.
+examples:
+  - name: Create a backup with name 'backup-name' of server 'server-name' in resource group 'resource-group-name', using container with SAS URL '<sas-url>'.
+    text: az postgres flexible-server long-term-retention start -g resource-group-name -b backup-name -n server-name -u <sas-url>
+"""
+
+helps['postgres flexible-server long-term-retention show'] = """
+type: command
+short-summary: Show the details of a specific long-term-retention backup for a given server.
+examples:
+  - name: Show the details of long-term-retention backup 'testbackup' for 'testsvr'.
+    text: az postgres flexible-server long-term-retention show -g resource-group-name -n server-name -b backup-name
+"""
+
+helps['postgres flexible-server long-term-retention list'] = """
+type: command
+short-summary: List all the long-term-retention backups for a given server.
+examples:
+  - name: List all long-term-retention backups for 'testsvr'.
+    text: az postgres flexible-server long-term-retention list -g resource-group-name -n server-name
 """
 
 helps['postgres flexible-server replica'] = """
@@ -757,7 +820,8 @@ examples:
         --source-server testserver --zone 3 --location testLocation \\
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
-        --private-dns-zone testDNS.postgres.database.azure.com
+        --private-dns-zone testDNS.postgres.database.azure.com \\
+        --tags "key=value"
   - name: >
       Create a read replica 'testreplicaserver' for 'testserver' with public or private access \
       in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \
@@ -845,8 +909,8 @@ helps['postgres flexible-server upgrade'] = """
 type: command
 short-summary: Upgrade the major version of a flexible server.
 examples:
-  - name: Upgrade server 'testsvr' to PostgreSQL major version 16.
-    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 16
+  - name: Upgrade server 'testsvr' to PostgreSQL major version 17.
+    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 17
 """
 
 helps['postgres flexible-server identity'] = """
@@ -854,9 +918,17 @@ type: group
 short-summary: Manage server user assigned identities.
 """
 
+helps['postgres flexible-server identity update'] = """
+type: command
+short-summary: Update to enable or disable system assigned managed identity on the server.
+examples:
+  - name: Enable system assigned managed identity on the server.
+    text: az postgres flexible-server identity update -g testgroup -s testsvr --system-assigned Enabled
+"""
+
 helps['postgres flexible-server identity assign'] = """
 type: command
-short-summary: Add user asigned managed identities to the server.
+short-summary: Add user assigned managed identities to the server.
 examples:
   - name: Add identities 'test-identity' and 'test-identity-2' to server 'testsvr'.
     text: az postgres flexible-server identity assign -g testgroup -s testsvr --identity test-identity test-identity-2
@@ -864,7 +936,7 @@ examples:
 
 helps['postgres flexible-server identity remove'] = """
 type: command
-short-summary: Remove user asigned managed identites from the server.
+short-summary: Remove user assigned managed identites from the server.
 examples:
   - name: Remove identity 'test-identity' from server 'testsvr'.
     text: az postgres flexible-server identity remove -g testgroup -s testsvr --identity test-identity
@@ -888,49 +960,96 @@ examples:
 
 helps['postgres flexible-server ad-admin'] = """
 type: group
-short-summary: Manage server Active Directory administrators.
+short-summary: Manage server Microsoft Entra administrators.
 """
 
 helps['postgres flexible-server ad-admin create'] = """
 type: command
-short-summary: Create an Active Directory administrator.
+short-summary: Create a Microsoft Entra administrator.
 examples:
-  - name: Create Active Directory administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and type User.
+  - name: Create Microsoft Entra administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and type User.
     text: az postgres flexible-server ad-admin create -g testgroup -s testsvr -u john@contoso.com -i 00000000-0000-0000-0000-000000000000 -t User
 """
 
 helps['postgres flexible-server ad-admin delete'] = """
 type: command
-short-summary: Delete an Active Directory administrator.
+short-summary: Delete a Microsoft Entra administrator.
 examples:
-  - name: Delete Active Directory administrator with ID '00000000-0000-0000-0000-000000000000'.
+  - name: Delete Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
     text: az postgres flexible-server ad-admin delete -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
 """
 
 helps['postgres flexible-server ad-admin list'] = """
 type: command
-short-summary: List all Active Directory administrators.
+short-summary: List all Microsoft Entra administrators.
 examples:
-  - name: List Active Directory administrators.
+  - name: List Microsoft Entra administrators.
     text: az postgres flexible-server ad-admin list -g testgroup -s testsvr
 """
 
 helps['postgres flexible-server ad-admin show'] = """
 type: command
-short-summary: Get an Active Directory administrator.
+short-summary: Get a Microsoft Entra administrator.
 examples:
-  - name: Get Active Directory administrator with ID '00000000-0000-0000-0000-000000000000'.
+  - name: Get Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
     text: az postgres flexible-server ad-admin show -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
 """
 
 helps['postgres flexible-server ad-admin wait'] = """
 type: command
-short-summary: Wait for an Active Directory administrator to satisfy certain conditions.
+short-summary: Wait for a Microsoft Entra administrator to satisfy certain conditions.
 examples:
-  - name: Wait until an Active Directory administrator exists.
+  - name: Wait until a Microsoft Entra administrator exists.
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --exists
-  - name: Wait for an Active Directory administrator to be deleted.
+  - name: Wait for a Microsoft Entra administrator to be deleted.
     text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
+"""
+
+helps['postgres flexible-server microsoft-entra-admin'] = """
+type: group
+short-summary: Manage server Microsoft Entra administrators.
+"""
+
+helps['postgres flexible-server microsoft-entra-admin create'] = """
+type: command
+short-summary: Create a Microsoft Entra administrator.
+examples:
+  - name: Create Microsoft Entra administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and type User.
+    text: az postgres flexible-server microsoft-entra-admin create -g testgroup -s testsvr -u john@contoso.com -i 00000000-0000-0000-0000-000000000000 -t User
+"""
+
+helps['postgres flexible-server microsoft-entra-admin delete'] = """
+type: command
+short-summary: Delete a Microsoft Entra administrator.
+examples:
+  - name: Delete Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
+    text: az postgres flexible-server microsoft-entra-admin delete -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
+"""
+
+helps['postgres flexible-server microsoft-entra-admin list'] = """
+type: command
+short-summary: List all Microsoft Entra administrators.
+examples:
+  - name: List Microsoft Entra administrators.
+    text: az postgres flexible-server microsoft-entra-admin list -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server microsoft-entra-admin show'] = """
+type: command
+short-summary: Get a Microsoft Entra administrator.
+examples:
+  - name: Get Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
+    text: az postgres flexible-server microsoft-entra-admin show -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
+"""
+
+helps['postgres flexible-server microsoft-entra-admin wait'] = """
+type: command
+short-summary: Wait for a Microsoft Entra administrator to satisfy certain conditions.
+examples:
+  - name: Wait until a Microsoft Entra administrator exists.
+    text: az postgres flexible-server microsoft-entra-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --exists
+  - name: Wait for a Microsoft Entra administrator to be deleted.
+    text: az postgres flexible-server microsoft-entra-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
 """
 
 helps['postgres flexible-server advanced-threat-protection-setting'] = """
@@ -1069,4 +1188,86 @@ examples:
     text: az postgres flexible-server private-link-resource show --subscription testSubscription --resource-group testGroup --server-name testserver
   - name: Get the private link resource for a flexible server using --ids parameter.
     text: az postgres flexible-server private-link-resource show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
+"""
+
+helps['postgres flexible-server fabric-mirroring'] = """
+type: group
+short-summary: Bring your PostgreSQL data into Microsoft Fabric. Mirroring allows you to create a replica of your data in OneLake which can be used for all your analytical needs.
+"""
+
+helps['postgres flexible-server fabric-mirroring start'] = """
+type: command
+short-summary: Enable bringing your PostgreSQL data into Microsoft Fabric.
+examples:
+  - name: Enable bringing your PostgreSQL data into Microsoft Fabric.
+    text: az postgres flexible-server fabric-mirroring start -g testgroup -s testsvr --database-names testdb
+"""
+
+helps['postgres flexible-server fabric-mirroring stop'] = """
+type: command
+short-summary: Stop bringing your PostgreSQL data into Microsoft Fabric.
+examples:
+  - name: Stop bringing your PostgreSQL data into Microsoft Fabric.
+    text: az postgres flexible-server fabric-mirroring stop -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server fabric-mirroring update-databases'] = """
+type: command
+short-summary: Update allowed mirrored databases.
+examples:
+  - name: Update allowed mirrored databases.
+    text: az postgres flexible-server fabric-mirroring update-databases -g testgroup -s testsvr --database-names testdb2 testdb3
+"""
+
+helps['postgres flexible-server index-tuning'] = """
+type: group
+short-summary: Index tuning analyzes read queries captured in Query Store and recommends index changes to optimize these queries.
+"""
+
+helps['postgres flexible-server index-tuning update'] = """
+type: command
+short-summary: Update index tuning to be enabled/disabled for a PostgreSQL flexible server.
+examples:
+  - name: Update index tuning to be enabled/disabled for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning update -g testgroup -s testsvr --enabled True
+"""
+
+helps['postgres flexible-server index-tuning show'] = """
+type: command
+short-summary: Show state of index tuning for a PostgreSQL flexible server.
+examples:
+  - name: Show state of index tuning for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning show -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server index-tuning list-settings'] = """
+type: command
+short-summary: Get tuning settings associated for a PostgreSQL flexible server.
+examples:
+  - name: Get tuning settings for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning list-settings -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server index-tuning show-settings'] = """
+type: command
+short-summary: Get a tuning setting for a PostgreSQL flexible server.
+examples:
+  - name: Get a tuning setting for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning show-settings -g testgroup -s testsvr --name setting-name
+"""
+
+helps['postgres flexible-server index-tuning set-settings'] = """
+type: command
+short-summary: Update a tuning setting for a PostgreSQL flexible server.
+examples:
+  - name: Update a tuning setting for a PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning set-settings -g testgroup -s testsvr --name setting-name --value setting-value
+"""
+
+helps['postgres flexible-server index-tuning list-recommendations'] = """
+type: command
+short-summary: Get available tuning index recommendations associated with a PostgreSQL flexible server.
+examples:
+  - name: Get tuning index recommendations for a PostgreSQL flexible server. Filter by selected type.
+    text: az postgres flexible-server index-tuning list-recommendations -g testgroup -s testsvr --recommendation-type CreateIndex
 """

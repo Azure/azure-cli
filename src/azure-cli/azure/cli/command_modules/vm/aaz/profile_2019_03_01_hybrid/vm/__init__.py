@@ -13,6 +13,7 @@ from ._convert import *
 from ._deallocate import *
 from ._generalize import *
 from ._list_sizes import *
+from ._list_skus import *
 from ._list_vm_resize_options import *
 from ._perform_maintenance import *
 from ._redeploy import *

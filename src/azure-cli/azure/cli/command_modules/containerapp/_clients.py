@@ -25,7 +25,7 @@ HEADER_AZURE_ASYNC_OPERATION = "azure-asyncoperation"
 HEADER_LOCATION = "location"
 
 
-class PollingAnimation():
+class PollingAnimation:
     def __init__(self):
         self.tickers = ["/", "|", "\\", "-", "/", "|", "\\", "-"]
         self.currTicker = 0
@@ -115,7 +115,7 @@ def _extract_delay(response):
     return POLLING_SECONDS
 
 
-class ContainerAppClient():
+class ContainerAppClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -159,12 +159,18 @@ class ContainerAppClient():
         if no_wait:
             return
         elif r.status_code == 202:
-            operation_url = r.headers.get(HEADER_LOCATION)
-            response = poll_results(cmd, operation_url)
-            if response is None:
-                raise ResourceNotFoundError("Could not find a container app")
+            operation_url = r.headers.get(HEADER_AZURE_ASYNC_OPERATION)
+            if operation_url:
+                poll_status(cmd, operation_url)
+                r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+                return r.json()
             else:
-                return response
+                operation_url = r.headers.get(HEADER_LOCATION)
+                r = poll_results(cmd, operation_url)
+                if r is None:
+                    raise ResourceNotFoundError("Could not find a container app")
+                else:
+                    return r
 
         return r.json()
 
@@ -450,7 +456,7 @@ class ContainerAppClient():
         return r.json()
 
 
-class ManagedEnvironmentClient():
+class ManagedEnvironmentClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -812,7 +818,7 @@ class ManagedEnvironmentClient():
         return r.json()
 
 
-class WorkloadProfileClient():
+class WorkloadProfileClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1006,6 +1012,8 @@ class ContainerAppsJobClient():
                 resource_group_name,
                 name,
                 cls.api_version)
+            r = send_raw_request(cmd.cli_ctx, "POST", request_url)
+            return r.json()
         else:
             url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/jobs/{}/stop/{}?api-version={}"
             request_url = url_fmt.format(
@@ -1015,9 +1023,8 @@ class ContainerAppsJobClient():
                 name,
                 job_execution_name,
                 cls.api_version)
-
-        r = send_raw_request(cmd.cli_ctx, "POST", request_url)
-        return r
+            r = send_raw_request(cmd.cli_ctx, "POST", request_url)
+            return r
 
     @classmethod
     def get_executions(cls, cmd, resource_group_name, name):
@@ -1102,7 +1109,7 @@ def poll(cmd, request_url, poll_if_status):  # pylint: disable=inconsistent-retu
             raise e
 
 
-class GitHubActionClient():
+class GitHubActionClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1211,7 +1218,7 @@ class GitHubActionClient():
         return None
 
 
-class DaprComponentClient():
+class DaprComponentClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1294,7 +1301,7 @@ class DaprComponentClient():
         return app_list
 
 
-class StorageClient():
+class StorageClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1378,7 +1385,7 @@ class StorageClient():
         return env_list
 
 
-class AuthClient():
+class AuthClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1415,7 +1422,7 @@ class AuthClient():
         return r.json()
 
 
-class SubscriptionClient():
+class SubscriptionClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod

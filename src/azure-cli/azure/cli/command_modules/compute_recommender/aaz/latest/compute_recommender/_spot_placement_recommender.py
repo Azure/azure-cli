@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "compute-recommender spot-placement-recommender",
+    is_preview=True,
 )
 class SpotPlacementRecommender(AAZCommand):
     """Generate placement scores for Spot VM skus.
@@ -45,7 +46,9 @@ class SpotPlacementRecommender(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
+            help="the Azure region where the recommendation will be generated",
             required=True,
+            is_preview=True,
             id_part="name",
         )
 
@@ -56,21 +59,28 @@ class SpotPlacementRecommender(AAZCommand):
             options=["--availability-zones"],
             arg_group="SpotPlacementScoresInput",
             help="Defines if the scope is zonal or regional.",
+            is_preview=True,
         )
         _args_schema.desired_count = AAZIntArg(
             options=["--desired-count"],
             arg_group="SpotPlacementScoresInput",
             help="Desired instance count per region/zone based on the scope.",
+            required=True,
+            is_preview=True,
         )
         _args_schema.desired_locations = AAZListArg(
             options=["--desired-locations"],
             arg_group="SpotPlacementScoresInput",
             help="The desired regions",
+            required=True,
+            is_preview=True,
         )
         _args_schema.desired_sizes = AAZListArg(
             options=["--desired-sizes"],
             arg_group="SpotPlacementScoresInput",
             help="The desired resource SKUs.",
+            required=True,
+            is_preview=True,
         )
 
         desired_locations = cls._args_schema.desired_locations
@@ -173,9 +183,9 @@ class SpotPlacementRecommender(AAZCommand):
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
             _builder.set_prop("availabilityZones", AAZBoolType, ".availability_zones")
-            _builder.set_prop("desiredCount", AAZIntType, ".desired_count")
-            _builder.set_prop("desiredLocations", AAZListType, ".desired_locations")
-            _builder.set_prop("desiredSizes", AAZListType, ".desired_sizes")
+            _builder.set_prop("desiredCount", AAZIntType, ".desired_count", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("desiredLocations", AAZListType, ".desired_locations", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("desiredSizes", AAZListType, ".desired_sizes", typ_kwargs={"flags": {"required": True}})
 
             desired_locations = _builder.get(".desiredLocations")
             if desired_locations is not None:

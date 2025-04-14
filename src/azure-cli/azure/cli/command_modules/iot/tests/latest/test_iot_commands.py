@@ -7,7 +7,7 @@ import json
 from unittest import mock
 from knack.util import CLIError
 
-from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
+from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.mgmt.iothub.models import RoutingSource
 from azure.cli.command_modules.iot.shared import IdentityType
@@ -18,7 +18,7 @@ from ..utils import KeyReplacer
 class IoTHubTest(ScenarioTest):
 
     def __init__(self, method_name):
-        super(IoTHubTest, self).__init__(
+        super().__init__(
             method_name, recording_processors=[KeyReplacer()]
         )
 
@@ -110,10 +110,12 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub update -n {0} -g {1} --fsi test/user/'.format(hub, rg), expect_failure=True)
 
         # Test auth config settings
-        updated_hub = self.cmd('iot hub update -n {0} -g {1} --disable-local-auth --disable-module-sas'.format(hub, rg)).get_output_in_json()
+        updated_hub = self.cmd('iot hub update -n {0} -g {1} --disable-local-auth --disable-module-sas '
+                               '--min-tls-version 1.0'.format(hub, rg)).get_output_in_json()
         assert updated_hub['properties']['disableLocalAuth']
         assert not updated_hub['properties']['disableDeviceSas']
         assert updated_hub['properties']['disableModuleSas']
+        assert updated_hub['properties']['minTlsVersion'] == '1.0'
 
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --disable-module-sas false  --disable-device-sas'.format(hub, rg)).get_output_in_json()
         assert updated_hub['properties']['disableLocalAuth']
@@ -840,6 +842,7 @@ class IoTHubTest(ScenarioTest):
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     def test_hub_wait(self, resource_group, resource_group_location):

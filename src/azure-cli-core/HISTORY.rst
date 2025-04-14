@@ -3,6 +3,41 @@
 Release History
 ===============
 
+2.71.0
+++++++
+* PREVIEW: Support managed identity authentication with MSAL. Run `az config set core.use_msal_managed_identity=true` or set environment variable `AZURE_CORE_USE_MSAL_MANAGED_IDENTITY` to enable it (#31092)
+
+2.70.0
+++++++
+* Resolve CVE-2024-12797 (#30816)
+* Drop Track 1 SDK authentication (#29631)
+* `aaz`: Add cross tenants control for `AAZResourceIdArgFormat` (#30817)
+* `aaz`: Support `Any` type with full value shorthand syntax allowed (#30868)
+
+2.69.0
+++++++
+* `aaz`: Support simple type parsed from string value (#30623)
+
+2.68.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Linux server (#30267)
+* Drop old Track 2 SDK authentication support (#29690)
+* Resolve CVE-2024-50602 (#30533)
+
+2.67.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Windows server (#29187)
+
+2.66.0
+++++++
+* `aaz`: Support managed identity (#29953)
+* Resolve CVE-2024-6119 (#29887)
+* Resolve CVE-2024-5535 (#29887)
+* Resolve CVE-2024-4741 (#29887)
+* Resolve CVE-2024-4603 (#29887)
+* Resolve CVE-2024-2511 (#29887)
+* Use MSAL for Cloud Shell authentication (#29637)
+
 2.65.0
 ++++++
 * Minor fixes

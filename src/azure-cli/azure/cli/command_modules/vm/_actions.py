@@ -49,8 +49,16 @@ def _get_thread_count():
 def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zone, architecture):
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
+    from .aaz.latest.vm.image.edge_zone import (ListPublishers as VMImageEdgeZoneListPublishers,
+                                                ListOffers as VMImageEdgeZoneListOffers,
+                                                ListSkus as VMImageEdgeZoneListSkus,
+                                                List as VMImageEdgeZoneList)
+    from .aaz.latest.vm.image import (ListPublishers as VMImageListPublishers,
+                                      ListOffers as VMImageListOffers,
+                                      ListSkus as VMImageListSkus,
+                                      List as VMImageList)
+
     all_images = []
-    client = _compute_client_factory(cli_ctx)
     if location is None:
         location = get_one_of_subscription_locations(cli_ctx)
 
@@ -58,48 +66,72 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
         from azure.core.exceptions import ResourceNotFoundError
         try:
             if edge_zone is not None:
-                offers = edge_zone_client.list_offers(location=location, edge_zone=edge_zone, publisher_name=publisher)
+                offers = VMImageEdgeZoneListOffers(cli_ctx=cli_ctx)(command_args={
+                    'location': location,
+                    'edge_zone': edge_zone,
+                    'publisher': publisher,
+                })
             else:
-                offers = client.virtual_machine_images.list_offers(location=location, publisher_name=publisher)
+                offers = VMImageListOffers(cli_ctx=cli_ctx)(command_args={
+                    'location': location,
+                    'publisher': publisher,
+                })
         except ResourceNotFoundError as e:
             logger.warning(str(e))
             return
         if offer:
-            offers = [o for o in offers if _matched(offer, o.name)]
+            offers = [o for o in offers if _matched(offer, o['name'])]
         for o in offers:
             try:
                 if edge_zone is not None:
-                    skus = edge_zone_client.list_skus(location=location, edge_zone=edge_zone,
-                                                      publisher_name=publisher, offer=o.name)
+                    skus = VMImageEdgeZoneListSkus(cli_ctx=cli_ctx)(command_args={
+                        'location': location,
+                        'edge_zone': edge_zone,
+                        'publisher': publisher,
+                        'offer': o['name']
+                    })
                 else:
-                    skus = client.virtual_machine_images.list_skus(location=location, publisher_name=publisher,
-                                                                   offer=o.name)
+                    skus = VMImageListSkus(cli_ctx=cli_ctx)(command_args={
+                        'location': location,
+                        'publisher': publisher,
+                        'offer': o['name']
+                    })
             except ResourceNotFoundError as e:
                 logger.warning(str(e))
                 continue
             if sku:
-                skus = [s for s in skus if _matched(sku, s.name)]
+                skus = [s for s in skus if _matched(sku, s['name'])]
             for s in skus:
                 try:
                     expand = "properties/imageDeprecationStatus"
                     if edge_zone is not None:
-                        images = edge_zone_client.list(location=location, edge_zone=edge_zone, publisher_name=publisher,
-                                                       offer=o.name, skus=s.name, expand=expand)
+                        images = VMImageEdgeZoneList(cli_ctx=cli_ctx)(command_args={
+                            'location': location,
+                            'edge_zone': edge_zone,
+                            'publisher': publisher,
+                            'offer': o['name'],
+                            'sku': s['name'],
+                            'expand': expand,
+                        })
                     else:
-                        images = client.virtual_machine_images.list(location=location, publisher_name=publisher,
-                                                                    offer=o.name, skus=s.name, expand=expand)
+                        images = VMImageList(cli_ctx=cli_ctx)(command_args={
+                            'location': location,
+                            'publisher': publisher,
+                            'offer': o['name'],
+                            'sku': s['name'],
+                            'expand': expand,
+                        })
                 except ResourceNotFoundError as e:
                     logger.warning(str(e))
                     continue
                 for i in images:
                     image_info = {
                         'publisher': publisher,
-                        'offer': o.name,
-                        'sku': s.name,
-                        'version': i.name,
-                        'architecture': i.additional_properties.get("properties", {}).get("architecture", None) or "",
-                        'imageDeprecationStatus': i.additional_properties.get(
-                            "properties", {}).get("imageDeprecationStatus", {}) or ""
+                        'offer': o['name'],
+                        'sku': s['name'],
+                        'version': i['name'],
+                        'architecture': i.get("properties", {}).get("architecture", None) or "",
+                        'imageDeprecationStatus': i.get("properties", {}).get("imageDeprecationStatus", {}) or ""
                     }
                     if edge_zone is not None:
                         image_info['edge_zone'] = edge_zone
@@ -108,24 +140,25 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                     all_images.append(image_info)
 
     if edge_zone is not None:
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        from azure.cli.core.profiles import ResourceType
-        edge_zone_client = get_mgmt_service_client(cli_ctx,
-                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        publishers = edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
+        publishers = VMImageEdgeZoneListPublishers(cli_ctx=cli_ctx)(command_args={
+            'location': location,
+            'edge_zone': edge_zone
+        })
     else:
-        publishers = client.virtual_machine_images.list_publishers(location=location)
+        publishers = VMImageListPublishers(cli_ctx=cli_ctx)(command_args={
+            'location': location,
+        })
     if publisher:
-        publishers = [p for p in publishers if _matched(publisher, p.name)]
+        publishers = [p for p in publishers if _matched(publisher, p['name'])]
 
     publisher_num = len(publishers)
     if publisher_num > 1:
         with ThreadPoolExecutor(max_workers=_get_thread_count()) as executor:
-            tasks = [executor.submit(_load_images_from_publisher, p.name) for p in publishers]
+            tasks = [executor.submit(_load_images_from_publisher, p['name']) for p in publishers]
             for t in as_completed(tasks):
                 t.result()  # don't use the result but expose exceptions from the threads
     elif publisher_num == 1:
-        _load_images_from_publisher(publishers[0].name)
+        _load_images_from_publisher(publishers[0]['name'])
 
     return all_images
 
@@ -144,7 +177,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None, 
     else:
         # under hack mode(say through proxies with unsigned cert), opt out the cert verification
         try:
-            response = requests.get(target_url, verify=(not should_disable_connection_verify()))
+            response = requests.get(target_url, verify=not should_disable_connection_verify())
             if response.status_code == 200:
                 dic = json.loads(response.content.decode())
             else:
@@ -157,7 +190,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None, 
             dic = json.loads(alias_json)
     try:
         all_images = []
-        result = (dic['outputs']['aliases']['value'])
+        result = dic['outputs']['aliases']['value']
         for v in result.values():  # loop around os
             for alias, vv in v.items():  # loop around distros
                 all_images.append({

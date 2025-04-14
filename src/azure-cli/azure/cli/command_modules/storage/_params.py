@@ -150,7 +150,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='When creating a file or directory and the parent folder does not have a default ACL, the umask restricts '
              'the permissions of the file or directory to be created. The resulting permission is given by p & ^u, '
              'where p is the permission and u is the umask. For more information, please refer to '
-             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
+             'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
     permissions_type = CLIArgumentType(
         help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
              'granted read (4), write (2), or execute (1) permission. Both symbolic (rwxrw-rw-) and 4-digit octal '
@@ -161,7 +161,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'indicates sticky bit not set. In 4-digit octal notation, its represented by 1st digit (e.g. 1766 '
              'represents rwxrw-rw- with sticky bit and 0766 represents rwxrw-rw- without sticky bit). For more '
              'information, please refer to '
-             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+             'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
 
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
@@ -301,7 +301,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account blob-inventory-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account Blob Inventory Policy, string in JSON format or json file path. See more '
-                   'details in https://docs.microsoft.com/azure/storage/blobs/blob-inventory#inventory-policy.')
+                   'details in https://learn.microsoft.com/azure/storage/blobs/blob-inventory#inventory-policy.')
 
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'],
@@ -397,7 +397,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
-        c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
+        c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
         c.argument('enable_alw', arg_type=get_three_state_flag(), min_api='2021-06-01',
                    help='The account level immutability property. The property is immutable and can only be set to true'
@@ -625,7 +625,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account management-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
-                        'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
+                        'https://learn.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
 
     for item in ['create', 'update', 'show', 'delete']:
         with self.argument_context('storage account management-policy {}'.format(item)) as c:
@@ -846,7 +846,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('ssh_authorized_key', nargs='+', action=SshPublicKeyAddAction,
                        help='SSH authorized keys for SFTP. Includes an optional description and key. '
                             'The key is the base64 encoded SSH public key , with format: '
-                            '<keyType> <keyData> e.g. ssh-rsa AAAABBBB.'
+                            '`<keyType> <keyData>` e.g. ssh-rsa AAAABBBB.'
                             'Example: --ssh_authorized_key description=description key="ssh-rsa AAAABBBB"'
                             'or --ssh_authorized_key key="ssh-rsa AAAABBBB"')
             c.argument('has_shared_key', arg_type=get_three_state_flag(),
@@ -1275,7 +1275,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of blob at the destination.')
         c.argument('preserve_s2s_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
                    help='Preserve access tier during service to service copy. '
-                   'Please refer to https://docs.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
+                   'Please refer to https://learn.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
                    'to ensure destination storage account support setting access tier. In the cases that setting '
                    'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
                    'access tier. (Default true)')
@@ -1397,7 +1397,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Required if the blob has an active lease.')
         c.argument('query_expression', help='The query expression in SQL. The maximum size of the query expression '
                    'is 256KiB. For more information about the expression syntax, please see '
-                   'https://docs.microsoft.com/azure/storage/blobs/query-acceleration-sql-reference')
+                   'https://learn.microsoft.com/azure/storage/blobs/query-acceleration-sql-reference')
         c.extra('input_format', arg_type=get_enum_type(['csv', 'json']), validator=validate_text_configuration,
                 help='Serialization type of the data currently stored in the blob. '
                 'The default is to treat the blob data as CSV data formatted in the default dialect.'
@@ -1743,13 +1743,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The DateTime value that specifies the share snapshot to retrieve.')
         c.ignore('filter', 'maxpagesize')
 
-    with self.argument_context('storage share-rm delete', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.argument('include', default='none')
-
-    with self.argument_context('storage share-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.ignore('x_ms_snapshot')
-
-    for item in ['create', 'update', 'snapshot']:
+    for item in ['snapshot']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
             t_enabled_protocols, t_root_squash, t_access_tier = \
                 self.get_models('EnabledProtocols', 'RootSquashType', 'ShareAccessTier',
@@ -1770,13 +1764,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '
                        '(default), Hot, and Cool. FileStorage account can choose Premium.')
 
-    with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.argument('account_name', storage_account_type, id_part=None)
-        c.argument('include_deleted', action='store_true',
-                   help='Include soft deleted file shares when specified.')
-        c.argument('include_snapshot', action='store_true',
-                   help='Include file share snapshots when specified.')
-
     with self.argument_context('storage share-rm restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('deleted_version',
                    help='Identify the version of the deleted share that will be restored.')
@@ -1791,6 +1778,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                          'default.')
         c.argument('quota', type=int, help='Specifies the maximum size of the share, in gigabytes. Must be greater '
                                            'than 0, and less than or equal to 5TB (5120).')
+        t_share_protocols_type = self.get_sdk('_models#ShareProtocols',
+                                              resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        c.extra('protocols', options_list=['--protocol'], arg_type=get_enum_type(t_share_protocols_type),
+                help='The protocol to enable for the share.')
+        c.extra('enable_snapshot_virtual_directory_access',
+                options_list=('--enable-snapshot-virtual-directory-access', '--virtual-dir-access'),
+                arg_type=get_three_state_flag(),
+                help='Specifies whether the snapshot virtual directory should be accessible at the root of the '
+                     'share mount point when NFS is enabled. If not specified, it will be accessible.')
 
     with self.argument_context('storage share url') as c:
         c.extra('unc', action='store_true', help='Output UNC network path.')
@@ -1954,6 +1950,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage directory create') as c:
         c.argument('fail_on_exist', help='Throw an exception if the directory already exists.')
+        c.extra('file_mode',
+                help='Only applicable to NFS Directory. The mode permissions to be set on the directory. '
+                     'Symbolic (rwxrw-rw-) is supported. The sticky bit is also supported and its represented '
+                     'either by the letter t or T in the final character-place depending on whether the execution '
+                     'bit for the others category is set or unset respectively, absence of t or T indicates sticky '
+                     'bit not set."')
+        c.extra('owner', help='Only applicable to NFS Directory. The owner user identifier (UID) to be set on the '
+                              'directory. The default value is 0 (root).')
+        c.extra('group', help='Only applicable to NFS Directory. The owner group identifier (GID) to be set on the '
+                              'directory. The default value is 0 (root group).')
 
     with self.argument_context('storage directory delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the directory does not exist.')
@@ -1982,6 +1988,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
                 validator=validate_metadata)
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.extra('file_mode',
+                help='The mode permissions to be set on the file. Only applicable to NFS Files. '
+                     'Only work together with parameter `--file-mode-copy-mode Override`. '
+                     'Symbolic (rwxrw-rw-) is supported. '
+                     'The sticky bit is also supported and its represented '
+                     'either by the letter t or T in the final character-place depending on whether the execution '
+                     'bit for the others category is set or unset respectively, absence of t or T indicates sticky '
+                     'bit not set."')
+        c.extra('owner', help='Only applicable to NFS Files. Only work together with parameter '
+                              '`--owner-copy-mode Override`. The owner user identifier (UID) '
+                              'to be set on the directory. The default value is 0 (root).')
+        c.extra('group', help='Only applicable to NFS Files. Only work together with parameter '
+                              '`--owner-copy-mode Override`. The owner group identifier (GID) '
+                              'to be set on the directory. The default value is 0 (root group).')
+        t_file_mode_copy_mode_type = self.get_sdk('_generated.models._azure_file_storage_enums#ModeCopyMode',
+                                                  resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        c.extra('file_mode_copy_mode',
+                arg_type=get_enum_type(t_file_mode_copy_mode_type),
+                help='Only applicable to NFS Files. Applicable only when the copy source is a File. '
+                     'Determines the copy behavior of the mode bits of the destination file. '
+                     'If not populated, the destination file will have the default File Mode.')
+        t_owner_copy_mode_type = self.get_sdk('_generated.models._azure_file_storage_enums#OwnerCopyMode',
+                                              resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        c.extra('owner_copy_mode', arg_type=get_enum_type(t_owner_copy_mode_type),
+                help='Only applicable to NFS Files. Applicable only when the copy source is a File. '
+                     'Determines the copy behavior of the owner and group of the destination file. '
+                     'If not populated, the destination file will have the default Owner and Group.')
 
     with self.argument_context('storage file copy cancel') as c:
         c.register_path_argument(options_list=('--destination-path', '-p'))
@@ -2128,6 +2161,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'for detecting bitflips on the wire if using http instead of https as https (the default) will '
                         'already validate. Note that this MD5 hash is not stored with the file.')
         c.extra('file_url', help='The full endpoint URL to the File, including SAS token if used.')
+
+    for cmd in ['file update', 'file upload']:
+        with self.argument_context(f'storage {cmd}') as c:
+            c.extra('file_mode',
+                    help='Only applicable to NFS Files. The mode permissions to be set on the file. '
+                         'Symbolic (rwxrw-rw-) is supported. The sticky bit is also supported and its represented '
+                         'either by the letter t or T in the final character-place depending on whether the execution '
+                         'bit for the others category is set or unset respectively, absence of t or T indicates sticky '
+                         'bit not set."')
+            c.extra('owner', help='Only applicable to NFS Files. The owner user identifier (UID) to be set on the '
+                                  'file. The default value is 0 (root).')
+            c.extra('group', help='Only applicable to NFS Files. The owner group identifier (GID) to be set on the '
+                                  'file. The default value is 0 (root group).')
 
     with self.argument_context('storage file url') as c:
         c.register_path_argument(fileshare=True)
@@ -2675,7 +2721,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('acl', help='The value is a comma-separated list of access control entries. Each access control '
                        'entry (ACE) consists of a scope, a type, a user or group identifier, and permissions in the '
                        'format "[scope:][type]:[id]:[permissions]".  For more information, please refer to '
-                       'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.')
+                       'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.')
             c.extra('continuation',
                     help='Optional continuation token that can be used to resume previously stopped operation.')
             c.extra('batch_size', type=int, help='Optional. If data set size exceeds batch size then operation will '
@@ -2714,3 +2760,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('disallow_source_trailing_dot', arg_type=get_three_state_flag(), default=False,
                     options_list=["--disallow-source-trailing-dot", "--disallow-src-trailing"],
                     help="If true, the trailing dot will be trimmed from the source URI. Default to False")
+
+    with self.argument_context('storage file hard-link create') as c:
+        c.extra('share_name', share_name_type, required=True)
+        c.register_path_argument()
+        c.extra('target', required=True,
+                help='Specifies the path of the target file to which the link will be created, up to 2 KiB in length. '
+                     'It should be the full path of the target starting from the root. The target file must be in the '
+                     'same share and the same storage account.')
+        c.extra('lease',
+                help='Lease id, required if the file has an active lease.')

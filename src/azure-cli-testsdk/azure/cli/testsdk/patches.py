@@ -68,13 +68,16 @@ def patch_retrieve_token_for_user(unit_test):
             def __init__(self, *args, **kwargs):
                 super().__init__()
 
-            def get_token(*args, **kwargs):  # pylint: disable=unused-argument
-                from azure.core.credentials import AccessToken
-                import time
+            def acquire_token(self, scopes, **kwargs):  # pylint: disable=unused-argument
+                # Old Track 2 SDKs are no longer supported. https://github.com/Azure/azure-cli/pull/29690
+                assert len(scopes) == 1, "'scopes' must contain only one element."
                 fake_raw_token = 'top-secret-token-for-you'
-                now = int(time.time())
-                return AccessToken(fake_raw_token, now + 3600)
-
+                return {
+                    'access_token': fake_raw_token,
+                    'token_type': 'Bearer',
+                    'expires_in': 1800,
+                    'token_source': 'cache'
+                }
         return UserCredentialMock()
 
     mock_in_unit_test(unit_test, 'azure.cli.core.auth.identity.Identity.get_user_credential', get_user_credential_mock)
@@ -85,10 +88,7 @@ def patch_long_run_operation_delay(unit_test):
         return
 
     mock_in_unit_test(unit_test,
-                      'msrestazure.azure_operation.AzureOperationPoller._delay',
-                      _shortcut_long_run_operation)
-    mock_in_unit_test(unit_test,
-                      'msrestazure.polling.arm_polling.ARMPolling._delay',
+                      'azure.mgmt.core.polling.arm_polling.ARMPolling._delay',
                       _shortcut_long_run_operation)
     mock_in_unit_test(unit_test,
                       'azure.cli.core.commands.LongRunningOperation._delay',

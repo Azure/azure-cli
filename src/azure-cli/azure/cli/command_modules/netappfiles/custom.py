@@ -353,8 +353,8 @@ class VolumeCreate(_VolumeCreate):
         for rule in args.export_policy_rules:
             logger.debug("ANF log: rule: %s", rule)
 
-        if (has_value(args.protocol_types) and any(x in ['NFSv3', 'NFSv4.1'] for x in args.protocol_types) and len(args.export_policy_rules) == 0)\
-                and not ((len(args.protocol_types) == 1 and all(elem == "NFSv3" for elem in args.protocol_types)) and len(args.export_policy_rules) == 0):
+        if (has_value(args.protocol_types) and any(x in ['NFSv3', 'NFSv4.1'] for x in args.protocol_types) and len(args.export_policy_rules) == 0) \
+                and not ((len(args.protocol_types) == 1 and all(elem == "NFSv3" for elem in args.protocol_types) and not has_value(args.rule_index)) and len(args.export_policy_rules) == 0):
             isNfs41 = False
             isNfs3 = False
             cifs = False
@@ -393,10 +393,9 @@ class VolumeCreate(_VolumeCreate):
             args.export_policy_rules[0]["has_root_access"] = args.has_root_access
             args.export_policy_rules[0]["chown_mode"] = args.chown_mode
 
-            logger.debug("ANF-Extension log: after exportPolicy rule => : %s, %s, %s, %s", args.export_policy_rules[0]["rule_index"], args.export_policy_rules[0]["nfsv3"], args.export_policy_rules[0]["nfsv41"], args.export_policy_rules[0]["cifs"])
-
+            logger.debug("ANF log: after exportPolicy rule => : %s, %s, %s, %s", args.export_policy_rules[0]["rule_index"], args.export_policy_rules[0]["nfsv3"], args.export_policy_rules[0]["nfsv41"], args.export_policy_rules[0]["cifs"])
         else:
-            logger.debug("Don't create export policy")
+            logger.debug("ANF log: Don't create export policy")
 
 # todo create export policy note no longer flatteneded
     # def post_operations(self):
@@ -454,7 +453,7 @@ class VolumeBreakFileLocks(_BreakFileLocks):
 
     def pre_operations(self):
         args = self.ctx.args
-        # RP expects bytes but CLI allows integer TiBs for ease of use
+        # RP expects confirm_running_disruptive_operation but we use standard Azure CLI prompts, if we are here we are confirmed
         logger.debug("ANF-Extension log: VolumeBreakFileLocks pre_operations")
         args.confirm_running_disruptive_operation = True
 # endregion
@@ -1021,7 +1020,7 @@ def create_data_volume_properties(subnet_id, application_identifier, pool_id, pp
     if data_repl_skd is not None and data_src_id is not None:
         replication = ({"replication_schedule": data_repl_skd,
                         "remote_volume_resource_id": data_src_id})
-        data_protection = ({"replication": replication})
+        data_protection = {"replication": replication}
 
     data_volume = {
         "subnet_id": subnet_id,
@@ -1201,7 +1200,7 @@ def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory
 # Memory should be sent in as GiB and additional snapshot capacity as percentage (0-200). Usage is returned in bytes.
 def calculate_usage_threshold(memory, volume_type, add_snap_capacity=50, total_host_count=1, data_size=50, log_size=50):
     if volume_type == VolumeType.DATA:
-        usage = ((add_snap_capacity / 100) * memory + memory)
+        usage = (add_snap_capacity / 100) * memory + memory
         return int(usage) * gib_scale if usage > 100 else 100 * gib_scale  # MIN 100 GiB
     if volume_type == VolumeType.LOG:
         if memory < 512:
@@ -1262,7 +1261,7 @@ def create_default_export_policy_for_vg(nfsv3=False):
                       "kerberos5p_read_write": False,
                       "allowed_clients": "0.0.0.0/0"})
     rules.append(export_policy)
-    volume_export_policy = ({"rules": rules})
+    volume_export_policy = {"rules": rules}
     return volume_export_policy
 
 

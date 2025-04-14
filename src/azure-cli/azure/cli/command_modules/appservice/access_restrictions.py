@@ -9,10 +9,10 @@ from azure.cli.core.azclierror import (ResourceNotFoundError, ArgumentUsageError
                                        MutuallyExclusiveArgumentError)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
 from azure.mgmt.web.models import IpSecurityRestriction
 from importlib import import_module
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from .custom import get_site_configs
@@ -47,7 +47,7 @@ def add_webapp_access_restriction(
             int(subnet is not None) != 1):
         err_msg = 'Please specify either: --subnet or --ip-address or --service-tag'
         raise MutuallyExclusiveArgumentError(err_msg)
-    if (skip_service_tag_validation is not None):
+    if skip_service_tag_validation is not None:
         logger.warning('Skipping service tag validation.')
 
     # get rules list
@@ -98,7 +98,7 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
     if input_rule_types > 1:
         err_msg = 'Please specify either: --subnet or --ip-address or --service-tag'
         raise MutuallyExclusiveArgumentError(err_msg)
-    if (skip_service_tag_validation is not None):
+    if skip_service_tag_validation is not None:
         logger.warning('Skipping service tag validation.')
 
     rule_instance = None

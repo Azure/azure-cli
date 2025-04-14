@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+
+# Check if running in Windows
+if [ -n "$COMSPEC" ]; then
+    # Windows section - Execute directly with PowerShell
+    powershell -NoProfile -Command "
+        if (Get-Command powershell -ErrorAction SilentlyContinue) {
+            Write-Host 'PowerShell found, executing pre-push.ps1...'
+            powershell -ExecutionPolicy Bypass -File '.githooks\pre-push.ps1'
+            exit $LASTEXITCODE
+        } else {
+            Write-Host 'Error: PowerShell is not available. Please install PowerShell.'
+            exit 1
+        }
+    "
+    echo "Exiting with status $?"
+    exit $?
+else
+    # Unix-like system section
+    echo "Unix-like system found, executing pre-push.sh..."
+    sh .githooks/pre-push.sh
+    echo "Exiting with status $?"
+    exit $?
+fi

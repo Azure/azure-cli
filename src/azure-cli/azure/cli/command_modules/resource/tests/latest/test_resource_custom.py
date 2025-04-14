@@ -387,8 +387,7 @@ class TestCustom(unittest.TestCase):
         result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
-        param_file_order = ["[u'secureParam', u'boolParam', u'enumParam', u'arrayParam', u'objectParam']",
-                            "['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"]
+        param_file_order = ["['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"]
         results = _prompt_for_parameters(missing_parameters, fail_on_no_tty=False)
         self.assertTrue(str(list(results.keys())) in param_file_order)
 
@@ -406,8 +405,7 @@ class TestCustom(unittest.TestCase):
         result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
-        param_alpha_order = ["[u'arrayParam', u'boolParam', u'enumParam', u'objectParam', u'secureParam']",
-                             "['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
+        param_alpha_order = ["['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
         results = _prompt_for_parameters(dict(missing_parameters), fail_on_no_tty=False)
         self.assertTrue(str(list(results.keys())) in param_alpha_order)
 
@@ -673,8 +671,8 @@ class TestFormatBicepFile(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
-            mock.call("0.12.1"),
-            mock.call("0.26.54"),
+            mock.call(cmd.cli_ctx, "0.12.1"),
+            mock.call(cmd.cli_ctx, "0.26.54"),
         ])
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])
 
@@ -691,7 +689,7 @@ class TestPublishWithSource(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
-            mock.call("0.4.1008"), # Min version for 'bicep publish'
+            mock.call(cmd.cli_ctx, "0.4.1008"), # Min version for 'bicep publish'
         ])
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1'])
 
@@ -707,9 +705,9 @@ class TestPublishWithSource(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
-            mock.call("0.4.1008"), # Min version for 'bicep publish'
-            mock.call('0.26.54'),
-            mock.call("0.23.1") # Min version for 'bicep publish --with-source'
+            mock.call(cmd.cli_ctx, "0.4.1008"), # Min version for 'bicep publish'
+            mock.call(cmd.cli_ctx, '0.26.54'),
+            mock.call(cmd.cli_ctx, "0.23.1") # Min version for 'bicep publish --with-source'
         ])
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1', '--with-source'])
 

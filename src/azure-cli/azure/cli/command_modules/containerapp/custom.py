@@ -23,10 +23,10 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import open_page_in_browser
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 from knack.log import get_logger
 from knack.prompting import prompt_y_n, prompt as prompt_str
 
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
 from msrest.exceptions import DeserializationError
 
 from .containerapp_job_decorator import ContainerAppJobDecorator, ContainerAppJobCreateDecorator
@@ -47,7 +47,6 @@ from ._clients import (
 )
 from ._github_oauth import get_github_access_token
 from ._models import (
-    Ingress as IngressModel,
     JobExecutionTemplate as JobExecutionTemplateModel,
     RegistryCredentials as RegistryCredentialsModel,
     ContainerResources as ContainerResourcesModel,
@@ -143,7 +142,7 @@ def load_yaml_file(file_name):
     try:
         with open(file_name) as stream:  # pylint: disable=unspecified-encoding
             return yaml.safe_load(stream.read().replace('\x00', ''))
-    except (IOError, OSError) as ex:
+    except OSError as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
             raise ValidationError('{} does not exist'.format(file_name)) from ex
         raise
@@ -899,6 +898,7 @@ def update_managed_environment(cmd,
                                max_nodes=None,
                                mtls_enabled=None,
                                p2p_encryption_enabled=None,
+                               dapr_connection_string=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_update_decorator = ContainerAppEnvUpdateDecorator(
@@ -2437,6 +2437,8 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port=None, trans
     if not containerapp_def:
         raise ResourceNotFoundError("The containerapp '{}' does not exist".format(name))
 
+    new_containerapp_def = {}
+
     external_ingress = None
     if type is not None:
         if type.lower() == "internal":
@@ -2444,9 +2446,8 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port=None, trans
         elif type.lower() == "external":
             external_ingress = True
 
-    ingress_def = None
     if type is not None:
-        ingress_def = IngressModel
+        ingress_def = {}
         ingress_def["external"] = external_ingress
         ingress_def["transport"] = transport
         ingress_def["allowInsecure"] = allow_insecure
@@ -2457,13 +2458,11 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port=None, trans
         else:
             ingress_def["targetPort"] = DEFAULT_PORT
 
-    containerapp_def["properties"]["configuration"]["ingress"] = ingress_def
-
-    _get_existing_secrets(cmd, resource_group_name, name, containerapp_def)
+        safe_set(new_containerapp_def, "properties", "configuration", "ingress", value=ingress_def)
 
     try:
-        r = ContainerAppClient.create_or_update(
-            cmd=cmd, resource_group_name=resource_group_name, name=name, container_app_envelope=containerapp_def, no_wait=no_wait)
+        r = ContainerAppClient.update(
+            cmd=cmd, resource_group_name=resource_group_name, name=name, container_app_envelope=new_containerapp_def, no_wait=no_wait)
         not disable_warnings and logger.warning("\nIngress enabled. Access your app at https://{}/\n".format(r["properties"]["configuration"]["ingress"]["fqdn"]))
         return r["properties"]["configuration"]["ingress"]
     except Exception as e:

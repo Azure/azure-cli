@@ -5,8 +5,11 @@
 import abc
 
 from collections import OrderedDict
+
+from azure.cli.core.util import shell_safe_json_parse
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
-from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue
+from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue, \
+    AAZIdentityObject, AAZAnyValue
 from ._utils import to_snack_case
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZInvalidFieldError, AAZInvalidValueError
@@ -22,9 +25,6 @@ class AAZSimpleType(AAZBaseType):
     DataType = None
 
     _ValueCls = AAZSimpleValue
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def process_data(self, data, **kwargs):
         if data == None:  # noqa: E711, pylint: disable=singleton-comparison
@@ -45,7 +45,13 @@ class AAZSimpleType(AAZBaseType):
 
         assert self.DataType is not None
         if not isinstance(data, self.DataType):
-            raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            try:
+                json_data = shell_safe_json_parse(data)
+            except:  # pylint:disable=bare-except
+                raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            if not isinstance(json_data, self.DataType):
+                raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            data = json_data
 
         return data
 
@@ -89,7 +95,53 @@ class AAZFloatType(AAZSimpleType):
             data = float(data)
 
         if not isinstance(data, self.DataType):
-            raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            try:
+                json_data = shell_safe_json_parse(data)
+            except:  # pylint:disable=bare-except
+                raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            if isinstance(json_data, int):
+                # transform int to float
+                if float(json_data) != json_data:
+                    raise AAZValuePrecisionLossError(json_data, float(json_data))
+                json_data = float(json_data)
+            if not isinstance(json_data, self.DataType):
+                raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+            data = json_data
+
+        return data
+
+
+class AAZAnyType(AAZSimpleType):
+    """Any type"""
+
+    _ValueCls = AAZAnyValue
+
+    def process_data(self, data, **kwargs):
+        if isinstance(data, (AAZObject, AAZDict, AAZList)):
+            # convert them to simple dict, list, None or AAZUndefined values
+            value = data.to_serialized_data()
+            # TODO: may need to add warnings or raise error when treat the patch assign into the full assign.
+            # for the code gen commands it will not happen as the any type args only support full assign.
+            # but for the customization code, this will happen when convert AAZCompoundTypeArg to AAZAnyTypeArg
+            # if data._is_patch and isinstance(value, (dict, list)) and len(value):
+            #     pass
+            data = value
+
+        if data == None:  # noqa: E711, pylint: disable=singleton-comparison
+            # data can be None or AAZSimpleValue == None
+            if self._nullable:
+                return None
+            return AAZValuePatch.build(self)
+
+        if data == AAZUndefined:
+            return AAZValuePatch.build(self)
+
+        if isinstance(data, AAZSimpleValue):
+            if data._is_patch:
+                # return value patch
+                return AAZValuePatch.build(self)
+
+            return data._data
 
         return data
 
@@ -275,9 +327,6 @@ class AAZBaseDictType(AAZBaseType):
 
     _PatchDataCls = dict
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @abc.abstractmethod
     def __getitem__(self, key):
         raise NotImplementedError()
@@ -342,13 +391,17 @@ class AAZDictType(AAZBaseDictType):
         return self.Element
 
 
-class AAZFreeFormDictType(AAZBaseDictType):
+# Warning: This type should not be used any more, the new aaz-dev-tools only use AAZDictType with AAZAnyType
+class AAZFreeFormDictType(AAZDictType):
     """Free form dict value type"""
 
     _ValueCls = AAZFreeFormDict
 
-    def __getitem__(self, key):
-        return None
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # for backward compatible, so support nullable for any type.
+        # from the new code gen tools, it will avoid using AAZFreeFormDictType
+        self._element = AAZAnyType(nullable=True)
 
 
 class AAZListType(AAZBaseType):
@@ -409,3 +462,7 @@ class AAZListType(AAZBaseType):
                 value[idx] = sub_data
 
         return result
+
+
+class AAZIdentityObjectType(AAZObjectType):
+    _ValueCls = AAZIdentityObject

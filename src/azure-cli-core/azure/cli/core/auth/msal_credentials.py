@@ -4,23 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 """
-Credentials defined in this module are alternative implementations of credentials provided by Azure Identity.
-
-These credentials implement azure.core.credentials.TokenCredential by exposing `get_token` method for Track 2
-SDK invocation.
-
-If you want to implement your own credential, the credential must also expose `get_token` method.
-
-`get_token` method takes `scopes` as positional arguments and other optional `kwargs`, such as `claims`, `data`.
-The return value should be a named tuple containing two elements: token (str), expires_on (int). You may simply use
-azure.cli.core.auth.util.AccessToken to build the return value. See below credentials as examples.
+Credentials to acquire tokens from MSAL.
 """
 
 from knack.log import get_logger
 from knack.util import CLIError
-from msal import PublicClientApplication, ConfidentialClientApplication
+from msal import (PublicClientApplication, ConfidentialClientApplication,
+                  ManagedIdentityClient, SystemAssignedManagedIdentity, UserAssignedManagedIdentity)
 
-from .util import check_result, build_sdk_access_token
+from .constants import AZURE_CLI_CLIENT_ID
+from .util import check_result
 
 logger = get_logger(__name__)
 
@@ -28,7 +21,7 @@ logger = get_logger(__name__)
 class UserCredential:  # pylint: disable=too-few-public-methods
 
     def __init__(self, client_id, username, **kwargs):
-        """User credential implementing get_token interface.
+        """User credential wrapping msal.application.PublicClientApplication
 
         :param client_id: Client ID of the CLI.
         :param username: The username for user credential.
@@ -50,20 +43,23 @@ class UserCredential:  # pylint: disable=too-few-public-methods
 
         self._account = accounts[0]
 
-    def get_token(self, *scopes, claims=None, **kwargs):
-        # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
-        logger.debug("UserCredential.get_token: scopes=%r, claims=%r, kwargs=%r", scopes, claims, kwargs)
+    def acquire_token(self, scopes, claims_challenge=None, **kwargs):
+        # scopes must be a list.
+        # For acquiring SSH certificate, scopes is ['https://pas.windows.net/CheckMyAccess/Linux/.default']
+        # kwargs is already sanitized by CredentialAdaptor, so it can be safely passed to MSAL
+        logger.debug("UserCredential.acquire_token: scopes=%r, claims_challenge=%r, kwargs=%r",
+                     scopes, claims_challenge, kwargs)
 
-        if claims:
+        if claims_challenge:
             logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
-                           self._msal_app.authority.tenant, claims)
-        result = self._msal_app.acquire_token_silent_with_error(list(scopes), self._account, claims_challenge=claims,
-                                                                **kwargs)
+                           self._msal_app.authority.tenant, claims_challenge)
+        result = self._msal_app.acquire_token_silent_with_error(
+            scopes, self._account, claims_challenge=claims_challenge, **kwargs)
 
         from azure.cli.core.azclierror import AuthenticationError
         try:
             # Check if an access token is returned.
-            check_result(result, scopes=scopes, claims=claims)
+            check_result(result, scopes=scopes, claims_challenge=claims_challenge)
         except AuthenticationError as ex:
             # For VM SSH ('data' is passed), if getting access token fails because
             # Conditional Access MFA step-up or compliance check is required, re-launch
@@ -80,7 +76,7 @@ class UserCredential:  # pylint: disable=too-few-public-methods
                 success_template, error_template = read_response_templates()
 
                 result = self._msal_app.acquire_token_interactive(
-                    list(scopes), login_hint=self._account['username'],
+                    scopes, login_hint=self._account['username'],
                     port=8400 if self._msal_app.authority.is_adfs else None,
                     success_template=success_template, error_template=error_template, **kwargs)
                 check_result(result)
@@ -89,22 +85,65 @@ class UserCredential:  # pylint: disable=too-few-public-methods
             # launch browser, but show the error message and `az login` command instead.
             else:
                 raise
-        return build_sdk_access_token(result)
+        return result
 
 
 class ServicePrincipalCredential:  # pylint: disable=too-few-public-methods
 
     def __init__(self, client_id, client_credential, **kwargs):
-        """Service principal credential implementing get_token interface.
+        """Service principal credential wrapping msal.application.ConfidentialClientApplication.
 
         :param client_id: The service principal's client ID.
         :param client_credential: client_credential that will be passed to MSAL.
         """
-        self._msal_app = ConfidentialClientApplication(client_id, client_credential, **kwargs)
+        self._msal_app = ConfidentialClientApplication(client_id, client_credential=client_credential, **kwargs)
 
-    def get_token(self, *scopes, **kwargs):
-        logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
-
-        result = self._msal_app.acquire_token_for_client(list(scopes), **kwargs)
+    def acquire_token(self, scopes, **kwargs):
+        logger.debug("ServicePrincipalCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)
+        result = self._msal_app.acquire_token_for_client(scopes, **kwargs)
         check_result(result)
-        return build_sdk_access_token(result)
+        return result
+
+
+class CloudShellCredential:  # pylint: disable=too-few-public-methods
+    # Cloud Shell acts as a "broker" to obtain access token for the user account, so even though it uses
+    # managed identity protocol, it returns a user token.
+    # That's why MSAL uses acquire_token_interactive to retrieve an access token in Cloud Shell.
+    # See https://github.com/Azure/azure-cli/pull/29637
+
+    def __init__(self):
+        self._msal_app = PublicClientApplication(
+            AZURE_CLI_CLIENT_ID,  # Use a real client_id, so that cache would work
+            # TODO: We currently don't maintain an MSAL token cache as Cloud Shell already has its own token cache.
+            #   Ideally we should also use an MSAL token cache.
+            #   token_cache=...
+        )
+
+    def acquire_token(self, scopes, **kwargs):
+        logger.debug("CloudShellCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)
+        result = self._msal_app.acquire_token_interactive(scopes, prompt="none", **kwargs)
+        check_result(result, scopes=scopes)
+        return result
+
+
+class ManagedIdentityCredential:  # pylint: disable=too-few-public-methods
+    """Managed identity credential implementing get_token interface.
+    Currently, only Azure Arc's system-assigned managed identity is supported.
+    """
+
+    def __init__(self, client_id=None, resource_id=None, object_id=None):
+        import requests
+        if client_id or resource_id or object_id:
+            managed_identity = UserAssignedManagedIdentity(
+                client_id=client_id, resource_id=resource_id, object_id=object_id)
+        else:
+            managed_identity = SystemAssignedManagedIdentity()
+        self._msal_client = ManagedIdentityClient(managed_identity, http_client=requests.Session())
+
+    def acquire_token(self, scopes, **kwargs):
+        logger.debug("ManagedIdentityCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)
+
+        from .util import scopes_to_resource
+        result = self._msal_client.acquire_token_for_client(resource=scopes_to_resource(scopes))
+        check_result(result)
+        return result

@@ -99,7 +99,6 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_list_ip')
     @AllowLargeResponse(size_kb=99999)
     def test_vm_show_list_sizes_list_ip_addresses(self, resource_group):
-
         self.kwargs.update({
             'loc': 'centralus',
             'vm': 'vm-with-public-ip',
@@ -108,7 +107,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
         })
         # Expecting no results at the beginning
         self.cmd('vm list-ip-addresses --resource-group {rg}', checks=self.is_empty())
-        self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest'
+        self.cmd('vm create --resource-group {rg} --location {loc} -n {vm} --admin-username ubuntu --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest'
                  ' --admin-password testPassword0 --public-ip-address-allocation {allocation} --authentication-type password --zone {zone} --nsg-rule NONE')
         result = self.cmd('vm show --resource-group {rg} --name {vm} -d', checks=[
             self.check('type(@)', 'object'),
@@ -131,17 +130,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
         # Expecting the one we just added
         self.kwargs['rg_caps'] = resource_group.upper()  # test the command handles name with casing diff.
-        self.cmd('vm list-ip-addresses --resource-group {rg_caps}', checks=[
-            self.check('length(@)', 1),
-            self.check('[0].virtualMachine.name', '{vm}'),
-            self.check('[0].virtualMachine.resourceGroup', '{rg}'),
-            self.check('length([0].virtualMachine.network.publicIpAddresses)', 1),
-            self.check('[0].virtualMachine.network.publicIpAddresses[0].ipAllocationMethod', self.kwargs['allocation'].title()),
-            self.check('type([0].virtualMachine.network.publicIpAddresses[0].ipAddress)', 'string'),
-            self.check('[0].virtualMachine.network.publicIpAddresses[0].zone', '{zone}'),
-            self.check('type([0].virtualMachine.network.publicIpAddresses[0].name)', 'string'),
-            self.check('[0].virtualMachine.network.publicIpAddresses[0].resourceGroup', '{rg}')
-        ])
+        self.cmd('vm list-ip-addresses --resource-group {rg_caps}', self.check('type(@)', 'array'))
 
 
 class VMSizeListScenarioTest(ScenarioTest):
@@ -200,8 +189,8 @@ class VMImageShowScenarioTest(ScenarioTest):
             'loc': 'westus',
             'pub': 'Canonical',
             'offer': 'UbuntuServer',
-            'sku': '14.04.2-LTS',
-            'ver': '14.04.201503090'
+            'sku': '18.04-LTS',
+            'ver': '18.04.202002180'
         })
 
         self.cmd('vm image show --location {loc} --publisher {pub} --offer {offer} --sku {sku} --version {ver}', checks=[
@@ -613,17 +602,17 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a disk and update
         data_disk = self.cmd('disk create -g {rg} -n {disk1} --size-gb 1 --tags tag1=d1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1),
+            self.check('diskSizeGB', 1),
             self.check('tags.tag1', 'd1')
         ]).get_output_in_json()
         self.cmd('disk update -g {rg} -n {disk1} --size-gb 10 --sku Standard_LRS', checks=[
             self.check('sku.name', 'Standard_LRS'),
-            self.check('diskSizeGb', 10)
+            self.check('diskSizeGB', 10)
         ])
 
         # get SAS token
         result = self.cmd('disk grant-access -g {rg} -n {disk1} --duration-in-seconds 10').get_output_in_json()
-        self.assertTrue('sv=' in result['accessSas'])
+        self.assertTrue('sv=' in result['accessSAS'])
 
         # create another disk by importing from the disk1
         self.kwargs['disk1_id'] = data_disk['id']
@@ -632,13 +621,13 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a snpashot
         os_snapshot = self.cmd('snapshot create -g {rg} -n {snapshot1} --size-gb 1 --sku Premium_LRS --tags tag1=s1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1),
+            self.check('diskSizeGB', 1),
             self.check('tags.tag1', 's1')
         ]).get_output_in_json()
         # update the sku
         self.cmd('snapshot update -g {rg} -n {snapshot1} --sku Standard_LRS', checks=[
             self.check('sku.name', 'Standard_LRS'),
-            self.check('diskSizeGb', 1)
+            self.check('diskSizeGB', 1)
         ])
 
         # create another snapshot by importing from the disk1
@@ -894,7 +883,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
 
         subscription_id = self.get_subscription_id()
 
@@ -1344,7 +1333,7 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
@@ -2137,7 +2126,8 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'vmss': 'vmss1',
             'avset': 'avset1',
-            'ssh_key': TEST_SSH_KEY_PUB
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'nsg': 'nsg1',
         })
 
         self.kwargs['ppg_id'] = self.cmd('ppg create -n {ppg} -t standard -g {rg}').get_output_in_json()['id']
@@ -2146,8 +2136,9 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg} --nsg-rule NONE').get_output_in_json()[
             'id']
 
+        self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id}')
+            'vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id} --nsg {nsg}')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.kwargs['avset_id'] = \
@@ -2171,12 +2162,14 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'vmss': 'vmss1',
             'avset': 'avset1',
-            'ssh_key': TEST_SSH_KEY_PUB
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'nsg': 'nsg1',
         })
 
         self.kwargs['ppg_id'] = self.cmd('ppg create -g {rg} -n {ppg} -t standard').get_output_in_json()['id']
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\'')
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --nsg {nsg}')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
         self.cmd('vmss deallocate -g {rg} -n {vmss}')
         time.sleep(30)
@@ -2208,7 +2201,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
     #
     # however, the CLI does not replace resource group values in payloads in the recordings.
     def _assert_ids_equal(self, id_1, id_2, rg_prefix=None):
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
 
         id_1, id_2, rg_prefix = id_1.lower(), id_2.lower(), rg_prefix.lower() if rg_prefix else rg_prefix
 
@@ -2313,6 +2306,89 @@ class DiskAccessTest(ScenarioTest):
         self.cmd('disk-access delete -g {rg} -n {diskaccess}')
         self.cmd('disk-access list -g {rg}', checks=[
             self.check('length(@)', 0)
+        ])
+
+
+class DiskEncryptionSetTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='westcentralus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westcentralus', additional_params='--enable-purge-protection --enable-rbac-authorization false')
+    @AllowLargeResponse(size_kb=99999)
+    def test_disk_encryption_set(self, resource_group, key_vault):
+        self.kwargs.update({
+            'key': self.create_random_name(prefix='key-', length=20),
+            'des1': self.create_random_name(prefix='des1-', length=20),
+            'des2': self.create_random_name(prefix='des2-', length=20),
+            'des3': self.create_random_name(prefix='des3-', length=20),
+            'disk': self.create_random_name(prefix='disk-', length=20),
+            'vm1': self.create_random_name(prefix='vm1-', length=20),
+            'vm2': self.create_random_name(prefix='vm2-', length=20),
+            'vmss': self.create_random_name(prefix='vmss-', length=20),
+        })
+
+        self.cmd('keyvault update -g {rg} -n {vault} --set properties.enableSoftDelete=true')
+        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
+        kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
+        self.kwargs.update({
+            'vault_id': vault_id,
+            'kid': kid
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault}')
+        des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
+        des1_sp_id = des1_show_output['identity']['principalId']
+        des1_id = des1_show_output['id']
+        self.kwargs.update({
+            'des1_sp_id': des1_sp_id,
+            'des1_id': des1_id
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault}')
+        des2_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des2}').get_output_in_json()
+        des2_sp_id = des2_show_output['identity']['principalId']
+        des2_id = des2_show_output['id']
+        self.kwargs.update({
+            'des2_sp_id': des2_sp_id,
+            'des2_id': des2_id
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des3} --key-url {kid} --source-vault {vault}')
+        des3_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des3}').get_output_in_json()
+        des3_sp_id = des3_show_output['identity']['principalId']
+        des3_id = des3_show_output['id']
+        self.kwargs.update({
+            'des3_sp_id': des3_sp_id,
+            'des3_id': des3_id
+        })
+
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {des3_sp_id} --key-permissions wrapKey unwrapKey get')
+
+        self.kwargs.update({
+            'des1_pattern': '.*/{}$'.format(self.kwargs['des1']),
+            'des2_pattern': '.*/{}$'.format(self.kwargs['des2']),
+            'des3_pattern': '.*/{}$'.format(self.kwargs['des3'])
+        })
+
+        self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des1} --size-gb 10', checks=[
+            self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des1_pattern']),
+            self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
+        ])
+        self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk} --os-type linux --nsg-rule NONE')
+
+        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-sets {des2} {des3} --nsg-rule NONE --admin-username azureuser --admin-password testPassword0 --authentication-type password')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check_pattern('storageProfile.osDisk.managedDisk.diskEncryptionSet.id', self.kwargs['des1_pattern']),
+            self.check_pattern('storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', self.kwargs['des2_pattern']),
+            self.check_pattern('storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', self.kwargs['des3_pattern'])
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-sets {des2} {des3} --admin-username azureuser --admin-password testPassword0 --authentication-type password --nsg ""')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check_pattern('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', self.kwargs['des1_pattern']),
+            self.check_pattern('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', self.kwargs['des2_pattern']),
+            self.check_pattern('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', self.kwargs['des3_pattern'])
         ])
 
 

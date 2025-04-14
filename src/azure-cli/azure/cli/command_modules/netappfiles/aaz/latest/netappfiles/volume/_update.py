@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2024-09-01"],
         ]
     }
 
@@ -85,13 +85,13 @@ class Update(AAZCommand):
         # define Arg Group "Backup"
 
         _args_schema = cls._args_schema
-        _args_schema.backup_policy_id = AAZStrArg(
+        _args_schema.backup_policy_id = AAZResourceIdArg(
             options=["--backup-policy-id"],
             arg_group="Backup",
             help="Backup Policy Resource ID",
             nullable=True,
         )
-        _args_schema.backup_vault_id = AAZStrArg(
+        _args_schema.backup_vault_id = AAZResourceIdArg(
             options=["--backup-vault-id"],
             arg_group="Backup",
             help="Backup Vault Resource ID",
@@ -258,6 +258,13 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Default": "Default", "Never": "Never", "OnRead": "OnRead"},
         )
+        _args_schema.cool_access_tiering_policy = AAZStrArg(
+            options=["--ca-tiering-policy", "--cool-access-tiering-policy"],
+            arg_group="Properties",
+            help="coolAccessTieringPolicy determines which cold data blocks are moved to cool tier. The possible values for this field are: Auto - Moves cold user data blocks in both the Snapshot copies and the active file system to the cool tier tier. This policy is the default. SnapshotOnly - Moves user data blocks of the Volume Snapshot copies that are not associated with the active file system to the cool tier.",
+            nullable=True,
+            enum={"Auto": "Auto", "SnapshotOnly": "SnapshotOnly"},
+        )
         _args_schema.coolness_period = AAZIntArg(
             options=["--coolness-period"],
             arg_group="Properties",
@@ -374,7 +381,7 @@ class Update(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.smb_continuously_available = AAZBoolArg(
-            options=["--smb-continuously-avl", "--smb-continuously-available"],
+            options=["--smb-ca", "--smb-continuously-avl", "--smb-continuously-available"],
             arg_group="Properties",
             help="Enables continuously available share property for smb volume. Only applicable for SMB volume",
             nullable=True,
@@ -481,6 +488,7 @@ class Update(AAZCommand):
             options=["--remote-volume-id", "--remote-volume-resource-id"],
             arg_group="Replication",
             help="The resource ID of the remote volume.",
+            nullable=True,
         )
         _args_schema.replication_schedule = AAZStrArg(
             options=["--replication-schedule"],
@@ -597,7 +605,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -704,7 +712,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -771,6 +779,7 @@ class Update(AAZCommand):
                 properties.set_prop("capacityPoolResourceId", AAZStrType, ".capacity_pool_resource_id")
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
                 properties.set_prop("coolAccessRetrievalPolicy", AAZStrType, ".cool_access_retrieval_policy")
+                properties.set_prop("coolAccessTieringPolicy", AAZStrType, ".cool_access_tiering_policy")
                 properties.set_prop("coolnessPeriod", AAZIntType, ".coolness_period")
                 properties.set_prop("creationToken", AAZStrType, ".creation_token", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("dataProtection", AAZObjectType)
@@ -820,7 +829,7 @@ class Update(AAZCommand):
             if replication is not None:
                 replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
-                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id", typ_kwargs={"flags": {"required": True}})
+                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
 
             snapshot = _builder.get(".properties.dataProtection.snapshot")
@@ -962,6 +971,9 @@ class _UpdateHelper:
         properties.cool_access_retrieval_policy = AAZStrType(
             serialized_name="coolAccessRetrievalPolicy",
         )
+        properties.cool_access_tiering_policy = AAZStrType(
+            serialized_name="coolAccessTieringPolicy",
+        )
         properties.coolness_period = AAZIntType(
             serialized_name="coolnessPeriod",
         )
@@ -984,6 +996,9 @@ class _UpdateHelper:
         )
         properties.delete_base_snapshot = AAZBoolType(
             serialized_name="deleteBaseSnapshot",
+        )
+        properties.effective_network_features = AAZStrType(
+            serialized_name="effectiveNetworkFeatures",
         )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",
@@ -1145,12 +1160,14 @@ class _UpdateHelper:
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
         )
+        replication.remote_path = AAZObjectType(
+            serialized_name="remotePath",
+        )
         replication.remote_volume_region = AAZStrType(
             serialized_name="remoteVolumeRegion",
         )
         replication.remote_volume_resource_id = AAZStrType(
             serialized_name="remoteVolumeResourceId",
-            flags={"required": True},
         )
         replication.replication_id = AAZStrType(
             serialized_name="replicationId",
@@ -1158,6 +1175,20 @@ class _UpdateHelper:
         )
         replication.replication_schedule = AAZStrType(
             serialized_name="replicationSchedule",
+        )
+
+        remote_path = _schema_volume_read.properties.data_protection.replication.remote_path
+        remote_path.external_host_name = AAZStrType(
+            serialized_name="externalHostName",
+            flags={"required": True},
+        )
+        remote_path.server_name = AAZStrType(
+            serialized_name="serverName",
+            flags={"required": True},
+        )
+        remote_path.volume_name = AAZStrType(
+            serialized_name="volumeName",
+            flags={"required": True},
         )
 
         snapshot = _schema_volume_read.properties.data_protection.snapshot

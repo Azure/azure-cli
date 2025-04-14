@@ -18,7 +18,7 @@ class TestCommandsLoader(AzCommandsLoader):
         self.cmd_to_loader_map = {}
 
     def load_command_table(self, args):
-        super(TestCommandsLoader, self).load_command_table(args)
+        super().load_command_table(args)
         with self.command_group('test group', operations_tmpl='{}#TestCommandsLoader.{{}}'.format(__name__)) as g:
             g.command('cmd', '_test_command')
         self.cmd_to_loader_map['test group cmd'] = [self]
@@ -26,7 +26,7 @@ class TestCommandsLoader(AzCommandsLoader):
         return self.command_table
 
     def load_arguments(self, command):
-        super(TestCommandsLoader, self).load_arguments(command)
+        super().load_arguments(command)
         with self.argument_context('test group cmd') as c:
             c.argument('arg1', options_list=('--arg1', '--arg1-alias', '-a'))
             c.argument('arg2', options_list=('--arg2', '--arg2-alias', '--arg2-alias-long'))
@@ -133,14 +133,15 @@ class TestBreakingChange(unittest.TestCase):
             self.assertIn('[Deprecated]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
+    @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_DATE', 'May 2024')
     def test_argument_deprecate(self):
         from contextlib import redirect_stderr, redirect_stdout
 
         from azure.cli.core.breaking_change import register_argument_deprecate
 
         register_argument_deprecate('test group cmd', argument='arg1', redirect='arg2')
-        warning = ("Argument 'arg1' has been deprecated and will be removed in next breaking change release(3.0.0). "
-                   "Use 'arg2' instead.")
+        warning = ("Argument 'arg1' has been deprecated and will be removed in next breaking change release(3.0.0) "
+                   "scheduled for May 2024. Use 'arg2' instead.")
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
         captured_err = io.StringIO()
@@ -156,14 +157,15 @@ class TestBreakingChange(unittest.TestCase):
             self.assertIn('[Deprecated]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
+    @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_DATE', 'May 2024')
     def test_option_deprecate(self):
         from contextlib import redirect_stderr, redirect_stdout
 
         from azure.cli.core.breaking_change import register_argument_deprecate
 
         register_argument_deprecate('test group cmd', argument='--arg1', redirect='--arg1-alias')
-        warning = ("Option '--arg1' has been deprecated and will be removed in next breaking change release(3.0.0). "
-                   "Use '--arg1-alias' instead.")
+        warning = ("Option '--arg1' has been deprecated and will be removed in next breaking change release(3.0.0) "
+                   "scheduled for May 2024. Use '--arg1-alias' instead.")
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
         captured_err = io.StringIO()
@@ -180,6 +182,7 @@ class TestBreakingChange(unittest.TestCase):
             self.assertIn('   --arg1                   [Deprecated]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
+    @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_DATE', None)
     def test_be_required(self):
         from contextlib import redirect_stderr, redirect_stdout
 
@@ -207,6 +210,7 @@ class TestBreakingChange(unittest.TestCase):
             self.assertIn('[Breaking Change]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
+    @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_DATE', None)
     def test_default_change(self):
         from contextlib import redirect_stderr, redirect_stdout
 
@@ -236,6 +240,7 @@ class TestBreakingChange(unittest.TestCase):
             self.assertIn('[Breaking Change]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
+    @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_DATE', 'May 2024')
     def test_output_change(self):
         from contextlib import redirect_stderr, redirect_stdout
 
@@ -243,8 +248,8 @@ class TestBreakingChange(unittest.TestCase):
 
         register_output_breaking_change('test group cmd', description="The output of 'test group cmd' "
                                                                       "would be changed.")
-        warning = ("The output will be changed in next breaking change release(3.0.0). The output of 'test group cmd' "
-                   "would be changed.")
+        warning = ("The output will be changed in next breaking change release(3.0.0) scheduled for May 2024. "
+                   "The output of 'test group cmd' would be changed.")
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
         captured_err = io.StringIO()
@@ -265,13 +270,14 @@ class TestBreakingChange(unittest.TestCase):
             self.assertIn('[Breaking Change]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
+    @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_DATE', 'May 2024')
     def test_logic_change(self):
         from contextlib import redirect_stderr, redirect_stdout
 
         from azure.cli.core.breaking_change import register_logic_breaking_change
 
         register_logic_breaking_change('test group cmd', summary="Logic Change Summary")
-        warning = "Logic Change Summary in next breaking change release(3.0.0)."
+        warning = "Logic Change Summary in next breaking change release(3.0.0) scheduled for May 2024."
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
         captured_err = io.StringIO()
@@ -292,6 +298,7 @@ class TestBreakingChange(unittest.TestCase):
             self.assertIn('[Breaking Change]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
+    @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_DATE', None)
     def test_multi_breaking_change(self):
         from contextlib import redirect_stderr, redirect_stdout
 

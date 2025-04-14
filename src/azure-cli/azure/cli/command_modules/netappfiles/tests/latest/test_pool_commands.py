@@ -10,7 +10,7 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 
 POOL_DEFAULT = "--service-level Premium --size 4"
 POOL_DEFAULT_STRING_SIZE = "--service-level 'Premium' --size a"
-LOCATION = "eastus"
+LOCATION = "eastus2euap"
 
 # No tidy up of tests required. The resource group is automatically removed
 

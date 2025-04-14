@@ -18,13 +18,13 @@ class Create(AAZCommand):
     """Create a new origin group within the specified profile.
 
     :example: Creates a new origin group within the specified profile.
-        az afd origin-group create -g group --origin-group-name og1 --profile-name profile --probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt --sample-size 4 --successful-samples-required 3 --additional-latency-in-milliseconds 50
+        az afd origin-group create -g group --origin-group-name og1 --profile-name profile --probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt --sample-size 4 --successful-samples-required 3 --additional-latency-in-milliseconds 50  --enable-health-probe true
     """
 
     _aaz_info = {
-        "version": "2024-02-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/origingroups/{}", "2024-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/origingroups/{}", "2024-09-01"],
         ]
     }
 
@@ -213,7 +213,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-02-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }

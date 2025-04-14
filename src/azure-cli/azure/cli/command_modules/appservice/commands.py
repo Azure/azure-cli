@@ -85,7 +85,7 @@ def _polish_bad_errors(ex, creating_plan):
                         detail = ("Plan with requested features is not supported in current region. \n"
                                   "If creating an App Service Plan with --zone-redundant/-z, "
                                   "please see supported regions here: "
-                                  "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
+                                  "https://learn.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
         else:
             detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
@@ -141,6 +141,15 @@ def load_command_table(self, _):
         g.custom_command('deploy', 'perform_onedeploy_webapp', validator=validate_onedeploy_params)
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp',
                                  custom_func_name='update_webapp', command_type=appservice_custom)
+
+    with self.command_group('webapp sitecontainers') as g:
+        g.custom_command('create', 'create_webapp_sitecontainers')
+        g.custom_command('update', 'update_webapp_sitecontainer')
+        g.custom_command('delete', 'delete_webapp_sitecontainer')
+        g.custom_show_command('show', 'get_webapp_sitecontainer')
+        g.custom_command('list', 'list_webapp_sitecontainers')
+        g.custom_command('status', 'get_webapp_sitecontainers_status')
+        g.custom_command('log', 'get_webapp_sitecontainer_log')
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')

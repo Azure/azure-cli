@@ -90,33 +90,6 @@ class TestVmCustom(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.vm.custom.get_vm_to_update', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
-    def test_enable_boot_diagnostics_on_vm_never_enabled(self, mock_vm_set, mock_vm_get_to_update):
-        vm_fake = mock.MagicMock()
-        cmd = _get_test_cmd()
-        mock_vm_get_to_update.return_value = vm_fake
-        enable_boot_diagnostics(cmd, 'g1', 'vm1', 'https://storage_uri1')
-        self.assertTrue(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
-        self.assertEqual('https://storage_uri1',
-                         vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
-        self.assertTrue(mock_vm_get_to_update.called)
-        mock_vm_set.assert_called_once_with(cmd, vm_fake, mock.ANY)
-
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm_to_update', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
-    def test_disable_boot_diagnostics_on_vm(self, mock_vm_set, mock_vm_get_to_update):
-        vm_fake = mock.MagicMock()
-        cmd = _get_test_cmd()
-        mock_vm_get_to_update.return_value = vm_fake
-        vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
-        vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'storage_uri1'
-        disable_boot_diagnostics(cmd, 'g1', 'vm1')
-        self.assertFalse(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
-        self.assertIsNone(vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
-        self.assertTrue(mock_vm_get_to_update.called)
-        mock_vm_set.assert_called_once_with(cmd, vm_fake, mock.ANY)
-
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm_to_update', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_attach_new_datadisk_default_on_vm(self, mock_vm_set, mock_vm_get_to_update):
         # pylint: disable=line-too-long
         faked_vhd_uri = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d1.vhd'
@@ -390,7 +363,7 @@ class TestVMBootLog(unittest.TestCase):
             get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
 
-class FakedVM(object):  # pylint: disable=too-few-public-methods
+class FakedVM:  # pylint: disable=too-few-public-methods
     def __init__(self, nics=None, disks=None, os_disk=None):
         self.network_profile = NetworkProfile(network_interfaces=nics)
         self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
@@ -402,7 +375,7 @@ class FakedVM(object):  # pylint: disable=too-few-public-methods
         self.instance_view.extensions = [ext]
 
 
-class FakedAccessExtensionEntity(object):  # pylint: disable=too-few-public-methods
+class FakedAccessExtensionEntity:  # pylint: disable=too-few-public-methods
     def __init__(self, is_linux, version):
         self.name = 'VMAccessForLinux' if is_linux else 'VMAccessAgent'
         self.type_handler_version = version

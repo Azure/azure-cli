@@ -37,9 +37,9 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.servicelinker import ServiceLinkerManagementClient
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._clients import ContainerAppClient, ManagedEnvironmentClient, WorkloadProfileClient, ContainerAppsJobClient
 from ._client_factory import handle_raw_exception, providers_client_factory, cf_resource_groups, log_analytics_client_factory, log_analytics_shared_key_client_factory
@@ -102,7 +102,7 @@ def _create_application(client, display_name):
         result = client.application_create(body)
     except GraphError as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://learn.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise ValidationError("Directory permission is needed for the current user to register the application. "
                                   "For how to configure, please refer '{}'. Original error: {}".format(link, ex)) from ex
         raise
@@ -412,12 +412,8 @@ def parse_secret_flags(secret_list):
 
 
 def get_linker_client(cmd):
-    resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    credential, subscription_id, _ = profile.get_login_credentials(
-        subscription_id=get_subscription_id(cmd.cli_ctx), resource=resource)
-    linker_client = ServiceLinkerManagementClient(credential)
-    return linker_client
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cmd.cli_ctx, ServiceLinkerManagementClient)
 
 
 def validate_binding_name(binding_name):
@@ -509,12 +505,21 @@ def _update_revision_env_secretrefs(containers, name):
 
 
 def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_server, registry_pass, update_existing_secret=False, disable_warnings=False):
+    def make_dns1123_compliant(name):
+        logger.debug(f"To construct the registry secret name, format the username '{name}' to DNS1123-compliant format.")
+
+        # Replace invalid characters with a hyphen and ensure lowercase
+        compliant_name = re.sub(r'[^a-z0-9\-]', '-', name.lower())
+
+        logger.debug(f"DNS1123-compliant name: '{compliant_name}' (original: '{name}')")
+
+        return compliant_name
+
     if registry_pass.startswith("secretref:"):
         # If user passed in registry password using a secret
-
         registry_pass = registry_pass.split("secretref:")
         if len(registry_pass) <= 1:
-            raise ValidationError("Invalid registry password secret. Value must be a non-empty value starting with \'secretref:\'.")
+            raise ValidationError("Invalid registry password secret. Value must be a non-empty value starting with 'secretref:'.")
         registry_pass = registry_pass[1:]
         registry_pass = ''.join(registry_pass)
 
@@ -526,9 +531,15 @@ def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_
         # If user passed in registry password
         registry_server = registry_server.replace(':', '-')
         if urlparse(registry_server).hostname is not None:
-            registry_secret_name = "{server}-{user}".format(server=urlparse(registry_server).hostname.replace('.', ''), user=registry_user.lower())
+            registry_secret_name = "{server}-{user}".format(
+                server=urlparse(registry_server).hostname.replace('.', ''),
+                user=make_dns1123_compliant(registry_user)
+            )
         else:
-            registry_secret_name = "{server}-{user}".format(server=registry_server.replace('.', ''), user=registry_user.lower())
+            registry_secret_name = "{server}-{user}".format(
+                server=registry_server.replace('.', ''),
+                user=make_dns1123_compliant(registry_user)
+            )
 
         for secret in secrets_list:
             if secret['name'].lower() == registry_secret_name.lower():
@@ -1584,7 +1595,7 @@ def set_managed_identity(cmd, resource_group_name, containerapp_def, system_assi
         containerapp_def["identity"] = {}
         containerapp_def["identity"]["type"] = "None"
 
-    if assign_system_identity and containerapp_def["identity"]["type"].__contains__("SystemAssigned"):
+    if assign_system_identity and "SystemAssigned" in containerapp_def["identity"]["type"]:
         logger.warning("System identity is already assigned to containerapp")
 
     # Assign correct type
@@ -1974,7 +1985,14 @@ def parse_oryx_mariner_tag(tag: str) -> OryxMarinerRunImgTagProperty:
         if len(re_matches) == 0:
             tag_obj = None
         else:
-            tag_obj = dict(fullTag=tag, version=SemVer.parse(re_matches[0][0]), framework=tag_split[2], marinerVersion=re_matches[0][2], architectures=None, support="lts")
+            tag_obj = {
+                "fullTag": tag,
+                "version": SemVer.parse(re_matches[0][0]),
+                "framework": tag_split[2],
+                "marinerVersion": re_matches[0][2],
+                "architectures": None,
+                "support": "lts",
+            }
     else:
         tag_obj = None
     return tag_obj

@@ -17,9 +17,9 @@ class RedisCommandsLoader(AzCommandsLoader):
         redis_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.redis.custom#{}',
             client_factory=cf_redis)
-        super(RedisCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                  resource_type=ResourceType.MGMT_REDIS,
-                                                  custom_command_type=redis_custom)
+        super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_REDIS,
+                         custom_command_type=redis_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.redis.commands import load_command_table

@@ -248,8 +248,11 @@ def get_yaml_template(cmd_value, timeout, file):
     :param str timeout: The timeout for each step
     :param str file: The task definition
     """
-    yaml_template = "version: v1.1.0\n"
+    yaml_template = ""
+    # The default version is required to be added to cmd source Task.
+    # The version is expeced to be included in the file for file source Task.
     if cmd_value:
+        yaml_template += "version: v1.1.0\n"
         yaml_template += "steps: \n  - cmd: {0}\n    disableWorkingDirectoryOverride: true\n".format(cmd_value)
         if timeout:
             yaml_template += "    timeout: {0}\n".format(timeout)
@@ -587,7 +590,7 @@ def get_scope_map_from_id(cmd, scope_map_id):
 def resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
     from azure.mgmt.msi import ManagedServiceIdentityClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     res = parse_resource_id(managed_identity_resource_id)
     client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])

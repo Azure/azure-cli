@@ -11,6 +11,27 @@ import sys
 import uuid
 
 from itertools import chain
+
+from ._kv_export_helpers import (
+    __export_kvset_to_file,
+    __map_to_appservice_config_reference,
+    __write_kv_and_features_to_file,
+    __write_kv_to_app_service,
+)
+from ._kv_helpers import (
+    __convert_featureflag_list_to_keyvalue_list,
+    __discard_features_from_retrieved_kv,
+    __read_kv_from_config_store,
+    __write_kv_and_features_to_config_store,
+    __print_restore_preview
+)
+from ._kv_import_helpers import (
+    __import_kvset_from_file,
+    __delete_configuration_setting_from_config_store,
+    __read_features_from_file,
+    __read_kv_from_app_service,
+    __read_kv_from_file,
+)
 from knack.log import get_logger
 from knack.util import CLIError
 from ._constants import HttpHeaders
@@ -33,13 +54,6 @@ from ._featuremodels import map_keyvalue_to_featureflag
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
 from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
-from ._kv_helpers import (__read_kv_from_file, __read_features_from_file,
-                          __write_kv_and_features_to_file, __read_kv_from_config_store,
-                          __write_kv_and_features_to_config_store,
-                          __discard_features_from_retrieved_kv, __read_kv_from_app_service,
-                          __write_kv_to_app_service, __print_restore_preview,
-                          __convert_featureflag_list_to_keyvalue_list, __export_kvset_to_file,
-                          __import_kvset_from_file, __delete_configuration_setting_from_config_store, __map_to_appservice_config_reference)
 from ._diff_utils import print_preview, KVComparer
 from .feature import __list_features
 
@@ -175,7 +189,7 @@ def import_config(cmd,
         label=label,
         content_type=content_type)
 
-    kv_diff = kv_comparer.compare(dest_kvs=dest_kvs, strict=strict)
+    kv_diff = kv_comparer.compare(dest_kvs=dest_kvs, strict=strict, ignore_matching_kvs=import_mode == ImportMode.IGNORE_MATCH)
     # Show indented key-value preview similar to kvset for appconfig source
     indent = 2 if source == "appconfig" else None
     need_kv_change = print_preview(kv_diff, source, yes=yes, strict=strict, title="Key Values", indent=indent)
@@ -198,7 +212,7 @@ def import_config(cmd,
             compare_fields=CompareFieldsMap[source],
             preserve_labels=source == "appconfig" and preserve_labels,
             label=label)
-        ff_diff = ff_comparer.compare(dest_kvs=dest_features, strict=strict)
+        ff_diff = ff_comparer.compare(dest_kvs=dest_features, strict=strict, ignore_matching_kvs=import_mode == ImportMode.IGNORE_MATCH)
         need_feature_change = print_preview(ff_diff, source, yes=yes, strict=strict, title="Feature Flags")
 
     if not need_kv_change and not need_feature_change:
@@ -225,8 +239,8 @@ def import_config(cmd,
         kvs_to_write = []
         kvs_to_write.extend(kv_diff.get(JsonDiff.ADD, []))
         kvs_to_write.extend(ff_diff.get(JsonDiff.ADD, []))
-        kvs_to_write.extend((update["new"] for update in kv_diff.get(JsonDiff.UPDATE, [])))
-        kvs_to_write.extend((update["new"] for update in ff_diff.get(JsonDiff.UPDATE, [])))
+        kvs_to_write.extend(update["new"] for update in kv_diff.get(JsonDiff.UPDATE, []))
+        kvs_to_write.extend(update["new"] for update in ff_diff.get(JsonDiff.UPDATE, []))
 
     # write all kvs
     else:
