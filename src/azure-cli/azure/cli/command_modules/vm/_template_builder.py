@@ -1654,13 +1654,13 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if skuprofile_rank:
             for vm_size, rank in zip(sku_profile_vmsizes_list, skuprofile_rank):
                 vm_size['rank'] = rank
-                
+
         sku_profile = {
             'vmSizes': sku_profile_vmsizes_list,
             'allocationStrategy': skuprofile_allostrat
         }
         vmss_properties['skuProfile'] = sku_profile
-
+        
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
         'name': name,
