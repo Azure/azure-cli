@@ -774,7 +774,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                      '--assignee-object-id {uami_object_id} --assignee-principal-type ServicePrincipal '
                      '--role {role_reader_guid} --scope {rg_id}')
             # Verify atScope() is not bound to scope,
-            # and when atScope() is not specified, scope can be used with `principalId eq '{}'` filter
+            # and when atScope() is not specified, scope can be used with `principalId eq '{}'` filter.
+            # At subscription scope
             self.cmd('role assignment list --scope {sub_id} --at-scope false '
                      '--assignee-object-id {uami_object_id} '
                      '--fill-role-definition-name false --fill-principal-name false',
@@ -782,6 +783,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                          self.check("length([])", 1),
                          self.check("[0].scope", '{rg_id}'),
                      ])
+            # At resource group scope
             self.cmd('role assignment list --scope {rg_id} --at-scope false '
                      '--assignee-object-id {uami_object_id} '
                      '--fill-role-definition-name false --fill-principal-name false',
