@@ -6241,7 +6241,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                                     self.check('[0].resourceGroup', '{rg}'),
                                     self.check('[0].operationMode', 'Copy')])
 
-    @record_only()
+    @live_only()
     def test_sql_midb_cross_subscription_move_copy(self):
 
         source_rg_name = "sqlmigeodr"
