@@ -334,7 +334,8 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--all'),
                    help="Show all assignments under the current subscription. This argument is deprecated. "
                         "Use '--at-scope false' instead.")
-        c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
+        c.argument('include_inherited', action='store_true',
+                   help='Include role assignments at parent scopes. This argument only takes effect when --at-scope is true.')
         c.argument('can_delegate', action='store_true', help='when set, the assignee will be able to create further role assignments to the same role')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
         c.argument('assignee_object_id',

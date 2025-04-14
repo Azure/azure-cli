@@ -793,8 +793,14 @@ helps['role assignment list'] = """
 type: command
 short-summary: List role assignments.
 long-summary: >-
-    By default, only assignments scoped to subscription will be displayed.
-    To view assignments scoped by resource or group, use `--all`.
+    By default, the scope is the current subscription. Specifying the scope with `--scope` is recommended.
+
+
+    By default, only role assignments exactly at the scope are included, not including role assignments at
+    parent scopes or sub-scopes. For example, when `--scope` is a subscription, role assignments at management
+    groups or resource groups are not included.
+    To include role assignments at parent scopes, use `--include-inherited`.
+    To include role assignments at parent scopes and sub-scopes, use `--at-scope false`.
 
 
     [WARNING] Azure classic subscription administrators will be retired on August 31, 2024.
