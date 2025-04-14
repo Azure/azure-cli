@@ -136,11 +136,10 @@ def _get_extension_instance_name(instance_view, publisher, extension_type_name,
                                  suggested_name=None):
     extension_instance_name = suggested_name or extension_type_name
     full_type_name = '.'.join([publisher, extension_type_name])
-    if instance_view.extensions:
-        ext = next((x for x in instance_view.extensions
-                    if x.type and (x.type.lower() == full_type_name.lower())), None)
+    if extensions := instance_view.get('extensions', []):
+        ext = next((x for x in extensions if x.type and (x.type.lower() == full_type_name.lower())), None)
         if ext:
-            extension_instance_name = ext.name
+            extension_instance_name = ext['name']
     return extension_instance_name
 
 
@@ -2128,35 +2127,43 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, 
 
 # region VirtualMachines Extensions
 def list_extensions(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
+    from .aaz.latest.vm import Show as _VMShow
+    vm = _VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_name': vm_name,
+        'resource_group': resource_group_name,
+    })
     extension_type = 'Microsoft.Compute/virtualMachines/extensions'
-    result = [r for r in (vm.resources or []) if r.type == extension_type]
+    result = [r for r in (vm.get('resources', [])) if r.get('type', None) == extension_type]
     return result
 
 
 def show_extensions(cmd, resource_group_name, vm_name, vm_extension_name, instance_view=False, expand=None):
+    from .operations.vm_extension import VMExtensionShow
     if instance_view:
         expand = 'instanceView'
-    client = _compute_client_factory(cmd.cli_ctx).virtual_machine_extensions
-    return client.get(resource_group_name=resource_group_name,
-                      vm_name=vm_name,
-                      vm_extension_name=vm_extension_name,
-                      expand=expand)
+
+    return VMExtensionShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_extension_name': vm_extension_name,
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'expand': expand
+    })
 
 
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
                   protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,
                   extension_instance_name=None, enable_auto_upgrade=None):
-    vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    client = _compute_client_factory(cmd.cli_ctx)
+    from .aaz.latest.vm import Show as _VMShow
+    vm = _VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_name': vm_name,
+        'resource_group': resource_group_name,
+        'expand': 'instanceView'
+    })
 
     if not extension_instance_name:
         extension_instance_name = vm_extension_name
 
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension',
-                                             resource_type=ResourceType.MGMT_COMPUTE,
-                                             operation_group='virtual_machines')
-    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
+    instance_name = _get_extension_instance_name(vm['instanceView'], publisher, vm_extension_name,
                                                  suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
         msg = "A %s extension with name %s already exists. Updating it with your settings..."
@@ -2171,19 +2178,26 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if vm_extension_name in auto_upgrade_extensions and enable_auto_upgrade is None:
         enable_auto_upgrade = True
 
-    version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
-    ext = VirtualMachineExtension(location=vm.location,
-                                  publisher=publisher,
-                                  type_properties_type=vm_extension_name,
-                                  protected_settings=protected_settings,
-                                  type_handler_version=version,
-                                  settings=settings,
-                                  auto_upgrade_minor_version=(not no_auto_upgrade),
-                                  enable_automatic_upgrade=enable_auto_upgrade)
+    version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm['location'])
+
+    from .operations.vm_extension import VMExtensionCreate as ExtensionSet
+    ext_args = {
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'vm_extension_name': instance_name,
+        'location': vm['location'],
+        'publisher': publisher,
+        'type': vm_extension_name,
+        'protected_settings': protected_settings,
+        'type_handler_version': version,
+        'settings': settings,
+        'auto_upgrade_minor_version': (not no_auto_upgrade),
+        'enable_automatic_upgrade': enable_auto_upgrade,
+        'no_wait': no_wait
+    }
     if force_update:
-        ext.force_update_tag = str(_gen_guid())
-    return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
-                       resource_group_name, vm_name, instance_name, ext)
+        ext_args['force_update_tag'] = str(_gen_guid())
+    return ExtensionSet(cli_ctx=cmd.cli_ctx)(command_args=ext_args)
 # endregion
 
 
