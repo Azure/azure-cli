@@ -472,8 +472,7 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('user_data', help='UserData for the VM. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
-        c.argument('key_incarnation_id', type=int, min_api='2024-07-01',  help='Increase the value of this property allows user to reset the key used for securing communication channel between guest and host.')
-
+        c.argument('key_incarnation_id', type=int, min_api='2024-07-01', help='Increase the value of this property allows user to reset the key used for securing communication channel between guest and host.')
 
     for scope in ['vm create', 'vm update']:
         with self.argument_context(scope) as c:
