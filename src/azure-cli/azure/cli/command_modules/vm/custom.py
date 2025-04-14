@@ -3185,7 +3185,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                enable_user_redeploy_scheduled_events=None, 
+                enable_user_redeploy_scheduled_events=None,
                 skuprofile_vmsizes=None, skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
