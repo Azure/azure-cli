@@ -1173,7 +1173,6 @@ jobs:
       cd ..
       git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
       azdev extension repo add ./azure-cli-extensions
-      pip install setuptools==70.0.0 wheel==0.30.0
       azdev extension add "*"
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
       azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
