@@ -216,23 +216,30 @@ class EmailAddressReplacer(RecordingProcessor):
 
     EMAIL_REPLACEMENT = 'test@example.com'
 
+    def _replace_email_address(self, text):
+        pattern = r'[\w.%#+-]+[%40|@|_]microsoft.com'
+        index = 0
+        replaced_text = ''
+        for match in re.finditer(pattern, text):
+            start = match.start()
+            end = match.end()
+            replaced_text += text[index:start] + self.EMAIL_REPLACEMENT
+            index = end
+        if index < len(text):
+            replaced_text += text[index:]
+        return replaced_text
+
     def process_request(self, request):
+        request.uri = self._replace_email_address(request.uri)
+        if request.body:
+            body = _byte_to_str(request.body)
+            request.body = self._replace_email_address(body)
         return request
 
     def process_response(self, response):
         if response['body']['string']:
             body = _byte_to_str(response['body']['string'])
-            pattern = r'[\w.%#+-]+[%40|@|_]microsoft.com'
-            index = 0
-            replaced_body = ''
-            for match in re.finditer(pattern, body):
-                start = match.start()
-                end = match.end()
-                replaced_body += body[index:start] + self.EMAIL_REPLACEMENT
-                index = end
-            if index < len(body):
-                replaced_body += body[index:]
-            response['body']['string'] = replaced_body
+            response['body']['string'] = _replace_email_address(body)
         return response
 
 
