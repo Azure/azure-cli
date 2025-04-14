@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-09-01",
+        "version": "2025-04-15",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/customdomains/{}", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/customdomains/{}", "2025-04-15"],
         ]
     }
 
@@ -57,6 +57,11 @@ class Create(AAZCommand):
             options=["--profile-name"],
             help="Name of the Azure Front Door Standard or Azure Front Door Premium profile which is unique within the resource group.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$",
+                max_length=260,
+                min_length=1,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -98,11 +103,42 @@ class Create(AAZCommand):
             help="Defines the source of the SSL certificate.",
             enum={"AzureFirstPartyManagedCertificate": "AzureFirstPartyManagedCertificate", "CustomerCertificate": "CustomerCertificate", "ManagedCertificate": "ManagedCertificate"},
         )
+        _args_schema.cipher_suite_set_type = AAZStrArg(
+            options=["--cipher-suite-set-type"],
+            arg_group="TlsSettings",
+            help="cipher suite set type that will be used for Https",
+            enum={"Customized": "Customized", "TLS10_2019": "TLS10_2019", "TLS12_2022": "TLS12_2022", "TLS12_2023": "TLS12_2023"},
+        )
+        _args_schema.customized_cipher_suite_set = AAZObjectArg(
+            options=["--customized-cipher-suite-set"],
+            arg_group="TlsSettings",
+            help="Customized cipher suites object that will be used for Https when cipherSuiteSetType is Customized.",
+        )
         _args_schema.minimum_tls_version = AAZStrArg(
             options=["--minimum-tls-version"],
             arg_group="TlsSettings",
             help="TLS protocol version that will be used for Https",
-            enum={"TLS10": "TLS10", "TLS12": "TLS12"},
+            enum={"TLS10": "TLS10", "TLS12": "TLS12", "TLS13": "TLS13"},
+        )
+
+        customized_cipher_suite_set = cls._args_schema.customized_cipher_suite_set
+        customized_cipher_suite_set.cipher_suite_set_for_tls12 = AAZListArg(
+            options=["cipher-suite-set-for-tls12"],
+            help="Cipher suites for TLS 1.2. Required at least one in minimumTlsVersion TLS 1.2.",
+        )
+        customized_cipher_suite_set.cipher_suite_set_for_tls13 = AAZListArg(
+            options=["cipher-suite-set-for-tls13"],
+            help="Cipher suites for TLS 1.3. Required at least one in minimumTlsVersion TLS 1.2, TLS 1.3.",
+        )
+
+        cipher_suite_set_for_tls12 = cls._args_schema.customized_cipher_suite_set.cipher_suite_set_for_tls12
+        cipher_suite_set_for_tls12.Element = AAZStrArg(
+            enum={"DHE_RSA_AES128_GCM_SHA256": "DHE_RSA_AES128_GCM_SHA256", "DHE_RSA_AES256_GCM_SHA384": "DHE_RSA_AES256_GCM_SHA384", "ECDHE_RSA_AES128_GCM_SHA256": "ECDHE_RSA_AES128_GCM_SHA256", "ECDHE_RSA_AES128_SHA256": "ECDHE_RSA_AES128_SHA256", "ECDHE_RSA_AES256_GCM_SHA384": "ECDHE_RSA_AES256_GCM_SHA384", "ECDHE_RSA_AES256_SHA384": "ECDHE_RSA_AES256_SHA384"},
+        )
+
+        cipher_suite_set_for_tls13 = cls._args_schema.customized_cipher_suite_set.cipher_suite_set_for_tls13
+        cipher_suite_set_for_tls13.Element = AAZStrArg(
+            enum={"TLS_AES_128_GCM_SHA256": "TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384": "TLS_AES_256_GCM_SHA384"},
         )
         return cls._args_schema
 
@@ -209,7 +245,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-04-15",
                     required=True,
                 ),
             }
@@ -249,8 +285,23 @@ class Create(AAZCommand):
             tls_settings = _builder.get(".properties.tlsSettings")
             if tls_settings is not None:
                 tls_settings.set_prop("certificateType", AAZStrType, ".certificate_type", typ_kwargs={"flags": {"required": True}})
+                tls_settings.set_prop("cipherSuiteSetType", AAZStrType, ".cipher_suite_set_type")
+                tls_settings.set_prop("customizedCipherSuiteSet", AAZObjectType, ".customized_cipher_suite_set")
                 tls_settings.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
                 tls_settings.set_prop("secret", AAZObjectType)
+
+            customized_cipher_suite_set = _builder.get(".properties.tlsSettings.customizedCipherSuiteSet")
+            if customized_cipher_suite_set is not None:
+                customized_cipher_suite_set.set_prop("cipherSuiteSetForTls12", AAZListType, ".cipher_suite_set_for_tls12")
+                customized_cipher_suite_set.set_prop("cipherSuiteSetForTls13", AAZListType, ".cipher_suite_set_for_tls13")
+
+            cipher_suite_set_for_tls12 = _builder.get(".properties.tlsSettings.customizedCipherSuiteSet.cipherSuiteSetForTls12")
+            if cipher_suite_set_for_tls12 is not None:
+                cipher_suite_set_for_tls12.set_elements(AAZStrType, ".")
+
+            cipher_suite_set_for_tls13 = _builder.get(".properties.tlsSettings.customizedCipherSuiteSet.cipherSuiteSetForTls13")
+            if cipher_suite_set_for_tls13 is not None:
+                cipher_suite_set_for_tls13.set_elements(AAZStrType, ".")
 
             secret = _builder.get(".properties.tlsSettings.secret")
             if secret is not None:
@@ -368,11 +419,31 @@ class _CreateHelper:
             serialized_name="certificateType",
             flags={"required": True},
         )
+        tls_settings.cipher_suite_set_type = AAZStrType(
+            serialized_name="cipherSuiteSetType",
+        )
+        tls_settings.customized_cipher_suite_set = AAZObjectType(
+            serialized_name="customizedCipherSuiteSet",
+        )
         tls_settings.minimum_tls_version = AAZStrType(
             serialized_name="minimumTlsVersion",
         )
         tls_settings.secret = AAZObjectType()
         cls._build_schema_resource_reference_read(tls_settings.secret)
+
+        customized_cipher_suite_set = _schema_afd_domain_read.properties.tls_settings.customized_cipher_suite_set
+        customized_cipher_suite_set.cipher_suite_set_for_tls12 = AAZListType(
+            serialized_name="cipherSuiteSetForTls12",
+        )
+        customized_cipher_suite_set.cipher_suite_set_for_tls13 = AAZListType(
+            serialized_name="cipherSuiteSetForTls13",
+        )
+
+        cipher_suite_set_for_tls12 = _schema_afd_domain_read.properties.tls_settings.customized_cipher_suite_set.cipher_suite_set_for_tls12
+        cipher_suite_set_for_tls12.Element = AAZStrType()
+
+        cipher_suite_set_for_tls13 = _schema_afd_domain_read.properties.tls_settings.customized_cipher_suite_set.cipher_suite_set_for_tls13
+        cipher_suite_set_for_tls13.Element = AAZStrType()
 
         validation_properties = _schema_afd_domain_read.properties.validation_properties
         validation_properties.expiration_date = AAZStrType(
