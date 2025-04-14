@@ -105,7 +105,7 @@ class TestActionGroupScenarios(ScenarioTest):
                      self.check('length(incidentReceivers)', 1),
                      self.check('incidentReceivers[0].name', 'testag')])      
 
-    @ResourceGroupPreparer(name_prefix='cli_test_monitor_ag_identity', location='southcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_ag_identity', location='eastus2euap')
     def test_monitor_action_group_identity(self, resource_group):
         action_group_name = self.create_random_name('cliactiongrouptest', 32)
         self.kwargs.update({
@@ -113,6 +113,19 @@ class TestActionGroupScenarios(ScenarioTest):
             'ag': action_group_name,
             'id_name': self.create_random_name('agid', 10)
         })
+
+        self.kwargs['system_mi'] = self.cmd('monitor action-group create -n {ag} -g {rg} -l eastus2euap --system-assigned').get_output_in_json()['identity']['principalId']
+        
+        self.cmd('monitor action-group update -n {ag} -g {rg} --event-hub-receiver '
+                 '[0].name=test_eventhub [0].subscription_id=187f412d-1758-44d9-b052-169e2564721d '
+                 '[0].event_hub_name_space=testEventHubNameSpace [0].event_hub_name=testEventHub '
+                 '[0].managed_identity={system_mi}',
+                 checks=[
+                     self.check('length(eventHubReceivers)', 1),
+                     self.check('eventHubReceivers[0].name', 'test_eventhub'),
+                     self.check('eventHubReceivers[0].managedIdentity', '{system_mi}')])
+
+        self.cmd('monitor action-group delete -n {ag} -g {rg}')
 
         identity = self.cmd('identity create -n {id_name} -g {rg}').get_output_in_json()
         self.kwargs['identity'] = identity['id']

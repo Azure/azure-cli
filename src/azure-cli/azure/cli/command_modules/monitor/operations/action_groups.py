@@ -129,18 +129,6 @@ class ActionGroupCreate(_ActionGroupCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.arm_role_receivers._registered = False
-        args_schema.automation_runbook_receivers._registered = False
-        args_schema.azure_app_push_receivers._registered = False
-        args_schema.azure_function_receivers._registered = False
-        args_schema.email_receivers._registered = False
-        args_schema.enabled._registered = False
-        args_schema.event_hub_receivers._registered = False
-        args_schema.itsm_receivers._registered = False
-        args_schema.logic_app_receivers._registered = False
-        args_schema.sms_receivers._registered = False
-        args_schema.voice_receivers._registered = False
-        args_schema.webhook_receivers._registered = False
         args_schema.receiver_actions = AAZCustomListArg(
             options=["--actions"],
             singular_options=["--action", "-a"],
@@ -211,18 +199,6 @@ class ActionGroupUpdate(_ActionGroupUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.arm_role_receivers._registered = False
-        args_schema.automation_runbook_receivers._registered = False
-        args_schema.azure_app_push_receivers._registered = False
-        args_schema.azure_function_receivers._registered = False
-        args_schema.email_receivers._registered = False
-        args_schema.enabled._registered = False
-        args_schema.event_hub_receivers._registered = False
-        args_schema.itsm_receivers._registered = False
-        args_schema.logic_app_receivers._registered = False
-        args_schema.sms_receivers._registered = False
-        args_schema.voice_receivers._registered = False
-        args_schema.webhook_receivers._registered = False
         args_schema.type._registered = False
         args_schema.user_assigned_identities._registered = False
         args_schema.receiver_actions = AAZCustomListArg(
