@@ -36,6 +36,10 @@ def get_sql_database_operations_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).database_operations
 
 
+def get_sql_database_advanced_threat_protection_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).database_advanced_threat_protection_settings
+
+
 def get_sql_database_blob_auditing_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).database_blob_auditing_policies
 
@@ -44,16 +48,16 @@ def get_sql_server_blob_auditing_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).server_blob_auditing_policies
 
 
+def get_sql_server_dev_ops_audit_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_dev_ops_audit_settings
+
+
 def get_sql_database_sensitivity_labels_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).sensitivity_labels
 
 
 def get_sql_database_threat_detection_policies_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).database_threat_detection_policies
-
-
-def get_sql_database_transparent_data_encryption_activities_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).transparent_data_encryption_activities
+    return get_sql_management_client(cli_ctx).database_security_alert_policies
 
 
 def get_sql_database_transparent_data_encryptions_operations(cli_ctx, _):
@@ -80,12 +84,24 @@ def get_sql_managed_instance_encryption_protectors_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_instance_encryption_protectors
 
 
+def get_sql_server_trust_groups_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_trust_groups
+
+
 def get_sql_failover_groups_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).failover_groups
 
 
 def get_sql_firewall_rules_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).firewall_rules
+
+
+def get_sql_ipv6_firewall_rules_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).ipv6_firewall_rules
+
+
+def get_sql_outbound_firewall_rules_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).outbound_firewall_rules
 
 
 def get_sql_instance_pools_operations(cli_ctx, _):
@@ -106,6 +122,10 @@ def get_sql_restorable_dropped_databases_operations(cli_ctx, _):
 
 def get_sql_restorable_dropped_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).restorable_dropped_managed_databases
+
+
+def get_sql_server_advanced_threat_protection_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_advanced_threat_protection_settings
 
 
 def get_sql_server_azure_ad_administrators_operations(cli_ctx, _):
@@ -140,6 +160,10 @@ def get_sql_subscription_usages_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).subscription_usages
 
 
+def get_sql_server_azure_ad_only_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_azure_ad_only_authentications
+
+
 def get_sql_virtual_network_rules_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).virtual_network_rules
 
@@ -152,12 +176,32 @@ def get_sql_managed_instances_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_instances
 
 
+def get_sql_managed_instance_advanced_threat_protection_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instance_advanced_threat_protection_settings
+
+
 def get_sql_managed_instance_azure_ad_administrators_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_instance_administrators
 
 
+def get_sql_managed_instance_azure_ad_only_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instance_azure_ad_only_authentications
+
+
 def get_sql_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_databases
+
+
+def get_sql_recoverable_managed_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).recoverable_managed_databases
+
+
+def get_sql_managed_database_advanced_threat_protection_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_database_advanced_threat_protection_settings
+
+
+def get_sql_backup_short_term_retention_policies_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).backup_short_term_retention_policies
 
 
 def get_sql_managed_backup_short_term_retention_policies_operations(cli_ctx, _):
@@ -185,8 +229,32 @@ def get_sql_managed_database_long_term_retention_backups_operations(cli_ctx, _):
 
 
 def get_sql_database_long_term_retention_policies_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).backup_long_term_retention_policies
+    return get_sql_management_client(cli_ctx).long_term_retention_policies
 
 
 def get_sql_database_long_term_retention_backups_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).long_term_retention_backups
+
+
+def get_sql_managed_database_restore_details_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_database_restore_details
+
+
+def get_sql_database_ledger_digest_uploads_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).ledger_digest_uploads
+
+
+def get_sql_database_encryption_protector_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).database_encryption_protectors
+
+
+def get_sql_database_recoverable_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).recoverable_databases
+
+
+def get_sql_managed_database_ledger_digest_uploads_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_ledger_digest_uploads
+
+
+def get_sql_managed_database_move_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_database_move_operations

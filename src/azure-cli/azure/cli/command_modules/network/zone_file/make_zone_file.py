@@ -24,9 +24,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # pylint: skip-file
-from __future__ import print_function
-
-
 def make_zone_file(json_obj):
     """
     Generate the DNS zonefile, given a json-encoded description of the
@@ -41,8 +38,11 @@ def make_zone_file(json_obj):
         "aaaa":    [ aaaa records ]
         "caa":     [ caa records ]
         "cname":   [ cname records ]
+        "ds":      [ ds records ]
         "mx":      [ mx records ]
+        "naptr":   [ naptr records ]
         "ptr":     [ ptr records ]
+        "tlsa":    [ tlsa records ]
         "txt":     [ txt records ]
         "srv":     [ srv records ]
         "spf":     [ spf records ]
@@ -50,7 +50,7 @@ def make_zone_file(json_obj):
     }
     """
     import azure.cli.command_modules.network.zone_file.record_processors as record_processors
-    from six import StringIO
+    from io import StringIO
 
     zone_file = StringIO()
 

@@ -5,6 +5,8 @@
 
 # pylint: disable=line-too-long
 
+from ._format import add_timestamp
+
 
 class ErrorClass:
     error_title = ""
@@ -16,9 +18,9 @@ class ErrorClass:
 
     def get_error_message(self, additional_message=None):
         if additional_message:
-            return "An error occurred: {}\n{}\n{}".format(self.error_title, self.error_message, additional_message)
+            return add_timestamp("An error occurred: {}\n{}\n{}".format(self.error_title, self.error_message, additional_message))
 
-        return "An error occurred: {}\n{}".format(self.error_title, self.error_message)
+        return add_timestamp("An error occurred: {}\n{}".format(self.error_title, self.error_message))
 
     def set_error_message(self, message):
         return ErrorClass(self.error_title, message)
@@ -88,7 +90,7 @@ CONNECTIVITY_DNS_ERROR = ErrorClass(
 
 CONNECTIVITY_FORBIDDEN_ERROR = ErrorClass(
     "CONNECTIVITY_FORBIDDEN_ERROR",
-    "Looks like you don't have access to registry '{}'. To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. Details: https://docs.microsoft.com/azure/container-registry/container-registry-health-error-reference#connectivity_forbidden_error"
+    "Looks like you don't have access to registry '{}'. To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. Details: https://learn.microsoft.com/azure/container-registry/container-registry-health-error-reference#connectivity_forbidden_error"
 )
 
 
@@ -116,6 +118,12 @@ CONNECTIVITY_REFRESH_TOKEN_ERROR = ErrorClass(
 )
 
 
+CONNECTIVITY_TOOMANYREQUESTS_ERROR = ErrorClass(
+    "CONNECTIVITY_TOOMANYREQUESTS_ERROR",
+    "Too many requests, access to registry '{}' was denied. Please wait a moment before trying again."
+)
+
+
 CONNECTIVITY_ACCESS_TOKEN_ERROR = ErrorClass(
     "CONNECTIVITY_ACCESS_TOKEN_ERROR",
     "Access to registry '{}' was denied. Response code: {}. Please try running 'az login' again to refresh permissions."
@@ -138,4 +146,9 @@ LOGIN_SERVER_ERROR = ErrorClass(
 UNEXPECTED_ERROR = ErrorClass(
     "UNEXPECTED_ERROR",
     "An unexpected error occurred."
+)
+
+CMK_MANAGED_IDENTITY_ERROR = ErrorClass(
+    "CMK_ERROR",
+    "The identity used for registry '{}' encryption doesn't exist."
 )

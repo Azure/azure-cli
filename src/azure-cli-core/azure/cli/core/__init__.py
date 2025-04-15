@@ -4,15 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from __future__ import print_function
-
-__version__ = "2.11.1"
+__version__ = "2.71.0"
 
 import os
 import sys
 import timeit
-
-import six
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -35,14 +31,34 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
-ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
+ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
+
+
+def _configure_knack():
+    """Override consts defined in knack to make them Azure CLI-specific."""
+
+    # Customize status tag messages.
+    from knack.util import status_tag_messages
+    ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
+    # Override the preview message.
+    status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
+    # Override the experimental message.
+    status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
+
+    # Allow logs from 'azure' logger to be displayed.
+    from knack.log import cli_logger_names
+    cli_logger_names.append('azure')
+
+
+_configure_knack()
 
 
 class AzCli(CLI):
 
     def __init__(self, **kwargs):
-        super(AzCli, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
+        from azure.cli.core.breaking_change import register_upcoming_breaking_change_info
         from azure.cli.core.commands import register_cache_arguments
         from azure.cli.core.commands.arm import (
             register_ids_argument, register_global_subscription_argument)
@@ -75,8 +91,11 @@ class AzCli(CLI):
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
         register_cache_arguments(self)
+        register_upcoming_breaking_change_info(self)
 
         self.progress_controller = None
+
+        self._configure_style()
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -87,12 +106,12 @@ class AzCli(CLI):
         import uuid
         self.data['headers']['x-ms-client-request-id'] = str(uuid.uuid1())
 
-    def get_progress_controller(self, det=False):
-        import azure.cli.core.commands.progress as progress
+    def get_progress_controller(self, det=False, spinner=None):
+        from azure.cli.core.commands import progress
         if not self.progress_controller:
             self.progress_controller = progress.ProgressHook()
 
-        self.progress_controller.init_progress(progress.get_progress_view(det))
+        self.progress_controller.init_progress(progress.get_progress_view(det, spinner=spinner))
         return self.progress_controller
 
     def get_cli_version(self):
@@ -100,17 +119,10 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
-        from azure.cli.core.commands.constants import (SURVEY_PROMPT, SURVEY_PROMPT_COLOR,
-                                                       UX_SURVEY_PROMPT, UX_SURVEY_PROMPT_COLOR)
 
-        ver_string, updates_available = get_az_version_string()
+        ver_string, updates_available_components = get_az_version_string()
         print(ver_string)
-        show_updates(updates_available)
-
-        show_link = self.config.getboolean('output', 'show_survey_link', True)
-        if show_link:
-            print('\n' + (SURVEY_PROMPT_COLOR if self.enable_color else SURVEY_PROMPT))
-            print(UX_SURVEY_PROMPT_COLOR if self.enable_color else UX_SURVEY_PROMPT)
+        show_updates(updates_available_components)
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
@@ -148,14 +160,35 @@ class AzCli(CLI):
 
         # print warning if there are values saved to local context
         if local_context_args:
-            logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
-                           'run `az local-context off` to turn it off.',
+            logger.warning('Parameter persistence is turned on. Its information is saved in working directory %s. '
+                           'You can run `az config param-persist off` to turn it off.',
                            self.local_context.effective_working_directory())
             args_str = []
             for name, value in local_context_args:
                 args_str.append('{}: {}'.format(name, value))
-            logger.warning('Your preference of %s now saved to local context. To learn more, type in `az '
-                           'local-context --help`', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
+            logger.warning('Your preference of %s now saved as persistent parameter. To learn more, type in `az '
+                           'config param-persist --help`',
+                           ', '.join(args_str) + (' is' if len(args_str) == 1 else ' are'))
+
+    def _configure_style(self):
+        from azure.cli.core.util import in_cloud_console
+        from azure.cli.core.style import format_styled_text, get_theme_dict, Style
+
+        # Configure Style
+        if self.enable_color:
+            theme = self.config.get('core', 'theme',
+                                    fallback="cloud-shell" if in_cloud_console() else "dark")
+
+            theme_dict = get_theme_dict(theme)
+
+            if theme_dict:
+                # If theme is used, also apply it to knack's logger
+                from knack.util import color_map
+                color_map['error'] = theme_dict[Style.ERROR]
+                color_map['warning'] = theme_dict[Style.WARNING]
+        else:
+            theme = 'none'
+        format_styled_text.theme = theme
 
 
 class MainCommandsLoader(CLICommandsLoader):
@@ -167,7 +200,7 @@ class MainCommandsLoader(CLICommandsLoader):
     item_ext_format_string = item_format_string + "  %s"
 
     def __init__(self, cli_ctx=None):
-        super(MainCommandsLoader, self).__init__(cli_ctx)
+        super().__init__(cli_ctx)
         self.cmd_to_loader_map = {}
         self.loaders = []
 
@@ -187,6 +220,8 @@ class MainCommandsLoader(CLICommandsLoader):
             _load_module_command_loader, _load_extension_command_loader, BLOCKED_MODS, ExtensionCommandSource)
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
+        from azure.cli.core.breaking_change import (
+            import_core_breaking_changes, import_module_breaking_changes, import_extension_breaking_changes)
 
         def _update_command_table_from_modules(args, command_modules=None):
             """Loads command tables from modules and merge into the main command table.
@@ -223,6 +258,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 try:
                     start_time = timeit.default_timer()
                     module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
+                    import_module_breaking_changes(mod)
                     for cmd in module_command_table.values():
                         cmd.command_source = mod
                     self.command_table.update(module_command_table)
@@ -238,7 +274,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 except Exception as ex:  # pylint: disable=broad-except
                     # Changing this error message requires updating CI script that checks for failed
                     # module loading.
-                    import azure.cli.core.telemetry as telemetry
+                    from azure.cli.core import telemetry
                     logger.error("Error loading command module '%s': %s", mod, ex)
                     telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
                                             summary='Error loading module: {}'.format(mod))
@@ -318,6 +354,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         start_time = timeit.default_timer()
                         extension_command_table, extension_group_table = \
                             _load_extension_command_loader(self, args, ext_mod)
+                        import_extension_breaking_changes(ext_mod)
 
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
@@ -380,6 +417,9 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_group_table.clear()
         self.command_table.clear()
 
+        # Import announced breaking changes in azure.cli.core._breaking_change.py
+        import_core_breaking_changes()
+
         command_index = None
         # Set fallback=False to turn off command index in case of regression
         use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
@@ -418,6 +458,20 @@ class MainCommandsLoader(CLICommandsLoader):
                 if raw_cmd in self.command_group_table:
                     logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
                     return self.command_table
+                if self.cli_ctx.data['completer_active']:
+                    # If the command is not complete in autocomplete mode, we should match shorter command.
+                    # For example, `account sho` should match `account`.
+                    logger.debug("Could not find a match in the command or command group table for '%s'", raw_cmd)
+                    trimmed_raw_cmd = ' '.join(raw_cmd.split()[:-1])
+                    logger.debug("In autocomplete mode, try to match trimmed raw cmd: '%s'", trimmed_raw_cmd)
+                    if not trimmed_raw_cmd:
+                        # If full command is 'az acc', raw_cmd is 'acc', trimmed_raw_cmd is ''.
+                        logger.debug("Trimmed raw cmd is empty, return command table.")
+                        return self.command_table
+                    if trimmed_raw_cmd in self.command_group_table:
+                        logger.debug("Found a match in the command group table for trimmed raw cmd: '%s'.",
+                                     trimmed_raw_cmd)
+                        return self.command_table
 
                 logger.debug("Could not find a match in the command or command group table for '%s'. "
                              "The index may be outdated.", raw_cmd)
@@ -439,6 +493,26 @@ class MainCommandsLoader(CLICommandsLoader):
 
         return self.command_table
 
+    @staticmethod
+    def _sort_command_loaders(command_loaders):
+        module_command_loaders = []
+        extension_command_loaders = []
+
+        # Separate module and extension command loaders
+        for loader in command_loaders:
+            if loader.__module__.startswith('azext'):
+                extension_command_loaders.append(loader)
+            else:
+                module_command_loaders.append(loader)
+
+        # Sort name in each command loader list
+        module_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
+        extension_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
+
+        # Module first, then extension
+        sorted_command_loaders = module_command_loaders + extension_command_loaders
+        return sorted_command_loaders
+
     def load_arguments(self, command=None):
         from azure.cli.core.commands.parameters import (
             resource_group_name_type, get_location_type, deployment_name_type, vnet_name_type, subnet_name_type)
@@ -449,6 +523,8 @@ class MainCommandsLoader(CLICommandsLoader):
             command_loaders = set()
             for loaders in self.cmd_to_loader_map.values():
                 command_loaders = command_loaders.union(set(loaders))
+            # sort command loaders for consistent order when loading all commands for docs generation to avoid random diff
+            command_loaders = self._sort_command_loaders(command_loaders)
             logger.info('Applying %s command loaders...', len(command_loaders))
         else:
             command_loaders = self.cmd_to_loader_map.get(command, None)
@@ -496,6 +572,7 @@ class CommandIndex:
         if cli_ctx:
             self.version = __version__
             self.cloud_profile = cli_ctx.cloud.profile
+        self.cli_ctx = cli_ctx
 
     def get(self, args):
         """Get the corresponding module and extension list of a command.
@@ -524,6 +601,13 @@ class CommandIndex:
         # Check the command index for (command: [module]) mapping, like
         # "network": ["azure.cli.command_modules.natgateway", "azure.cli.command_modules.network", "azext_firewall"]
         index_modules_extensions = index.get(top_command)
+        if not index_modules_extensions and self.cli_ctx.data['completer_active']:
+            # If user type `az acco`, command begin with `acco` will be matched.
+            logger.debug("In autocomplete mode, load commands starting with: '%s'", top_command)
+            index_modules_extensions = []
+            for command in index:
+                if command.startswith(top_command):
+                    index_modules_extensions += index[command]
 
         if index_modules_extensions:
             # This list contains both built-in modules and extensions
@@ -597,9 +681,9 @@ class ModExtensionSuppress:  # pylint: disable=too-few-public-methods
         self.recommend_update = recommend_update
 
     def handle_suppress(self, ext):
-        from pkg_resources import parse_version
+        from packaging.version import parse
         should_suppress = ext.name == self.suppress_extension_name and ext.version and \
-            parse_version(ext.version) <= parse_version(self.suppress_up_to_version)
+            parse(ext.version) <= parse(self.suppress_up_to_version)
         if should_suppress:
             reason = self.reason or "Use --debug for more information."
             logger.warning("Extension %s (%s) has been suppressed. %s",
@@ -619,9 +703,9 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                  suppress_extension=None, **kwargs):
         from azure.cli.core.commands import AzCliCommand, AzCommandGroup, AzArgumentContext
 
-        super(AzCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                               command_cls=AzCliCommand,
-                                               excluded_command_handler_args=EXCLUDED_PARAMS)
+        super().__init__(cli_ctx=cli_ctx,
+                         command_cls=AzCliCommand,
+                         excluded_command_handler_args=EXCLUDED_PARAMS)
         self.suppress_extension = suppress_extension
         self.module_kwargs = kwargs
         self.command_name = None
@@ -745,13 +829,15 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def argument_context(self, scope, **kwargs):
         return self._argument_context_cls(self, scope, **kwargs)
 
+    # Please use add_cli_command instead of _cli_command.
+    # Currently "keyvault" and "batch" modules are still rely on this function, so it cannot be removed now.
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
 
         from knack.deprecation import Deprecated
 
         kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
 
-        if operation and not isinstance(operation, six.string_types):
+        if operation and not isinstance(operation, str):
             raise TypeError("Operation must be a string. Got '{}'".format(operation))
         if handler and not callable(handler):
             raise TypeError("Handler must be a callable. Got '{}'".format(operation))
@@ -804,6 +890,31 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                                         handler or default_command_handler,
                                                         **kwargs)
 
+    def add_cli_command(self, name, command_operation, **kwargs):
+        """Register a command in command_table with command operation provided"""
+        from knack.deprecation import Deprecated
+        from .commands.command_operation import BaseCommandOperation
+        if not issubclass(type(command_operation), BaseCommandOperation):
+            raise TypeError("CommandOperation must be an instance of subclass of BaseCommandOperation."
+                            " Got instance of '{}'".format(type(command_operation)))
+
+        kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
+
+        name = ' '.join(name.split())
+
+        if self.supported_api_version(resource_type=kwargs.get('resource_type'),
+                                      min_api=kwargs.get('min_api'),
+                                      max_api=kwargs.get('max_api'),
+                                      operation_group=kwargs.get('operation_group')):
+            self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
+            self.command_table[name] = self.command_cls(loader=self,
+                                                        name=name,
+                                                        handler=command_operation.handler,
+                                                        arguments_loader=command_operation.arguments_loader,
+                                                        description_loader=command_operation.description_loader,
+                                                        command_operation=command_operation,
+                                                        **kwargs)
+
     def get_op_handler(self, operation, operation_group=None):
         """ Import and load the operation handler """
         # Patch the unversioned sdk path to include the appropriate API version for the
@@ -819,6 +930,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 operation = operation.replace(rt.import_prefix,
                                               get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
                                                                      operation_group=operation_group))
+                break
 
         try:
             mod_to_import, attr_path = operation.split('#')
@@ -827,7 +939,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 op = getattr(op, part)
             if isinstance(op, types.FunctionType):
                 return op
-            return six.get_method_function(op)
+            return op.__func__
         except (ValueError, AttributeError):
             raise ValueError("The operation '{}' is invalid.".format(operation))
 

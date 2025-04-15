@@ -5,14 +5,12 @@
 
 import os
 import platform
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from urllib.request import urlopen
 
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.cli.core.util import in_cloud_console
-
-from ._utils import user_confirmation
+from azure.cli.core.util import in_cloud_console, user_confirmation
 
 from ._docker_utils import (
     get_access_credentials,
@@ -189,7 +187,7 @@ def acr_helm_install_cli(client_version='2.16.3', install_location=None, yes=Fal
         logger.warning('Please note that "az acr helm" commands do not work with Helm 3, '
                        'but you can still push Helm chart to ACR using a different command flow. '
                        'For more information, please check out '
-                       'https://docs.microsoft.com/en-us/azure/container-registry/container-registry-helm-repos')
+                       'https://learn.microsoft.com/azure/container-registry/container-registry-helm-repos')
 
     install_location, install_dir, cli = _process_helm_install_location_info(install_location)
 
@@ -229,7 +227,7 @@ def acr_helm_install_cli(client_version='2.16.3', install_location=None, yes=Fal
 
                 if os.path.splitext(f.name)[0] in ('helm', 'tiller'):
                     os.chmod(target_path, os.stat(target_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    except IOError as e:
+    except OSError as e:
         import traceback
         logger.debug(traceback.format_exc())
         raise CLIError('Error while installing {} to {}: {}'.format(cli, install_dir, e))

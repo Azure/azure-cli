@@ -46,7 +46,8 @@ def action_group_list_table(results):
                                      ('webhookReceivers', 'webhook'), ('armRoleReceivers', 'armrole'),
                                      ('azureAppPushReceivers', 'azureapppush'), ('itsmReceivers', 'itsm'),
                                      ('automationRunbookReceivers', 'automationrunbook'), ('voiceReceivers', 'voice'),
-                                     ('logicAppReceivers', 'logicapp'), ('azureFunctionReceivers', 'azurefunction'))
+                                     ('logicAppReceivers', 'logicapp'), ('azureFunctionReceivers', 'azurefunction'),
+                                     ('eventHubReceivers', 'eventhub'))
 
         output_results.append(data)
 
@@ -69,6 +70,16 @@ def metrics_definitions_table(results):
     return _generic_table_convert(results, row_convert)
 
 
+def metrics_namespaces_table(results):
+    def row_convert(item):
+        from collections import OrderedDict
+        result = OrderedDict()
+        result['Classification'] = item['classification']
+        result['Metric Namespace Name'] = item['properties']['metricNamespaceName']
+        return result
+    return _generic_table_convert(results, row_convert)
+
+
 def metrics_table(results):
     from collections import OrderedDict
 
@@ -83,7 +94,7 @@ def metrics_table(results):
     for value_group in results['value']:
         name = value_group['name']['localizedValue']
         for series in value_group['timeseries']:
-            metadata = dict((m['name']['localizedValue'], m['value']) for m in series['metadatavalues'])
+            metadata = {m['name']['localizedValue']: m['value'] for m in series['metadatavalues']}
 
             for data in series['data']:
                 row = OrderedDict()

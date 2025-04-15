@@ -1,8 +1,9 @@
 interactions:
 - request:
-    body: 'b''b\''{"location": "japaneast", "properties": {"storageAccounts": [{"id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}}\'''''
+    body: '{"location": "japaneast", "identity": {"type": "SystemAssigned"}, "properties":
+      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
+      "ipAllowList": []}}, "publicNetworkAccess": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -13,33 +14,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '304'
+      - '389'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -n -g --storage-account -l
+      - -n -g --storage-account -l --mi-system-assigned --default-action
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Japan
-        East\",\"properties\":{\r\n    \"mediaServiceId\":\"3530e1b9-4d9d-4d46-b328-b0fbd4ce2520\",\"storageAccounts\":[\r\n
+        East\",\"properties\":{\r\n    \"mediaServiceId\":\"80cf39b3-ae61-442b-8ae7-51b1a1546268\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+        \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
+        \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
+        \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
+        \     }\r\n    },\"publicNetworkAccess\":\"Enabled\"\r\n  },\"systemData\":{\r\n
+        \   \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:02:59.8889514Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:02:59.8889514Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"133ef8ea-497d-420c-9bb7-0e5fa186275b\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '666'
+      - '1165'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:49 GMT
+      - Thu, 14 Apr 2022 18:03:03 GMT
       expires:
       - '-1'
       odata-version:
@@ -72,32 +76,30 @@ interactions:
       Content-Length:
       - '144'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -a -n -g --preset
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-05-07T23:15:51.2022547Z\",\"lastModified\":\"2020-05-07T23:15:51.2022547Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-04-14T18:03:03.9767722Z\",\"lastModified\":\"2022-04-14T18:03:03.9767722Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:03:03.9767722Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:03:03.9767722Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '648'
+      - '826'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:50 GMT
+      - Thu, 14 Apr 2022 18:03:04 GMT
       expires:
       - '-1'
       odata-version:
@@ -111,7 +113,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -129,28 +131,26 @@ interactions:
       ParameterSetName:
       - -a -n -g --preset --on-error --relative-priority
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-05-07T23:15:51.2022547Z\",\"lastModified\":\"2020-05-07T23:15:51.2022547Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-04-14T18:03:03.9767722Z\",\"lastModified\":\"2022-04-14T18:03:03.9767722Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:03:03.9767722Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:03:03.9767722Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '648'
+      - '826'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:52 GMT
+      - Thu, 14 Apr 2022 18:03:05 GMT
       expires:
       - '-1'
       odata-version:
@@ -175,21 +175,19 @@ interactions:
       "Normal", "preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
       "presetName": "AACGoodQualityAudio"}}, {"onError": "ContinueJob", "relativePriority":
       "High", "preset": {"@odata.type": "#Microsoft.Media.StandardEncoderPreset",
-      "filters": {"rotation": "Auto", "overlays": [{"inputLabel": "videooverlay",
-      "audioGainLevel": 1.0, "@odata.type": "#Microsoft.Media.VideoOverlay", "opacity":
-      1.0}]}, "codecs": [{"@odata.type": "#Microsoft.Media.AacAudio", "channels":
-      2, "samplingRate": 48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type":
-      "#Microsoft.Media.H264Video", "keyFrameInterval": "PT2S", "stretchMode": "AutoSize",
-      "sceneChangeDetection": false, "complexity": "Balanced", "layers": [{"width":
-      "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer", "bitrate":
-      2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
-      true, "profile": "Auto", "level": "auto", "bufferWindow": "PT5S", "referenceFrames":
-      3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "@odata.type":
-      "#Microsoft.Media.H264Layer", "bitrate": 1000000, "maxBitrate": 1000000, "bFrames":
-      3, "slices": 0, "adaptiveBFrame": true, "profile": "Auto", "level": "auto",
-      "bufferWindow": "PT5S", "referenceFrames": 3, "entropyMode": "Cabac"}]}], "formats":
-      [{"filenamePattern": "{Basename}_{Bitrate}{Extension}", "@odata.type": "#Microsoft.Media.Mp4Format",
-      "outputFiles": []}]}}]}}'
+      "filters": {"rotation": "Auto", "overlays": [{"@odata.type": "#Microsoft.Media.VideoOverlay",
+      "inputLabel": "videooverlay", "audioGainLevel": 1.0, "opacity": 1.0}]}, "codecs":
+      [{"@odata.type": "#Microsoft.Media.AacAudio", "channels": 2, "samplingRate":
+      48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type": "#Microsoft.Media.H264Video",
+      "keyFrameInterval": "PT2S", "stretchMode": "AutoSize", "complexity": "Balanced",
+      "layers": [{"width": "1280", "height": "720", "bitrate": 2000000, "maxBitrate":
+      2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame": true, "profile": "Auto",
+      "level": "auto", "bufferWindow": "PT5S", "referenceFrames": 3, "entropyMode":
+      "Cabac"}, {"width": "640", "height": "360", "bitrate": 1000000, "maxBitrate":
+      1000000, "bFrames": 3, "slices": 0, "adaptiveBFrame": true, "profile": "Auto",
+      "level": "auto", "bufferWindow": "PT5S", "referenceFrames": 3, "entropyMode":
+      "Cabac"}], "sceneChangeDetection": false}], "formats": [{"@odata.type": "#Microsoft.Media.Mp4Format",
+      "filenamePattern": "{Basename}_{Bitrate}{Extension}", "outputFiles": []}]}}]}}'
     headers:
       Accept:
       - application/json
@@ -200,22 +198,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1497'
+      - '1407'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -a -n -g --preset --on-error --relative-priority
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-05-07T23:15:51.2022547Z\",\"lastModified\":\"2020-05-07T23:15:52.5939834Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-04-14T18:03:03.9767722Z\",\"lastModified\":\"2022-04-14T18:03:06.3509447Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -223,22 +218,23 @@ interactions:
         \           \"rotation\":\"Auto\",\"overlays\":[\r\n              {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"videooverlay\",\"audioGainLevel\":1.0,\"opacity\":1.0\r\n
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
-        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
-        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
-        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"rateControlMode\":\"ABR\",\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
+        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+        \     }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:03:03.9767722Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:03:06.3509447Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2169'
+      - '2407'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:52 GMT
+      - Thu, 14 Apr 2022 18:03:05 GMT
       expires:
       - '-1'
       odata-version:
@@ -272,18 +268,15 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -a -n -g --preset --audio-language
+      - -a -n -g --preset --audio-language --audio-analysis-mode
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-05-07T23:15:51.2022547Z\",\"lastModified\":\"2020-05-07T23:15:52.5939834Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-04-14T18:03:03.9767722Z\",\"lastModified\":\"2022-04-14T18:03:06.3509447Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -291,22 +284,23 @@ interactions:
         \           \"rotation\":\"Auto\",\"overlays\":[\r\n              {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"videooverlay\",\"audioGainLevel\":1.0,\"opacity\":1.0\r\n
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
-        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
-        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
-        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"rateControlMode\":\"ABR\",\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
+        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+        \     }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:03:03.9767722Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:03:06.3509447Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2169'
+      - '2407'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:53 GMT
+      - Thu, 14 Apr 2022 18:03:07 GMT
       expires:
       - '-1'
       odata-version:
@@ -331,22 +325,21 @@ interactions:
       "Normal", "preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
       "presetName": "AACGoodQualityAudio"}}, {"onError": "ContinueJob", "relativePriority":
       "High", "preset": {"@odata.type": "#Microsoft.Media.StandardEncoderPreset",
-      "filters": {"rotation": "Auto", "overlays": [{"inputLabel": "videooverlay",
-      "audioGainLevel": 1.0, "@odata.type": "#Microsoft.Media.VideoOverlay", "opacity":
-      1.0}]}, "codecs": [{"@odata.type": "#Microsoft.Media.AacAudio", "channels":
-      2, "samplingRate": 48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type":
-      "#Microsoft.Media.H264Video", "keyFrameInterval": "PT2S", "stretchMode": "AutoSize",
-      "sceneChangeDetection": false, "complexity": "Balanced", "layers": [{"width":
-      "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer", "bitrate":
-      2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
-      true, "profile": "Auto", "level": "auto", "bufferWindow": "PT5S", "referenceFrames":
-      3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "@odata.type":
-      "#Microsoft.Media.H264Layer", "bitrate": 1000000, "maxBitrate": 1000000, "bFrames":
-      3, "slices": 0, "adaptiveBFrame": true, "profile": "Auto", "level": "auto",
-      "bufferWindow": "PT5S", "referenceFrames": 3, "entropyMode": "Cabac"}]}], "formats":
-      [{"filenamePattern": "{Basename}_{Bitrate}{Extension}", "@odata.type": "#Microsoft.Media.Mp4Format",
-      "outputFiles": []}]}}, {"preset": {"@odata.type": "#Microsoft.Media.AudioAnalyzerPreset",
-      "audioLanguage": "es-ES"}}]}}'
+      "filters": {"rotation": "Auto", "overlays": [{"@odata.type": "#Microsoft.Media.VideoOverlay",
+      "inputLabel": "videooverlay", "audioGainLevel": 1.0, "opacity": 1.0}]}, "codecs":
+      [{"@odata.type": "#Microsoft.Media.AacAudio", "channels": 2, "samplingRate":
+      48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type": "#Microsoft.Media.H264Video",
+      "keyFrameInterval": "PT2S", "stretchMode": "AutoSize", "syncMode": "Auto", "complexity":
+      "Balanced", "layers": [{"width": "1280", "height": "720", "bitrate": 2000000,
+      "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame": true, "profile":
+      "Auto", "level": "auto", "bufferWindow": "PT5S", "crf": 23.0, "referenceFrames":
+      3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "bitrate": 1000000,
+      "maxBitrate": 1000000, "bFrames": 3, "slices": 0, "adaptiveBFrame": true, "profile":
+      "Auto", "level": "auto", "bufferWindow": "PT5S", "crf": 23.0, "referenceFrames":
+      3, "entropyMode": "Cabac"}], "rateControlMode": "ABR", "sceneChangeDetection":
+      false}], "formats": [{"@odata.type": "#Microsoft.Media.Mp4Format", "filenamePattern":
+      "{Basename}_{Bitrate}{Extension}", "outputFiles": []}]}}, {"preset": {"@odata.type":
+      "#Microsoft.Media.AudioAnalyzerPreset", "audioLanguage": "es-ES", "mode": "Basic"}}]}}'
     headers:
       Accept:
       - application/json
@@ -357,22 +350,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1592'
+      - '1591'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -a -n -g --preset --audio-language
+      - -a -n -g --preset --audio-language --audio-analysis-mode
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-05-07T23:15:51.2022547Z\",\"lastModified\":\"2020-05-07T23:15:54.2088584Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-04-14T18:03:03.9767722Z\",\"lastModified\":\"2022-04-14T18:03:07.7813954Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -380,24 +370,25 @@ interactions:
         \           \"rotation\":\"Auto\",\"overlays\":[\r\n              {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"videooverlay\",\"audioGainLevel\":1.0,\"opacity\":1.0\r\n
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
-        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
-        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
-        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"rateControlMode\":\"ABR\",\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
+        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:03:03.9767722Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:03:07.7813954Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2357'
+      - '2610'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:53 GMT
+      - Thu, 14 Apr 2022 18:03:07 GMT
       expires:
       - '-1'
       odata-version:
@@ -415,7 +406,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -431,18 +422,15 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -a -n -g --preset --audio-language --insights-to-extract
+      - -a -n -g --preset --audio-language --insights-to-extract --video-analysis-mode
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-05-07T23:15:51.2022547Z\",\"lastModified\":\"2020-05-07T23:15:54.2088584Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-04-14T18:03:03.9767722Z\",\"lastModified\":\"2022-04-14T18:03:07.7813954Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -450,24 +438,25 @@ interactions:
         \           \"rotation\":\"Auto\",\"overlays\":[\r\n              {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"videooverlay\",\"audioGainLevel\":1.0,\"opacity\":1.0\r\n
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
-        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
-        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
-        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"rateControlMode\":\"ABR\",\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
+        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:03:03.9767722Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:03:07.7813954Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2357'
+      - '2610'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:54 GMT
+      - Thu, 14 Apr 2022 18:03:08 GMT
       expires:
       - '-1'
       odata-version:
@@ -492,24 +481,23 @@ interactions:
       "Normal", "preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
       "presetName": "AACGoodQualityAudio"}}, {"onError": "ContinueJob", "relativePriority":
       "High", "preset": {"@odata.type": "#Microsoft.Media.StandardEncoderPreset",
-      "filters": {"rotation": "Auto", "overlays": [{"inputLabel": "videooverlay",
-      "audioGainLevel": 1.0, "@odata.type": "#Microsoft.Media.VideoOverlay", "opacity":
-      1.0}]}, "codecs": [{"@odata.type": "#Microsoft.Media.AacAudio", "channels":
-      2, "samplingRate": 48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type":
-      "#Microsoft.Media.H264Video", "keyFrameInterval": "PT2S", "stretchMode": "AutoSize",
-      "sceneChangeDetection": false, "complexity": "Balanced", "layers": [{"width":
-      "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer", "bitrate":
-      2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
-      true, "profile": "Auto", "level": "auto", "bufferWindow": "PT5S", "referenceFrames":
-      3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "@odata.type":
-      "#Microsoft.Media.H264Layer", "bitrate": 1000000, "maxBitrate": 1000000, "bFrames":
-      3, "slices": 0, "adaptiveBFrame": true, "profile": "Auto", "level": "auto",
-      "bufferWindow": "PT5S", "referenceFrames": 3, "entropyMode": "Cabac"}]}], "formats":
-      [{"filenamePattern": "{Basename}_{Bitrate}{Extension}", "@odata.type": "#Microsoft.Media.Mp4Format",
-      "outputFiles": []}]}}, {"onError": "StopProcessingJob", "relativePriority":
-      "Normal", "preset": {"@odata.type": "#Microsoft.Media.AudioAnalyzerPreset",
-      "audioLanguage": "es-ES"}}, {"preset": {"@odata.type": "#Microsoft.Media.VideoAnalyzerPreset",
-      "audioLanguage": "en-US", "insightsToExtract": "AudioInsightsOnly"}}]}}'
+      "filters": {"rotation": "Auto", "overlays": [{"@odata.type": "#Microsoft.Media.VideoOverlay",
+      "inputLabel": "videooverlay", "audioGainLevel": 1.0, "opacity": 1.0}]}, "codecs":
+      [{"@odata.type": "#Microsoft.Media.AacAudio", "channels": 2, "samplingRate":
+      48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type": "#Microsoft.Media.H264Video",
+      "keyFrameInterval": "PT2S", "stretchMode": "AutoSize", "syncMode": "Auto", "complexity":
+      "Balanced", "layers": [{"width": "1280", "height": "720", "bitrate": 2000000,
+      "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame": true, "profile":
+      "Auto", "level": "auto", "bufferWindow": "PT5S", "crf": 23.0, "referenceFrames":
+      3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "bitrate": 1000000,
+      "maxBitrate": 1000000, "bFrames": 3, "slices": 0, "adaptiveBFrame": true, "profile":
+      "Auto", "level": "auto", "bufferWindow": "PT5S", "crf": 23.0, "referenceFrames":
+      3, "entropyMode": "Cabac"}], "rateControlMode": "ABR", "sceneChangeDetection":
+      false}], "formats": [{"@odata.type": "#Microsoft.Media.Mp4Format", "filenamePattern":
+      "{Basename}_{Bitrate}{Extension}", "outputFiles": []}]}}, {"onError": "StopProcessingJob",
+      "relativePriority": "Normal", "preset": {"@odata.type": "#Microsoft.Media.AudioAnalyzerPreset",
+      "audioLanguage": "es-ES", "mode": "Basic"}}, {"preset": {"@odata.type": "#Microsoft.Media.VideoAnalyzerPreset",
+      "audioLanguage": "en-US", "mode": "Basic", "insightsToExtract": "AudioInsightsOnly"}}]}}'
     headers:
       Accept:
       - application/json
@@ -520,22 +508,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1791'
+      - '1807'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -a -n -g --preset --audio-language --insights-to-extract
+      - -a -n -g --preset --audio-language --insights-to-extract --video-analysis-mode
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-05-07T23:15:51.2022547Z\",\"lastModified\":\"2020-05-07T23:15:55.6984171Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-04-14T18:03:03.9767722Z\",\"lastModified\":\"2022-04-14T18:03:09.3385763Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -543,26 +528,27 @@ interactions:
         \           \"rotation\":\"Auto\",\"overlays\":[\r\n              {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"videooverlay\",\"audioGainLevel\":1.0,\"opacity\":1.0\r\n
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
-        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
-        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
-        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"rateControlMode\":\"ABR\",\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
+        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"mode\":\"Basic\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:03:03.9767722Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:03:09.3385763Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2585'
+      - '2853'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:55 GMT
+      - Thu, 14 Apr 2022 18:03:09 GMT
       expires:
       - '-1'
       odata-version:
@@ -580,7 +566,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1194'
     status:
       code: 200
       message: OK
@@ -596,18 +582,15 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -a -n -g --preset --resolution
+      - -a -n -g --preset --resolution --face-detector-mode --blur-type
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-05-07T23:15:51.2022547Z\",\"lastModified\":\"2020-05-07T23:15:55.6984171Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-04-14T18:03:03.9767722Z\",\"lastModified\":\"2022-04-14T18:03:09.3385763Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -615,26 +598,27 @@ interactions:
         \           \"rotation\":\"Auto\",\"overlays\":[\r\n              {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"videooverlay\",\"audioGainLevel\":1.0,\"opacity\":1.0\r\n
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
-        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
-        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
-        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"rateControlMode\":\"ABR\",\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
+        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"mode\":\"Basic\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:03:03.9767722Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:03:09.3385763Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2585'
+      - '2853'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:55 GMT
+      - Thu, 14 Apr 2022 18:03:09 GMT
       expires:
       - '-1'
       odata-version:
@@ -659,26 +643,26 @@ interactions:
       "Normal", "preset": {"@odata.type": "#Microsoft.Media.BuiltInStandardEncoderPreset",
       "presetName": "AACGoodQualityAudio"}}, {"onError": "ContinueJob", "relativePriority":
       "High", "preset": {"@odata.type": "#Microsoft.Media.StandardEncoderPreset",
-      "filters": {"rotation": "Auto", "overlays": [{"inputLabel": "videooverlay",
-      "audioGainLevel": 1.0, "@odata.type": "#Microsoft.Media.VideoOverlay", "opacity":
-      1.0}]}, "codecs": [{"@odata.type": "#Microsoft.Media.AacAudio", "channels":
-      2, "samplingRate": 48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type":
-      "#Microsoft.Media.H264Video", "keyFrameInterval": "PT2S", "stretchMode": "AutoSize",
-      "sceneChangeDetection": false, "complexity": "Balanced", "layers": [{"width":
-      "1280", "height": "720", "@odata.type": "#Microsoft.Media.H264Layer", "bitrate":
-      2000000, "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame":
-      true, "profile": "Auto", "level": "auto", "bufferWindow": "PT5S", "referenceFrames":
-      3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "@odata.type":
-      "#Microsoft.Media.H264Layer", "bitrate": 1000000, "maxBitrate": 1000000, "bFrames":
-      3, "slices": 0, "adaptiveBFrame": true, "profile": "Auto", "level": "auto",
-      "bufferWindow": "PT5S", "referenceFrames": 3, "entropyMode": "Cabac"}]}], "formats":
-      [{"filenamePattern": "{Basename}_{Bitrate}{Extension}", "@odata.type": "#Microsoft.Media.Mp4Format",
-      "outputFiles": []}]}}, {"onError": "StopProcessingJob", "relativePriority":
-      "Normal", "preset": {"@odata.type": "#Microsoft.Media.AudioAnalyzerPreset",
-      "audioLanguage": "es-ES"}}, {"onError": "StopProcessingJob", "relativePriority":
-      "Normal", "preset": {"@odata.type": "#Microsoft.Media.VideoAnalyzerPreset",
-      "audioLanguage": "en-US", "insightsToExtract": "AudioInsightsOnly"}}, {"preset":
-      {"@odata.type": "#Microsoft.Media.FaceDetectorPreset", "resolution": "SourceResolution"}}]}}'
+      "filters": {"rotation": "Auto", "overlays": [{"@odata.type": "#Microsoft.Media.VideoOverlay",
+      "inputLabel": "videooverlay", "audioGainLevel": 1.0, "opacity": 1.0}]}, "codecs":
+      [{"@odata.type": "#Microsoft.Media.AacAudio", "channels": 2, "samplingRate":
+      48000, "bitrate": 128000, "profile": "AacLc"}, {"@odata.type": "#Microsoft.Media.H264Video",
+      "keyFrameInterval": "PT2S", "stretchMode": "AutoSize", "syncMode": "Auto", "complexity":
+      "Balanced", "layers": [{"width": "1280", "height": "720", "bitrate": 2000000,
+      "maxBitrate": 2000000, "bFrames": 3, "slices": 0, "adaptiveBFrame": true, "profile":
+      "Auto", "level": "auto", "bufferWindow": "PT5S", "crf": 23.0, "referenceFrames":
+      3, "entropyMode": "Cabac"}, {"width": "640", "height": "360", "bitrate": 1000000,
+      "maxBitrate": 1000000, "bFrames": 3, "slices": 0, "adaptiveBFrame": true, "profile":
+      "Auto", "level": "auto", "bufferWindow": "PT5S", "crf": 23.0, "referenceFrames":
+      3, "entropyMode": "Cabac"}], "rateControlMode": "ABR", "sceneChangeDetection":
+      false}], "formats": [{"@odata.type": "#Microsoft.Media.Mp4Format", "filenamePattern":
+      "{Basename}_{Bitrate}{Extension}", "outputFiles": []}]}}, {"onError": "StopProcessingJob",
+      "relativePriority": "Normal", "preset": {"@odata.type": "#Microsoft.Media.AudioAnalyzerPreset",
+      "audioLanguage": "es-ES", "mode": "Basic"}}, {"onError": "StopProcessingJob",
+      "relativePriority": "Normal", "preset": {"@odata.type": "#Microsoft.Media.VideoAnalyzerPreset",
+      "audioLanguage": "en-US", "mode": "Basic", "insightsToExtract": "AudioInsightsOnly"}},
+      {"preset": {"@odata.type": "#Microsoft.Media.FaceDetectorPreset", "resolution":
+      "SourceResolution", "mode": "Redact", "blurType": "Low"}}]}}'
     headers:
       Accept:
       - application/json
@@ -689,22 +673,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1955'
+      - '2008'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -a -n -g --preset --resolution
+      - -a -n -g --preset --resolution --face-detector-mode --blur-type
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.5.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000004\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-05-07T23:15:51.2022547Z\",\"lastModified\":\"2020-05-07T23:15:57.319004Z\",\"outputs\":[\r\n
+        \   \"created\":\"2022-04-14T18:03:03.9767722Z\",\"lastModified\":\"2022-04-14T18:03:10.8584501Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"ContinueJob\",\"relativePriority\":\"High\",\"preset\":{\r\n
@@ -712,28 +693,29 @@ interactions:
         \           \"rotation\":\"Auto\",\"overlays\":[\r\n              {\r\n                \"@odata.type\":\"#Microsoft.Media.VideoOverlay\",\"inputLabel\":\"videooverlay\",\"audioGainLevel\":1.0,\"opacity\":1.0\r\n
         \             }\r\n            ]\r\n          },\"codecs\":[\r\n            {\r\n
         \             \"@odata.type\":\"#Microsoft.Media.AacAudio\",\"channels\":2,\"samplingRate\":48000,\"bitrate\":128000,\"profile\":\"AacLc\"\r\n
-        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"sceneChangeDetection\":false,\"complexity\":\"Balanced\",\"layers\":[\r\n
-        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
-        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"entropyMode\":\"Cabac\"\r\n
+        \           },{\r\n              \"@odata.type\":\"#Microsoft.Media.H264Video\",\"keyFrameInterval\":\"PT2S\",\"stretchMode\":\"AutoSize\",\"syncMode\":\"Auto\",\"sceneChangeDetection\":false,\"rateControlMode\":\"ABR\",\"complexity\":\"Balanced\",\"layers\":[\r\n
+        \               {\r\n                  \"width\":\"1280\",\"height\":\"720\",\"bitrate\":2000000,\"maxBitrate\":2000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
+        \               },{\r\n                  \"width\":\"640\",\"height\":\"360\",\"bitrate\":1000000,\"maxBitrate\":1000000,\"bFrames\":3,\"slices\":0,\"adaptiveBFrame\":true,\"profile\":\"Auto\",\"level\":\"auto\",\"bufferWindow\":\"PT5S\",\"referenceFrames\":3,\"crf\":23,\"entropyMode\":\"Cabac\"\r\n
         \               }\r\n              ]\r\n            }\r\n          ],\"formats\":[\r\n
         \           {\r\n              \"@odata.type\":\"#Microsoft.Media.Mp4Format\",\"filenamePattern\":\"{Basename}_{Bitrate}{Extension}\",\"outputFiles\":[\r\n
         \               \r\n              ]\r\n            }\r\n          ]\r\n        }\r\n
         \     },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\"\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.AudioAnalyzerPreset\",\"audioLanguage\":\"es-ES\",\"mode\":\"Basic\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.VideoAnalyzerPreset\",\"audioLanguage\":\"en-US\",\"mode\":\"Basic\",\"insightsToExtract\":\"AudioInsightsOnly\"\r\n
         \       }\r\n      },{\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
-        \         \"@odata.type\":\"#Microsoft.Media.FaceDetectorPreset\",\"resolution\":\"SourceResolution\"\r\n
-        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         \"@odata.type\":\"#Microsoft.Media.FaceDetectorPreset\",\"resolution\":\"SourceResolution\",\"mode\":\"Redact\",\"blurType\":\"Low\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"aaa@foo.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:03:03.9767722Z\",\"lastModifiedBy\":\"aaa@foo.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:03:10.8584501Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2779'
+      - '3081'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 07 May 2020 23:15:57 GMT
+      - Thu, 14 Apr 2022 18:03:10 GMT
       expires:
       - '-1'
       odata-version:
@@ -751,7 +733,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 200
       message: OK

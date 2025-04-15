@@ -2,6 +2,8 @@
 
 root=$(cd $(dirname $0); pwd)
 
+tdnf install -y ca-certificates
+
 pip install wheel
 pip install -U pip
 pip install -r $root/requirements.txt
@@ -10,4 +12,6 @@ pip install -r /mnt/src/azure-cli/requirements.py3.Darwin.txt
 
 pip list
 
-python $root/formula_generate.py -b use_template
+# default option is update_existing to build from homebrew master branch,
+# append '-b use_template' to build from formula_template.txt 
+python3 $root/formula_generate.py

@@ -36,12 +36,11 @@ def _query_account_key(cli_ctx, account_name):
     t_storage_account_keys = get_sdk(
         cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
 
-    scf.config.enable_http_logger = False
     logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     if t_storage_account_keys:
-        return scf.storage_accounts.list_keys(rg, account_name).key1
+        return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).key1
     # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
-    return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+    return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).keys[0].value  # pylint: disable=no-member
 
 
 def _query_account_rg(cli_ctx, account_name):
@@ -49,7 +48,7 @@ def _query_account_rg(cli_ctx, account_name):
     scf = storage_client_factory(cli_ctx)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         return parse_resource_id(acc.id)['resource_group'], scf
     raise ValueError("Storage account '{}' not found.".format(account_name))
 
@@ -71,7 +70,7 @@ def _create_token_credential(cli_ctx):
 # region PARAMETER VALIDATORS
 def parse_storage_account(cmd, namespace):
     """Parse storage account which can be either account name or account id"""
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
     if namespace.account_name and is_valid_resource_id(namespace.account_name):
         namespace.resource_group_name = parse_resource_id(namespace.account_name)['resource_group']
@@ -128,8 +127,7 @@ def validate_client_parameters(cmd, namespace):
             if is_storagev2(prefix):
                 from azure.cli.core._profile import Profile
                 profile = Profile(cli_ctx=cmd.cli_ctx)
-                n.token_credential, _, _ = profile.get_login_credentials(
-                    resource="https://storage.azure.com", subscription_id=n._subscription)
+                n.token_credential, _, _ = profile.get_login_credentials(subscription_id=n._subscription)
             # Otherwise, we will assume it is in track1 and keep previous token updater
             else:
                 n.token_credential = _create_token_credential(cmd.cli_ctx)
@@ -175,7 +173,7 @@ def validate_client_parameters(cmd, namespace):
                        '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
                        'have required RBAC roles in your command. For more information about RBAC roles '
                        'in storage, visit '
-                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
+                       'https://learn.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli. \n'
                        'Setting the corresponding environment variables can avoid inputting credentials in '
                        'your command. Please use --help to get more information.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
@@ -406,6 +404,7 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         clear_content_settings = ns.pop('clear_content_settings', False)
 
         # retrieve the existing object properties for an update
+        props = None
         if update and not clear_content_settings:
             account = ns.get('account_name')
             key = ns.get('account_key')
@@ -586,6 +585,8 @@ def validate_key_name(namespace):
         namespace.key_name = namespace.key_type + key_options[namespace.key_name]
     else:
         namespace.key_name = storage_account_key_options[namespace.key_name]
+    if hasattr(namespace, 'key_type'):
+        del namespace.key_type
 
 
 def validate_metadata(namespace):
@@ -811,7 +812,7 @@ def process_blob_upload_batch_parameters(cmd, namespace):
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
-    namespace.source_files = [c for c in glob_files_locally(namespace.source, namespace.pattern)]
+    namespace.source_files = list(glob_files_locally(namespace.source, namespace.pattern))
 
     # 4. determine blob type
     if namespace.blob_type is None:
@@ -947,7 +948,7 @@ def process_metric_update_namespace(namespace):
 
 
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     subnet = namespace.subnet
@@ -1030,7 +1031,7 @@ def services_type(loader):
 
 def get_char_options_validator(types, property_name):
     def _validator(namespace):
-        service_types = set(getattr(namespace, property_name, list()))
+        service_types = set(getattr(namespace, property_name, []))
 
         if not service_types:
             raise ValueError('Missing options --{}.'.format(property_name.replace('_', '-')))
@@ -1131,7 +1132,7 @@ def validate_azcopy_remove_arguments(cmd, namespace):
                                              'specified'))
     if valid_blob:
         client = blob_data_service_factory(cmd.cli_ctx, {
-            'account_name': namespace.account_name})
+            'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
         if not blob:
             blob = ''
         url = client.make_blob_url(container, blob)
@@ -1292,4 +1293,4 @@ def validate_logging_version(namespace):
     if validate_service_type(namespace.services, 'table') and namespace.version != 1.0:
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
-            'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
+            'please refer to https://learn.microsoft.com/rest/api/storageservices/storage-analytics-log-format.')

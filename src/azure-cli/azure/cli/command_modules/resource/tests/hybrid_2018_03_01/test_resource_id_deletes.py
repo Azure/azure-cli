@@ -16,14 +16,13 @@ class ResourceDeleteTests(ScenarioTest):
         username = 'ubuntu'
         password = self.create_random_name('Password#1', 30)
 
-        self.cmd('vm create -n {} -g {} --image UbuntuLTS --tag {} '
+        self.cmd('vm create -n {} -g {} --image Canonical:UbuntuServer:18.04-LTS:latest --tag {} '
                  '--admin-username {} --admin-password {} --authentication-type {} --nsg-rule None'
                  .format(vm_name, resource_group, tag_name, username, password, 'password'))
 
         rsrc_list = self.cmd('resource list --tag {} --query [].id'.format(tag_name)).get_output_in_json()
-
         self.cmd('resource delete --ids {}'.format(' '.join(rsrc_list)))
-        self.cmd('resource list --tag {}'.format(tag_name), checks=[JMESPathCheck('length([])', 0)])
+        self.cmd('resource wait --ids {} --deleted --timeout 300'.format(''.join(rsrc_list)))
 
 
 if __name__ == '__main__':

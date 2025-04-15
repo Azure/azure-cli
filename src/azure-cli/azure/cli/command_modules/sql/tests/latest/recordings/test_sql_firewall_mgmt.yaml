@@ -1,7 +1,8 @@
 interactions:
 - request:
-    body: '{"location": "westeurope", "properties": {"administratorLoginPassword":
-      "SecretPassword123", "administratorLogin": "admin123"}}'
+    body: '{"location": "westus", "properties": {"administratorLogin": "admin123",
+      "administratorLoginPassword": "SecretPassword123", "minimalTlsVersion": "1.2",
+      "administrators": {}}}'
     headers:
       Accept:
       - application/json
@@ -12,46 +13,49 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '127'
+      - '173'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"operation":"UpsertLogicalServer","startTime":"2020-03-04T19:37:04.393Z"}'
+      string: '{"operation":"UpsertLogicalServer","startTime":"2025-04-08T16:14:23.76Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/dc6518bd-3cc2-4e1e-bfce-2bbd4927d494?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639059750&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=4Rx05ccevVAXNGep3kvs5bQNXs7FsAV5AxFC-N3Vo_pLtG9O2J4IZFjTygW9UKdMhp8iDt2gR4J5tg4NzgT-x3f1G4UbgnN7H8u2av_I-2tayw8To7DPyAtH0yVt8PRpO1xy6HsF8efxUmTSQ6tHDrcU7cbd7ZuX3xCKw0pfh1wLSF_ApI9iwH3dz4oF-DIkyIpLmQTz0IdrYy9QdJzokFLhRMVa6Nn64R6jzvYzoE6yIftfC4dDZp4truM5QMlDLE0Bu6GUoNEjUx6BciKx6P3gGAs8XaAXgLYYZTfyoBlR4UAVkrmFrG0ktRektkv5fKH5R4uQk-CSgHQU6rLzTA&h=6R0IMgDGpMEh78NrdDJ6dwIQo6-KLTfG6Jgs2xRacHg
       cache-control:
       - no-cache
       content-length:
-      - '74'
+      - '73'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:37:03 GMT
+      - Tue, 08 Apr 2025 16:14:23 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverOperationResults/dc6518bd-3cc2-4e1e-bfce-2bbd4927d494?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverOperationResults/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639215998&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=OosA_hTeZwvC8NMcEQGoYQPwiDlRtj2T3r05H15HsOgMqiIl2i79NVRNQAuUwRPZZ_4aBrLg2km7vHgtrBbjR143MmAj_2JL30_FbO7gIhhzVgH4rGPlOOtzIE4p1l-eyvVviPUDORKA2F8bq87pl6bbjffB6diw9ohJxxkT9G0wv3BPMc2rrqBJCxxR-E5cdhCjS7wlVrbpTc9XFDNea4CF2T50nLUgAp0gi1x0kW7q6HWhlQWzc5twuanr4xckS6a6Idft1tDesNIUgTIvnnCJKMFhIjcLqtXpGM4_e__Vicsj3z32lIg5XWAJBOig_cz-4l_MosOgJhq_4yJ0nA&h=-NnPvOZ1pEVVHk39SUO2ja-v1bQweZSSDOq81QSYpTw
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/d7908522-6e09-4869-a392-ffa11508ea74
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 884ED1F8CCC74F69B2CBE281077A389F Ref B: MAA201060514053 Ref C: 2025-04-08T16:14:20Z'
     status:
       code: 202
       message: Accepted
@@ -59,7 +63,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -69,295 +73,12 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/dc6518bd-3cc2-4e1e-bfce-2bbd4927d494?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639059750&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=4Rx05ccevVAXNGep3kvs5bQNXs7FsAV5AxFC-N3Vo_pLtG9O2J4IZFjTygW9UKdMhp8iDt2gR4J5tg4NzgT-x3f1G4UbgnN7H8u2av_I-2tayw8To7DPyAtH0yVt8PRpO1xy6HsF8efxUmTSQ6tHDrcU7cbd7ZuX3xCKw0pfh1wLSF_ApI9iwH3dz4oF-DIkyIpLmQTz0IdrYy9QdJzokFLhRMVa6Nn64R6jzvYzoE6yIftfC4dDZp4truM5QMlDLE0Bu6GUoNEjUx6BciKx6P3gGAs8XaAXgLYYZTfyoBlR4UAVkrmFrG0ktRektkv5fKH5R4uQk-CSgHQU6rLzTA&h=6R0IMgDGpMEh78NrdDJ6dwIQo6-KLTfG6Jgs2xRacHg
   response:
     body:
-      string: '{"name":"dc6518bd-3cc2-4e1e-bfce-2bbd4927d494","status":"InProgress","startTime":"2020-03-04T19:37:04.393Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Mar 2020 19:37:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p
-      User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/dc6518bd-3cc2-4e1e-bfce-2bbd4927d494?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"name":"dc6518bd-3cc2-4e1e-bfce-2bbd4927d494","status":"InProgress","startTime":"2020-03-04T19:37:04.393Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Mar 2020 19:37:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p
-      User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/dc6518bd-3cc2-4e1e-bfce-2bbd4927d494?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"name":"dc6518bd-3cc2-4e1e-bfce-2bbd4927d494","status":"InProgress","startTime":"2020-03-04T19:37:04.393Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Mar 2020 19:37:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p
-      User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/dc6518bd-3cc2-4e1e-bfce-2bbd4927d494?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"name":"dc6518bd-3cc2-4e1e-bfce-2bbd4927d494","status":"InProgress","startTime":"2020-03-04T19:37:04.393Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Mar 2020 19:37:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p
-      User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/dc6518bd-3cc2-4e1e-bfce-2bbd4927d494?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"name":"dc6518bd-3cc2-4e1e-bfce-2bbd4927d494","status":"InProgress","startTime":"2020-03-04T19:37:04.393Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Mar 2020 19:37:29 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p
-      User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/dc6518bd-3cc2-4e1e-bfce-2bbd4927d494?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"name":"dc6518bd-3cc2-4e1e-bfce-2bbd4927d494","status":"InProgress","startTime":"2020-03-04T19:37:04.393Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 04 Mar 2020 19:37:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p
-      User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/dc6518bd-3cc2-4e1e-bfce-2bbd4927d494?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"name":"dc6518bd-3cc2-4e1e-bfce-2bbd4927d494","status":"Succeeded","startTime":"2020-03-04T19:37:04.393Z"}'
+      string: '{"name":"f3e0f0bd-158e-4235-9a04-80d5fad0938a","status":"InProgress","startTime":"2025-04-08T16:14:23.76Z"}'
     headers:
       cache-control:
       - no-cache
@@ -366,21 +87,23 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:09 GMT
+      - Tue, 08 Apr 2025 16:14:23 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/e4c39284-bd45-4859-8104-f3162eb09cca
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 48E614FD518D4BED832478DB9D75615F Ref B: MAA201060514053 Ref C: 2025-04-08T16:14:24Z'
     status:
       code: 200
       message: OK
@@ -388,7 +111,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -398,41 +121,376 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639059750&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=4Rx05ccevVAXNGep3kvs5bQNXs7FsAV5AxFC-N3Vo_pLtG9O2J4IZFjTygW9UKdMhp8iDt2gR4J5tg4NzgT-x3f1G4UbgnN7H8u2av_I-2tayw8To7DPyAtH0yVt8PRpO1xy6HsF8efxUmTSQ6tHDrcU7cbd7ZuX3xCKw0pfh1wLSF_ApI9iwH3dz4oF-DIkyIpLmQTz0IdrYy9QdJzokFLhRMVa6Nn64R6jzvYzoE6yIftfC4dDZp4truM5QMlDLE0Bu6GUoNEjUx6BciKx6P3gGAs8XaAXgLYYZTfyoBlR4UAVkrmFrG0ktRektkv5fKH5R4uQk-CSgHQU6rLzTA&h=6R0IMgDGpMEh78NrdDJ6dwIQo6-KLTfG6Jgs2xRacHg
   response:
     body:
-      string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000002.database.windows.net","privateEndpointConnections":[],"publicNetworkAccess":"Enabled"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers"}'
+      string: '{"name":"f3e0f0bd-158e-4235-9a04-80d5fad0938a","status":"InProgress","startTime":"2025-04-08T16:14:23.76Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '645'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:09 GMT
+      - Tue, 08 Apr 2025 16:14:24 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/fb33a7d5-c748-4d18-bc7e-ea1245ce90c2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 4E8F6403D4BB4CE4959F5206234FE9B7 Ref B: MAA201060514053 Ref C: 2025-04-08T16:14:25Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"endIpAddress": "255.255.255.255", "startIpAddress": "0.0.0.0"}}'
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639059750&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=4Rx05ccevVAXNGep3kvs5bQNXs7FsAV5AxFC-N3Vo_pLtG9O2J4IZFjTygW9UKdMhp8iDt2gR4J5tg4NzgT-x3f1G4UbgnN7H8u2av_I-2tayw8To7DPyAtH0yVt8PRpO1xy6HsF8efxUmTSQ6tHDrcU7cbd7ZuX3xCKw0pfh1wLSF_ApI9iwH3dz4oF-DIkyIpLmQTz0IdrYy9QdJzokFLhRMVa6Nn64R6jzvYzoE6yIftfC4dDZp4truM5QMlDLE0Bu6GUoNEjUx6BciKx6P3gGAs8XaAXgLYYZTfyoBlR4UAVkrmFrG0ktRektkv5fKH5R4uQk-CSgHQU6rLzTA&h=6R0IMgDGpMEh78NrdDJ6dwIQo6-KLTfG6Jgs2xRacHg
+  response:
+    body:
+      string: '{"name":"f3e0f0bd-158e-4235-9a04-80d5fad0938a","status":"InProgress","startTime":"2025-04-08T16:14:23.76Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Apr 2025 16:14:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/ae280a0b-0b4b-405b-b3c5-1d0ed58bbd1f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: B2CF7BEBBF2C4104A14E47B8AEF17243 Ref B: MAA201060514053 Ref C: 2025-04-08T16:14:26Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639059750&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=4Rx05ccevVAXNGep3kvs5bQNXs7FsAV5AxFC-N3Vo_pLtG9O2J4IZFjTygW9UKdMhp8iDt2gR4J5tg4NzgT-x3f1G4UbgnN7H8u2av_I-2tayw8To7DPyAtH0yVt8PRpO1xy6HsF8efxUmTSQ6tHDrcU7cbd7ZuX3xCKw0pfh1wLSF_ApI9iwH3dz4oF-DIkyIpLmQTz0IdrYy9QdJzokFLhRMVa6Nn64R6jzvYzoE6yIftfC4dDZp4truM5QMlDLE0Bu6GUoNEjUx6BciKx6P3gGAs8XaAXgLYYZTfyoBlR4UAVkrmFrG0ktRektkv5fKH5R4uQk-CSgHQU6rLzTA&h=6R0IMgDGpMEh78NrdDJ6dwIQo6-KLTfG6Jgs2xRacHg
+  response:
+    body:
+      string: '{"name":"f3e0f0bd-158e-4235-9a04-80d5fad0938a","status":"InProgress","startTime":"2025-04-08T16:14:23.76Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Apr 2025 16:14:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/0b44b71b-a615-4bab-93bd-07cd8d2ba55f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 959A0FA2138E419890572DB99417C2AA Ref B: MAA201060514053 Ref C: 2025-04-08T16:14:28Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639059750&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=4Rx05ccevVAXNGep3kvs5bQNXs7FsAV5AxFC-N3Vo_pLtG9O2J4IZFjTygW9UKdMhp8iDt2gR4J5tg4NzgT-x3f1G4UbgnN7H8u2av_I-2tayw8To7DPyAtH0yVt8PRpO1xy6HsF8efxUmTSQ6tHDrcU7cbd7ZuX3xCKw0pfh1wLSF_ApI9iwH3dz4oF-DIkyIpLmQTz0IdrYy9QdJzokFLhRMVa6Nn64R6jzvYzoE6yIftfC4dDZp4truM5QMlDLE0Bu6GUoNEjUx6BciKx6P3gGAs8XaAXgLYYZTfyoBlR4UAVkrmFrG0ktRektkv5fKH5R4uQk-CSgHQU6rLzTA&h=6R0IMgDGpMEh78NrdDJ6dwIQo6-KLTfG6Jgs2xRacHg
+  response:
+    body:
+      string: '{"name":"f3e0f0bd-158e-4235-9a04-80d5fad0938a","status":"InProgress","startTime":"2025-04-08T16:14:23.76Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Apr 2025 16:14:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/9ace5f69-1674-4612-9cc0-d6659e35aea3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 718B2DE5F0114F799B1D9A95A7CF759E Ref B: MAA201060514053 Ref C: 2025-04-08T16:14:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639059750&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=4Rx05ccevVAXNGep3kvs5bQNXs7FsAV5AxFC-N3Vo_pLtG9O2J4IZFjTygW9UKdMhp8iDt2gR4J5tg4NzgT-x3f1G4UbgnN7H8u2av_I-2tayw8To7DPyAtH0yVt8PRpO1xy6HsF8efxUmTSQ6tHDrcU7cbd7ZuX3xCKw0pfh1wLSF_ApI9iwH3dz4oF-DIkyIpLmQTz0IdrYy9QdJzokFLhRMVa6Nn64R6jzvYzoE6yIftfC4dDZp4truM5QMlDLE0Bu6GUoNEjUx6BciKx6P3gGAs8XaAXgLYYZTfyoBlR4UAVkrmFrG0ktRektkv5fKH5R4uQk-CSgHQU6rLzTA&h=6R0IMgDGpMEh78NrdDJ6dwIQo6-KLTfG6Jgs2xRacHg
+  response:
+    body:
+      string: '{"name":"f3e0f0bd-158e-4235-9a04-80d5fad0938a","status":"InProgress","startTime":"2025-04-08T16:14:23.76Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Apr 2025 16:14:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/a95be213-64b7-4968-a8c8-414051dc29dc
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 61C77DD113EE4E00B6D28804649E122A Ref B: MAA201060514053 Ref C: 2025-04-08T16:14:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639059750&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=4Rx05ccevVAXNGep3kvs5bQNXs7FsAV5AxFC-N3Vo_pLtG9O2J4IZFjTygW9UKdMhp8iDt2gR4J5tg4NzgT-x3f1G4UbgnN7H8u2av_I-2tayw8To7DPyAtH0yVt8PRpO1xy6HsF8efxUmTSQ6tHDrcU7cbd7ZuX3xCKw0pfh1wLSF_ApI9iwH3dz4oF-DIkyIpLmQTz0IdrYy9QdJzokFLhRMVa6Nn64R6jzvYzoE6yIftfC4dDZp4truM5QMlDLE0Bu6GUoNEjUx6BciKx6P3gGAs8XaAXgLYYZTfyoBlR4UAVkrmFrG0ktRektkv5fKH5R4uQk-CSgHQU6rLzTA&h=6R0IMgDGpMEh78NrdDJ6dwIQo6-KLTfG6Jgs2xRacHg
+  response:
+    body:
+      string: '{"name":"f3e0f0bd-158e-4235-9a04-80d5fad0938a","status":"InProgress","startTime":"2025-04-08T16:14:23.76Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Apr 2025 16:15:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/22b5b1bd-1330-42bf-8cff-60d4e566e09b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 93BCD0B1134D4B5DADD775F6F3A35776 Ref B: MAA201060514053 Ref C: 2025-04-08T16:15:10Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/f3e0f0bd-158e-4235-9a04-80d5fad0938a?api-version=2024-05-01-preview&t=638797256639059750&c=MIIHhzCCBm-gAwIBAgITfAahW1AM79KhMijZVgAABqFbUDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTI3MDc1NTUwWhcNMjUwNzI2MDc1NTUwWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAON48qlkk82sETfcSrPQVQEB3sgZ9agfyQmjl5ePiRD1gHBTI5GMItpc0UH0FD6BzcnSThVwUO3zZLiZ9HYryuk6Z4ho1swNS9WprxsKBTkiMinO7_Fv4al72Z65eb1z0fc99jaSXLcBxax81143g8xSgT1q2pKdnYdFgoZq8StARw97Xj7wJsgnjMGVXVckCV30AwyH-x_7cl_PZ8gqfzYBFhbCUQCbN2aV3MdeJNwsnSYqJzkv08mlGrALgXkVQFGaUtA2PRs7TkrkFLQ79gnmDju7vYUEjxXjsNdBwvfpZAF2hbTVaScwZ0E2dA98nZA-M3u0Ve63f_Ra99PafUECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBRGhb3Uyd9HfU-JJaNxUCr6YIOXrDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIO0wI6FWmcFoF567nd2Ex_Mz_eVq5TQvquyf90JVWY744uYtzRpss6MhJHFc1knuFCR1jH-I_-oF9qxFHI6gjtzJzR7JY0BYar2KuWc5biJaaHVqnHfvMByIekfPBRoUSCjPPRHn1ATrQiGCwVlkuOwTsJP9qqunfi_yhcjbLAh2ddm7cXhrbIXYCdHdXc76RaC1iZFGIrZddnwyBNT-D7MIgZwtEVm6vRXYRX6E81DWAM4Tbe3s3zXVNoelRUSf8DLQP1iCCtgEqsiW46Ic-HWdmrmDg1AxjwEsfkOQdrALD7z_d1Z02yiAirH2jVVWiCjbunDd_yz1Ia5f4GrGUY&s=4Rx05ccevVAXNGep3kvs5bQNXs7FsAV5AxFC-N3Vo_pLtG9O2J4IZFjTygW9UKdMhp8iDt2gR4J5tg4NzgT-x3f1G4UbgnN7H8u2av_I-2tayw8To7DPyAtH0yVt8PRpO1xy6HsF8efxUmTSQ6tHDrcU7cbd7ZuX3xCKw0pfh1wLSF_ApI9iwH3dz4oF-DIkyIpLmQTz0IdrYy9QdJzokFLhRMVa6Nn64R6jzvYzoE6yIftfC4dDZp4truM5QMlDLE0Bu6GUoNEjUx6BciKx6P3gGAs8XaAXgLYYZTfyoBlR4UAVkrmFrG0ktRektkv5fKH5R4uQk-CSgHQU6rLzTA&h=6R0IMgDGpMEh78NrdDJ6dwIQo6-KLTfG6Jgs2xRacHg
+  response:
+    body:
+      string: '{"name":"f3e0f0bd-158e-4235-9a04-80d5fad0938a","status":"Succeeded","startTime":"2025-04-08T16:14:23.76Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Apr 2025 16:15:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/34ba1f80-2742-4a6d-bed9-3d4c1b053a30
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: FF3959E2D9154EE1B5B7D2094904EDDD Ref B: MAA201060514053 Ref C: 2025-04-08T16:15:30Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2024-05-01-preview
+  response:
+    body:
+      string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000002.database.windows.net","privateEndpointConnections":[],"minimalTlsVersion":"1.2","publicNetworkAccess":"Enabled","restrictOutboundNetworkAccess":"Disabled","externalGovernanceStatus":"Disabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '560'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Apr 2025 16:15:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 60593673534844138EE0A5E76D8A7A5C Ref B: MAA201060514053 Ref C: 2025-04-08T16:15:31Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"startIpAddress": "0.0.0.0", "endIpAddress": "255.255.255.255"}}'
     headers:
       Accept:
       - application/json
@@ -445,44 +503,46 @@ interactions:
       Content-Length:
       - '80'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --name -g --server --start-ip-address --end-ip-address
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"}}'
+      string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '441'
+      - '299'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:12 GMT
-      preference-applied:
-      - return-content
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/centralindia/ed4e007d-5fbc-41f8-92ff-51594e2023fc
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: F73283ECDA5641EC970DFC4ADD2CFE9F Ref B: MAA201060516029 Ref C: 2025-04-08T16:15:33Z'
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -497,37 +557,37 @@ interactions:
       ParameterSetName:
       - --name -g --server
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"}}'
+      string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '441'
+      - '299'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:12 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/5870317c-b627-4e3c-bab7-6992fee8e519
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: DF033C751EB24C448C83D60E447ABE74 Ref B: MAA201060513025 Ref C: 2025-04-08T16:15:35Z'
     status:
       code: 200
       message: OK
@@ -545,37 +605,37 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"}}'
+      string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '441'
+      - '299'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:13 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/centralindia/5155b3cf-2fa8-46df-b1c3-440c6bfe1c2e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 847E695340004670B724756551A71CDF Ref B: MAA201060516045 Ref C: 2025-04-08T16:15:36Z'
     status:
       code: 200
       message: OK
@@ -593,42 +653,42 @@ interactions:
       ParameterSetName:
       - --name -g --server --start-ip-address --end-ip-address
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"}}'
+      string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '441'
+      - '299'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:14 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/centralindia/1f67852d-297e-4893-b7bd-297600a10381
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: DBBC5EEC2B3A408E931AF7D041AEB598 Ref B: MAA201060515023 Ref C: 2025-04-08T16:15:37Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"endIpAddress": "123.123.123.124", "startIpAddress": "123.123.123.123"}}'
+    body: '{"properties": {"startIpAddress": "123.123.123.123", "endIpAddress": "123.123.123.124"}}'
     headers:
       Accept:
       - application/json
@@ -641,45 +701,43 @@ interactions:
       Content-Length:
       - '88'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --name -g --server --start-ip-address --end-ip-address
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"}}'
+      string: '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '449'
+      - '307'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:15 GMT
-      preference-applied:
-      - return-content
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/centralindia/45a5aea0-038e-4f60-a5f6-fa875cee8f19
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: B1873D8FD1034442B996395200164062 Ref B: MAA201060515023 Ref C: 2025-04-08T16:15:38Z'
     status:
       code: 200
       message: OK
@@ -697,42 +755,42 @@ interactions:
       ParameterSetName:
       - --id --start-ip-address
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"}}'
+      string: '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '449'
+      - '307'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:14 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/868ac670-cfde-4cc4-ada2-8f8538fc455a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 16D8358C304E4C7AB1AE5E27FE3872BE Ref B: MAA201060514029 Ref C: 2025-04-08T16:15:40Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"endIpAddress": "123.123.123.124", "startIpAddress": "0.0.0.0"}}'
+    body: '{"properties": {"startIpAddress": "0.0.0.0", "endIpAddress": "123.123.123.124"}}'
     headers:
       Accept:
       - application/json
@@ -745,45 +803,43 @@ interactions:
       Content-Length:
       - '80'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --id --start-ip-address
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"}}'
+      string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '441'
+      - '299'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:16 GMT
-      preference-applied:
-      - return-content
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/ecd5aff4-cd95-41d0-a8c3-e2754d9b2567
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 87A4F84D2C94419686D0ECBB6979AE80 Ref B: MAA201060514029 Ref C: 2025-04-08T16:15:41Z'
     status:
       code: 200
       message: OK
@@ -801,42 +857,42 @@ interactions:
       ParameterSetName:
       - --name -g --server --end-ip-address
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"}}'
+      string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '441'
+      - '299'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:16 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/jioindiacentral/1c109e14-34ee-4cf5-a4dc-3f535613ca29
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A2E249893A154DB5AA4CC3D15D0FF722 Ref B: MAA201060516019 Ref C: 2025-04-08T16:15:43Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"endIpAddress": "255.255.255.255", "startIpAddress": "0.0.0.0"}}'
+    body: '{"properties": {"startIpAddress": "0.0.0.0", "endIpAddress": "255.255.255.255"}}'
     headers:
       Accept:
       - application/json
@@ -849,50 +905,48 @@ interactions:
       Content-Length:
       - '80'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --name -g --server --end-ip-address
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"}}'
+      string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '441'
+      - '299'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:17 GMT
-      preference-applied:
-      - return-content
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/jioindiacentral/63c607be-f7e8-4768-bd62-843b3f0cff2a
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: C6F896D11B294628AE6CE1DE38B236A5 Ref B: MAA201060516019 Ref C: 2025-04-08T16:15:44Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"endIpAddress": "123.123.123.124", "startIpAddress": "123.123.123.123"}}'
+    body: '{"properties": {"startIpAddress": "123.123.123.123", "endIpAddress": "123.123.123.124"}}'
     headers:
       Accept:
       - application/json
@@ -905,44 +959,46 @@ interactions:
       Content-Length:
       - '88'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --name -g --server --start-ip-address --end-ip-address
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2","name":"rule2","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"}}'
+      string: '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2","name":"rule2","type":"Microsoft.Sql/servers/firewallRules"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '449'
+      - '307'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:19 GMT
-      preference-applied:
-      - return-content
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/centralindia/f2d59dc6-b0de-4687-8d02-99b6f667da6f
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: E2896EF8177A4D9E95711019657A402D Ref B: MAA201060513035 Ref C: 2025-04-08T16:15:49Z'
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -957,38 +1013,37 @@ interactions:
       ParameterSetName:
       - -g --server
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2","name":"rule2","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"}}]}'
+      string: '{"value":[{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1","name":"rule1","type":"Microsoft.Sql/servers/firewallRules"},{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2","name":"rule2","type":"Microsoft.Sql/servers/firewallRules"}]}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '903'
+      - '619'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:19 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/dd972537-a39d-496f-92ce-cc22663e7067
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 60126C8DC940419596904C3023A08447 Ref B: MAA201060513047 Ref C: 2025-04-08T16:15:50Z'
     status:
       code: 200
       message: OK
@@ -1008,34 +1063,37 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule1?api-version=2024-05-01-preview
   response:
     body:
       string: ''
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
       - '0'
-      content-type:
-      - application/json
-      dataserviceversion:
-      - 1.0;
       date:
-      - Wed, 04 Mar 2020 19:38:20 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/centralindia/be7ca083-9313-4738-97c6-f61d1b20f6fb
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 813845F4102C4936B5BA20077AF727D4 Ref B: MAA201060515029 Ref C: 2025-04-08T16:15:51Z'
     status:
       code: 200
       message: OK
@@ -1053,37 +1111,37 @@ interactions:
       ParameterSetName:
       - -g --server
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2","name":"rule2","type":"Microsoft.Sql/servers/firewallRules","location":"West
-        Europe","kind":"v12.0","properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"}}]}'
+      string: '{"value":[{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2","name":"rule2","type":"Microsoft.Sql/servers/firewallRules"}]}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '461'
+      - '319'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:22 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/cba20092-a19b-46c4-91a4-6d9fd1d43045
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E193D22C946D4E17A1413576BC82F744 Ref B: MAA201060516021 Ref C: 2025-04-08T16:15:53Z'
     status:
       code: 200
       message: OK
@@ -1103,34 +1161,37 @@ interactions:
       ParameterSetName:
       - --name -g --server
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules/rule2?api-version=2024-05-01-preview
   response:
     body:
       string: ''
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
       - '0'
-      content-type:
-      - application/json
-      dataserviceversion:
-      - 1.0;
       date:
-      - Wed, 04 Mar 2020 19:38:22 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/westindia/4451ddfe-e3d1-49ab-8487-5adff81ebac0
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 5C328A3568A44F988D7BAE36BE17A2A5 Ref B: MAA201060513047 Ref C: 2025-04-08T16:15:54Z'
     status:
       code: 200
       message: OK
@@ -1148,36 +1209,37 @@ interactions:
       ParameterSetName:
       - -g --server
       User-Agent:
-      - python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) msrest/0.6.11 msrest_azure/0.6.2
-        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/firewallRules?api-version=2024-05-01-preview
   response:
     body:
       string: '{"value":[]}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
       - '12'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 04 Mar 2020 19:38:23 GMT
-      server:
-      - Microsoft-HTTPAPI/2.0
+      - Tue, 08 Apr 2025 16:15:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=6c1f60e8-d413-449a-a4bc-14ddbe9afbbc/southindia/667000d8-4619-4ff7-a037-d83035cfead9
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 43DDC8679DC140BE8CDDABC53108DE9C Ref B: MAA201060514049 Ref C: 2025-04-08T16:15:55Z'
     status:
       code: 200
       message: OK

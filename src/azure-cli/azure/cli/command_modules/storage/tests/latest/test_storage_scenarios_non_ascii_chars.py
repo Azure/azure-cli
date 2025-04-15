@@ -28,7 +28,7 @@ class StorageCopyTests(StorageScenarioMixin, LiveScenarioTest):
                                    blob_name, src_container).get_output_in_json()
             self.storage_cmd('storage blob copy start -c {} -b {} -u {}',
                              storage_account_info, dst_container, blob_name, url).assert_with_checks([
-                                 JMESPathCheck('status', "success")])
+                                 JMESPathCheck('copy_status', "success")])
             self.storage_cmd('storage blob exists -c {} -n {}', storage_account_info,
                              dst_container, blob_name).assert_with_checks(JMESPathCheck('exists', True))
 

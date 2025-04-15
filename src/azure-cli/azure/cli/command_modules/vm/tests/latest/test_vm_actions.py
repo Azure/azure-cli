@@ -7,7 +7,7 @@ import os
 import shutil
 import tempfile
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
@@ -15,7 +15,8 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _validate_admin_username,
                                                       _validate_admin_password,
                                                       _parse_image_argument,
-                                                      process_disk_or_snapshot_create_namespace,
+                                                      process_disk_create_namespace,
+                                                      process_snapshot_create_namespace,
                                                       _validate_vmss_create_subnet,
                                                       _get_next_subnet_addr_suffix,
                                                       _validate_vm_vmss_msi,
@@ -62,6 +63,7 @@ class TestActions(unittest.TestCase):
         os.remove(private_key_file)
 
         args = mock.MagicMock()
+        args.ssh_key_name = None
         args.ssh_key_value = [public_key_file]
         args.generate_ssh_keys = True
 
@@ -77,6 +79,7 @@ class TestActions(unittest.TestCase):
         # for convinience we will reuse the generated file in the previous step
         args2 = mock.MagicMock()
         args2.ssh_key_value = [generated_public_key_string]
+        args2.ssh_key_name = None
         args2.generate_ssh_keys = False
         validate_ssh_key(args2)
         # we didn't regenerate
@@ -87,6 +90,7 @@ class TestActions(unittest.TestCase):
         os.close(fd)
         public_key_file2 = private_key_file2 + '.pub'
         args3 = mock.MagicMock()
+        args3.ssh_key_name = None
         args3.ssh_key_value = [public_key_file2]
         args3.generate_ssh_keys = False
         with self.assertRaises(CLIError):
@@ -97,6 +101,7 @@ class TestActions(unittest.TestCase):
         os.close(fd)
         public_key_file4 += '1'  # make it nonexisting
         args4 = mock.MagicMock()
+        args4.ssh_key_name = None
         args4.ssh_key_value = [public_key_file4]
         args4.generate_ssh_keys = True
         validate_ssh_key(args4)
@@ -105,15 +110,24 @@ class TestActions(unittest.TestCase):
 
     def test_figure_out_storage_source(self):
         test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, src_restore_point, _ = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
         self.assertFalse(src_disk)
         self.assertFalse(src_snapshot)
+        self.assertFalse(src_restore_point)
         self.assertEqual(src_blob_uri, test_data)
 
         test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/JAVACSMRG6017/providers/Microsoft.Compute/disks/ex.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(None, 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, src_restore_point, _ = _figure_out_storage_source(None, 'tg1', test_data)
         self.assertEqual(src_disk, test_data)
         self.assertFalse(src_snapshot)
+        self.assertFalse(src_restore_point)
+        self.assertFalse(src_blob_uri)
+        
+        test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/qinkaiwu-test/providers/Microsoft.Compute/restorePointCollections/vm_rpc/restorePoints/vm_rp'
+        src_blob_uri, src_disk, src_snapshot, src_restore_point, _ = _figure_out_storage_source(None, 'tg1', test_data)
+        self.assertFalse(src_disk)
+        self.assertFalse(src_snapshot)
+        self.assertEqual(src_restore_point, test_data)
         self.assertFalse(src_blob_uri)
 
     def test_source_storage_account_err_case(self):
@@ -127,11 +141,13 @@ class TestActions(unittest.TestCase):
         # action (should throw)
         kwargs = {'namespace': np}
         with self.assertRaises(CLIError):
-            process_disk_or_snapshot_create_namespace(cmd, **kwargs)
+            process_disk_create_namespace(cmd, **kwargs)
+            process_snapshot_create_namespace(cmd, **kwargs)
 
         # with blob uri, should be fine
         np.source = 'https://s1.blob.core.windows.net/vhds/s1.vhd'
-        process_disk_or_snapshot_create_namespace(cmd, **kwargs)
+        process_disk_create_namespace(cmd, **kwargs)
+        process_snapshot_create_namespace(cmd, **kwargs)
 
     def test_validate_admin_username_linux(self):
         # pylint: disable=line-too-long
@@ -215,7 +231,7 @@ class TestActions(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.vm._validators.logger.warning', autospec=True)
     def test_parse_staging_image_argument(self, logger_mock, client_factory_mock):
-        from msrestazure.azure_exceptions import CloudError
+        from azure.core.exceptions import ResourceNotFoundError
         compute_client = mock.MagicMock()
         resp = mock.MagicMock()
         cmd = mock.MagicMock()
@@ -223,7 +239,7 @@ class TestActions(unittest.TestCase):
         resp.status_code = 404
         resp.text = '{"Message": "Not Found"}'
 
-        compute_client.virtual_machine_images.get.side_effect = CloudError(resp, error='image not found')
+        compute_client.virtual_machine_images.get.side_effect = ResourceNotFoundError('image not found')
         client_factory_mock.return_value = compute_client
 
         np = mock.MagicMock()
@@ -296,23 +312,33 @@ class TestActions(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', autospec=True)
     def test_validate_msi_on_create(self, mock_get_subscription, mock_resolve_role_id):
         # check throw on : az vm/vmss create --assign-identity --role reader --scope ""
+        from azure.cli.core.azclierror import ArgumentUsageError
+
         np_mock = mock.MagicMock()
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         np_mock.assign_identity = []
         np_mock.identity_scope = None
         np_mock.identity_role = 'reader'
-
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is "
-                        "not provided" in str(err.exception))
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity" in str(err.exception))
+
+        np_mock = mock.MagicMock()
+        np_mock.assign_identity = []
+        np_mock.identity_scope = 'foo-scope'
+        np_mock.identity_role = None
+        with self.assertRaises(ArgumentUsageError) as err:
+            _validate_vm_vmss_msi(cmd, np_mock)
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity" in str(err.exception))
 
         # check throw on : az vm/vmss create --scope "some scope"
         np_mock = mock.MagicMock()
         np_mock.assign_identity = None
         np_mock.identity_scope = 'foo-scope'
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
@@ -320,7 +346,7 @@ class TestActions(unittest.TestCase):
         np_mock = mock.MagicMock()
         np_mock.assign_identity = None
         np_mock.identity_role = 'reader'
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
@@ -344,10 +370,12 @@ class TestActions(unittest.TestCase):
         np_mock.identity_scope = ''
         np_mock.identity_role = 'reader'
 
-        with self.assertRaises(CLIError) as err:
-            _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is set to None",
-                        str(err.exception))
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError) as err:
+            _validate_vm_vmss_msi(cmd, np_mock, is_identity_assign=True)
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity"
+                        in str(err.exception))
 
         # check we set right role id
         np_mock = mock.MagicMock()
@@ -355,7 +383,7 @@ class TestActions(unittest.TestCase):
         np_mock.identity_role = 'reader'
         np_mock.assign_identity = []
         mock_resolve_role_id.return_value = 'foo-role-id'
-        _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
+        _validate_vm_vmss_msi(cmd, np_mock, is_identity_assign=True)
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
         mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 
@@ -459,7 +487,8 @@ class TestActions(unittest.TestCase):
         self.assertEqual(r[5], {
             'lun': 5,
             'managedDisk': {'id': attach_data_disks[1]},
-            'createOption': 'attach'
+            'createOption': 'attach',
+            'name': 'disk'
         })
 
         # last image data disk
@@ -528,7 +557,8 @@ class TestActions(unittest.TestCase):
         self.assertEqual(r[7], {
             'lun': 7,
             'managedDisk': {'id': attach_data_disks[1]},
-            'createOption': 'attach'
+            'createOption': 'attach',
+            'name': 'disk'
         })
 
         self.assertEqual(r[10], {
@@ -569,7 +599,7 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.size = 'Standard_DS4_v2'
         np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'coreos', 'coreos', 'alpha'
+        np.os_publisher, np.os_offer, np.os_sku = 'kinvolk', 'flatcar-container-linux-free', 'alpha'
         size_mock.number_of_cores, size_mock.name = 8, 'Standard_DS4_v2'
         _validate_vm_vmss_accelerated_networking(mock.MagicMock(), np)
         self.assertTrue(np.accelerated_networking)
@@ -577,7 +607,7 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.size = 'Standard_D3_v2'  # known supported 4 core size
         np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'coreos', 'coreos', 'alpha'
+        np.os_publisher, np.os_offer, np.os_sku = 'kinvolk', 'flatcar-container-linux-free', 'alpha'
         _validate_vm_vmss_accelerated_networking(None, np)
         self.assertTrue(np.accelerated_networking)
 
@@ -632,7 +662,7 @@ class TestActions(unittest.TestCase):
         for test_sku, expected in sku_tests.values():
             if isinstance(expected, dict):
                 # build info dict from expected values.
-                info_dict = {lun: dict(managedDisk={'storageAccountType': None}) for lun in expected if lun != "os"}
+                info_dict = {lun: {"managedDisk": {'storageAccountType': None}} for lun in expected if lun != "os"}
                 if "os" in expected:
                     info_dict["os"] = {}
 
@@ -644,7 +674,10 @@ class TestActions(unittest.TestCase):
                         self.assertEqual(info_dict[lun]['managedDisk']['storageAccountType'], expected[lun])
             elif expected is None:
                 dummy_expected = ["os", 1, 2]
-                info_dict = {lun: dict(managedDisk={'storageAccountType': None}) for lun in dummy_expected if lun != "os"}
+                info_dict = {
+                    lun: {"managedDisk": {'storageAccountType': None}}
+                    for lun in dummy_expected if lun != "os"
+                }
                 if "os" in dummy_expected:
                     info_dict["os"] = {}
 
@@ -654,26 +687,23 @@ class TestActions(unittest.TestCase):
                 self.fail("Test Expected value should be a dict or None, instead it is {}.".format(expected))
 
     def test_process_gallery_image_version_namespace(self):
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
         np = mock.MagicMock(spec='target_regions')
-        api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].profile['gallery_images']
-        TargetRegion = self._get_compute_model('TargetRegion', api_version)
-        EncryptionImages = self._get_compute_model('EncryptionImages', api_version)
-        OSDiskImageEncryption = self._get_compute_model('OSDiskImageEncryption', api_version)
-        DataDiskImageEncryption = self._get_compute_model('DataDiskImageEncryption', api_version)
         cmd = mock.MagicMock()
-        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption]
 
-        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs"]
+        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs", 'CentralUSEUAP=1']
         np.target_regions = target_regions_list
 
         process_gallery_image_version_namespace(cmd, np)
         target_regions_objs = np.target_regions
 
-        self.assertEqual(target_regions_objs[0], TargetRegion(name="southcentralus"))
-        self.assertEqual(target_regions_objs[1], TargetRegion(name="westus", regional_replica_count=1))
-        self.assertEqual(target_regions_objs[2], TargetRegion(name="westus2", storage_account_type="standard_zrs"))
-        self.assertEqual(target_regions_objs[3], TargetRegion(name="eastus", regional_replica_count=2, storage_account_type="standard_lrs"))
+        self.assertEqual(target_regions_objs[0]["name"], "southcentralus")
+        self.assertEqual(target_regions_objs[1]["name"], "westus")
+        self.assertEqual(target_regions_objs[1]["regional_replica_count"], 1)
+        self.assertEqual(target_regions_objs[2]["name"], "westus2")
+        self.assertEqual(target_regions_objs[2]["storage_account_type"], "standard_zrs")
+        self.assertEqual(target_regions_objs[3]["name"], "eastus")
+        self.assertEqual(target_regions_objs[3]["regional_replica_count"], 2)
+        self.assertEqual(target_regions_objs[3]["storage_account_type"], "standard_lrs")
 
         # handle invalid storage account / replica count
         with self.assertRaises(CLIError):

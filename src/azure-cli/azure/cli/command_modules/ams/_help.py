@@ -47,6 +47,70 @@ helps['ams account check-name'] = """
     short-summary: Checks whether the Media Service resource name is available.
 """
 
+helps['ams account identity'] = """
+    type: group
+    short-summary: Manage managed identity settings for an Azure Media Services account.
+"""
+
+helps['ams account identity show'] = """
+    type: command
+    short-summary: Show the details of managed identity settings for an Azure Media Services account.
+    examples:
+        - name: Show the media account's managed identity details
+          text: >
+            az ams account identity show -n myAmsAccount -g myRG
+"""
+
+helps['ams account identity assign'] = """
+    type: command
+    short-summary: Assign a managed identity to an Azure Media Services account.
+    examples:
+        - name: Assign a system managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity assign -n myAmsAccount -g myRG --system-assigned
+        - name: Assign a user managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity assign -n myAmsAccount -g myRG --user-assigned myUserId
+"""
+
+helps['ams account identity remove'] = """
+    type: command
+    short-summary: Remove a managed identity to an Azure Media Services account.
+    examples:
+        - name: Remove a system managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity remove -n myAmsAccount -g myRG --system-assigned
+        - name: Remove a user managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity remove -n myAmsAccount -g myRG --user-assigned myUserId
+"""
+
+helps['ams account encryption'] = """
+    type: group
+    short-summary: Manage encryption for an Azure Media Services account.
+"""
+
+helps['ams account encryption show'] = """
+    type: command
+    short-summary: Show the details of encryption settings for an Azure Media Services account.
+    examples:
+        - name: Show the media account's encryption details
+          text: >
+            az ams account encryption show --account-name myAmsAccount -g myRG
+"""
+
+helps['ams account encryption set'] = """
+    type: command
+    short-summary: Set the encryption settings for an Azure Media Services account.
+    examples:
+        - name: Set the media account's encryption to a customer managed key
+          text: >
+            az ams account encryption set -a myAmsAccount -g myRG --key-type CustomerKey --key-identifier keyVaultId
+        - name: Set the media account's encryption to a system managed key
+          text: >
+            az ams account encryption set -a myAmsAccount -g myRG --key-type SystemKey
+"""
+
 helps['ams account storage'] = """
     type: group
     short-summary: Manage storage for an Azure Media Services account.
@@ -88,6 +152,11 @@ helps['ams account sp reset-credentials'] = """
 helps['ams account storage sync-storage-keys'] = """
     type: command
     short-summary: Synchronize storage account keys for a storage account associated with an Azure Media Services account.
+"""
+
+helps['ams account storage set-authentication'] = """
+    type: command
+    short-summary: Set the authentication of a storage account attached to an Azure Media Services account.
 """
 
 helps['ams transform'] = """
@@ -170,6 +239,31 @@ helps['ams asset-filter'] = """
 helps['ams account-filter'] = """
     type: group
     short-summary: Manage account filters for an Azure Media Services account.
+"""
+
+helps['ams asset-track'] = """
+    type: group
+    short-summary: Manage asset tracks for an Azure Media Services account.
+"""
+
+helps['ams asset-track show'] = """
+    type: command
+    short-summary: Show the details of a track.
+"""
+
+helps['ams asset-track create'] = """
+    type: command
+    short-summary: Create a track for an Azure Media Services asset.
+"""
+
+helps['ams asset-track update'] = """
+    type: command
+    short-summary: Update the parameters of a track.
+"""
+
+helps['ams asset-track update-data'] = """
+    type: command
+    short-summary: Update a track if the file in the storage container was recently modified.
 """
 
 helps['ams asset show'] = """
@@ -281,6 +375,10 @@ helps['ams content-key-policy update'] = """
 helps['ams content-key-policy list'] = """
     type: command
     short-summary: List all the content key policies within an Azure Media Services account.
+    examples:
+        - name: list the content key policies within an Azure Media Services account with a filter clause.
+          text: >
+            az ams content-key-policy list -a amsAccount -g resourceGroup --filter "properties/lastModified gt 2022-08-16 or properties/created lt 2022-08-17"
 """
 
 helps['ams content-key-policy option'] = """
@@ -404,6 +502,11 @@ helps['ams streaming-endpoint'] = """
     short-summary: Manage streaming endpoints for an Azure Media Service account.
 """
 
+helps['ams streaming-endpoint get-skus'] = """
+    type: command
+    short-summary: Get the sku details for a streaming endpoint.
+"""
+
 helps['ams streaming-endpoint start'] = """
     type: command
     short-summary: Start a streaming endpoint.
@@ -480,6 +583,11 @@ helps['ams live-event create'] = """
 helps['ams live-event start'] = """
     type: command
     short-summary: Start a live event.
+"""
+
+helps['ams live-event standby'] = """
+    type: command
+    short-summary: Allocate a live event to be started later.
 """
 
 helps['ams live-event show'] = """
@@ -588,15 +696,15 @@ helps['ams account-filter delete'] = """
 
 helps['ams account mru'] = """
     type: group
-    short-summary: Manage media reserved units for an Azure Media Services account.
+    short-summary: Manage media reserved units for an Azure Media Services account. This doesn't work with accounts created with 2020-05-01 version of the Media Services API or later. Accounts created this way no longer need to set media reserved units as the system will automaticaly scale up and down based on load.
 """
 
 helps['ams account mru set'] = """
     type: command
-    short-summary: Set the type and number of media reserved units for an Azure Media Services account.
+    short-summary: Set the type and number of media reserved units for an Azure Media Services account. This doesn't work with accounts created with 2020-05-01 version of the Media Services API or later. Accounts created this way no longer need to set media reserved units as the system will automaticaly scale up and down based on load.
 """
 
 helps['ams account mru show'] = """
     type: command
-    short-summary: Show the details of media reserved units for an Azure Media Services account.
+    short-summary: Show the details of media reserved units for an Azure Media Services account. This doesn't work with accounts created with 2020-05-01 version of the Media Services API or later. Accounts created this way no longer need to set media reserved units as the system will automaticaly scale up and down based on load.
 """

@@ -1,5 +1,48 @@
 interactions:
 - request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest_privatedns000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001","name":"clitest_privatedns000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_ListRecordSetsByType_MultipleRecordSetsPresent_ExpectMultipleRecordSetsRetrieved","date":"2023-08-07T14:46:43Z","module":"privatedns"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Aug 2023 14:46:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"location": "global"}'
     headers:
       Accept:
@@ -13,16 +56,13 @@ interactions:
       Content-Length:
       - '22'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       If-None-Match:
       - '*'
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002?api-version=2018-09-01
   response:
@@ -30,7 +70,7 @@ interactions:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2NGZmMGEzMS1lMjAwLTQwMGItOWQwYi1hYjlhYmY5NDllNTk=?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTthOWE2Yjc2Zi03MTFkLTQwMGUtOGVmYS1kODUxODNmNGNhODZfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -38,9 +78,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:34:44 GMT
+      - Mon, 07 Aug 2023 14:46:50 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2NGZmMGEzMS1lMjAwLTQwMGItOWQwYi1hYjlhYmY5NDllNTk=?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTthOWE2Yjc2Zi03MTFkLTQwMGUtOGVmYS1kODUxODNmNGNhODZfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -60,7 +100,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -70,16 +110,15 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2NGZmMGEzMS1lMjAwLTQwMGItOWQwYi1hYjlhYmY5NDllNTk=?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTthOWE2Yjc2Zi03MTFkLTQwMGUtOGVmYS1kODUxODNmNGNhODZfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
   response:
     body:
       string: '{"status":"InProgress"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2NGZmMGEzMS1lMjAwLTQwMGItOWQwYi1hYjlhYmY5NDllNTk=?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTthOWE2Yjc2Zi03MTFkLTQwMGUtOGVmYS1kODUxODNmNGNhODZfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -87,9 +126,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:34:54 GMT
+      - Mon, 07 Aug 2023 14:46:51 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2NGZmMGEzMS1lMjAwLTQwMGItOWQwYi1hYjlhYmY5NDllNTk=?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTthOWE2Yjc2Zi03MTFkLTQwMGUtOGVmYS1kODUxODNmNGNhODZfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -99,7 +138,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11997'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
@@ -109,7 +148,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -119,10 +158,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2NGZmMGEzMS1lMjAwLTQwMGItOWQwYi1hYjlhYmY5NDllNTk=?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTthOWE2Yjc2Zi03MTFkLTQwMGUtOGVmYS1kODUxODNmNGNhODZfMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkw?api-version=2018-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -134,7 +172,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:04 GMT
+      - Mon, 07 Aug 2023 14:47:21 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -148,7 +186,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '498'
       x-powered-by:
       - ASP.NET
     status:
@@ -158,7 +196,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -168,24 +206,23 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002","name":"clitest.privatedns.com000002","type":"Microsoft.Network\/privateDnsZones","etag":"978c412f-8045-4a5f-aac4-260058db7dba","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002","name":"clitest.privatedns.com000002","type":"Microsoft.Network\/privateDnsZones","etag":"ec2e4161-de36-46f6-bb10-5aefa97988b3","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '665'
+      - '600'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:05 GMT
+      - Mon, 07 Aug 2023 14:47:22 GMT
       etag:
-      - 978c412f-8045-4a5f-aac4-260058db7dba
+      - ec2e4161-de36-46f6-bb10-5aefa97988b3
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -199,7 +236,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
@@ -219,32 +256,29 @@ interactions:
       Content-Length:
       - '29'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       If-None-Match:
       - '*'
       ParameterSetName:
       - -g -n -z
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000003?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000003","name":"clitestprivatednsrecordset000003","type":"Microsoft.Network\/privateDnsZones\/A","etag":"6db4f29c-6bc8-4528-a7c6-6ac362052882","properties":{"fqdn":"clitestprivatednsrecordset000003.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000003","name":"clitestprivatednsrecordset000003","type":"Microsoft.Network\/privateDnsZones\/A","etag":"1ae50d79-7153-4261-9845-a164fbd778bb","properties":{"fqdn":"clitestprivatednsrecordset000003.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '564'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:06 GMT
+      - Mon, 07 Aug 2023 14:47:24 GMT
       etag:
-      - 6db4f29c-6bc8-4528-a7c6-6ac362052882
+      - 1ae50d79-7153-4261-9845-a164fbd778bb
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -274,26 +308,23 @@ interactions:
       ParameterSetName:
       - -g -n -z -a
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000003?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000003","name":"clitestprivatednsrecordset000003","type":"Microsoft.Network\/privateDnsZones\/A","etag":"6db4f29c-6bc8-4528-a7c6-6ac362052882","properties":{"fqdn":"clitestprivatednsrecordset000003.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000003","name":"clitestprivatednsrecordset000003","type":"Microsoft.Network\/privateDnsZones\/A","etag":"1ae50d79-7153-4261-9845-a164fbd778bb","properties":{"fqdn":"clitestprivatednsrecordset000003.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '564'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:07 GMT
+      - Mon, 07 Aug 2023 14:47:26 GMT
       etag:
-      - 6db4f29c-6bc8-4528-a7c6-6ac362052882
+      - 1ae50d79-7153-4261-9845-a164fbd778bb
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -307,15 +338,65 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"etag": "6db4f29c-6bc8-4528-a7c6-6ac362052882", "properties": {"ttl":
-      3600, "aRecords": [{"ipv4Address": "10.0.0.1"}]}}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns record-set a add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -z -a
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000003?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000003","name":"clitestprivatednsrecordset000003","type":"Microsoft.Network\/privateDnsZones\/A","etag":"1ae50d79-7153-4261-9845-a164fbd778bb","properties":{"fqdn":"clitestprivatednsrecordset000003.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '490'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Aug 2023 14:47:26 GMT
+      etag:
+      - 1ae50d79-7153-4261-9845-a164fbd778bb
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "1ae50d79-7153-4261-9845-a164fbd778bb", "properties": {"aRecords":
+      [{"ipv4Address": "10.0.0.1"}], "ttl": 3600}}'
     headers:
       Accept:
       - application/json
@@ -328,30 +409,27 @@ interactions:
       Content-Length:
       - '120'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -z -a
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000003?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000003","name":"clitestprivatednsrecordset000003","type":"Microsoft.Network\/privateDnsZones\/A","etag":"1d8f9df1-1e2e-4f6d-a625-120c1f7cc298","properties":{"fqdn":"clitestprivatednsrecordset000003.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000003","name":"clitestprivatednsrecordset000003","type":"Microsoft.Network\/privateDnsZones\/A","etag":"74082b12-bf3e-4e52-852f-1642ce470a37","properties":{"fqdn":"clitestprivatednsrecordset000003.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '590'
+      - '516'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:08 GMT
+      - Mon, 07 Aug 2023 14:47:27 GMT
       etag:
-      - 1d8f9df1-1e2e-4f6d-a625-120c1f7cc298
+      - 74082b12-bf3e-4e52-852f-1642ce470a37
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -385,32 +463,29 @@ interactions:
       Content-Length:
       - '29'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       If-None-Match:
       - '*'
       ParameterSetName:
       - -g -n -z
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000004?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000004","name":"clitestprivatednsrecordset000004","type":"Microsoft.Network\/privateDnsZones\/A","etag":"56fa5b48-c610-465e-b7e9-b02c05b5ba5f","properties":{"fqdn":"clitestprivatednsrecordset000004.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000004","name":"clitestprivatednsrecordset000004","type":"Microsoft.Network\/privateDnsZones\/A","etag":"d53ed08f-31dc-419f-bdba-92eff54d2b7e","properties":{"fqdn":"clitestprivatednsrecordset000004.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '564'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:09 GMT
+      - Mon, 07 Aug 2023 14:47:29 GMT
       etag:
-      - 56fa5b48-c610-465e-b7e9-b02c05b5ba5f
+      - d53ed08f-31dc-419f-bdba-92eff54d2b7e
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -440,26 +515,23 @@ interactions:
       ParameterSetName:
       - -g -n -z -a
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000004?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000004","name":"clitestprivatednsrecordset000004","type":"Microsoft.Network\/privateDnsZones\/A","etag":"56fa5b48-c610-465e-b7e9-b02c05b5ba5f","properties":{"fqdn":"clitestprivatednsrecordset000004.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000004","name":"clitestprivatednsrecordset000004","type":"Microsoft.Network\/privateDnsZones\/A","etag":"d53ed08f-31dc-419f-bdba-92eff54d2b7e","properties":{"fqdn":"clitestprivatednsrecordset000004.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '564'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:10 GMT
+      - Mon, 07 Aug 2023 14:47:30 GMT
       etag:
-      - 56fa5b48-c610-465e-b7e9-b02c05b5ba5f
+      - d53ed08f-31dc-419f-bdba-92eff54d2b7e
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -473,15 +545,65 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"etag": "56fa5b48-c610-465e-b7e9-b02c05b5ba5f", "properties": {"ttl":
-      3600, "aRecords": [{"ipv4Address": "10.0.0.1"}]}}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns record-set a add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -z -a
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000004?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000004","name":"clitestprivatednsrecordset000004","type":"Microsoft.Network\/privateDnsZones\/A","etag":"d53ed08f-31dc-419f-bdba-92eff54d2b7e","properties":{"fqdn":"clitestprivatednsrecordset000004.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '490'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Aug 2023 14:47:31 GMT
+      etag:
+      - d53ed08f-31dc-419f-bdba-92eff54d2b7e
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "d53ed08f-31dc-419f-bdba-92eff54d2b7e", "properties": {"aRecords":
+      [{"ipv4Address": "10.0.0.1"}], "ttl": 3600}}'
     headers:
       Accept:
       - application/json
@@ -494,30 +616,27 @@ interactions:
       Content-Length:
       - '120'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -z -a
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000004?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000004","name":"clitestprivatednsrecordset000004","type":"Microsoft.Network\/privateDnsZones\/A","etag":"17bca067-c0fe-426a-aa9d-7cd9f788c74d","properties":{"fqdn":"clitestprivatednsrecordset000004.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000004","name":"clitestprivatednsrecordset000004","type":"Microsoft.Network\/privateDnsZones\/A","etag":"7adafbec-deb8-40b5-90d2-daeb104f362c","properties":{"fqdn":"clitestprivatednsrecordset000004.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '590'
+      - '516'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:11 GMT
+      - Mon, 07 Aug 2023 14:47:32 GMT
       etag:
-      - 17bca067-c0fe-426a-aa9d-7cd9f788c74d
+      - 7adafbec-deb8-40b5-90d2-daeb104f362c
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -551,32 +670,29 @@ interactions:
       Content-Length:
       - '29'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       If-None-Match:
       - '*'
       ParameterSetName:
       - -g -n -z
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000005?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000005","name":"clitestprivatednsrecordset000005","type":"Microsoft.Network\/privateDnsZones\/A","etag":"65926404-ec19-4d03-b6c1-165a9876a68c","properties":{"fqdn":"clitestprivatednsrecordset000005.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000005","name":"clitestprivatednsrecordset000005","type":"Microsoft.Network\/privateDnsZones\/A","etag":"c7c2e40e-b814-4366-b7a4-4e01a1e9f74a","properties":{"fqdn":"clitestprivatednsrecordset000005.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '564'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:12 GMT
+      - Mon, 07 Aug 2023 14:47:33 GMT
       etag:
-      - 65926404-ec19-4d03-b6c1-165a9876a68c
+      - c7c2e40e-b814-4366-b7a4-4e01a1e9f74a
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -606,26 +722,23 @@ interactions:
       ParameterSetName:
       - -g -n -z -a
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000005?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000005","name":"clitestprivatednsrecordset000005","type":"Microsoft.Network\/privateDnsZones\/A","etag":"65926404-ec19-4d03-b6c1-165a9876a68c","properties":{"fqdn":"clitestprivatednsrecordset000005.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000005","name":"clitestprivatednsrecordset000005","type":"Microsoft.Network\/privateDnsZones\/A","etag":"c7c2e40e-b814-4366-b7a4-4e01a1e9f74a","properties":{"fqdn":"clitestprivatednsrecordset000005.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '564'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:13 GMT
+      - Mon, 07 Aug 2023 14:47:35 GMT
       etag:
-      - 65926404-ec19-4d03-b6c1-165a9876a68c
+      - c7c2e40e-b814-4366-b7a4-4e01a1e9f74a
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -639,15 +752,65 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"etag": "65926404-ec19-4d03-b6c1-165a9876a68c", "properties": {"ttl":
-      3600, "aRecords": [{"ipv4Address": "10.0.0.1"}]}}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns record-set a add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -z -a
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000005?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000005","name":"clitestprivatednsrecordset000005","type":"Microsoft.Network\/privateDnsZones\/A","etag":"c7c2e40e-b814-4366-b7a4-4e01a1e9f74a","properties":{"fqdn":"clitestprivatednsrecordset000005.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '490'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Aug 2023 14:47:35 GMT
+      etag:
+      - c7c2e40e-b814-4366-b7a4-4e01a1e9f74a
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "c7c2e40e-b814-4366-b7a4-4e01a1e9f74a", "properties": {"aRecords":
+      [{"ipv4Address": "10.0.0.1"}], "ttl": 3600}}'
     headers:
       Accept:
       - application/json
@@ -660,30 +823,27 @@ interactions:
       Content-Length:
       - '120'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -z -a
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000005?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000005","name":"clitestprivatednsrecordset000005","type":"Microsoft.Network\/privateDnsZones\/A","etag":"0e1eedd9-b1fb-4b0b-9257-0b460a48e66c","properties":{"fqdn":"clitestprivatednsrecordset000005.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000005","name":"clitestprivatednsrecordset000005","type":"Microsoft.Network\/privateDnsZones\/A","etag":"5809fe42-8606-4f31-917d-20773beb034f","properties":{"fqdn":"clitestprivatednsrecordset000005.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '590'
+      - '516'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:13 GMT
+      - Mon, 07 Aug 2023 14:47:36 GMT
       etag:
-      - 0e1eedd9-b1fb-4b0b-9257-0b460a48e66c
+      - 5809fe42-8606-4f31-917d-20773beb034f
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -717,32 +877,29 @@ interactions:
       Content-Length:
       - '29'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       If-None-Match:
       - '*'
       ParameterSetName:
       - -g -n -z
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000006?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000006","name":"clitestprivatednsrecordset000006","type":"Microsoft.Network\/privateDnsZones\/A","etag":"ffce5b82-d710-4cc6-8617-bccc43d8f8da","properties":{"fqdn":"clitestprivatednsrecordset000006.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000006","name":"clitestprivatednsrecordset000006","type":"Microsoft.Network\/privateDnsZones\/A","etag":"6f64f04f-9be5-4b0a-a136-2b2153142f4c","properties":{"fqdn":"clitestprivatednsrecordset000006.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '564'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:15 GMT
+      - Mon, 07 Aug 2023 14:47:37 GMT
       etag:
-      - ffce5b82-d710-4cc6-8617-bccc43d8f8da
+      - 6f64f04f-9be5-4b0a-a136-2b2153142f4c
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -772,26 +929,23 @@ interactions:
       ParameterSetName:
       - -g -n -z -a
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000006?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000006","name":"clitestprivatednsrecordset000006","type":"Microsoft.Network\/privateDnsZones\/A","etag":"ffce5b82-d710-4cc6-8617-bccc43d8f8da","properties":{"fqdn":"clitestprivatednsrecordset000006.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000006","name":"clitestprivatednsrecordset000006","type":"Microsoft.Network\/privateDnsZones\/A","etag":"6f64f04f-9be5-4b0a-a136-2b2153142f4c","properties":{"fqdn":"clitestprivatednsrecordset000006.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '564'
+      - '490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:16 GMT
+      - Mon, 07 Aug 2023 14:47:38 GMT
       etag:
-      - ffce5b82-d710-4cc6-8617-bccc43d8f8da
+      - 6f64f04f-9be5-4b0a-a136-2b2153142f4c
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -805,15 +959,65 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"etag": "ffce5b82-d710-4cc6-8617-bccc43d8f8da", "properties": {"ttl":
-      3600, "aRecords": [{"ipv4Address": "10.0.0.1"}]}}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns record-set a add-record
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -z -a
+      User-Agent:
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000006?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000006","name":"clitestprivatednsrecordset000006","type":"Microsoft.Network\/privateDnsZones\/A","etag":"6f64f04f-9be5-4b0a-a136-2b2153142f4c","properties":{"fqdn":"clitestprivatednsrecordset000006.clitest.privatedns.com000002.","ttl":3600,"aRecords":[],"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '490'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Aug 2023 14:47:39 GMT
+      etag:
+      - 6f64f04f-9be5-4b0a-a136-2b2153142f4c
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "6f64f04f-9be5-4b0a-a136-2b2153142f4c", "properties": {"aRecords":
+      [{"ipv4Address": "10.0.0.1"}], "ttl": 3600}}'
     headers:
       Accept:
       - application/json
@@ -826,30 +1030,27 @@ interactions:
       Content-Length:
       - '120'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -z -a
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A/clitestprivatednsrecordset000006?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000006","name":"clitestprivatednsrecordset000006","type":"Microsoft.Network\/privateDnsZones\/A","etag":"3665dccc-9dec-4824-b295-36992e17b72d","properties":{"fqdn":"clitestprivatednsrecordset000006.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000006","name":"clitestprivatednsrecordset000006","type":"Microsoft.Network\/privateDnsZones\/A","etag":"c80a1da6-3a64-4a52-b192-d4a543081252","properties":{"fqdn":"clitestprivatednsrecordset000006.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '590'
+      - '516'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:17 GMT
+      - Mon, 07 Aug 2023 14:47:40 GMT
       etag:
-      - 3665dccc-9dec-4824-b295-36992e17b72d
+      - c80a1da6-3a64-4a52-b192-d4a543081252
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -883,24 +1084,21 @@ interactions:
       ParameterSetName:
       - -g -z
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.73
-      accept-language:
-      - en-US
+      - AZURECLI/2.51.0 (PIP) (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest_privatedns000001/providers/Microsoft.Network/privateDnsZones/clitest.privatedns.com000002/A?api-version=2018-09-01
   response:
     body:
-      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000003","name":"clitestprivatednsrecordset000003","type":"Microsoft.Network\/privateDnsZones\/A","etag":"1d8f9df1-1e2e-4f6d-a625-120c1f7cc298","properties":{"fqdn":"clitestprivatednsrecordset000003.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000006","name":"clitestprivatednsrecordset000006","type":"Microsoft.Network\/privateDnsZones\/A","etag":"3665dccc-9dec-4824-b295-36992e17b72d","properties":{"fqdn":"clitestprivatednsrecordset000006.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000004","name":"clitestprivatednsrecordset000004","type":"Microsoft.Network\/privateDnsZones\/A","etag":"17bca067-c0fe-426a-aa9d-7cd9f788c74d","properties":{"fqdn":"clitestprivatednsrecordset000004.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000005","name":"clitestprivatednsrecordset000005","type":"Microsoft.Network\/privateDnsZones\/A","etag":"0e1eedd9-b1fb-4b0b-9257-0b460a48e66c","properties":{"fqdn":"clitestprivatednsrecordset000005.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}]}'
+      string: '{"value":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000005","name":"clitestprivatednsrecordset000005","type":"Microsoft.Network\/privateDnsZones\/A","etag":"5809fe42-8606-4f31-917d-20773beb034f","properties":{"fqdn":"clitestprivatednsrecordset000005.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000006","name":"clitestprivatednsrecordset000006","type":"Microsoft.Network\/privateDnsZones\/A","etag":"c80a1da6-3a64-4a52-b192-d4a543081252","properties":{"fqdn":"clitestprivatednsrecordset000006.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000004","name":"clitestprivatednsrecordset000004","type":"Microsoft.Network\/privateDnsZones\/A","etag":"7adafbec-deb8-40b5-90d2-daeb104f362c","properties":{"fqdn":"clitestprivatednsrecordset000004.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest_privatedns000001\/providers\/Microsoft.Network\/privateDnsZones\/clitest.privatedns.com000002\/A\/clitestprivatednsrecordset000003","name":"clitestprivatednsrecordset000003","type":"Microsoft.Network\/privateDnsZones\/A","etag":"74082b12-bf3e-4e52-852f-1642ce470a37","properties":{"fqdn":"clitestprivatednsrecordset000003.clitest.privatedns.com000002.","ttl":3600,"aRecords":[{"ipv4Address":"10.0.0.1"}],"isAutoRegistered":false}}]}'
     headers:
       cache-control:
       - private
       content-length:
-      - '2375'
+      - '2079'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 19 Sep 2019 23:35:17 GMT
+      - Mon, 07 Aug 2023 14:47:42 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -913,8 +1111,10 @@ interactions:
       - 4.0.30319
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-entities-read:
+      - '59996'
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '499'
       x-powered-by:
       - ASP.NET
     status:

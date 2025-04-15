@@ -20,12 +20,8 @@ def cf_security_alerts(cli_ctx, _):
     return _cf_security(cli_ctx).alerts
 
 
-def cf_security_settings(cli_ctx, _):
-    return _cf_security(cli_ctx).settings
-
-
-def cf_security_contacts(cli_ctx, _):
-    return _cf_security(cli_ctx).security_contacts
+def cf_security_alerts_suppression_rule(cli_ctx, _):
+    return _cf_security(cli_ctx).alerts_suppression_rules
 
 
 def cf_security_auto_provisioning_settings(cli_ctx, _):
@@ -65,6 +61,18 @@ def cf_security_workspace_settings(cli_ctx, _):
 
 def cf_security_advanced_threat_protection(cli_ctx, _):
     return _cf_security(cli_ctx).advanced_threat_protection
+
+
+def cf_sql_vulnerability_assessment_scans(cli_ctx, _):
+    return _cf_security(cli_ctx).sql_vulnerability_assessment_scans
+
+
+def cf_sql_vulnerability_assessment_results(cli_ctx, _):
+    return _cf_security(cli_ctx).sql_vulnerability_assessment_scan_results
+
+
+def cf_sql_vulnerability_assessment_baseline(cli_ctx, _):
+    return _cf_security(cli_ctx).sql_vulnerability_assessment_baseline_rules
 
 
 def cf_security_assessment(cli_ctx, _):
@@ -119,4 +127,28 @@ def cf_security_adaptive_network_hardenings(cli_ctx, _):
 
 def cf_security_allowed_connections(cli_ctx, _):
     # do not return cli_ctx.allowed_connections for home region compatibility
+    return _cf_security(cli_ctx)
+
+
+def cf_security_secure_scores(cli_ctx, _):
+    return _cf_security(cli_ctx).secure_scores
+
+
+def cf_security_secure_score_controls(cli_ctx, _):
+    return _cf_security(cli_ctx).secure_score_controls
+
+
+def cf_security_secure_score_control_definitions(cli_ctx, _):
+    return _cf_security(cli_ctx).secure_score_control_definitions
+
+
+def cf_security_security_solutions_reference_data(cli_ctx, _):
+    return _cf_security(cli_ctx).security_solutions_reference_data
+
+
+def cf_security_automations(cli_ctx, _):
+    return _cf_security(cli_ctx).automations
+
+
+def cf_security_security_solutions(cli_ctx, _):
     return _cf_security(cli_ctx)

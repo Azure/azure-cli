@@ -1,0 +1,488 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --intent-vm-sizes --zone --tags
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_intent_vm_sizes_and_zone_000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001","name":"cli_test_ppg_intent_vm_sizes_and_zone_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","test":"test_ppg_intent_vm_sizes_and_zone","date":"2025-02-06T10:03:22Z","module":"vm","DateCreated":"2025-02-06T10:03:26Z","Creator":"zhuyan@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 06 Feb 2025 10:03:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 67A0639D2D7C4A1796C334A375FE7FF1 Ref B: SEL221051801011 Ref C: 2025-02-06T10:03:26Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2", "properties": {"intent": {"vmSizes": ["Standard_E64s_v4",
+      "Standard_M416ms_v2"]}}, "tags": {"tag": "test"}, "zones": ["2"]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '147'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --intent-vm-sizes --zone --tags
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?api-version=2024-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\"\
+        : \"eastus2\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"proximityPlacementGroupType\": \"Standard\",\r\n    \"intent\"\
+        : {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\",\r\n        \"\
+        Standard_M416ms_v2\"\r\n      ]\r\n    }\r\n  },\r\n  \"zones\": [\r\n   \
+        \ \"2\"\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '547'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 06 Feb 2025 10:03:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeletePPGSubscriptionMaximum;119
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: D5AA6091A2C64AD69DD5E7E4759FD94D Ref B: SEL221051801039 Ref C: 2025-02-06T10:03:27Z'
+    status:
+      code: 201
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --intent-vm-sizes
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_intent_vm_sizes_and_zone_000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001","name":"cli_test_ppg_intent_vm_sizes_and_zone_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","test":"test_ppg_intent_vm_sizes_and_zone","date":"2025-02-06T10:03:22Z","module":"vm","DateCreated":"2025-02-06T10:03:26Z","Creator":"zhuyan@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 06 Feb 2025 10:03:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 9EC820AC5B5344719026CEB1A76CEC3A Ref B: SEL221051504039 Ref C: 2025-02-06T10:03:34Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2", "properties": {"intent": {"vmSizes": ["Standard_E64s_v4",
+      "Standard_M416ms_v2"]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '106'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --intent-vm-sizes
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_2?api-version=2024-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my_ppg_2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_2\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\"\
+        : \"eastus2\",\r\n  \"properties\": {\r\n    \"proximityPlacementGroupType\"\
+        : \"Standard\",\r\n    \"intent\": {\r\n      \"vmSizes\": [\r\n        \"\
+        Standard_E64s_v4\",\r\n        \"Standard_M416ms_v2\"\r\n      ]\r\n    }\r\
+        \n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '480'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 06 Feb 2025 10:03:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeletePPGSubscriptionMaximum;118
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: CD0FB4BF16D340F590E5C675FD75CA5D Ref B: SEL221051503009 Ref C: 2025-02-06T10:03:35Z'
+    status:
+      code: 201
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --zone
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_intent_vm_sizes_and_zone_000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001","name":"cli_test_ppg_intent_vm_sizes_and_zone_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","test":"test_ppg_intent_vm_sizes_and_zone","date":"2025-02-06T10:03:22Z","module":"vm","DateCreated":"2025-02-06T10:03:26Z","Creator":"zhuyan@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 06 Feb 2025 10:03:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: C1E1F0FBC4BE4AF99E341E383C774AFB Ref B: SEL221051504049 Ref C: 2025-02-06T10:03:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --intent-vm-sizes
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_intent_vm_sizes_and_zone_000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001","name":"cli_test_ppg_intent_vm_sizes_and_zone_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","test":"test_ppg_intent_vm_sizes_and_zone","date":"2025-02-06T10:03:22Z","module":"vm","DateCreated":"2025-02-06T10:03:26Z","Creator":"zhuyan@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 06 Feb 2025 10:03:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: DD88D5AC055C45BAAD5B0C25098DB732 Ref B: SEL221051804023 Ref C: 2025-02-06T10:03:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --intent-vm-sizes
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?api-version=2024-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\"\
+        : \"eastus2\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"proximityPlacementGroupType\": \"Standard\",\r\n    \"intent\"\
+        : {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\",\r\n        \"\
+        Standard_M416ms_v2\"\r\n      ]\r\n    },\r\n    \"virtualMachines\": [],\r\
+        \n    \"virtualMachineScaleSets\": [],\r\n    \"availabilitySets\": []\r\n\
+        \  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '640'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 06 Feb 2025 10:03:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/HighCostGetSubscriptionMaximum;899
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: C74F9D482EA34CCEB098615CA90FFABD Ref B: SEL221051802053 Ref C: 2025-02-06T10:03:42Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"location": "eastus2", "properties": {"intent": {"vmSizes": ["Standard_E64s_v4"]},
+      "proximityPlacementGroupType": "Standard"}, "tags": {"tag": "test"}, "zones":
+      ["2"]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '168'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --intent-vm-sizes
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?api-version=2024-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\"\
+        : \"eastus2\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"proximityPlacementGroupType\": \"Standard\",\r\n    \"intent\"\
+        : {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\"\r\n      ]\r\n\
+        \    }\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '516'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 06 Feb 2025 10:03:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeletePPGSubscriptionMaximum;117
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: EDB120CBF5704D1BBBEE6C497EADCDAF Ref B: SEL221051802053 Ref C: 2025-02-06T10:03:43Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?api-version=2024-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_intent_vm_sizes_and_zone_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\"\
+        : \"eastus2\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"proximityPlacementGroupType\": \"Standard\",\r\n    \"intent\"\
+        : {\r\n      \"vmSizes\": [\r\n        \"Standard_E64s_v4\"\r\n      ]\r\n\
+        \    },\r\n    \"virtualMachines\": [],\r\n    \"virtualMachineScaleSets\"\
+        : [],\r\n    \"availabilitySets\": []\r\n  },\r\n  \"zones\": [\r\n    \"\
+        2\"\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '609'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 06 Feb 2025 10:03:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/HighCostGetSubscriptionMaximum;898
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 52F50187FFD44B6D8A555FE741D4688A Ref B: SEL221051504051 Ref C: 2025-02-06T10:03:46Z'
+    status:
+      code: 200
+      message: ''
+version: 1

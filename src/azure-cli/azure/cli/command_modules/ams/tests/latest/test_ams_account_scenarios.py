@@ -15,12 +15,13 @@ class AmsAccountTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'centralus'
+            'location': 'centralus',
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'Central US')
+            self.check('location', 'Central US'),
+            self.check('identity.type', 'SystemAssigned')
         ])
 
         self.cmd('az ams account update -n {amsname} -g {rg} --tags key=value', checks=[
@@ -45,16 +46,16 @@ class AmsAccountTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'southeastasia'
+            'location': 'southeastasia',
         })
 
-        account = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}').get_output_in_json()
+        account = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow').get_output_in_json()
 
         self.kwargs.update({
             'storageId': account['storageAccounts'][0]['id']
         })
 
-        self.cmd('az ams account storage sync-storage-keys -g {rg} -a {amsname} --id "{storageId}"')
+        self.cmd('az ams account storage sync-storage-keys -g {rg} -a {amsname} --storage-account-id "{storageId}"')
 
         self.cmd('az ams account delete -n {amsname} -g {rg}')
 
@@ -70,7 +71,7 @@ class AmsAccountTests(ScenarioTest):
             'location': 'eastasia'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'East Asia')
         ])
@@ -79,7 +80,7 @@ class AmsAccountTests(ScenarioTest):
             'storageAccount': storage_account_for_update
         })
 
-        self.cmd('az ams account storage add -a {amsname} -g {rg} -n {storageAccount}', checks=[
+        self.cmd('az ams account storage add -a {amsname} -g {rg} -n {storageAccount} --system-assigned', checks=[
             self.check('name', '{amsname}'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -104,10 +105,10 @@ class AmsAccountTests(ScenarioTest):
             'amsname3': amsname3
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --mi-system-assigned --default-action Allow')
 
         self.cmd('az ams account check-name --location {location} -n {amsname}', checks=[
-            self.check('@', 'Already in use by another Media Service account. Please try again with a name that is not likely to be in use.')
+            self.check('@', 'Already in use by another account. Please try again with a name that is not likely to be in use.')
         ])
 
         self.cmd('az ams account check-name --location {location} -n {amsname2}', checks=[
@@ -115,7 +116,7 @@ class AmsAccountTests(ScenarioTest):
         ])
 
         self.cmd('az ams account check-name --location {location} -n {amsname3}', checks=[
-            self.check('@', 'The Media Services account name should be between 3 and 24 characters and may contain only lowercase letters and numbers.')
+            self.check('@', 'The Media Account account name should be between 3 and 24 characters and may contain only lowercase letters and numbers.')
         ])
 
         self.cmd('az ams account delete -n {amsname} -g {rg}')

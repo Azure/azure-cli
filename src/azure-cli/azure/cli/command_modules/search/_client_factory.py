@@ -14,6 +14,18 @@ def cf_search_services(cli_ctx, _):
     return cf_search(cli_ctx).services
 
 
+def cf_search_private_endpoint_connections(cli_ctx, _):
+    return cf_search(cli_ctx).private_endpoint_connections
+
+
+def cf_search_private_link_resources(cli_ctx, _):
+    return cf_search(cli_ctx).private_link_resources
+
+
+def cf_search_shared_private_link_resources(cli_ctx, _):
+    return cf_search(cli_ctx).shared_private_link_resources
+
+
 def cf_search_admin_keys(cli_ctx, _):
     return cf_search(cli_ctx).admin_keys
 

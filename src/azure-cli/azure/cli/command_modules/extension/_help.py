@@ -15,6 +15,7 @@ short-summary: Manage and update CLI extensions.
 helps['extension add'] = """
 type: command
 short-summary: Add an extension.
+long-summary: To learn about installing extensions automatically, visit https://aka.ms/AzExtDynamicInstall.
 parameters:
   - name: --system
     type: string
@@ -31,6 +32,10 @@ examples:
     text: az extension add --source ~/anextension-0.0.1-py2.py3-none-any.whl --pip-proxy https://user:pass@proxy.server:8080
   - name: Add extension to system directory
     text: az extension add --name anextension --system
+  - name: Add a specific version of extension
+    text: az extension add --name anextension --version 1.0.0
+  - name: Upgrade the extension if already installed
+    text: az extension add --upgrade --name anextension
 """
 
 helps['extension list'] = """

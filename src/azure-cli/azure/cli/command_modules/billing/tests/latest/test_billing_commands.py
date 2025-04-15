@@ -19,32 +19,6 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
         else:
             self.assertIsNone(invoice['downloadUrl'])
 
-    @record_only()
-    def test_list_invoices_no_url(self):
-        # list
-        invoices_list = self.cmd('billing invoice list').get_output_in_json()
-        self.assertTrue(invoices_list)
-        self._validate_invoice(invoices_list[0], False)
-        # get
-        self.kwargs.update({
-            'invoice_name': invoices_list[0]['name']
-        })
-        invoice = self.cmd('billing invoice show -n {invoice_name}').get_output_in_json()
-        self._validate_invoice(invoice, True)
-
-    @record_only()
-    def test_list_invoices_with_url(self):
-        invoices_list = self.cmd('billing invoice list -d').get_output_in_json()
-        self.assertTrue(invoices_list)
-        self._validate_invoice(invoices_list[0], True)
-
-    @record_only()
-    def test_get_latest_invoice(self):
-        create_cmd = 'billing invoice show'
-        invoice = self.cmd(create_cmd).get_output_in_json()
-        self._validate_invoice(invoice, True)
-
-    @record_only()
     def test_list_billing_periods(self):
         # list
         periods_list = self.cmd('billing period list').get_output_in_json()
@@ -55,6 +29,9 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
             'period_name': period_name
         })
         self.cmd('billing period show -n {period_name}', checks=self.check('name', period_name))
+        self.cmd('billing period list --top 3', checks=[
+            self.check('length(@)', 3)
+        ])
 
     @record_only()
     def test_list_enrollment_accounts(self):
@@ -67,3 +44,10 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
             'enrollment_account_name': enrollment_account_name
         })
         self.cmd('billing enrollment-account show -n {enrollment_account_name}', checks=self.check('name', enrollment_account_name))
+
+    def test_invoice_list(self):
+        # please apply swagger changes: https://github.com/Azure/azure-rest-api-specs/pull/32870
+        self.cmd(
+            "billing invoice list --period-end-date '2025-06-30' --period-start-date '2000-01-01' "
+            "--account-name 9a157b81-1503-516b-4fe8-7849e97ca70e:e6bd1c01-9e9b-4fa7-a9f1-6fe6cbad31fa_2019-05-31"
+        )

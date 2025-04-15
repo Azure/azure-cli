@@ -3,15 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import logging
 import shutil
 import inspect
 from inspect import getmembers as inspect_getmembers
 
 import unittest
-import mock
+from unittest import mock
 import tempfile
 
 from knack.help import GroupHelpFile, HelpAuthoringException
@@ -132,7 +130,6 @@ class HelpTest(unittest.TestCase):
         except SystemExit:
             pass
         cmd_tbl = cli.invocation.commands_loader.command_table
-        cli.invocation.parser.load_command_table(cli.invocation.commands_loader)
         for cmd in cmd_tbl:
             try:
                 cmd_tbl[cmd].loader.command_name = cmd
@@ -142,7 +139,6 @@ class HelpTest(unittest.TestCase):
         cli.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, register_global_subscription_argument)
         cli.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, register_ids_argument)
         cli.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, command_table=cmd_tbl)
-        cli.invocation.parser.load_command_table(cli.invocation.commands_loader)
         _store_parsers(cli.invocation.parser, parser_dict)
 
         # TODO: do we want to update this as it doesn't actually load all help.
@@ -206,7 +202,7 @@ class TestHelpLoads(unittest.TestCase):
             description: Group yaml description. A.K.A long description
             links:
                 - title: Azure Test Docs
-                  url: "https://docs.microsoft.com/azure/test"
+                  url: "https://learn.microsoft.com/azure/test"
                 - url: "https://aka.ms/just-a-url"
         - command:
             name: test alpha
@@ -214,7 +210,7 @@ class TestHelpLoads(unittest.TestCase):
             description: Command yaml description. A.K.A long description
             links:
                 - title: Azure Test Alpha Docs
-                  url: "https://docs.microsoft.com/azure/test/alpha"
+                  url: "https://learn.microsoft.com/azure/test/alpha"
                 - url: "https://aka.ms/just-a-long-url"
             arguments:
                 - name: --arg2 # we do not specify the short option in the name.
@@ -255,7 +251,7 @@ class TestHelpLoads(unittest.TestCase):
                             "hyper-links": [
                                 {
                                     "title": "Azure Json Test Docs",
-                                    "url": "https://docs.microsoft.com/azure/test"
+                                    "url": "https://learn.microsoft.com/azure/test"
                                 },
                                 {
                                     "url": "https://aka.ms/just-a-url"
@@ -271,7 +267,7 @@ class TestHelpLoads(unittest.TestCase):
                             "hyper-links": [
                                 {
                                     "title": "Azure Json Test Alpha Docs",
-                                    "url": "https://docs.microsoft.com/azure/test/alpha"
+                                    "url": "https://learn.microsoft.com/azure/test/alpha"
                                 },
                                 {
                                     "url": "https://aka.ms/just-a-long-url"
@@ -407,7 +403,7 @@ class TestHelpLoads(unittest.TestCase):
         self.assertIsNotNone(group_help_obj)
         self.assertEqual(group_help_obj.short_summary, "Group yaml summary.")
         self.assertEqual(group_help_obj.long_summary, "Group yaml description. A.K.A long description.")
-        self.assertEqual(group_help_obj.links[0], {"title": "Azure Test Docs", "url": "https://docs.microsoft.com/azure/test"})
+        self.assertEqual(group_help_obj.links[0], {"title": "Azure Test Docs", "url": "https://learn.microsoft.com/azure/test"})
         self.assertEqual(group_help_obj.links[1], {"url": "https://aka.ms/just-a-url"})
 
         # Test command help
@@ -415,7 +411,7 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(command_help_obj.short_summary, "Command yaml summary.")
         self.assertEqual(command_help_obj.long_summary, "Command yaml description. A.K.A long description.")
         self.assertEqual(command_help_obj.links[0], {"title": "Azure Test Alpha Docs",
-                                                     "url": "https://docs.microsoft.com/azure/test/alpha"})
+                                                     "url": "https://learn.microsoft.com/azure/test/alpha"})
         self.assertEqual(command_help_obj.links[1], {"url": "https://aka.ms/just-a-long-url"})
 
         # test that parameters and help are loaded from command function docstring, argument registry help and help.yaml
@@ -482,7 +478,7 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(group_help_obj.short_summary, "Group json summary.")
         self.assertEqual(group_help_obj.long_summary, "Group json description. A.K.A long description.")
         self.assertEqual(group_help_obj.links[0], {"title": "Azure Json Test Docs",
-                                                   "url": "https://docs.microsoft.com/azure/test"})
+                                                   "url": "https://learn.microsoft.com/azure/test"})
         self.assertEqual(group_help_obj.links[1], {"url": "https://aka.ms/just-a-url"})
 
         # Test command help
@@ -490,7 +486,7 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(command_help_obj.short_summary, "Command json summary.")
         self.assertEqual(command_help_obj.long_summary, "Command json description. A.K.A long description.")
         self.assertEqual(command_help_obj.links[0], {"title": "Azure Json Test Alpha Docs",
-                                                     "url": "https://docs.microsoft.com/azure/test/alpha"})
+                                                     "url": "https://learn.microsoft.com/azure/test/alpha"})
         self.assertEqual(command_help_obj.links[1], {"url": "https://aka.ms/just-a-long-url"})
 
         # test that parameters and help are loaded from command function docstring, argument registry help and help.yaml

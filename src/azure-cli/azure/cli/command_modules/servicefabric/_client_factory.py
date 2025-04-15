@@ -58,7 +58,37 @@ def storage_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
 
 
-def network_client_factory(cli_ctx, **_):
-    from azure.cli.core.profiles import ResourceType
+# Managed clusters
+
+def servicefabric_managed_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
+    from azure.mgmt.servicefabricmanagedclusters import ServiceFabricManagedClustersManagementClient
+    return get_mgmt_service_client(cli_ctx, ServiceFabricManagedClustersManagementClient)
+
+
+def servicefabric_managed_client_factory_all(cli_ctx, kwargs):
+    return servicefabric_managed_client_factory(cli_ctx, **kwargs)
+
+
+def servicefabric_managed_cluster_client_factory(cli_ctx, kwargs):
+    return servicefabric_managed_client_factory(cli_ctx, **kwargs).managed_clusters
+
+
+def servicefabric_managed_node_type_client_factory(cli_ctx, kwargs):
+    return servicefabric_managed_client_factory(cli_ctx, **kwargs).node_types
+
+
+def servicefabric_managed_application_type_client_factory(cli_ctx, kwargs):
+    return servicefabric_managed_client_factory(cli_ctx, **kwargs).application_types
+
+
+def servicefabric_managed_application_type_version_client_factory(cli_ctx, kwargs):
+    return servicefabric_managed_client_factory(cli_ctx, **kwargs).application_type_versions
+
+
+def servicefabric_managed_application_client_factory(cli_ctx, kwargs):
+    return servicefabric_managed_client_factory(cli_ctx, **kwargs).applications
+
+
+def servicefabric_managed_service_client_factory(cli_ctx, kwargs):
+    return servicefabric_managed_client_factory(cli_ctx, **kwargs).services

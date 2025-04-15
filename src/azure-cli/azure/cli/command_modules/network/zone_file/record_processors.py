@@ -25,8 +25,6 @@
 # SOFTWARE.
 # pylint: skip-file
 
-from __future__ import print_function
-
 import copy
 
 
@@ -85,8 +83,12 @@ def process_rr(io, data, record_type, record_keys, name, print_name):
     elif not isinstance(record_keys, list):
         raise ValueError('record_keys must be a string or list of strings')
 
+    in_or_azure = "IN"
+    if record_type == 'ALIAS':
+        in_or_azure = "AZURE"
+
     name_display = name if print_name else ' ' * len(name)
-    print('{} {} IN {} '.format(name_display, data['ttl'], record_type), end='', file=io)
+    print('{} {} {} {} '.format(name_display, data['ttl'], in_or_azure, record_type), end='', file=io)
 
     for i, key in enumerate(record_keys):
         print(data[key], end='\n' if i == len(record_keys) - 1 else ' ', file=io)
@@ -112,12 +114,24 @@ def process_cname(io, data, name, print_name=False):
     return process_rr(io, data, 'CNAME', 'alias', name, print_name)
 
 
+def process_ds(io, data, name, print_name=False):
+    return process_rr(io, data, 'DS', ['key_tag', 'algorithm', 'digest_type', 'digest'], name, print_name)
+
+
 def process_mx(io, data, name, print_name=False):
     return process_rr(io, data, 'MX', ['preference', 'host'], name, print_name)
 
 
+def process_naptr(io, data, name, print_name=False):
+    return process_rr(io, data, 'NAPTR', ['order', 'preference', 'flags', 'services', 'regexp', 'replacement'], name, print_name)
+
+
 def process_ptr(io, data, name, print_name=False):
     return process_rr(io, data, 'PTR', 'host', name, print_name)
+
+
+def process_tlsa(io, data, name, print_name=False):
+    return process_rr(io, data, 'TLSA', ['usage', 'selector', 'matching_type', 'certificate'], name, print_name)
 
 
 def process_txt(io, data, name, print_name=False):
@@ -126,3 +140,7 @@ def process_txt(io, data, name, print_name=False):
 
 def process_srv(io, data, name, print_name=False):
     return process_rr(io, data, 'SRV', ['priority', 'weight', 'port', 'target'], name, print_name)
+
+
+def process_alias(io, data, name, print_name=False):
+    return process_rr(io, data, 'ALIAS', 'target-resource-id', name, print_name)

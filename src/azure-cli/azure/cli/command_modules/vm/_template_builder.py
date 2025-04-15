@@ -6,13 +6,17 @@
 
 from enum import Enum
 
+from knack.log import get_logger
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import ValidationError, InvalidArgumentValueError
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 from azure.cli.command_modules.vm._vm_utils import get_target_network_api
+
+logger = get_logger(__name__)
 
 
 # pylint: disable=too-few-public-methods
@@ -23,6 +27,8 @@ class StorageProfile(Enum):
     ManagedPirImage = 4  # this would be the main scenarios
     ManagedCustomImage = 5
     ManagedSpecializedOSDisk = 6
+    SharedGalleryImage = 7
+    CommunityGalleryImage = 8
 
 
 def build_deployment_resource(name, template, dependencies=None):
@@ -64,7 +70,7 @@ def build_output_deployment_resource(key, property_name, property_provider, prop
     return deployment
 
 
-def build_storage_account_resource(_, name, location, tags, sku):
+def build_storage_account_resource(_, name, location, tags, sku, edge_zone=None):
     storage_account = {
         'type': 'Microsoft.Storage/storageAccounts',
         'name': name,
@@ -74,10 +80,16 @@ def build_storage_account_resource(_, name, location, tags, sku):
         'dependsOn': [],
         'properties': {'accountType': sku}
     }
+
+    if edge_zone:
+        storage_account['apiVersion'] = '2021-04-01'
+        storage_account['extendedLocation'] = edge_zone
+
     return storage_account
 
 
-def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, count=None,
+                             edge_zone=None):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -93,6 +105,14 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         'properties': public_ip_properties
     }
 
+    if count:
+        public_ip['name'] = "[concat('{}', copyIndex())]".format(name)
+        public_ip['copy'] = {
+            'name': 'publicipcopy',
+            'mode': 'parallel',
+            'count': count
+        }
+
     # when multiple zones are provided(through a x-zone scale set), we don't propagate to PIP becasue it doesn't
     # support x-zone; rather we will rely on the Standard LB to work with such scale sets
     if zone and len(zone) == 1:
@@ -100,12 +120,18 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
 
     if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
+
+        # The edge zones are only built out using Standard SKU Public IPs
+        if edge_zone and sku.lower() == 'standard':
+            public_ip['apiVersion'] = '2021-02-01'
+            public_ip['extendedLocation'] = edge_zone
+
     return public_ip
 
 
 def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_address=None,
-                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None):
-
+                       nsg_id=None, public_ip_id=None, application_security_groups=None, accelerated_networking=None,
+                       count=None, edge_zone=None):
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     ip_config_properties = {
         'privateIPAllocationMethod': private_ip_allocation,
@@ -117,22 +143,27 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
 
     if public_ip_id:
         ip_config_properties['publicIPAddress'] = {'id': public_ip_id}
+        if count:
+            ip_config_properties['publicIPAddress']['id'] = "[concat('{}', copyIndex())]".format(public_ip_id)
 
+    ipconfig_name = 'ipconfig{}'.format(vm_name)
     nic_properties = {
         'ipConfigurations': [
             {
-                'name': 'ipconfig{}'.format(vm_name),
+                'name': ipconfig_name,
                 'properties': ip_config_properties
             }
         ]
     }
+    if count:
+        nic_properties['ipConfigurations'][0]['name'] = "[concat('{}', copyIndex())]".format(ipconfig_name)
 
     if nsg_id:
         nic_properties['networkSecurityGroup'] = {'id': nsg_id}
 
     api_version = '2015-06-15'
     if application_security_groups:
-        asg_ids = [{'id': x.id} for x in application_security_groups]
+        asg_ids = [{'id': x['id']} for x in application_security_groups]
         nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
         api_version = '2017-09-01'
 
@@ -149,6 +180,19 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
         'dependsOn': [],
         'properties': nic_properties
     }
+
+    if count:
+        nic['name'] = "[concat('{}', copyIndex())]".format(name)
+        nic['copy'] = {
+            'name': 'niccopy',
+            'mode': 'parallel',
+            'count': count
+        }
+
+    if edge_zone:
+        nic['extendedLocation'] = edge_zone
+        nic['apiVersion'] = '2021-02-01'
+
     return nic
 
 
@@ -190,7 +234,7 @@ def build_nsg_resource(_, name, location, tags, nsg_rule):
 
 
 def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
-                        subnet_prefix=None, dns_servers=None):
+                        subnet_prefix=None, dns_servers=None, edge_zone=None):
     vnet = {
         'name': name,
         'type': 'Microsoft.Network/virtualNetworks',
@@ -213,12 +257,16 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
                 'addressPrefix': subnet_prefix
             }
         }]
+    if edge_zone:
+        vnet['extendedLocation'] = edge_zone
+        vnet['apiVersion'] = '2021-02-01'
+
     return vnet
 
 
 def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
                               role_assignment_guid, identity_scope, is_vm=True):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     result = parse_resource_id(identity_scope)
     if result.get('type'):  # is a resource id?
         name = '{}/Microsoft.Authorization/{}'.format(result['name'], role_assignment_guid)
@@ -245,7 +293,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
-def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
+def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_values=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None, authentication_type=None,
@@ -254,7 +302,13 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
-        encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None):
+        encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
+        enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
+        enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
+        capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+        os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
+        enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
+        enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -262,11 +316,17 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
         special_chars = '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
 
+        # _computer_name is used to avoid shadow names
+        _computer_name = computer_name or ''.join(filter(lambda x: x not in special_chars, name))
+
         os_profile = {
             # Use name as computer_name if it's not provided. Remove special characters from name.
-            'computerName': computer_name or ''.join(filter(lambda x: x not in special_chars, name)),
+            'computerName': _computer_name,
             'adminUsername': admin_username
         }
+
+        if count:
+            os_profile['computerName'] = "[concat('{}', copyIndex())]".format(_computer_name)
 
         if admin_password:
             os_profile['adminPassword'] = "[parameters('adminPassword')]"
@@ -301,10 +361,33 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
             os_profile['secrets'] = secrets
 
         if enable_auto_update is not None and custom_image_os_type.lower() == 'windows':
+            if 'windowsConfiguration' not in os_profile:
+                os_profile['windowsConfiguration'] = {}
             os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
 
+        # Windows patch settings
         if patch_mode is not None and custom_image_os_type.lower() == 'windows':
+            if patch_mode.lower() not in ['automaticbyos', 'automaticbyplatform', 'manual']:
+                raise ValidationError(
+                    'Invalid value of --patch-mode for Windows VM. Valid values are AutomaticByOS, '
+                    'AutomaticByPlatform, Manual.')
+
+            if 'windowsConfiguration' not in os_profile:
+                os_profile['windowsConfiguration'] = {}
             os_profile['windowsConfiguration']['patchSettings'] = {
+                'patchMode': patch_mode,
+                'enableHotpatching': enable_hotpatching
+            }
+
+        # Linux patch settings
+        if patch_mode is not None and custom_image_os_type.lower() == 'linux':
+            if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
+                raise ValidationError(
+                    'Invalid value of --patch-mode for Linux VM. Valid values are AutomaticByPlatform, ImageDefault.')
+
+            if 'linuxConfiguration' not in os_profile:
+                os_profile['linuxConfiguration'] = {}
+            os_profile['linuxConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode
             }
 
@@ -382,6 +465,32 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
                         'id': attach_os_disk
                     }
                 }
+            },
+            'SharedGalleryImage': {
+                "osDisk": {
+                    "caching": os_caching,
+                    "managedDisk": {
+                        "storageAccountType": disk_info['os'].get('storageAccountType'),
+                    },
+                    "name": os_disk_name,
+                    "createOption": "fromImage"
+                },
+                "imageReference": {
+                    'sharedGalleryImageId': image_reference
+                }
+            },
+            'CommunityGalleryImage': {
+                "osDisk": {
+                    "caching": os_caching,
+                    "managedDisk": {
+                        "storageAccountType": disk_info['os'].get('storageAccountType'),
+                    },
+                    "name": os_disk_name,
+                    "createOption": "fromImage"
+                },
+                "imageReference": {
+                    'communityGalleryImageId': image_reference
+                }
             }
         }
         if os_disk_encryption_set is not None:
@@ -391,11 +500,62 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
             storage_profiles['ManagedCustomImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set,
             }
+            storage_profiles['SharedGalleryImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set,
+            }
+            storage_profiles['CommunityGalleryImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set,
+            }
+        if os_disk_security_encryption_type is not None:
+            storage_profiles['ManagedPirImage']['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            storage_profiles['ManagedCustomImage']['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            storage_profiles['SharedGalleryImage']['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            storage_profiles['CommunityGalleryImage']['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            if os_disk_secure_vm_disk_encryption_set is not None:
+                storage_profiles['ManagedPirImage']['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+                storage_profiles['ManagedCustomImage']['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+                storage_profiles['SharedGalleryImage']['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+                storage_profiles['CommunityGalleryImage']['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+
         profile = storage_profiles[storage_profile.name]
         if os_disk_size_gb:
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         if disk_info['os'].get('writeAcceleratorEnabled') is not None:
             profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
+        if os_disk_delete_option is not None:
+            profile['osDisk']['deleteOption'] = os_disk_delete_option
         data_disks = [v for k, v in disk_info.items() if k != 'os']
         if data_disk_encryption_sets:
             if len(data_disk_encryption_sets) != len(data_disks):
@@ -409,10 +569,47 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         if disk_info['os'].get('diffDiskSettings'):
             profile['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
+        if disk_controller_type is not None:
+            profile['diskControllerType'] = disk_controller_type
+
         return profile
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
                      'storageProfile': _build_storage_profile()}
+
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if scheduled_events_policy:
+        vm_properties['scheduledEventsPolicy'] = scheduled_events_policy
+
+    vm_size_properties = {}
+    if v_cpus_available is not None:
+        vm_size_properties['vCPUsAvailable'] = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm_size_properties['vCPUsPerCore'] = v_cpus_per_core
+
+    if vm_size_properties:
+        vm_properties['hardwareProfile']['vmSizeProperties'] = vm_size_properties
 
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
@@ -435,8 +632,13 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
             }
         }
 
-    if ultra_ssd_enabled is not None:
-        vm_properties['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
+    if any((ultra_ssd_enabled, enable_hibernation)):
+        vm_properties['additionalCapabilities'] = {}
+        if ultra_ssd_enabled is not None:
+            vm_properties['additionalCapabilities']['ultraSSDEnabled'] = ultra_ssd_enabled
+
+        if enable_hibernation is not None:
+            vm_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
 
     if proximity_placement_group:
         vm_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
@@ -456,8 +658,50 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if max_price is not None:
         vm_properties['billingProfile'] = {'maxPrice': max_price}
 
+    vm_properties['securityProfile'] = {}
+
     if encryption_at_host is not None:
-        vm_properties['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+        vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
+
+    proxy_agent_settings = {}
+    if enable_proxy_agent is not None:
+        proxy_agent_settings['enabled'] = enable_proxy_agent
+
+    if proxy_agent_mode is not None:
+        proxy_agent_settings['mode'] = proxy_agent_mode
+
+    if proxy_agent_settings:
+        vm_properties['securityProfile']['proxyAgentSettings'] = proxy_agent_settings
+
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    if security_type is not None:
+        vm_properties['securityProfile']['securityType'] = security_type
+
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (
+            enable_secure_boot is not None or enable_vtpm is not None):
+        vm_properties['securityProfile']['uefiSettings'] = {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }
+
+    # Compatibility of various API versions
+    if vm_properties['securityProfile'] == {}:
+        del vm_properties['securityProfile']
+
+    if platform_fault_domain is not None:
+        vm_properties['platformFaultDomain'] = platform_fault_domain
+
+    if user_data:
+        vm_properties['userData'] = b64encode(user_data)
+
+    if capacity_reservation_group:
+        vm_properties['capacityReservation'] = {
+            'capacityReservationGroup': {
+                'id': capacity_reservation_group
+            }
+        }
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -468,8 +712,21 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         'dependsOn': [],
         'properties': vm_properties,
     }
+
     if zone:
         vm['zones'] = zone
+
+    if count:
+        vm['copy'] = {
+            'name': 'vmcopy',
+            'mode': 'parallel',
+            'count': count
+        }
+        vm['name'] = "[concat('{}', copyIndex())]".format(name)
+
+    if edge_zone:
+        vm['extendedLocation'] = edge_zone
+
     return vm
 
 
@@ -593,7 +850,7 @@ def build_application_gateway_resource(_, name, location, tags, backend_pool_nam
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, nat_pool_name,
                                  backend_port, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
-                                 private_ip_allocation, sku, instance_count, disable_overprovision):
+                                 private_ip_allocation, sku, instance_count, disable_overprovision, edge_zone=None):
     lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
 
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
@@ -606,25 +863,24 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
                 'name': backend_pool_name
             }
         ],
-        'inboundNatPools': [
-            {
-                'name': nat_pool_name,
-                'properties': {
-                    'frontendIPConfiguration': {
-                        'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(
-                            lb_id, frontend_ip_name)
-                    },
-                    'protocol': 'tcp',
-                    'frontendPortRangeStart': '50000',
-                    # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
-                    'frontendPortRangeEnd': str(max(50119,
-                                                    49999 + instance_count * (1 if disable_overprovision else 2))),
-                    'backendPort': backend_port
-                }
-            }
-        ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
+    if nat_pool_name:
+        lb_properties['inboundNatPools'] = [{
+            'name': nat_pool_name,
+            'properties': {
+                'frontendIPConfiguration': {
+                    'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(
+                        lb_id, frontend_ip_name)
+                },
+                'protocol': 'tcp',
+                'frontendPortRangeStart': '50000',
+                # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
+                'frontendPortRangeEnd': str(max(50119, 49999 + instance_count * (1 if disable_overprovision else 2))),
+                'backendPort': backend_port
+            }
+        }]
+
     lb = {
         'type': 'Microsoft.Network/loadBalancers',
         'name': name,
@@ -654,10 +910,47 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
                     "idleTimeoutInMinutes": 5,
                 }
             }]
+
+    if edge_zone:
+        lb['apiVersion'] = '2021-02-01'
+        lb['extendedLocation'] = edge_zone
+
     return lb
 
 
-def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, storage_sku):
+def build_nat_rule_v2(cmd, name, location, lb_name, frontend_ip_name, backend_pool_name, backend_port, instance_count,
+                      disable_overprovision):
+    lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(lb_name)
+
+    nat_rule = {
+        "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+        "apiVersion": get_target_network_api(cmd.cli_ctx),
+        "name": name,
+        "location": location,
+        "properties": {
+            "frontendIPConfiguration": {
+                'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(lb_id, frontend_ip_name)
+            },
+            "backendAddressPool": {
+                "id": "[concat({}, '/backendAddressPools/', '{}')]".format(lb_id, backend_pool_name)
+            },
+            "backendPort": backend_port,
+            "frontendPortRangeStart": "50000",
+            # This logic comes from the template of `inboundNatPools` to keep consistent with NAT pool
+            # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
+            "frontendPortRangeEnd": str(max(50119, 49999 + instance_count * (1 if disable_overprovision else 2))),
+            "protocol": "tcp",
+            "idleTimeoutInMinutes": 5
+        },
+        "dependsOn": [
+            "[concat('Microsoft.Network/loadBalancers/', '{}')]".format(lb_name)
+        ]
+    }
+
+    return nat_rule
+
+
+def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, storage_sku, edge_zone=None):
 
     storage_resource = {
         'type': 'Microsoft.Storage/storageAccounts',
@@ -673,11 +966,16 @@ def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, stora
             'accountType': storage_sku
         }
     }
+
+    if edge_zone:
+        storage_resource['apiVersion'] = '2021-04-01'
+        storage_resource['extendedLocation'] = edge_zone
+
     return storage_resource
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, too-many-lines
-def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
+def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
                         admin_username, authentication_type, storage_profile, os_disk_name, disk_info,
@@ -690,47 +988,70 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         terminate_notification_time=None, max_price=None, scale_in_policy=None,
                         os_disk_encryption_set=None, data_disk_encryption_sets=None,
                         data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None,
-                        specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None):
+                        specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None,
+                        max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
+                        max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
+                        enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
+                        orchestration_mode=None, user_data=None, network_api_version=None,
+                        enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                        enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
+                        enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
+                        v_cpus_per_core=None, os_disk_security_encryption_type=None,
+                        os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
+                        regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
+                        enable_osimage_notification=None, max_surge=None, enable_hibernation=None,
+                        enable_auto_os_upgrade=None, enable_proxy_agent=None, proxy_agent_mode=None,
+                        security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
+                        enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
+                        additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+                        enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
+                        security_posture_reference_is_overridable=None, zone_balance=None):
 
     # Build IP configuration
-    ip_configuration = {
-        'name': ip_config_name,
-        'properties': {
-            'subnet': {'id': subnet_id}
-        }
-    }
+    ip_configuration = {}
+    ip_config_properties = {}
+
+    if subnet_id:
+        ip_config_properties['subnet'] = {'id': subnet_id}
 
     if public_ip_per_vm:
-        ip_configuration['properties']['publicipaddressconfiguration'] = {
+        ip_config_properties['publicipaddressconfiguration'] = {
             'name': 'instancepublicip',
             'properties': {
                 'idleTimeoutInMinutes': 10,
             }
         }
         if vm_domain_name:
-            ip_configuration['properties']['publicipaddressconfiguration']['properties']['dnsSettings'] = {
+            ip_config_properties['publicipaddressconfiguration']['properties']['dnsSettings'] = {
                 'domainNameLabel': vm_domain_name
             }
 
     if backend_address_pool_id:
         key = 'loadBalancerBackendAddressPools' if 'loadBalancers' in backend_address_pool_id \
             else 'ApplicationGatewayBackendAddressPools'
-        ip_configuration['properties'][key] = [
+        ip_config_properties[key] = [
             {'id': backend_address_pool_id}
         ]
 
     if inbound_nat_pool_id:
-        ip_configuration['properties']['loadBalancerInboundNatPools'] = [
+        ip_config_properties['loadBalancerInboundNatPools'] = [
             {'id': inbound_nat_pool_id}
         ]
 
     if application_security_groups and cmd.supported_api_version(min_api='2018-06-01',
                                                                  operation_group='virtual_machine_scale_sets'):
-        ip_configuration['properties']['applicationSecurityGroups'] = [{'id': x.id}
-                                                                       for x in application_security_groups]
+        ip_config_properties['applicationSecurityGroups'] = [{'id': x['id']} for x in application_security_groups]
+
+    if ip_config_properties:
+        ip_configuration = {
+            'name': ip_config_name,
+            'properties': ip_config_properties
+        }
+
     # Build storage profile
     storage_properties = {}
-    os_caching = disk_info['os'].get('caching')
+    if disk_info:
+        os_caching = disk_info['os'].get('caching')
 
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {
@@ -751,6 +1072,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
         if os_disk_size_gb is not None:
             storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
+
     elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedCustomImage]:
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
@@ -761,11 +1085,25 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set
             }
-        if disk_info['os'].get('diffDiskSettings'):
+        if os_disk_security_encryption_type is not None:
+            storage_properties['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type
+                }
+            })
+            if os_disk_secure_vm_disk_encryption_set is not None:
+                storage_properties['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+        if disk_info and disk_info['os'].get('diffDiskSettings'):
             storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
         if os_disk_size_gb is not None:
             storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:
         storage_properties['imageReference'] = {
@@ -778,7 +1116,68 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['imageReference'] = {
             'id': image
         }
-    data_disks = [v for k, v in disk_info.items() if k != 'os']
+    if storage_profile == StorageProfile.SharedGalleryImage:
+        storage_properties['osDisk'] = {
+            'caching': os_caching,
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
+            "name": os_disk_name,
+            "createOption": "fromImage"
+        }
+        storage_properties['imageReference'] = {
+            'sharedGalleryImageId': image
+        }
+        if os_disk_encryption_set is not None:
+            storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set
+            }
+        if os_disk_security_encryption_type is not None:
+            storage_properties['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            if os_disk_secure_vm_disk_encryption_set is not None:
+                storage_properties['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
+    if storage_profile == StorageProfile.CommunityGalleryImage:
+        storage_properties['osDisk'] = {
+            'caching': os_caching,
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
+            "name": os_disk_name,
+            "createOption": "fromImage"
+        }
+        storage_properties['imageReference'] = {
+            'communityGalleryImageId': image
+        }
+        if os_disk_encryption_set is not None:
+            storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set
+            }
+        if os_disk_security_encryption_type is not None:
+            storage_properties['osDisk']['managedDisk'].update({
+                'securityProfile': {
+                    'securityEncryptionType': os_disk_security_encryption_type,
+                }
+            })
+            if os_disk_secure_vm_disk_encryption_set is not None:
+                storage_properties['osDisk']['managedDisk']['securityProfile'].update({
+                    'diskEncryptionSet': {
+                        'id': os_disk_secure_vm_disk_encryption_set
+                    }
+                })
+        if os_disk_delete_option is not None:
+            storage_properties['osDisk']['deleteOption'] = os_disk_delete_option
+
+    if disk_info:
+        data_disks = [v for k, v in disk_info.items() if k != 'os']
+    else:
+        data_disks = []
+
     if data_disk_encryption_sets:
         if len(data_disk_encryption_sets) != len(data_disks):
             raise CLIError(
@@ -797,12 +1196,16 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             data_disk['diskMBpsReadWrite'] = data_disk_mbps[i]
     if data_disks:
         storage_properties['dataDisks'] = data_disks
+    if disk_controller_type is not None:
+        storage_properties['diskControllerType'] = disk_controller_type
 
     # Build OS Profile
-    os_profile = {
-        'computerNamePrefix': naming_prefix,
-        'adminUsername': admin_username
-    }
+    os_profile = {}
+    if computer_name_prefix:
+        os_profile['computerNamePrefix'] = computer_name_prefix
+
+    if admin_username:
+        os_profile['adminUsername'] = admin_username
 
     if admin_password:
         os_profile['adminPassword'] = "[parameters('adminPassword')]"
@@ -826,60 +1229,200 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if secrets:
         os_profile['secrets'] = secrets
 
-    # Build VMSS
-    nic_config = {
-        'name': nic_name,
-        'properties': {
-            'primary': 'true',
-            'ipConfigurations': [ip_configuration]
+    if enable_agent is not None:
+        if os_type.lower() == 'linux':
+            if 'linuxConfiguration' not in os_profile:
+                os_profile['linuxConfiguration'] = {}
+            os_profile['linuxConfiguration']['provisionVMAgent'] = enable_agent
+        elif os_type.lower() == 'windows':
+            if 'windowsConfiguration' not in os_profile:
+                os_profile['windowsConfiguration'] = {}
+            os_profile['windowsConfiguration']['provisionVMAgent'] = enable_agent
+
+    if enable_auto_update is not None and os_type.lower() == 'windows':
+        os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
+
+    # Windows patch settings
+    if patch_mode is not None and os_type.lower() == 'windows':
+        if patch_mode.lower() not in ['automaticbyos', 'automaticbyplatform', 'manual']:
+            raise InvalidArgumentValueError(
+                'Invalid value of --patch-mode for Windows VMSS. Valid values are AutomaticByOS, '
+                'AutomaticByPlatform, Manual.')
+        os_profile['windowsConfiguration']['patchSettings'] = {
+            'patchMode': patch_mode
         }
-    }
+
+    # Linux patch settings
+    if patch_mode is not None and os_type.lower() == 'linux':
+        if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
+            raise InvalidArgumentValueError(
+                'Invalid value of --patch-mode for Linux VMSS. Valid values are AutomaticByPlatform, ImageDefault.')
+        os_profile['linuxConfiguration']['patchSettings'] = {
+            'patchMode': patch_mode
+        }
+
+    # Build VMSS
+    nic_config = {}
+    nic_config_properties = {}
+
+    if ip_configuration:
+        nic_config_properties['ipConfigurations'] = [ip_configuration]
 
     if cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         if dns_servers:
-            nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
+            nic_config_properties['dnsSettings'] = {'dnsServers': dns_servers}
 
         if accelerated_networking:
-            nic_config['properties']['enableAcceleratedNetworking'] = True
+            nic_config_properties['enableAcceleratedNetworking'] = True
 
     if nsg:
-        nic_config['properties']['networkSecurityGroup'] = {'id': nsg}
+        nic_config_properties['networkSecurityGroup'] = {'id': nsg}
 
-    vmss_properties = {
-        'overprovision': overprovision,
-        'upgradePolicy': {
-            'mode': upgrade_policy_mode
-        },
-        'virtualMachineProfile': {
-            'storageProfile': storage_properties,
-            'networkProfile': {
-                'networkInterfaceConfigurations': [nic_config]
-            }
+    if nic_config_properties:
+        nic_config_properties['primary'] = 'true'
+        nic_config = {
+            'name': nic_name,
+            'properties': nic_config_properties
         }
-    }
 
-    if not specialized:
-        vmss_properties['virtualMachineProfile']['osProfile'] = os_profile
+    vmss_properties = {}
+    network_profile = {}
+    virtual_machine_profile = {}
+    if nic_config:
+        network_profile['networkInterfaceConfigurations'] = [nic_config]
+
+    if overprovision is not None:
+        vmss_properties['overprovision'] = overprovision
+
+    if storage_properties:
+        virtual_machine_profile['storageProfile'] = storage_properties
+
+    hardware_profile = {}
+    vm_size_properties = {}
+    if v_cpus_available is not None:
+        vm_size_properties['vCPUsAvailable'] = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm_size_properties['vCPUsPerCore'] = v_cpus_per_core
+
+    if vm_size_properties:
+        hardware_profile['vmSizeProperties'] = vm_size_properties
+
+    if hardware_profile:
+        virtual_machine_profile['hardwareProfile'] = hardware_profile
+
+    if not specialized and os_profile:
+        virtual_machine_profile['osProfile'] = os_profile
+
+    if upgrade_policy_mode:
+        vmss_properties['upgradePolicy'] = {
+            'mode': upgrade_policy_mode
+        }
+    if upgrade_policy_mode and cmd.supported_api_version(min_api='2020-12-01',
+                                                         operation_group='virtual_machine_scale_sets'):
+        rolling_upgrade_policy = {}
+        if max_batch_instance_percent is not None:
+            rolling_upgrade_policy['maxBatchInstancePercent'] = max_batch_instance_percent
+
+        if max_unhealthy_instance_percent is not None:
+            rolling_upgrade_policy['maxUnhealthyInstancePercent'] = max_unhealthy_instance_percent
+
+        if max_unhealthy_upgraded_instance_percent is not None:
+            rolling_upgrade_policy['maxUnhealthyUpgradedInstancePercent'] = max_unhealthy_upgraded_instance_percent
+
+        if pause_time_between_batches is not None:
+            rolling_upgrade_policy['pauseTimeBetweenBatches'] = pause_time_between_batches
+
+        if enable_cross_zone_upgrade is not None:
+            rolling_upgrade_policy['enableCrossZoneUpgrade'] = enable_cross_zone_upgrade
+
+        if prioritize_unhealthy_instances is not None:
+            rolling_upgrade_policy['prioritizeUnhealthyInstances'] = prioritize_unhealthy_instances
+
+        if max_surge is not None:
+            rolling_upgrade_policy['maxSurge'] = max_surge
+
+        if rolling_upgrade_policy:
+            vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = rolling_upgrade_policy
+
+    if upgrade_policy_mode and cmd.supported_api_version(min_api='2018-10-01',
+                                                         operation_group='virtual_machine_scale_sets'):
+        automatic_os_upgrade_policy = {}
+        if enable_auto_os_upgrade is not None:
+            automatic_os_upgrade_policy['enableAutomaticOSUpgrade'] = enable_auto_os_upgrade
+
+        if automatic_os_upgrade_policy:
+            vmss_properties['upgradePolicy']['automaticOSUpgradePolicy'] = automatic_os_upgrade_policy
+
+    if upgrade_policy_mode and upgrade_policy_mode.lower() == 'rolling' and\
+            cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
+        if os_type.lower() == 'linux':
+            from azure.cli.command_modules.vm._vmss_application_health import application_health_setting_for_linux
+            application_health_data = application_health_setting_for_linux
+            health_extension_name = 'ApplicationHealthLinux'
+        else:
+            from azure.cli.command_modules.vm._vmss_application_health import application_health_setting_for_windows
+            application_health_data = application_health_setting_for_windows
+            health_extension_name = 'ApplicationHealthWindows'
+        health_extension = [{
+            "name": health_extension_name,
+            "properties": {
+                "publisher": "Microsoft.ManagedServices",
+                "type": health_extension_name,
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": True,
+                "settings": {
+                    "port": 80,
+                    "protocol": "http",
+                    "requestPath": "/"
+                }
+            }
+        }]
+        virtual_machine_profile['extensionProfile'] = {
+            'extensions': health_extension
+        }
+        os_profile['customData'] = b64encode(application_health_data)
+
+    if enable_spot_restore and cmd.supported_api_version(min_api='2021-04-01',
+                                                         operation_group='virtual_machine_scale_sets'):
+        vmss_properties['spotRestorePolicy'] = {}
+        if enable_spot_restore:
+            vmss_properties['spotRestorePolicy']['enabled'] = enable_spot_restore
+
+        if spot_restore_timeout:
+            vmss_properties['spotRestorePolicy']['restoreTimeout'] = spot_restore_timeout
+
+    if regular_priority_count is not None or regular_priority_percentage is not None:
+        priority_mix_policy = {}
+        if regular_priority_count is not None:
+            priority_mix_policy['baseRegularPriorityCount'] = regular_priority_count
+        if regular_priority_percentage is not None:
+            priority_mix_policy['regularPriorityPercentageAboveBase'] = regular_priority_percentage
+        vmss_properties['priorityMixPolicy'] = priority_mix_policy
 
     if license_type:
-        vmss_properties['virtualMachineProfile']['licenseType'] = license_type
+        virtual_machine_profile['licenseType'] = license_type
 
     if health_probe and cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['networkProfile']['healthProbe'] = {'id': health_probe}
+        network_profile['healthProbe'] = {'id': health_probe}
+
+    if network_api_version and \
+            cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
+        network_profile['networkApiVersion'] = network_api_version
 
     if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='virtual_machine_scale_sets'):
         vmss_properties['singlePlacementGroup'] = single_placement_group
 
     if priority and cmd.supported_api_version(min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['priority'] = priority
+        virtual_machine_profile['priority'] = priority
 
     if eviction_policy and cmd.supported_api_version(min_api='2017-12-01',
                                                      operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
+        virtual_machine_profile['evictionPolicy'] = eviction_policy
 
     if max_price is not None and cmd.supported_api_version(
             min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['billingProfile'] = {'maxPrice': max_price}
+        virtual_machine_profile['billingProfile'] = {'maxPrice': max_price}
 
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
@@ -889,35 +1432,160 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
             vmss_properties['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
         else:
-            vmss_properties['virtualMachineProfile']['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
+            virtual_machine_profile['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
 
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
+    if zone_balance is not None:
+        vmss_properties['zoneBalance'] = zone_balance
+
+    scheduled_events_profile = {}
     if terminate_notification_time is not None:
-        scheduled_events_profile = {
+        scheduled_events_profile.update({
             'terminateNotificationProfile': {
                 'notBeforeTimeout': terminate_notification_time,
                 'enable': 'true'
             }
-        }
-        vmss_properties['virtualMachineProfile']['scheduledEventsProfile'] = scheduled_events_profile
+        })
+        virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
-    if automatic_repairs_grace_period is not None:
+    if enable_osimage_notification is not None:
+        scheduled_events_profile.update({
+            'osImageNotificationProfile': {
+                'enable': enable_osimage_notification
+            }
+        })
+        virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
+
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if scheduled_events_policy:
+        vmss_properties['scheduledEventsPolicy'] = scheduled_events_policy
+
+    if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         automatic_repairs_policy = {
             'enabled': 'true',
-            'gracePeriod': automatic_repairs_grace_period
+            'gracePeriod': automatic_repairs_grace_period or 'PT10M',
+            'repairAction': automatic_repairs_action or 'Replace'
         }
         vmss_properties['automaticRepairsPolicy'] = automatic_repairs_policy
 
     if scale_in_policy:
         vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
 
+    if enable_resilient_vm_creation is not None or enable_resilient_vm_deletion is not None:
+        resiliency_policy = {}
+        if enable_resilient_vm_creation is not None:
+            resiliency_policy['resilientVMCreationPolicy'] = {'enabled': enable_resilient_vm_creation}
+        if enable_resilient_vm_deletion is not None:
+            resiliency_policy['resilientVMDeletionPolicy'] = {'enabled': enable_resilient_vm_deletion}
+        vmss_properties['resiliencyPolicy'] = resiliency_policy
+
+    security_profile = {}
     if encryption_at_host:
-        vmss_properties['virtualMachineProfile']['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+        security_profile['encryptionAtHost'] = encryption_at_host
+
+    # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
+    # after changing the default values to Trusted Launch VMs in the future.
+    if security_type is not None:
+        security_profile['securityType'] = security_type
+
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (
+            enable_secure_boot is not None or enable_vtpm is not None):
+        security_profile['uefiSettings'] = {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }
+
+    proxy_agent_settings = {}
+    if enable_proxy_agent is not None:
+        proxy_agent_settings['enabled'] = enable_proxy_agent
+
+    if proxy_agent_mode is not None:
+        proxy_agent_settings['mode'] = proxy_agent_mode
+
+    if proxy_agent_settings:
+        security_profile['proxyAgentSettings'] = proxy_agent_settings
+
+    if security_profile:
+        virtual_machine_profile['securityProfile'] = security_profile
+
+    if user_data:
+        virtual_machine_profile['userData'] = b64encode(user_data)
 
     if host_group:
         vmss_properties['hostGroup'] = {'id': host_group}
+
+    if network_profile:
+        virtual_machine_profile['networkProfile'] = network_profile
+
+    if capacity_reservation_group:
+        virtual_machine_profile['capacityReservation'] = {
+            'capacityReservationGroup': {
+                'id': capacity_reservation_group
+            }
+        }
+
+    if security_posture_reference_id:
+        virtual_machine_profile['securityPostureReference'] = {
+            'id': security_posture_reference_id,
+        }
+
+    if security_posture_reference_exclude_extensions:
+        security_posture_reference = virtual_machine_profile.get('securityPostureReference', {})
+        security_posture_reference['excludeExtensions'] = security_posture_reference_exclude_extensions
+        virtual_machine_profile['securityPostureReference'] = security_posture_reference
+
+    if security_posture_reference_is_overridable is not None:
+        security_posture_reference = virtual_machine_profile.get('securityPostureReference', {})
+        security_posture_reference['isOverridable'] = security_posture_reference_is_overridable
+        virtual_machine_profile['securityPostureReference'] = security_posture_reference
+
+    if virtual_machine_profile:
+        vmss_properties['virtualMachineProfile'] = virtual_machine_profile
+
+    if orchestration_mode and cmd.supported_api_version(min_api='2020-06-01',
+                                                        operation_group='virtual_machine_scale_sets'):
+        vmss_properties['orchestrationMode'] = orchestration_mode
+
+    if enable_hibernation is not None:
+        if not vmss_properties.get('additionalCapabilities'):
+            vmss_properties['additionalCapabilities'] = {}
+        vmss_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
+
+    if skuprofile_vmsizes:
+        sku_profile_vmsizes_list = []
+        for vm_size in skuprofile_vmsizes:
+            vmsize_obj = {
+                'name': vm_size
+            }
+            sku_profile_vmsizes_list.append(vmsize_obj)
+        sku_profile = {
+            'vmSizes': sku_profile_vmsizes_list,
+            'allocationStrategy': skuprofile_allostrat
+        }
+        vmss_properties['skuProfile'] = sku_profile
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
@@ -926,28 +1594,38 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         'tags': tags,
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
         'dependsOn': [],
-        'sku': {
-            'name': vm_sku,
-            'capacity': instance_count
-        },
         'properties': vmss_properties
     }
+
+    if vm_sku:
+        vmss['sku'] = {
+            'name': vm_sku,
+            'capacity': instance_count
+        }
+
+    if vmss_properties:
+        vmss['properties'] = vmss_properties
+
     if zones:
         vmss['zones'] = zones
+
+    if edge_zone:
+        vmss['extendedLocation'] = edge_zone
+
     return vmss
 
 
 def build_av_set_resource(cmd, name, location, tags, platform_update_domain_count,
-                          platform_fault_domain_count, unmanaged, proximity_placement_group=None):
+                          platform_fault_domain_count, unmanaged, proximity_placement_group=None,
+                          additional_scheduled_events=None,
+                          enable_user_reboot_scheduled_events=None,
+                          enable_user_redeploy_scheduled_events=None):
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
         'location': location,
         'tags': tags,
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='availability_sets'),
-        "properties": {
-            'platformFaultDomainCount': platform_fault_domain_count,
-        }
     }
 
     if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='availability_sets'):
@@ -955,13 +1633,40 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
             'name': 'Classic' if unmanaged else 'Aligned'
         }
 
+    properties = {"platformFaultDomainCount": platform_fault_domain_count}
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+
+    if scheduled_events_policy:
+        properties['scheduledEventsPolicy'] = scheduled_events_policy
+
     # server defaults the UD to 5 unless set otherwise
     if platform_update_domain_count is not None:
-        av_set['properties']['platformUpdateDomainCount'] = platform_update_domain_count
+        properties['platformUpdateDomainCount'] = platform_update_domain_count
 
     if proximity_placement_group:
-        av_set['properties']['proximityPlacementGroup'] = {'id': proximity_placement_group}
+        properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
+    av_set["properties"] = properties
     return av_set
 
 

@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import base64
+from urllib.parse import quote
 
 
 def _dont_fail_on_exist(ex, error_code):
@@ -39,10 +41,15 @@ def _if_none_match(if_none_match, **kwargs):
 
 
 def _encode_bytes(b):
-    import base64
     if isinstance(b, (bytes, bytearray)):
         return base64.b64encode(b).decode('utf-8')
     return b
+
+
+def _str_to_bytearray(data):
+    if data is not None:
+        return bytearray(base64.b64decode(data))
+    return data
 
 
 def transform_dict_keys_to_hump(data_dict):
@@ -73,10 +80,21 @@ def list_generator(pages, num_results):
 
         # handle num results
         if num_results is not None:
-            if num_results == len(result):
+            if num_results <= len(result):
                 break
 
         page = list(next(pages))
         result += page
 
     return result
+
+
+def url_quote(url):
+    return quote(url)
+
+
+def encode_base64(data):
+    if isinstance(data, str):
+        data = data.encode('utf-8')
+    encoded = base64.b64encode(data)
+    return encoded.decode('utf-8')

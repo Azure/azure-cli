@@ -9,7 +9,8 @@ import os
 import time
 
 from azure.cli.core.util import get_file_json
-from azure.mgmt.servicefabric.models import (ErrorModelException,
+from azure.core.exceptions import HttpResponseError
+from azure.mgmt.servicefabric.models import (ApplicationTypeResource,
                                              ApplicationTypeVersionResource,
                                              ApplicationResource,
                                              ApplicationUpgradePolicy,
@@ -38,7 +39,7 @@ def create_app(client,
 
     try:
         apps = client.applications.list(resource_group_name, cluster_name)
-        for app in apps.value:
+        for app in apps:
             if app.name.lower() == application_name.lower():
                 logger.info("Application '%s' already exists", application_name)
                 return app
@@ -49,10 +50,10 @@ def create_app(client,
                                           maximum_nodes=maximum_nodes,
                                           parameters=application_parameters)
         appResource.name = application_name
-        app = client.applications.create_or_update(resource_group_name, cluster_name, application_name, appResource).result()
+        app = client.applications.begin_create_or_update(resource_group_name, cluster_name, application_name, appResource).result()
         return app
-    except ErrorModelException as ex:
-        logger.error("ErrorModelException: %s", ex)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -87,7 +88,7 @@ def update_app(client,
         if application_type_version:
             appResource.type_version = application_type_version
         if application_parameters:
-            appResource.parameters.update(application_parameters)
+            appResource.parameters = application_parameters
         if minimum_nodes is not None:
             appResource.minimum_nodes = minimum_nodes
         if maximum_nodes is not None:
@@ -111,24 +112,25 @@ def update_app(client,
 
         # TODO: change to patch once the fix is deployed in the rp
         # client.applications.update(resource_group_name, cluster_name, application_name, appResourceUpdate)
-        return client.applications.create_or_update(resource_group_name, cluster_name, application_name, appResource).result()
-    except ErrorModelException as ex:
-        logger.error("ErrorModelException: %s", ex)
+        return client.applications.begin_create_or_update(resource_group_name, cluster_name, application_name, appResource).result()
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
 def create_app_type(client, resource_group_name, cluster_name, application_type_name):
     try:
         appTypes = client.application_types.list(resource_group_name, cluster_name)
-        for appType in appTypes.value:
+        for appType in appTypes:
             if appType.name.lower() == application_type_name.lower():
                 logger.info("Application type '%s' already exists", application_type_name)
                 return appType
 
+        appTypeResource = ApplicationTypeResource()
         logger.info("Creating application type '%s'", application_type_name)
-        return client.application_types.create_or_update(resource_group_name, cluster_name, application_type_name)
-    except ErrorModelException as ex:
-        logger.error("ErrorModelException: %s", ex)
+        return client.application_types.create_or_update(resource_group_name, cluster_name, application_type_name, appTypeResource)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 
@@ -141,20 +143,20 @@ def create_app_type_version(client,
     create_app_type(client, resource_group_name, cluster_name, application_type_name)
     try:
         appTypeVerions = client.application_type_versions.list(resource_group_name, cluster_name, application_type_name)
-        for appTypeVerion in appTypeVerions.value:
+        for appTypeVerion in appTypeVerions:
             if appTypeVerion.name.lower() == version.lower():
                 logger.info("Application type version '%s' already exists", version)
                 return appTypeVerion
 
         appTypeVersionResource = ApplicationTypeVersionResource(app_package_url=package_url)
         logger.info("Creating application type version %s:%s", application_type_name, version)
-        return client.application_type_versions.create_or_update(resource_group_name,
-                                                                 cluster_name,
-                                                                 application_type_name,
-                                                                 version,
-                                                                 appTypeVersionResource).result()
-    except ErrorModelException as ex:
-        logger.error("ErrorModelException: %s", ex)
+        return client.application_type_versions.begin_create_or_update(resource_group_name,
+                                                                       cluster_name,
+                                                                       application_type_name,
+                                                                       version,
+                                                                       appTypeVersionResource).result()
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
         raise
 
 

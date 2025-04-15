@@ -4,13 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest
-from azure_devtools.scenario_tests import AllowLargeResponse
-from msrestazure.tools import parse_resource_id
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.mgmt.core.tools import parse_resource_id
 import re
 
 
 class SecurityCenterTasksTests(ScenarioTest):
-
     @AllowLargeResponse()
     def test_security_tasks(self):
 

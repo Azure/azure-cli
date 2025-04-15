@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait, user_confirmation
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 logger = get_logger(__name__)
 
@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    location=None, tags=None, no_wait=False, cluster_version='default', cluster_tier=None,
                    cluster_configurations=None, component_version=None,
-                   headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None,
+                   headnode_size=None, workernode_size=None, zookeepernode_size=None, edgenode_size=None,
                    kafka_management_node_size=None, kafka_management_node_count=2,
                    kafka_client_group_id=None, kafka_client_group_name=None,
                    workernode_count=3, workernode_data_disks_per_node=None,
@@ -32,19 +32,23 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    assign_identity=None,
                    minimal_tls_version=None,
                    encryption_vault_uri=None, encryption_key_name=None, encryption_key_version=None,
-                   encryption_algorithm='RSA-OAEP', public_network_access_type=None,
-                   outbound_public_network_access_type=None, encryption_in_transit=None,
+                   encryption_algorithm='RSA-OAEP', encryption_in_transit=None,
                    autoscale_type=None, autoscale_min_workernode_count=None, autoscale_max_workernode_count=None,
                    timezone=None, days=None, time=None, autoscale_workernode_count=None,
-                   encryption_at_host=None, esp=False, no_validation_timeout=False):
+                   encryption_at_host=None, esp=False, idbroker=False,
+                   resource_provider_connection=None, enable_private_link=None,
+                   public_ip_tag_type=None, public_ip_tag_value=None,
+                   enable_compute_isolation=None, host_sku=None, zones=None, private_link_configurations=None,
+                   no_validation_timeout=False, outbound_dependencies_managed_type=None):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
-        get_storage_account_endpoint, validate_esp_cluster_create_params
+        get_storage_account_endpoint, validate_esp_cluster_create_params, set_vm_size
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
-        DirectoryType, DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
-        KafkaRestProperties, ClientGroupInfo, NetworkSettings, EncryptionInTransitProperties, \
-        Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity
+        DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
+        KafkaRestProperties, ClientGroupInfo, EncryptionInTransitProperties, \
+        Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity, \
+        NetworkProperties, IpTag, PrivateLink, ComputeIsolationProperties
 
     validate_esp_cluster_create_params(esp, cluster_name, resource_group_name, cluster_type,
                                        subnet, domain, cluster_admin_account, assign_identity,
@@ -62,17 +66,18 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
 
     # Format dictionary/free-form arguments
     if not cluster_configurations:
-        cluster_configurations = dict()
+        cluster_configurations = {}
 
     if component_version:
         # See validator
-        component_version = {c: v for c, v in [version.split('=') for version in component_version]}
+        # pylint: disable=consider-using-dict-comprehension
+        component_version = dict([version.split('=') for version in component_version])
 
     # Validate whether HTTP credentials were provided
     if 'gateway' in cluster_configurations:
         gateway_config = cluster_configurations['gateway']
     else:
-        gateway_config = dict()
+        gateway_config = {}
     if http_username and 'restAuthCredential.username' in gateway_config:
         raise CLIError('An HTTP username must be specified either as a command-line parameter '
                        'or in the cluster configuration, but not both.')
@@ -117,7 +122,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         storage_account_key = key
 
     # Attempt to provide a default container for WASB storage accounts
-    if not storage_default_container and is_wasb:
+    if not storage_default_container and storage_account and is_wasb:
         storage_default_container = cluster_name.lower()
         logger.warning('Default WASB container not specified, using "%s".', storage_default_container)
     elif not storage_default_filesystem and not is_wasb:
@@ -195,6 +200,16 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         )
     ]
 
+    # call get default vm size api to set vm size if customer does not provide the value
+    if not (workernode_size and headnode_size):
+        headnode_size, workernode_size = set_vm_size(cmd.cli_ctx, location, cluster_type, headnode_size,
+                                                     workernode_size)
+
+    if not headnode_size:
+        raise RequiredArgumentMissingError('Please specify --headnode-size explicitly.')
+    if not workernode_size:
+        raise RequiredArgumentMissingError('Please specify --workernode-size explicitly.')
+
     os_profile = OsProfile(
         linux_operating_system_profile=LinuxOperatingSystemProfile(
             username=ssh_username,
@@ -257,6 +272,15 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             )
         )
 
+    if esp and idbroker:
+        roles.append(
+            Role(
+                name="idbrokernode",
+                target_instance_count=2,
+                virtual_network_profile=virtual_network_profile
+            )
+        )
+
     storage_accounts = []
     if storage_account:
         # Specify storage account details only when storage arguments are provided
@@ -266,7 +290,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                 key=storage_account_key,
                 container=storage_default_container,
                 file_system=storage_default_filesystem,
-                resource_id=None if is_wasb else storage_account,
+                resource_id=storage_account,
                 msi_resource_id=storage_account_managed_identity,
                 is_default=True
             )
@@ -298,7 +322,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         ldaps_urls = ['ldaps://{}:636'.format(domain_name)]
 
     security_profile = domain and SecurityProfile(
-        directory_type=DirectoryType.active_directory,
+        directory_type=SecurityProfile.directory_type,
         domain=domain_name,
         ldaps_urls=ldaps_urls,
         domain_username=cluster_admin_account,
@@ -322,25 +346,40 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         else:
             disk_encryption_properties = DiskEncryptionProperties(encryption_at_host=encryption_at_host)
 
-    kafka_rest_properties = (kafka_client_group_id and kafka_client_group_name) and KafkaRestProperties(
+    kafka_rest_properties = KafkaRestProperties(
         client_group_info=ClientGroupInfo(
             group_id=kafka_client_group_id,
             group_name=kafka_client_group_name
         )
-    )
+    ) if (kafka_client_group_id and kafka_client_group_name) else None
 
-    network_settings = (public_network_access_type or outbound_public_network_access_type) and NetworkSettings(
-        public_network_access=public_network_access_type,
-        outbound_only_public_network_access_type=outbound_public_network_access_type
-    )
-
-    encryption_in_transit_properties = encryption_in_transit and EncryptionInTransitProperties(
+    encryption_in_transit_properties = EncryptionInTransitProperties(
         is_encryption_in_transit_enabled=encryption_in_transit
-    )
+    ) if encryption_in_transit is True else None
+
+    # relay outbound and private link
+    network_properties = NetworkProperties(
+        resource_provider_connection=resource_provider_connection,
+        private_link=PrivateLink.enabled if enable_private_link is True else PrivateLink.disabled
+    ) if (resource_provider_connection is not None or enable_private_link is not None) else None
+    if outbound_dependencies_managed_type:
+        network_properties.outbound_dependencies_managed_type = outbound_dependencies_managed_type
+    if public_ip_tag_type and public_ip_tag_value:
+        network_properties.public_ip_tag = IpTag(
+            ip_tag_type=public_ip_tag_type,
+            tag=public_ip_tag_value
+        )
+
+    # compute isolation
+    compute_isolation_properties = ComputeIsolationProperties(
+        enable_compute_isolation=enable_compute_isolation,
+        host_sku=host_sku
+    ) if enable_compute_isolation is True else None
 
     create_params = ClusterCreateParametersExtended(
         location=location,
         tags=tags,
+        zones=zones,
         properties=ClusterCreateProperties(
             cluster_version=cluster_version,
             os_type=OSType.linux,
@@ -360,16 +399,15 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             disk_encryption_properties=disk_encryption_properties,
             kafka_rest_properties=kafka_rest_properties,
             min_supported_tls_version=minimal_tls_version,
-            network_settings=network_settings,
-            encryption_in_transit_properties=encryption_in_transit_properties
+            encryption_in_transit_properties=encryption_in_transit_properties,
+            network_properties=network_properties,
+            compute_isolation_properties=compute_isolation_properties,
+            private_link_configurations=private_link_configurations
         ),
         identity=cluster_identity
     )
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.create, resource_group_name, cluster_name, create_params)
-
-    return client.create(resource_group_name, cluster_name, create_params)
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, cluster_name, create_params)
 
 
 def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
@@ -377,6 +415,22 @@ def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unu
         if resource_group_name else client.list()
 
     return list(clusters_list)
+
+
+def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None,
+                   assign_identity_type=None, assign_identity=None, no_wait=False):
+    from azure.mgmt.hdinsight.models import ClusterPatchParameters
+    from .util import build_update_identities_info
+    assign_identities = []
+    if assign_identity:
+        assign_identities.append(assign_identity)
+
+    cluster_patch_parameters = ClusterPatchParameters(
+        tags=tags,
+        identity=build_update_identities_info(assign_identity_type, assign_identities)
+    )
+
+    return sdk_no_wait(no_wait, client.update, resource_group_name, cluster_name, cluster_patch_parameters)
 
 
 # pylint: disable=unused-argument
@@ -389,10 +443,18 @@ def rotate_hdi_cluster_key(cmd, client, resource_group_name, cluster_name,
         key_version=encryption_key_version
     )
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.rotate_disk_encryption_key, resource_group_name, cluster_name, rotate_params)
+    return sdk_no_wait(no_wait, client.begin_rotate_disk_encryption_key, resource_group_name, cluster_name,
+                       rotate_params)
 
-    return client.rotate_disk_encryption_key(resource_group_name, cluster_name, rotate_params)
+
+def resize_cluster(cmd, client, cluster_name, resource_group_name, target_instance_count, no_wait=False):
+    from azure.mgmt.hdinsight.models import ClusterResizeParameters, RoleName
+    resize_cluster_parameters = ClusterResizeParameters(
+        target_instance_count=target_instance_count
+    )
+
+    return sdk_no_wait(no_wait, client.begin_resize, resource_group_name, cluster_name, RoleName.WORKERNODE,
+                       resize_cluster_parameters)
 
 
 def _all_or_none(*params):
@@ -479,13 +541,14 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
         properties=application_properties
     )
 
-    return client.create(resource_group_name, cluster_name, application_name, create_params)
+    return client.begin_create(resource_group_name, cluster_name, application_name, create_params)
 
 
 # pylint: disable=unused-argument
 def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, workspace,
                           primary_key=None, workspace_type='resource_id', no_validation_timeout=False):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.hdinsight.models import ClusterMonitoringRequest
+    from azure.mgmt.core.tools import parse_resource_id
     from ._client_factory import cf_log_analytics
 
     if workspace_type != 'resource_id' and not primary_key:
@@ -513,18 +576,106 @@ def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, worksp
 
         workspace_id = log_analytics_workspace.customer_id
 
-    return client.enable_monitoring(
+    monitor_request_parameter = ClusterMonitoringRequest(
+        workspace_id=workspace_id,
+        primary_key=primary_key
+    )
+    return client.begin_enable_monitoring(
         resource_group_name,
         cluster_name,
-        workspace_id,
-        primary_key)
+        monitor_request_parameter)
+
+
+# pylint: disable=unused-argument
+def enable_hdi_azure_monitor(cmd, client, resource_group_name, cluster_name, workspace, primary_key=None,
+                             workspace_type='resource_id', no_validation_timeout=False):
+    from azure.mgmt.hdinsight.models import AzureMonitorRequest
+    from azure.mgmt.core.tools import parse_resource_id
+    from ._client_factory import cf_log_analytics
+
+    if workspace_type != 'resource_id' and not primary_key:
+        raise RequiredArgumentMissingError('primary key is required when workspace ID is provided.')
+
+    workspace_id = workspace
+    if workspace_type == 'resource_id':
+        parsed_workspace = parse_resource_id(workspace)
+        workspace_resource_group_name = parsed_workspace['resource_group']
+        workspace_name = parsed_workspace['resource_name']
+
+        log_analytics_client = cf_log_analytics(cmd.cli_ctx)
+        log_analytics_workspace = log_analytics_client.workspaces.get(workspace_resource_group_name, workspace_name)
+        if not log_analytics_workspace:
+            raise CLIError('Fails to retrieve workspace by {}'.format(workspace))
+
+        # Only retrieve primary key when not provided
+        if not primary_key:
+            shared_keys = log_analytics_client.shared_keys.get_shared_keys(workspace_resource_group_name,
+                                                                           workspace_name)
+            if not shared_keys:
+                raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
+
+            primary_key = shared_keys.primary_shared_key
+
+        workspace_id = log_analytics_workspace.customer_id
+
+    azure_monitor_request_parameter = AzureMonitorRequest(
+        workspace_id=workspace_id,
+        primary_key=primary_key
+    )
+    return client.begin_enable_azure_monitor(
+        resource_group_name,
+        cluster_name,
+        azure_monitor_request_parameter)
+
+# pylint: disable=unused-argument
+
+
+def enable_hdi_azure_monitor_agent(cmd, client, resource_group_name, cluster_name, workspace, primary_key=None,
+                                   workspace_type='resource_id', no_validation_timeout=False):
+    from azure.mgmt.hdinsight.models import AzureMonitorRequest
+    from azure.mgmt.core.tools import parse_resource_id
+    from ._client_factory import cf_log_analytics
+
+    if workspace_type != 'resource_id' and not primary_key:
+        raise RequiredArgumentMissingError('primary key is required when workspace ID is provided.')
+
+    workspace_id = workspace
+    if workspace_type == 'resource_id':
+        parsed_workspace = parse_resource_id(workspace)
+        workspace_resource_group_name = parsed_workspace['resource_group']
+        workspace_name = parsed_workspace['resource_name']
+
+        log_analytics_client = cf_log_analytics(cmd.cli_ctx)
+        log_analytics_workspace = log_analytics_client.workspaces.get(workspace_resource_group_name, workspace_name)
+        if not log_analytics_workspace:
+            raise CLIError('Fails to retrieve workspace by {}'.format(workspace))
+
+        # Only retrieve primary key when not provided
+        if not primary_key:
+            shared_keys = log_analytics_client.shared_keys.get_shared_keys(workspace_resource_group_name,
+                                                                           workspace_name)
+            if not shared_keys:
+                raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
+
+            primary_key = shared_keys.primary_shared_key
+
+        workspace_id = log_analytics_workspace.customer_id
+
+    azure_monitor_agent_request_parameter = AzureMonitorRequest(
+        workspace_id=workspace_id,
+        primary_key=primary_key
+    )
+    return client.begin_enable_azure_monitor_agent(
+        resource_group_name,
+        cluster_name,
+        azure_monitor_agent_request_parameter)
 
 
 # pylint: disable=unused-argument
 def execute_hdi_script_action(cmd, client, resource_group_name, cluster_name,
                               script_uri, script_action_name, roles, script_parameters=None,
                               persist_on_success=False):
-    from azure.mgmt.hdinsight.models import RuntimeScriptAction
+    from azure.mgmt.hdinsight.models import RuntimeScriptAction, ExecuteScriptActionParameters
 
     script_actions_params = [
         RuntimeScriptAction(
@@ -534,8 +685,11 @@ def execute_hdi_script_action(cmd, client, resource_group_name, cluster_name,
             roles=roles
         )
     ]
-
-    return client.execute_script_actions(resource_group_name, cluster_name, persist_on_success, script_actions_params)
+    execute_script_action_parameters = ExecuteScriptActionParameters(
+        persist_on_success=persist_on_success,
+        script_actions=script_actions_params
+    )
+    return client.begin_execute_script_actions(resource_group_name, cluster_name, execute_script_action_parameters)
 
 
 # pylint: disable=redefined-builtin
@@ -543,7 +697,7 @@ def create_autoscale(cmd, client, resource_group_name, cluster_name, type, min_w
                      max_workernode_count=None, timezone=None, days=None, time=None, workernode_count=None,
                      no_wait=False, yes=False):
     from azure.mgmt.hdinsight.models import Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, \
-        AutoscaleTimeAndCapacity
+        AutoscaleTimeAndCapacity, AutoscaleConfigurationUpdateParameter, RoleName
     load_based_type = "Load"
     schedule_based_type = "Schedule"
     autoscale_configuration = None
@@ -583,13 +737,17 @@ def create_autoscale(cmd, client, resource_group_name, cluster_name, type, min_w
         "This operation will override previous autoscale configuration. "
         "Are you sure you want to perform this operation", yes)
 
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def update_autoscale(cmd, client, resource_group_name, cluster_name, min_workernode_count=None,
                      max_workernode_count=None, timezone=None, no_wait=False):
-    from azure.mgmt.hdinsight.models import AutoscaleCapacity, AutoscaleRecurrence
+    from azure.mgmt.hdinsight.models import AutoscaleCapacity, AutoscaleRecurrence, \
+        AutoscaleConfigurationUpdateParameter, RoleName
     cluster = client.get(resource_group_name, cluster_name)
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
 
@@ -615,8 +773,11 @@ def update_autoscale(cmd, client, resource_group_name, cluster_name, min_workern
         elif not autoscale_configuration.recurrence:
             autoscale_configuration.recurrence = AutoscaleRecurrence(time_zone=timezone)
 
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def show_autoscale(cmd, client, resource_group_name, cluster_name):
@@ -626,12 +787,17 @@ def show_autoscale(cmd, client, resource_group_name, cluster_name):
 
 
 def delete_autoscale(cmd, client, resource_group_name, cluster_name, no_wait=False):
+    from azure.mgmt.hdinsight.models import AutoscaleConfigurationUpdateParameter, RoleName
+
     cluster = client.get(resource_group_name, cluster_name)
     _extract_and_validate_autoscale_configuration(cluster)
     autoscale_configuration = None
 
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def list_timezones(cmd, client):
@@ -641,7 +807,8 @@ def list_timezones(cmd, client):
 
 def create_autoscale_condition(cmd, client, resource_group_name, cluster_name, days, time, workernode_count,
                                no_wait=False):
-    from azure.mgmt.hdinsight.models import AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity
+    from azure.mgmt.hdinsight.models import AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity, \
+        AutoscaleConfigurationUpdateParameter, RoleName
     cluster = client.get(resource_group_name, cluster_name)
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
 
@@ -659,13 +826,17 @@ def create_autoscale_condition(cmd, client, resource_group_name, cluster_name, d
         autoscale_configuration.recurrence = AutoscaleRecurrence(
             schedule=[condition]
         )
-
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def update_autoscale_condition(cmd, client, resource_group_name, cluster_name, index, days=None, time=None,
                                workernode_count=None, no_wait=False):
+    from azure.mgmt.hdinsight.models import AutoscaleConfigurationUpdateParameter, RoleName
+
     cluster = client.get(resource_group_name, cluster_name)
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
     _validate_schedule_configuration(autoscale_configuration)
@@ -684,11 +855,16 @@ def update_autoscale_condition(cmd, client, resource_group_name, cluster_name, i
         autoscale_configuration.recurrence.schedule[index].time_and_capacity.min_instance_count = workernode_count
         autoscale_configuration.recurrence.schedule[index].time_and_capacity.max_instance_count = workernode_count
 
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def delete_autoscale_condition(cmd, client, resource_group_name, cluster_name, index, no_wait=False):
+    from azure.mgmt.hdinsight.models import AutoscaleConfigurationUpdateParameter, RoleName
+
     cluster = client.get(resource_group_name, cluster_name)
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
     _validate_schedule_configuration(autoscale_configuration)
@@ -699,8 +875,11 @@ def delete_autoscale_condition(cmd, client, resource_group_name, cluster_name, i
                        'If you want to disable autoscale please use `az hdinsight autoscale delete`.')
     autoscale_configuration.recurrence.schedule = [autoscale_configuration.recurrence.schedule[i] for i in
                                                    range(conditions_count) if i not in index]
-    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                       autoscale_configuration)
+    autoscale_configuration_update_parameter = AutoscaleConfigurationUpdateParameter(
+        autoscale=autoscale_configuration
+    )
+    return sdk_no_wait(no_wait, client.begin_update_auto_scale_configuration, resource_group_name, cluster_name,
+                       RoleName.WORKERNODE, autoscale_configuration_update_parameter)
 
 
 def list_autoscale_condition(cmd, client, resource_group_name, cluster_name):

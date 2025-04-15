@@ -15,24 +15,21 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2024-01-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2025-02-23T09:19:48.4041425Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-02-23T09:19:48.4041425Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '288'
+      - '260'
       content-type:
       - application/json
       date:
-      - Thu, 18 Jun 2020 03:58:17 GMT
+      - Sun, 23 Feb 2025 09:20:12 GMT
       expires:
       - '-1'
       pragma:
@@ -41,30 +38,36 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/05e062e1-d9be-423d-84ac-d879e5a2c657
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11992'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container create
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.7.0
+      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 18 Jun 2020 03:58:18 GMT
+      - Sun, 23 Feb 2025 09:20:14 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2022-11-02'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container
   response:
@@ -74,15 +77,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 18 Jun 2020 03:58:21 GMT
+      - Sun, 23 Feb 2025 09:20:14 GMT
       etag:
-      - '"0x8D8133BD7929C94"'
+      - '"0x8DD53EB48438CC9"'
       last-modified:
-      - Thu, 18 Jun 2020 03:58:21 GMT
+      - Sun, 23 Feb 2025 09:20:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2022-11-02'
     status:
       code: 201
       message: Created

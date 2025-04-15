@@ -8,7 +8,7 @@ import os
 import time
 import unittest
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only
 from azure.cli.core.util import get_file_json
 
@@ -199,10 +199,10 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag add-value -n {tag} --value test')
         self.cmd('tag add-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-                 checks=self.check('[].values[].tagValue', [u'test', u'test2']))
+                 checks=self.check('[].values[].tagValue', ['test', 'test2']))
         self.cmd('tag remove-value -n {tag} --value test')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-                 checks=self.check('[].values[].tagValue', [u'test2']))
+                 checks=self.check('[].values[].tagValue', ['test2']))
         self.cmd('tag remove-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.check('[].values[].tagValue', []))
@@ -215,7 +215,7 @@ class ProviderRegistrationTest(ScenarioTest):
 
     def test_provider_registration(self):
 
-        self.kwargs.update({'prov': 'TrendMicro.DeepSecurity'})
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
 
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
@@ -357,7 +357,7 @@ class DeploymentThruUriTest(LiveScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
         self.kwargs.update({
-            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
+            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
         })
         self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri "{tf}" --parameters @"{params}"', checks=[
@@ -395,6 +395,7 @@ class ResourceMoveScenarioTest(ScenarioTest):
 
 class PolicyScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policy(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -526,7 +527,7 @@ class InvokeActionTest(ScenarioTest):
             'pass': self.create_random_name('Longpassword#1', 30)
         })
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
 
         self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')

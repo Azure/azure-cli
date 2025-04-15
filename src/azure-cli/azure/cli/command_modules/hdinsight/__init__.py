@@ -15,13 +15,24 @@ class HDInsightCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.hdinsight.custom#{}',
             operation_group='hdinsight')
 
-        super(HDInsightCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx,
             operation_group='hdinsight',
             custom_command_type=hdinsight_custom)
 
     def load_command_table(self, args):
         from .commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         return self.command_table
 

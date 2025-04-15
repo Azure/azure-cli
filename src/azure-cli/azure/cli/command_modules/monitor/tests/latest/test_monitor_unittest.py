@@ -5,21 +5,9 @@
 
 import unittest
 
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from knack.util import CLIError
-
-from azure.cli.command_modules.monitor.operations.autoscale_settings import scaffold_autoscale_settings_parameters
-
-
-class FilterBuilderTests(unittest.TestCase):
-    def test_scaffold_autoscale_settings_parameters(self):
-        template = scaffold_autoscale_settings_parameters(None)
-        self.assertTrue(template)
-        self.assertTrue(isinstance(template, dict))
 
 
 def _mock_get_subscription_id(_):
@@ -101,19 +89,20 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         from azure.cli.command_modules.monitor.actions import MetricAlertConditionAction
         MetricAlertConditionAction('--condition', 'condition').__call__(None, ns, value.split(), '--condition')
 
-    def check_condition(self, ns, time_aggregation, metric_namespace, metric_name, operator, threshold):
-        prop = ns.condition[0]
-        self.assertEqual(prop.time_aggregation, time_aggregation)
-        self.assertEqual(prop.metric_name, metric_name)
-        self.assertEqual(prop.operator, operator)
-        self.assertEqual(prop.threshold, threshold)
-        self.assertEqual(prop.metric_namespace, metric_namespace)
+    def check_condition(self, ns, time_aggregation, metric_namespace, metric_name, operator, threshold, skip_metric_validation):
+        prop = ns.condition[0]["static"] if "static" in ns.condition[0] else ns.condition[0]["dynamic"]
+        self.assertEqual(prop.get("time_aggregation", None), time_aggregation)
+        self.assertEqual(prop.get("metric_name", None), metric_name)
+        self.assertEqual(prop.get("operator", None), operator)
+        self.assertEqual(prop.get("threshold", None), threshold)
+        self.assertEqual(prop.get("metric_namespace", None), metric_namespace)
+        self.assertEqual(prop.get("skip_metric_validation", None), skip_metric_validation)
 
     def check_dimension(self, ns, index, name, operator, values):
-        dim = ns.condition[0].dimensions[index]
-        self.assertEqual(dim.name, name)
-        self.assertEqual(dim.operator, operator)
-        self.assertEqual(dim.values, values)
+        dim = ns.condition[0]["static"]["dimensions"][index] if "static" in ns.condition[0] else ns.condition[0]["dynamic"]["dimensions"][index]
+        self.assertEqual(dim.get("name", None), name)
+        self.assertEqual(dim.get("operator", None), operator)
+        self.assertEqual(dim.get("values", None), values)
 
     def test_monitor_metric_alert_condition_action(self):
 
@@ -121,41 +110,45 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg ns."CPU Percent" > 90')
-        self.check_condition(ns, 'Average', 'ns', 'CPU Percent', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', 'ns', 'CPU Percent', 'GreaterThan', 90.0, None)
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg ns."a.b/c_d" > 90')
-        self.check_condition(ns, 'Average', 'ns', 'a.b/c_d', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', 'ns', 'a.b/c_d', 'GreaterThan', 90.0, None)
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg CPU Percent > 90')
-        self.check_condition(ns, 'Average', None, 'CPU Percent', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', None, 'CPU Percent', 'GreaterThan', 90.0, None)
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg "a.b/c_d" > 90')
-        self.check_condition(ns, 'Average', None, 'a.b/c_d', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', None, 'a.b/c_d', 'GreaterThan', 90.0, None)
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob')
-        self.check_condition(ns, 'Average', None, 'SuccessE2ELatency', 'GreaterThan', '250')
+        self.check_condition(ns, 'Average', None, 'SuccessE2ELatency', 'GreaterThan', 250.0, None)
         self.check_dimension(ns, 0, 'ApiName', 'Include', ['GetBlob', 'PutBlob'])
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg ns.foo/bar_doo > 90')
-        self.check_condition(ns, 'Average', 'ns', 'foo/bar_doo', 'GreaterThan', '90')
+        self.check_condition(ns, 'Average', 'ns', 'foo/bar_doo', 'GreaterThan', 90.0, None)
 
         ns = self._build_namespace()
-        with self.assertRaisesRegexp(CLIError, 'usage error: --condition'):
+        with self.assertRaisesRegex(CLIError, 'usage error: --condition'):
             self.call_condition(ns, 'avg blah"what > 90')
 
         ns = self._build_namespace()
-        with self.assertRaisesRegexp(CLIError, 'usage error: --condition'):
+        with self.assertRaisesRegex(CLIError, 'usage error: --condition'):
             self.call_condition(ns, 'avg Wra!!ga * woo')
 
         ns = self._build_namespace()
         self.call_condition(ns, 'avg SuccessE2ELatenc,|y > 250 where ApiName includes Get|,%_Blob or PutB,_lob')
-        self.check_condition(ns, 'Average', None, 'SuccessE2ELatenc,|y', 'GreaterThan', '250')
+        self.check_condition(ns, 'Average', None, 'SuccessE2ELatenc,|y', 'GreaterThan', 250.0, None)
         self.check_dimension(ns, 0, 'ApiName', 'Include', ['Get|,%_Blob', 'PutB,_lob'])
+
+        ns = self._build_namespace()
+        self.call_condition(ns, 'avg ns.foo/bar_doo > 90 with skipmetricvalidation')
+        self.check_condition(ns, 'Average', 'ns', 'foo/bar_doo', 'GreaterThan', 90.0, True)
 
 
 class MonitorAutoscaleActionTest(unittest.TestCase):
@@ -204,6 +197,14 @@ class MonitorAutoscaleActionTest(unittest.TestCase):
         ns = self._build_namespace()
         self.call_condition(ns, '"Microsoft.AppPlatform/Spring" tomcat.global.request.total.count > 0 avg 3m where App == app1 or app3 and Deployment == default and Instance != instance1')
         self.check_condition(ns, "Microsoft.AppPlatform/Spring", 'tomcat.global.request.total.count', 'GreaterThan', '0', 'Average', 'PT3M')
+        self.check_dimension(ns, 0, 'App', 'Equals', ['app1', 'app3'])
+        self.check_dimension(ns, 1, 'Deployment', 'Equals', ['default'])
+        self.check_dimension(ns, 2, 'Instance', 'NotEquals', ['instance1'])
+
+        ns = self._build_namespace()
+        self.call_condition(ns, '"kubernetes custom metrics %#*@_-" tomcat.global.request.total.count > 0 avg 3m where App == app1 or app3 and Deployment == default and Instance != instance1')
+        self.check_condition(ns, "kubernetes custom metrics %#*@_-", 'tomcat.global.request.total.count', 'GreaterThan',
+                             '0', 'Average', 'PT3M')
         self.check_dimension(ns, 0, 'App', 'Equals', ['app1', 'app3'])
         self.check_dimension(ns, 1, 'Deployment', 'Equals', ['default'])
         self.check_dimension(ns, 2, 'Instance', 'NotEquals', ['instance1'])

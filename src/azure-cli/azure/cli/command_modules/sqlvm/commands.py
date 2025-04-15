@@ -21,6 +21,10 @@ from ._util import (
     get_sqlvirtualmachine_sql_virtual_machines_operations,
 )
 
+from ._validators import (
+    validate_azure_ad_authentication
+)
+
 
 # pylint: disable=too-many-statements,line-too-long,too-many-locals
 def load_command_table(self, _):
@@ -37,13 +41,16 @@ def load_command_table(self, _):
     with self.command_group('sql vm',
                             sqlvm_vm_operations,
                             client_factory=get_sqlvirtualmachine_sql_virtual_machines_operations) as g:
-        g.generic_update_command('update', custom_func_name='sqlvm_update', transform=transform_sqlvm_output)
+        g.generic_update_command('update', custom_func_name='sqlvm_update', setter_name='begin_create_or_update', transform=transform_sqlvm_output)
         g.show_command('show', 'get', transform=transform_sqlvm_output)
         g.custom_command('list', 'sqlvm_list', transform=transform_sqlvm_list)
         g.custom_command('add-to-group', 'sqlvm_add_to_group', transform=transform_sqlvm_output)
         g.custom_command('remove-from-group', 'sqlvm_remove_from_group', transform=transform_sqlvm_output)
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('create', 'sqlvm_create', transform=transform_sqlvm_output, table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
+        g.command('start-assessment', 'begin_start_assessment')
+        g.custom_command('enable-azure-ad-auth', 'sqlvm_enable_azure_ad_auth', transform=transform_sqlvm_output, validator=validate_azure_ad_authentication)
+        g.custom_command('validate-azure-ad-auth', 'validate_azure_ad_auth', validator=validate_azure_ad_authentication)
 
     ###############################################
     #      sql virtual machine groups             #
@@ -57,10 +64,10 @@ def load_command_table(self, _):
     with self.command_group('sql vm group',
                             sqlvm_group_operations,
                             client_factory=get_sqlvirtualmachine_sql_virtual_machine_groups_operations) as g:
-        g.generic_update_command('update', custom_func_name='sqlvm_group_update', transform=transform_sqlvm_group_output)
+        g.generic_update_command('update', custom_func_name='sqlvm_group_update', setter_name='begin_create_or_update', transform=transform_sqlvm_group_output)
         g.show_command('show', 'get', transform=transform_sqlvm_group_output)
         g.custom_command('list', 'sqlvm_group_list', transform=transform_sqlvm_group_list)
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('create', 'sqlvm_group_create', transform=transform_sqlvm_group_output, table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
 
     ###############################################
@@ -75,11 +82,11 @@ def load_command_table(self, _):
     with self.command_group('sql vm group ag-listener',
                             sqlvm_agl_operations,
                             client_factory=get_sqlvirtualmachine_availability_group_listeners_operations) as g:
-        g.generic_update_command('update', custom_func_name='aglistener_update', transform=transform_aglistener_output)
+        g.generic_update_command('update', custom_func_name='aglistener_update', setter_name='begin_create_or_update', transform=transform_aglistener_output)
         g.show_command('show', 'get', transform=transform_aglistener_output)
         g.command('list', 'list_by_group', transform=transform_aglistener_list)
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('create', 'sqlvm_aglistener_create', transform=transform_aglistener_output, table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
 
-    with self.command_group('sql vm', is_preview=True):
+    with self.command_group('sql vm'):
         pass

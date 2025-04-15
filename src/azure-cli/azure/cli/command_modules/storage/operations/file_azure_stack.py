@@ -87,7 +87,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
 
     from azure.cli.command_modules.storage.util import glob_files_locally, normalize_blob_file_path
 
-    source_files = [c for c in glob_files_locally(source, pattern)]
+    source_files = list(glob_files_locally(source, pattern))
     logger = get_logger(__name__)
     settings_class = cmd.get_models('file.models#ContentSettings')
 
@@ -121,7 +121,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
 
         return client.make_file_url(destination, dir_name, file_name)
 
-    return list(_upload_action(src, dst) for src, dst in source_files)
+    return [_upload_action(src, dst) for src, dst in source_files]
 
 
 def storage_file_download_batch(cmd, client, source, destination, pattern=None, dryrun=False, validate_content=False,
@@ -164,7 +164,7 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
         client.get_file_to_path(**get_file_args)
         return client.make_file_url(source, *pair)
 
-    return list(_download_action(f) for f in source_files)
+    return [_download_action(f) for f in source_files]
 
 
 def storage_file_copy_batch(cmd, client, source_client, destination_share=None, destination_path=None,
@@ -193,7 +193,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         if not source_sas:
             source_sas = create_short_lived_container_sas(cmd, source_client.account_name, source_client.account_key,
@@ -221,7 +221,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         if not source_sas:
             source_sas = create_short_lived_share_sas(cmd, source_client.account_name, source_client.account_key,
@@ -359,9 +359,9 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
 
 
 def _file_share_exists(client, resource_group_name, account_name, share_name):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     try:
-        file_share = client.get(resource_group_name, account_name, share_name)
+        file_share = client.get(resource_group_name, account_name, share_name, expand=None)
         return file_share is not None
-    except CloudError:
+    except HttpResponseError:
         return False

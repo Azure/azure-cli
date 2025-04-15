@@ -1,0 +1,28 @@
+on:
+  pull_request_target:
+    types: [opened]
+    branches:
+      - dev
+      - release
+
+permissions: {}
+
+jobs:
+  thank-user:
+    runs-on: ubuntu-latest
+    name: Say thanks for the PR
+    steps:
+      - name: Comment on PR
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          REPO_TOKEN: ${{ secrets.CLI_BOT }}
+        run: |
+          message='Thank you for your contribution! We will review the pull request and get back to you soon.'
+
+          # Comment on the PR using GitHub API
+          curl -X POST \
+            -H "Authorization: token $REPO_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments \
+            -d "{\"body\": \"$message\"}"

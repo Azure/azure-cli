@@ -3,16 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from urllib.parse import urlsplit
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.models import HostType
-
-try:
-    # Try importing Python 3 urllib.parse
-    from urllib.parse import urlsplit
-except ImportError:
-    # If urllib.parse was not imported, use Python 2 module urlparse
-    from urlparse import urlsplit  # pylint: disable=import-error
 
 
 class WebAppOperations:
@@ -44,7 +39,7 @@ class WebAppOperations:
     @staticmethod
     def get_site_credential(cli_ctx, resource_group_name, name, slot=None):
         creds = WebAppOperations.__generic_site_operation(cli_ctx, resource_group_name, name,
-                                                          'list_publishing_credentials', slot)
+                                                          'begin_list_publishing_credentials', slot)
         creds = creds.result()
         return creds.publishing_user_name, creds.publishing_password
 
@@ -67,8 +62,8 @@ class WebAppOperations:
                             operation_name if slot is None else operation_name + '_slot')
         if slot is None:
             return (operation(resource_group_name, name)
-                    if extra_parameter is None else operation(resource_group_name,
+                    if extra_parameter is None else operation(resource_group_name,  # pylint:disable=too-many-function-args
                                                               name, extra_parameter))
 
-        return (operation(resource_group_name, name, slot)
-                if extra_parameter is None else operation(resource_group_name, name, extra_parameter, slot))
+        return (operation(resource_group_name, name, slot)  # pylint:disable=too-many-function-args
+                if extra_parameter is None else operation(resource_group_name, name, extra_parameter, slot))  # pylint:disable=too-many-function-args

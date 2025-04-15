@@ -11,18 +11,20 @@ import inspect
 import unittest
 import tempfile
 
-from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
-                                           OAuthRequestResponsesFilter, LargeRequestBodyProcessor,
-                                           LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
-                                           live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
+from .scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
+                             LargeRequestBodyProcessor,
+                             LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
+                             GeneralNameReplacer,
+                             live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
+from .scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
                       patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
-from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
+from .utilities import (find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer,
+                        MSGraphClientPasswordReplacer, AADAuthRequestFilter)
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -32,7 +34,7 @@ ENV_COMMAND_COVERAGE = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 COVERAGE_FILE = 'az_command_coverage.txt'
 
 
-class CheckerMixin(object):
+class CheckerMixin:
 
     def _apply_kwargs(self, val):
         try:
@@ -79,15 +81,18 @@ class CheckerMixin(object):
 
 class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def __init__(self, method_name, config_file=None, recording_name=None,
-                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
-        self.cli_ctx = get_dummy_cli()
+                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None,
+                 random_config_dir=False):
+        self.cli_ctx = get_dummy_cli(random_config_dir=random_config_dir)
+        self.random_config_dir = random_config_dir
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
-        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer()]
+        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer(),
+                                     MSGraphClientPasswordReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
-            OAuthRequestResponsesFilter(),
+            AADAuthRequestFilter(),
             LargeRequestBodyProcessor(),
             LargeResponseBodyProcessor(),
             DeploymentNameReplacer(),
@@ -120,7 +125,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
                 merged = list(set(merged).union(set(patches)))
             return merged
 
-        super(ScenarioTest, self).__init__(
+        super().__init__(
             method_name,
             config_file=config_file,
             recording_processors=_merge_lists(default_recording_processors, recording_processors),
@@ -134,7 +139,11 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def tearDown(self):
         for processor in self._processors_to_reset:
             processor.reset()
-        super(ScenarioTest, self).tearDown()
+        if self.random_config_dir:
+            from azure.cli.core.util import rmtree_with_retry
+            rmtree_with_retry(self.cli_ctx.config.config_dir)
+            self.cli_ctx.env_patch.stop()
+        super().tearDown()
 
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
@@ -177,8 +186,9 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
 class LocalContextScenarioTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None, working_dir=None):
-        super(LocalContextScenarioTest, self).__init__(method_name, config_file, recording_name, recording_processors,
-                                                       replay_processors, recording_patches, replay_patches)
+        super().__init__(method_name, config_file, recording_name, recording_processors,
+                         replay_processors, recording_patches, replay_patches,
+                         random_config_dir=True)
         if self.in_recording:
             self.recording_patches.append(patch_get_current_system_username)
         else:
@@ -190,15 +200,15 @@ class LocalContextScenarioTest(ScenarioTest):
             self.working_dir = tempfile.mkdtemp()
 
     def setUp(self):
-        super(LocalContextScenarioTest, self).setUp()
+        super().setUp()
         self.cli_ctx.local_context.initialize()
         os.chdir(self.working_dir)
-        self.cmd('local-context on')
+        self.cmd('config param-persist on')
 
     def tearDown(self):
-        super(LocalContextScenarioTest, self).tearDown()
-        self.cmd('local-context off')
-        self.cmd('local-context delete --all --purge -y')
+        super().tearDown()
+        self.cmd('config param-persist off')
+        self.cmd('config param-persist delete --all --purge -y')
         os.chdir(self.original_working_dir)
         if os.path.exists(self.working_dir):
             import shutil
@@ -209,10 +219,13 @@ class LocalContextScenarioTest(ScenarioTest):
 class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
 
     def __init__(self, method_name):
-        super(LiveScenarioTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.cli_ctx = get_dummy_cli()
         self.kwargs = {}
         self.test_resources_count = 0
+
+    def setUp(self):
+        patch_main_exception_handler(self)
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
@@ -222,7 +235,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         return self.cmd('account list --query "[?isDefault].id" -o tsv').output.strip()
 
 
-class ExecutionResult(object):
+class ExecutionResult:
     def __init__(self, cli_ctx, command, expect_failure=False):
         self.output = ''
         self.applog = ''
@@ -275,7 +288,7 @@ class ExecutionResult(object):
         return self.json_value
 
     def _in_process_execute(self, cli_ctx, command, expect_failure=False):
-        from six import StringIO
+        from io import StringIO
         from vcr.errors import CannotOverwriteExistingCassetteException
 
         if command.startswith('az '):

@@ -1,11 +1,16 @@
-Try new features before release
-===
+# Try new features before release
 
-This documentation shows how to try new features in commit or PR before release even if the PR is not merged.
+This documentation shows how to try new features in commits or PRs before release even if the PR is not merged.
 
-Azure CLI releases new versions every 3 weeks. Many customers and developers are eager to try and test new features before the formal release. Fortunately, Azure CLI project builds artifacts for every commit and PR and you can download them.
+Azure CLI release schedule can be found at https://github.com/Azure/azure-cli/milestones. Many customers and developers are eager to try and test new features before the formal release. Fortunately, Azure CLI project builds artifacts for every commit and PR and you can download them.
 
-## Tutorial for commit
+## Install edge builds for `dev` branch
+
+The most convenient way is to [install edge builds](https://github.com/Azure/azure-cli#edge-builds) released for every commit on `dev` branch.
+
+If no edge builds are released for your platform, you may directly install the artifacts built by the CI pipeline as described below.
+
+## For commits
 
 Step 1. Select a commit. Click the √ or × symbol. Click "Details" of a "build package" item.
 
@@ -23,7 +28,7 @@ Step 4. Download your favorite artifact.
 
 ![](assets/4.PNG)
 
-## Tutorial for PR
+## For PRs
 
 Step 1. Open a PR no matter it is merged or not. Click "Checks" tab.
 
@@ -39,37 +44,52 @@ Follow the same steps in previous sessions and find artifact page. Click `pypi` 
 
 ![](assets/6.PNG)
 
+```powershell
+pip install azure_cli-2.6.0-py3-none-any.whl azure_cli_core-2.6.0-py3-none-any.whl azure_cli_telemetry-1.0.4-py3-none-any.whl azure_mgmt_imagebuilder-1.0.0-py2.py3-none-any.whl
 ```
-pip install azure_cli-2.6.0-py3-none-any.whl azure_cli_command_modules_nspkg-2.0.3-py3-none-any.whl azure_cli_core-2.6.0-py3-none-any.whl azure_cli_nspkg-3.0.4-py3-none-any.whl azure_cli_telemetry-1.0.4-py3-none-any.whl azure_mgmt_imagebuilder-1.0.0-py2.py3-none-any.whl
-```
-`azure_cli-2.6.0-py3-none-any.whl`, `azure_cli_command_modules_nspkg-2.0.3-py3-none-any.whl`, `azure_cli_core-2.6.0-py3-none-any.whl`, `azure_cli_nspkg-3.0.4-py3-none-any.whl`, `azure_cli_telemetry-1.0.4-py3-none-any.whl` are packages of Azure CLI. `azure_mgmt_imagebuilder-1.0.0-py2.py3-none-any.whl` is a package of Image Builder resource provider. You should change it to your own SDK package containing the new feature.
+`azure_cli-2.6.0-py3-none-any.whl`, `azure_cli_core-2.6.0-py3-none-any.whl`, `azure_cli_telemetry-1.0.4-py3-none-any.whl` are packages of Azure CLI. `azure_mgmt_imagebuilder-1.0.0-py2.py3-none-any.whl` is a package of Image Builder resource provider. You should change it to your own SDK package containing the new feature.
 
-We recommend using a virtual environment to install the .whl files. This is an optional step.
+We recommend using a virtual environment to install the `.whl` files. This is an optional step.
 Example commands in PowerShell:
-```
-# Create a virtual environment 
+
+```powershell
+# Create a virtual environment
 python -m venv env
+
 # Activate it
+# PowerShell
 env\Scripts\activate.ps1
+# Linux/MacOS Bash
+. ./env/bin/activate
 ```
 
 ## Install from source code
 
 This approach is for geek users. You can test Azure CLI of any repository, any branch, any commit.
 
-```
+```powershell
 # You can also clone a fork of this repository
 git clone https://github.com/Azure/azure-cli.git
+
 # You can checkout any branch, any commit
-git checkout dev
-# Create a virtual environment
+git checkout <branch>/<commit>
+
+# Create a Python virtual environment
+# https://docs.python.org/3/using/cmdline.html#cmdoption-m
 python -m venv env
-# Activate it
+
+# Activate the virtual environment
+# PowerShell
 env\Scripts\activate.ps1
-# Install azdev
+# Linux/MacOS Bash
+. ./env/bin/activate
+
+# Install azdev - the development tool for Azure CLI
 pip install azdev
-# Install dependencies
+
+# Install dependencies. This may take about 5 minutes
 azdev setup -c azure-cli
+
 # Run Azure CLI
 az -v
 ```

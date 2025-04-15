@@ -5,33 +5,34 @@
 
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
-
 from azure.cli.core.commands.parameters import (get_location_type,
                                                 file_type,
                                                 get_resource_name_completion_list,
                                                 get_enum_type,
-                                                get_three_state_flag)
+                                                get_three_state_flag,
+                                                tags_type)
+
 from azure.mgmt.iotcentral.models import AppSku
 from azure.mgmt.iothub.models import IotHubSku
 from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
-                                                          AllocationPolicy,
                                                           AccessRightsDescription)
 from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType,
                                                   EncodingFormat,
                                                   RenewKeyType,
                                                   AuthenticationType)
-from .custom import KeyType, SimpleAccessRights
-from ._validators import (validate_policy_permissions,
-                          validate_retention_days,
-                          validate_fileupload_notification_max_delivery_count,
-                          validate_fileupload_notification_ttl,
-                          validate_fileupload_sas_ttl,
-                          validate_feedback_ttl,
-                          validate_feedback_lock_duration,
-                          validate_feedback_max_delivery_count,
-                          validate_c2d_max_delivery_count,
-                          validate_c2d_ttl)
+from azure.cli.command_modules.iot.custom import KeyType, SimpleAccessRights
+from azure.cli.command_modules.iot._validators import (validate_policy_permissions,
+                                                       validate_retention_days,
+                                                       validate_fileupload_notification_max_delivery_count,
+                                                       validate_fileupload_notification_ttl,
+                                                       validate_fileupload_sas_ttl,
+                                                       validate_feedback_ttl,
+                                                       validate_feedback_lock_duration,
+                                                       validate_fileupload_notification_lock_duration,
+                                                       validate_feedback_max_delivery_count,
+                                                       validate_c2d_max_delivery_count,
+                                                       validate_c2d_ttl)
 
 
 hub_name_type = CLIArgumentType(
@@ -41,54 +42,90 @@ hub_name_type = CLIArgumentType(
 dps_name_type = CLIArgumentType(
     options_list=['--dps-name'],
     completer=get_resource_name_completion_list('Microsoft.Devices/ProvisioningServices'),
-    help='IoT Provisioning Service name')
+    help='IoT Hub Device Provisioning Service name')
 
 app_name_type = CLIArgumentType(
     completer=get_resource_name_completion_list('Microsoft.IoTCentral/IoTApps'),
     help='IoT Central application name.')
+
+mi_system_assigned_type = CLIArgumentType(
+    options_list=['--mi-system-assigned'],
+    help='Provide this flag to use system assigned identity.')
+
+system_assigned_type = CLIArgumentType(
+    options_list=['--system-assigned'],
+    help='Provide this flag to refer to the system-assigned identity.')
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     # Arguments for IoT DPS
     with self.argument_context('iot dps') as c:
         c.argument('dps_name', dps_name_type, options_list=['--name', '-n'], id_part='name')
+        c.argument('tags', tags_type)
 
     with self.argument_context('iot dps create') as c:
         c.argument('location', get_location_type(self.cli_ctx),
-                   help='Location of your IoT Provisioning Service. Default is the location of target resource group.')
+                   help='Location of your IoT Hub Device Provisioning Service. '
+                   'Default is the location of target resource group.')
         c.argument('sku', arg_type=get_enum_type(IotDpsSku),
-                   help='Pricing tier for the IoT provisioning service.')
-        c.argument('unit', help='Units in your IoT Provisioning Service.', type=int)
+                   help='Pricing tier for the IoT Hub Device Provisioning Service.')
+        c.argument('unit', help='Units in your IoT Hub Device Provisioning Service.', type=int)
+        c.argument('enable_data_residency', arg_type=get_three_state_flag(),
+                   options_list=['--enforce-data-residency', '--edr'],
+                   help='Enforce data residency for this IoT Hub Device Provisioning Service by disabling '
+                   'cross geo-pair disaster recovery. This property is immutable once set on the resource. '
+                   'Only available in select regions. Learn more at https://aka.ms/dpsdr')
 
-    for subgroup in ['access-policy', 'linked-hub', 'certificate']:
+    # plan to slowly align this with extension naming patterns - n should be aligned with dps_name
+    for subgroup in ['linked-hub', 'certificate']:
         with self.argument_context('iot dps {}'.format(subgroup)) as c:
             c.argument('dps_name', options_list=['--dps-name'], id_part=None)
 
-    with self.argument_context('iot dps access-policy') as c:
-        c.argument('access_policy_name', options_list=['--access-policy-name', '--name', '-n'],
+    # To replace above
+    for subgroup in ['policy']:
+        with self.argument_context('iot dps {}'.format(subgroup)) as c:
+            c.argument('dps_name', options_list=['--dps-name', '-n'], id_part=None)
+
+    with self.argument_context('iot dps policy') as c:
+        c.argument('access_policy_name', options_list=['--policy-name', '--pn'],
                    help='A friendly name for DPS access policy.')
 
-    with self.argument_context('iot dps access-policy create') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT provisioning service. Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
+    for subgroup in ['create', 'update']:
+        with self.argument_context('iot dps policy {}'.format(subgroup)) as c:
+            c.argument('rights', options_list=['--rights', '-r'], nargs='+',
+                       arg_type=get_enum_type(AccessRightsDescription),
+                       help='Access rights for the IoT Hub Device Provisioning Service. '
+                            'Use space-separated list for multiple rights.')
 
-    with self.argument_context('iot dps access-policy update') as c:
-        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
-                   arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT provisioning service. Use space-separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.')
-        c.argument('secondary_key', help='Secondary SAS key value.')
+    with self.argument_context('iot dps policy create') as c:
+        c.argument('primary_key', help='Primary SAS key value, if not provided it will be generated by the service')
+        c.argument('secondary_key', help='Secondary SAS key value, if not provided it will be generated by the service')
+
+    with self.argument_context('iot dps policy update') as c:
+        c.argument('primary_key', help='Primary SAS key value. Set to empty string '
+                   'in order to regenerate a new primary key.')
+        c.argument('secondary_key', help='Secondary SAS key value. Set to empty string '
+                   'in order to regenerate a new secondary key.')
 
     with self.argument_context('iot dps linked-hub') as c:
         c.argument('linked_hub', options_list=['--linked-hub'], help='Host name of linked IoT Hub.')
 
     with self.argument_context('iot dps linked-hub create') as c:
-        c.argument('connection_string', help='Connection string of the IoT hub.')
+        c.argument('connection_string',
+                   help='Connection string of the IoT hub. Required if hub name is not provided using --hub-name.',
+                   arg_group='IoT Hub Identifier')
+        c.argument('hub_name',
+                   options_list=['--hub-name', '--hn'],
+                   help='IoT Hub name.',
+                   arg_group='IoT Hub Identifier')
+        c.argument('hub_resource_group',
+                   options_list=['--hub-resource-group', '--hrg'],
+                   help='IoT Hub resource group name.',
+                   arg_group='IoT Hub Identifier')
         c.argument('location', get_location_type(self.cli_ctx),
-                   help='Location of the IoT hub.')
+                   help='Location of the IoT hub.',
+                   arg_group='IoT Hub Identifier',
+                   deprecate_info=c.deprecate(hide=True))
         c.argument('apply_allocation_policy',
                    help='A boolean indicating whether to apply allocation policy to the IoT hub.',
                    arg_type=get_three_state_flag())
@@ -100,16 +137,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    arg_type=get_three_state_flag())
         c.argument('allocation_weight', help='Allocation weight of the IoT hub.')
 
-    with self.argument_context('iot dps allocation-policy update') as c:
-        c.argument('allocation_policy', options_list=['--policy', '-p'], arg_type=get_enum_type(AllocationPolicy),
-                   help='Allocation policy for the IoT provisioning service.')
-
     with self.argument_context('iot dps certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
                    completer=FilesCompleter([".cer", ".pem"]), help='The path to the file containing the certificate.')
         c.argument('certificate_name', options_list=['--certificate-name', '--name', '-n'],
                    help='A friendly name for the certificate.')
         c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
+
+    for subgroup in ['create', 'update']:
+        with self.argument_context('iot dps certificate {}'.format(subgroup)) as c:
+            c.argument('is_verified', options_list=['--verified', '-v'], arg_type=get_three_state_flag(),
+                       help='A boolean indicating whether or not the certificate is verified.')
 
     # Arguments for IoT Hub
     with self.argument_context('iot hub') as c:
@@ -133,6 +171,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    type=int, validator=validate_c2d_max_delivery_count,
                    help='The number of times the IoT hub will attempt to deliver a cloud-to-device'
                         ' message to a device, between 1 and 100.')
+        c.argument('disable_local_auth', options_list=['--disable-local-auth', '--dla'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether or not to disable '
+                        'IoT hub scoped SAS keys for authentication.')
+        c.argument('disable_device_sas', options_list=['--disable-device-sas', '--dds'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether or not to disable all device '
+                        '(including Edge devices but excluding modules) scoped SAS keys for authentication')
+        c.argument('disable_module_sas', options_list=['--disable-module-sas', '--dms'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether or not to disable module-scoped SAS keys for authentication.')
         c.argument('feedback_ttl', options_list=['--feedback-ttl', '--ft'],
                    type=int, validator=validate_feedback_ttl,
                    help='The period of time for which the IoT hub will maintain the feedback for expiration'
@@ -148,6 +197,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    arg_type=get_three_state_flag(),
                    help='A boolean indicating whether to log information about uploaded files to the'
                         ' messages/servicebound/filenotifications IoT Hub endpoint.')
+        c.argument('fileupload_notification_lock_duration',
+                   options_list=['--fileupload-notification-lock-duration', '--fnld'],
+                   type=int, validator=validate_fileupload_notification_lock_duration,
+                   help='The lock duration for the file upload notifications queue, between 5 and 300 seconds.')
         c.argument('fileupload_notification_max_delivery_count', type=int,
                    options_list=['--fileupload-notification-max-delivery-count', '--fnd'],
                    validator=validate_fileupload_notification_max_delivery_count,
@@ -161,12 +214,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    options_list=['--fileupload-storage-connectionstring', '--fcs'],
                    help='The connection string for the Azure Storage account to which files are uploaded.')
         c.argument('fileupload_storage_authentication_type',
+                   arg_type=get_enum_type(AuthenticationType),
                    options_list=['--fileupload-storage-auth-type', '--fsa'],
-                   help='The authentication type for the Azure Storage account to which files are uploaded.'
-                        'Possible values are keyBased and identityBased')
+                   help='The authentication type for the Azure Storage account to which files are uploaded.')
         c.argument('fileupload_storage_container_uri',
                    options_list=['--fileupload-storage-container-uri', '--fcu'],
-                   help='The container URI for the Azure Storage account to which files are uploaded.')
+                   help='The container URI for the Azure Storage account to which files are uploaded.',
+                   deprecate_info=c.deprecate(hide=True))
         c.argument('fileupload_storage_container_name',
                    options_list=['--fileupload-storage-container-name', '--fc'],
                    help='The name of the root container where you upload files. The container need not exist but'
@@ -175,6 +229,43 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    type=int, validator=validate_fileupload_sas_ttl,
                    help='The amount of time a SAS URI generated by IoT Hub is valid before it expires,'
                         ' between 1 and 24 hours.')
+        c.argument('fileupload_storage_identity',
+                   options_list=['--fileupload-storage-identity', '--fsi'],
+                   help="The managed identity to use for file upload authentication. Use '[system]' to "
+                        "refer to the system-assigned managed identity or a resource ID to refer to a "
+                        "user-assigned managed identity.")
+        c.argument('min_tls_version', options_list=['--min-tls-version', '--mintls'],
+                   type=str, help='Specify the minimum TLS version to support for this hub. Can be set to '
+                                  '"1.0" or "1.2". For example, minimum TLS version set to "1.2" '
+                                  'results in clients that use a TLS version below 1.2 to be rejected.')
+        c.argument('tags', tags_type)
+        c.argument('system_identity', options_list=['--mi-system-assigned'],
+                   arg_type=get_three_state_flag(),
+                   help="Enable system-assigned managed identity for this hub")
+        c.argument('user_identities', options_list=['--mi-user-assigned'],
+                   nargs='*', help="Enable user-assigned managed identities for this hub. "
+                   "Accept space-separated list of identity resource IDs.")
+        c.argument('identity_role', options_list=['--role'],
+                   help="Role to assign to the hub's system-assigned managed identity.")
+        c.argument('identity_scopes', options_list=['--scopes'], nargs='*',
+                   help="Space separated list of scopes to assign the role (--role) "
+                   "for the system-assigned managed identity.")
+
+    with self.argument_context('iot hub identity assign') as c:
+        c.argument('system_identity', options_list=['--system-assigned', '--system'],
+                   arg_type=get_three_state_flag(),
+                   nargs='*', help="Assign a system-assigned managed identity to this hub.")
+        c.argument('user_identities', options_list=['--user-assigned', '--user'],
+                   nargs='+', help="Assign user-assigned managed identities to this hub. "
+                   "Accept space-separated list of identity resource IDs.")
+
+    with self.argument_context('iot hub identity remove') as c:
+        c.argument('system_identity', options_list=['--system-assigned', '--system'],
+                   arg_type=get_three_state_flag(),
+                   nargs='*', help="Remove a system-assigned managed identity from this hub.")
+        c.argument('user_identities', options_list=['--user-assigned', '--user'],
+                   nargs='*', help="Remove user-assigned managed identities from this hub. "
+                   "Accept space-separated list of identity resource IDs.")
 
     for subgroup in ['consumer-group', 'policy', 'certificate', 'routing-endpoint', 'route']:
         with self.argument_context('iot hub {}'.format(subgroup)) as c:
@@ -231,11 +322,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                         ' mandatory but can be reordered with or without delimiters.')
         c.argument('authentication_type', options_list=['--auth-type'], arg_type=get_enum_type(AuthenticationType),
                    help='Authentication type for the endpoint. The default is keyBased.')
+        c.argument('identity', help='Use a system-assigned or user-assigned managed identity for endpoint '
+                   'authentication. Use "[system]" to refer to the system-assigned identity or a resource ID '
+                   'to refer to a user-assigned identity. If you use --auth-type without this parameter, '
+                   'system-assigned managed identity is assumed.')
 
     with self.argument_context('iot hub certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
                    completer=FilesCompleter([".cer", ".pem"]), help='The path to the file containing the certificate.')
         c.argument('certificate_name', options_list=['--name', '-n'], help='A friendly name for the certificate.')
+
+    for subgroup in ['create', 'update']:
+        with self.argument_context('iot hub certificate {}'.format(subgroup)) as c:
+            c.argument('is_verified', options_list=['--verified', '-v'], arg_type=get_three_state_flag(),
+                       help='A boolean indicating whether or not the certificate is verified.')
 
     with self.argument_context('iot hub consumer-group') as c:
         c.argument('consumer_group_name', options_list=['--name', '-n'], id_part='child_name_2',
@@ -258,6 +358,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('hub_name', completer=None)
         c.argument('location', get_location_type(self.cli_ctx),
                    help='Location of your IoT Hub. Default is the location of target resource group.')
+        c.argument('enable_data_residency', arg_type=get_three_state_flag(),
+                   options_list=['--enforce-data-residency', '--edr'],
+                   help='Enforce data residency for this IoT Hub by disabling cross-region disaster recovery. '
+                   'This property is immutable once set on the resource. Only available in select regions. '
+                   'Learn more at https://aka.ms/iothubdisabledr')
 
     with self.argument_context('iot hub show-connection-string') as c:
         c.argument('show_all', options_list=['--all'], help='Allow to show all shared access policies.')
@@ -287,7 +392,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sku', arg_type=get_enum_type(AppSku), options_list=['--sku', '-p'],
                    help='Pricing plan for IoT Central application.')
         c.argument('subdomain', options_list=['--subdomain', '-s'],
-                   help='Enter a unique URL. Your app will be accessible via https://<subdomain>.azureiotcentral.com/.'
+                   help='Enter a unique URL. Your app will be accessible via https://{subdomain}.azureiotcentral.com/.'
                         ' Avoid special characters `-` instead, use lower '
                         'case letters (a-z), numbers (0-9), and dashes (-).')
         c.argument('template', options_list=['--template', '-t'],
@@ -296,3 +401,84 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('display_name', options_list=['--display-name', '-d'],
                    help='Custom display name for the IoT Central app. This will be used in the IoT Central application'
                         ' manager to help you identify your app. Default value is the resource name.')
+        c.argument('mi_system_assigned', mi_system_assigned_type)
+
+    with self.argument_context('iot central app identity assign') as c:
+        c.argument('app_name', app_name_type, options_list=['--name', '-n'])
+        c.argument('system_assigned', system_assigned_type)
+
+    with self.argument_context('iot central app identity remove') as c:
+        c.argument('app_name', app_name_type, options_list=['--name', '-n'])
+        c.argument('system_assigned', system_assigned_type)
+
+    with self.argument_context('iot central app identity show') as c:
+        c.argument('app_name', app_name_type, options_list=['--name', '-n'])
+
+    with self.argument_context('iot central app private-endpoint-connection') as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with IoT Central application. '
+                        'Required if --id is not specified')
+        c.argument('account_name', app_name_type,
+                   help='Name of the IoT Central application. Required if --id is not specified')
+        c.argument('resource_group_name',
+                   help='The resource group name of specified IoT Central application. '
+                        'Required if --id is not specified', options_list=['--resource-group', '-g'])
+
+    for item in ['approve', 'reject']:
+        with self.argument_context('iot central app private-endpoint-connection {}'.format(item)) as c:
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the IoT Central application. '
+                         'If --account-name --resource-group/-g and --name/-n are specified, this should be omitted.')
+            c.extra('description', options_list=['--description'],
+                    help='Comments for the {} operation.'.format(item))
+
+    with self.argument_context('iot central app private-endpoint-connection delete') as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with IoT Central application. '
+                   'Required if --id is not specified')
+        c.argument('account_name', app_name_type,
+                   help='Name of the IoT Central application. Required if --id is not specified')
+        c.argument('resource_group_name',
+                   help='The resource group name of specified IoT Central application. '
+                        'Required if --id is not specified', options_list=['--resource-group', '-g'])
+        c.extra('connection_id', options_list=['--id'],
+                help='The ID of the private endpoint connection associated with the IoT Central application. '
+                'If --account-name --resource-group/-g and --name/-n are specified, this should be omitted.')
+
+    with self.argument_context('iot central app private-endpoint-connection show') as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with IoT Central application. '
+                   'Required if --id is not specified')
+        c.argument('account_name', app_name_type,
+                   help='Name of the IoT Central application. Required if --id is not specified')
+        c.argument('resource_group_name',
+                   help='The resource group name of specified IoT Central application. '
+                        'Required if --id is not specified', options_list=['--resource-group', '-g'])
+        c.extra('connection_id', options_list=['--id'],
+                help='The ID of the private endpoint connection associated with the IoT Central application. '
+                     'If --account-name --resource-group/-g and --name/-n are specified, this should be omitted.')
+
+    with self.argument_context('iot central app private-endpoint-connection list') as c:
+        c.argument('account_name', app_name_type,
+                   help='Name of the IoT Central application. Required if --id is not specified')
+        c.argument('resource_group_name', help='Name of resource group. '
+                   'If provided, --name must be provided too', options_list=['--resource-group', '-g'])
+        c.extra('connection_id', help='ID of the resource', options_list=['--id'])
+
+    with self.argument_context('iot central app private-link-resource list') as c:
+        c.argument('name', help='Name of the resource. '
+                   'If provided, --type and --resource-group must be provided too', options_list=['--name', '-n'])
+        c.argument('resource_group_name', help='Name of resource group. '
+                   'If provided, --name and --type must be provided too', options_list=['--resource-group', '-g'])
+        c.argument('source_type', help='Type of the resource. '
+                   'If provided, --name and --resource-group must be provided too', options_list=['--type'])
+        c.extra('connection_id', help='ID of the resource', options_list=['--id'])
+
+    with self.argument_context('iot central app private-link-resource show') as c:
+        c.argument('name', help='Name of the resource. '
+                   'If provided, --type and --resource-group must be provided too', options_list=['--name', '-n'])
+        c.argument('resource_group_name', help='Name of resource group. '
+                   'If provided, --name and --type must be provided too', options_list=['--resource-group', '-g'])
+        c.argument('group_id', help='Name of the private link resource. '
+                   'If provided, --name and --type must be provided too', options_list=['--group-id'])
+        c.extra('connection_id', help='ID of the resource', options_list=['--id'])

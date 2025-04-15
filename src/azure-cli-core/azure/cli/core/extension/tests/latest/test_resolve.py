@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-
+from unittest import mock
 from azure.cli.core.extension._resolve import (resolve_from_index, resolve_project_url_from_index,
                                                NoExtensionCandidatesError, _is_not_platform_specific,
                                                _is_greater_than_cur_version)
@@ -16,13 +16,13 @@ class TestResolveFromIndex(unittest.TestCase):
         name = 'myext'
         with IndexPatch({}), self.assertRaises(NoExtensionCandidatesError) as err:
             resolve_from_index(name)
-        self.assertEqual(str(err.exception), "No extension found with name '{}'".format(name))
+        self.assertEqual(str(err.exception), "No matching extensions for '{}'.".format(name))
 
     def test_ext_not_in_index(self):
         name = 'an_extension_b'
         with IndexPatch({'an_extension_a': []}), self.assertRaises(NoExtensionCandidatesError) as err:
             resolve_from_index(name)
-        self.assertEqual(str(err.exception), "No extension found with name '{}'".format(name))
+        self.assertEqual(str(err.exception), "No matching extensions for '{}'.".format(name))
 
     def test_ext_resolved(self):
         name = 'myext'
@@ -70,8 +70,73 @@ class TestResolveFromIndex(unittest.TestCase):
             self.assertEqual(resolve_from_index(ext_name, target_version='0.2.0')[0], index_data[ext_name][1]['downloadUrl'])
 
         with IndexPatch(index_data):
-            with self.assertRaisesRegex(NoExtensionCandidatesError, 'Extension with version 0.3.0 not found'):
+            with self.assertRaisesRegex(NoExtensionCandidatesError, "Version '0.3.0' not found for extension 'hello'"):
                 resolve_from_index(ext_name, target_version='0.3.0')
+
+    def test_ext_has_available_update(self):
+        ext_name = 'myext'
+        index_data = {
+            ext_name: [
+                mock_ext(f'{ext_name}-0.1.0-py3-none-any.whl', '0.1.0'),
+                mock_ext(f'{ext_name}-0.2.0-py3-none-any.whl', '0.2.0')
+            ]
+        }
+
+        with IndexPatch(index_data):
+            self.assertEqual(resolve_from_index(ext_name, cur_version='0.1.0')[0], index_data[ext_name][1]['downloadUrl'])
+
+
+    def test_ext_has_no_available_updates(self):
+        ext_name = 'myext'
+        index_data = {
+            ext_name: [
+                mock_ext(f'{ext_name}-0.1.0-py3-none-any.whl', '0.1.0'),
+                mock_ext(f'{ext_name}-0.2.0-py3-none-any.whl', '0.2.0')
+            ]
+        }
+
+        with IndexPatch(index_data):
+            with self.assertRaisesRegex(NoExtensionCandidatesError, f"Latest version of '{ext_name}' is already installed."):
+                resolve_from_index(ext_name, cur_version='0.2.0')
+
+    @mock.patch("azure.cli.core.__version__", "2.15.0")
+    def test_ext_requires_later_version_of_cli_core(self):
+        ext_name = 'myext'
+        min_cli_version="2.16.0"
+        index_data = {
+            ext_name: [
+                mock_ext(f'{ext_name}-0.1.0-py3-none-any.whl', '0.1.0', name=ext_name, min_cli_version=min_cli_version),
+                mock_ext(f'{ext_name}-0.2.0-py3-none-any.whl', '0.2.0', name=ext_name, min_cli_version=min_cli_version)
+            ]
+        }
+
+        exception_regex = '\n'.join([
+            f'This extension requires a min of {min_cli_version} CLI core.',
+            "Please run 'az upgrade' to upgrade to a compatible version."
+        ])
+        with IndexPatch(index_data):
+            with self.assertRaisesRegex(NoExtensionCandidatesError, exception_regex):
+                resolve_from_index(ext_name)
+
+
+    @mock.patch("azure.cli.core.__version__", "2.15.0")
+    def test_ext_requires_earlier_version_of_cli_core(self):
+        ext_name = 'myext'
+        max_cli_version="2.14.0"
+        index_data = {
+            ext_name: [
+                mock_ext(f'{ext_name}-0.1.0-py3-none-any.whl', '0.1.0', name=ext_name, max_cli_version=max_cli_version),
+                mock_ext(f'{ext_name}-0.2.0-py3-none-any.whl', '0.2.0', name=ext_name, max_cli_version=max_cli_version)
+            ]
+        }
+        exception_regex = '\n'.join([
+            f'This extension requires a max of {max_cli_version} CLI core.',
+            f"Please run 'az extension update -n {ext_name}' to update the extension."
+        ])
+
+        with IndexPatch(index_data):
+            with self.assertRaisesRegex(NoExtensionCandidatesError, exception_regex):
+                resolve_from_index(ext_name)
 
 
 class TestResolveFilters(unittest.TestCase):

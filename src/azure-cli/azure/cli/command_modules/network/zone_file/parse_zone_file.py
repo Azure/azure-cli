@@ -31,8 +31,8 @@ Known limitations:
     * only the IN class is supported
     * PTR records must have a non-empty name
     * currently only supports the following:
-    '$ORIGIN', '$TTL', 'SOA', 'NS', 'A', 'AAAA', 'CNAME', 'MX', 'PTR',
-    'TXT', 'SRV', 'SPF', 'URI', 'CAA'
+    '$ORIGIN', '$TTL', 'SOA', 'NS', 'A', 'AAAA', 'CNAME', 'DS', 'MX', 'NAPTR', 'PTR',
+    'TLSA', 'TXT', 'SRV', 'SPF', 'URI', 'CAA'
 """
 
 import copy
@@ -43,7 +43,7 @@ from collections import OrderedDict
 import re
 
 from knack.log import get_logger
-from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
 logger = get_logger(__name__)
@@ -60,18 +60,22 @@ date_regex_dict = {
 _REGEX = {
     'ttl': r'(?P<delim>\$ttl)\s+(?P<val>\d+\w*)',
     'origin': r'(?P<delim>\$origin)\s+(?P<val>[\w\.-]+)',
-    'soa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>soa)\s+(?P<host>[\w\.-]+)\s+(?P<email>[\w\.-]+)\s+(?P<serial>\d*)\s+(?P<refresh>\w*)\s+(?P<retry>\w*)\s+(?P<expire>\w*)\s+(?P<minimum>\w*)?',
+    'soa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>soa)\s+(?P<host>[\w\.-]+)\s+(?P<email>[@\w\.-]+)\s+(?P<serial>\d*)\s+(?P<refresh>\w*)\s+(?P<retry>\w*)\s+(?P<expire>\w*)\s+(?P<minimum>\w*)?',
     'a': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>a)\s+(?P<ip>[\d\.]+)',
-    'ns': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ns)\s+(?P<host>[\w\.-]+)',
+    'ns': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ns)\s+(?P<host>[@\w\.-]+)',
     'aaaa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>aaaa)\s+(?P<ip>[\w:]+)',
     'caa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>.+)',
-    'cname': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>cname)\s+(?P<alias>[\w\.-]+)',
-    'mx': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[\w\.-]+)',
+    'cname': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>cname)\s+(?P<alias>[@\w\.-]+)',
+    'ds': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ds)\s+(?P<key_tag>\d+)\s+(?P<algorithm>\d+)\s+(?P<digest_type>\d+)\s+(?P<digest>.+)',
+    'mx': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[@\w\.-]+)',
+    'naptr': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>naptr)\s+(?P<order>\d+)\s+(?P<preference>\d+)\s+(?P<flags>\w+)\s+(?P<services>\S+)\s+(?P<regexp>\S+)\s+(?P<replacement>.*)',
+    'tlsa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>tlsa)\s+(?P<usage>\d+)\s+(?P<selector>\d+)\s+(?P<matching_type>\d+)\s+(?P<certificate>.+)',
     'txt': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>txt)\s+(?P<txt>.+)',
     'ptr': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
-    'srv': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[\w\.]+)',
+    'srv': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[@\w\.-]+)',
     'spf': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>spf)\s+(?P<txt>.+)',
-    'uri': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)'
+    'uri': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)',
+    'alias': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>azure)\s+)?(?P<delim>alias)\s+(?P<aliasDelim>aaaa|a|cname)\s+(?P<resourceId>[a-zA-Z0-9/._-]*)',
 }
 
 _COMPILED_REGEX = {k: re.compile(v, re.IGNORECASE) for k, v in _REGEX.items()}
@@ -202,7 +206,11 @@ def _serialize(tokens):
     """
     ret = []
     for tok in tokens:
-        if " " in tok:
+        if tok is None:
+            continue
+        elif tok == '':
+            tok = 'EMPTY'
+        elif " " in tok:
             tok = '"%s"' % tok
 
         ret.append(tok)
@@ -285,8 +293,6 @@ def _add_record_names(text):
     Go through each line of the text and ensure that
     a name is defined.  Use previous record name if there is none.
     """
-    global SUPPORTED_RECORDS
-
     lines = text.split("\n")
     ret = []
     previous_record_name = None
@@ -331,7 +337,7 @@ def _convert_to_seconds(value):
             seconds += int(ttl_string)
             return seconds
         except ValueError:
-            raise CLIError("Unable to convert value '{}' to seconds.".format(value))
+            raise InvalidArgumentValueError("Unable to convert value '{}' to seconds.".format(value))
 
 
 def _expand_with_origin(record, properties, origin):
@@ -339,7 +345,9 @@ def _expand_with_origin(record, properties, origin):
         properties = [properties]
 
     for property in properties:
-        if not record[property].endswith('.'):
+        if "@" in record[property]:
+            record[property] = record[property].replace('@', origin)
+        elif not record[property].endswith('.'):
             record[property] = '{}.{}'.format(record[property], origin)
 
 
@@ -386,6 +394,14 @@ def _post_process_caa_record(record):
         record['val'] = record['val'][1:-1]
 
 
+def _post_process_naptr_record(record):
+    # strip EMPTY part of regexp
+    if record['regexp'] == 'EMPTY':
+        record['regexp'] = ''
+    if '\\\\' in record['regexp']:
+        record['regexp'] = record['regexp'].replace('\\\\', '\\')
+
+
 def _post_check_names(zone):
 
     # get the origin name that has the SOA record
@@ -400,7 +416,7 @@ def _post_check_names(zone):
             break
     bad_names = [x for x in zone if origin not in x]
     if bad_names:
-        raise CLIError("Record names '{}' are not part of the domain.".format(bad_names))
+        raise InvalidArgumentValueError("Record names '{}' are not part of the domain.".format(bad_names))
 
 
 def parse_zone_file(text, zone_name, ignore_invalid=False):
@@ -430,7 +446,7 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
             record = match.groupdict()
 
         if not parse_match and not ignore_invalid:
-            raise CLIError('Unable to parse: {}'.format(record_line))
+            raise InvalidArgumentValueError('Unable to parse: {}'.format(record_line))
 
         record_type = record['delim'].lower()
         if record_type == '$origin':
@@ -446,7 +462,6 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
                 record_name = record_name.replace('@', current_origin)
             elif not record_name.endswith('.'):
                 record_name = '{}.{}'.format(record_name, current_origin)
-            print(current_origin, record_name)
 
             # special record-specific fix-ups
             if record_type == 'ptr':
@@ -473,21 +488,24 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
             elif record_type == 'txt':
                 # handle TXT concatenation and splitting separately
                 _post_process_txt_record(record)
+            elif record_type == 'naptr':
+                # handle NAPTR empty regexp separately
+                _post_process_naptr_record(record)
 
             if record_name not in zone_obj:
                 zone_obj[record_name] = OrderedDict()
 
             if record_type == 'soa':
                 if soa_processed:
-                    raise CLIError('Zone file can contain only one SOA record.')
+                    raise InvalidArgumentValueError('Zone file can contain only one SOA record.')
                 if record_name != current_origin:
-                    raise CLIError("Zone SOA record must be at the apex '@'.")
+                    raise InvalidArgumentValueError("Zone SOA record must be at the apex '@'.")
                 zone_obj[record_name][record_type] = record
                 soa_processed = True
                 continue
 
             if not soa_processed:
-                raise CLIError('First record in zone file must be SOA.')
+                raise InvalidArgumentValueError('First record in zone file must be SOA.')
 
             if record_type == 'cname':
                 if record_type in zone_obj[record_name]:

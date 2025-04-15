@@ -55,6 +55,10 @@ def cf_metric_def(cli_ctx, _):
     return cf_monitor(cli_ctx).metric_definitions
 
 
+def cf_metric_ns(cli_ctx, _):
+    return cf_monitor(cli_ctx).metric_namespaces
+
+
 def cf_activity_log(cli_ctx, _):
     return cf_monitor(cli_ctx).activity_logs
 
@@ -71,26 +75,6 @@ def _log_analytics_client_factory(cli_ctx, **kwargs):
     from azure.mgmt.loganalytics import LogAnalyticsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient, **kwargs)
-
-
-def cf_private_link_resources(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_link_resources
-
-
-def cf_private_link_scoped_resources(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_link_scoped_resources
-
-
-def cf_private_link_scope_operation_status(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_link_scope_operation_status
-
-
-def cf_private_link_scopes(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_link_scopes
-
-
-def cf_private_endpoint_connections(cli_ctx, _):
-    return cf_monitor(cli_ctx).private_endpoint_connections
 
 
 def cf_log_analytics_workspace(cli_ctx, _):

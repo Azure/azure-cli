@@ -3,6 +3,390 @@
 Release History
 ===============
 
+2.71.0
+++++++
+* PREVIEW: Support managed identity authentication with MSAL. Run `az config set core.use_msal_managed_identity=true` or set environment variable `AZURE_CORE_USE_MSAL_MANAGED_IDENTITY` to enable it (#31092)
+
+2.70.0
+++++++
+* Resolve CVE-2024-12797 (#30816)
+* Drop Track 1 SDK authentication (#29631)
+* `aaz`: Add cross tenants control for `AAZResourceIdArgFormat` (#30817)
+* `aaz`: Support `Any` type with full value shorthand syntax allowed (#30868)
+
+2.69.0
+++++++
+* `aaz`: Support simple type parsed from string value (#30623)
+
+2.68.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Linux server (#30267)
+* Drop old Track 2 SDK authentication support (#29690)
+* Resolve CVE-2024-50602 (#30533)
+
+2.67.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Windows server (#29187)
+
+2.66.0
+++++++
+* `aaz`: Support managed identity (#29953)
+* Resolve CVE-2024-6119 (#29887)
+* Resolve CVE-2024-5535 (#29887)
+* Resolve CVE-2024-4741 (#29887)
+* Resolve CVE-2024-4603 (#29887)
+* Resolve CVE-2024-2511 (#29887)
+* Use MSAL for Cloud Shell authentication (#29637)
+
+2.65.0
+++++++
+* Minor fixes
+
+2.64.0
+++++++
+* Minor fixes
+
+2.63.0
+++++++
+* Resolve CVE-2024-39689 (#29320)
+* Support `az config set extension.dynamic_install_allow_preview` for extension dynamic installation configuration (#29413)
+* Resolve CVE-2024-6345 (#29433)
+* `az logout`: Remove service principal access tokens from token cache (#29441)
+
+2.62.0
+++++++
+* Fix #28997: Fix error "User cancelled the Accounts Control Operation" when logging in with WAM as Administrator (#29088)
+* Resolve CVE-2024-37891 (#29194)
+* Resolve CVE-2024-35195 (#29186)
+* `aaz`: Add argument completer support (#29204)
+
+2.61.0
+++++++
+* Resolve CVE-2024-34064 (#28895)
+* [BREAKING CHANGE] `az login`: Use WAM as the default authentication method on Windows. For more details, see https://go.microsoft.com/fwlink/?linkid=2271136 (#28841)
+* `aaz`: Support extended values in `AAZArgEnum` (#28850)
+* Add `tenantDefaultDomain` and `tenantDisplayName` properties to login contexts (shown by `az account list`) (#28910)
+* Prompt for interactive authentication for all silent authentication failures (#28966)
+
+2.60.0
+++++++
+* Fix #28737: Fix token cache for service principal authentication (#28747)
+* Resolve CVE-2023-3651 (#28735)
+
+2.59.0
+++++++
+* Minor fixes
+
+2.58.0
+++++++
+* [BREAKING CHANGE] `az login`: Replace `allow_broker` with `enable_broker_on_windows` (#27726)
+
+2.57.0
+++++++
+* `aaz`: Handle null value when deserialize output (#28253)
+* Add warning for customers when there're credentials in cli output if this feature has been turned on through `az config set clients.show_secrets_warning=True` (#27929)
+
+2.56.0
+++++++
+* Minor fixes
+
+2.55.0
+++++++
+* Minor fixes
+
+2.54.0
+++++++
+* `aaz`: Support data-plane clients (#27617)
+* [PREVIEW] Support disabling instance discovery by running `az config set core.instance_discovery=false` (#27494)
+
+2.53.1
+++++++
+* No changes
+
+2.53.0
+++++++
+* `aaz`: Fix command name case issue for aaz command table lazy load (#27344)
+
+2.52.0
+++++++
+* `aaz`: Support `configured_default` for `AAZBaseArg` (#27205)
+
+2.51.0
+++++++
+* `aaz`: Add `--max-items` and `--next-token` for pagination (#26710)
+* `aaz`: Support paginating calculation (#26713)
+* `aaz`: Support blank input for compound argument types (#26870)
+* Drop client telemetry cache strategy (#26854)
+
+2.50.0
+++++++
+* `aaz`: Add short summary for `--location` when its default value comes from resource group (#26584)
+* `aaz`: Handle null property in error response (#26605)
+* `aaz`: Explicitly raise TypeError exception during LRO (#26634)
+* `aaz`: Parse and re-serialize query parameters within next link (#26768)
+
+2.49.0
+++++++
+* Dynamically install extensions without prompt when not in a TTY (#26219)
+
+2.48.1
+++++++
+* No changes
+
+2.48.0
+++++++
+* `aaz`: Support hidden secret properties of response in output (#26102)
+* `aaz`: Support `AAZPasswordArg` (#26134)
+* `aaz`: Support argument prompt input for simple type args (#26134)
+
+2.47.0
+++++++
+* `aaz`: Add support for changing subscription of `AAZCommand` in customization code (#25745)
+
+2.46.0
+++++++
+* Add announcement for WAM-based login (#25416)
+
+2.45.0
+++++++
+* `aaz`: Support AAZFileArg (#25075)
+* `aaz`: Support singular options of `AAZListArg` in shorthand syntax partial value expression (#25302)
+
+2.44.1
+++++++
+* No changes
+
+2.44.0
+++++++
+* `aaz`: Support subresource selector (#24827)
+* `aaz`: Improve generic update arguments to consist with previous behaviors (#24960)
+
+2.43.0
+++++++
+* `aaz`: Fix `has_value` function for list, dict and object arg types (#24625)
+* `aaz`: Support argument preview and experimental (#24637)
+* `aaz`: Add registered property for `AAZBaseArg` (#24640)
+* `aaz`: Add aazlist and aazdict args transform help functions (#24690)
+* `aaz`: Support camel case key in `AAZObjectType` (#24771)
+* Disable removing and updating system extension in Cloud Shell (#24361)
+
+2.42.0
+++++++
+* `aaz`: Support `FreeFormDictType` and `FreeFormDictArg` (#24183)
+* `aaz`: Support `configured_default` property in arguments (#24411)
+
+2.41.0
+++++++
+* Support Continuous Access Evaluation (#23635)
+* `aaz`: Support `yaml` file as value for compound arguments (#23817)
+* PREVIEW: Support Web Account Manager (WAM) login on Windows. To opt in, run `az config set core.allow_broker=true` (#23828)
+* `aaz`: Fix recursion depth exceeded for to_serialized_data of AAZObject (#23930)
+* `aaz`: Support customized life cycle callback functions for `AAZCommand` (#23949)
+* `aaz`: Fix two AAZObjects or AAZDicts comparison (#24035)
+* Revert #23514: Rename entry script `az.ps1` to `azps.ps1` (#24015)
+
+2.40.0
+++++++
+* `aaz`: Support using `cli_ctx` to initiate AAZCommand class (#23459)
+* `aaz`: Fix AAZBearerTokenCredentialPolicy to support MSIAuthenticationWrapper credential (#23471)
+* Allow adding dedicated key for collecting CLI Telemetry (#23530)
+* Add `az.ps1` entry script for PowerShell (#23514)
+* `aaz`: Support generic update arguments (#23701)
+* Add CLI survey invitation (#23460)
+
+2.39.0
+++++++
+* `az extension add`: Improve feedback shown to users when installation is unsuccessful (#22941)
+* `aaz`: Fix early exit for long running commands run with `--no-wait` parameter (#23092)
+* `aaz`: Feature Atomic Azure Command support argument validation (#23126)
+* `aaz`: Implement wait command (#23189)
+* `aaz`: Support blank value expression in `full value` of shorthand syntax (#23268)
+* `aaz`: Support `singular quota string` for special property names in `partial value` key of shorthand synatx (#23268)
+* `aaz`: Support `AAZDurationArg`, `AAZDateArg`, `AAZTimeArg`, `AAZDateTimeArg` and `AAZUuidArg` (#23280)
+* Support specifying `telemetry.push_interval_in_hours` to force push telemetry cache file (#23205)
+
+2.38.0
+++++++
+* Shorthand syntax: Simplify the escape character usage in Single Quotes String (#22607)
+
+2.37.0
+++++++
+* Codegen v2 support (#20967)
+* Support getting SSH certificate inside Cloud Shell (#22162)
+
+2.36.0
+++++++
+* Minor fixes
+
+2.35.0
+++++++
+* Minor fixes
+
+2.34.1
+++++++
+* No changes
+
+2.34.0
+++++++
+* Minor fixes
+
+2.33.1
+++++++
+* No changes
+
+2.33.0
+++++++
+* Drop `--query-examples` global argument (#20962)
+
+2.32.0
+++++++
+* Use optimistic locking for service principal entry reads (#20408)
+
+2.31.0
+++++++
+* Use MSAL HTTP cache (#20234)
+
+2.30.0
+++++++
+* [BREAKING CHANGE] ADAL to MSAL migration (#19853)
+
+2.29.1
+++++++
+* No changes
+
+2.29.0
+++++++
+* Add a global config `core.disable_progress_bar` by `az config` to allow users to disable progress bar globally in the automation scenario. (#19464)
+* It is supported to use the parameter `--only-show-errors` to disable progress bar. (#19464)
+
+2.28.1
+++++++
+* No changes
+
+2.28.0
+++++++
+* Conditional Access: Show `--scope` for `az login` message when failed to refresh the access token (#17738)
+
+2.27.2
+++++++
+* No changes
+
+2.27.1
+++++++
+* No changes
+
+2.27.0
+++++++
+* Minor fixes
+
+2.26.1
+++++++
+* No changes
+
+2.26.0
+++++++
+* Minor fixes
+
+2.25.0
+++++++
+* Fix #18360 and #18262: Write to stderr issue (#18414)
+
+2.24.2
+++++++
+* No changes
+
+2.24.1
+++++++
+* No changes
+
+2.24.0
+++++++
+* Fix issue #16798: Azure CLI output is corrupted! (#18065)
+
+2.23.0
+++++++
+* Display allowed values in error message when enum validation fails (#17621)
+* Refactor AzCommandGroup (#17387)
+* Add a linter rule for `service_name.json` (#17428)
+
+2.22.1
+++++++
+* Minor fixes
+
+2.22.0
+++++++
+* Add spinner progress bar for long running operation (#17262)
+* Add service_name.json (#17159)
+* Provide recommendation for JSON parsing error (#17445)
+* Add workaround for cross-tenant authentication with Track 2 SDKs (#16797)
+
+2.21.0
+++++++
+* Unify ADAL and MSAL error handler (#17072)
+* Add support for specifying minimum required version of an extension to work with the current core version (#16751)
+
+2.20.0
+++++++
+* Minor fixes
+
+2.19.1
+++++++
+* No changes
+
+2.19.0
+++++++
+* New error output: Support multiple failure recommendations with colorization (#16257)
+
+2.18.0
+++++++
+* Print INFO log from SDK (#15676)
+
+2.17.1
+++++++
+* No changes
+
+2.17.0
+++++++
+* Minor fixes
+
+2.16.0
+++++++
+* Add 2020-09-01-hybrid API profile for AzureStack (#15096)
+
+2.15.1
+++++++
+* Minor fixes
+
+2.15.0
+++++++
+* Upgrade azure-mgmt-core to 1.2.1 (#15780)
+
+2.14.2
+++++++
+* No changes
+
+2.14.1
+++++++
+* Minor fixes
+
+2.14.0
+++++++
+* Minor fixes
+
+2.13.0
+++++++
+* Minor fixes
+
+2.12.1
+++++++
+* No changes
+
+2.12.0
+++++++
+* Add a new global parameter `--query-examples` (#14765)
+* Fix #15025: MSIAuthenticationWrapper not working with azure.core (#15118)
+* Error message improvement (#14855)
+
 2.11.1
 ++++++
 * Minor fixes
@@ -280,8 +664,8 @@ Release History
 ++++++
 * Minor fixes
 
-2.0.36	
-++++++	
+2.0.36
+++++++
 * Minor fixes
 
 2.0.35

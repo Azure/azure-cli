@@ -1,0 +1,306 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault key create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --kty -n --exportable --policy --hsm-name
+      User-Agent:
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/create?api-version=7.5-preview.1
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        resource="https://managedhsm.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-server-latency:
+      - '0'
+    status:
+      code: 401
+      message: Unauthorized
+- request:
+    body: '{"kty": "EC-HSM", "attributes": {"enabled": true, "exportable": true},
+      "release_policy": {"data": "eyJhbnlPZiI6IFt7ImF1dGhvcml0eSI6ICJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8iLCAiYWxsT2YiOiBbeyJjbGFpbSI6ICJ4LW1zLXNneC1pcy1kZWJ1Z2dhYmxlIiwgImVxdWFscyI6ICJmYWxzZSJ9XX1dLCAidmVyc2lvbiI6ICIxLjAuMCJ9"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault key create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '310'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --kty -n --exportable --policy --hsm-name
+      User-Agent:
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/create?api-version=7.5-preview.1
+  response:
+    body:
+      string: '{"attributes":{"created":1741751413,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1741751413},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/6740957414be050dacc00a4b6f7aca64","kty":"EC-HSM","x":"DSj5Avm0IeXteEOs29b6fSeLNe1cMHrywm1KZWkChjs","y":"XnNoVlzWD_zZOX6buQ_RE2OPeiNnfqwe9t9m63CmVz4"},"release_policy":{"contentType":"application/json;
+        charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '736'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.26;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - uksouth
+      x-ms-server-latency:
+      - '136'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault key create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --kty -n --exportable --default-cvm-policy --hsm-name
+      User-Agent:
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/managedHSMs?api-version=2024-11-01
+  response:
+    body:
+      string: '{"value":[{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-mhsm-rgnabanxxc2ga3j54qo6qkwn3oxtjrwprzl37qotnym5fsmpsa5rlvuak4assh/providers/Microsoft.KeyVault/managedHSMs/clitest-mhsm-zd44vdo74qj","name":"clitest-mhsm-zd44vdo74qj","type":"Microsoft.KeyVault/managedHSMs","location":"uksouth","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2025-03-12T00:06:39.319Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2025-03-12T00:06:39.319Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://clitest-mhsm-zd44vdo74qj.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":false,"provisioningState":"Succeeded","statusMessage":"The
+        Managed HSM is provisioned and ready to use.","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled","regions":[],"securityDomainProperties":{"activationStatus":"NotActivated","activationStatusMessage":"Your
+        HSM has been provisioned, but cannot be used for cryptographic operations
+        until it is activated. To activate the HSM, download the security domain."}}},{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_krp000001/providers/Microsoft.KeyVault/managedHSMs/clitesthsmkrp000002","name":"clitesthsmkrp000002","type":"Microsoft.KeyVault/managedHSMs","location":"uksouth","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2025-03-12T03:37:26.178Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2025-03-12T03:37:26.178Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://clitesthsmkrp000002.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":false,"provisioningState":"Succeeded","statusMessage":"The
+        Managed HSM is provisioned and ready to use.","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled","regions":[],"securityDomainProperties":{"activationStatus":"NotActivated","activationStatusMessage":"Your
+        HSM has been provisioned, but cannot be used for cryptographic operations
+        until it is activated. To activate the HSM, download the security domain."}}},{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.KeyVault/managedHSMs/ystesthsm","name":"ystesthsm","type":"Microsoft.KeyVault/managedHSMs","location":"uksouth","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2025-02-11T21:20:51.006Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2025-02-11T21:20:51.006Z"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","hsmUri":"https://ystesthsm.managedhsm.azure.net/","initialAdminObjectIds":["3707fb2f-ac10-4591-a04f-8b0d786ea37d"],"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":false,"provisioningState":"Succeeded","statusMessage":"The
+        Managed HSM is provisioned and ready to use.","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled","regions":[],"securityDomainProperties":{"activationStatus":"NotActivated","activationStatusMessage":"Your
+        HSM has been provisioned, but cannot be used for cryptographic operations
+        until it is activated. To activate the HSM, download the security domain."}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3930'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Mar 2025 03:50:15 GMT
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 2.2.29.0
+      x-ms-original-request-ids:
+      - 48930010-6720-47fe-aee2-80104a77cf99
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 8D976A3718BC42FC94EB9C5C2BD7F126 Ref B: MAA201060516049 Ref C: 2025-03-12T03:50:14Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault key create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --kty -n --exportable --default-cvm-policy --hsm-name
+      User-Agent:
+      - python/3.11.9 (Windows-10-10.0.26100-SP0) AZURECLI/2.70.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Attestation/Locations/uksouth/defaultProvider?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Attestation/attestationProviders/shareduks","name":"shareduks","type":"Microsoft.Attestation/attestationProviders","location":"UK
+        South","properties":{"trustModel":"AAD","status":"Ready","attestUri":"https://shareduks.uks.attest.azure.net"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '269'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Mar 2025 03:50:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-maa-service-version:
+      - 1.11.02949.3694
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: EAC6BB6143654812B530CBF64C02F2DF Ref B: MAA201060515029 Ref C: 2025-03-12T03:50:16Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"kty": "EC-HSM", "attributes": {"enabled": true, "exportable": true},
+      "release_policy": {"data": "eyJ2ZXJzaW9uIjogIjEuMC4wIiwgImFueU9mIjogW3siYXV0aG9yaXR5IjogImh0dHBzOi8vc2hhcmVkdWtzLnVrcy5hdHRlc3QuYXp1cmUubmV0IiwgImFsbE9mIjogW3siY2xhaW0iOiAieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsICJlcXVhbHMiOiAiYXp1cmUtY29tcGxpYW50LWN2bSJ9XX1dfQ"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault key create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '328'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --kty -n --exportable --default-cvm-policy --hsm-name
+      User-Agent:
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/create?api-version=7.5-preview.1
+  response:
+    body:
+      string: '{"attributes":{"created":1741751418,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1741751418},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/a024a51b2fbc06e9ab0bb5f5c1fd9e39","kty":"EC-HSM","x":"l2IvtB0GjBamDI-JpyBpnSz44fTLf_9gpUJF4lXNQtc","y":"yTCVzvv3JYkb93tu1wEp2gu6QzSAiFmdJzHAUf3BQEI"},"release_policy":{"contentType":"application/json;
+        charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkdWtzLnVrcy5hdHRlc3QuYXp1cmUubmV0LyJ9XSwidmVyc2lvbiI6IjEuMC4wIn0","immutable":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '755'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.26;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - uksouth
+      x-ms-server-latency:
+      - '618'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"release_policy": {"immutable": true, "data": "eyJhbnlPZiI6IFt7ImF1dGhvcml0eSI6ICJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8iLCAiYWxsT2YiOiBbeyJjbGFpbSI6ICJ4LW1zLXNneC1pcy1kZWJ1Z2dhYmxlIiwgImVxdWFscyI6ICJmYWxzZSJ9XX1dLCAidmVyc2lvbiI6ICIxLjAuMCJ9"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault key set-attributes
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '259'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --policy --immutable -n --hsm-name
+      User-Agent:
+      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PATCH
+    uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/?api-version=7.5-preview.1
+  response:
+    body:
+      string: '{"attributes":{"created":1741751418,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1741751421},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/a024a51b2fbc06e9ab0bb5f5c1fd9e39","kty":"EC-HSM","x":"l2IvtB0GjBamDI-JpyBpnSz44fTLf_9gpUJF4lXNQtc","y":"yTCVzvv3JYkb93tu1wEp2gu6QzSAiFmdJzHAUf3BQEI"},"release_policy":{"contentType":"application/json;
+        charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '735'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.26;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - uksouth
+      x-ms-server-latency:
+      - '1653'
+    status:
+      code: 200
+      message: OK
+version: 1

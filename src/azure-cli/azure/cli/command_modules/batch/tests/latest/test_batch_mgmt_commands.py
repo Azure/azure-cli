@@ -3,39 +3,42 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import mock
-import os
 import tempfile
 import time
-
-from knack.util import CLIError
-from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest)
-from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
-from azure.cli.core.profiles import ResourceType, get_sdk
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from .batch_preparers import BatchMgmtScenarioMixin
+
+from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
 
-class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
+class BatchMgmtScenarioTests(ScenarioTest):
 
-    @ResourceGroupPreparer(location='northeurope')
-    def test_batch_general_arm_cmd(self, resource_group):
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            BatchAccountKeyReplacer(),
+            StorageSASReplacer()
+        ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
+    def test_batch_general_arm_cmd(self, resource_group, storage_account):
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        account_name2 = self.create_random_name(prefix='clibatchtestacct', length=24)
         self.kwargs.update({
             'rg': resource_group,
-            'str_n': 'clibatchteststorage1',
-            'loc': 'northeurope',
-            'acc': 'clibatchtest1',
+            'str_n': storage_account,
+            'loc': 'eastus2',
+            'acc': account_name,
+            'acc2': account_name2,
             'ip': resource_group + 'ip',
             'poolname': 'batch_account_cmd_pool'
         })
 
         # test create storage account with default set
-        result = self.cmd('storage account create -g {rg} -n {str_n} -l {loc} --sku Standard_LRS').assert_with_checks([
-            self.check('name', '{str_n}'),
-            self.check('location', '{loc}'),
-            self.check('resourceGroup', '{rg}')])
-        storage_id = result.get_output_in_json()['id']
+        storage_id = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{storage_account}"
 
         # test create account with default set
         self.cmd('batch account create -g {rg} -n {acc} -l {loc}').assert_with_checks([
@@ -43,7 +46,15 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
             self.check('location', '{loc}'),
             self.check('resourceGroup', '{rg}')])
 
-        time.sleep(100)
+         # test create account with default set
+        self.cmd('batch account create -g {rg} -n {acc2} -l {loc} --encryption-key-source Microsoft.Batch').assert_with_checks([
+            self.check('name', '{acc2}'),
+            self.check('location', '{loc}'),
+            self.check('encryption.keySource', 'Microsoft.Batch'),
+            self.check('resourceGroup', '{rg}')])
+
+        if self.is_live or self.in_recording:
+            time.sleep(100)
 
         self.cmd('batch account set -g {rg} -n {acc} --storage-account {str_n}').assert_with_checks([
             self.check('name', '{acc}'),
@@ -66,47 +77,214 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
             self.check('primary != null', True),
             self.check('secondary', keys.get_output_in_json()['secondary'])])
 
-        self.assertTrue(keys.get_output_in_json()['primary'] !=
-                        keys2.get_output_in_json()['primary'])
+        self.assertNotEqual(keys.get_output_in_json()['primary'], keys2.get_output_in_json()['primary'])
 
-        self.cmd('batch account login -g {rg} -n {acc}').assert_with_checks(self.is_empty())
-        self.assertEqual(self.cli_ctx.config.get('batch', 'auth_mode'), 'aad')
-        self.assertEqual(self.cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
-
-        self.cmd('batch account login -g {rg} -n {acc} --shared-key-auth').assert_with_checks(self.is_empty())
-        self.assertEqual(self.cli_ctx.config.get('batch', 'auth_mode'), 'shared_key')
-        self.assertEqual(self.cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
-        self.assertEqual(self.cli_ctx.config.get('batch', 'access_key'), keys2.get_output_in_json()['primary'])
+        self.cmd('batch account outbound-endpoints -g {rg} -n {acc}').assert_with_checks([
+            self.check('length(@)', 4),
+            self.check('[0].category', 'Azure Batch'),
+            self.check('[1].category', 'Azure Storage'),
+            self.check('[2].category', 'Microsoft Package Repository'),
+            self.check('[3].category', 'Azure Key Vault'),
+            self.check('length([0].endpoints)', 2),
+            self.check('ends_with([0].endpoints[0].domainName, `batch.azure.com`)', True)
+        ])
 
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {acc} --yes')
+        self.cmd('batch account delete -g {rg} -n {acc2} --yes')
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
-            [self.check('accountQuota', 3)])
+            [self.greater_than('accountQuota', 0)])
+
+        self.cmd('batch location list-skus -l {loc} --query "[0:20]"').assert_with_checks([
+            self.check('length(@)', 20), # Ensure at least 20 entries
+            self.check('[?name==`Basic_A2`] | [0].familyName', 'basicAFamily'),
+            self.check('[?name==`Basic_A2`] | [0].capabilities[?name==`vCPUs`] | [0].value', 2)
+        ])
 
 
-class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
+class BatchMgmtApplicationScenarioTests(ScenarioTest):
 
-    @ResourceGroupPreparer(location='ukwest')
-    def test_batch_application_cmd(self, resource_group):
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            StorageSASReplacer()
+        ])
+
+
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
+    def test_batch_privateendpoint_cmd(self, resource_group, storage_account):
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
+        pe_name = self.create_random_name(prefix='clibatchtestpe', length=24)
+
         _, package_file_name = tempfile.mkstemp()
+
+
         self.kwargs.update({
             'rg': resource_group,
-            'str_n': 'clibatchteststorage7',
-            'loc': 'ukwest',
-            'acc': 'clibatchtest7',
+            'str_n': storage_account,
+            'loc': 'eastus2',
+            'acc': account_name,
+            'app': 'testapp',
+            'app_p': '1.0',
+            'app_f': package_file_name,
+            'vnetname': vnet_name,
+            'pename': pe_name
+        })
+
+        # test create account with default set
+        batchaccount = self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n} --public-network-access Disabled').assert_with_checks([
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')]).get_output_in_json()
+
+        self.kwargs['accountId'] = batchaccount['id']
+
+        # create private endpoint
+        self.cmd('network vnet create --resource-group {rg} --name {vnetname} -l {loc}')
+        self.cmd('network vnet subnet create --resource-group {rg} --name default --vnet-name {vnetname} --address-prefixes 10.0.0.0/24')
+        self.cmd('network vnet subnet update --name default --resource-group {rg} --vnet-name {vnetname} --disable-private-endpoint-network-policies true')
+        self.cmd('network private-endpoint create -g {rg} -n {pename} --vnet-name {vnetname} --subnet default --private-connection-resource-id {accountId} --group-id batchAccount --connection-name {pename} -l {loc}')
+
+        self.cmd('batch private-link-resource list --account-name {acc} --resource-group {rg}').assert_with_checks([
+             self.check('length(@)', 2),
+            self.check('[0].name', 'batchAccount')])
+
+        self.cmd('batch private-link-resource show --account-name {acc} --resource-group {rg} --name batchAccount').assert_with_checks([
+             self.check('name', 'batchAccount')])
+
+        endpoints = self.cmd('batch private-endpoint-connection list --account-name {acc} --resource-group {rg}').get_output_in_json()
+        self.kwargs['endpointId'] = endpoints[0]['name']
+        self.cmd('batch private-endpoint-connection show --account-name {acc} --resource-group {rg} --name {endpointId}').assert_with_checks([
+             self.check('name', '{endpointId}')])
+
+
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
+    def test_batch_network_profile_cmd(self, resource_group, storage_account):
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
+        pe_name = self.create_random_name(prefix='clibatchtestpe', length=24)
+
+        _, package_file_name = tempfile.mkstemp()
+
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'str_n': storage_account,
+            'loc': 'eastus2',
+            'acc': account_name,
+            'app': 'testapp',
+            'app_p': '1.0',
+            'app_f': package_file_name,
+            'vnetname': vnet_name,
+            'pename': pe_name
+        })
+
+        # test create account with default set
+        batchaccount = self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n} --public-network-access Enabled').assert_with_checks([
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')]).get_output_in_json()
+
+        self.kwargs['accountId'] = batchaccount['id']
+
+        # create private endpoint
+        output = self.cmd('batch account network-profile network-rule add -n {acc} -g {rg} --profile BatchAccount --ip-address 1.2.3.6').assert_with_checks([
+            self.check('accountAccess.defaultAction', 'Allow'),
+            self.check('accountAccess.ipRules[0].value', '1.2.3.6')]).get_output_in_json()
+
+
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
+    def test_batch_managed_identity_cmd(self, resource_group, storage_account):
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
+        pe_name = self.create_random_name(prefix='clibatchtestpe', length=24)
+
+        _, package_file_name = tempfile.mkstemp()
+
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'str_n': storage_account,
+            'loc': 'eastus2',
+            'acc': account_name,
+            'app': 'testapp',
+            'app_p': '1.0',
+            'app_f': package_file_name,
+            'vnetname': vnet_name,
+            'pename': pe_name,
+            'identity1': 'identity1',
+            'identity2': 'identity2',
+        })
+
+        identity1_json = self. cmd('identity create -g {rg} -n {identity1}'). get_output_in_json()
+        identity2_json = self. cmd('identity create -g {rg} -n {identity2}'). get_output_in_json()
+        identity1_id = identity1_json['id']
+        identity2_id = identity2_json['id']
+        identity1_principalId = identity1_json['principalId']
+        identity2_principalId = identity2_json['principalId']
+        self. kwargs. update({
+            'identity1_id': identity1_id,
+            'identity1_principalId': identity1_principalId,
+            'identity2_id': identity2_id,
+            'identity2_principalId': identity2_principalId
+        })
+
+        # test create account with managed identity
+        batchaccount = self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n} --mi-user-assigned {identity1_id}').assert_with_checks([
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('identity.type', 'UserAssigned'),
+            self. check('length(identity.userAssignedIdentities)', 1)]).get_output_in_json()
+
+        # display the managed identity
+        self. cmd('batch account identity show -g {rg} -n {acc}', checks=[
+        self.check('type', 'UserAssigned')])
+
+        # delete specific managed identity
+        self. cmd('batch account identity remove -g {rg} -n {acc} --user-assigned {identity1_id} --yes', checks=[
+        self. check('type', 'None'),
+        self. check('userAssignedIdentities', 'None')])
+
+        # create a managed identity to an existing accountS
+        self. cmd('batch account identity assign -g {rg} -n {acc} --user-assigned {identity2_id}', checks=[
+        self. check('type', 'UserAssigned'),
+        self. check('length(userAssignedIdentities)', 1)])
+
+        # delete all the managed identity
+        self. cmd('batch account identity remove -g {rg} -n {acc} --user-assigned --yes', checks=[
+        self. check('type', 'None'),
+        self. check('userAssignedIdentities', 'None')])
+
+        # create a managed identity to an existing accountS
+        self. cmd('batch account identity assign -g {rg} -n {acc} --user-assigned {identity2_id}', checks=[
+        self. check('type', 'UserAssigned'),
+        self. check('length(userAssignedIdentities)', 1)])
+
+
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
+    def test_batch_application_cmd(self, resource_group, storage_account):
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+
+        _, package_file_name = tempfile.mkstemp()
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'str_n': storage_account,
+            'loc': 'eastus2',
+            'acc': account_name,
             'app': 'testapp',
             'app_p': '1.0',
             'app_f': package_file_name
         })
 
         # test create account with default set
-        self.cmd('storage account create -g {rg} -n {str_n} -l {loc} --sku Standard_LRS').assert_with_checks([
-            self.check('name', '{str_n}'),
-            self.check('location', '{loc}'),
-            self.check('resourceGroup', '{rg}')])
-
         self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n}').assert_with_checks([
             self.check('name', '{acc}'),
             self.check('location', '{loc}'),
@@ -150,47 +328,40 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
                  '--version {app_p} --yes')
         self.cmd('batch application delete -g {rg} -n {acc} --application-name {app} --yes')
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks(self.is_empty())
-        self.cmd('storage account delete -g {rg} -n {str_n} --yes')
 
 
-# These tests have requirements which cannot be met by CLI team so reserved for live testing.
-class BatchMgmtLiveScenarioTests(LiveScenarioTest):
-    @ResourceGroupPreparer(location='northeurope')
+class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
+
+    def __init__(self, method_name):
+        super().__init__(method_name)
+
+    # Note for this test to run you subscrition needs to give access to batch https://learn.microsoft.com/azure/batch/batch-account-create-portal#allow-batch-to-access-the-subscription
+    @ResourceGroupPreparer(location='eastus2')
     def test_batch_byos_account_cmd(self, resource_group):
-        SecretPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                    'models.key_vault_management_client_enums#SecretPermissions')
-        KeyPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                 'models.key_vault_management_client_enums#KeyPermissions')
-        ALL_SECRET_PERMISSIONS = ' '.join(
-            [perm.value for perm in SecretPermissions])
-        ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        kv_name = self.create_random_name('clibatchtestkv', 24)
 
         self.kwargs.update({
             'rg': resource_group,
-            'str_n': 'clibatchteststorage1',
-            'byos_n': 'clibatchtestuser1',
-            'byos_l': 'southindia',
-            'kv': 'clibatchtestkeyvault1',
-            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',
-            'perm_k': ALL_KEY_PERMISSIONS,
-            'perm_s': ALL_SECRET_PERMISSIONS
+            'byos_n': account_name,
+            'byos_l': 'eastus2',
+            'kv': kv_name,
+            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',  # object id for Microsoft Azure Batch
+            'perm_s': "get list set delete recover",
         })
 
         # test create keyvault for use with BYOS account
         self.cmd(
             'keyvault create -g {rg} -n {kv} -l {byos_l} --enabled-for-deployment true --enabled-for'
-            '-disk-encryption true --enabled-for-template-deployment true').assert_with_checks(
+            '-disk-encryption true --enabled-for-template-deployment true --enable-rbac-authorization false').assert_with_checks(
             [
                 self.check('name', '{kv}'),
                 self.check('location', '{byos_l}'),
                 self.check('resourceGroup', '{rg}'),
-                self.check('type(properties.accessPolicies)', 'array'),
                 self.check('length(properties.accessPolicies)', 1),
                 self.check('properties.sku.name', 'standard')])
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {obj_id} '
-                 '--key-permissions {perm_k} --secret-permissions {perm_s}')
-
-        time.sleep(100)
+                 '--secret-permissions {perm_s}')
 
         # test create account with BYOS
         self.cmd(
@@ -200,6 +371,19 @@ class BatchMgmtLiveScenarioTests(LiveScenarioTest):
                 self.check('location', '{byos_l}'),
                 self.check('resourceGroup', '{rg}')])
 
+        self.set_account_info(account_name, resource_group)    
+
+        self.batch_cmd('batch pool create --id xplatCreatedPool --vm-size "standard_d2s_v3" '
+                        '--image "canonical:0001-com-ubuntu-server-focal:20_04-lts" '
+                        '--node-agent-sku-id "batch.node.ubuntu 20.04" '
+                        '--resource-tags "dept=finance env=prod"')
+
+        # test for resource tags
+        self.batch_cmd('batch pool show --pool-id xplatCreatedPool').assert_with_checks([
+            self.check('resourceTags.dept', 'finance'),
+            self.check('resourceTags.env', 'prod'),
+        ])
+
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {byos_n} --yes')
-        self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
+        #self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())

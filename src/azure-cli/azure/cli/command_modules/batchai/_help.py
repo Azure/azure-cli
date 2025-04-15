@@ -127,7 +127,7 @@ examples:
 helps['batchai cluster node list'] = """
 type: command
 short-summary: List remote login information for cluster's nodes.
-long-summary: "List remote login information for cluster nodes. You can ssh to a particular node using the provided public IP address and the port number.\nE.g. ssh <admin user name>@<public ip> -p <node's SSH port number>"
+long-summary: "List remote login information for cluster nodes. You can ssh to a particular node using the provided public IP address and the port number.\nE.g. `ssh <admin user name>@<public ip> -p <node's SSH port number>`"
 examples:
   - name: List remote login information for a cluster.
     text: az batchai cluster node list -g MyResourceGroup -w MyWorkspace -c MyCluster -o table
@@ -213,17 +213,17 @@ examples:
             -u $USER -k ~/.ssh/id_rsa.pub
 """
 
-helps['batchai file-server delete'] = """
-type: command
-short-summary: Delete a file server.
-examples:
-  - name: Delete file server and wait for deletion to be completed.
-    text: az batchai file-server delete -g MyResourceGroup -w MyWorkspace -n MyNFS
-  - name: Delete file server without asking for confirmation (for non-interactive scenarios).
-    text: az batchai file-server delete -g MyResourceGroup -w MyWorkspace -n MyNFS -y
-  - name: Request file server deletion without waiting for deletion to be completed.
-    text: az batchai file-server delete -g MyResourceGroup -w MyWorkspace -n MyNFS --no-wait
-"""
+# helps['batchai file-server delete'] = """
+# # type: command
+# short-summary: Delete a file server.
+# examples:
+#   - name: Delete file server and wait for deletion to be completed.
+#     text: az batchai file-server delete -g MyResourceGroup -w MyWorkspace -n MyNFS
+#   - name: Delete file server without asking for confirmation (for non-interactive scenarios).
+#     text: az batchai file-server delete -g MyResourceGroup -w MyWorkspace -n MyNFS -y
+#   - name: Request file server deletion without waiting for deletion to be completed.
+#     text: az batchai file-server delete -g MyResourceGroup -w MyWorkspace -n MyNFS --no-wait
+# """
 
 helps['batchai file-server list'] = """
 type: command
@@ -233,16 +233,16 @@ examples:
     text: az batchai file-server list -g MyResourceGroup -w MyWorkspace -o table
 """
 
-helps['batchai file-server show'] = """
-type: command
-short-summary: Show information about a file server.
-examples:
-  - name: Show full information about a file server.
-    text: az batchai file-server show -g MyResourceGroup -w MyWorkspace -n MyNFS
-  - name: Show file server summary.
-    text: az batchai file-server show -g MyResourceGroup -w MyWorkspace -n MyNFS -o table
-
-"""
+# helps['batchai file-server show'] = """
+# # type: command
+# short-summary: Show information about a file server.
+# examples:
+#   - name: Show full information about a file server.
+#     text: az batchai file-server show -g MyResourceGroup -w MyWorkspace -n MyNFS
+#   - name: Show file server summary.
+#     text: az batchai file-server show -g MyResourceGroup -w MyWorkspace -n MyNFS -o table
+#
+# """
 
 helps['batchai job'] = """
 type: group
@@ -359,7 +359,7 @@ examples:
 helps['batchai job node list'] = """
 type: command
 short-summary: List remote login information for nodes which executed the job.
-long-summary: "List remote login information for currently existing (not deallocated) nodes on which the job was executed. You can ssh to a particular node using the provided public IP address and the port number.\nE.g. ssh <admin user name>@<public ip> -p <node's SSH port number>"
+long-summary: "List remote login information for currently existing (not deallocated) nodes on which the job was executed. You can ssh to a particular node using the provided public IP address and the port number.\nE.g. `ssh <admin user name>@<public ip> -p <node's SSH port number>`"
 examples:
   - name: List remote login information for a job nodes.
     text: az batchai job node list -g MyResourceGroup -w MyWorkspace -e MyExperiment -j MyJob -o table

@@ -8,9 +8,9 @@ import os
 import shutil
 from uuid import UUID
 
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
 from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
-from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
 from azure.cli.command_modules.botservice.constants import CSHARP, JAVASCRIPT, TYPESCRIPT
 from azure.cli.command_modules.botservice.kudu_client import KuduClient
 from azure.cli.command_modules.botservice.name_availability import NameAvailability
@@ -21,19 +21,13 @@ from azure.mgmt.botservice.models import (
     ConnectionSetting,
     ConnectionSettingProperties,
     ConnectionSettingParameter,
-    ErrorException,
     Sku)
+from azure.core.exceptions import HttpResponseError
 
 from knack.util import CLIError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
-
-
-def __bot_template_validator(deploy_echo):  # pylint: disable=inconsistent-return-statements
-    if deploy_echo:
-        return 'echo'
-    return None
 
 
 def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_path):
@@ -85,10 +79,10 @@ def __handle_failed_name_check(name_response, cmd, client, resource_group_name, 
         existing_bot = get_bot(cmd, client, resource_group_name, resource_name)
         logger.warning('Provided bot name already exists in Resource Group. Returning bot information:')
         return existing_bot
-    except ErrorException as e:
-        if e.error.error.code == 'ResourceNotFound':
-            code = e.error.error.code
-            message = e.error.error.message
+    except HttpResponseError as e:
+        if e.error.code == 'ResourceNotFound':
+            code = e.error.code
+            message = e.error.message
 
             logger.debug('Bot "%s" not found in Resource Group "%s".\n  Code: "%s"\n  Message: '
                          '"%s"', resource_name, resource_group_name, code, message)
@@ -98,18 +92,11 @@ def __handle_failed_name_check(name_response, cmd, client, resource_group_name, 
         raise e
 
 
-def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password=None, language=None,  # pylint: disable=too-many-locals, too-many-statements, inconsistent-return-statements
-           description=None, display_name=None, endpoint=None, tags=None, location='Central US',
-           sku_name='F0', deploy_echo=None):
-    # Kind parameter validation
-    kind = kind.lower()
-    registration_kind = 'registration'
-    bot_kind = 'bot'
-    webapp_kind = 'webapp'
-
-    # Mapping: registration is deprecated, we now use 'bot' kind for registration bots
-    if kind == registration_kind:
-        kind = bot_kind
+def create(cmd, client, resource_group_name, resource_name, msa_app_id, msa_app_type,
+           msa_app_tenant_id=None, msa_app_msi_resource_id=None, description=None, display_name=None,
+           endpoint=None, tags=None, location='global', sku_name='F0', cmek_key_vault_url=None):
+    # Kind only support azure bot for now
+    kind = "azurebot"
 
     # Check the resource name availability for the bot.
     name_response = NameAvailability.check_name_availability(client, resource_name, kind)
@@ -129,7 +116,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     except Exception as e:
         logger.debug(e)
         raise CLIError("--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
-                       "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app for "
+                       "https://learn.microsoft.com/azure/active-directory/develop/quickstart-register-app for "
                        "more information on App Registrations. See 'az bot create --help' for more CLI information.")
 
     # If display name was not provided, just use the resource name
@@ -137,55 +124,40 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
 
     logger.info('Creating Azure Bot Service.')
 
+    # Registration bot specific validation
+    if not endpoint:
+        endpoint = ''
+
+    is_cmek_enabled = False
+    if cmek_key_vault_url is not None:
+        is_cmek_enabled = True
+
     # Registration bots: simply call ARM and create the bot
-    if kind == bot_kind:
-
-        logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
-
-        # Registration bot specific validation
-        if not endpoint:
-            endpoint = ''
-
-        parameters = Bot(
-            location='global',
-            sku=Sku(name=sku_name),
-            kind=kind,
-            tags=tags,
-            properties=BotProperties(
-                display_name=display_name,
-                description=description,
-                endpoint=endpoint,
-                msa_app_id=msa_app_id
-            )
+    parameters = Bot(
+        location=location,
+        sku=Sku(name=sku_name),
+        kind=kind,
+        tags=tags,
+        properties=BotProperties(
+            display_name=display_name,
+            description=description,
+            endpoint=endpoint,
+            msa_app_id=msa_app_id,
+            msa_app_type=msa_app_type,
+            msa_app_tenant_id=msa_app_tenant_id,
+            msa_app_msi_resource_id=msa_app_msi_resource_id,
+            is_cmek_enabled=is_cmek_enabled,
+            cmek_key_vault_url=cmek_key_vault_url
         )
-        logger.info('Bot parameters client side validation successful.')
-        logger.info('Creating bot.')
+    )
+    logger.info('Bot parameters client side validation successful.')
+    logger.info('Creating bot.')
 
-        return client.bots.create(
-            resource_group_name=resource_group_name,
-            resource_name=resource_name,
-            parameters=parameters
-        )
-
-    if not password:
-        raise CLIError("--password cannot have a length of 0 for Web App Bots. This value is used to authorize calls "
-                       "to your bot. See 'az bot create --help'.")
-
-    # Web app bots require deploying custom ARM templates, we do that in a separate method
-    logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
-
-    if not language:
-        raise CLIError("You must pass in a language when creating a {0} bot. See 'az bot create --help'."
-                       .format(webapp_kind))
-    language = language.lower()
-
-    bot_template_type = __bot_template_validator(deploy_echo)
-
-    creation_results = BotTemplateDeployer.create_app(
-        cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
-        location, sku_name, language, bot_template_type)
-
-    return creation_results
+    return client.bots.create(
+        resource_group_name=resource_group_name,
+        resource_name=resource_name,
+        parameters=parameters
+    )
 
 
 def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
@@ -388,8 +360,8 @@ def get_service_providers(client, name=None):
     name = name and name.lower()
     if name:
         try:
-            return next((item for item in service_provider_response.value if
-                         item.properties.service_provider_name.lower() == name.lower()))
+            return next(item for item in service_provider_response.value if
+                        item.properties.service_provider_name.lower() == name.lower())
         except StopIteration:
             raise CLIError('A service provider with the name {0} was not found'.format(name))
     return service_provider_response
@@ -676,7 +648,8 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
 
 def update(client, resource_group_name, resource_name, endpoint=None, description=None,
            display_name=None, tags=None, sku_name=None, app_insights_key=None,
-           app_insights_api_key=None, app_insights_app_id=None, icon_url=None):
+           app_insights_api_key=None, app_insights_app_id=None, icon_url=None,
+           encryption_off=None, cmek_key_vault_url=None):
     bot = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
@@ -695,6 +668,18 @@ def update(client, resource_group_name, resource_name, endpoint=None, descriptio
 
     if app_insights_api_key:
         bot_props.developer_app_insights_api_key = app_insights_api_key
+
+    if cmek_key_vault_url is not None and encryption_off is not None:
+        error_msg = "Both --encryption-off and a --cmk-key-vault-key-url (encryption ON) were passed. " \
+                    "Please use only one: --cmk-key-vault-key-url or --encryption_off"
+        raise MutuallyExclusiveArgumentError(error_msg)
+
+    if cmek_key_vault_url is not None:
+        bot_props.cmek_key_vault_url = cmek_key_vault_url
+        bot_props.is_cmek_enabled = True
+
+    if encryption_off is not None:
+        bot_props.is_cmek_enabled = False
 
     return client.bots.update(resource_group_name,
                               resource_name,

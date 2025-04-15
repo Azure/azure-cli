@@ -20,13 +20,15 @@ If in doubt, ask!
 
 [7. Network Rule Commands](#network-rule-commands)
 
-[8. Coding Practices](#coding-practices)
+[8. Error Handling](#error-handling)
+
+[9. Coding Practices](#coding-practices)
 
 ## General Patterns
 
 - Be consistent with POSIX tools (support piping, work with grep, awk, jq, etc.)
 - Support tab completion for parameter names and values (e.g. resource names)
-- Commands must support all output types (json, tsv, table)
+- Commands must support all output types (JSON, TSV, table)
 - Provide custom table outputs for commands that don't provide table output automatically
 - Commands must return an object, dictionary or `None` (do not string, Boolean, etc. types)
 - Command output must go to `stdout`, everything else to `stderr` (log/status/errors).
@@ -418,9 +420,13 @@ Virtual Network Rule Arguments
     --vnet-name                  : Name of a virtual network.
 ```
 
+## Error Handling
+
+Follow the [Error Handling Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/error_handling_guidelines.md) to select a proper error type and write an actionable error message.
+
 ## Coding Practices
 
-- All code must support Python 3.6, 3.7 and 3.8
+- All code must support Python 3.9 ~ 3.12
 - PRs to Azure/azure-cli and Azure/azure-cli-extensions must pass CI
 - Code must pass style checks with pylint and pep8
 - (*) All commands should have tests

@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
-# pylint: disable=import-error
-from jmespath import compile as compile_jmes, Options
-# pylint: disable=import-error
+
+from jmespath import Options
+from jmespath import compile as compile_jmes
 from jmespath import functions
 
 
@@ -41,9 +41,37 @@ def aks_list_table_format(results):
     return [_aks_table_format(r) for r in results]
 
 
-def osa_list_table_format(results):
-    """"Format a list of OpenShift managed clusters as summary results for display with "-o table"."""
-    return [_osa_table_format(r) for r in results]
+def aks_machine_list_table_format(results):
+    return [aks_machine_show_table_format(r) for r in results]
+
+
+def aks_machine_show_table_format(result):
+    def parser(entry):
+        ip_addresses = ""
+        for k in entry["properties"]["network"]["ipAddresses"]:
+            ip_addresses += "ip:" + k["ip"] + "," + "family:" + k["family"] + ";"
+        entry["ip"] = ip_addresses
+        parsed = compile_jmes("""{
+                name: name,
+                ip: ip
+            }""")
+        return parsed.search(entry, Options(dict_cls=OrderedDict))
+    return parser(result)
+
+
+def aks_run_command_result_format(cmdResult):
+    result = OrderedDict()
+    if cmdResult['provisioningState'] == "Succeeded":
+        result['exit code'] = cmdResult['exitCode']
+        result['logs'] = cmdResult['logs']
+        return result
+    if cmdResult['provisioningState'] == "Failed":
+        result['provisioning state'] = cmdResult['provisioningState']
+        result['reason'] = cmdResult['reason']
+        return result
+    result['provisioning state'] = cmdResult['provisioningState']
+    result['started At'] = cmdResult['startedAt']
+    return result
 
 
 def aks_show_table_format(result):
@@ -57,21 +85,9 @@ def _aks_table_format(result):
         location: location,
         resourceGroup: resourceGroup,
         kubernetesVersion: kubernetesVersion,
+        currentKubernetesVersion: currentKubernetesVersion,
         provisioningState: provisioningState,
         fqdn: fqdn || privateFqdn
-    }""")
-    # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict))
-
-
-def _osa_table_format(result):
-    parsed = compile_jmes("""{
-        name: name,
-        location: location,
-        resourceGroup: resourceGroup,
-        openShiftVersion: openShiftVersion,
-        provisioningState: provisioningState,
-        publicHostname: publicHostname
     }""")
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))
@@ -102,22 +118,43 @@ def aks_upgrades_table_format(result):
 def aks_versions_table_format(result):
     """Format get-versions results as a summary for display with "-o table"."""
 
-    preview = {}
+    version_table = flatten_version_table(result.get("values", []))
 
-    def find_preview_versions():
-        for orchestrator in result.get('orchestrators', []):
-            if orchestrator.get('isPreview', False):
-                preview[orchestrator['orchestratorVersion']] = True
-    find_preview_versions()
-
-    parsed = compile_jmes("""orchestrators[].{
-        kubernetesVersion: orchestratorVersion | set_preview(@),
-        upgrades: upgrades[].orchestratorVersion || [`None available`] | sort_versions(@) | set_preview_array(@) | join(`, `, @)
+    parsed = compile_jmes("""[].{
+        kubernetesVersion: version,
+        isPreview: isPreview,
+        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
+        supportPlan: supportPlan | join(`, `, @)
     }""")
 
     # use ordered dicts so headers are predictable
-    results = parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
-    return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
+    results = parsed.search(version_table, Options(
+        dict_cls=OrderedDict, custom_functions=_custom_functions({})))
+    return sorted(results, key=lambda x: version_to_tuple(x.get("kubernetesVersion")), reverse=True)
+
+
+def aks_list_nodepool_snapshot_table_format(results):
+    """"Format a list of nodepool snapshots as summary results for display with "-o table"."""
+    return [_aks_nodepool_snapshot_table_format(r) for r in results]
+
+
+def aks_show_nodepool_snapshot_table_format(result):
+    """Format a nodepool snapshot as summary results for display with "-o table"."""
+    return [_aks_nodepool_snapshot_table_format(result)]
+
+
+def _aks_nodepool_snapshot_table_format(result):
+    parsed = compile_jmes("""{
+        name: name,
+        location: location,
+        resourceGroup: resourceGroup,
+        nodeImageVersion: nodeImageVersion,
+        kubernetesVersion: kubernetesVersion,
+        osType: osType,
+        enableFIPS: enableFIPS
+    }""")
+    # use ordered dicts so headers are predictable
+    return parsed.search(result, Options(dict_cls=OrderedDict))
 
 
 def version_to_tuple(version):
@@ -125,6 +162,18 @@ def version_to_tuple(version):
     if version.endswith('(preview)'):
         version = version[:-len('(preview)')]
     return tuple(map(int, (version.split('.'))))
+
+
+def flatten_version_table(release_info):
+    """Flattens version table"""
+    flattened = []
+    for release in release_info:
+        isPreview = release.get("isPreview", False)
+        supportPlan = release.get("capabilities", {}).get("supportPlan", {})
+        for k, v in release.get("patchVersions", {}).items():
+            item = {"version": k, "upgrades": v.get("upgrades", []), "isPreview": isPreview, "supportPlan": supportPlan}
+            flattened.append(item)
+    return flattened
 
 
 def _custom_functions(preview_versions):
@@ -135,7 +184,8 @@ def _custom_functions(preview_versions):
             """Custom JMESPath `sort_versions` function that sorts an array of strings as software versions."""
             try:
                 return sorted(versions, key=version_to_tuple)
-            except (TypeError, ValueError):  # if it wasn't sortable, return the input so the pipeline continues
+            # if it wasn't sortable, return the input so the pipeline continues
+            except (TypeError, ValueError):
                 return versions
 
         @functions.signature({'types': ['array']})
@@ -145,7 +195,7 @@ def _custom_functions(preview_versions):
                 for i, _ in enumerate(versions):
                     versions[i] = self._func_set_preview(versions[i])
                 return versions
-            except(TypeError, ValueError):
+            except (TypeError, ValueError):
                 return versions
 
         @functions.signature({'types': ['string']})
@@ -155,7 +205,63 @@ def _custom_functions(preview_versions):
                 if preview_versions.get(version, False):
                     return version + '(preview)'
                 return version
-            except(TypeError, ValueError):
+            except (TypeError, ValueError):
                 return version
 
     return CustomFunctions()
+
+
+def aks_mesh_revisions_table_format(result):
+    """Format a list of mesh revisions as summary results for display with "-o table". """
+    revision_table = flatten_mesh_revision_table(result['meshRevisions'])
+    parsed = compile_jmes("""[].{
+        revision: revision,
+        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
+        compatibleWith: compatibleWith_name,
+        compatibleVersions: compatibleVersions || [`None available`] | sort_versions(@) | join(`, `, @)
+    }""")
+    # Use ordered dicts so headers are predictable
+    results = parsed.search(revision_table, Options(
+        dict_cls=OrderedDict, custom_functions=_custom_functions({})))
+
+    return results
+
+
+# Helper function used by aks_mesh_revisions_table_format
+def flatten_mesh_revision_table(revision_info):
+    """Flattens revision information"""
+    flattened = []
+    for revision_data in revision_info:
+        flattened.extend(_format_mesh_revision_entry(revision_data))
+    return flattened
+
+
+def aks_mesh_upgrades_table_format(result):
+    """Format a list of mesh upgrades as summary results for display with "-o table". """
+    upgrades_table = _format_mesh_revision_entry(result)
+    parsed = compile_jmes("""[].{
+        revision: revision,
+        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
+        compatibleWith: compatibleWith_name,
+        compatibleVersions: compatibleVersions || [`None available`] | sort_versions(@) | join(`, `, @)
+    }""")
+    # Use ordered dicts so headers are predictable
+    results = parsed.search(upgrades_table, Options(
+        dict_cls=OrderedDict, custom_functions=_custom_functions({})))
+    return results
+
+
+def _format_mesh_revision_entry(revision):
+    flattened = []
+    revision_entry = revision['revision']
+    upgrades = revision['upgrades']
+    compatible_with_list = revision['compatibleWith']
+    for compatible_with in compatible_with_list:
+        item = {
+            'revision': revision_entry,
+            'upgrades': upgrades,
+            'compatibleWith_name': compatible_with['name'],
+            'compatibleVersions': compatible_with['versions']
+        }
+        flattened.append(item)
+    return flattened

@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "eastus2", "properties": {"encryptionState": "Disabled"}}'
+    body: '{"location": "westus2", "properties": {"encryptionState": "Disabled"}}'
     headers:
       Accept:
       - application/json
@@ -13,46 +13,47 @@ interactions:
       Content-Length:
       - '70'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -l --disable-encryption
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.10.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002?api-version=2016-11-01
   response:
     body:
-      string: '{"properties":{"encryptionState":"Disabled","provisioningState":"Creating","state":null,"endpoint":null,"accountId":"988308d4-8752-4b9b-83a3-5408c87f5455"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'
+      string: '{"properties":{"encryptionState":"Disabled","provisioningState":"Creating","state":null,"endpoint":null,"accountId":"9978860a-f243-4471-8850-a3df452559f6"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/988308d4-8752-4b9b-83a3-5408c87f5455_0?api-version=2016-11-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/westus2/operationResults/9978860a-f243-4471-8850-a3df452559f6_0?api-version=2016-11-01&t=638654794557958877&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=O2QOd-YrI930UkmrR9J6cilBEndex_tQOL3cPYzuSNIVUE9UAcQ0cUWRsI8J0SxO-jkaC_XLeX1-ZddsZmlk_2JN9A_2TVHGl5xMNoJlJA8e4uleba6NGe9rU8Sf63wFqy4pMaN0v17FWzdzl4xLf_BGKvd62FQHWyKc-yeTqSXu5iJZu_aFlVsP8xCHyCfNnD6ZqlsYjZoqnD-jfB6wTLfKtX-hL8JoXw5nFNx63OhOYwOQ_rDqwug58TYgq6Kck6Hi6oOWi-FXJcI3CwfuOFN7-RQhzQSjQ9ZaRPTLJQBBAuZ_zZppEna-8J6JVBirId0td8ck_GLiMrNHSaOcBA&h=dBogOzxQjhoBAkfzIXDOz3K2MQi9ooNsnzVDEmfVsW0
       cache-control:
       - no-cache
       content-length:
-      - '471'
+      - '398'
       content-type:
       - application/json
       date:
-      - Thu, 20 Aug 2020 02:20:34 GMT
+      - Fri, 25 Oct 2024 18:57:35 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002/operationresults/0?api-version=2016-11-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002/operationresults/0?api-version=2016-11-01&t=638654794558115122&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=0uzPJngTg7j_hKP4lSC_4KSiQLMLEkcWF3H-B99Qc6Revjd3bh-_ckS7dPR4SjJ2AdAlNp8T9suYDGe_SRI8V7IUJ-GzcJi0NrbPpm7izaOf3yXe1ahrpKiRxnTVCb5uIWk7vVH_01rlBJWTxuEd9fqbau6c58lvZ_ViUr4wnEdtiCgBIYVayHK2s7azOVI31zepuqobhDp_wunYmoNOKBMqKjVK4Z-2xquXBSsXCZ4M0Pxc2Xvgw6ldJpevNj0nNHWMvuS-uZLNRUjoBjRpWTcG9h5-kksWCMncLsFuHpqLTr0sJQ49IpfDcCIyhDy5e0h-H2ocB2-kfhsAqZ1DAA&h=9Swm2QjPRQmFOhVLOXq9F8Tk_N3toq8JwRLkG01PpNo
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 556AF2CC63B647CEAD7EC5B6931A04F0 Ref B: CO6AA3150217011 Ref C: 2024-10-25T18:57:34Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -62,7 +63,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -72,38 +73,37 @@ interactions:
       ParameterSetName:
       - -g -n -l --disable-encryption
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/988308d4-8752-4b9b-83a3-5408c87f5455_0?api-version=2016-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/westus2/operationResults/9978860a-f243-4471-8850-a3df452559f6_0?api-version=2016-11-01&t=638654794557958877&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=O2QOd-YrI930UkmrR9J6cilBEndex_tQOL3cPYzuSNIVUE9UAcQ0cUWRsI8J0SxO-jkaC_XLeX1-ZddsZmlk_2JN9A_2TVHGl5xMNoJlJA8e4uleba6NGe9rU8Sf63wFqy4pMaN0v17FWzdzl4xLf_BGKvd62FQHWyKc-yeTqSXu5iJZu_aFlVsP8xCHyCfNnD6ZqlsYjZoqnD-jfB6wTLfKtX-hL8JoXw5nFNx63OhOYwOQ_rDqwug58TYgq6Kck6Hi6oOWi-FXJcI3CwfuOFN7-RQhzQSjQ9ZaRPTLJQBBAuZ_zZppEna-8J6JVBirId0td8ck_GLiMrNHSaOcBA&h=dBogOzxQjhoBAkfzIXDOz3K2MQi9ooNsnzVDEmfVsW0
   response:
     body:
-      string: '{"status":"InProgress"}'
+      string: '{"status":"InProgress","startTime":"2024-10-25T18:57:35.670105Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '23'
+      - '65'
       content-type:
       - application/json
       date:
-      - Thu, 20 Aug 2020 02:20:46 GMT
+      - Fri, 25 Oct 2024 18:57:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: F733A5040F354611840265F203097BD0 Ref B: CO6AA3150217011 Ref C: 2024-10-25T18:57:35Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -113,7 +113,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -123,38 +123,37 @@ interactions:
       ParameterSetName:
       - -g -n -l --disable-encryption
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/988308d4-8752-4b9b-83a3-5408c87f5455_0?api-version=2016-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/westus2/operationResults/9978860a-f243-4471-8850-a3df452559f6_0?api-version=2016-11-01&t=638654794557958877&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=O2QOd-YrI930UkmrR9J6cilBEndex_tQOL3cPYzuSNIVUE9UAcQ0cUWRsI8J0SxO-jkaC_XLeX1-ZddsZmlk_2JN9A_2TVHGl5xMNoJlJA8e4uleba6NGe9rU8Sf63wFqy4pMaN0v17FWzdzl4xLf_BGKvd62FQHWyKc-yeTqSXu5iJZu_aFlVsP8xCHyCfNnD6ZqlsYjZoqnD-jfB6wTLfKtX-hL8JoXw5nFNx63OhOYwOQ_rDqwug58TYgq6Kck6Hi6oOWi-FXJcI3CwfuOFN7-RQhzQSjQ9ZaRPTLJQBBAuZ_zZppEna-8J6JVBirId0td8ck_GLiMrNHSaOcBA&h=dBogOzxQjhoBAkfzIXDOz3K2MQi9ooNsnzVDEmfVsW0
   response:
     body:
-      string: '{"status":"Succeeded"}'
+      string: '{"status":"InProgress","startTime":"2024-10-25T18:57:35.670105Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '22'
+      - '65'
       content-type:
       - application/json
       date:
-      - Thu, 20 Aug 2020 02:21:19 GMT
+      - Fri, 25 Oct 2024 18:58:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: AA74786B516F45C295EB73CF3BA8FC74 Ref B: CO6AA3150217011 Ref C: 2024-10-25T18:58:06Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -164,7 +163,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -174,38 +173,87 @@ interactions:
       ParameterSetName:
       - -g -n -l --disable-encryption
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/westus2/operationResults/9978860a-f243-4471-8850-a3df452559f6_0?api-version=2016-11-01&t=638654794557958877&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=O2QOd-YrI930UkmrR9J6cilBEndex_tQOL3cPYzuSNIVUE9UAcQ0cUWRsI8J0SxO-jkaC_XLeX1-ZddsZmlk_2JN9A_2TVHGl5xMNoJlJA8e4uleba6NGe9rU8Sf63wFqy4pMaN0v17FWzdzl4xLf_BGKvd62FQHWyKc-yeTqSXu5iJZu_aFlVsP8xCHyCfNnD6ZqlsYjZoqnD-jfB6wTLfKtX-hL8JoXw5nFNx63OhOYwOQ_rDqwug58TYgq6Kck6Hi6oOWi-FXJcI3CwfuOFN7-RQhzQSjQ9ZaRPTLJQBBAuZ_zZppEna-8J6JVBirId0td8ck_GLiMrNHSaOcBA&h=dBogOzxQjhoBAkfzIXDOz3K2MQi9ooNsnzVDEmfVsW0
+  response:
+    body:
+      string: '{"status":"Succeeded","startTime":"2024-10-25T18:57:35.670105Z","endTime":"2024-10-25T18:58:07.732727Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '104'
+      content-type:
+      - application/json
+      date:
+      - Fri, 25 Oct 2024 18:58:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: FE08834456EA4A8EB8950F67987F66E4 Ref B: CO6AA3150217011 Ref C: 2024-10-25T18:58:36Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --disable-encryption
+      User-Agent:
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002?api-version=2016-11-01
   response:
     body:
-      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"988308d4-8752-4b9b-83a3-5408c87f5455","creationTime":"2020-08-20T02:20:35.5550939Z","lastModifiedTime":"2020-08-20T02:20:35.5550939Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'
+      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"9978860a-f243-4471-8850-a3df452559f6","creationTime":"2024-10-25T18:57:40.2049264Z","lastModifiedTime":"2024-10-25T18:57:40.2049264Z"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '943'
+      - '883'
       content-type:
       - application/json
       date:
-      - Thu, 20 Aug 2020 02:21:20 GMT
+      - Fri, 25 Oct 2024 18:58:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 0733C1C8D12C47FCB6B27DCB668358C3 Ref B: CO6AA3150217011 Ref C: 2024-10-25T18:58:36Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -222,45 +270,40 @@ interactions:
       - dls account show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.10.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002?api-version=2016-11-01
   response:
     body:
-      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"988308d4-8752-4b9b-83a3-5408c87f5455","creationTime":"2020-08-20T02:20:35.5550939Z","lastModifiedTime":"2020-08-20T02:20:35.5550939Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'
+      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"9978860a-f243-4471-8850-a3df452559f6","creationTime":"2024-10-25T18:57:40.2049264Z","lastModifiedTime":"2024-10-25T18:57:40.2049264Z"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_file000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '943'
+      - '883'
       content-type:
       - application/json
       date:
-      - Thu, 20 Aug 2020 02:21:22 GMT
+      - Fri, 25 Oct 2024 18:58:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E404839D7FF34F0684C9017D4FEE0E6E Ref B: CO1EDGE1905 Ref C: 2024-10-25T18:58:36Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -276,13 +319,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder01 [ee054b9f-4848-428d-956e-d018cdfe49c5][2020-08-19T19:21:25.0777017-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder01 [81e3aa6e-f83f-439d-844f-54d1ac7ef563][2024-10-25T11:58:43.6785489-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -291,7 +335,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:24 GMT
+      - Fri, 25 Oct 2024 18:58:43 GMT
       expires:
       - '-1'
       pragma:
@@ -319,7 +363,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: PUT
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=MKDIRS&api-version=2018-09-01
   response:
@@ -333,7 +378,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:25 GMT
+      - Fri, 25 Oct 2024 18:58:43 GMT
       expires:
       - '-1'
       pragma:
@@ -359,12 +404,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1597890085385,"modificationTime":1597890085385,"replication":0,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","aclBit":false}}'
+      string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1729882723776,"modificationTime":1729882723776,"replication":0,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -373,7 +419,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:26 GMT
+      - Fri, 25 Oct 2024 18:58:43 GMT
       expires:
       - '-1'
       pragma:
@@ -399,13 +445,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder01/adltestfile01 [5ed15701-c38c-422d-a73d-5f8c9b8e40df][2020-08-19T19:21:28.5093005-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder01/adltestfile01 [4aae4eb2-da36-4bc8-8556-22b7995e0d21][2024-10-25T11:58:44.7036757-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -414,7 +461,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:27 GMT
+      - Fri, 25 Oct 2024 18:58:44 GMT
       expires:
       - '-1'
       pragma:
@@ -440,13 +487,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder01/adltestfile01 [9be7da2c-45dc-4083-9404-b698d2864f64][2020-08-19T19:21:28.8217802-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder01/adltestfile01 [80847d1b-fedb-4fb2-a183-665befc87fa9][2024-10-25T11:58:44.7886273-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -455,7 +503,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:27 GMT
+      - Fri, 25 Oct 2024 18:58:44 GMT
       expires:
       - '-1'
       pragma:
@@ -483,7 +531,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: PUT
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=CREATE&api-version=2018-09-01&overwrite=true&write=true&syncFlag=DATA&leaseid=12345678-1234-5678-1234-567812345678&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -497,7 +546,7 @@ interactions:
       contentlength:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:21:28 GMT
+      - Fri, 25 Oct 2024 18:58:44 GMT
       expires:
       - '-1'
       location:
@@ -527,7 +576,8 @@ interactions:
       Content-Length:
       - '6'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: POST
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=APPEND&api-version=2018-09-01&syncFlag=CLOSE&offset=0&append=true&leaseid=12345678-1234-5678-1234-567812345678&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -539,7 +589,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:21:28 GMT
+      - Fri, 25 Oct 2024 18:58:45 GMT
       expires:
       - '-1'
       pragma:
@@ -565,12 +615,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -579,7 +630,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:30 GMT
+      - Fri, 25 Oct 2024 18:58:44 GMT
       expires:
       - '-1'
       pragma:
@@ -605,12 +656,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -619,7 +671,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:32 GMT
+      - Fri, 25 Oct 2024 18:58:45 GMT
       expires:
       - '-1'
       pragma:
@@ -647,7 +699,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: PUT
     uri: https://cliadls000002.azuredatalakestore.net/webhdfsext/adltestfolder01/adltestfile01?OP=SETEXPIRY&api-version=2018-09-01&expiryOption=Absolute&expireTime=1896091200000
   response:
@@ -659,7 +712,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:21:32 GMT
+      - Fri, 25 Oct 2024 18:58:45 GMT
       expires:
       - '-1'
       pragma:
@@ -683,12 +736,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":1896091200000,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":1896091200006,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -697,7 +751,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:34 GMT
+      - Fri, 25 Oct 2024 18:58:46 GMT
       expires:
       - '-1'
       pragma:
@@ -723,12 +777,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":1896091200000,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":1896091200006,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -737,7 +792,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:35 GMT
+      - Fri, 25 Oct 2024 18:58:46 GMT
       expires:
       - '-1'
       pragma:
@@ -765,7 +820,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: PUT
     uri: https://cliadls000002.azuredatalakestore.net/webhdfsext/adltestfolder01/adltestfile01?OP=SETEXPIRY&api-version=2018-09-01&expiryOption=NeverExpire
   response:
@@ -777,7 +833,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:21:35 GMT
+      - Fri, 25 Oct 2024 18:58:46 GMT
       expires:
       - '-1'
       pragma:
@@ -801,12 +857,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -815,7 +872,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:36 GMT
+      - Fri, 25 Oct 2024 18:58:47 GMT
       expires:
       - '-1'
       pragma:
@@ -841,13 +898,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder02 [36a1f3c9-f25b-45db-a17e-089a81227077][2020-08-19T19:21:39.0277893-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder02 [f10ee043-dab9-4233-8a48-c0bf63803d4f][2024-10-25T11:58:48.1643303-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -856,7 +914,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:38 GMT
+      - Fri, 25 Oct 2024 18:58:47 GMT
       expires:
       - '-1'
       pragma:
@@ -884,7 +942,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: PUT
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02?OP=MKDIRS&api-version=2018-09-01
   response:
@@ -898,7 +957,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:38 GMT
+      - Fri, 25 Oct 2024 18:58:47 GMT
       expires:
       - '-1'
       pragma:
@@ -926,7 +985,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: PUT
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile01?OP=RENAME&api-version=2018-09-01&destination=adltestfolder02%2Fadltestfile01
   response:
@@ -940,7 +1000,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:39 GMT
+      - Fri, 25 Oct 2024 18:58:48 GMT
       expires:
       - '-1'
       pragma:
@@ -966,12 +1026,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -980,7 +1041,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:42 GMT
+      - Fri, 25 Oct 2024 18:58:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1006,12 +1067,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1020,7 +1082,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:43 GMT
+      - Fri, 25 Oct 2024 18:58:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1046,12 +1108,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1060,7 +1123,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:43 GMT
+      - Fri, 25 Oct 2024 18:58:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1086,12 +1149,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1100,7 +1164,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:44 GMT
+      - Fri, 25 Oct 2024 18:58:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1126,7 +1190,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=OPEN&api-version=2018-09-01&offset=0&length=6&read=true&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -1135,10 +1200,12 @@ interactions:
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
+      content-length:
+      - '6'
       content-type:
       - application/octet-stream
       date:
-      - Thu, 20 Aug 2020 02:21:44 GMT
+      - Fri, 25 Oct 2024 18:58:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1166,12 +1233,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1180,7 +1248,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:45 GMT
+      - Fri, 25 Oct 2024 18:58:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1206,12 +1274,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1220,7 +1289,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:45 GMT
+      - Fri, 25 Oct 2024 18:58:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1246,7 +1315,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=OPEN&api-version=2018-09-01&offset=3&length=3&read=true&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -1255,10 +1325,12 @@ interactions:
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
+      content-length:
+      - '3'
       content-type:
       - application/octet-stream
       date:
-      - Thu, 20 Aug 2020 02:21:46 GMT
+      - Fri, 25 Oct 2024 18:58:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1286,12 +1358,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02?OP=LISTSTATUS&api-version=2018-09-01&listSize=4000
   response:
     body:
-      string: '{"FileStatuses":{"continuationToken":"","FileStatus":[{"length":6,"pathSuffix":"adltestfile01","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}]}}'
+      string: '{"FileStatuses":{"continuationToken":"","FileStatus":[{"length":6,"pathSuffix":"adltestfile01","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}]}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1300,7 +1373,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:47 GMT
+      - Fri, 25 Oct 2024 18:58:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1326,12 +1399,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1340,7 +1414,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:49 GMT
+      - Fri, 25 Oct 2024 18:58:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1366,12 +1440,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890089477,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":6,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882725075,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1380,7 +1455,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:49 GMT
+      - Fri, 25 Oct 2024 18:58:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1408,7 +1483,8 @@ interactions:
       Content-Length:
       - '6'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: POST
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=APPEND&api-version=2018-09-01&syncFlag=CLOSE&offset=6&append=true&leaseid=12345678-1234-5678-1234-567812345678&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -1420,7 +1496,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:21:50 GMT
+      - Fri, 25 Oct 2024 18:58:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1446,12 +1522,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/adltestfile01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":12,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890089137,"modificationTime":1597890110349,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":12,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882724947,"modificationTime":1729882731801,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1460,7 +1537,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:51 GMT
+      - Fri, 25 Oct 2024 18:58:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1486,13 +1563,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile02?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder01/adltestfile02 [598d6bd2-0d14-4122-97a2-24b9e01c8702][2020-08-19T19:21:53.2841871-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder01/adltestfile02 [cdcd4107-1f25-4745-989a-654eb625a62e][2024-10-25T11:58:52.7664228-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1501,7 +1579,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:53 GMT
+      - Fri, 25 Oct 2024 18:58:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1527,7 +1605,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=LISTSTATUS&api-version=2018-09-01&listSize=4000
   response:
@@ -1541,7 +1620,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:53 GMT
+      - Fri, 25 Oct 2024 18:58:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1567,13 +1646,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile02?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder01/adltestfile02 [24816eb5-33c3-435e-bbac-ecf3fbb091f9][2020-08-19T19:21:54.7955936-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder01/adltestfile02 [ffce7be1-7e33-468c-8c38-b0d5e534403d][2024-10-25T11:58:54.4925781-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1582,7 +1662,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:54 GMT
+      - Fri, 25 Oct 2024 18:58:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1610,7 +1690,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: PUT
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile02?OP=CREATE&api-version=2018-09-01&overwrite=true&write=true&syncFlag=DATA&leaseid=12345678-1234-5678-1234-567812345678&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -1624,7 +1705,7 @@ interactions:
       contentlength:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:21:54 GMT
+      - Fri, 25 Oct 2024 18:58:53 GMT
       expires:
       - '-1'
       location:
@@ -1654,7 +1735,8 @@ interactions:
       Content-Length:
       - '18'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: POST
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile02?OP=APPEND&api-version=2018-09-01&syncFlag=CLOSE&offset=0&append=true&leaseid=12345678-1234-5678-1234-567812345678&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -1666,7 +1748,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:21:55 GMT
+      - Fri, 25 Oct 2024 18:58:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1692,12 +1774,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile02?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":18,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890115118,"modificationTime":1597890115436,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":18,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882734616,"modificationTime":1729882734779,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1706,7 +1789,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:56 GMT
+      - Fri, 25 Oct 2024 18:58:55 GMT
       expires:
       - '-1'
       pragma:
@@ -1736,7 +1819,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: POST
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile03?OP=MSCONCAT&api-version=2018-09-01&deleteSourceDirectory=false
   response:
@@ -1748,7 +1832,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:21:57 GMT
+      - Fri, 25 Oct 2024 18:58:55 GMT
       expires:
       - '-1'
       pragma:
@@ -1774,12 +1858,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile03?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890118335,"modificationTime":1597890118342,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882735718,"modificationTime":1729882735728,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1788,7 +1873,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:21:59 GMT
+      - Fri, 25 Oct 2024 18:58:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1814,12 +1899,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile03?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890118335,"modificationTime":1597890118342,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882735718,"modificationTime":1729882735728,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1828,7 +1914,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:00 GMT
+      - Fri, 25 Oct 2024 18:58:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1854,12 +1940,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile03?OP=LISTSTATUS&api-version=2018-09-01&listSize=4000
   response:
     body:
-      string: '{"FileStatuses":{"continuationToken":"","FileStatus":[{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890118335,"modificationTime":1597890118342,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}]}}'
+      string: '{"FileStatuses":{"continuationToken":"","FileStatus":[{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882735718,"modificationTime":1729882735728,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}]}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1868,7 +1955,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:00 GMT
+      - Fri, 25 Oct 2024 18:58:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1894,12 +1981,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile03?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890118335,"modificationTime":1597890118342,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882735718,"modificationTime":1729882735728,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1908,7 +1996,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:01 GMT
+      - Fri, 25 Oct 2024 18:58:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1934,7 +2022,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile03?OP=OPEN&api-version=2018-09-01&offset=0&length=30&read=true&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -1943,10 +2032,12 @@ interactions:
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
+      content-length:
+      - '30'
       content-type:
       - application/octet-stream
       date:
-      - Thu, 20 Aug 2020 02:22:02 GMT
+      - Fri, 25 Oct 2024 18:58:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1974,12 +2065,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile03?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1597890118335,"modificationTime":1597890118342,"replication":1,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
+      string: '{"FileStatus":{"length":30,"pathSuffix":"","type":"FILE","blockSize":268435456,"accessTime":1729882735718,"modificationTime":1729882735728,"replication":1,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","msExpirationTime":0,"aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -1988,7 +2080,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:04 GMT
+      - Fri, 25 Oct 2024 18:58:57 GMT
       expires:
       - '-1'
       pragma:
@@ -2016,7 +2108,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: DELETE
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01/adltestfile03?OP=DELETE&api-version=2018-09-01&recursive=False
   response:
@@ -2030,7 +2123,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:04 GMT
+      - Fri, 25 Oct 2024 18:58:57 GMT
       expires:
       - '-1'
       pragma:
@@ -2056,7 +2149,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=LISTSTATUS&api-version=2018-09-01&listSize=4000
   response:
@@ -2070,7 +2164,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:06 GMT
+      - Fri, 25 Oct 2024 18:58:58 GMT
       expires:
       - '-1'
       pragma:
@@ -2096,12 +2190,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/?OP=LISTSTATUS&api-version=2018-09-01&listSize=4000
   response:
     body:
-      string: '{"FileStatuses":{"continuationToken":"","FileStatus":[{"length":0,"pathSuffix":"adltestfolder01","type":"DIRECTORY","blockSize":0,"accessTime":1597890085385,"modificationTime":1597890125194,"replication":0,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","aclBit":false}]}}'
+      string: '{"FileStatuses":{"continuationToken":"","FileStatus":[{"length":0,"pathSuffix":"adltestfolder01","type":"DIRECTORY","blockSize":0,"accessTime":1729882723776,"modificationTime":1729882738142,"replication":0,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","aclBit":false}]}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -2110,7 +2205,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:06 GMT
+      - Fri, 25 Oct 2024 18:58:58 GMT
       expires:
       - '-1'
       pragma:
@@ -2136,13 +2231,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder02 [85799a01-af3b-4b9e-820b-38fcff40b459][2020-08-19T19:22:08.4997010-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder02 [3f9a7ac8-cd6c-4e68-ad7e-3de2314d0e4b][2024-10-25T11:58:59.1700680-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -2151,7 +2247,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:07 GMT
+      - Fri, 25 Oct 2024 18:58:58 GMT
       expires:
       - '-1'
       pragma:
@@ -2179,7 +2275,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: PUT
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02?OP=MKDIRS&api-version=2018-09-01
   response:
@@ -2193,7 +2290,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:08 GMT
+      - Fri, 25 Oct 2024 18:58:58 GMT
       expires:
       - '-1'
       pragma:
@@ -2219,13 +2316,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/tempfile01.txt?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder02/tempfile01.txt [88119834-2783-4400-972a-80e7316704f8][2020-08-19T19:22:10.2968559-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder02/tempfile01.txt [182ce60a-226f-49f3-a5fe-a996b61aa215][2024-10-25T11:58:59.9052615-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -2234,7 +2332,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:09 GMT
+      - Fri, 25 Oct 2024 18:58:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2260,13 +2358,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/tempfile01.txt?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder02/tempfile01.txt [f2f4e36c-21e9-4aa8-9026-aa41cab7f20e][2020-08-19T19:22:10.5937115-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder02/tempfile01.txt [4762dd3f-26b8-41e1-9ec8-eb476b845799][2024-10-25T11:59:00.0761638-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -2275,7 +2374,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:10 GMT
+      - Fri, 25 Oct 2024 18:58:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2303,7 +2402,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: PUT
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/tempfile01.txt?OP=CREATE&api-version=2018-09-01&overwrite=true&write=true&syncFlag=DATA&leaseid=12345678-1234-5678-1234-567812345678&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -2317,7 +2417,7 @@ interactions:
       contentlength:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:22:10 GMT
+      - Fri, 25 Oct 2024 18:58:59 GMT
       expires:
       - '-1'
       location:
@@ -2347,7 +2447,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: POST
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02/tempfile01.txt?OP=APPEND&api-version=2018-09-01&syncFlag=CLOSE&offset=0&append=true&leaseid=12345678-1234-5678-1234-567812345678&filesessionid=12345678-1234-5678-1234-567812345678
   response:
@@ -2359,7 +2460,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 20 Aug 2020 02:22:10 GMT
+      - Fri, 25 Oct 2024 18:58:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2385,12 +2486,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1597890128819,"modificationTime":1597890130918,"replication":0,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","aclBit":false}}'
+      string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1729882739290,"modificationTime":1729882740194,"replication":0,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -2399,7 +2501,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:12 GMT
+      - Fri, 25 Oct 2024 18:59:00 GMT
       expires:
       - '-1'
       pragma:
@@ -2427,7 +2529,8 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: DELETE
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02?OP=DELETE&api-version=2018-09-01&recursive=True
   response:
@@ -2441,7 +2544,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:12 GMT
+      - Fri, 25 Oct 2024 18:59:00 GMT
       expires:
       - '-1'
       pragma:
@@ -2467,13 +2570,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder02?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
       string: '{"RemoteException":{"exception":"FileNotFoundException","message":"File/Folder
-        does not exist: /adltestfolder02 [9b93eead-d040-49bd-b8ae-55194c85f7db][2020-08-19T19:22:24.5325230-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
+        does not exist: /adltestfolder02 [3655ccc6-f1d4-46a1-84e9-1c69eee76b87][2024-10-25T11:59:11.4781189-07:00]","javaClassName":"java.io.FileNotFoundException"}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -2482,7 +2586,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:24 GMT
+      - Fri, 25 Oct 2024 18:59:10 GMT
       expires:
       - '-1'
       pragma:
@@ -2508,12 +2612,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.19041-SP0) azure.datalake.store.lib/0.0.49 Azure-Data-Lake-Store-SDK-For-Python
+      - python/3.12.7 (Windows-11-10.0.26100-SP0) azure.datalake.store.lib/0.0.53
+        Azure-Data-Lake-Store-SDK-For-Python
     method: GET
     uri: https://cliadls000002.azuredatalakestore.net/webhdfs/v1/adltestfolder01?OP=GETFILESTATUS&api-version=2018-09-01
   response:
     body:
-      string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1597890085385,"modificationTime":1597890125194,"replication":0,"permission":"770","owner":"21cd756e-e290-4a26-9547-93e8cc1a8923","group":"00000000-0000-0000-0000-000000000000","aclBit":false}}'
+      string: '{"FileStatus":{"length":0,"pathSuffix":"","type":"DIRECTORY","blockSize":0,"accessTime":1729882723776,"modificationTime":1729882738142,"replication":0,"permission":"770","owner":"6d86a146-d7dc-49d0-862f-1897c5dd2afe","group":"00000000-0000-0000-0000-000000000000","aclBit":false}}'
     headers:
       cache-control:
       - no-cache, no-cache, no-store, max-age=0
@@ -2522,7 +2627,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 02:22:25 GMT
+      - Fri, 25 Oct 2024 18:59:11 GMT
       expires:
       - '-1'
       pragma:

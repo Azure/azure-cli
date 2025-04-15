@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.core.profiles import (ResourceType, PROFILE_TYPE, CustomResourceType,
                                      get_api_version, supported_api_version, register_resource_type)
@@ -261,14 +261,6 @@ class TestAPIProfiles(unittest.TestCase):
             self.assertEqual(
                 get_versioned_sdk_path('latest', ResourceType.MGMT_STORAGE),
                 "azure.mgmt.storage.v2020_10_10"
-            )
-
-    def test_get_versioned_sdk_path_semver(self):
-        test_profile = {'latest': {ResourceType.DATA_KEYVAULT: '7.0'}}
-        with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
-            self.assertEqual(
-                get_versioned_sdk_path('latest', ResourceType.DATA_KEYVAULT),
-                "azure.keyvault.v7_0"
             )
 
 

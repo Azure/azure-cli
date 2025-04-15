@@ -1,0 +1,45 @@
+ {
+    "enabled": true,
+    "type": "Inventory",
+    "rules": [
+      {
+        "enabled": true,
+        "name": "inventoryPolicyRule2",
+        "destination": "mycontainer",
+        "definition": {
+          "filters": {
+            "blobTypes": [
+              "blockBlob"
+            ],
+            "prefixMatch": [
+              "inventoryprefix1",
+              "inventoryprefix2"
+            ],
+            "includeSnapshots": true,
+            "includeBlobVersions": true,
+            "creationTime": {
+              "lastNDays": 3
+            }
+          },
+          "format": "Csv",
+          "schedule": "Daily",
+          "objectType": "Blob",
+          "schemaFields": [
+            "Name",
+            "Creation-Time",
+            "Last-Modified",
+            "Content-Length",
+            "Content-MD5",
+            "BlobType",
+            "AccessTier",
+            "AccessTierChangeTime",
+            "Snapshot",
+            "VersionId",
+            "IsCurrentVersion",
+            "Metadata"
+          ]
+        }
+      }
+    ]
+  }
+

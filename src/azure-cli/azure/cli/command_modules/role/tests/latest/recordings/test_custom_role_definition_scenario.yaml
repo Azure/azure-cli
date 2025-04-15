@@ -1,0 +1,263 @@
+interactions:
+- request:
+    body: '{"properties": {"roleName": "cli-test-role000001", "description": "Can
+      monitor compute, network and storage, and restart virtual machines", "permissions":
+      [{"actions": ["Microsoft.Compute/*/read", "Microsoft.Compute/virtualMachines/start/action",
+      "Microsoft.Compute/virtualMachines/restart/action", "Microsoft.Network/*/read",
+      "Microsoft.Storage/*/read", "Microsoft.Authorization/*/read", "Microsoft.Resources/subscriptions/resourceGroups/read",
+      "Microsoft.Resources/subscriptions/resourceGroups/resources/read", "Microsoft.Insights/alertRules/*"],
+      "dataActions": ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"],
+      "notDataActions": ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]}],
+      "assignableScopes": ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role definition create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '807'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --role-definition
+      User-Agent:
+      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.12.8 (Windows-11-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/88888888-0000-0000-0000-000000000001?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"properties":{"roleName":"cli-test-role000001","type":"CustomRole","description":"Can
+        monitor compute, network and storage, and restart virtual machines","assignableScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"permissions":[{"actions":["Microsoft.Compute/*/read","Microsoft.Compute/virtualMachines/start/action","Microsoft.Compute/virtualMachines/restart/action","Microsoft.Network/*/read","Microsoft.Storage/*/read","Microsoft.Authorization/*/read","Microsoft.Resources/subscriptions/resourceGroups/read","Microsoft.Resources/subscriptions/resourceGroups/resources/read","Microsoft.Insights/alertRules/*"],"notActions":[],"dataActions":["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"],"notDataActions":["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]}],"createdOn":"2025-01-10T08:20:27.0007137Z","updatedOn":"2025-01-10T08:20:27.0007137Z","createdBy":null,"updatedBy":"0d504196-1423-4569-9a6e-15149656f0ee"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleDefinitions","name":"88888888-0000-0000-0000-000000000001"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1217'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jan 2025 08:20:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 3DA9696496494F579E86A59EEC19744A Ref B: MAA201060516049 Ref C: 2025-01-10T08:20:26Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role definition list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.12.8 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27cli-test-role000001%27&api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"roleName":"cli-test-role000001","type":"CustomRole","description":"Can
+        monitor compute, network and storage, and restart virtual machines","assignableScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"permissions":[{"actions":["Microsoft.Compute/*/read","Microsoft.Compute/virtualMachines/start/action","Microsoft.Compute/virtualMachines/restart/action","Microsoft.Network/*/read","Microsoft.Storage/*/read","Microsoft.Authorization/*/read","Microsoft.Resources/subscriptions/resourceGroups/read","Microsoft.Resources/subscriptions/resourceGroups/resources/read","Microsoft.Insights/alertRules/*"],"notActions":[],"dataActions":["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"],"notDataActions":["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]}],"createdOn":"2025-01-10T08:20:27.0127134Z","updatedOn":"2025-01-10T08:20:27.0127134Z","createdBy":"0d504196-1423-4569-9a6e-15149656f0ee","updatedBy":"0d504196-1423-4569-9a6e-15149656f0ee"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleDefinitions","name":"88888888-0000-0000-0000-000000000001"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1263'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jan 2025 08:20:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 721218A1A02B44A4BFD873CFC0486514 Ref B: MAA201060516039 Ref C: 2025-01-10T08:20:30Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"roleName": "cli-test-role000001", "description": "Can
+      monitor compute, network and storage, and restart virtual machines", "permissions":
+      [{"actions": ["Microsoft.Compute/*/read", "Microsoft.Compute/virtualMachines/start/action",
+      "Microsoft.Compute/virtualMachines/restart/action", "Microsoft.Network/*/read",
+      "Microsoft.Storage/*/read", "Microsoft.Authorization/*/read", "Microsoft.Resources/subscriptions/resourceGroups/read",
+      "Microsoft.Resources/subscriptions/resourceGroups/resources/read", "Microsoft.Insights/alertRules/*",
+      "Microsoft.Support/*"], "notActions": [], "dataActions": ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"],
+      "notDataActions": ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]}],
+      "assignableScopes": ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role definition update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '848'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --role-definition
+      User-Agent:
+      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.12.8 (Windows-11-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/88888888-0000-0000-0000-000000000001?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"properties":{"roleName":"cli-test-role000001","type":"CustomRole","description":"Can
+        monitor compute, network and storage, and restart virtual machines","assignableScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"permissions":[{"actions":["Microsoft.Compute/*/read","Microsoft.Compute/virtualMachines/start/action","Microsoft.Compute/virtualMachines/restart/action","Microsoft.Network/*/read","Microsoft.Storage/*/read","Microsoft.Authorization/*/read","Microsoft.Resources/subscriptions/resourceGroups/read","Microsoft.Resources/subscriptions/resourceGroups/resources/read","Microsoft.Insights/alertRules/*","Microsoft.Support/*"],"notActions":[],"dataActions":["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"],"notDataActions":["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]}],"createdOn":"2025-01-10T08:20:31.0536501Z","updatedOn":"2025-01-10T08:20:31.0536501Z","createdBy":null,"updatedBy":"0d504196-1423-4569-9a6e-15149656f0ee"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleDefinitions","name":"88888888-0000-0000-0000-000000000001"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1239'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jan 2025 08:20:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: F24C8CA60578459A89142403CEB6F074 Ref B: MAA201060513033 Ref C: 2025-01-10T08:20:30Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role definition delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.12.8 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27cli-test-role000001%27&api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jan 2025 08:20:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: F9C08EF99EC04683AFB1C61832D9C324 Ref B: MAA201060513011 Ref C: 2025-01-10T08:20:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role definition list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.12.8 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27cli-test-role000001%27&api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Jan 2025 08:20:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 5207B9A11DE64D52AE9498F887DD248E Ref B: MAA201060514053 Ref C: 2025-01-10T08:20:35Z'
+    status:
+      code: 200
+      message: OK
+version: 1

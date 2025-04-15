@@ -1,0 +1,474 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/queue000002/listKeys?api-version=2024-01-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2025-02-23T09:40:01.3045226Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-02-23T09:40:01.3045226Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Sun, 23 Feb 2025 09:40:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/6d370c64-b5f9-4077-9734-c14ea7b981ef
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11978'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-connection-string
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/queue000002/listKeys?api-version=2024-01-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2025-02-23T09:40:01.3045226Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-02-23T09:40:01.3045226Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Sun, 23 Feb 2025 09:40:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/5bf2cb21-b83d-431f-bfe1-223e89186a5f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11979'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-connection-string
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/queue000002?api-version=2024-01-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/queue000002","name":"queue000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"keyCreationTime":{"key1":"2025-02-23T09:40:01.3045226Z","key2":"2025-02-23T09:40:01.3045226Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-02-23T09:40:01.5545226Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-02-23T09:40:01.5545226Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2025-02-23T09:40:01.1951480Z","primaryEndpoints":{"dfs":"https://queue000002.dfs.core.windows.net/","web":"https://queue000002.z20.web.core.windows.net/","blob":"https://queue000002.blob.core.windows.net/","queue":"https://queue000002.queue.core.windows.net/","table":"https://queue000002.table.core.windows.net/","file":"https://queue000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available","secondaryLocation":"centralus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://queue000002-secondary.dfs.core.windows.net/","web":"https://queue000002-secondary.z20.web.core.windows.net/","blob":"https://queue000002-secondary.blob.core.windows.net/","queue":"https://queue000002-secondary.queue.core.windows.net/","table":"https://queue000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1836'
+      content-type:
+      - application/json
+      date:
+      - Sun, 23 Feb 2025 09:40:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 23 Feb 2025 09:40:26 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: PUT
+    uri: https://queue000002.queue.core.windows.net/queue000003
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Sun, 23 Feb 2025 09:40:27 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue metadata show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 23 Feb 2025 09:40:28 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://queue000002.queue.core.windows.net/queue000003?comp=metadata
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sun, 23 Feb 2025 09:40:28 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-approximate-messages-count:
+      - '0'
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue metadata update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --metadata --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 23 Feb 2025 09:40:29 GMT
+      x-ms-meta-key1:
+      - value1
+      x-ms-version:
+      - '2021-02-12'
+    method: PUT
+    uri: https://queue000002.queue.core.windows.net/queue000003?comp=metadata
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Sun, 23 Feb 2025 09:40:30 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue metadata show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --connection-string
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 23 Feb 2025 09:40:31 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://queue000002.queue.core.windows.net/queue000003?comp=metadata
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sun, 23 Feb 2025 09:40:31 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-approximate-messages-count:
+      - '0'
+      x-ms-meta-key1:
+      - value1
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue metadata update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --metadata --connection-string
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 23 Feb 2025 09:40:32 GMT
+      x-ms-meta-newkey:
+      - newvalue
+      x-ms-meta-oldkey:
+      - oldvalue
+      x-ms-version:
+      - '2021-02-12'
+    method: PUT
+    uri: https://queue000002.queue.core.windows.net/queue000003?comp=metadata
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Sun, 23 Feb 2025 09:40:33 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue metadata show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 23 Feb 2025 09:40:34 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://queue000002.queue.core.windows.net/queue000003?comp=metadata
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sun, 23 Feb 2025 09:40:35 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-approximate-messages-count:
+      - '0'
+      x-ms-meta-newkey:
+      - newvalue
+      x-ms-meta-oldkey:
+      - oldvalue
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue metadata update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --metadata --account-name --auth-mode
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 23 Feb 2025 09:40:35 GMT
+      x-ms-meta-a:
+      - b
+      x-ms-meta-c:
+      - d
+      x-ms-version:
+      - '2021-02-12'
+    method: PUT
+    uri: https://queue000002.queue.core.windows.net/queue000003?comp=metadata
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Sun, 23 Feb 2025 09:40:36 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage queue metadata show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-storage-queue/12.3.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 23 Feb 2025 09:40:37 GMT
+      x-ms-version:
+      - '2021-02-12'
+    method: GET
+    uri: https://queue000002.queue.core.windows.net/queue000003?comp=metadata
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sun, 23 Feb 2025 09:40:37 GMT
+      server:
+      - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-approximate-messages-count:
+      - '0'
+      x-ms-meta-a:
+      - b
+      x-ms-meta-c:
+      - d
+      x-ms-version:
+      - '2021-02-12'
+    status:
+      code: 200
+      message: OK
+version: 1

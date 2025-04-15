@@ -9,13 +9,14 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['config'] = """
 type: group
 short-summary: Manage Azure CLI configuration.
+long-summary: Available since Azure CLI 2.10.0.
 """
 
 helps['config set'] = """
 type: command
 short-summary: Set a configuration.
 long-summary: |
-    For available configuration options, see https://docs.microsoft.com/en-us/cli/azure/azure-cli-configuration.
+    For available configuration options, see https://learn.microsoft.com/cli/azure/azure-cli-configuration.
     By default without specifying --local, the configuration will be saved to `~/.azure/config`.
 examples:
   - name: Disable color with `core.no_color`.
@@ -52,4 +53,43 @@ short-summary: Unset a configuration.
 examples:
   - name: Unset the configuration of key `core.no_color`.
     text: az config unset core.no_color
+"""
+
+helps['config param-persist'] = """
+type: group
+short-summary: Manage parameter persistence.
+"""
+
+helps['config param-persist on'] = """
+type: command
+short-summary: Turn on parameter persistence.
+"""
+
+helps['config param-persist off'] = """
+type: command
+short-summary: Turn off parameter persistence.
+"""
+
+helps['config param-persist show'] = """
+type: command
+short-summary: Show parameter persistence data.
+examples:
+  - name: Show all parameter persistence value
+    text: az config param-persist show
+  - name: Show resource_group_name parameter persistence value
+    text: az config param-persist show resource_group_name
+"""
+
+helps['config param-persist delete'] = """
+type: command
+short-summary: Delete parameter persistence data.
+examples:
+  - name: Delete resource_group_name from parameter persistence
+    text: az config param-persist delete resource_group_name
+  - name: Clear all parameter persistence data
+    text: az config param-persist delete --all
+  - name: Delete parameter persistence file
+    text: az config param-persist delete --all --purge
+  - name: Delete parameter persistence file recursively
+    text: az config param-persist delete --all --purge --recursive
 """

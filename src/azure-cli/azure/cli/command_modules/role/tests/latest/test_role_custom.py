@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.command_modules.role.custom import _resolve_role_id
 
@@ -14,7 +14,7 @@ class TestRoleCustomCommands(unittest.TestCase):
 
     def test_resolve_role_id(self, ):
         mock_client = mock.Mock()
-        mock_client.config.subscription_id = '123'
+        mock_client._config.subscription_id = '123'
         test_role_id = 'b24988ac-6180-42a0-ab88-20f738123456'
 
         # action(using a logical name)

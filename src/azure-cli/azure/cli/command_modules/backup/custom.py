@@ -4,82 +4,439 @@
 # --------------------------------------------------------------------------------------------
 
 import time
-import json
-import re
 import os
-from datetime import datetime, timedelta
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from datetime import datetime, timedelta, timezone
 # pylint: disable=too-many-lines
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
+from azure.mgmt.core.tools import is_valid_resource_id
 
-from msrest.paging import Paged
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
+from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservices import RecoveryServicesClient
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
+from azure.cli.core.profiles import ResourceType
 
-from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName
-from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
-    AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
-    IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
-    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
-    BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties
+from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
+    CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
+    AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings, RestoreSettings, \
+    CrossSubscriptionRestoreSettings
+from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
+    AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
+    BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
+    ILRRequestResource, IaasVMILRRegistrationRequest, \
+    BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
+    MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
+    BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
+    UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
+import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError as CoreResourceNotFoundError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
+    MutuallyExclusiveArgumentError, ArgumentUsageError, ValidationError, ResourceNotFoundError
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
-    protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
-    job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
-    protected_items_cf, backup_resource_vault_config_cf)
+    protection_containers_cf, backup_protectable_items_cf, backup_protection_containers_cf,
+    protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
+    cross_region_restore_cf, backup_crr_job_details_cf, backup_crr_jobs_cf, backup_protected_items_crr_cf,
+    _backup_client_factory, recovery_points_recommended_cf, backup_resource_encryption_config_cf, backup_status_cf,
+    backup_storage_configs_non_crr_cf, recovery_points_passive_cf)
+
+import azure.cli.command_modules.backup.custom_common as common
+import azure.cli.command_modules.backup.custom_help as cust_help
 
 logger = get_logger(__name__)
 
+# Mapping of workload type
+secondary_region_map = {
+    "australiacentral": "australiacentral2",
+    "australiacentral2": "australiacentral",
+    "australiaeast": "australiasoutheast",
+    "australiasoutheast": "australiaeast",
+    "brazilsouth": "southcentralus",
+    "brazilsoutheast": "brazilsouth",
+    "canadacentral": "canadaeast",
+    "canadaeast": "canadacentral",
+    "centralindia": "southindia",
+    "centralus": "eastus2",
+    "centraluseuap": "eastus2euap",
+    "chinaeast": "chinanorth",
+    "chinaeast2": "chinanorth2",
+    "chinaeast3": "chinanorth3",
+    "chinanorth": "chinaeast",
+    "chinanorth2": "chinaeast2",
+    "chinanorth3": "chinaeast3",
+    "eastasia": "southeastasia",
+    "eastus": "westus",
+    "eastus2": "centralus",
+    "eastus2euap": "centraluseuap",
+    "francecentral": "francesouth",
+    "francesouth": "francecentral",
+    "germanycentral": "germanynortheast",
+    "germanynorth": "germanywestcentral",
+    "germanynortheast": "germanycentral",
+    "germanywestcentral": "germanynorth",
+    "japaneast": "japanwest",
+    "japanwest": "japaneast",
+    "jioindiacentral": "jioindiawest",
+    "jioindiawest": "jioindiacentral",
+    "koreacentral": "koreasouth",
+    "koreasouth": "koreacentral",
+    "malaysiasouth": "japanwest",
+    "northcentralus": "southcentralus",
+    "northeurope": "westeurope",
+    "norwayeast": "norwaywest",
+    "norwaywest": "norwayeast",
+    "southafricanorth": "southafricawest",
+    "southafricawest": "southafricanorth",
+    "southcentralus": "northcentralus",
+    "southcentralus2": "westcentralus",
+    "southeastasia": "eastasia",
+    "southeastus": "westus3",
+    "southeastus3": "westus3",
+    "southeastus5": "centralus",
+    "southindia": "centralindia",
+    "southwestus": "centralus",
+    "swedencentral": "swedensouth",
+    "swedensouth": "swedencentral",
+    "switzerlandnorth": "switzerlandwest",
+    "switzerlandwest": "switzerlandnorth",
+    "taiwannorth": "taiwannorthwest",
+    "taiwannorthwest": "taiwannorth",
+    "uaecentral": "uaenorth",
+    "uaenorth": "uaecentral",
+    "uksouth": "ukwest",
+    "ukwest": "uksouth",
+    "usdodcentral": "usdodeast",
+    "usdodeast": "usdodcentral",
+    "usgovarizona": "usgovtexas",
+    "usgoviowa": "usgovvirginia",
+    "usgovtexas": "usgovarizona",
+    "usgovvirginia": "usgovtexas",
+    "usnateast": "usnatwest",
+    "usnatwest": "usnateast",
+    "usseceast": "ussecwest",
+    "ussecwest": "usseceast",
+    "westcentralus": "westus2",
+    "westeurope": "northeurope",
+    "westindia": "southindia",
+    "westus": "eastus",
+    "westus2": "westcentralus",
+    "westus3": "eastus"
+}
+
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
+default_resource_guard = "VaultProxy"
 os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
 password_length = 15
+vm_policy_type_map = {
+    'v2': 'enhanced',
+    'v1': 'standard'
+}
+enhanced_policy_type = "v2"
+standard_policy_type = "v1"
 # pylint: disable=too-many-function-args
 
 
-def create_vault(client, vault_name, resource_group_name, location):
-    vault_sku = Sku(name=SkuName.standard)
-    vault_properties = VaultProperties()
+# pylint: disable=line-too-long
+def update_vault(cmd, client, vault_name, resource_group_name, tags=None,
+                 public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
+                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None, tenant_id=None,
+                 backup_storage_redundancy=None, cross_region_restore_flag=None):
+    try:
+        existing_vault = client.get(resource_group_name, vault_name)
+    except CoreResourceNotFoundError:
+        raise CLIError("The vault you are trying to update does not exist. Please create it with "
+                       "az backup vault create")
 
-    vault = Vault(location=location, sku=vault_sku, properties=vault_properties)
-    return client.create_or_update(resource_group_name, vault_name, vault)
+    patchvault = PatchVault()
+    patchvault.properties = VaultProperties()
+
+    if public_network_access is not None:
+        patchvault.properties.public_network_access = _get_vault_public_network_access(public_network_access)
+
+    if immutability_state is not None:
+        patchvault.properties.security_settings = _get_vault_security_settings(immutability_state, existing_vault)
+
+    if cross_subscription_restore_state is not None:
+        patchvault.properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
+
+    if classic_alerts is not None or azure_monitor_alerts_for_job_failures is not None:
+        patchvault.properties.monitoring_settings = _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures,
+                                                                                   classic_alerts, existing_vault)
+
+    if backup_storage_redundancy is not None or cross_region_restore_flag is not None:
+        patchvault.properties.redundancy_settings = \
+            _get_vault_redunancy_settings(backup_storage_redundancy, cross_region_restore_flag, existing_vault)
+
+    if tags is not None:
+        patchvault.tags = tags
+
+    # If immutability settings have been switched from Unlocked to Disabled, then we have an issue with it.
+    # Also need to figure out how to deal with both soft delete and immutability getting weakened but not today.
+    resource_guard_used = False
+
+    if cust_help.is_immutability_weakened(existing_vault, patchvault):
+        if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
+                                                vault_name, operation_name="RecoveryServicesDisableImmutability"):
+            resource_guard_used = True
+            patchvault.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesDisableImmutability")]
+
+    if resource_guard_used and tenant_id is not None:
+        client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesClient,
+                                         aux_tenants=[tenant_id]).vaults
+
+    return client.begin_update(resource_group_name, vault_name, patchvault)
+
+
+# TODO: Re-add references to SoftDeleteSettings once SDK version is upgraded:
+# Import SoftDeleteSettings, args in create_vault and _get_vault_security_settings
+def create_vault(cmd, client, vault_name, resource_group_name, location, tags=None,
+                 public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
+                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
+    try:
+        client.get(resource_group_name, vault_name)
+        logger.warning("You are using the az backup vault create command to update vault properties. Please "
+                       "note that this is not officially supported, and can also reset some vault properties "
+                       "to their default values. It is recommended to use az backup vault update instead.")
+
+        # If the vault exists, we move to the update flow instead
+        return update_vault(cmd, client, vault_name, resource_group_name, tags, public_network_access,
+                            immutability_state, cross_subscription_restore_state, classic_alerts,
+                            azure_monitor_alerts_for_job_failures)
+    except CoreResourceNotFoundError:
+        vault_properties = VaultProperties()
+
+        # Setting defaults. If we set it in the function signature, the update functionality of the command will break
+        classic_alerts = 'Enable' if classic_alerts is None else classic_alerts
+        azure_monitor_alerts_for_job_failures = 'Enable' if azure_monitor_alerts_for_job_failures is None \
+            else azure_monitor_alerts_for_job_failures
+        public_network_access = 'Enable' if public_network_access is None else public_network_access
+
+    vault_sku = Sku(name=SkuName.standard)
+
+    vault_properties.public_network_access = _get_vault_public_network_access(public_network_access)
+    vault_properties.monitoring_settings = _get_vault_monitoring_settings(
+        azure_monitor_alerts_for_job_failures, classic_alerts)
+
+    if immutability_state is not None:
+        vault_properties.security_settings = _get_vault_security_settings(immutability_state)
+
+    if cross_subscription_restore_state is not None:
+        vault_properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
+
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
+
+    return client.begin_create_or_update(resource_group_name, vault_name, vault)
+
+
+def _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures, classic_alerts, existing_vault=None):
+    # Update scenario
+    if existing_vault is not None:
+        monitoring_settings = existing_vault.properties.monitoring_settings
+
+        if azure_monitor_alerts_for_job_failures is not None:
+            monitoring_settings.azure_monitor_alert_settings.alerts_for_all_job_failures = \
+                cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures)
+
+        if classic_alerts is not None:
+            monitoring_settings.classic_alert_settings.alerts_for_critical_operations = \
+                cust_help.transform_enable_parameters(classic_alerts)
+
+        return monitoring_settings
+
+    # Create scenario
+    monitoring_settings = MonitoringSettings()
+    if azure_monitor_alerts_for_job_failures is not None:
+        monitoring_settings.azure_monitor_alert_settings = AzureMonitorAlertSettings(
+            alerts_for_all_job_failures=cust_help.transform_enable_parameters(azure_monitor_alerts_for_job_failures),
+            alerts_for_all_replication_issues="Enabled",
+            alerts_for_all_failover_issues="Enabled")
+    if classic_alerts is not None:
+        monitoring_settings.classic_alert_settings = ClassicAlertSettings(
+            alerts_for_critical_operations=cust_help.transform_enable_parameters(classic_alerts),
+            email_notifications_for_site_recovery="Enabled")  # Not processing this yet but we need in new SDK
+
+    return monitoring_settings
+
+
+# We only support backup vault update, not create. Hence we don't need to setup any defaults. Existing vault won't be None.
+def _get_vault_redunancy_settings(backup_storage_redundancy, cross_region_restore_flag, existing_vault):
+    redundancy_settings = existing_vault.properties.redundancy_settings
+
+    if backup_storage_redundancy is not None:
+        redundancy_settings.standard_tier_storage_redundancy = backup_storage_redundancy
+
+    if cross_region_restore_flag is not None:
+        if redundancy_settings.cross_region_restore == 'Enabled' and cross_region_restore_flag == 'Disabled':
+            raise ArgumentUsageError("""
+            Cross Region Restore is currently a non-reversible storage property. You can not disable it once enabled.
+            """)
+        redundancy_settings.cross_region_restore = cross_region_restore_flag
+
+    return redundancy_settings
+
+
+# TODO Remove pylint supress once the new SDK is in place
+# pylint: disable=unused-argument
+def _get_vault_security_settings(immutability_state, existing_vault=None):
+    security_settings = None
+    if immutability_state is not None:
+        security_settings = SecuritySettings()
+        security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
+
+    # TODO Re-add once the new SDK is in place
+    # Using updated process (defaults for soft delete need to be set in create function):
+    # security_settings = SecuritySettings()
+    # if existing_vault is not None:
+    #     security_settings = existing_vault.properties.security_settings
+
+    # if immutability_state is not None:
+    #     security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
+
+    # if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
+    #     soft_delete_settings = security_settings.soft_delete_settings
+
+    #     if soft_delete_state is not None:
+    #         soft_delete_settings.soft_delete_state = help.transform_softdelete_parameters(soft_delete_state)
+    #     if soft_delete_retention_period_in_days is not None:
+    #         soft_delete_settings.soft_delete_retention_period_in_days = soft_delete_retention_period_in_days
+
+    #     security_settings.soft_delete_settings = soft_delete_settings
+    # Old process
+    # security_settings = None
+    # if immutability_state is not None or soft_delete_state is not None or \
+    #         soft_delete_retention_period_in_days is not None:
+    #     immutability_settings = None
+    #     soft_delete_settings = None
+
+    #     if immutability_state is not None:
+    #         immutability_settings = ImmutabilitySettings(state=immutability_state)
+
+    #     if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
+    #         # Both soft delete state and retention period need to be passed, so we need to fetch the existing values
+    #         # if not provided in the input. If the vault does not exist, the default values are Enabled/14 days
+    #         if soft_delete_state is None:
+    #             try:
+    #                 existing_vault_if_any = client.get(resource_group_name, vault_name)
+    #                 existing_soft_delete_state = existing_vault_if_any.properties.security_settings.\
+    #                     soft_delete_settings.soft_delete_state
+    #                 soft_delete_state = cust_help.transform_enable_parameters(existing_soft_delete_state)
+    #             except CoreResourceNotFoundError:
+    #                 soft_delete_state = "Enable"
+    #         if soft_delete_retention_period_in_days is None:
+    #             try:
+    #                 existing_vault_if_any = client.get(resource_group_name, vault_name)
+    #                 existing_soft_delete_retention_period_in_days = existing_vault_if_any.properties.\
+    #                     security_settings.soft_delete_settings.soft_delete_retention_period_in_days
+    #                 soft_delete_retention_period_in_days = existing_soft_delete_retention_period_in_days
+    #             except CoreResourceNotFoundError:
+    #                 soft_delete_retention_period_in_days = 14
+
+    #         soft_delete_settings = SoftDeleteSettings(
+    #             soft_delete_state=cust_help.transform_softdelete_parameters(soft_delete_state),
+    #             soft_delete_retention_period_in_days=soft_delete_retention_period_in_days
+    #         )
+
+    #     security_settings = SecuritySettings(
+    #         immutability_settings=None if immutability_settings is None else immutability_settings,
+    #         soft_delete_settings=None if soft_delete_settings is None else soft_delete_settings
+    #     )
+
+    return security_settings
+
+
+def _get_vault_restore_settings(cross_subscription_restore_state):
+    restore_settings = None
+    if cross_subscription_restore_state is not None:
+        restore_settings = RestoreSettings()
+        restore_settings.cross_subscription_restore_settings = CrossSubscriptionRestoreSettings(
+            cross_subscription_restore_state=cust_help.transform_enable_parameters(cross_subscription_restore_state))
+    return restore_settings
+
+
+def _get_vault_public_network_access(public_network_access):
+    return cust_help.transform_enable_parameters(public_network_access)
 
 
 def _force_delete_vault(cmd, vault_name, resource_group_name):
     logger.warning('Attemping to force delete vault: %s', vault_name)
     container_client = backup_protection_containers_cf(cmd.cli_ctx)
+    protection_containers_client = protection_containers_cf(cmd.cli_ctx)
     backup_item_client = backup_protected_items_cf(cmd.cli_ctx)
     item_client = protected_items_cf(cmd.cli_ctx)
     vault_client = vaults_cf(cmd.cli_ctx)
+    # delete the AzureIaasVM backup management type items
     containers = _get_containers(
         container_client, 'AzureIaasVM', 'Registered',
         resource_group_name, vault_name)
     for container in containers:
         container_name = container.name.rsplit(';', 1)[1]
         items = list_items(
-            cmd, backup_item_client, resource_group_name, vault_name, container_name)
+            cmd, backup_item_client, resource_group_name, vault_name, container.name)
         for item in items:
             item_name = item.name.rsplit(';', 1)[1]
             logger.warning("Deleting backup item '%s' in container '%s'",
                            item_name, container_name)
-            disable_protection(cmd, item_client, resource_group_name, vault_name,
-                               item, True)
+            common.delete_protected_item(cmd, item_client, resource_group_name, vault_name,
+                                         item)
+
+    # delete the AzureWorkload backup management type items
+    containers = _get_containers(
+        container_client, 'AzureWorkload', 'Registered',
+        resource_group_name, vault_name)
+    for container in containers:
+        container_name = container.name.rsplit(';', 1)[1]
+        items_sql = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container.name, 'AzureWorkload', 'SQLDataBase')
+        items_hana = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container.name, 'AzureWorkload',
+            'SAPHanaDatabase')
+        items = items_sql + items_hana
+        for item in items:
+            item_name = item.name.rsplit(';', 1)[1]
+            logger.warning("Deleting backup item '%s' in container '%s'",
+                           item_name, container_name)
+            common.delete_protected_item(cmd, item_client, resource_group_name, vault_name,
+                                         item)
+        _unregister_containers(cmd, protection_containers_client, resource_group_name, vault_name, container.name)
+
+    # delete the AzureStorage backup management type items
+    containers = _get_containers(
+        container_client, 'AzureStorage', 'Registered',
+        resource_group_name, vault_name)
+    for container in containers:
+        container_name = container.name.rsplit(';', 1)[1]
+        items = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container.name, 'AzureStorage', 'AzureFileShare')
+        for item in items:
+            item_name = item.name.rsplit(';', 1)[1]
+            logger.warning("Deleting backup item '%s' in container '%s'",
+                           item_name, container_name)
+            common.delete_protected_item(cmd, item_client, resource_group_name, vault_name,
+                                         item)
+        _unregister_containers(cmd, protection_containers_client, resource_group_name, vault_name, container.name)
     # now delete the vault
     try:
-        vault_client.delete(resource_group_name, vault_name)
-    except Exception:
-        raise CLIError("Vault cannot be deleted as there are existing resources within the vault")
+        return vault_client.begin_delete(resource_group_name, vault_name)
+    except HttpResponseError as ex:
+        raise ex
 
 
 def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
     try:
-        client.delete(resource_group_name, vault_name)
-    except Exception as ex:  # pylint: disable=broad-except
+        return client.begin_delete(resource_group_name, vault_name)
+    except HttpResponseError as ex:  # pylint: disable=broad-except
         if 'existing resources within the vault' in ex.message and force:  # pylint: disable=no-member
             _force_delete_vault(cmd, vault_name, resource_group_name)
+        elif "Operation returned an invalid status 'Accepted'" in ex.message:
+            # TODO: Once the swagger is updated, this won't be needed.
+            pass
         else:
             raise ex
 
@@ -90,21 +447,275 @@ def list_vaults(client, resource_group_name=None):
     return client.list_by_subscription_id()
 
 
+def assign_identity(client, resource_group_name, vault_name, system_assigned=None, user_assigned=None):
+    vault_details = client.get(resource_group_name, vault_name)
+
+    curr_identity_details = vault_details.identity
+    curr_identity_type = 'none'
+    identity_type = 'none'
+    user_assigned_identity = None
+
+    if curr_identity_details is not None:
+        curr_identity_type = curr_identity_details.type.lower()
+
+    if user_assigned is not None:
+        userid = UserIdentity()
+        user_assigned_identity = {}
+        for userMSI in user_assigned:
+            user_assigned_identity[userMSI] = userid
+        if system_assigned is not None or curr_identity_type in ["systemassigned", "systemassigned, userassigned"]:
+            identity_type = "systemassigned,userassigned"
+        else:
+            identity_type = "userassigned"
+    elif system_assigned is not None:
+        if curr_identity_type in ["systemassigned, userassigned", "userassigned"]:
+            identity_type = "systemassigned,userassigned"
+        else:
+            identity_type = "systemassigned"
+    else:
+        raise RequiredArgumentMissingError(
+            """
+            Invalid parameters, no operation specified.
+            """)
+
+    identity_data = IdentityData(type=identity_type, user_assigned_identities=user_assigned_identity)
+    vault = PatchVault(identity=identity_data)
+    return client.begin_update(resource_group_name, vault_name, vault)
+
+
+def remove_identity(client, resource_group_name, vault_name, system_assigned=None, user_assigned=None):
+    vault_details = client.get(resource_group_name, vault_name)
+
+    curr_identity_details = vault_details.identity
+    curr_identity_type = 'none'
+    user_assigned_identity = None
+    identity_type = 'none'
+
+    if curr_identity_details is not None:
+        curr_identity_type = curr_identity_details.type.lower()
+
+    if user_assigned is not None:
+        if curr_identity_type not in ["userassigned", "systemassigned, userassigned"]:
+            raise ArgumentUsageError(
+                """
+                There are no user assigned identities to be removed.
+                """)
+        userid = None
+        remove_count_of_userMSI = 0
+        totaluserMSI = 0
+        user_assigned_identity = {}
+        for element in curr_identity_details.user_assigned_identities.keys():
+            if element in user_assigned:
+                remove_count_of_userMSI += 1
+            totaluserMSI += 1
+        if not user_assigned:
+            remove_count_of_userMSI = totaluserMSI
+        for userMSI in user_assigned:
+            user_assigned_identity[userMSI] = userid
+        if system_assigned is not None:
+            if curr_identity_type != "systemassigned, userassigned":
+                raise ArgumentUsageError(
+                    """
+                    System assigned identity is not enabled for Recovery Services Vault.
+                    """)
+            if remove_count_of_userMSI == totaluserMSI:
+                identity_type = 'none'
+                user_assigned_identity = None
+            else:
+                identity_type = "userassigned"
+        else:
+            if curr_identity_type == 'systemassigned, userassigned':
+                if remove_count_of_userMSI == totaluserMSI:
+                    identity_type = 'systemassigned'
+                    user_assigned_identity = None
+                else:
+                    identity_type = 'systemassigned,userassigned'
+            else:
+                if remove_count_of_userMSI == totaluserMSI:
+                    identity_type = 'none'
+                    user_assigned_identity = None
+                else:
+                    identity_type = 'userassigned'
+    elif system_assigned is not None:
+        return _remove_system_identity(client, resource_group_name, vault_name, curr_identity_type)
+    else:
+        raise RequiredArgumentMissingError(
+            """
+            Invalid parameters, no operation specified.
+            """)
+
+    identity_data = IdentityData(type=identity_type, user_assigned_identities=user_assigned_identity)
+    vault = PatchVault(identity=identity_data)
+    return client.begin_update(resource_group_name, vault_name, vault)
+
+
+def _remove_system_identity(client, resource_group_name, vault_name, curr_identity_type):
+    user_assigned_identity = None
+    identity_type = 'none'
+    if curr_identity_type not in ["systemassigned", "systemassigned, userassigned"]:
+        raise ArgumentUsageError(
+            """
+            System assigned identity is not enabled for Recovery Services Vault.
+            """)
+    if curr_identity_type == 'systemassigned':
+        identity_type = 'none'
+    else:
+        identity_type = 'userassigned'
+
+    identity_data = IdentityData(type=identity_type, user_assigned_identities=user_assigned_identity)
+    vault = PatchVault(identity=identity_data)
+    return client.begin_update(resource_group_name, vault_name, vault)
+
+
+def show_identity(client, resource_group_name, vault_name):
+    return client.get(resource_group_name, vault_name).identity
+
+
+def update_encryption(cmd, client, resource_group_name, vault_name, encryption_key_id, infrastructure_encryption=None,
+                      mi_user_assigned=None, mi_system_assigned=None, tenant_id=None):
+    keyVaultproperties = CmkKeyVaultProperties(key_uri=encryption_key_id)
+
+    vault_details = client.get(resource_group_name, vault_name)
+    encryption_details = backup_resource_encryption_config_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
+    encryption_type = encryption_details.properties.encryption_at_rest_type
+    identity_details = vault_details.identity
+    identity_type = 'none'
+
+    if identity_details is not None:
+        identity_type = identity_details.type.lower()
+    if identity_details is None or identity_type == 'none':
+        raise ValidationError(
+            """
+            Please enable identities of Recovery Services Vault
+            """)
+
+    if encryption_type != "CustomerManaged":
+        if mi_system_assigned is None and mi_user_assigned is None:
+            raise RequiredArgumentMissingError(
+                """
+                Please provide user assigned identity id using --identity-id paramter or set --use-system-assigned flag
+                """)
+        if infrastructure_encryption is None:
+            infrastructure_encryption = "Disabled"
+    if mi_user_assigned is not None and mi_system_assigned:
+        raise MutuallyExclusiveArgumentError(
+            """
+            Both --identity-id and --use-system-assigned parameters can't be given at the same time.
+            """)
+
+    kekIdentity = None
+    is_identity_present = False
+    if mi_user_assigned is not None:
+        if identity_type not in ["userassigned", "systemassigned, userassigned"]:
+            raise ArgumentUsageError(
+                """
+                Please add user assigned identity for Recovery Services Vault.
+                """)
+        if mi_user_assigned in identity_details.user_assigned_identities.keys():
+            is_identity_present = True
+        if not is_identity_present:
+            raise InvalidArgumentValueError(
+                """
+                This user assigned identity not available for Recovery Services Vault.
+                """)
+
+    if mi_system_assigned:
+        if identity_type not in ["systemassigned", "systemassigned, userassigned"]:
+            raise ArgumentUsageError(
+                """
+                Please make sure that system assigned identity is enabled for Recovery Services Vault
+                """)
+    if mi_user_assigned is not None or mi_system_assigned:
+        kekIdentity = CmkKekIdentity(user_assigned_identity=mi_user_assigned,
+                                     use_system_assigned_identity=mi_system_assigned)
+    encryption_data = VaultPropertiesEncryption(key_vault_properties=keyVaultproperties, kek_identity=kekIdentity,
+                                                infrastructure_encryption=infrastructure_encryption)
+    vault_properties = VaultProperties(encryption=encryption_data)
+    vault = PatchVault(properties=vault_properties)
+
+    if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name,
+                                            "RecoveryServicesModifyEncryptionSettings"):
+        # Cross tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesClient,
+                                             aux_tenants=[tenant_id]).vaults
+
+        vault.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+            cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesModifyEncryptionSettings")]
+
+    client.begin_update(resource_group_name, vault_name, vault).result()
+
+
+def show_encryption(client, resource_group_name, vault_name):
+    encryption_config_response = client.get(vault_name, resource_group_name)
+    return encryption_config_response
+
+
+# pylint: disable=too-many-locals
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
-                          soft_delete_feature_state=None):
-    if soft_delete_feature_state:
-        soft_delete_feature_state += "d"
+                          soft_delete_feature_state=None, cross_region_restore_flag=None,
+                          hybrid_backup_security_features=None, tenant_id=None,
+                          classic_alerts=None, azure_monitor_alerts_for_job_failures=None,
+                          retention_duration_in_days=None):
+    if soft_delete_feature_state or hybrid_backup_security_features or retention_duration_in_days:
+        logger.warning('--backup-storage-redundancy, --cross-region-restore-flag, --classic-alerts and '
+                       '--azure-monitor-alerts-for-job-failures parameters will be ignored if provided.')
+
+        # TODO Re-add once the new SDK is in place
+        # if soft_delete_feature_state or retention_duration_in_days:
+        #     logger.warning("Modifying the soft delete properties of a vault via this command will "
+        #                    "soon be deprecated. Please use the 'az backup vault create' command "
+        #                    "to modify soft delete settings.")
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
+        if tenant_id is not None:
+            vault_config_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                          aux_tenants=[tenant_id]).backup_resource_vault_configs
         vault_config_response = vault_config_client.get(vault_name, resource_group_name)
-        enhanced_security_state = vault_config_response.properties.enhanced_security_state
+
+        # Manual input validation - can be removed once the error messages are fixed (ETA October 2023)
+        if vault_config_response.properties.soft_delete_feature_state.lower() == "alwayson" \
+                and soft_delete_feature_state is not None:
+            logger.warning("Vault's current Soft Delete State is AlwaysOn. This cannot be modified.")
+            soft_delete_feature_state = None
+        if retention_duration_in_days is not None:
+            if retention_duration_in_days < 14 or retention_duration_in_days > 180:
+                logger.warning("Retention duration must be between 14 and 180 days. Not modifying this field.")
+                retention_duration_in_days = None
+
+        soft_delete_feature_state = vault_config_response.properties.soft_delete_feature_state if (
+            soft_delete_feature_state is None) else cust_help.transform_softdelete_parameters(soft_delete_feature_state)
+        retention_duration_in_days = vault_config_response.properties.soft_delete_retention_period_in_days if (
+            retention_duration_in_days is None) else retention_duration_in_days
+        hybrid_backup_security_features = vault_config_response.properties.enhanced_security_state if (
+            hybrid_backup_security_features is None) else hybrid_backup_security_features + "d"
+        resource_guard_operation_requests = None
+        if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "disableSoftDelete"):
+            if soft_delete_feature_state.lower() == "disabled" or hybrid_backup_security_features.lower() == "disabled":
+                resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+                    cmd.cli_ctx, resource_group_name, vault_name, "disableSoftDelete")]
         vault_config = BackupResourceVaultConfig(soft_delete_feature_state=soft_delete_feature_state,
-                                                 enhanced_security_state=enhanced_security_state)
+                                                 enhanced_security_state=hybrid_backup_security_features,
+                                                 resource_guard_operation_requests=resource_guard_operation_requests,
+                                                 soft_delete_retention_period_in_days=retention_duration_in_days)
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
-    backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy)
-    backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
-    return client.update(vault_name, resource_group_name, backup_storage_config_resource)
+    if backup_storage_redundancy or cross_region_restore_flag:
+        logger.warning(
+            '--classic-alerts and --azure-monitor-alerts-for-job-failures parameters will be ignored if provided.')
+        logger.warning('Please use the "az backup vault update" command to perform this operation instead.')
+        cross_region_restore_flag_str = 'Enabled' if cross_region_restore_flag else 'Disabled'
+        vault_client = vaults_cf(cmd.cli_ctx)
+        return update_vault(cmd, vault_client, vault_name, resource_group_name,
+                            backup_storage_redundancy=backup_storage_redundancy,
+                            cross_region_restore_flag=cross_region_restore_flag_str)
+
+    if classic_alerts or azure_monitor_alerts_for_job_failures:
+        logger.warning('This command will be deprecated soon and some operations may not work.'
+                       'Please use the "az backup vault update" command to perform this operation instead.')
+        vault_client = vaults_cf(cmd.cli_ctx)
+        return update_vault(cmd, vault_client, vault_name, resource_group_name, classic_alerts=classic_alerts,
+                            azure_monitor_alerts_for_job_failures=azure_monitor_alerts_for_job_failures)
 
 
 def get_backup_properties(cmd, client, vault_name, resource_group_name):
@@ -122,90 +733,151 @@ def show_policy(client, resource_group_name, vault_name, name):
     return client.get(vault_name, resource_group_name, name)
 
 
+# pylint: disable=redefined-builtin
+def list_deleted_protection_containers(client, resource_group_name, vault_name, backup_management_type):
+    # backup_management_type should be made an optional field after the swagger is fixed
+    filter = "backupManagementType eq '{}'".format(backup_management_type)
+    return client.list(resource_group_name, vault_name, filter)
+
+
+def update_resource_guard_mapping(cmd, client, resource_group_name, vault_name, resource_guard_id, tenant_id=None):
+    # Authorization for cross tenant
+    if tenant_id is not None:
+        client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                         aux_tenants=[tenant_id]).resource_guard_proxy
+    # unlock delete if already protected
+    if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name):
+        delete_resource_guard_mapping(cmd, client, resource_group_name, vault_name, tenant_id)
+    properties = ResourceGuardProxyBase(resource_guard_resource_id=resource_guard_id)
+    return client.put(vault_name, resource_group_name, default_resource_guard,
+                      ResourceGuardProxyBaseResource(properties=properties))
+
+
+def show_resource_guard_mapping(client, resource_group_name, vault_name):
+    return client.get(vault_name, resource_group_name, default_resource_guard)
+
+
+def delete_resource_guard_mapping(cmd, client, resource_group_name, vault_name, tenant_id=None):
+    if not cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "deleteRGMapping"):
+        raise ResourceNotFoundError("The vault does not have any Resource Guard Mapping.")
+    # For Cross Tenant Scenario
+    if tenant_id is not None:
+        client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                         aux_tenants=[tenant_id]).resource_guard_proxy
+
+    # unlock delete
+    resource_guard_operation_request = cust_help.get_resource_guard_operation_request(cmd.cli_ctx,
+                                                                                      resource_group_name, vault_name,
+                                                                                      "deleteRGMapping")
+    client.unlock_delete(vault_name, resource_group_name, default_resource_guard,
+                         UnlockDeleteRequest(resource_guard_operation_requests=[resource_guard_operation_request]))
+    return client.delete(vault_name, resource_group_name, default_resource_guard)
+
+
 def list_policies(client, resource_group_name, vault_name):
     policies = client.list(vault_name, resource_group_name)
-    return _get_list_from_paged_response(policies)
+    return cust_help.get_list_from_paged_response(policies)
 
 
-def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type):
-    filter_string = _get_filter_string({
-        'policyName': name,
-        'backupManagementType': backup_management_type})
-    items = client.list(vault_name, resource_group_name, filter_string)
-    return _get_list_from_paged_response(items)
-
-
-def set_policy(client, resource_group_name, vault_name, policy, policy_name):
-    policy_object = _get_policy_from_json(client, policy)
+def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, tenant_id=None,
+               is_critical_operation=False):
+    policy_object = cust_help.get_policy_from_json(client, policy)
     retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
     schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
 
     # Validating range of days input
-    if schedule_run_frequency == 'Weekly' and retention_range_in_days != 5:
-        raise CLIError(
-            """
-            Retention policy range must be equal to 5.
-            """)
-    if schedule_run_frequency == 'Daily' and (retention_range_in_days > 5 or retention_range_in_days < 1):
-        raise CLIError(
-            """
-            Retention policy range must be between 1 to 5.
-            """)
-
-    error_message = "For SnapshotRetentionRangeInDays, the minimum value is 1 and"\
-                    "maximum is 5. For weekly backup policies, the only allowed value is 5 "\
-                    ". Please set the value accordingly."
-
-    if policy_object.properties.schedule_policy.schedule_run_frequency == "Weekly":
-        if policy_object.properties.instant_rp_retention_range_in_days is not None:
-            if policy_object.properties.instant_rp_retention_range_in_days != 5:
-                logger.error(error_message)
+    if retention_range_in_days is not None:
+        if policy_object.properties.policy_type != 'V2':
+            if schedule_run_frequency == ScheduleRunType.weekly and retention_range_in_days != 5:
+                raise InvalidArgumentValueError(
+                    """
+                    Retention policy range must be equal to 5.
+                    """)
+            if schedule_run_frequency == ScheduleRunType.daily and (retention_range_in_days > 5 or
+                                                                    retention_range_in_days < 1):
+                raise InvalidArgumentValueError(
+                    """
+                    Retention policy range must be between 1 to 5.
+                    """)
         else:
-            policy_object.properties.instant_rp_retention_range_in_days = 5
-    else:
-        if policy_object.properties.instant_rp_retention_range_in_days is not None:
-            if not 1 <= policy_object.properties.instant_rp_retention_range_in_days <= 5:
-                logger.error(error_message)
-        else:
-            policy_object.properties.instant_rp_retention_range_in_days = 2
+            if (retention_range_in_days > 30 or retention_range_in_days < 1):
+                raise InvalidArgumentValueError(
+                    """
+                    Retention policy range must be between 1 to 30.
+                    """)
     if policy_name is None:
         policy_name = policy_object.name
 
     additional_properties = policy_object.properties.additional_properties
     if 'instantRpDetails' in additional_properties:
         policy_object.properties.instant_rp_details = additional_properties['instantRpDetails']
-
+    if is_critical_operation:
+        existing_policy = common.show_policy(client, resource_group_name, vault_name, policy_name)
+        if cust_help.is_retention_duration_decreased(existing_policy, policy_object, "AzureIaasVM"):
+            # update the payload with critical operation and add auxiliary header for cross tenant case
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protection_policies
+            policy_object.properties.resource_guard_operation_requests = [
+                cust_help.get_resource_guard_operation_request(cmd.cli_ctx, resource_group_name, vault_name,
+                                                               "updatePolicy")]
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
+def create_policy(client, resource_group_name, vault_name, name, policy):
+    policy_object = cust_help.get_policy_from_json(client, policy)
+
+    policy_object.name = name
+    policy_object.properties.backup_management_type = "AzureIaasVM"
+
+    additional_properties = policy_object.properties.additional_properties
+    if 'instantRpDetails' in additional_properties:
+        policy_object.properties.instant_rp_details = additional_properties['instantRpDetails']
+
+    return client.create_or_update(vault_name, resource_group_name, name, policy_object)
+
+
 def delete_policy(client, resource_group_name, vault_name, name):
-    client.delete(vault_name, resource_group_name, name)
+    client.begin_delete(vault_name, resource_group_name, name)
 
 
 def show_container(client, name, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
-    return _get_none_one_or_many(_get_containers(client, container_type, status, resource_group_name, vault_name, name))
+    return cust_help.get_none_one_or_many(_get_containers(client, container_type, status, resource_group_name,
+                                                          vault_name, name))
 
 
 def list_containers(client, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
     return _get_containers(client, container_type, status, resource_group_name, vault_name)
 
 
-def check_protection_enabled_for_vm(cmd, vm_id):
-    vaults = list_vaults(vaults_cf(cmd.cli_ctx))
-    for vault in vaults:
-        vault_rg = _get_resource_group_from_id(vault.id)
-        items = list_items(cmd, backup_protected_items_cf(cmd.cli_ctx), vault_rg, vault.name)
-        if any(vm_id.lower() == item.properties.virtual_machine_id.lower() for item in items):
-            return vault.id
-    return None
+def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_name=None):
+    if vm_id is None:
+        if is_valid_resource_id(vm):
+            vm_id = vm
+        else:
+            if vm is None or resource_group_name is None:
+                raise RequiredArgumentMissingError("--vm or --resource-group missing. Please provide the required "
+                                                   "arguments.")
+            vm_id = virtual_machines_cf(cmd.cli_ctx).get(resource_group_name, vm).id
+    vm_name, vm_rg = cust_help.get_resource_name_and_rg(resource_group_name, vm_id)
+    vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
+    parameters = BackupStatusRequest(resource_type='VM', resource_id=vm_id)
+    return backup_status_cf(cmd.cli_ctx).get(vm.location, parameters).vault_id
 
 
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name, diskslist=None,
                              disk_list_setting=None, exclude_all_data_disks=None):
-    vm_name, vm_rg = _get_resource_name_and_rg(resource_group_name, vm)
+    vm_name, vm_rg = cust_help.get_resource_name_and_rg(resource_group_name, vm)
     vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
+
+    logger.warning('Starting in May 2025, Trusted Launch virtual machines can be protected with both'
+                   ' standard and enhanced policies via PS and CLI')
+
+    # throw error if policy has more than 1000 protected VMs.
+    if policy.properties.protected_items_count >= 1000:
+        raise CLIError("Cannot configure backup for more than 1000 VMs per policy")
 
     if vm.location.lower() != vault.location.lower():
         raise CLIError(
@@ -219,6 +891,16 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
             The policy type should match with the workload being protected.
             Use the relevant get-default policy command and use it to protect the workload.
             """)
+
+    if (hasattr(vm, 'security_profile') and hasattr(vm.security_profile, 'security_type') and
+            vm.security_profile.security_type is not None and
+            vm.security_profile.security_type.lower() == 'trustedlaunch'):
+        if policy.properties.policy_type != 'V2':
+            raise InvalidArgumentValueError(
+                """
+                Trusted VM can only be protected using Enhanced Policy. Please provide a valid IaasVM Enhanced Policy
+                in --policy-name argument.
+                """)
 
     # Get protectable item.
     protectable_item = _get_protectable_item_for_vm(cmd.cli_ctx, vault_name, resource_group_name, vm_name, vm_rg)
@@ -235,12 +917,16 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
             """)
 
     # Construct enable protection request object
-    container_uri = _get_protection_container_uri_from_id(protectable_item.id)
-    item_uri = _get_protectable_item_uri_from_id(protectable_item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(protectable_item.id)
+    item_uri = cust_help.get_protectable_item_uri_from_id(protectable_item.id)
     vm_item_properties = _get_vm_item_properties_from_vm_type(vm.type)
     vm_item_properties.policy_id = policy.id
     vm_item_properties.source_resource_id = protectable_item.properties.virtual_machine_id
 
+    if disk_list_setting is not None and exclude_all_data_disks is not None:
+        raise MutuallyExclusiveArgumentError("""
+        Both --disk-list-setting and --exclude-all-data-disks can not be provided together.
+        """)
     if disk_list_setting is not None:
         if diskslist is None:
             raise CLIError("Please provide LUNs of disks that will be included or excluded.")
@@ -261,19 +947,23 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
 
     # Trigger enable protection and wait for completion
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, vm_item, raw=True)
-    return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+                                     container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def update_protection_for_vm(cmd, client, resource_group_name, vault_name, item, diskslist=None,
                              disk_list_setting=None, exclude_all_data_disks=None):
-    container_uri = _get_protection_container_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = item.name
     vm_type = '/'.join(item.properties.virtual_machine_id.split('/')[-3:-1])
     vm_item_properties = _get_vm_item_properties_from_vm_type(vm_type)
     vm_item_properties.policy_id = item.properties.policy_id
     vm_item_properties.source_resource_id = item.properties.virtual_machine_id
 
+    if disk_list_setting is not None and exclude_all_data_disks is not None:
+        raise MutuallyExclusiveArgumentError("""
+        Both --disk-list-setting and --exclude-all-data-disks can not be provided together.
+        """)
     if disk_list_setting is not None:
         if disk_list_setting.lower() == "resetexclusionsettings":
             disk_exclusion_properties = None
@@ -297,46 +987,50 @@ def update_protection_for_vm(cmd, client, resource_group_name, vault_name, item,
 
     # Trigger enable protection and wait for completion
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, vm_item, raw=True)
-    return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+                                     container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, container_type="AzureIaasVM",
-              item_type="VM"):
-    items = list_items(cmd, client, resource_group_name, vault_name, container_name, container_type, item_type)
+              item_type="VM", use_secondary_region=None):
+    items = list_items(cmd, client, resource_group_name, vault_name, container_name, container_type, item_type,
+                       use_secondary_region)
 
-    if _is_native_name(name):
+    if cust_help.is_native_name(name):
         filtered_items = [item for item in items if item.name == name]
     else:
         filtered_items = [item for item in items if item.properties.friendly_name == name]
 
-    return _get_none_one_or_many(filtered_items)
+    return cust_help.get_none_one_or_many(filtered_items)
 
 
 def list_items(cmd, client, resource_group_name, vault_name, container_name=None, container_type="AzureIaasVM",
-               item_type="VM"):
-    filter_string = _get_filter_string({
+               item_type="VM", use_secondary_region=None):
+    filter_string = cust_help.get_filter_string({
         'backupManagementType': container_type,
         'itemType': item_type})
 
+    if use_secondary_region:
+        client = backup_protected_items_crr_cf(cmd.cli_ctx)
     items = client.list(vault_name, resource_group_name, filter_string)
-    paged_items = _get_list_from_paged_response(items)
+    paged_items = cust_help.get_list_from_paged_response(items)
     if container_name:
-        if _is_native_name(container_name):
+        if cust_help.is_native_name(container_name):
             container_uri = container_name
         else:
             container = show_container(backup_protection_containers_cf(cmd.cli_ctx),
                                        container_name, resource_group_name, vault_name,
                                        container_type)
-            _validate_container(container)
+            cust_help.validate_container(container)
             container_uri = container.name
 
         return [item for item in paged_items if
-                _get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+                cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
     return paged_items
 
 
-def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy):
+def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
+                           is_critical_operation=False, yes=False):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -344,67 +1038,159 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             Use the relevant get-default policy command and use it to update the policy for the workload.
             """)
 
-    # throw error if policy has more than 100 protected VMs.
-    if policy.properties.protected_items_count >= 100:
-        raise CLIError("Cannot configure backup for more than 100 VMs per policy")
+    # throw error if policy has more than 1000 protected VMs.
+    if policy.properties.protected_items_count >= 1000:
+        raise CLIError("Cannot configure backup for more than 1000 VMs per policy")
 
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(item.id)
-    item_uri = _get_protected_item_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
     # Update policy request
     vm_item_properties = _get_vm_item_properties_from_vm_id(item.properties.virtual_machine_id)
     vm_item_properties.policy_id = policy.id
     vm_item_properties.source_resource_id = item.properties.source_resource_id
     vm_item = ProtectedItemResource(properties=vm_item_properties)
+    existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                         item.properties.policy_name)
+
+    if is_critical_operation:
+        if cust_help.is_retention_duration_decreased(existing_policy, policy, "AzureIaasVM"):
+            # update the payload with critical operation and add auxiliary header for cross tenant case
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protected_items
+            vm_item.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
+
+    # Raise warning for standard->enhanced policy
+    try:
+        existing_policy_type = existing_policy.properties.policy_type.lower()
+        new_policy_type = policy.properties.policy_type.lower()
+        if (not yes and
+                new_policy_type in vm_policy_type_map and vm_policy_type_map[new_policy_type] == 'enhanced' and
+                existing_policy_type in vm_policy_type_map and vm_policy_type_map[existing_policy_type] == 'standard'):
+            warning_prompt = ('Upgrading to enhanced policy can incur additional charges. Once upgraded to the enhanced '
+                              'policy, it is not possible to revert back to the standard policy. Do you want to continue?')
+            if not prompt_y_n(warning_prompt):
+                logger.warning('Cancelling policy update operation')
+                return None
+    except AttributeError:
+        logger.warning("Unable to fetch policy type for either existing or new policy. Proceeding with update.")
 
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, vm_item, raw=True)
-    return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+                                     container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
+
+    if retain_until is None:
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
+
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(item.id)
-    item_uri = _get_protected_item_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
     trigger_backup_request = _get_backup_request(item.properties.workload_type, retain_until)
 
     # Trigger backup
     result = client.trigger(vault_name, resource_group_name, fabric_name,
-                            container_uri, item_uri, trigger_backup_request, raw=True)
-    return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+                            container_uri, item_uri, trigger_backup_request, cls=cust_help.get_pipeline_response)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,  # pylint: disable=redefined-builtin
-                        container_type="AzureIaasVM", item_type="VM"):
+                        container_type="AzureIaasVM", item_type="VM", use_secondary_region=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, container_type, item_type)
-    _validate_item(item)
+                     item_name, container_type, item_type, use_secondary_region)
+    cust_help.validate_item(item)
 
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(item.id)
-    item_uri = _get_protected_item_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
+
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, None)
+        paged_rps = cust_help.get_list_from_paged_response(recovery_points)
+        filtered_rps = [rp for rp in paged_rps if rp.name.lower() == name.lower()]
+        recovery_point = cust_help.get_none_one_or_many(filtered_rps)
+        if recovery_point is None:
+            raise InvalidArgumentValueError("The recovery point provided does not exist. Please provide valid RP.")
+        return recovery_point
 
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
 
-def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None):
+def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
+                         use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
+                         recommended_for_archive=None):
+
+    if cmd.name.split()[2] == 'show-log-chain':
+        raise ArgumentUsageError("show-log-chain is supported by AzureWorkload backup management type only.")
+
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(item.id)
-    item_uri = _get_protected_item_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
-    query_end_date, query_start_date = _get_query_dates(end_date, start_date)
+    query_end_date, query_start_date = cust_help.get_query_dates(end_date, start_date)
 
-    filter_string = _get_filter_string({
+    filter_string = cust_help.get_filter_string({
         'startDate': query_start_date,
         'endDate': query_end_date})
 
-    # Get recovery points
-    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
-    paged_recovery_points = _get_list_from_paged_response(recovery_points)
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
 
-    return paged_recovery_points
+    if recommended_for_archive:
+        if is_ready_for_move is False:
+            raise InvalidArgumentValueError(
+                """
+                All the recommended archivable recovery points are by default ready for
+                move. Please provide the correct value for --is-ready-for-move.
+                """)
+
+        client = recovery_points_recommended_cf(cmd.cli_ctx)
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                                      ListRecoveryPointsRecommendedForMoveRequest(excluded_rp_list=[]))
+
+    else:
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                                      filter_string)
+
+    paged_recovery_points = cust_help.get_list_from_paged_response(recovery_points)
+    common.fetch_tier(paged_recovery_points)
+
+    if use_secondary_region:
+        paged_recovery_points = [item for item in paged_recovery_points if item.properties.recovery_point_tier_details
+                                 is None or (item.properties.recovery_point_tier_details is not None and
+                                             item.tier_type != 'VaultArchive')]
+
+    recovery_point_list = common.check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move)
+    recovery_point_list = common.filter_rp_based_on_tier(recovery_point_list, tier)
+    return recovery_point_list
+
+
+def move_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_name, source_tier,
+                         destination_tier):
+
+    container_uri = cust_help.get_protection_container_uri_from_id(item_name.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item_name.id)
+
+    if source_tier not in common.tier_type_map:
+        raise InvalidArgumentValueError('This source tier-type is not accepted by move command at present.')
+
+    parameters = MoveRPAcrossTiersRequest(source_tier_type=common.tier_type_map[source_tier],
+                                          target_tier_type=common.tier_type_map[destination_tier])
+
+    result = _backup_client_factory(cmd.cli_ctx).begin_move_recovery_point(vault_name, resource_group_name,
+                                                                           fabric_name, container_uri, item_uri,
+                                                                           rp_name, parameters,
+                                                                           cls=cust_help.get_pipeline_response,
+                                                                           polling=False).result()
+
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def _should_use_original_storage_account(recovery_point, restore_to_staging_storage_account):
@@ -437,21 +1223,230 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
     return use_original_storage_account
 
 
+def get_vault_csr_state(vault):
+    restore_settings = vault.properties.restore_settings
+    return (None if restore_settings is None else
+            restore_settings.cross_subscription_restore_settings.cross_subscription_restore_state)
+
+
+def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
+                                    source_resource_id, target_rg_id,
+                                    use_original_storage_account, restore_disk_lun_list,
+                                    rehydration_duration, rehydration_priority, tier, disk_encryption_set_id,
+                                    encryption, recovery_point, mi_system_assigned,
+                                    mi_user_assigned, restore_mode):
+
+    if disk_encryption_set_id is not None:
+        if not (encryption.properties.encryption_at_rest_type == "CustomerManaged" and
+                recovery_point.properties.is_managed_virtual_machine and
+                not recovery_point.properties.is_source_vm_encrypted):
+            raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
+
+    identity_info = None
+    identity_based_restore_details = None
+    target_storage_account_id = storage_account_id
+    if mi_system_assigned or mi_user_assigned:
+        if not recovery_point.properties.is_managed_virtual_machine:
+            raise InvalidArgumentValueError("MI based restore is not supported for unmanaged VMs.")
+        identity_info = IdentityInfo(
+            is_system_assigned_identity=mi_system_assigned is not None,
+            managed_identity_resource_id=mi_user_assigned)
+        identity_based_restore_details = IdentityBasedRestoreDetails(
+            target_storage_account_id=target_storage_account_id)
+        target_storage_account_id = None
+
+    if tier == 'VaultArchive':
+        rehyd_duration = 'P' + str(rehydration_duration) + 'D'
+        rehydration_info = RecoveryPointRehydrationInfo(rehydration_retention_duration=rehyd_duration,
+                                                        rehydration_priority=rehydration_priority)
+
+        trigger_restore_properties = IaasVMRestoreWithRehydrationRequest(
+            create_new_cloud_service=False,
+            recovery_point_id=rp_name,
+            recovery_type=restore_mode,
+            region=vault_location,
+            storage_account_id=target_storage_account_id,
+            source_resource_id=source_resource_id,
+            target_resource_group_id=target_rg_id,
+            original_storage_account_option=use_original_storage_account,
+            restore_disk_lun_list=restore_disk_lun_list,
+            recovery_point_rehydration_info=rehydration_info,
+            disk_encryption_set_id=disk_encryption_set_id,
+            identity_info=identity_info,
+            identity_based_restore_details=identity_based_restore_details)
+
+    else:
+        trigger_restore_properties = IaasVMRestoreRequest(
+            create_new_cloud_service=False,
+            recovery_point_id=rp_name,
+            recovery_type=restore_mode,
+            region=vault_location,
+            storage_account_id=target_storage_account_id,
+            source_resource_id=source_resource_id,
+            target_resource_group_id=target_rg_id,
+            original_storage_account_option=use_original_storage_account,
+            restore_disk_lun_list=restore_disk_lun_list,
+            disk_encryption_set_id=disk_encryption_set_id,
+            identity_info=identity_info,
+            identity_based_restore_details=identity_based_restore_details)
+
+    return trigger_restore_properties
+
+
+def _set_trigger_restore_properties(cmd, trigger_restore_properties, target_virtual_machine_name, virtual_network_name,
+                                    target_vnet_resource_group, subnet_name, vault_name, resource_group_name,
+                                    recovery_point, target_zone, target_rg_id, source_resource_id, restore_mode,
+                                    target_subscription, use_secondary_region):
+    if restore_mode == "AlternateLocation":
+        virtual_network = _get_vnet_object(cmd.cli_ctx, target_subscription, virtual_network_name,
+                                           target_vnet_resource_group)
+        subnet_id = None
+        for subnet in virtual_network.properties['subnets']:
+            if subnet_name.lower() == subnet['name'].lower():
+                subnet_id = subnet['id']
+                break
+        if subnet_id is None:
+            raise InvalidArgumentValueError(
+                """
+                --target-subnet-name provided does not exist in the virtual network specified. Please check the
+                combination and try again.
+                """)
+        trigger_restore_properties.target_virtual_machine_id = (target_rg_id + '/' +
+                                                                '/'.join(source_resource_id.split('/')[-4:-1]) + '/' +
+                                                                target_virtual_machine_name)
+        trigger_restore_properties.virtual_network_id = virtual_network.id
+        trigger_restore_properties.subnet_id = subnet_id
+    if target_zone:
+        backup_config_response = backup_storage_configs_non_crr_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
+        validators.validate_czr(backup_config_response, recovery_point, use_secondary_region)
+        trigger_restore_properties.zones = [target_zone]
+
+
+def _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource_group, target_subnet_name,
+                          target_resource_group):
+    if (target_vm_name is None and target_vnet_name is None and target_vnet_resource_group is None and
+            target_subnet_name is None):
+        return 'RestoreDisks'
+    if not (target_vm_name is None or target_vnet_name is None or target_vnet_resource_group is None or
+            target_subnet_name is None):
+        if target_resource_group is None:
+            raise RequiredArgumentMissingError(
+                """
+                --target-resource-group is required for ALR. Please specify a valid --target-resource-group.
+                """)
+        return 'AlternateLocation'
+    raise RequiredArgumentMissingError(
+        """
+        Target VM details are not specified completely. Please make sure all these parameters are specified:
+        --target-vm-name, --target-vnet-name, --target-vnet-resource-group, --target-subnet-name.
+        """)
+
+
+def _set_pe_restore_trigger_restore_properties(cmd, trigger_restore_properties, disk_access_option, target_disk_access_id,
+                                               recovery_point, use_secondary_region):
+    if not hasattr(recovery_point.properties, 'is_private_access_enabled_on_any_disk'):
+        return trigger_restore_properties
+    if recovery_point.properties.is_private_access_enabled_on_any_disk:
+        if disk_access_option is None:
+            raise InvalidArgumentValueError("--disk-access-option parameter must be provided since private access "
+                                            "is enabled in given recovery point")
+
+        if disk_access_option == "EnablePrivateAccessForAllDisks":
+            if target_disk_access_id is None:
+                raise InvalidArgumentValueError("--target-disk-access-id must be provided when --disk-access-option "
+                                                "is set to EnablePrivateAccessForAllDisks")
+
+        if disk_access_option == "SameAsOnSourceDisks":
+            if use_secondary_region:
+                raise InvalidArgumentValueError("Given --disk-access-option is not applicable to cross region restore")
+            if target_disk_access_id is not None:
+                raise InvalidArgumentValueError("--target-disk-access-id can't be provided for the "
+                                                "given --disk-access-option")
+
+        if disk_access_option == "EnablePublicAccessForAllDisks":
+            if target_disk_access_id is not None:
+                raise InvalidArgumentValueError("--target-disk-access-id can't be provided for the "
+                                                "given --disk-access-option")
+
+        trigger_restore_properties.target_disk_network_access_settings = TargetDiskNetworkAccessSettings(
+            target_disk_access_id=target_disk_access_id,
+            target_disk_network_access_option=disk_access_option
+        )
+    else:
+        if disk_access_option is not None or target_disk_access_id is not None:
+            raise InvalidArgumentValueError("--disk-access-option parameter can't be provided since private access "
+                                            "is not enabled in given recovery point")
+
+    return trigger_restore_properties
+
+
+def _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties, restore_to_edge_zone, recovery_point,
+                                               target_subscription, use_secondary_region, restore_mode):
+    # TODO: As the subscription we currently use does not have access to Edge Zones, no tests have been written for
+    # this. We have manually validated it, but tests should be added to validate all (successful + exceptional)
+    # cases as soon as is viable.
+    if restore_to_edge_zone is not None and restore_to_edge_zone:
+        # If CSR or CRR, error
+        if target_subscription != get_subscription_id(cmd.cli_ctx) or use_secondary_region:
+            raise InvalidArgumentValueError("The restore-to-edge-zone parameter can't be used for cross region "
+                                            "or cross subscription restore")
+        if recovery_point.properties.extended_location is None \
+                or recovery_point.properties.extended_location.name is None \
+                or recovery_point.properties.extended_location.name == "":
+            raise InvalidArgumentValueError("Please make sure that the recovery point belongs to an edge zone VM "
+                                            "and contains extended location")
+        trigger_restore_properties.extended_location = recovery_point.properties.extended_location
+
+    if restore_mode == "OriginalLocation":
+        if recovery_point.properties.extended_location is not None \
+                and recovery_point.properties.extended_location.name is not None \
+                and recovery_point.properties.extended_location.name != "":
+            trigger_restore_properties.extended_location = recovery_point.properties.extended_location
+
+    return trigger_restore_properties
+
+
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
-                  diskslist=None, restore_as_unmanaged_disks=None):
-    item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, "AzureIaasVM", "VM")
-    _validate_item(item)
-    recovery_point = show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                                         container_name, item_name, rp_name, "AzureIaasVM", "VM")
+                  diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
+                  rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
+                  mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
+                  target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
+                  target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None,
+                  tenant_id=None, disk_access_option=None, target_disk_access_id=None):
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
+    vault_identity = vault.identity
+
+    target_subscription = get_subscription_id(cmd.cli_ctx)
+    if target_subscription_id is not None and restore_mode == "AlternateLocation":
+        vault_csr_state = get_vault_csr_state(vault)
+        if vault_csr_state is None or vault_csr_state == "Enabled":
+            target_subscription = target_subscription_id
+        else:
+            raise ArgumentUsageError(
+                """
+                Cross Subscription Restore is not allowed on this Vault. Please either enable CSR on the vault or
+                try restoring in the same subscription.
+                """)
+    item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
+                     item_name, "AzureIaasVM", "VM", use_secondary_region)
+    cust_help.validate_item(item)
+
+    recovery_point = show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                         container_name, item_name, rp_name, "AzureIaasVM", "VM", use_secondary_region)
+
+    common.fetch_tier_for_rp(recovery_point)
+
+    validators.validate_archive_restore(recovery_point, rehydration_priority)
+
+    encryption = backup_resource_encryption_config_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
 
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(item.id)
-    item_uri = _get_protected_item_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
     # Original Storage Account Restore Logic
     use_original_storage_account = _should_use_original_storage_account(recovery_point,
@@ -464,30 +1459,36 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
             """)
 
     # Construct trigger restore request object
-    sa_name, sa_rg = _get_resource_name_and_rg(resource_group_name, storage_account)
-    _storage_account_id = _get_storage_account_id(cmd.cli_ctx, sa_name, sa_rg)
+    if storage_account_resource_group is None:
+        storage_account_resource_group = resource_group_name
+    sa_name, sa_rg = cust_help.get_resource_name_and_rg(storage_account_resource_group, storage_account)
+    _storage_account_id = _get_storage_account_id(cmd.cli_ctx, target_subscription, sa_name, sa_rg)
     _source_resource_id = item.properties.source_resource_id
     target_rg_id = None
 
-    if restore_as_unmanaged_disks and target_resource_group is not None:
-        raise CLIError(
-            """
-            Both restore_as_unmanaged_disks and target_resource_group can't be spceified.
-            Please give Only one parameter and retry.
-            """)
+    if restore_mode == "AlternateLocation":
+        restore_mode = _get_alr_restore_mode(target_vm_name, target_vnet_name, target_vnet_resource_group,
+                                             target_subnet_name, target_resource_group)
 
-    if recovery_point.properties.is_managed_virtual_machine:
-        if target_resource_group is not None:
-            target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + target_resource_group
-        if not restore_as_unmanaged_disks and target_resource_group is None:
-            logger.warning(
+        if restore_as_unmanaged_disks and target_resource_group is not None:
+            raise MutuallyExclusiveArgumentError(
                 """
-                The disks of the managed VM will be restored as unmanaged since targetRG parameter is not provided.
-                This will NOT leverage the instant restore functionality.
-                Hence it can be significantly slow based on given storage account.
-                To leverage instant restore, provide the target RG parameter.
-                Otherwise, provide the intent next time by passing the --restore-as-unmanaged-disks parameter
+                Both restore_as_unmanaged_disks and target_resource_group can't be spceified.
+                Please give Only one parameter and retry.
                 """)
+
+        if recovery_point.properties.is_managed_virtual_machine:
+            if target_resource_group is not None:
+                target_rg_id = "/subscriptions/" + target_subscription + "/resourceGroups/" + target_resource_group
+            if not restore_as_unmanaged_disks and target_resource_group is None:
+                logger.warning(
+                    """
+                    The disks of the managed VM will be restored as unmanaged since targetRG parameter is not provided.
+                    This will NOT leverage the instant restore functionality.
+                    Hence it can be significantly slow based on given storage account.
+                    To leverage instant restore, provide the target RG parameter.
+                    Otherwise, provide the intent next time by passing the --restore-as-unmanaged-disks parameter
+                    """)
 
     _validate_restore_disk_parameters(restore_only_osdisk, diskslist)
     restore_disk_lun_list = None
@@ -497,32 +1498,72 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     if diskslist:
         restore_disk_lun_list = diskslist
 
-    trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
-                                                      recovery_point_id=rp_name,
-                                                      recovery_type='RestoreDisks',
-                                                      region=vault_location,
-                                                      storage_account_id=_storage_account_id,
-                                                      source_resource_id=_source_resource_id,
-                                                      target_resource_group_id=target_rg_id,
-                                                      original_storage_account_option=use_original_storage_account,
-                                                      restore_disk_lun_list=restore_disk_lun_list)
+    validators.validate_mi_used_for_restore_disks(vault_identity, mi_system_assigned, mi_user_assigned)
+
+    trigger_restore_properties = _get_trigger_restore_properties(rp_name, vault_location, _storage_account_id,
+                                                                 _source_resource_id, target_rg_id,
+                                                                 use_original_storage_account, restore_disk_lun_list,
+                                                                 rehydration_duration, rehydration_priority,
+                                                                 None if recovery_point.
+                                                                 properties.recovery_point_tier_details is None else
+                                                                 recovery_point.tier_type, disk_encryption_set_id,
+                                                                 encryption, recovery_point, mi_system_assigned,
+                                                                 mi_user_assigned, restore_mode)
+
+    _set_trigger_restore_properties(cmd, trigger_restore_properties, target_vm_name, target_vnet_name,
+                                    target_vnet_resource_group, target_subnet_name, vault_name, resource_group_name,
+                                    recovery_point, target_zone, target_rg_id, _source_resource_id, restore_mode,
+                                    target_subscription, use_secondary_region)
+
+    # Edge zones-specific code. Not using existing set/get properties code as it is messy and prone to errors
+    trigger_restore_properties = _set_edge_zones_trigger_restore_properties(cmd, trigger_restore_properties,
+                                                                            restore_to_edge_zone,
+                                                                            recovery_point, target_subscription,
+                                                                            use_secondary_region, restore_mode)
+
+    trigger_restore_properties = _set_pe_restore_trigger_restore_properties(cmd, trigger_restore_properties,
+                                                                            disk_access_option, target_disk_access_id,
+                                                                            recovery_point, use_secondary_region)
+
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
+    if use_secondary_region:
+        validators.validate_crr(target_rg_id, rehydration_priority)
+        azure_region = secondary_region_map[vault_location]
+        crr_access_token = _get_crr_access_token(cmd, azure_region, vault_name, resource_group_name, container_uri,
+                                                 item_uri, rp_name)
+        crr_client = cross_region_restore_cf(cmd.cli_ctx)
+        trigger_restore_properties.region = azure_region
+        trigger_crr_request = CrossRegionRestoreRequest(cross_region_restore_access_details=crr_access_token,
+                                                        restore_request=trigger_restore_properties)
+        result = crr_client.begin_trigger(azure_region, trigger_crr_request, cls=cust_help.get_pipeline_response,
+                                          polling=False).result()
+
+        return cust_help.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
+
+    if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore"):
+        # Cross Tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                             aux_tenants=[tenant_id]).restores
+        trigger_restore_request.properties.resource_guard_operation_requests = [
+            cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore")]
+
     # Trigger restore
-    result = client.trigger(vault_name, resource_group_name, fabric_name,
-                            container_uri, item_uri, rp_name,
-                            trigger_restore_request, raw=True)
-    return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+    result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
+                                  trigger_restore_request, cls=cust_help.get_pipeline_response, polling=False).result()
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def restore_files_mount_rp(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
-    _validate_item(item)
+    cust_help.validate_item(item)
 
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(item.id)
-    item_uri = _get_protected_item_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
     # file restore request
     _virtual_machine_id = item.properties.virtual_machine_id
@@ -536,10 +1577,10 @@ def restore_files_mount_rp(cmd, client, resource_group_name, vault_name, contain
     if recovery_point.properties.is_instant_ilr_session_active:
         recovery_point.properties.renew_existing_registration = True
 
-    result = client.provision(vault_name, resource_group_name, fabric_name,
-                              container_uri, item_uri, rp_name, file_restore_request, raw=True)
+    result = client.provision(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
+                              file_restore_request, cls=cust_help.get_pipeline_response)
 
-    client_scripts = _track_backup_ilr(cmd.cli_ctx, result, vault_name, resource_group_name)
+    client_scripts = cust_help.track_backup_ilr(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     if client_scripts[0].os_type == os_windows:
         _run_client_script_for_windows(client_scripts)
@@ -550,47 +1591,58 @@ def restore_files_mount_rp(cmd, client, resource_group_name, vault_name, contain
 def restore_files_unmount_rp(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
-    _validate_item(item)
+    cust_help.validate_item(item)
 
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(item.id)
-    item_uri = _get_protected_item_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
     recovery_point = recovery_points_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name,
                                                          container_uri, item_uri, rp_name)
 
     if recovery_point.properties.is_instant_ilr_session_active:
         result = client.revoke(vault_name, resource_group_name, fabric_name,
-                               container_uri, item_uri, rp_name, raw=True)
-        _track_backup_operation(cmd.cli_ctx, resource_group_name, result, vault_name)
+                               container_uri, item_uri, rp_name, cls=cust_help.get_pipeline_response)
+        cust_help.track_backup_operation(cmd.cli_ctx, resource_group_name, result, vault_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data=False):
+def disable_protection(cmd, client, resource_group_name, vault_name, item,
+                       retain_recovery_points_as_per_policy=False, tenant_id=None):
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(item.id)
-    item_uri = _get_protected_item_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
-    # Trigger disable protection and wait for completion
-    if delete_backup_data:
-        result = client.delete(vault_name, resource_group_name, fabric_name,
-                               container_uri, item_uri, raw=True)
-        return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+    # Parameters: item, undelete=True, retain_recovery_points_as_per_policy=False. Passed like this
+    # because the parameter=variable format breaks linting.
+    vm_item = _get_disable_protection_request(item, False, retain_recovery_points_as_per_policy)
 
-    vm_item = _get_disable_protection_request(item)
+    # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
+    # we want to set the appropriate parameters.
+    if vm_item.properties.protection_state == ProtectionState.protection_stopped:
+        if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
+                                                vault_name, "RecoveryServicesStopProtection"):
+            # Cross Tenant scenario
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protected_item
+            vm_item.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
 
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, vm_item, raw=True)
-    return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+                                     container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def undelete_protection(cmd, client, resource_group_name, vault_name, item):
-    container_uri = _get_protection_container_uri_from_id(item.id)
-    item_uri = _get_protected_item_uri_from_id(item.id)
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
-    vm_item = _get_disable_protection_request(item, True)
+    # Parameters: item, undelete=True, retain_recovery_points_as_per_policy=False. Passed like this to
+    # maintain consistency wih call in disable_protection, where parameter=variable format breaks linting.
+    vm_item = _get_disable_protection_request(item, True, False)
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, vm_item, raw=True)
-    return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+                                     container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def resume_protection(cmd, client, resource_group_name, vault_name, item, policy):
@@ -599,45 +1651,76 @@ def resume_protection(cmd, client, resource_group_name, vault_name, item, policy
     return update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
 
 
-def list_jobs(client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None):
-    query_end_date, query_start_date = _get_query_dates(end_date, start_date)
+def list_jobs(cmd, client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None,
+              backup_management_type=None, use_secondary_region=None):
+    query_end_date, query_start_date = cust_help.get_query_dates(end_date, start_date)
 
-    filter_string = _get_filter_string({
+    filter_string = cust_help.get_filter_string({
         'status': status,
         'operation': operation,
         'startTime': query_start_date,
-        'endTime': query_end_date})
+        'endTime': query_end_date,
+        'backupManagementType': backup_management_type})
 
-    return _get_list_from_paged_response(client.list(vault_name, resource_group_name, filter_string))
+    if use_secondary_region:
+        vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+        vault_location = vault.location
+        azure_region = secondary_region_map[vault_location]
+        client = backup_crr_jobs_cf(cmd.cli_ctx)
+        return cust_help.get_list_from_paged_response(client.list(azure_region, CrrJobRequest(resource_id=vault.id),
+                                                                  filter_string))
+
+    return cust_help.get_list_from_paged_response(client.list(vault_name, resource_group_name, filter_string))
 
 
-def show_job(client, resource_group_name, vault_name, name):
-    return client.get(vault_name, resource_group_name, name)
+def show_job(cmd, client, resource_group_name, vault_name, name, use_secondary_region=None):
+    if use_secondary_region:
+        vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+        vault_location = vault.location
+        azure_region = secondary_region_map[vault_location]
+        client = backup_crr_job_details_cf(cmd.cli_ctx)
+        response = client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
+        return cust_help.replace_min_value_in_subtask(response)
+    response = client.get(vault_name, resource_group_name, name)
+    return cust_help.replace_min_value_in_subtask(response)
 
 
-def stop_job(client, resource_group_name, vault_name, name):
+def stop_job(client, resource_group_name, vault_name, name, use_secondary_region=None):
+    if use_secondary_region:
+        raise InvalidArgumentValueError("Secondary region jobs do not support cancellation as of now.")
     client.trigger(vault_name, resource_group_name, name)
 
 
-def wait_for_job(client, resource_group_name, vault_name, name, timeout=None):
+def wait_for_job(cmd, client, resource_group_name, vault_name, name, timeout=None, use_secondary_region=None):
     logger.warning("Waiting for job '%s' ...", name)
     start_timestamp = datetime.utcnow()
-    job_details = client.get(vault_name, resource_group_name, name)
-    while _job_in_progress(job_details.properties.status):
-        if timeout:
-            elapsed_time = datetime.utcnow() - start_timestamp
-            if elapsed_time.seconds > timeout:
-                logger.warning("Command timed out while waiting for job '%s'", name)
-                break
+    if use_secondary_region:
+        vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+        vault_location = vault.location
+        azure_region = secondary_region_map[vault_location]
+        client = backup_crr_job_details_cf(cmd.cli_ctx)
+        job_details = client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
+        while cust_help.job_in_progress(job_details.properties.status):
+            if timeout:
+                elapsed_time = datetime.utcnow() - start_timestamp
+                if elapsed_time.seconds > timeout:
+                    logger.warning("Command timed out while waiting for job '%s'", name)
+                    break
+            job_details = client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
+            time.sleep(30)
+    else:
         job_details = client.get(vault_name, resource_group_name, name)
-        time.sleep(30)
+        while cust_help.job_in_progress(job_details.properties.status):
+            if timeout:
+                elapsed_time = datetime.utcnow() - start_timestamp
+                if elapsed_time.seconds > timeout:
+                    logger.warning("Command timed out while waiting for job '%s'", name)
+                    break
+            job_details = client.get(vault_name, resource_group_name, name)
+            time.sleep(30)
     return job_details
 
 # Client Utilities
-
-
-def _is_native_name(name):
-    return ";" in name
 
 
 def _get_containers(client, container_type, status, resource_group_name, vault_name, container_name=None):
@@ -646,17 +1729,23 @@ def _get_containers(client, container_type, status, resource_group_name, vault_n
         'status': status
     }
 
-    if container_name and not _is_native_name(container_name):
+    if container_name and not cust_help.is_native_name(container_name):
         filter_dict['friendlyName'] = container_name
-    filter_string = _get_filter_string(filter_dict)
+    filter_string = cust_help.get_filter_string(filter_dict)
 
     paged_containers = client.list(vault_name, resource_group_name, filter_string)
-    containers = _get_list_from_paged_response(paged_containers)
+    containers = cust_help.get_list_from_paged_response(paged_containers)
 
-    if container_name and _is_native_name(container_name):
+    if container_name and cust_help.is_native_name(container_name):
         return [container for container in containers if container.name == container_name]
 
     return containers
+
+
+def _unregister_containers(cmd, client, resource_group_name, vault_name, container_name):
+    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name,
+                               cls=cust_help.get_pipeline_response)
+    return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
 def _get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg):
@@ -665,8 +1754,9 @@ def _get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg):
     protectable_item = _try_get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg)
     if protectable_item is None:
         # Protectable item not found. Trigger discovery.
-        refresh_result = protection_containers_client.refresh(vault_name, vault_rg, fabric_name, raw=True)
-        _track_refresh_operation(cli_ctx, refresh_result, vault_name, vault_rg)
+        refresh_result = protection_containers_client.refresh(vault_name, vault_rg, fabric_name,
+                                                              cls=cust_help.get_pipeline_response)
+        cust_help.track_refresh_operation(cli_ctx, refresh_result, vault_name, vault_rg)
     protectable_item = _try_get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg)
     return protectable_item
 
@@ -674,15 +1764,15 @@ def _get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg):
 def _try_get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg):
     backup_protectable_items_client = backup_protectable_items_cf(cli_ctx)
 
-    filter_string = _get_filter_string({
+    filter_string = cust_help.get_filter_string({
         'backupManagementType': 'AzureIaasVM'})
 
     protectable_items_paged = backup_protectable_items_client.list(vault_name, vault_rg, filter_string)
-    protectable_items = _get_list_from_paged_response(protectable_items_paged)
+    protectable_items = cust_help.get_list_from_paged_response(protectable_items_paged)
 
     for protectable_item in protectable_items:
-        item_vm_name = _get_vm_name_from_vm_id(protectable_item.properties.virtual_machine_id)
-        item_vm_rg = _get_resource_group_from_id(protectable_item.properties.virtual_machine_id)
+        item_vm_name = cust_help.get_vm_name_from_vm_id(protectable_item.properties.virtual_machine_id)
+        item_vm_rg = cust_help.get_resource_group_from_id(protectable_item.properties.virtual_machine_id)
         if item_vm_name.lower() == vm_name.lower() and item_vm_rg.lower() == vm_rg.lower():
             return protectable_item
     return None
@@ -695,8 +1785,31 @@ def _get_backup_request(workload_type, retain_until):
     return trigger_backup_request
 
 
-def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
-    resources_client = resources_cf(cli_ctx)
+def _get_crr_access_token(cmd, azure_region, vault_name, resource_group_name, container_uri, item_uri, rp_name):
+    aad_client = aad_properties_cf(cmd.cli_ctx)
+    aad_result = aad_client.get(azure_region)
+    rp_client = recovery_points_passive_cf(cmd.cli_ctx)
+    crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
+                                                  item_uri, rp_name, aad_result).properties
+    crr_access_token.object_type = "CrrAccessToken"
+    return crr_access_token
+
+
+def _get_vnet_object(cli_ctx, vnet_subscription, vnet_name, vnet_resource_group):
+    resources_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                               subscription_id=vnet_subscription).resources
+    vnet_resource_namespace = 'Microsoft.Network'
+    parent_resource_path = 'virtualNetworks'
+    resource_type = ''
+    api_version = '2019-11-01'
+
+    return resources_client.get(vnet_resource_group, vnet_resource_namespace, parent_resource_path, resource_type,
+                                vnet_name, api_version)
+
+
+def _get_storage_account_id(cli_ctx, storage_account_sub, storage_account_name, storage_account_rg):
+    resources_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                               subscription_id=storage_account_sub).resources
     classic_storage_resource_namespace = 'Microsoft.ClassicStorage'
     storage_resource_namespace = 'Microsoft.Storage'
     parent_resource_path = 'storageAccounts'
@@ -716,11 +1829,15 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
 
 
 # pylint: disable=inconsistent-return-statements
-def _get_disable_protection_request(item, undelete=False):
+def _get_disable_protection_request(item, undelete=False,
+                                    retain_recovery_points_as_per_policy=False):
     if item.properties.workload_type == WorkloadType.vm.value:
         vm_item_properties = _get_vm_item_properties_from_vm_id(item.properties.virtual_machine_id)
         vm_item_properties.policy_id = ''
-        vm_item_properties.protection_state = ProtectionState.protection_stopped
+        if retain_recovery_points_as_per_policy:
+            vm_item_properties.protection_state = ProtectionState.backups_suspended
+        else:
+            vm_item_properties.protection_state = ProtectionState.protection_stopped
         vm_item_properties.source_resource_id = item.properties.source_resource_id
         if undelete:
             vm_item_properties.is_rehydrate = True
@@ -748,11 +1865,11 @@ def _get_associated_vm_item(cli_ctx, container_uri, item_uri, resource_group, va
     container_name = container_uri.split(';')[-1]
     item_name = item_uri.split(';')[-1]
 
-    filter_string = _get_filter_string({
+    filter_string = cust_help.get_filter_string({
         'backupManagementType': BackupManagementType.azure_iaas_vm.value,
         'itemType': WorkloadType.vm.value})
     items = backup_protected_items_cf(cli_ctx).list(vault_name, resource_group, filter_string)
-    paged_items = _get_list_from_paged_response(items)
+    paged_items = cust_help.get_list_from_paged_response(items)
 
     filtered_items = [item for item in paged_items
                       if container_name.lower() in item.properties.container_name.lower() and
@@ -792,7 +1909,7 @@ def _run_client_script_for_windows(client_scripts):
     file_name, password = _get_script_file_name_and_password(windows_script)
 
     # Create File
-    from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+    from urllib.request import urlopen
     import shutil
     with urlopen(windows_script.url) as response, open(file_name, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
@@ -820,237 +1937,6 @@ def _run_client_script_for_linux(client_scripts):
     logger.warning('File downloaded: %s. Use password %s', file_name, password)
 
 
-def _get_resource_name_and_rg(resource_group_name, name_or_id):
-    if is_valid_resource_id(name_or_id):
-        id_parts = parse_resource_id(name_or_id)
-        name = id_parts['name']
-        resource_group = id_parts['resource_group']
-    else:
-        name = name_or_id
-        resource_group = resource_group_name
-    return name, resource_group
-
-
-def _validate_container(container):
-    _validate_object(container, "Container not found. Please provide a valid container_name.")
-
-
-def _validate_item(item):
-    _validate_object(item, "Item not found. Please provide a valid item_name.")
-
-
-def _validate_policy(policy):
-    _validate_object(policy, "Policy not found. Please provide a valid policy_name.")
-
-
-def _validate_object(obj, error_message):
-    if obj is None:
-        raise ValueError(error_message)
-
-
 def _validate_restore_disk_parameters(restore_only_osdisk, diskslist):
     if restore_only_osdisk and diskslist is not None:
         logger.warning("Value of diskslist parameter will be ignored as restore-only-osdisk is set to be true.")
-
-
-# Tracking Utilities
-# pylint: disable=inconsistent-return-statements
-def _track_backup_ilr(cli_ctx, result, vault_name, resource_group):
-    operation_status = _track_backup_operation(cli_ctx, resource_group, result, vault_name)
-
-    if operation_status.properties:
-        recovery_target = operation_status.properties.recovery_target
-        return recovery_target.client_scripts
-
-
-# pylint: disable=inconsistent-return-statements
-def _track_backup_job(cli_ctx, result, vault_name, resource_group):
-    job_details_client = job_details_cf(cli_ctx)
-
-    operation_status = _track_backup_operation(cli_ctx, resource_group, result, vault_name)
-
-    if operation_status.properties:
-        job_id = operation_status.properties.job_id
-        job_details = job_details_client.get(vault_name, resource_group, job_id)
-        return job_details
-
-
-def _track_backup_operation(cli_ctx, resource_group, result, vault_name):
-    backup_operation_statuses_client = backup_operation_statuses_cf(cli_ctx)
-
-    operation_id = _get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
-    operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
-    while operation_status.status == OperationStatusValues.in_progress.value:
-        time.sleep(1)
-        operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
-    return operation_status
-
-
-def _track_refresh_operation(cli_ctx, result, vault_name, resource_group):
-    protection_container_refresh_operation_results_client = protection_container_refresh_operation_results_cf(cli_ctx)
-
-    operation_id = _get_operation_id_from_header(result.response.headers['Location'])
-    result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
-                                                                       fabric_name, operation_id, raw=True)
-    while result.response.status_code == 202:
-        time.sleep(1)
-        result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
-                                                                           fabric_name, operation_id, raw=True)
-
-
-def _job_in_progress(job_status):
-    return job_status in (JobStatus.in_progress.value, JobStatus.cancelling.value)
-
-# List Utilities
-
-
-def _get_list_from_paged_response(obj_list):
-    return list(obj_list) if isinstance(obj_list, Paged) else obj_list
-
-
-def _get_none_one_or_many(obj_list):
-    if not obj_list:
-        return None
-    if len(obj_list) == 1:
-        return obj_list[0]
-    return obj_list
-
-
-def _get_filter_string(filter_dict):
-    filter_list = []
-    for k, v in sorted(filter_dict.items()):
-        filter_segment = None
-        if isinstance(v, str):
-            filter_segment = "{} eq '{}'".format(k, v)
-        elif isinstance(v, datetime):
-            filter_segment = "{} eq '{}'".format(k, v.strftime('%Y-%m-%d %I:%M:%S %p'))  # yyyy-MM-dd hh:mm:ss tt
-        if filter_segment is not None:
-            filter_list.append(filter_segment)
-    filter_string = " and ".join(filter_list)
-    return None if not filter_string else filter_string
-
-
-def _get_query_dates(end_date, start_date):
-    query_start_date = None
-    query_end_date = None
-    if start_date and end_date:
-        query_start_date = start_date
-        query_end_date = end_date
-    elif not start_date and end_date:
-        query_end_date = end_date
-        query_start_date = query_end_date - timedelta(days=30)
-    elif start_date and not end_date:
-        query_start_date = start_date
-        query_end_date = query_start_date + timedelta(days=30)
-    return query_end_date, query_start_date
-
-# JSON Utilities
-
-
-def _get_container_from_json(client, container):
-    return _get_object_from_json(client, container, 'ProtectionContainerResource')
-
-
-def _get_vault_from_json(client, vault):
-    return _get_object_from_json(client, vault, 'Vault')
-
-
-def _get_vm_from_json(client, vm):
-    return _get_object_from_json(client, vm, 'VirtualMachine')
-
-
-def _get_policy_from_json(client, policy):
-    return _get_object_from_json(client, policy, 'ProtectionPolicyResource')
-
-
-def _get_item_from_json(client, item):
-    return _get_object_from_json(client, item, 'ProtectedItemResource')
-
-
-def _get_job_from_json(client, job):
-    return _get_object_from_json(client, job, 'JobResource')
-
-
-def _get_recovery_point_from_json(client, recovery_point):
-    return _get_object_from_json(client, recovery_point, 'RecoveryPointResource')
-
-
-def _get_or_read_json(json_or_file):
-    json_obj = None
-    if is_json(json_or_file):
-        json_obj = json.loads(json_or_file)
-    elif os.path.exists(json_or_file):
-        with open(json_or_file) as f:
-            json_obj = json.load(f)
-    if json_obj is None:
-        raise ValueError(
-            """
-            The variable passed should be in valid JSON format and be supplied by az backup CLI commands.
-            Make sure that you use output of relevant 'az backup show' commands and the --out is 'json'
-            (use -o json for explicit JSON output) while assigning value to this variable.
-            Take care to edit only the values and not the keys within the JSON file or string.
-            """)
-    return json_obj
-
-
-def _get_object_from_json(client, json_or_file, class_name):
-    # Determine if input is json or file
-    json_obj = _get_or_read_json(json_or_file)
-
-    # Deserialize json to object
-    param = client._deserialize(class_name, json_obj)  # pylint: disable=protected-access
-    if param is None:
-        raise ValueError(
-            """
-            The variable passed should be in valid JSON format and be supplied by az backup CLI commands.
-            Make sure that you use output of relevant 'az backup show' commands and the --out is 'json'
-            (use -o json for explicit JSON output) while assigning value to this variable.
-            Take care to edit only the values and not the keys within the JSON file or string.
-            """)
-
-    return param
-
-
-def is_json(content):
-    try:
-        json.loads(content)
-    except ValueError:
-        return False
-    return True
-
-# ID Utilities
-
-
-def _get_protection_container_uri_from_id(arm_id):
-    m = re.search('(?<=protectionContainers/)[^/]+', arm_id)
-    return m.group(0)
-
-
-def _get_protectable_item_uri_from_id(arm_id):
-    m = re.search('(?<=protectableItems/)[^/]+', arm_id)
-    return m.group(0)
-
-
-def _get_protected_item_uri_from_id(arm_id):
-    m = re.search('(?<=protectedItems/)[^/]+', arm_id)
-    return m.group(0)
-
-
-def _get_vm_name_from_vm_id(arm_id):
-    m = re.search('(?<=virtualMachines/)[^/]+', arm_id)
-    return m.group(0)
-
-
-def _get_resource_group_from_id(arm_id):
-    m = re.search('(?<=resourceGroups/)[^/]+', arm_id)
-    return m.group(0)
-
-
-def _get_operation_id_from_header(header):
-    parse_object = urlparse(header)
-    return parse_object.path.split("/")[-1]
-
-
-def _get_vault_from_arm_id(arm_id):
-    m = re.search('(?<=vaults/)[^/]+', arm_id)
-    return m.group(0)

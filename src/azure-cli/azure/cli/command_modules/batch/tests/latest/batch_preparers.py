@@ -10,10 +10,10 @@ from azure.cli.testsdk.base import execute
 
 
 class BatchAccountPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clibatch', parameter_name='batch_account_name', location='westus',
+    def __init__(self, name_prefix='clibatch', parameter_name='batch_account_name', location='eastus2',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_BATCH_ACCT_NAME'):
-        super(BatchAccountPreparer, self).__init__(name_prefix, 24)
+        super().__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
@@ -69,4 +69,24 @@ class BatchScenarioMixin:
 
     def batch_cmd(self, cmd, **kwargs):
         cmd = cmd + ' --account-name {acc_n} --account-key "{acc_k}" --account-endpoint {acc_u}'
+        return self.cmd(cmd, **kwargs)
+    
+
+class BatchMgmtScenarioMixin: 
+    def set_account_info(self, account_name, group_name):
+        """Returns the batch account name, key, and endpoint in a tuple."""
+        endpoint = self.get_account_endpoint(account_name, group_name)
+        self.kwargs.update({
+            'acc_u': endpoint,
+            'acc_n': account_name,
+        })
+
+  
+    def get_account_endpoint(self, *args):
+        endpoint = self.cmd('batch account show -n {} -g {}'.format(*args)).get_output_in_json()[
+            'accountEndpoint']
+        return 'https://' + endpoint
+
+    def batch_cmd(self, cmd, **kwargs):
+        cmd = cmd + ' --account-name {acc_n}  --account-endpoint {acc_u}'
         return self.cmd(cmd, **kwargs)

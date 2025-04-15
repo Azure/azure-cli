@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import uuid
+from azure.mgmt.advisor.models import SuppressionContract
 
 
 def list_recommendations(client, ids=None, resource_group_name=None,
@@ -16,36 +17,50 @@ def list_recommendations(client, ids=None, resource_group_name=None,
 
 def disable_recommendations(client, ids=None, recommendation_name=None,
                             resource_group_name=None, days=None):
+    if recommendation_name is None and ids is None:
+        from knack.prompting import prompt_y_n
+
+        if not prompt_y_n("\nAre you sure you want to disabled all recommendations?"):
+            return None
+
     recs = _get_recommendations(
         client=client.recommendations,
         ids=ids,
         resource_group_name=resource_group_name,
         recommendation_name=recommendation_name)
 
-    for rec in recs:
-        suppression_name = str(uuid.uuid4())
-        ttl = '{}:00:00:00'.format(days) if days else ''
+    if recs is not None:
+        for rec in recs:
+            suppression_name = str(uuid.uuid4())
+            ttl = '{}:00:00:00'.format(days) if days else ''
 
-        result = _parse_recommendation_uri(rec.id)
-        resource_uri = result['resource_uri']
-        recommendation_id = result['recommendation_id']
+            result = _parse_recommendation_uri(rec.id)
+            resource_uri = result['resource_uri']
+            recommendation_id = result['recommendation_id']
+            suppression_contract = SuppressionContract(ttl=ttl)
 
-        sup = client.suppressions.create(
-            resource_uri=resource_uri,
-            recommendation_id=recommendation_id,
-            name=suppression_name,
-            ttl=ttl
-        )
+            sup = client.suppressions.create(
+                resource_uri=resource_uri,
+                recommendation_id=recommendation_id,
+                name=suppression_name,
+                suppression_contract=suppression_contract
+            )
 
-        if rec.suppression_ids:
-            rec.suppression_ids.append(sup.suppression_id)
-        else:
-            rec.suppression_ids = [sup.suppression_id]
+            if rec.suppression_ids:
+                rec.suppression_ids.append(sup.suppression_id)
+            else:
+                rec.suppression_ids = [sup.suppression_id]
 
     return recs
 
 
 def enable_recommendations(client, ids=None, resource_group_name=None, recommendation_name=None):
+    if recommendation_name is None and ids is None:
+        from knack.prompting import prompt_y_n
+
+        if not prompt_y_n("\nAre you sure you want to enable all recommendation?"):
+            return None
+
     recs = _get_recommendations(
         client=client.recommendations,
         ids=ids,
@@ -55,12 +70,15 @@ def enable_recommendations(client, ids=None, resource_group_name=None, recommend
 
     for rec in recs:
         for sup in all_sups:
-            if sup.suppression_id in rec.suppression_ids:
-                result = _parse_recommendation_uri(rec.id)
-                client.suppressions.delete(
-                    resource_uri=result['resource_uri'],
-                    recommendation_id=result['recommendation_id'],
-                    name=sup.name)
+            try:
+                if sup.suppression_id in rec.suppression_ids:
+                    result = _parse_recommendation_uri(rec.id)
+                    client.suppressions.delete(
+                        resource_uri=result['resource_uri'],
+                        recommendation_id=result['recommendation_id'],
+                        name=sup.name)
+            except TypeError:  # when rec.id is already suppressed, rec.suppression_ids is None
+                pass
         rec.suppression_ids = None
 
     return recs
@@ -82,10 +100,10 @@ def show_configuration(client, resource_group_name=None):
 
 def update_configuration(instance, low_cpu_threshold=None,
                          exclude=None, include=None):
-    instance.properties.low_cpu_threshold = low_cpu_threshold
-    instance.properties.exclude = exclude
+    instance.low_cpu_threshold = low_cpu_threshold
+    instance.exclude = exclude
     if include:
-        instance.properties.exclude = False
+        instance.exclude = False
 
     return instance
 
@@ -129,43 +147,47 @@ def _parse_recommendation_uri(recommendation_uri):
 
 
 def _generate_recommendations(client):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
 
-    response = client.generate(raw=True)
+    response = client.generate(cls=_callback)
     location = response.headers['Location']
     operation_id = _parse_operation_id(location)
 
     try:
         client.get_generate_status(operation_id=operation_id)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         # Advisor API returns 204 which is not aligned with ARM guidelines
         # so the SDK will throw an exception that we will have to ignore
         if ex.status_code != 204:
             raise ex
 
 
-def _set_configuration(client, resource_group_name=None, parameters=None):
+def _set_configuration(client, resource_group_name=None, parameters=None, configuration_name=None):
+
+    if not configuration_name:
+        configuration_name = 'default'
+
     if resource_group_name:
         return client.create_in_resource_group(
             config_contract=parameters,
-            resource_group=resource_group_name)
+            resource_group=resource_group_name,
+            configuration_name=configuration_name)
 
-    return client.create_in_subscription(parameters)
+    return client.create_in_subscription(config_contract=parameters,
+                                         configuration_name=configuration_name)
 
 
 def _get_recommendations(client, ids=None, resource_group_name=None, recommendation_name=None):
     if ids:
         resource_ids = [_parse_recommendation_uri(id_arg)['resource_uri'] for id_arg in ids]
-        recs = list_recommendations(
-            client=client,
-            ids=resource_ids
-        )
+        recs = list_recommendations(client=client, ids=resource_ids)
         return [r for r in recs if r.id in ids]
 
+    recs = list_recommendations(client=client, resource_group_name=resource_group_name)
     if recommendation_name:
-        recs = list_recommendations(
-            client=client,
-            resource_group_name=resource_group_name)
         return [r for r in recs if r.name == recommendation_name]
+    return recs
 
-    return None
+
+def _callback(*args):
+    return args[0].http_response

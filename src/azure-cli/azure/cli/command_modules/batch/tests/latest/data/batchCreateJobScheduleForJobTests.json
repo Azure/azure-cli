@@ -34,8 +34,7 @@
       "constraints": {
         "maxWallClockTime": "PT1H"
       },
-      "killJobOnCompletion": false,
-      "runElevated": false
+      "killJobOnCompletion": false
     },
     "jobPreparationTask": {
       "id": "jobPrep",
@@ -58,8 +57,7 @@
       ],
       "constraints": {
         "maxTaskRetryCount": 2
-      },
-      "runElevated": false
+      }
     },
     "jobReleaseTask": {
       "id": "jobRelease",
@@ -79,8 +77,7 @@
           "name": "jobReleaseName2",
           "value": "jobReleaseValue2"
         }
-      ],
-      "runElevated": false
+      ]
     },
     "commonEnvironmentSettings": [
       {
@@ -98,26 +95,33 @@
         "poolLifetimeOption": "jobschedule",
         "keepAlive": false,
         "pool": {
-          "vmSize": "small",
-		  "cloudServiceConfiguration": {
-            "osFamily": "4",
-            "targetOSVersion": "*"
-		  },
-          "targetDedicated": 3,
+          "vmSize": "STANDARD_D2S_V3",
+          "virtualMachineConfiguration": {
+            "imageReference": {
+              "publisher": "microsoftwindowsserver",
+              "offer": "windowsserver",
+              "sku": "2022-datacenter",
+              "version": "latest",
+              "virtualMachineImageId": null,
+              "exactVersion": "latest"
+            },
+            "nodeAgentSKUId": "batch.node.windows amd64",
+            "nodePlacementConfiguration": {
+              "policy": "regional"
+            },
+            "osDisk": {
+              "caching": "none",
+              "managedDisk": {
+                "storageAccountType": "premium_lrs"
+              },
+              "diskSizeGB": null,
+              "writeAcceleratorEnabled": null
+            }
+          },
+          "targetDedicatedNodes": 3,
           "startTask": {
             "commandLine": "cmd /c dir /s"
-          },
-          "certificateReferences": [
-            {
-              "thumbprint": "0123456789ABCDEF",
-              "thumbprintAlgorithm": "sha1",
-              "storeLocation": "localmachine",
-              "storeName": "certStore",
-              "visibility": [
-			    "starttask"
-			  ]
-            }
-          ]
+          }
         }
       }
     },

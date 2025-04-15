@@ -4,36 +4,10 @@
 # --------------------------------------------------------------------------------------------
 """Table transformer for storage commands"""
 
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.commands.transform import build_table_output
 from knack.log import get_logger
 
 logger = get_logger(__name__)
-
-
-def build_table_output(result, projection):
-
-    if not isinstance(result, list):
-        result = [result]
-
-    final_list = []
-
-    from collections import OrderedDict
-    for item in result:
-        def _value_from_path(each_item, path):
-            obj = each_item
-            try:
-                for part in path.split('.'):
-                    obj = obj.get(part, None)
-            except AttributeError:
-                obj = None
-            return obj or ' '
-
-        item_dict = OrderedDict()
-        for element in projection:
-            item_dict[element[0]] = _value_from_path(item, element[1])
-        final_list.append(item_dict)
-
-    return final_list
 
 
 def transform_container_list(result):
@@ -129,7 +103,7 @@ def transform_boolean_for_table(result):
     return result
 
 
-def transform_file_directory_result(cli_ctx):
+def transform_file_directory_result(result):
     """
     Transform a the result returned from file and directory listing API.
 
@@ -137,20 +111,19 @@ def transform_file_directory_result(cli_ctx):
     in order to align the object's properties so as to offer a better view to the file and dir
     list.
     """
-    def transformer(result):
-        if getattr(result, 'next_marker', None):
-            logger.warning('Next Marker:')
-            logger.warning(result.next_marker)
+    from ._transformers import transform_share_directory_json_output, transform_share_file_json_output
+    return_list = []
+    for each in result:
+        if getattr(each, 'is_directory', None):
+            setattr(each, 'type', 'dir')
+            each = transform_share_directory_json_output(each)
+        else:
+            setattr(each, 'type', 'file')
+            each = transform_share_file_json_output(each)
+        return_list.append(each)
 
-        t_file, t_dir = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
-        return_list = []
-        for each in result:
-            if isinstance(each, t_file):
-                delattr(each, 'content')
-                setattr(each, 'type', 'file')
-            elif isinstance(each, t_dir):
-                setattr(each, 'type', 'dir')
-            return_list.append(each)
+    return return_list
 
-        return return_list
-    return transformer
+
+def transform_metadata_show(result):
+    return result.metadata

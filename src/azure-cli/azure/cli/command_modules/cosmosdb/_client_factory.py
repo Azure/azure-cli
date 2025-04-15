@@ -108,3 +108,69 @@ def cf_gremlin_resources(cli_ctx, _):
 
 def cf_table_resources(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).table_resources
+
+
+def cf_restorable_database_accounts(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_database_accounts
+
+
+def cf_restorable_sql_databases(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_sql_databases
+
+
+def cf_restorable_sql_containers(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_sql_containers
+
+
+def cf_restorable_sql_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_sql_resources
+
+
+def cf_restorable_mongodb_databases(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_mongodb_databases
+
+
+def cf_restorable_mongodb_collections(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_mongodb_collections
+
+
+def cf_restorable_mongodb_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_mongodb_resources
+
+
+def cf_db_locations(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).locations
+
+
+def cf_cassandra_cluster(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).cassandra_clusters
+
+
+def cf_cassandra_data_center(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).cassandra_data_centers
+
+
+def cf_service(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).service
+
+
+# restorable gremlin databases/graphs
+def cf_restorable_gremlin_databases(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_gremlin_databases
+
+
+def cf_restorable_gremlin_graphs(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_gremlin_graphs
+
+
+def cf_restorable_gremlin_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_gremlin_resources
+
+
+# restorable tables
+def cf_restorable_tables(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_tables
+
+
+def cf_restorable_table_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_table_resources

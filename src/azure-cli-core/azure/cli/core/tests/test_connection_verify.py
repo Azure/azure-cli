@@ -6,10 +6,7 @@
 import os
 import logging
 import unittest
-try:
-    from unittest.mock import MagicMock
-except ImportError:
-    from mock import MagicMock
+from unittest.mock import MagicMock
 
 import azure.cli.core._debug as _debug
 import azure.cli.core.util as cli_util

@@ -9,7 +9,7 @@ from ._client_factory import (get_mediaservices_client, get_transforms_client,
                               get_streaming_policies_client, get_streaming_endpoints_client,
                               get_locations_client, get_live_events_client, get_live_outputs_client,
                               get_content_key_policies_client, get_asset_filters_client,
-                              get_account_filters_client)
+                              get_account_filters_client, get_asset_tracks_client)
 from ._exception_handler import ams_exception_handler
 
 
@@ -51,7 +51,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.custom_command('remove', 'remove_mediaservice_secondary_storage',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
-        g.command('sync-storage-keys', 'sync_storage_keys')
+        g.custom_command('set-authentication', 'set_mediaservice_trusted_storage',
+                         custom_command_type=get_custom_sdk('account', get_mediaservices_client))
+        g.custom_command('sync-storage-keys', 'sync_storage_keys',
+                         custom_command_type=get_custom_sdk('account', get_mediaservices_client))
 
     with self.command_group('ams account sp', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_command('create', 'create_or_update_assign_sp_to_mediaservice',
@@ -61,9 +64,23 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('ams account mru', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_show_command('show', 'get_mru',
-                              custom_command_type=get_custom_sdk('mru', None))
+                              custom_command_type=get_custom_sdk('mru', get_mediaservices_client))
         g.custom_command('set', 'set_mru',
-                         custom_command_type=get_custom_sdk('mru', None))
+                         custom_command_type=get_custom_sdk('mru', get_mediaservices_client))
+
+    with self.command_group('ams account encryption', get_sdk('Mediaservices', get_mediaservices_client)) as g:
+        g.custom_show_command('show', 'get_encryption',
+                              custom_command_type=get_custom_sdk('encryption', get_mediaservices_client))
+        g.custom_command('set', 'set_encryption',
+                         custom_command_type=get_custom_sdk('encryption', get_mediaservices_client))
+
+    with self.command_group('ams account identity', get_sdk('Mediaservices', get_mediaservices_client)) as g:
+        g.custom_show_command('assign', 'assign_identity',
+                              custom_command_type=get_custom_sdk('identity', get_mediaservices_client))
+        g.custom_command('remove', 'remove_identity',
+                         custom_command_type=get_custom_sdk('identity', get_mediaservices_client))
+        g.custom_show_command('show', 'show_identity',
+                              custom_command_type=get_custom_sdk('identity', get_mediaservices_client))
 
     with self.command_group('ams transform', get_sdk('Transforms', get_transforms_client)) as g:
         g.custom_show_command('show', 'get_transform',
@@ -109,6 +126,21 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.generic_update_command('update',
                                  custom_func_name='update_asset_filter',
                                  custom_func_type=get_custom_sdk('asset_filter', get_mediaservices_client))
+
+    with self.command_group('ams asset-track', get_sdk('Tracks', get_asset_tracks_client)) as g:
+        g.command('list', 'list')
+        g.custom_show_command('show', 'get_asset_track',
+                              custom_command_type=get_custom_sdk('tracks', get_asset_tracks_client))
+        g.command('delete', 'begin_delete')
+        g.custom_command('create', 'create_asset_track',
+                         custom_command_type=get_custom_sdk('tracks', get_asset_tracks_client),
+                         supports_no_wait=True)
+        g.custom_command('update', 'update_track',
+                         custom_command_type=get_custom_sdk('tracks', get_asset_tracks_client),
+                         supports_no_wait=True)
+        g.custom_command('update-data', 'update_track_data',
+                         custom_command_type=get_custom_sdk('tracks', get_asset_tracks_client),
+                         supports_no_wait=True)
 
     with self.command_group('ams job', get_sdk('Jobs', get_jobs_client)) as g:
         g.custom_show_command('show', 'get_job',
@@ -176,6 +208,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_streaming_endpoint',
                          custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
                          supports_no_wait=True)
+        g.custom_command('scale', 'scale',
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
         g.generic_update_command('update',
                                  setter_name='update_streaming_endpoint_setter',
                                  setter_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
@@ -184,9 +218,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  supports_no_wait=True)
         g.custom_show_command('show', 'get_streaming_endpoint',
                               custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
-        g.command('delete', 'delete')
-        g.command('scale', 'scale')
+        g.command('delete', 'begin_delete')
         g.wait_command('wait')
+        g.custom_command('get-skus', 'get_skus',
+                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
 
     with self.command_group('ams streaming-endpoint akamai', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:
         g.custom_command('add', 'add_akamai_access_control',
@@ -201,6 +236,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('start', 'start',
                          custom_command_type=get_custom_sdk('live_event', get_live_events_client),
                          supports_no_wait=True)
+        g.custom_command('standby', 'standby',
+                         custom_command_type=get_custom_sdk('live_event', get_live_events_client),
+                         supports_no_wait=True)
         g.custom_command('stop', 'stop',
                          custom_command_type=get_custom_sdk('live_event', get_live_events_client),
                          supports_no_wait=True)
@@ -209,7 +247,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          supports_no_wait=True)
         g.custom_show_command('show', 'get_live_event',
                               custom_command_type=get_custom_sdk('live_event', get_live_events_client))
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.command('list', 'list')
         g.generic_update_command('update',
                                  setter_name='update_live_event_setter',
@@ -224,7 +262,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_show_command('show', 'get_live_output',
                               custom_command_type=get_custom_sdk('live_output', get_live_outputs_client))
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
 
     with self.command_group('ams account-filter', get_sdk('AccountFilters', get_account_filters_client)) as g:
         g.custom_command('create', 'create_account_filter',

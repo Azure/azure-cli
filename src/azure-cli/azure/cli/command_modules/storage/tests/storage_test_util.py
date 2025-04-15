@@ -26,9 +26,28 @@ class StorageScenarioMixin:
 
         return self.cmd(template.format(name, group)).output
 
+    def get_connection_string(self, group, name):
+        return self.cmd('storage account show-connection-string -n {} -g {} '
+                        '--query connectionString -otsv'.format(name, group)).output.strip()
+
+    def get_account_id(self, group, name):
+        return self.cmd('storage account show -n {} -g {} --query id -otsv'.format(name, group)).output.strip()
+
     def get_account_info(self, group, name):
         """Returns the storage account name and key in a tuple"""
         return name, self.get_account_key(group, name)
+
+    def oauth_cmd(self, cmd, *args, **kwargs):
+        if args:
+            cmd = cmd.format(*args)
+            args = ()
+        return self.cmd(cmd + ' --auth-mode login', *args, **kwargs)
+
+    def file_oauth_cmd(self, cmd, *args, **kwargs):
+        if args:
+            cmd = cmd.format(*args)
+            args = ()
+        return self.cmd(cmd + ' --auth-mode login --backup-intent', *args, **kwargs)
 
     def storage_cmd(self, cmd, account_info, *args):
         cmd = cmd.format(*args)
@@ -40,9 +59,12 @@ class StorageScenarioMixin:
         cmd = '{} --account-name {} --account-key {}'.format(cmd, *account_info)
         return self.cmd(cmd, expect_failure=True)
 
-    def create_container(self, account_info, prefix='cont', length=24):
+    def create_container(self, account_info, prefix='cont', length=24, oauth=False):
         container_name = self.create_random_name(prefix=prefix, length=length)
-        self.storage_cmd('storage container create -n {}', account_info, container_name)
+        if oauth:
+            self.oauth_cmd('storage container create -n {} --account-name {}', container_name, account_info[0])
+        else:
+            self.storage_cmd('storage container create -n {}', account_info, container_name)
         return container_name
 
     def create_share(self, account_info, prefix='share', length=24):
@@ -58,7 +80,7 @@ class StorageScenarioMixin:
 
 class StorageTestFilesPreparer(AbstractPreparer):
     def __init__(self, parameter_name='test_dir'):
-        super(StorageTestFilesPreparer, self).__init__(name_prefix='test', name_len=24)
+        super().__init__(name_prefix='test', name_len=24)
         self.parameter_name = parameter_name
 
     def create_resource(self, name, **kwargs):

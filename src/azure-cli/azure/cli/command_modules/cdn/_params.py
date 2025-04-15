@@ -4,37 +4,21 @@
 # --------------------------------------------------------------------------------------------
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.cdn.models import QueryStringCachingBehavior, SkuName, ActionType
-
-from azure.cli.core.commands.parameters import get_three_state_flag, tags_type, get_enum_type
+from azure.mgmt.cdn.models import (QueryStringCachingBehavior, DeliveryRuleAction,
+                                   ForwardingProtocol, DeliveryRuleCondition,
+                                   AfdQueryStringCachingBehavior, Transform)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-
-from ._validators import (validate_origin, validate_priority)
-from ._actions import (OriginType, MatchConditionAction, ManagedRuleOverrideAction)
+from azure.cli.core.commands.parameters import get_three_state_flag, get_enum_type
+from ._validators import (validate_origin)
+from ._actions import (OriginType)
 
 
 # pylint:disable=too-many-statements
 def load_arguments(self, _):
-
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
-    endpoint_name_type = CLIArgumentType(options_list=('--endpoint-name'), metavar='ENDPOINT_NAME')
     profile_name_help = 'Name of the CDN profile which is unique within the resource group.'
 
-    with self.argument_context('cdn') as c:
-        c.argument('name', name_arg_type, id_part='name')
-        c.argument('tags', tags_type)
-
-    # Profile #
-    with self.argument_context('cdn profile') as c:
-        c.argument('profile_name', name_arg_type, id_part='name', help=profile_name_help)
-
-    with self.argument_context('cdn profile create') as c:
-        c.argument('sku', arg_type=get_enum_type([item.value for item in list(SkuName)]))
-        c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('name', name_arg_type, id_part='name', help=profile_name_help)
-
     # Endpoint #
-
     with self.argument_context('cdn endpoint') as c:
         c.argument('content_paths', nargs='+')
         c.argument('endpoint_name', name_arg_type, id_part='child_name_1', help='Name of the CDN endpoint.')
@@ -52,96 +36,42 @@ def load_arguments(self, _):
         c.argument('is_https_allowed', arg_type=get_three_state_flag(invert=True), options_list='--no-https',
                    help='Indicates whether HTTPS traffic is not allowed on the endpoint. '
                    'Default is to allow HTTPS traffic.')
+        c.argument('origin_path',
+                   help='A directory path on the origin that Azure CDN can use to retrieve content from.')
+        c.argument('origin_host_header',
+                   help="The Host header to send for requests to this origin. If you leave this blank, "
+                        "the request hostname determines this value. "
+                        "Azure CDN origins, such as Web Apps, Blob Storage, and Cloud Services "
+                        "require this host header value to match the origin hostname by default.")
         c.argument('is_compression_enabled', arg_type=get_three_state_flag(), options_list='--enable-compression',
                    help='If compression is enabled, content will be served as compressed if '
                         'user requests for a compressed version. Content won\'t be compressed '
                         'on CDN when requested content is smaller than 1 byte or larger than 1 '
                         'MB.')
+
+        c.argument('query_string_caching_behavior',
+                   options_list='--query-string-caching',
+                   arg_type=get_enum_type(QueryStringCachingBehavior),
+                   help="Defines how CDN caches requests that include query strings. "
+                        "You can ignore any query strings when caching, "
+                        "bypass caching to prevent requests that contain query strings from being cached, "
+                        "or cache every request with a unique URL.")
+
         c.argument('profile_name', help=profile_name_help, id_part='name')
-
-    with self.argument_context('cdn endpoint update') as c:
-        caching_behavior = [item.value for item in list(QueryStringCachingBehavior)]
-        c.argument('query_string_caching_behavior', options_list='--query-string-caching',
-                   arg_type=get_enum_type(caching_behavior))
-        c.argument('content_types_to_compress', nargs='+')
-
+        c.argument('content_types_to_compress', nargs='*',
+                   help='List of content types on which compression applies. The value should be a valid MIME type.')
     with self.argument_context('cdn endpoint rule') as c:
-        c.argument('rule_name', help='Name of the rule.')
-        c.argument('order', help='The order of the rule. The order number must start from 0 and consecutive.\
-                    Rule with higher order will be applied later.')
-        c.argument('match_variable', arg_group="Match Condition", help='Name of the match condition.')
-        c.argument('operator', arg_group="Match Condition", help='Operator of the match condition.')
-        c.argument('selector', arg_group="Match Condition", help='Selector of the match condition.')
-        c.argument('match_values', arg_group="Match Condition", nargs='+',
-                   help='Match values of the match condition (comma separated).')
-        c.argument('transform', arg_group="Match Condition", arg_type=get_enum_type(['Lowercase', 'Uppercase']),
-                   nargs='+', help='Transform to apply before matching.')
-        c.argument('negate_condition', arg_group="Match Condition", arg_type=get_three_state_flag(),
-                   help='If true, negates the condition')
-        c.argument('action_name', arg_group="Action", help='Name of the action.')
-        c.argument('cache_behavior', arg_group="Action",
-                   arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']),
-                   help='Caching behavior for the requests.')
-        c.argument('cache_duration', arg_group="Action",
-                   help='The duration for which the content needs to be cached. \
-                   Allowed format is [d.]hh:mm:ss.')
-        c.argument('header_action', arg_group="Action",
-                   arg_type=get_enum_type(['Append', 'Overwrite', 'Delete']),
-                   help='Header action for the requests.')
-        c.argument('header_name', arg_group="Action", help='Name of the header to modify.')
-        c.argument('header_value', arg_group="Action", help='Value of the header.')
-        c.argument('redirect_type', arg_group="Action",
-                   arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']),
-                   help='The redirect type the rule will use when redirecting traffic.')
-        c.argument('redirect_protocol', arg_group="Action",
-                   arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']),
-                   help='Protocol to use for the redirect.')
-        c.argument('custom_hostname', arg_group="Action", help='Host to redirect. \
-                   Leave empty to use the incoming host as the destination host.')
-        c.argument('custom_path', arg_group="Action",
-                   help='The full path to redirect. Path cannot be empty and must start with /. \
-                   Leave empty to use the incoming path as destination path.')
-        c.argument('custom_querystring', arg_group="Action",
-                   help='The set of query strings to be placed in the redirect URL. \
-                   leave empty to preserve the incoming query string.')
-        c.argument('custom_fragment', arg_group="Action", help='Fragment to add to the redirect URL.')
-        c.argument('query_string_behavior', arg_group="Action",
-                   arg_type=get_enum_type(['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']),
-                   help='Query string behavior for the requests.')
-        c.argument('query_parameters', arg_group="Action",
-                   help='Query parameters to include or exclude (comma separated).')
-        c.argument('source_pattern', arg_group="Action",
-                   help='A request URI pattern that identifies the type of requests that may be rewritten.')
-        c.argument('destination', help='The destination path to be used in the rewrite.')
-        c.argument('preserve_unmatched_path', arg_group="Action",
-                   arg_type=get_three_state_flag(),
-                   help='If True, the remaining path after the source \
-                   pattern will be appended to the new destination path.')
-        c.argument('index', type=int, help='The index of the condition/action')
-
-    with self.argument_context('cdn endpoint create') as c:
-        c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
-    with self.argument_context('cdn endpoint set') as c:
-        c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
-
-    with self.argument_context('cdn endpoint list') as c:
-        c.argument('profile_name', id_part=None)
-
-    with self.argument_context('cdn endpoint waf') as c:
-        c.argument('endpoint_name', endpoint_name_type, help='Name of the CDN endpoint.')
+        configure_rule_parameters(c, False)
 
     # Custom Domain #
 
     with self.argument_context('cdn custom-domain') as c:
-        c.argument('custom_domain_name', name_arg_type, id_part=None, help='Name of the custom domain.')
-
-    with self.argument_context('cdn custom-domain create') as c:
-        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('custom_domain_name', name_arg_type, id_part=None, help='Resource name of the custom domain.')
 
     with self.argument_context('cdn custom-domain enable-https') as c:
         c.argument('profile_name', id_part=None, help='Name of the parent profile.')
         c.argument('endpoint_name', help='Name of the parent endpoint.')
-        c.argument('custom_domain_name', name_arg_type, help='Name of the custom domain.')
+        c.argument('custom_domain_name', name_arg_type, help='Resource name of the custom domain.')
         c.argument('min_tls_version',
                    help='The minimum TLS version required for the custom domain.',
                    arg_type=get_enum_type(['none', '1.0', '1.2']))
@@ -163,75 +93,141 @@ def load_arguments(self, _):
                    help='The secret name of the KeyVault certificate')
         c.argument('user_cert_secret_version',
                    arg_group='Bring Your Own Certificate',
-                   help='The secret version of the KeyVault certificate')
+                   help='The secret version of the KeyVault certificate, If not specified, the "Latest" version will '
+                        'always been used and the deployed certificate will be automatically rotated to the latest '
+                        'version when a newer version of the certificate is available.')
 
-    # Origin #
-    with self.argument_context('cdn origin') as c:
-        c.argument('name', name_arg_type, id_part='child_name_2', help='Name of the origin.')
-        c.argument('origin_name', name_arg_type, id_part='child_name_2', help='Name of the origin.')
-        c.argument('profile_name', help=profile_name_help, id_part='name')
-        c.argument('endpoint_name', endpoint_name_type, id_part='child_name_1', help='Name of the CDN endpoint.')
-    with self.argument_context('cdn origin update') as c:
-        c.argument('http_port', type=int)
-        c.argument('https_port', type=int)
-    with self.argument_context('cdn origin list') as c:
-        # list commands can't use --ids argument.
-        c.argument('profile_name', id_part=None)
-        c.argument('endpoint_name', id_part=None)
 
-    # WAF #
+# pylint: disable=protected-access
+def configure_rule_parameters(c, is_afdx):
+    c.argument('rule_name', help='Name of the rule.')
+    c.argument('order', type=int,
+               help='The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,………}. '
+               'A rule with a lower order will be applied before one with a higher order. '
+               'Rule with order 0 is a special rule. '
+               'It does not require any condition and actions listed in it will always be applied.')
 
-    with self.argument_context('cdn waf policy set') as c:
-        c.argument('disabled', arg_type=get_three_state_flag())
-        c.argument('block_response_status_code', type=int)
-        c.argument('name', name_arg_type, id_part='name', help='The name of the CDN WAF policy.')
-    with self.argument_context('cdn waf policy show') as c:
-        c.argument('policy_name', name_arg_type, id_part='name', help='The name of the CDN WAF policy.')
-    with self.argument_context('cdn waf policy delete') as c:
-        c.argument('policy_name', name_arg_type, id_part='name', help='The name of the CDN WAF policy.')
+    if is_afdx:
+        c.argument('match_variable', arg_group="Match Condition",
+                   help='Name of the match condition: '
+                        'https://learn.microsoft.com/en-us/azure/frontdoor/rules-match-conditions',
+                   arg_type=get_enum_type(DeliveryRuleCondition._subtype_map["name"].keys()))
+    else:
+        c.argument('match_variable', arg_group="Match Condition",
+                   help='Name of the match condition: '
+                        'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions',
+                   arg_type=get_enum_type(DeliveryRuleCondition._subtype_map["name"].keys()))
 
-    with self.argument_context('cdn waf policy managed-rule-set') as c:
-        c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')
-        c.argument('rule_set_type', help='The type of the managed rule set.')
-        c.argument('rule_set_version', help='The version of the managed rule set.')
-    with self.argument_context('cdn waf policy managed-rule-set list') as c:
-        # List commands cannot use --ids flag
-        c.argument('policy_name', id_part=None)
-    with self.argument_context('cdn waf policy managed-rule-set add') as c:
-        c.argument('enabled', arg_type=get_three_state_flag())
+    c.argument('operator', arg_group="Match Condition", help='Operator of the match condition.')
+    c.argument('selector', arg_group="Match Condition", help='Selector of the match condition.')
+    c.argument('match_values', arg_group="Match Condition", nargs='+',
+               help='Match values of the match condition. e.g, space separated values "GET" "HTTP"')
 
-    with self.argument_context('cdn waf policy managed-rule-set rule-group-override') as c:
-        c.argument('name', name_arg_type, id_part=None, help='The name of the rule group.')
-    with self.argument_context('cdn waf policy managed-rule-set rule-group-override list') as c:
-        # List commands cannot use --ids flag
-        c.argument('policy_name', id_part=None)
-    with self.argument_context('cdn waf policy managed-rule-set rule-group-override set') as c:
-        c.argument('rule_overrides',
-                   options_list=['-r', '--rule-override'],
-                   action=ManagedRuleOverrideAction,
-                   nargs='+')
+    if not is_afdx:
+        c.argument('transform', arg_group="Match Condition", arg_type=get_enum_type(['Lowercase', 'Uppercase']),
+                   nargs='+', help='Transform to apply before matching.')
+    else:
+        transforms = [item.value for item in list(Transform)]
+        c.argument('transforms', arg_group="Match Condition", arg_type=get_enum_type(transforms),
+                   nargs='+', help='Transform to apply before matching.')
 
-    with self.argument_context('cdn waf policy custom-rule') as c:
-        c.argument('name', name_arg_type, id_part=None, help='The name of the custom rule.')
-        c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')
-    with self.argument_context('cdn waf policy custom-rule list') as c:
-        # List commands cannot use --ids flag
-        c.argument('policy_name', id_part=None)
-    with self.argument_context('cdn waf policy rate-limit-rule') as c:
-        c.argument('name', name_arg_type, id_part=None, help='The name of the rate limit rule.')
-        c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')
-    with self.argument_context('cdn waf policy rate-limit-rule list') as c:
-        # List commands cannot use --ids flag
-        c.argument('policy_name', id_part=None)
+    c.argument('negate_condition', arg_group="Match Condition", arg_type=get_three_state_flag(),
+               help='If true, negates the condition')
 
-    with self.argument_context('cdn waf policy custom-rule set') as c:
-        c.argument('match_conditions', options_list=['-m', '--match-condition'], action=MatchConditionAction, nargs='+')
-        c.argument('priority', type=int, validator=validate_priority)
-        c.argument('action', arg_type=get_enum_type([item.value for item in list(ActionType)]))
+    all_actions = list(DeliveryRuleAction._subtype_map["name"].keys())
+    if is_afdx:
+        excldued_actions = ["UrlSigning", "CacheExpiration", "CacheKeyQueryString", "OriginGroupOverride"]
+        c.argument('action_name', arg_group="Action",
+                   help='The name of the action for the delivery rule: '
+                        'https://learn.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions',
+                   arg_type=get_enum_type([action for action in all_actions if action not in excldued_actions]))
 
-    with self.argument_context('cdn waf policy rate-limit-rule set') as c:
-        c.argument('match_conditions', options_list=['-m', '--match-condition'], action=MatchConditionAction, nargs='+')
-        c.argument('priority', type=int, validator=validate_priority)
-        c.argument('action', arg_type=get_enum_type([item.value for item in list(ActionType)]))
-        c.argument('request_threshold', type=int)
-        c.argument('duration', type=int)
+        c.argument('cache_behavior', arg_group="Action",
+                   arg_type=get_enum_type(['HonorOrigin', 'OverrideAlways', 'OverrideIfOriginMissing']),
+                   help='Caching behavior for the requests.')
+        c.argument('query_string_caching_behavior',
+                   arg_group="Action",
+                   arg_type=get_enum_type(AfdQueryStringCachingBehavior),
+                   help="Defines how CDN caches requests that include query strings. "
+                        "You can ignore any query strings when caching, "
+                        "bypass caching to prevent requests that contain query strings from being cached, "
+                        "or cache every request with a unique URL.")
+
+        c.argument('query_parameters', arg_group="Action",
+                   nargs='*',
+                   help="query parameters to include or exclude")
+        c.argument('forwarding_protocol', arg_group="Action",
+                   arg_type=get_enum_type(ForwardingProtocol),
+                   help="Protocol this rule will use when forwarding traffic to backends.")
+        c.argument(
+            'is_compression_enabled', arg_group="Action",
+            arg_type=get_three_state_flag(),
+            options_list='--enable-compression',
+            help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false. '
+                 'If compression is enabled, content will be served as compressed if user requests for a '
+                 "compressed version. Content won't be compressed on AzureFrontDoor when requested content is "
+                 'smaller than 1 byte or larger than 1 MB.')
+        c.argument('enable_caching', arg_type=get_three_state_flag(invert=False),
+                   options_list='--enable-caching',
+                   arg_group="Action",
+                   help='Indicates whether to enable caching on the route.')
+    else:
+        excldued_actions = ["RouteConfigurationOverride", "UrlSigning"]
+        c.argument('action_name', arg_group="Action",
+                   help='The name of the action for the delivery rule: '
+                        'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions',
+                   arg_type=get_enum_type([action for action in all_actions if action not in excldued_actions]))
+
+        # CacheExpirationAction parameters
+        c.argument('cache_behavior', arg_group="Action",
+                   arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']),
+                   help='Caching behavior for the requests.')
+        c.argument('query_string_caching_behavior',
+                   options_list='--query-string-caching',
+                   arg_type=get_enum_type(QueryStringCachingBehavior),
+                   help="Defines how CDN caches requests that include query strings. "
+                        "You can ignore any query strings when caching, "
+                        "bypass caching to prevent requests that contain query strings from being cached, "
+                        "or cache every request with a unique URL.")
+
+        # CacheKeyQueryStringAction parameters
+        c.argument('query_parameters', arg_group="Action",
+                   help='Query parameters to include or exclude (comma separated).')
+        c.argument('query_string_behavior', arg_group="Action",
+                   arg_type=get_enum_type(['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']),
+                   help='Query string behavior for the requests.')
+
+    c.argument('cache_duration', arg_group="Action",
+               help='The duration for which the content needs to be cached. \
+               Allowed format is hh:mm:ss.xxxxxx')
+    c.argument('header_action', arg_group="Action",
+               arg_type=get_enum_type(['Append', 'Overwrite', 'Delete']),
+               help='Header action for the requests.')
+    c.argument('header_name', arg_group="Action", help='Name of the header to modify.')
+    c.argument('header_value', arg_group="Action", help='Value of the header.')
+    c.argument('redirect_type', arg_group="Action",
+               arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']),
+               help='The redirect type the rule will use when redirecting traffic.')
+    c.argument('redirect_protocol', arg_group="Action",
+               arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']),
+               help='Protocol to use for the redirect.')
+    c.argument('custom_hostname', arg_group="Action", help='Host to redirect. \
+               Leave empty to use the incoming host as the destination host.')
+    c.argument('custom_path', arg_group="Action",
+               help='The full path to redirect. Path cannot be empty and must start with /. \
+               Leave empty to use the incoming path as destination path.')
+    c.argument('custom_querystring', arg_group="Action",
+               help='The set of query strings to be placed in the redirect URL. \
+               leave empty to preserve the incoming query string.')
+    c.argument('custom_fragment', arg_group="Action", help='Fragment to add to the redirect URL.')
+
+    c.argument('source_pattern', arg_group="Action",
+               help='A request URI pattern that identifies the type of requests that may be rewritten.')
+    c.argument('destination', arg_group="Action", help='The destination path to be used in the rewrite.')
+    c.argument('preserve_unmatched_path', arg_group="Action",
+               arg_type=get_three_state_flag(),
+               help='If True, the remaining path after the source \
+               pattern will be appended to the new destination path.')
+    c.argument('index', type=int, help='The index of the condition/action')
+    c.argument('origin_group', arg_group="Action",
+               help='Name or ID of the OriginGroup that would override the default OriginGroup')

@@ -1,0 +1,38 @@
+{
+  "core-site": {},
+  "oozie-site": {
+    "oozie.service.JPAService.jdbc.url": "jdbc:sqlserver://{yoursqlserver}.database.windows.net;database={yourooziedb};encrypt=true;trustServerCertificate=true;create=false;loginTimeout=300;sendStringParametersAsUnicode=true;prepareSQL=0",
+    "oozie.service.JPAService.jdbc.username": "{yoursqlserverusername}",
+    "oozie.service.JPAService.jdbc.password": "********",
+    "oozie.service.JPAService.jdbc.driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+    "oozie.db.schema.name": "oozie"
+  },
+  "oozie-env": {
+    "oozie_database": "Existing MSSQL Server database with SQL authentication",
+    "oozie_database_name": "{yourooziedb}",
+    "oozie_database_type": "mssql",
+    "oozie_existing_mssql_server_database": "{yourooziedb}",
+    "oozie_existing_mssql_server_host": "{yoursqlserver}.database.windows.net",
+    "oozie_hostname": "{yoursqlserver}.database.windows.net"
+  },
+  "hive-site": {
+    "javax.jdo.option.ConnectionURL": "jdbc:sqlserver://{yoursqlserver}.database.windows.net;database={yourhivedb};encrypt=true;trustServerCertificate=true;create=false;loginTimeout=300;sendStringParametersAsUnicode=true;prepareSQL=0",
+    "javax.jdo.option.ConnectionUserName": "{yoursqlserverusername}",
+    "javax.jdo.option.ConnectionPassword": "********",
+    "javax.jdo.option.ConnectionDriverName": "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+  },
+  "hive-env": {
+    "hive_database": "Existing MSSQL Server database with SQL authentication",
+    "hive_database_name": "{yourhivedb}",
+    "hive_database_type": "mssql",
+    "hive_existing_mssql_server_database": "{yourhivedb}",
+    "hive_existing_mssql_server_host": "{yoursqlserver}.database.windows.net",
+    "hive_hostname": "{yoursqlserver}.database.windows.net"
+  },
+  "ambari-conf": {
+    "database-server": "{yoursqlserver}.database.windows.net",
+    "database-name": "{yourambaridb}",
+    "database-user-name": "{yoursqlserverusername}",
+    "database-user-password": "********"
+  }
+}

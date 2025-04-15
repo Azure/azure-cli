@@ -48,14 +48,32 @@ def _authorization_management_client(cli_ctx, **_):
 
 def _resource_managedapps_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.managedapplications import ApplicationClient
-    return get_mgmt_service_client(cli_ctx, ApplicationClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS)
 
 
 def _resource_managementgroups_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.managementgroups import ManagementGroupsAPI
     return get_mgmt_service_client(cli_ctx, ManagementGroupsAPI, subscription_bound=False)
+
+
+def _resource_templatespecs_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
+
+
+def _resource_deploymentstacks_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS)
+
+
+def _resource_privatelinks_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_PRIVATELINKS)
 
 
 def cf_resource_groups(cli_ctx, _):
@@ -86,12 +104,20 @@ def cf_features(cli_ctx, _):
     return _resource_feature_client_factory(cli_ctx).features
 
 
+def cf_feature_registrations(cli_ctx, _):
+    return _resource_feature_client_factory(cli_ctx).subscription_feature_registrations
+
+
 def cf_policy_definitions(cli_ctx, _):
     return _resource_policy_client_factory(cli_ctx).policy_definitions
 
 
 def cf_policy_set_definitions(cli_ctx, _):
     return _resource_policy_client_factory(cli_ctx).policy_set_definitions
+
+
+def cf_policy_exemptions(cli_ctx, _):
+    return _resource_policy_client_factory(cli_ctx).policy_exemptions
 
 
 def cf_management_locks(cli_ctx, _):
@@ -114,9 +140,37 @@ def cf_resource_managedappdefinitions(cli_ctx, _):
     return _resource_managedapps_client_factory(cli_ctx).application_definitions
 
 
+def cf_management_groups_mixin(cli_ctx, _):
+    return _resource_managementgroups_client_factory(cli_ctx)
+
+
 def cf_management_groups(cli_ctx, _):
     return _resource_managementgroups_client_factory(cli_ctx).management_groups
 
 
 def cf_management_group_subscriptions(cli_ctx, _):
     return _resource_managementgroups_client_factory(cli_ctx).management_group_subscriptions
+
+
+def cf_management_group_entities(cli_ctx, _):
+    return _resource_managementgroups_client_factory(cli_ctx).entities
+
+
+def cf_hierarchy_settings(cli_ctx, _):
+    return _resource_managementgroups_client_factory(cli_ctx).hierarchy_settings
+
+
+def cf_resource_templatespecs(cli_ctx, _):
+    return _resource_templatespecs_client_factory(cli_ctx).template_specs
+
+
+def cf_resource_deploymentstacks(cli_ctx, _):
+    return _resource_deploymentstacks_client_factory(cli_ctx).deployment_stacks
+
+
+def cf_resource_privatelinkassociations(cli_ctx, _):
+    return _resource_privatelinks_client_factory(cli_ctx).private_link_association
+
+
+def cf_resource_resourcemanagementprivatelinks(cli_ctx, _):
+    return _resource_privatelinks_client_factory(cli_ctx).resource_management_private_link

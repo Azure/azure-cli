@@ -16,6 +16,7 @@ short-summary: Manage HDInsight resources.
 helps['hdinsight application'] = """
 type: group
 short-summary: Manage HDInsight applications.
+long-summary: We no longer maintain module before version 2.30.0. It is recommended to upgrade to at least version 2.30.0.
 """
 
 helps['hdinsight application create'] = """
@@ -77,13 +78,6 @@ examples:
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount --encryption-at-host true
-  - name: Create a cluster with private link settings.
-    text: |-
-        az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
-        -p "HttpPassword1234!" \\
-        --storage-account MyStorageAccount \\
-        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
-        --public-network-access-type OutboundOnly --outbound-public-network-access-type PublicLoadBalancer
   - name: Create a cluster with the Enterprise Security Package (ESP).
     text: |-
         az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
@@ -94,7 +88,17 @@ examples:
         --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
         --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
         --cluster-users-group-dns MyGroup
-  - name: Create a Kafka cluster with disk encryption. See https://docs.microsoft.com/azure/hdinsight/kafka/apache-kafka-byok.
+  - name: Create a cluster with the Enterprise Security Package (ESP) and enable HDInsight ID Broker.
+    text: |-
+        az hdinsight create --esp --idbroker -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
+        --domain "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.AAD/domainServices/MyDomain.onmicrosoft.com" \\
+        --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
+        --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
+        --cluster-users-group-dns MyGroup
+  - name: Create a Kafka cluster with disk encryption. See https://learn.microsoft.com/azure/hdinsight/kafka/apache-kafka-byok.
     text: |-
         az hdinsight create -t kafka -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" --workernode-data-disks-per-node 2 \\
@@ -141,6 +145,47 @@ examples:
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
         --autoscale-type Schedule --timezone "Pacific Standard Time" --days Monday \\
         --time 09:00 --autoscale-workernode-count 5
+  - name: Create a cluster with Relay Outbound and Private Link feature.
+    text: |-
+        az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --storage-account MyStorageAccount \\
+        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/default" \\
+        --resource-provider-connection Outbound --enable-private-link
+  - name: Create a cluster with Compute Isolation feature.
+    text: |-
+        az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --storage-account MyStorageAccount \\
+        --enable-compute-isolation --workernode-size "Standard_E8S_V3" --headnode-size "Standard_E8S_V3"
+"""
+
+helps['hdinsight resize'] = """
+type: command
+short-summary: Resize the specified HDInsight cluster to the specified size.
+examples:
+  - name: Resize the cluster's workernode.
+    text: |-
+        az hdinsight resize --name MyCluster --resource-group rg --workernode-count 5
+"""
+
+helps['hdinsight update'] = """
+type: command
+short-summary: Update the tags or identity of the specified HDInsight cluster. Setting the identity property will override the existing identity configuration of the cluster.
+examples:
+  - name: Update the tags.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --tags key=value
+  - name: Update manage identity with single UserAssigned msi.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type UserAssigned --assign-identity MyMsi
+  - name: Update manage identity with multiple UserAssigned msi.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type UserAssigned --assign-identity MyMsi1 MyMsi2
+  - name: Update SystemAssigned manage identity.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type SystemAssigned
+  - name: Update manage identity with SystemAssigned,UserAssigned msi.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type "SystemAssigned,UserAssigned" --assign-identity MyMsi1
 """
 
 helps['hdinsight list'] = """
@@ -150,22 +195,74 @@ short-summary: List HDInsight clusters in a resource group or subscription.
 
 helps['hdinsight monitor'] = """
 type: group
-short-summary: Manage Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Manage Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor disable'] = """
 type: command
-short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Disable the Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor enable'] = """
 type: command
-short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
+short-summary: Enable the Classic Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor show'] = """
 type: command
+short-summary: Get the status of Classic Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor'] = """
+type: group
+short-summary: Manage Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor disable'] = """
+type: command
+short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor enable'] = """
+type: command
+short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor show'] = """
+type: command
 short-summary: Get the status of Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent'] = """
+type: group
+short-summary: Manage Azure Monitor Agent logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent disable'] = """
+type: command
+short-summary: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
+examples:
+  - name: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
+    text: |-
+        az hdinsight azure-monitor-agent disable --name MyCluster --resource-group rg
+"""
+
+helps['hdinsight azure-monitor-agent enable'] = """
+type: command
+short-summary: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
+examples:
+  - name: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
+    text: |-
+        az hdinsight azure-monitor-agent enable --name MyCluster --resource-group rg --workspace WorkspaceId --primary-key WorkspaceKey
+"""
+
+helps['hdinsight azure-monitor-agent show'] = """
+type: command
+short-summary: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
+examples:
+  - name: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
+    text: |-
+        az hdinsight azure-monitor-agent show --name MyCluster --resource-group rg
 """
 
 helps['hdinsight rotate-disk-encryption-key'] = """
@@ -298,7 +395,7 @@ short-summary: Update a schedule condition.
 examples:
   - name: Update a schedule condition.
     text: |-
-        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0\\
+        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0 \\
         --time 10:00 --workernode-count 5
 """
 

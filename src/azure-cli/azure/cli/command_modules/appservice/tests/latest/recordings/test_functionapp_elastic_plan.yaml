@@ -13,24 +13,22 @@ interactions:
       ParameterSetName:
       - -g -n --sku --min-instances --max-burst
       User-Agent:
-      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.9 msrest_azure/0.6.3
-        azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","date":"2020-07-19T21:26:34Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","test":"test_functionapp_elastic_plan","date":"2023-11-15T17:25:21Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '435'
+      - '378'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 19 Jul 2020 21:26:32 GMT
+      - Wed, 15 Nov 2023 17:25:22 GMT
       expires:
       - '-1'
       pragma:
@@ -45,9 +43,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "francecentral", "properties": {"perSiteScaling": false, "maximumElasticWorkerCount":
-      12, "isXenon": false}, "sku": {"name": "EP1", "tier": "ElasticPremium", "capacity":
-      4}}'
+    body: '{"location": "francecentral", "sku": {"name": "EP1", "tier": "ElasticPremium",
+      "capacity": 4}, "properties": {"perSiteScaling": false, "maximumElasticWorkerCount":
+      12, "isXenon": false, "zoneRedundant": false}}'
     headers:
       Accept:
       - application/json
@@ -58,32 +56,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '186'
+      - '210'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --sku --min-instances --max-burst
       User-Agent:
-      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.9 msrest_azure/0.6.3
-        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002?api-version=2023-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002","name":"funcappplan000002","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"France
-        Central","properties":{"serverFarmId":24787,"name":"funcappplan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":4,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":4,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"5700fc96-77b4-4f8d-afce-c353d8c443bd","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"maximumElasticWorkerCount":12,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-007_24787","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":4}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002","name":"funcappplan000002","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"francecentral","properties":{"serverFarmId":49476,"name":"funcappplan000002","sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":4},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":4,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":4,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":12,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_49476","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2023-11-15T17:25:27.51"},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":4}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1557'
+      - '1634'
       content-type:
       - application/json
       date:
-      - Sun, 19 Jul 2020 21:26:45 GMT
+      - Wed, 15 Nov 2023 17:25:29 GMT
+      etag:
+      - '"1DA17E8BAB8A98B"'
       expires:
       - '-1'
       pragma:
@@ -92,16 +89,12 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
@@ -121,26 +114,24 @@ interactions:
       ParameterSetName:
       - -g -n --min-instances --max-burst
       User-Agent:
-      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.9 msrest_azure/0.6.3
-        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002","name":"funcappplan000002","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"France
-        Central","properties":{"serverFarmId":24787,"name":"funcappplan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":4,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":4,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"5700fc96-77b4-4f8d-afce-c353d8c443bd","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"maximumElasticWorkerCount":12,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-007_24787","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":4}}'
+        Central","properties":{"serverFarmId":49476,"name":"funcappplan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":4,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":4,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":12,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_49476","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2023-11-15T17:25:27.51"},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":4}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1557'
+      - '1545'
       content-type:
       - application/json
       date:
-      - Sun, 19 Jul 2020 21:26:46 GMT
+      - Wed, 15 Nov 2023 17:25:30 GMT
       expires:
       - '-1'
       pragma:
@@ -149,10 +140,6 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
@@ -163,11 +150,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"kind": "elastic", "location": "France Central", "properties": {"perSiteScaling":
-      false, "maximumElasticWorkerCount": 11, "isSpot": false, "reserved": false,
-      "isXenon": false, "hyperV": false, "targetWorkerCount": 0, "targetWorkerSizeId":
-      0}, "sku": {"name": "EP1", "tier": "ElasticPremium", "size": "EP1", "family":
-      "EP", "capacity": 5}}'
+    body: '{"kind": "elastic", "location": "France Central", "sku": {"name": "EP1",
+      "tier": "ElasticPremium", "size": "EP1", "family": "EP", "capacity": 5}, "properties":
+      {"perSiteScaling": false, "elasticScaleEnabled": true, "maximumElasticWorkerCount":
+      11, "isSpot": false, "reserved": false, "isXenon": false, "hyperV": false, "targetWorkerCount":
+      0, "targetWorkerSizeId": 0, "zoneRedundant": false}}'
     headers:
       Accept:
       - application/json
@@ -178,32 +165,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '339'
+      - '392'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --min-instances --max-burst
       User-Agent:
-      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.9 msrest_azure/0.6.3
-        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002","name":"funcappplan000002","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"France
-        Central","properties":{"serverFarmId":24787,"name":"funcappplan000002","sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","capacity":5},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":5,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":5,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"5700fc96-77b4-4f8d-afce-c353d8c443bd","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"maximumElasticWorkerCount":11,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-007_24787","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":null,"webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","capacity":5}}'
+        Central","properties":{"serverFarmId":49476,"name":"funcappplan000002","sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":11,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_49476","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2023-11-15T17:25:27.51"},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1607'
+      - '1630'
       content-type:
       - application/json
       date:
-      - Sun, 19 Jul 2020 21:26:54 GMT
+      - Wed, 15 Nov 2023 17:25:33 GMT
       expires:
       - '-1'
       pragma:
@@ -221,7 +206,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1194'
       x-powered-by:
       - ASP.NET
     status:
@@ -241,26 +226,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.9 msrest_azure/0.6.3
-        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcappplan000002","name":"funcappplan000002","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"France
-        Central","properties":{"serverFarmId":24787,"name":"funcappplan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":5,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":5,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"5700fc96-77b4-4f8d-afce-c353d8c443bd","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"maximumElasticWorkerCount":11,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-007_24787","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":5}}'
+        Central","properties":{"serverFarmId":49476,"name":"funcappplan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":11,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_49476","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2023-11-15T17:25:27.51"},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1557'
+      - '1545'
       content-type:
       - application/json
       date:
-      - Sun, 19 Jul 2020 21:26:55 GMT
+      - Wed, 15 Nov 2023 17:25:34 GMT
       expires:
       - '-1'
       pragma:
@@ -298,12 +281,10 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.9 msrest_azure/0.6.3
-        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.54.0 azsdk-python-azure-mgmt-web/7.0.0 Python/3.10.13 (Linux-5.15.0-1050-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/funcappplan000002?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/funcappplan000002?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -311,7 +292,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Sun, 19 Jul 2020 21:26:56 GMT
+      - Wed, 15 Nov 2023 17:25:35 GMT
       expires:
       - '-1'
       pragma:
@@ -321,7 +302,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 204
       message: No Content

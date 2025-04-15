@@ -1,0 +1,487 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account file-service-properties update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --delete-retention-days --enable-delete-retention
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default?api-version=2024-01-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/fileServices","properties":{"protocolSettings":{"smb":{}},"cors":{"corsRules":[]},"shareDeleteRetentionPolicy":{"enabled":true,"days":7}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '412'
+      content-type:
+      - application/json
+      date:
+      - Tue, 25 Feb 2025 03:14:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 3FE8864BA726406C8751D64F7BC4BCAA Ref B: MAA201060515025 Ref C: 2025-02-25T03:14:19Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"shareDeleteRetentionPolicy": {"enabled": true, "days":
+      7}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account file-service-properties update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '76'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --delete-retention-days --enable-delete-retention
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default?api-version=2024-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/fileServices","properties":{"shareDeleteRetentionPolicy":{"enabled":true,"days":7}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '310'
+      content-type:
+      - application/json
+      date:
+      - Tue, 25 Feb 2025 03:14:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 8719B341CAFE4E188D59E8626AD386E3 Ref B: MAA201060513045 Ref C: 2025-02-25T03:14:21Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --storage-account -g -n
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003?api-version=2024-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","properties":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json
+      date:
+      - Tue, 25 Feb 2025 03:14:24 GMT
+      etag:
+      - '"0x8DD554A80FC4B0F"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 2D68E3D4E8064A36A0C31B1F823DCED5 Ref B: MAA201060515045 Ref C: 2025-02-25T03:14:22Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?api-version=2024-01-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8DD554A80FC4B0F\"","properties":{"leaseStatus":"unlocked","leaseState":"available","accessTier":"TransactionOptimized","lastModifiedTime":"2025-02-25T03:14:23.0000000Z","shareQuota":102400,"enabledProtocols":"SMB"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '509'
+      content-type:
+      - application/json
+      date:
+      - Tue, 25 Feb 2025 03:14:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 1024FB54A9C944A78C9D41CE93FEA6D1 Ref B: MAA201060516039 Ref C: 2025-02-25T03:14:25Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --storage-account -g -n -y
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003?$include=none&api-version=2024-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 25 Feb 2025 03:14:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '198'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2998'
+      x-msedge-ref:
+      - 'Ref A: 11C0E638E7834250B1E81FD4C4350851 Ref B: MAA201060516011 Ref C: 2025-02-25T03:14:26Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?api-version=2024-01-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json
+      date:
+      - Tue, 25 Feb 2025 03:14:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: A2CAEEDE580B4EB995B7769896F1726D Ref B: MAA201060515047 Ref C: 2025-02-25T03:14:28Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g --include-deleted
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?$expand=deleted&api-version=2024-01-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003_01DB87335E824130","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8DD554A80FC4B0F\"","properties":{"leaseStatus":"unlocked","leaseState":"broken","version":"01DB87335E824130","deleted":true,"deletedTime":"2025-02-25T03:14:27.0000000Z","remainingRetentionDays":7,"accessTier":"TransactionOptimized","lastModifiedTime":"2025-02-25T03:14:23.0000000Z","shareQuota":102400,"enabledProtocols":"SMB"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json
+      date:
+      - Tue, 25 Feb 2025 03:14:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 332E021A811A4214A55AB99CD2DBB471 Ref B: MAA201060516047 Ref C: 2025-02-25T03:14:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g --include-deleted --query -o
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?$expand=deleted&api-version=2024-01-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003_01DB87335E824130","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8DD554A80FC4B0F\"","properties":{"leaseStatus":"unlocked","leaseState":"broken","version":"01DB87335E824130","deleted":true,"deletedTime":"2025-02-25T03:14:27.0000000Z","remainingRetentionDays":7,"accessTier":"TransactionOptimized","lastModifiedTime":"2025-02-25T03:14:23.0000000Z","shareQuota":102400,"enabledProtocols":"SMB"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json
+      date:
+      - Tue, 25 Feb 2025 03:15:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 389DCA3D30B144F99225AC0AA37393F7 Ref B: MAA201060514017 Ref C: 2025-02-25T03:15:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"deletedShareName": "share000003", "deletedShareVersion": "01DB87335E824130"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '78'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --storage-account -g -n --deleted-version
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003/restore?api-version=2024-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 25 Feb 2025 03:15:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 2C179C9D183A4868BBD7440A937FB99F Ref B: MAA201060516033 Ref C: 2025-02-25T03:15:02Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?api-version=2024-01-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8DD554A98A674DA\"","properties":{"leaseStatus":"unlocked","leaseState":"available","accessTier":"TransactionOptimized","lastModifiedTime":"2025-02-25T03:15:03.0000000Z","shareQuota":102400,"enabledProtocols":"SMB"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '509'
+      content-type:
+      - application/json
+      date:
+      - Tue, 25 Feb 2025 03:15:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 284B44A155204AD9B827E053CA4214C4 Ref B: MAA201060516037 Ref C: 2025-02-25T03:15:04Z'
+    status:
+      code: 200
+      message: OK
+version: 1

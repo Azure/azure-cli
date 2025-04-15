@@ -4,20 +4,24 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-
+from azure.cli.core import ModExtensionSuppress
+from azure.cli.core.commands import CliCommandType
+from azure.cli.core.profiles import ResourceType
+from azure.cli.command_modules.rdbms._util import RdbmsArgumentContext
+from azure.cli.command_modules.rdbms.commands import load_command_table
+from azure.cli.command_modules.rdbms.flexible_server_commands import load_flexibleserver_command_table
+from azure.cli.command_modules.rdbms._params import load_arguments
 import azure.cli.command_modules.rdbms._help  # pylint: disable=unused-import
+import azure.cli.command_modules.rdbms._helptext_pg  # pylint: disable=unused-import
 
 
+# pylint: disable=import-outside-toplevel
 class RdbmsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core import ModExtensionSuppress
-        from azure.cli.core.commands import CliCommandType
-        from azure.cli.core.profiles import ResourceType
-        from azure.cli.command_modules.rdbms._util import RdbmsArgumentContext
 
         rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
-        super(RdbmsCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx,
             resource_type=ResourceType.MGMT_RDBMS,
             custom_command_type=rdbms_custom,
@@ -30,12 +34,23 @@ class RdbmsCommandsLoader(AzCommandsLoader):
                 recommend_remove=True))
 
     def load_command_table(self, args):
-        from azure.cli.command_modules.rdbms.commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
+
         load_command_table(self, args)
+        load_flexibleserver_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        from azure.cli.command_modules.rdbms._params import load_arguments
         load_arguments(self, command)
 
 

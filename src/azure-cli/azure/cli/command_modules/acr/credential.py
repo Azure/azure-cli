@@ -19,10 +19,10 @@ def acr_credential_show(cmd, client, registry_name, resource_group_name=None):
 
 def acr_credential_renew(cmd, client, registry_name, password_name, resource_group_name=None):
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
-
+    regenerate_credential_parameters = {'name': password_name}
     if registry.admin_user_enabled:  # pylint: disable=no-member
         return client.regenerate_credential(
-            resource_group_name, registry_name, password_name)
+            resource_group_name, registry_name, regenerate_credential_parameters)
 
     raise admin_not_enabled_error(registry_name)
 

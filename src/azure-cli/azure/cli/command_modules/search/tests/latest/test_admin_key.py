@@ -9,7 +9,12 @@ import unittest
 
 class AzureSearchAdminKeysTests(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
+    def setUp(self):
+        self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
+        super().setUp()
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_admin_key_show_renew(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -30,12 +35,12 @@ class AzureSearchAdminKeysTests(ScenarioTest):
 
         self.cmd('az search admin-key renew --service-name {name} -g {rg} --key-kind primary')
         _adminkey_1 = self.cmd('az search admin-key show --service-name {name} -g {rg}').get_output_in_json()
-        self.assertNotEquals(_adminkey['primaryKey'], _adminkey_1['primaryKey'])
+        self.assertNotEqual(_adminkey['primaryKey'], _adminkey_1['primaryKey'])
         self.assertEqual(_adminkey['secondaryKey'], _adminkey_1['secondaryKey'])
 
         self.cmd('az search admin-key renew --service-name {name} -g {rg} --key-kind secondary')
         _adminkey_2 = self.cmd('az search admin-key show --service-name {name} -g {rg}').get_output_in_json()
-        self.assertNotEquals(_adminkey_2['secondaryKey'], _adminkey_1['secondaryKey'])
+        self.assertNotEqual(_adminkey_2['secondaryKey'], _adminkey_1['secondaryKey'])
         self.assertEqual(_adminkey_2['primaryKey'], _adminkey_1['primaryKey'])
 
 

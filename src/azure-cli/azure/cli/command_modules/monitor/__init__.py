@@ -32,18 +32,27 @@ class MonitorArgumentContext(AzArgumentContext):
 class MonitorCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.command_modules.monitor._exception_handler import monitor_exception_handler
         from azure.cli.core.profiles import ResourceType
         monitor_custom = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
-            exception_handler=monitor_exception_handler)
-        super(MonitorCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                    resource_type=ResourceType.MGMT_MONITOR,
-                                                    argument_context_cls=MonitorArgumentContext,
-                                                    custom_command_type=monitor_custom)
+            operations_tmpl='azure.cli.command_modules.monitor.custom#{}')
+        super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_MONITOR,
+                         argument_context_cls=MonitorArgumentContext,
+                         custom_command_type=monitor_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.monitor.commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         return self.command_table
 

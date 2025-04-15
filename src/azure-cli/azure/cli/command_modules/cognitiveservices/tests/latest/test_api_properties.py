@@ -15,11 +15,11 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
 
         self.kwargs.update({
             'sname': sname,
-            'kind': 'QnAMaker',
+            'kind': 'QnAMaker.v2',
             'sku': 'S0',
-            'location': 'westus',
-            'apiProperties': 'qnaRuntimeEndpoint=https://cs-cli-test-qnamaker.azurewebsites.net',
-            'apiPropertiesJson': '{\\\"qnaRuntimeEndpoint\\\":\\\"https://cs-cli-test-qnamaker.azurewebsites.net\\\"}',
+            'location': 'SOUTHCENTRALUS',
+            'apiProperties': 'qnaAzureSearchEndpointId=https://cs-cli-test-qnamaker.azurewebsites.net',
+            'apiPropertiesJson': '{\\\"qnaAzureSearchEndpointId\\\":\\\"https://cs-cli-test-qnamaker.azurewebsites.net\\\"}',
         })
 
         # test to create cognitive services account
@@ -33,6 +33,10 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)
+
+        self.kwargs.update({
+            'sname': self.create_random_name(prefix='cs_cli_test_', length=16)
+        })
 
         # test to create cognitive services account
         self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} '

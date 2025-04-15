@@ -1,5 +1,14 @@
 The document provides instructions and guidelines on how to author individual commands.
 
+> **Note**
+> 
+> [aaz-dev-tools](https://azure.github.io/aaz-dev-tools/) is our codegen tool which can be used for Control Plane APIs. Highly recommend using it in new commands. It brings the following benefits:
+> - Shorten development cycle (save 50%+ development time).
+> - Consistent code style improves command quality and saves PR review time.
+> - Directly generate CLI commands from swagger instead of waiting for SDK release.
+>
+> If you have any question, you can post it in this Teams [channel](https://aka.ms/azure-cli-codegen-channel).
+
 **AUTHORING COMMANDS**
 
 [1. Write the Command Loader](#write-the-command-loader)
@@ -847,7 +856,7 @@ AZURE_API_PROFILES = {
     ResourceType.MGMT_MYSERVICE: '2019-03-01' # the supported API version on that profile
     ...
   },
-  '2019-03-01-hybrid': {
+  '2020-09-01-hybrid': {
     ResourceType.MGMT_MYSERVICE: '2018-08-01' # different API version for this profile
     ...
   },

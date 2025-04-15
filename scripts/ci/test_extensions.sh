@@ -18,15 +18,26 @@ export AZURE_CLI_DIAGNOSTICS_TELEMETRY=
 output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
-for ext in $output; do
+# Disable azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
+# Disable fzf: https://github.com/Azure/azure-cli/pull/17979
+# Disable arcappliance arcdata connectedk8s: https://github.com/Azure/azure-cli/pull/20436
+# Disable k8s-extension temporarily: https://github.com/Azure/azure-cli-extensions/pull/6702
+# Disable alias temporarily: https://github.com/Azure/azure-cli/pull/27717
+# hybridaks is going to be deprecated: https://github.com/Azure/azure-cli/pull/29838
+# db-up is going to be deprecated: https://github.com/Azure/azure-cli/pull/29887
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up'
 
-    # TODO: Remove when ML extension is compatible with CLI 2.0.69 core
-    # https://github.com/Azure/azure-cli-extensions/issues/826
-    if [ $ext == 'azure-cli-ml' ]; then
+# Does not exit if az extension add fails until all extensions have been tested
+set +e
+
+for ext in $output; do
+    echo
+    # Use regex to detect if $ext is in $ignore_list
+    if [[ $ignore_list =~ $ext ]]; then
+        echo "Ignore extension: $ext"
         continue
     fi
 
-    echo
     echo "Verifying extension:" $ext
     az extension add -n $ext
     if [ $? != 0 ]
@@ -35,6 +46,8 @@ for ext in $output; do
         echo "Failed to load:" $ext
     fi
 done
+
+pip list -v
 
 az self-test --debug
 if [ $? != 0 ]

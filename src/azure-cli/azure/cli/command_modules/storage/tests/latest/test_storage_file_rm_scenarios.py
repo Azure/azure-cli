@@ -4,11 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import unittest
+
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint,
                                JMESPathCheck, JMESPathCheckExists)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
@@ -89,7 +91,8 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'non_exist_share_name': non_exist_share_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {non_exist_share_name}')
 
         # 5. Test update command.
@@ -144,9 +147,126 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('storage share-rm exists --ids {share_id_2}').get_output_in_json()
         self.assertEqual(result['exists'], False)
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2024-01-01')
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus2euap")
+    def test_storage_file_using_rm_provisioned_v2_scenario(self, resource_group):
+        self.kwargs = {
+            'sku': 'StandardV2_LRS',
+            'sa': self.create_random_name(prefix='sastdlrs', length=24),
+            'rg': resource_group
+        }
+        self.cmd('az storage account create -n {sa} -g {rg} --sku {sku} --kind FileStorage '
+                 '-l eastus2euap',
+                 checks=[self.check('sku.name', self.kwargs.get('sku'))])
+
+        self.kwargs.update({
+            'share_name_1': self.create_random_name('share', 24)
+        })
+        # create default provisioned v2 share
+        self.cmd('az storage share-rm create --storage-account {sa} -g {rg} -n {share_name_1}',
+                 checks=[self.check('name', self.kwargs['share_name_1']),
+                         self.exists('includedBurstIops'),
+                         self.exists('maxBurstCreditsForIops'),
+                         self.exists('nextAllowedProvisionedBandwidthDowngradeTime'),
+                         self.exists('nextAllowedProvisionedIopsDowngradeTime'),
+                         self.exists('provisionedBandwidthMibps'),
+                         self.exists('provisionedIops')])
+
+        self.kwargs.update({
+            'share_name_2': self.create_random_name('share', 24)
+        })
+        # create provisioned v2 share with new params
+        self.cmd('az storage share-rm create --storage-account {sa} -g {rg} -n {share_name_2} '
+                 '--provisioned-bandwidth-mibps 60 --provisioned-iops 500',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('provisionedBandwidthMibps', 60),
+                         self.check('provisionedIops', 500),
+                         self.exists('includedBurstIops'),
+                         self.exists('maxBurstCreditsForIops'),
+                         self.exists('nextAllowedProvisionedBandwidthDowngradeTime'),
+                         self.exists('nextAllowedProvisionedIopsDowngradeTime')])
+
+        self.cmd('az storage share-rm show --storage-account {sa} -g {rg} -n {share_name_2}',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('provisionedBandwidthMibps', 60),
+                         self.check('provisionedIops', 500),
+                         self.exists('includedBurstIops'),
+                         self.exists('maxBurstCreditsForIops'),
+                         self.exists('nextAllowedProvisionedBandwidthDowngradeTime'),
+                         self.exists('nextAllowedProvisionedIopsDowngradeTime')])
+
+        self.cmd('az storage share-rm update --storage-account {sa} -g {rg} -n {share_name_2} '
+                 '--provisioned-bandwidth-mibps 70 --provisioned-iops 600',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('provisionedBandwidthMibps', 70),
+                         self.check('provisionedIops', 600),
+                         self.exists('includedBurstIops'),
+                         self.exists('maxBurstCreditsForIops'),
+                         self.exists('nextAllowedProvisionedBandwidthDowngradeTime'),
+                         self.exists('nextAllowedProvisionedIopsDowngradeTime')])
+
+        self.cmd('az storage account file-service-usage --account-name {sa} -g {rg}',
+                 checks=[self.exists('properties.fileShareLimits.maxProvisionedBandwidthMiBPerSec'),
+                         self.exists('properties.fileShareLimits.maxProvisionedIOPS'),
+                         self.exists('properties.fileShareLimits.maxProvisionedStorageGiB')])
+
+        self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('az storage share-rm delete --storage-account {sa} -g {rg} -n {share_name_2} -y')
+
+        self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
+                 checks=[self.check('length(@)', 1)])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2024-01-01')
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus2euap")
+    def test_storage_file_using_rm_provisioned_v1_scenario(self, resource_group):
+        self.kwargs = {
+            'sku': 'Premium_LRS',
+            'sa': self.create_random_name(prefix='sastdlrs', length=24),
+            'rg': resource_group
+        }
+        self.cmd('az storage account create -n {sa} -g {rg} --sku {sku} --kind FileStorage '
+                 '-l eastus2euap',
+                 checks=[self.check('sku.name', self.kwargs.get('sku'))])
+
+        self.kwargs.update({
+            'share_name_1': self.create_random_name('share', 24)
+        })
+        # create default provisioned v1 share
+        self.cmd('az storage share-rm create --storage-account {sa} -g {rg} -n {share_name_1}',
+                 checks=[self.check('name', self.kwargs['share_name_1']),
+                         self.check('fileSharePaidBursting.paidBurstingEnabled', False)])
+
+        self.kwargs.update({
+            'share_name_2': self.create_random_name('share', 24)
+        })
+        # create provisioned v1 share with new params
+        self.cmd('az storage share-rm create --storage-account {sa} -g {rg} -n {share_name_2} '
+                 '--paid-bursting-enabled true '
+                 '--paid-bursting-max-bandwidth-mibps 100 --paid-bursting-max-iops 1000',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('fileSharePaidBursting.paidBurstingEnabled', True),
+                         self.check('fileSharePaidBursting.paidBurstingMaxBandwidthMibps', 100),
+                         self.check('fileSharePaidBursting.paidBurstingMaxIops', 1000)])
+
+        self.cmd('az storage share-rm show --storage-account {sa} -g {rg} -n {share_name_2}',
+                 checks=[self.check('name', self.kwargs['share_name_2']),
+                         self.check('fileSharePaidBursting.paidBurstingEnabled', True),
+                         self.check('fileSharePaidBursting.paidBurstingMaxBandwidthMibps', 100),
+                         self.check('fileSharePaidBursting.paidBurstingMaxIops', 1000)])
+
+        self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('az storage share-rm delete --storage-account {sa} -g {rg} -n {share_name_2} -y')
+
+        self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
+                 checks=[self.check('length(@)', 1)])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_nfs", location="eastus2euap")
-    @StorageAccountPreparer(name_prefix="nfs", location="eastus2euap")
+    @StorageAccountPreparer(name_prefix="nfs", location="eastus2", kind='FileStorage', sku='Premium_LRS')
     def test_storage_share_rm_with_NFS(self):
 
         self.kwargs.update({
@@ -178,6 +298,58 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
         self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
             JMESPathCheck('length(@)', 0)
+        })
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
+    @ResourceGroupPreparer(name_prefix="cli_snapshot", location="eastus")
+    @StorageAccountPreparer(name_prefix="snapshot", location="eastus", kind='StorageV2')
+    def test_storage_share_rm_with_snapshot(self):
+        self.kwargs.update({
+            'share': self.create_random_name('share', 24),
+        })
+        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share}')
+
+        result = self.cmd('storage share-rm snapshot --storage-account {sa} -g {rg} -n {share} '
+                          '-q 10 --metadata k1=v1 --access-tier Hot --enabled-protocols SMB --root-squash AllSquash').get_output_in_json()
+        self.assertEqual(result['name'], self.kwargs['share'])
+        self.assertEqual(result['shareQuota'], 10)
+        self.assertEqual(result['metadata']['k1'], 'v1')
+        self.assertEqual(result['accessTier'], 'Hot')
+        self.assertEqual(result['enabledProtocols'], 'SMB')
+        self.assertEqual(result['rootSquash'], 'AllSquash')
+        self.assertIsNotNone(result['snapshotTime'])
+
+        self.kwargs.update({
+            'snapshot': result['snapshotTime']
+        })
+
+        self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot}', checks=[
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('snapshotTime', self.kwargs['snapshot'])
+        ])
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-snapshot', checks={
+            JMESPathCheck('length(@)', 2)
+        })
+
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaises(ResourceExistsError):
+            self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot} -y')
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --include-snapshot', checks={
+            JMESPathCheck('length(@)', 1)
+        })
+
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
+            self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot}')
+
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --include-snapshot', checks={
+            JMESPathCheck('length(@)', 1)
         })
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
@@ -216,4 +388,67 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {new_share} --access-tier Hot', checks={
             JMESPathCheck('[0].name', self.kwargs['share']),
             JMESPathCheck('accessTier', 'Hot')
+        })
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix="cli_stats")
+    @StorageAccountPreparer(name_prefix="stats")
+    def test_storage_share_rm_with_stats(self, resource_group, storage_account):
+        account_info = self.get_account_info(group=resource_group, name=storage_account)
+        share_name = self.create_random_name(prefix='share', length=12)
+        self.cmd('storage share-rm create -n {} --storage-account {} -g {} '.format(
+            share_name, storage_account, resource_group))
+        result = self.cmd('storage share-rm stats -n {} --storage-account {} -g {} '.format(
+            share_name, storage_account, resource_group)).output.strip('\n')
+        self.assertEqual(result, str(0))
+
+        local_file = self.create_temp_file(512, full_random=False)
+
+        self.storage_cmd('storage file upload --share-name {} --source "{}" --path source_file.txt ', account_info,
+                         share_name, local_file)
+        result = self.cmd('storage share-rm stats -n {} --storage-account {} -g {} '.format(
+            share_name, storage_account, resource_group)).output.strip('\n')
+        self.assertEqual(result, str(512 * 1024))
+
+    # @unittest.skip('FileServiceProperties object has no attribute protocol_settings')
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_sf", location="francecentral")
+    @StorageAccountPreparer(name_prefix="clitest", location="francecentral")
+    def test_storage_share_rm_soft_delete(self):
+        import time
+        self.cmd('storage account file-service-properties update -n {sa} -g {rg} --delete-retention-days 7 --enable-delete-retention',
+                 checks={
+                     JMESPathCheck('shareDeleteRetentionPolicy.days', 7),
+                     JMESPathCheck('shareDeleteRetentionPolicy.enabled', True)
+                 })
+
+        self.kwargs.update({
+            'share': self.create_random_name(prefix='share', length=24)
+        })
+        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share}', checks={
+            JMESPathCheck('name', self.kwargs['share'])
+        })
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('length(@)', 1)
+        })
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('length(@)', 0)
+        })
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted', checks={
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].deleted', True)
+        })
+
+        time.sleep(30)
+        self.kwargs['version'] = \
+            self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --query [0].version -o tsv'
+                     ).output.strip('\n')
+        self.cmd('storage share-rm restore --storage-account {sa} -g {rg} -n {share} --deleted-version {version}',
+                 checks={
+                     JMESPathCheck('name', self.kwargs['share'])})
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('length(@)', 1)
         })

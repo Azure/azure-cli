@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import os
 from datetime import datetime
 
@@ -18,8 +16,43 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     filter_none, collect_blobs, collect_blob_objects, collect_files,
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
+from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.util import CLIError
+
+logger = get_logger(__name__)
+
+
+def set_legal_hold(cmd, client, container_name, account_name, tags, resource_group_name=None):
+    LegalHold = cmd.get_models('LegalHold', resource_type=ResourceType.MGMT_STORAGE)
+    legal_hold = LegalHold(tags=tags)
+    return client.set_legal_hold(resource_group_name, account_name, container_name, legal_hold)
+
+
+def clear_legal_hold(cmd, client, container_name, account_name, tags, resource_group_name=None):
+    LegalHold = cmd.get_models('LegalHold', resource_type=ResourceType.MGMT_STORAGE)
+    legal_hold = LegalHold(tags=tags)
+    return client.clear_legal_hold(resource_group_name, account_name, container_name, legal_hold)
+
+
+def create_or_update_immutability_policy(cmd, client, container_name, account_name,
+                                         resource_group_name=None, allow_protected_append_writes=None,
+                                         period=None, if_match=None):
+    ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
+    immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
+                                             allow_protected_append_writes=allow_protected_append_writes)
+    return client.create_or_update_immutability_policy(resource_group_name, account_name, container_name,
+                                                       if_match, immutability_policy)
+
+
+def extend_immutability_policy(cmd, client, container_name, account_name,
+                               resource_group_name=None, allow_protected_append_writes=None,
+                               period=None, if_match=None):
+    ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
+    immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
+                                             allow_protected_append_writes=allow_protected_append_writes)
+    return client.extend_immutability_policy(resource_group_name, account_name, container_name,
+                                             if_match, immutability_policy)
 
 
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,
@@ -58,9 +91,10 @@ def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_
     if blob_ranges is None:
         BlobRestoreRange = cmd.get_models("BlobRestoreRange")
         blob_ranges = [BlobRestoreRange(start_range="", end_range="")]
-
-    return sdk_no_wait(no_wait, client.restore_blob_ranges, resource_group_name=resource_group_name,
-                       account_name=account_name, time_to_restore=time_to_restore, blob_ranges=blob_ranges)
+    restore_parameters = cmd.get_models("BlobRestoreParameters")(time_to_restore=time_to_restore,
+                                                                 blob_ranges=blob_ranges)
+    return sdk_no_wait(no_wait, client.begin_restore_blob_ranges, resource_group_name=resource_group_name,
+                       account_name=account_name, parameters=restore_parameters)
 
 
 def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):
@@ -131,9 +165,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                             destination_path=None, source_container=None, source_share=None,
                             source_sas=None, pattern=None, dryrun=False):
     """Copy a group of blob or files to a blob container."""
-    logger = None
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('copy files or blobs to blob container')
         logger.warning('    account %s', client.account_name)
         logger.warning('  container %s', container_name)
@@ -216,7 +248,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         blobs_to_download[normalized_blob_name] = blob_name
 
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('download action: from %s to %s', source, destination)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
@@ -261,7 +292,6 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             'Last Modified': upload_result.last_modified if upload_result else None,
             'eTag': upload_result.etag if upload_result else None}
 
-    logger = get_logger(__name__)
     source_files = source_files or []
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
 
@@ -459,13 +489,17 @@ def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=No
         if_modified_since=if_modified_since, if_unmodified_since=if_unmodified_since, if_match=if_match,
         if_none_match=if_none_match, timeout=timeout)
 
-    page_ranges = None
-    if blob.properties.blob_type == cmd.get_models('blob.models#_BlobTypes').PageBlob:
-        page_ranges = client.get_page_ranges(
-            container_name, blob_name, snapshot=snapshot, lease_id=lease_id, if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match, timeout=timeout)
+    try:
+        page_ranges = None
+        if blob.properties.blob_type == cmd.get_models('blob.models#_BlobTypes').PageBlob:
+            page_ranges = client.get_page_ranges(
+                container_name, blob_name, snapshot=snapshot, lease_id=lease_id, if_modified_since=if_modified_since,
+                if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match,
+                timeout=timeout)
 
-    blob.properties.page_ranges = page_ranges
+        blob.properties.page_ranges = page_ranges
+    except HttpResponseError as ex:
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 
@@ -488,7 +522,6 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         }
         return client.delete_blob(**delete_blob_args)
 
-    logger = get_logger(__name__)
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
@@ -625,11 +658,14 @@ def show_blob_v2(cmd, client, container_name, blob_name, snapshot=None, lease_id
 
     blob = client.get_blob_properties(**property_kwargs)
 
-    page_ranges = None
-    if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
-        page_ranges = client.get_page_ranges(**property_kwargs)
+    try:
+        page_ranges = None
+        if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
+            page_ranges = client.get_page_ranges(**property_kwargs)
 
-    blob.page_ranges = page_ranges
+        blob.page_ranges = page_ranges
+    except HttpResponseError as ex:
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 

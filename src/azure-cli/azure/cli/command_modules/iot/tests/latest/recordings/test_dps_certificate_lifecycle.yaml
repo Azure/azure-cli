@@ -1,0 +1,1162 @@
+interactions:
+- request:
+    body: '{"name": "dps000002"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '21'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/checkProvisioningServiceNameAvailability?api-version=2021-10-15
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"Invalid","message":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '56'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: BF4BBAF3280D4CEEA4112BEEEA83764E Ref B: CO6AA3150219011 Ref C: 2024-05-07T19:07:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_dps_certificate_lifecycle","date":"2024-05-07T19:06:58Z","module":"iot"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '365'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: E3858796DD6E472C975AAFFDDBF8FF40 Ref B: CO6AA3150219053 Ref C: 2024-05-07T19:07:05Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {}, "sku": {"name": "S1", "capacity":
+      1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '78'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2021-10-15
+  response:
+    body:
+      string: '{"name":"dps000002","location":"westus","properties":{"state":"Activating","provisioningState":"Accepted","allocationPolicy":"Hashed","idScope":null},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"a386d5ea-ea90-441a-8263-d816368c84a1","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/westus/provisioningserviceoperationresults/aWQ9b3NfaWRfMmQ4NWEyMDYtZjkwMS00NzQ4LWFjZDItOGVhNjliNjg2OTI4O3JlZ2lvbj13ZXN0dXM=?api-version=2021-10-15&asyncinfo&t=638507056279758479&c=MIIHKjCCBhKgAwIBAgITfATLTVgL1TFPlLPYYgAABMtNWDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwNTAyMDIxNjQ3WhcNMjUwNDI3MDIxNjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6dMlyzLhfjTqgpK0ak7lUYlktWoaGVBDdCGjuh9_Tan7-jV2uWUD4RkOrtgvB4YkiFoRtBNBXjjoEonOoUYRurBtxwPFad9vRUZ_DI_rWbJtTLRFCWcfQsbif2PdKnEhJY516wQNDMEoBOEbnIc1y9YfB9bIs7IEiWk7D7-DM36qf95dLDczZrmlZVMcY1o7b0QfFKOdeEGIT7DFQmwZPqqXVAtXgfx_IuiPOV10h17_C8jj017DwYyrZGVUZW5NTL-UBzjwXP4PUzzjlSBKgS8P2JZ6UGJCcGsQxlk7UzoZsRpgASFkOI7Pb7iHNCdIVtzThnFpznmpGQl2zN3J0CAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBQsvTY45Tg0y5RD2QrGXKkZUewNfzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAEzzZuDjeQg8R2ZevaD977WxPr07WGdwdwx1NtB3dHN7TZJqRgyAYDoxNR0xq9dhHw-e4q6JwML6ihshb3p1gvbAgaMGJwdtOKgCcJGzu7LAe0hz_PEjtom9-pPSrNZSQ9F7EH3bR5EiHZiIHK3Hcc4Yc_h6bKy6olqJWcXv3k0_ExaKVUdG_vaMOD7ho3cjwWX4aN_0wIo0BwDrCe4bQoHWwM4Hz9_HjmbAWLb1O6Teyg5lxbP-gmxAzCQbUlqK_onCZrHPpqesdyo2xL2_XufGurmjllywMiRtQkPRV7qAAZxK35Iht_zPAJ9ZVWTWvIFt_f1gX1go1JEET0FJPcA&s=Vdqng9MKmHx3zvIooJJnxXgVVIquoGLu4FsLmNYe5B2siD-FCSglTkhVF5tp0ny9I87AI04QhmKEyJfnGydencCrtpXot2sreKXd5TYtVaKW8qpcWt1Lr8yJKdz0tKo5WB0S6u-HblcuhAbE-VICKRRlp36YrlJtLV1CNCUo_brwy1pwJpAoLcU85RI12CIxpn8qSrsq26G8M4XvjuRoHk4X7CGL-HwIgRJZDetGPwVgdF_y-PNenCZ54ZkUmqSBh7YbA_vjXb_C0BjCMhmUKP5bYCxpI1iZS6q3bSNr3x72PTwDlsyd3os6suO-NQUOhGwadg0tXws2WA-CXy-7ug&h=ZBN5Beo4QX6ZY0qKw9Bi2H4dfNwlljhNhOpH8JTWCSc
+      cache-control:
+      - no-cache
+      content-length:
+      - '500'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+      x-msedge-ref:
+      - 'Ref A: DB7513F28D0940D68530CF355784FD5E Ref B: CO6AA3150219011 Ref C: 2024-05-07T19:07:05Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/westus/provisioningserviceoperationresults/aWQ9b3NfaWRfMmQ4NWEyMDYtZjkwMS00NzQ4LWFjZDItOGVhNjliNjg2OTI4O3JlZ2lvbj13ZXN0dXM=?api-version=2021-10-15&asyncinfo&t=638507056279758479&c=MIIHKjCCBhKgAwIBAgITfATLTVgL1TFPlLPYYgAABMtNWDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwNTAyMDIxNjQ3WhcNMjUwNDI3MDIxNjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6dMlyzLhfjTqgpK0ak7lUYlktWoaGVBDdCGjuh9_Tan7-jV2uWUD4RkOrtgvB4YkiFoRtBNBXjjoEonOoUYRurBtxwPFad9vRUZ_DI_rWbJtTLRFCWcfQsbif2PdKnEhJY516wQNDMEoBOEbnIc1y9YfB9bIs7IEiWk7D7-DM36qf95dLDczZrmlZVMcY1o7b0QfFKOdeEGIT7DFQmwZPqqXVAtXgfx_IuiPOV10h17_C8jj017DwYyrZGVUZW5NTL-UBzjwXP4PUzzjlSBKgS8P2JZ6UGJCcGsQxlk7UzoZsRpgASFkOI7Pb7iHNCdIVtzThnFpznmpGQl2zN3J0CAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBQsvTY45Tg0y5RD2QrGXKkZUewNfzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAEzzZuDjeQg8R2ZevaD977WxPr07WGdwdwx1NtB3dHN7TZJqRgyAYDoxNR0xq9dhHw-e4q6JwML6ihshb3p1gvbAgaMGJwdtOKgCcJGzu7LAe0hz_PEjtom9-pPSrNZSQ9F7EH3bR5EiHZiIHK3Hcc4Yc_h6bKy6olqJWcXv3k0_ExaKVUdG_vaMOD7ho3cjwWX4aN_0wIo0BwDrCe4bQoHWwM4Hz9_HjmbAWLb1O6Teyg5lxbP-gmxAzCQbUlqK_onCZrHPpqesdyo2xL2_XufGurmjllywMiRtQkPRV7qAAZxK35Iht_zPAJ9ZVWTWvIFt_f1gX1go1JEET0FJPcA&s=Vdqng9MKmHx3zvIooJJnxXgVVIquoGLu4FsLmNYe5B2siD-FCSglTkhVF5tp0ny9I87AI04QhmKEyJfnGydencCrtpXot2sreKXd5TYtVaKW8qpcWt1Lr8yJKdz0tKo5WB0S6u-HblcuhAbE-VICKRRlp36YrlJtLV1CNCUo_brwy1pwJpAoLcU85RI12CIxpn8qSrsq26G8M4XvjuRoHk4X7CGL-HwIgRJZDetGPwVgdF_y-PNenCZ54ZkUmqSBh7YbA_vjXb_C0BjCMhmUKP5bYCxpI1iZS6q3bSNr3x72PTwDlsyd3os6suO-NQUOhGwadg0tXws2WA-CXy-7ug&h=ZBN5Beo4QX6ZY0qKw9Bi2H4dfNwlljhNhOpH8JTWCSc
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 25B6949D74514A8081B9D235C6D2868D Ref B: CO6AA3150219011 Ref C: 2024-05-07T19:07:08Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/westus/provisioningserviceoperationresults/aWQ9b3NfaWRfMmQ4NWEyMDYtZjkwMS00NzQ4LWFjZDItOGVhNjliNjg2OTI4O3JlZ2lvbj13ZXN0dXM=?api-version=2021-10-15&asyncinfo&t=638507056279758479&c=MIIHKjCCBhKgAwIBAgITfATLTVgL1TFPlLPYYgAABMtNWDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwNTAyMDIxNjQ3WhcNMjUwNDI3MDIxNjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6dMlyzLhfjTqgpK0ak7lUYlktWoaGVBDdCGjuh9_Tan7-jV2uWUD4RkOrtgvB4YkiFoRtBNBXjjoEonOoUYRurBtxwPFad9vRUZ_DI_rWbJtTLRFCWcfQsbif2PdKnEhJY516wQNDMEoBOEbnIc1y9YfB9bIs7IEiWk7D7-DM36qf95dLDczZrmlZVMcY1o7b0QfFKOdeEGIT7DFQmwZPqqXVAtXgfx_IuiPOV10h17_C8jj017DwYyrZGVUZW5NTL-UBzjwXP4PUzzjlSBKgS8P2JZ6UGJCcGsQxlk7UzoZsRpgASFkOI7Pb7iHNCdIVtzThnFpznmpGQl2zN3J0CAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBQsvTY45Tg0y5RD2QrGXKkZUewNfzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAEzzZuDjeQg8R2ZevaD977WxPr07WGdwdwx1NtB3dHN7TZJqRgyAYDoxNR0xq9dhHw-e4q6JwML6ihshb3p1gvbAgaMGJwdtOKgCcJGzu7LAe0hz_PEjtom9-pPSrNZSQ9F7EH3bR5EiHZiIHK3Hcc4Yc_h6bKy6olqJWcXv3k0_ExaKVUdG_vaMOD7ho3cjwWX4aN_0wIo0BwDrCe4bQoHWwM4Hz9_HjmbAWLb1O6Teyg5lxbP-gmxAzCQbUlqK_onCZrHPpqesdyo2xL2_XufGurmjllywMiRtQkPRV7qAAZxK35Iht_zPAJ9ZVWTWvIFt_f1gX1go1JEET0FJPcA&s=Vdqng9MKmHx3zvIooJJnxXgVVIquoGLu4FsLmNYe5B2siD-FCSglTkhVF5tp0ny9I87AI04QhmKEyJfnGydencCrtpXot2sreKXd5TYtVaKW8qpcWt1Lr8yJKdz0tKo5WB0S6u-HblcuhAbE-VICKRRlp36YrlJtLV1CNCUo_brwy1pwJpAoLcU85RI12CIxpn8qSrsq26G8M4XvjuRoHk4X7CGL-HwIgRJZDetGPwVgdF_y-PNenCZ54ZkUmqSBh7YbA_vjXb_C0BjCMhmUKP5bYCxpI1iZS6q3bSNr3x72PTwDlsyd3os6suO-NQUOhGwadg0tXws2WA-CXy-7ug&h=ZBN5Beo4QX6ZY0qKw9Bi2H4dfNwlljhNhOpH8JTWCSc
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: DFB84160E4954A97B9696F00F8077AB9 Ref B: CO6AA3150219011 Ref C: 2024-05-07T19:07:38Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2021-10-15
+  response:
+    body:
+      string: '{"etag":"AAAAAB6ZDmg=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"Hashed","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne00CAF894"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"a386d5ea-ea90-441a-8263-d816368c84a1","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '681'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 4F93F1239ADC47E7BB772D5F03C5BFD1 Ref B: CO6AA3150219011 Ref C: 2024-05-07T19:07:38Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --name -p
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates?api-version=2021-10-15
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 01F817D36986407EA4B2C656D83A8697 Ref B: CO6AA3150217035 Ref C: 2024-05-07T19:07:39Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN4akNDQWE2Z0F3SUJBZ0lJQXBxYVZEczhyT3N3RFFZSktvWklodmNOQVFFTEJRQXdJekVoTUI4R0ExVUUKQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvTUI0WERUSTBNRFV3TnpFNU1EY3pOMW9YRFRJMApNRFV4TURFNU1EY3pOMW93SXpFaE1COEdBMVVFQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvCk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBclZrS2xjSVlRN0hjRjhNdTRjR2EKb25TdDdRamxCdG9hVmU5R1g5S0lrcStEK2lSb0g4YkhKdUNESEs5SW9mNG9tamVEV1lPZ2lOL29rU1NIcFNXQQpmQ2hXclNwZDhlbm9FNEVxRnUvTEtVZlZFR0ZHOGd2Sml2cm9qT2RKVjBIV0theWM3bVVSbjlkYzNJcCtGNDV3ClMzTlBZaTY1NUdrVzZ2eUs0bVU5Mkxud1dSOXUxZDFPSXZTdWNVWHhZN2Z4SmZTWktVb3RNY0s3cXJUckN3N3AKRGlkUFNtS1BGMFpYLytXWGk2dEhmeC9ac2dMQk1EcFRiQWZWT25hT3pRSllQWXVpakhVV2pWNnZQemhTaktpegpwRDRoYUU0QjJ6dG82bW1vTDNSSGNvMmxqbG5GdlVoZU0zUDNWdFdrM1ZCWk5PVURFUHdiank4THhPOUpweDRqCjFRSURBUUFCTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFBbko4bjAxOFVlUVlFd3F0WFFIUWpUVGdJTkJueTAKKzhvYlJUd2JJSWgzR2hMSEdWYWpxck1jVzBycmdwbE5vT2hnUDh6bFhUeEhZWUVaSUJUZ3gzdnBvMXI1TUNhdwo4TW5ldnJHVWZFS1VTMnBzYWFpejFuaElkTUR4aFJUWHRZYnI2Tk5RZm1ETytGbldndnErZlhJaTB4VnEwWWRCCnJvUG1hUHREWldtNkZoOHQ0WVNobEtacEJVaXlQVHpOSGdQb3BWVWlkQ3VvaEpPR1MwMTUzN0FLdDBpWVBEZ3YKL3VuanlONlkxT0lJRHFuL094aWlNcGNNcURJbDVWRyswOGVxTGFKa2dUTnBaMUtmODVkWVBHd25KcUU1Nm5kMgpNQ09VeTVTS01pWnVmaFZFNkI3UVpEMjJGeVRJUkVxbWdEYzJxR3NTaGlwMERjZlFmVEk5eWM5OAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1383'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --dps-name -g --name -p
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003?api-version=2021-10-15
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000007","expiry":"Fri, 10 May 2024
+        19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":false,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:40 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDAyYjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZjMDAwMCI="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '593'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: FC27DB6F52AC431E9C2FF66374C95CC6 Ref B: CO6AA3150217035 Ref C: 2024-05-07T19:07:39Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --name -p --verified
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates?api-version=2021-10-15
+  response:
+    body:
+      string: '{"value":[{"properties":{"subject":"TESTCERT000007","expiry":"Fri,
+        10 May 2024 19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":false,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:40 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDAyYjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZjMDAwMCI="}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '605'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 27722328B1014986823DA291F03BFA51 Ref B: CO6AA3150217039 Ref C: 2024-05-07T19:07:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN4akNDQWE2Z0F3SUJBZ0lJQXBxYVZEczhyT3N3RFFZSktvWklodmNOQVFFTEJRQXdJekVoTUI4R0ExVUUKQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvTUI0WERUSTBNRFV3TnpFNU1EY3pOMW9YRFRJMApNRFV4TURFNU1EY3pOMW93SXpFaE1COEdBMVVFQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvCk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBclZrS2xjSVlRN0hjRjhNdTRjR2EKb25TdDdRamxCdG9hVmU5R1g5S0lrcStEK2lSb0g4YkhKdUNESEs5SW9mNG9tamVEV1lPZ2lOL29rU1NIcFNXQQpmQ2hXclNwZDhlbm9FNEVxRnUvTEtVZlZFR0ZHOGd2Sml2cm9qT2RKVjBIV0theWM3bVVSbjlkYzNJcCtGNDV3ClMzTlBZaTY1NUdrVzZ2eUs0bVU5Mkxud1dSOXUxZDFPSXZTdWNVWHhZN2Z4SmZTWktVb3RNY0s3cXJUckN3N3AKRGlkUFNtS1BGMFpYLytXWGk2dEhmeC9ac2dMQk1EcFRiQWZWT25hT3pRSllQWXVpakhVV2pWNnZQemhTaktpegpwRDRoYUU0QjJ6dG82bW1vTDNSSGNvMmxqbG5GdlVoZU0zUDNWdFdrM1ZCWk5PVURFUHdiank4THhPOUpweDRqCjFRSURBUUFCTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFBbko4bjAxOFVlUVlFd3F0WFFIUWpUVGdJTkJueTAKKzhvYlJUd2JJSWgzR2hMSEdWYWpxck1jVzBycmdwbE5vT2hnUDh6bFhUeEhZWUVaSUJUZ3gzdnBvMXI1TUNhdwo4TW5ldnJHVWZFS1VTMnBzYWFpejFuaElkTUR4aFJUWHRZYnI2Tk5RZm1ETytGbldndnErZlhJaTB4VnEwWWRCCnJvUG1hUHREWldtNkZoOHQ0WVNobEtacEJVaXlQVHpOSGdQb3BWVWlkQ3VvaEpPR1MwMTUzN0FLdDBpWVBEZ3YKL3VuanlONlkxT0lJRHFuL094aWlNcGNNcURJbDVWRyswOGVxTGFKa2dUTnBaMUtmODVkWVBHd25KcUU1Nm5kMgpNQ09VeTVTS01pWnVmaFZFNkI3UVpEMjJGeVRJUkVxbWdEYzJxR3NTaGlwMERjZlFmVEk5eWM5OAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==",
+      "isVerified": true}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1403'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --dps-name -g --name -p --verified
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/verified-certificate-000004?api-version=2021-10-15
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000007","expiry":"Fri, 10 May 2024
+        19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":true,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:41 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/verified-certificate-000004","name":"verified-certificate-000004","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDA0NjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZkMDAwMCI="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '612'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: 2322AB5ADBD3488A90BE3F6D7F884563 Ref B: CO6AA3150217039 Ref C: 2024-05-07T19:07:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates?api-version=2021-10-15
+  response:
+    body:
+      string: '{"value":[{"properties":{"subject":"TESTCERT000007","expiry":"Fri,
+        10 May 2024 19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":false,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:40 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDAyYjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZjMDAwMCI="},{"properties":{"subject":"TESTCERT000007","expiry":"Fri,
+        10 May 2024 19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":true,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:41 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/verified-certificate-000004","name":"verified-certificate-000004","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDA0NjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZkMDAwMCI="}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1218'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: F84C1C154B7140C5A380ABFA520DB5B8 Ref B: CO6AA3150219039 Ref C: 2024-05-07T19:07:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --name
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003?api-version=2021-10-15
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000007","expiry":"Fri, 10 May 2024
+        19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":false,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:40 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDAyYjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZjMDAwMCI="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '593'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 75CF8E8DD9D74331A22692BB5DAFF094 Ref B: CO6AA3150220029 Ref C: 2024-05-07T19:07:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --name -p --etag
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates?api-version=2021-10-15
+  response:
+    body:
+      string: '{"value":[{"properties":{"subject":"TESTCERT000007","expiry":"Fri,
+        10 May 2024 19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":false,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:40 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDAyYjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZjMDAwMCI="},{"properties":{"subject":"TESTCERT000007","expiry":"Fri,
+        10 May 2024 19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":true,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:41 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/verified-certificate-000004","name":"verified-certificate-000004","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDA0NjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZkMDAwMCI="}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1218'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 67A7D60BB6DA433AACA5A54DF2B4D90D Ref B: CO6AA3150217051 Ref C: 2024-05-07T19:07:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN4akNDQWE2Z0F3SUJBZ0lJQXBxYVZEczhyT3N3RFFZSktvWklodmNOQVFFTEJRQXdJekVoTUI4R0ExVUUKQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvTUI0WERUSTBNRFV3TnpFNU1EY3pOMW9YRFRJMApNRFV4TURFNU1EY3pOMW93SXpFaE1COEdBMVVFQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvCk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBclZrS2xjSVlRN0hjRjhNdTRjR2EKb25TdDdRamxCdG9hVmU5R1g5S0lrcStEK2lSb0g4YkhKdUNESEs5SW9mNG9tamVEV1lPZ2lOL29rU1NIcFNXQQpmQ2hXclNwZDhlbm9FNEVxRnUvTEtVZlZFR0ZHOGd2Sml2cm9qT2RKVjBIV0theWM3bVVSbjlkYzNJcCtGNDV3ClMzTlBZaTY1NUdrVzZ2eUs0bVU5Mkxud1dSOXUxZDFPSXZTdWNVWHhZN2Z4SmZTWktVb3RNY0s3cXJUckN3N3AKRGlkUFNtS1BGMFpYLytXWGk2dEhmeC9ac2dMQk1EcFRiQWZWT25hT3pRSllQWXVpakhVV2pWNnZQemhTaktpegpwRDRoYUU0QjJ6dG82bW1vTDNSSGNvMmxqbG5GdlVoZU0zUDNWdFdrM1ZCWk5PVURFUHdiank4THhPOUpweDRqCjFRSURBUUFCTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFBbko4bjAxOFVlUVlFd3F0WFFIUWpUVGdJTkJueTAKKzhvYlJUd2JJSWgzR2hMSEdWYWpxck1jVzBycmdwbE5vT2hnUDh6bFhUeEhZWUVaSUJUZ3gzdnBvMXI1TUNhdwo4TW5ldnJHVWZFS1VTMnBzYWFpejFuaElkTUR4aFJUWHRZYnI2Tk5RZm1ETytGbldndnErZlhJaTB4VnEwWWRCCnJvUG1hUHREWldtNkZoOHQ0WVNobEtacEJVaXlQVHpOSGdQb3BWVWlkQ3VvaEpPR1MwMTUzN0FLdDBpWVBEZ3YKL3VuanlONlkxT0lJRHFuL094aWlNcGNNcURJbDVWRyswOGVxTGFKa2dUTnBaMUtmODVkWVBHd25KcUU1Nm5kMgpNQ09VeTVTS01pWnVmaFZFNkI3UVpEMjJGeVRJUkVxbWdEYzJxR3NTaGlwMERjZlFmVEk5eWM5OAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1383'
+      Content-Type:
+      - application/json
+      If-Match:
+      - Ijg3MDAyYjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZjMDAwMCI=
+      ParameterSetName:
+      - --dps-name -g --name -p --etag
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003?api-version=2021-10-15
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000007","expiry":"Fri, 10 May 2024
+        19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":false,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:48 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDA0ZjA0LTAwMDAtMDcwMC0wMDAwLTY2M2E3YzA0MDAwMCI="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '593'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: C28E38BF3FDA43DCBF376C7F46E66F74 Ref B: CO6AA3150217051 Ref C: 2024-05-07T19:07:48Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate generate-verification-code
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      If-Match:
+      - Ijg3MDA0ZjA0LTAwMDAtMDcwMC0wMDAwLTY2M2E3YzA0MDAwMCI=
+      ParameterSetName:
+      - --dps-name -g -n --etag
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003/generateVerificationCode?api-version=2021-10-15
+  response:
+    body:
+      string: '{"properties":{"verificationCode":"FC5FE5693A68BF4D557D9A232014894A52EAD8F5430119A0","subject":"TESTCERT000007","expiry":"Fri,
+        10 May 2024 19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":false,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:49 GMT","certificate":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN4akNDQWE2Z0F3SUJBZ0lJQXBxYVZEczhyT3N3RFFZSktvWklodmNOQVFFTEJRQXdJekVoTUI4R0ExVUUKQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvTUI0WERUSTBNRFV3TnpFNU1EY3pOMW9YRFRJMApNRFV4TURFNU1EY3pOMW93SXpFaE1COEdBMVVFQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvCk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBclZrS2xjSVlRN0hjRjhNdTRjR2EKb25TdDdRamxCdG9hVmU5R1g5S0lrcStEK2lSb0g4YkhKdUNESEs5SW9mNG9tamVEV1lPZ2lOL29rU1NIcFNXQQpmQ2hXclNwZDhlbm9FNEVxRnUvTEtVZlZFR0ZHOGd2Sml2cm9qT2RKVjBIV0theWM3bVVSbjlkYzNJcCtGNDV3ClMzTlBZaTY1NUdrVzZ2eUs0bVU5Mkxud1dSOXUxZDFPSXZTdWNVWHhZN2Z4SmZTWktVb3RNY0s3cXJUckN3N3AKRGlkUFNtS1BGMFpYLytXWGk2dEhmeC9ac2dMQk1EcFRiQWZWT25hT3pRSllQWXVpakhVV2pWNnZQemhTaktpegpwRDRoYUU0QjJ6dG82bW1vTDNSSGNvMmxqbG5GdlVoZU0zUDNWdFdrM1ZCWk5PVURFUHdiank4THhPOUpweDRqCjFRSURBUUFCTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFBbko4bjAxOFVlUVlFd3F0WFFIUWpUVGdJTkJueTAKKzhvYlJUd2JJSWgzR2hMSEdWYWpxck1jVzBycmdwbE5vT2hnUDh6bFhUeEhZWUVaSUJUZ3gzdnBvMXI1TUNhdwo4TW5ldnJHVWZFS1VTMnBzYWFpejFuaElkTUR4aFJUWHRZYnI2Tk5RZm1ETytGbldndnErZlhJaTB4VnEwWWRCCnJvUG1hUHREWldtNkZoOHQ0WVNobEtacEJVaXlQVHpOSGdQb3BWVWlkQ3VvaEpPR1MwMTUzN0FLdDBpWVBEZ3YKL3VuanlONlkxT0lJRHFuL094aWlNcGNNcURJbDVWRyswOGVxTGFKa2dUTnBaMUtmODVkWVBHd25KcUU1Nm5kMgpNQ09VeTVTS01pWnVmaFZFNkI3UVpEMjJGeVRJUkVxbWdEYzJxR3NTaGlwMERjZlFmVEk5eWM5OAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDA3ZjA0LTAwMDAtMDcwMC0wMDAwLTY2M2E3YzA1MDAwMCI="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2025'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: 4C703C762D77491E8053D7DE0FF66D92 Ref B: CO6AA3150217029 Ref C: 2024-05-07T19:07:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMzakNDQWNhZ0F3SUJBZ0lJQzM3VWU2UHQ4TGd3RFFZSktvWklodmNOQVFFTEJRQXdJekVoTUI4R0ExVUUKQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvTUI0WERUSTBNRFV3TnpFNU1EYzBPRm9YRFRJMApNRFV4TURFNU1EYzBPRm93T3pFNU1EY0dBMVVFQXd3d1JrTTFSa1UxTmprelFUWTRRa1kwUkRVMU4wUTVRVEl6Ck1qQXhORGc1TkVFMU1rVkJSRGhHTlRRek1ERXhPVUV3TUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEEKTUlJQkNnS0NBUUVBb0t3bS9DV0lqZzZiZGlFVnoyQ0N6TjRvMGc4Uzc1cE9DS2VsUjh0eGZMNGYxMm5FcDA5KwpGMGZoNUwxWDlreUhtMG9mVDNPT2JSVnVTV3R6M0tneGFlQ0lqV0ZsY29qc0R6WjY0Y2NRUFN5WlFTUVNFeTJQCkZTYmREbWtKTkFkYTFreTRac0hLcG5wTHlFWWNXZjNqZ1lHWXdZYVZSQ2NXeEd0NFBZMFYwa3dsRFFzaWY3c2YKMlNjZEIvazdqRWtOclorT09QRVZpOThTcWNHazNZMkUvTWcrT3lsT0JFNmt6UkROa0JZNnBIa1hoNWliM3diSwp2ZnZkMm1KQ2RkRThCWEgzeWJIZXBzKzNBM2F6cVVieG5DdFFKRmh4UG8wOU5BQ3NuRnR3b1Q2WXJvSjRDaWFPCkNURXFsOUw1TCsxcGJlWWR5dngrVmxuRXNmclM0dThaa1FJREFRQUJNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUIKQVFBN2dhalNZQ2NWM2pHTTQ4TnFzUGJoSFpEaUZnMS9WQitaZDNvay9Qc09DOEN4OTBPS3hlQ2oyLzBTOUJjVQo1aUZLL2JJNUVySnZEQ293Y1FCLzFoYU8xcTJlZUVKdDNoclVIaU53NkNCRGFueTRlTHdxUi9Ra0t2UnhKVXoyCk9MNFhCQ2tRdFRFVUJycVlNWWw0Um9tOWVRYmlnejFCQzR3bTVZdTRqcDJhaHo3bUt1WTE2V2tFUU1tb2Zhb1AKcGI3SjBrRnVrOWlaSUpNanVBQndJeU9mYkx5WlBWbFM5Sm9yWE5EdnllM2VMbGVGNkdTalA0ZUJJN0ViWkY1cgpaVER3V0h4MHVpem5Fa21jUTgzaytjcEsvNWQrS0Fpc0dJVHducXB1UW1OUTYvZFlxNXBkZU9VOS84ZzVOM1ZxCnhiN3NoOThkR0JKY1VQKzFkRW9DRmllegotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate verify
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1427'
+      Content-Type:
+      - application/json
+      If-Match:
+      - Ijg3MDA3ZjA0LTAwMDAtMDcwMC0wMDAwLTY2M2E3YzA1MDAwMCI=
+      ParameterSetName:
+      - --dps-name -g -n -p --etag
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003/verify?api-version=2021-10-15
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000007","expiry":"Fri, 10 May 2024
+        19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":true,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:50 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDA4ODA0LTAwMDAtMDcwMC0wMDAwLTY2M2E3YzA2MDAwMCI="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '592'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: AD39B7972A3C4B67A4282AA3A151605D Ref B: CO6AA3150218029 Ref C: 2024-05-07T19:07:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --name -p
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates?api-version=2021-10-15
+  response:
+    body:
+      string: '{"value":[{"properties":{"subject":"TESTCERT000007","expiry":"Fri,
+        10 May 2024 19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":true,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:50 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDA4ODA0LTAwMDAtMDcwMC0wMDAwLTY2M2E3YzA2MDAwMCI="},{"properties":{"subject":"TESTCERT000007","expiry":"Fri,
+        10 May 2024 19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":true,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:41 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/verified-certificate-000004","name":"verified-certificate-000004","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDA0NjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZkMDAwMCI="}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1217'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 4232ED05EFC84D18BCB16433981E8F8A Ref B: CO6AA3150220045 Ref C: 2024-05-07T19:07:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN4akNDQWE2Z0F3SUJBZ0lJQXBxYVZEczhyT3N3RFFZSktvWklodmNOQVFFTEJRQXdJekVoTUI4R0ExVUUKQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvTUI0WERUSTBNRFV3TnpFNU1EY3pOMW9YRFRJMApNRFV4TURFNU1EY3pOMW93SXpFaE1COEdBMVVFQXd3WVZFVlRWRU5GVWxSbWRXUnJiRFJtWVdobmNIVmtOR3RvCk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBclZrS2xjSVlRN0hjRjhNdTRjR2EKb25TdDdRamxCdG9hVmU5R1g5S0lrcStEK2lSb0g4YkhKdUNESEs5SW9mNG9tamVEV1lPZ2lOL29rU1NIcFNXQQpmQ2hXclNwZDhlbm9FNEVxRnUvTEtVZlZFR0ZHOGd2Sml2cm9qT2RKVjBIV0theWM3bVVSbjlkYzNJcCtGNDV3ClMzTlBZaTY1NUdrVzZ2eUs0bVU5Mkxud1dSOXUxZDFPSXZTdWNVWHhZN2Z4SmZTWktVb3RNY0s3cXJUckN3N3AKRGlkUFNtS1BGMFpYLytXWGk2dEhmeC9ac2dMQk1EcFRiQWZWT25hT3pRSllQWXVpakhVV2pWNnZQemhTaktpegpwRDRoYUU0QjJ6dG82bW1vTDNSSGNvMmxqbG5GdlVoZU0zUDNWdFdrM1ZCWk5PVURFUHdiank4THhPOUpweDRqCjFRSURBUUFCTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFBbko4bjAxOFVlUVlFd3F0WFFIUWpUVGdJTkJueTAKKzhvYlJUd2JJSWgzR2hMSEdWYWpxck1jVzBycmdwbE5vT2hnUDh6bFhUeEhZWUVaSUJUZ3gzdnBvMXI1TUNhdwo4TW5ldnJHVWZFS1VTMnBzYWFpejFuaElkTUR4aFJUWHRZYnI2Tk5RZm1ETytGbldndnErZlhJaTB4VnEwWWRCCnJvUG1hUHREWldtNkZoOHQ0WVNobEtacEJVaXlQVHpOSGdQb3BWVWlkQ3VvaEpPR1MwMTUzN0FLdDBpWVBEZ3YKL3VuanlONlkxT0lJRHFuL094aWlNcGNNcURJbDVWRyswOGVxTGFKa2dUTnBaMUtmODVkWVBHd25KcUU1Nm5kMgpNQ09VeTVTS01pWnVmaFZFNkI3UVpEMjJGeVRJUkVxbWdEYzJxR3NTaGlwMERjZlFmVEk5eWM5OAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCgotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KTUlJQ3hqQ0NBYTZnQXdJQkFnSUlBcHFhVkRzOHJPc3dEUVlKS29aSWh2Y05BUUVMQlFBd0l6RWhNQjhHQTFVRQpBd3dZVkVWVFZFTkZVbFJtZFdScmJEUm1ZV2huY0hWa05HdG9NQjRYRFRJME1EVXdOekU1TURjek4xb1hEVEkwCk1EVXhNREU1TURjek4xb3dJekVoTUI4R0ExVUVBd3dZVkVWVFZFTkZVbFJtZFdScmJEUm1ZV2huY0hWa05HdG8KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyVmtLbGNJWVE3SGNGOE11NGNHYQpvblN0N1FqbEJ0b2FWZTlHWDlLSWtxK0QraVJvSDhiSEp1Q0RISzlJb2Y0b21qZURXWU9naU4vb2tTU0hwU1dBCmZDaFdyU3BkOGVub0U0RXFGdS9MS1VmVkVHRkc4Z3ZKaXZyb2pPZEpWMEhXS2F5YzdtVVJuOWRjM0lwK0Y0NXcKUzNOUFlpNjU1R2tXNnZ5SzRtVTkyTG53V1I5dTFkMU9JdlN1Y1VYeFk3ZnhKZlNaS1VvdE1jSzdxclRyQ3c3cApEaWRQU21LUEYwWlgvK1dYaTZ0SGZ4L1pzZ0xCTURwVGJBZlZPbmFPelFKWVBZdWlqSFVXalY2dlB6aFNqS2l6CnBENGhhRTRCMnp0bzZtbW9MM1JIY28ybGpsbkZ2VWhlTTNQM1Z0V2szVkJaTk9VREVQd2JqeThMeE85SnB4NGoKMVFJREFRQUJNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUFuSjhuMDE4VWVRWUV3cXRYUUhRalRUZ0lOQm55MAorOG9iUlR3YklJaDNHaExIR1ZhanFyTWNXMHJyZ3BsTm9PaGdQOHpsWFR4SFlZRVpJQlRneDN2cG8xcjVNQ2F3CjhNbmV2ckdVZkVLVVMycHNhYWl6MW5oSWRNRHhoUlRYdFlicjZOTlFmbURPK0ZuV2d2cStmWElpMHhWcTBZZEIKcm9QbWFQdERaV202Rmg4dDRZU2hsS1pwQlVpeVBUek5IZ1BvcFZVaWRDdW9oSk9HUzAxNTM3QUt0MGlZUERndgovdW5qeU42WTFPSUlEcW4vT3hpaU1wY01xRElsNVZHKzA4ZXFMYUprZ1ROcFoxS2Y4NWRZUEd3bkpxRTU2bmQyCk1DT1V5NVNLTWladWZoVkU2QjdRWkQyMkZ5VElSRXFtZ0RjMnFHc1NoaXAwRGNmUWZUSTl5Yzk4Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2743'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --dps-name -g --name -p
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate-000005?api-version=2021-10-15
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000007","expiry":"Fri, 10 May 2024
+        19:07:37 GMT","thumbprint":"FDBB4DBE82ACCB8DE81CF2CF7290234886AC6CAE","isVerified":false,"created":"Mon,
+        01 Jan 0001 00:00:00 GMT","updated":"Tue, 07 May 2024 19:07:51 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate-000005","name":"certificate-000005","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"Ijg3MDBhOTA0LTAwMDAtMDcwMC0wMDAwLTY2M2E3YzA3MDAwMCI="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '595'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: DCD7884F943B483FA32B23FEAB6A40B1 Ref B: CO6AA3150220045 Ref C: 2024-05-07T19:07:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      If-Match:
+      - Ijg3MDA4ODA0LTAwMDAtMDcwMC0wMDAwLTY2M2E3YzA2MDAwMCI=
+      ParameterSetName:
+      - --dps-name -g --name --etag
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000003?api-version=2021-10-15
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 07 May 2024 19:07:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-msedge-ref:
+      - 'Ref A: B528A69F2BA5437888B0426611B626A4 Ref B: CO6AA3150218031 Ref C: 2024-05-07T19:07:52Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      If-Match:
+      - Ijg3MDA0NjAzLTAwMDAtMDcwMC0wMDAwLTY2M2E3YmZkMDAwMCI=
+      ParameterSetName:
+      - --dps-name -g --name --etag
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/verified-certificate-000004?api-version=2021-10-15
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 07 May 2024 19:07:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-msedge-ref:
+      - 'Ref A: 524F3267B35B4C64B2FC55E88ABC7645 Ref B: CO6AA3150220045 Ref C: 2024-05-07T19:07:53Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      If-Match:
+      - '*'
+      ParameterSetName:
+      - --dps-name -g --name --etag
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate-000005?api-version=2021-10-15
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 07 May 2024 19:07:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-msedge-ref:
+      - 'Ref A: C844F4C64F3C4327968861AC90C032BF Ref B: CO6AA3150219037 Ref C: 2024-05-07T19:07:54Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2021-10-15
+  response:
+    body:
+      string: 'null'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/westus/provisioningserviceoperationresults/aWQ9b3NfaWRfMGM4ZGQ0ZjgtNzNmYS00ZDkxLWFjMmYtMGZhYTFjMzQ1NTEzO3JlZ2lvbj13ZXN0dXM=?api-version=2021-10-15&asyncinfo&t=638507056759399594&c=MIIHKjCCBhKgAwIBAgITfATLTVgL1TFPlLPYYgAABMtNWDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwNTAyMDIxNjQ3WhcNMjUwNDI3MDIxNjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6dMlyzLhfjTqgpK0ak7lUYlktWoaGVBDdCGjuh9_Tan7-jV2uWUD4RkOrtgvB4YkiFoRtBNBXjjoEonOoUYRurBtxwPFad9vRUZ_DI_rWbJtTLRFCWcfQsbif2PdKnEhJY516wQNDMEoBOEbnIc1y9YfB9bIs7IEiWk7D7-DM36qf95dLDczZrmlZVMcY1o7b0QfFKOdeEGIT7DFQmwZPqqXVAtXgfx_IuiPOV10h17_C8jj017DwYyrZGVUZW5NTL-UBzjwXP4PUzzjlSBKgS8P2JZ6UGJCcGsQxlk7UzoZsRpgASFkOI7Pb7iHNCdIVtzThnFpznmpGQl2zN3J0CAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBQsvTY45Tg0y5RD2QrGXKkZUewNfzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAEzzZuDjeQg8R2ZevaD977WxPr07WGdwdwx1NtB3dHN7TZJqRgyAYDoxNR0xq9dhHw-e4q6JwML6ihshb3p1gvbAgaMGJwdtOKgCcJGzu7LAe0hz_PEjtom9-pPSrNZSQ9F7EH3bR5EiHZiIHK3Hcc4Yc_h6bKy6olqJWcXv3k0_ExaKVUdG_vaMOD7ho3cjwWX4aN_0wIo0BwDrCe4bQoHWwM4Hz9_HjmbAWLb1O6Teyg5lxbP-gmxAzCQbUlqK_onCZrHPpqesdyo2xL2_XufGurmjllywMiRtQkPRV7qAAZxK35Iht_zPAJ9ZVWTWvIFt_f1gX1go1JEET0FJPcA&s=f8iTzmNXnvHvOrYpob2hk5buntSU7axTouH1e0PyAgRjoiZEb5kgR3jxt5CuOEGHM5c7qHogo-AvTkJCDvWXwJLBfOmHmIBWmKS9aEiBvXj7nXkaaHmGAR8kYUGu42R5g340CeMuuc3tIccr-_Ri-Uzjv2qwz5LJ_HF1Bna4TmPhVkUljzCmBx24A0S-0pF5Aa-gSoQf_A9djUc0FOP2Fa_3IN6UjPWcRRWm158FNqv3cpjZV8YepTJndwD42wcfwsP5Y2426SyyuikglhNp-y5FQ2iBBS3WlRcKc7xGLzqqpvDqWhcb7XNv7DzJKzObEwxFPlAFTP-k0Kbg5EcDuQ&h=sx3Rx7Xcwz846vPERn8_J-0kpdYo0g_jPziyz5G3n-M
+      cache-control:
+      - no-cache
+      content-length:
+      - '4'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:55 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/westus/provisioningserviceoperationresults/aWQ9b3NfaWRfMGM4ZGQ0ZjgtNzNmYS00ZDkxLWFjMmYtMGZhYTFjMzQ1NTEzO3JlZ2lvbj13ZXN0dXM=?api-version=2021-10-15&t=638507056759555700&c=MIIHKjCCBhKgAwIBAgITfATLTVgL1TFPlLPYYgAABMtNWDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwNTAyMDIxNjQ3WhcNMjUwNDI3MDIxNjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6dMlyzLhfjTqgpK0ak7lUYlktWoaGVBDdCGjuh9_Tan7-jV2uWUD4RkOrtgvB4YkiFoRtBNBXjjoEonOoUYRurBtxwPFad9vRUZ_DI_rWbJtTLRFCWcfQsbif2PdKnEhJY516wQNDMEoBOEbnIc1y9YfB9bIs7IEiWk7D7-DM36qf95dLDczZrmlZVMcY1o7b0QfFKOdeEGIT7DFQmwZPqqXVAtXgfx_IuiPOV10h17_C8jj017DwYyrZGVUZW5NTL-UBzjwXP4PUzzjlSBKgS8P2JZ6UGJCcGsQxlk7UzoZsRpgASFkOI7Pb7iHNCdIVtzThnFpznmpGQl2zN3J0CAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBQsvTY45Tg0y5RD2QrGXKkZUewNfzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAEzzZuDjeQg8R2ZevaD977WxPr07WGdwdwx1NtB3dHN7TZJqRgyAYDoxNR0xq9dhHw-e4q6JwML6ihshb3p1gvbAgaMGJwdtOKgCcJGzu7LAe0hz_PEjtom9-pPSrNZSQ9F7EH3bR5EiHZiIHK3Hcc4Yc_h6bKy6olqJWcXv3k0_ExaKVUdG_vaMOD7ho3cjwWX4aN_0wIo0BwDrCe4bQoHWwM4Hz9_HjmbAWLb1O6Teyg5lxbP-gmxAzCQbUlqK_onCZrHPpqesdyo2xL2_XufGurmjllywMiRtQkPRV7qAAZxK35Iht_zPAJ9ZVWTWvIFt_f1gX1go1JEET0FJPcA&s=mB-ybAysTV9dvcUUAIoPZD3b_61gLGuHGkatJ5gorMGEvZ5Yhpe3Ve4R8fdoSP8XzC9CJ1cpe9OCeJj4SzD5s_npB2QrVppS2AT-ZVrt_IAbfxfQ_efLoZ6NV44ct7_lGBq54p9SRrrfwfCx1uXxqK9MOI7DxW_XpSGZeR-WVqLM2QYR342SVsAtcH2KbNWLM1p7JJmqgYbmLUzB7k4u-9t1I58p_ihKQCRgyWToH3krGm6YN4DGx_tNy3CU_TSCsHd1-APL_yMybE4BMUHh4Fod9OBzvXo0A1r_gQOq3YRlx-RdI5y4y7iNS_gae8CJP9rB232MyWKyNfKUIifi2Q&h=AQUqICK9XgyOYa14r7UsQ1T-XOqmu6Xsc-CjsQ5oT3A
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-msedge-ref:
+      - 'Ref A: A25F8520629E4299BF170F0B00D8CE5C Ref B: CO6AA3150217035 Ref C: 2024-05-07T19:07:55Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/westus/provisioningserviceoperationresults/aWQ9b3NfaWRfMGM4ZGQ0ZjgtNzNmYS00ZDkxLWFjMmYtMGZhYTFjMzQ1NTEzO3JlZ2lvbj13ZXN0dXM=?api-version=2021-10-15&asyncinfo&t=638507056759399594&c=MIIHKjCCBhKgAwIBAgITfATLTVgL1TFPlLPYYgAABMtNWDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwNTAyMDIxNjQ3WhcNMjUwNDI3MDIxNjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6dMlyzLhfjTqgpK0ak7lUYlktWoaGVBDdCGjuh9_Tan7-jV2uWUD4RkOrtgvB4YkiFoRtBNBXjjoEonOoUYRurBtxwPFad9vRUZ_DI_rWbJtTLRFCWcfQsbif2PdKnEhJY516wQNDMEoBOEbnIc1y9YfB9bIs7IEiWk7D7-DM36qf95dLDczZrmlZVMcY1o7b0QfFKOdeEGIT7DFQmwZPqqXVAtXgfx_IuiPOV10h17_C8jj017DwYyrZGVUZW5NTL-UBzjwXP4PUzzjlSBKgS8P2JZ6UGJCcGsQxlk7UzoZsRpgASFkOI7Pb7iHNCdIVtzThnFpznmpGQl2zN3J0CAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBQsvTY45Tg0y5RD2QrGXKkZUewNfzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAEzzZuDjeQg8R2ZevaD977WxPr07WGdwdwx1NtB3dHN7TZJqRgyAYDoxNR0xq9dhHw-e4q6JwML6ihshb3p1gvbAgaMGJwdtOKgCcJGzu7LAe0hz_PEjtom9-pPSrNZSQ9F7EH3bR5EiHZiIHK3Hcc4Yc_h6bKy6olqJWcXv3k0_ExaKVUdG_vaMOD7ho3cjwWX4aN_0wIo0BwDrCe4bQoHWwM4Hz9_HjmbAWLb1O6Teyg5lxbP-gmxAzCQbUlqK_onCZrHPpqesdyo2xL2_XufGurmjllywMiRtQkPRV7qAAZxK35Iht_zPAJ9ZVWTWvIFt_f1gX1go1JEET0FJPcA&s=f8iTzmNXnvHvOrYpob2hk5buntSU7axTouH1e0PyAgRjoiZEb5kgR3jxt5CuOEGHM5c7qHogo-AvTkJCDvWXwJLBfOmHmIBWmKS9aEiBvXj7nXkaaHmGAR8kYUGu42R5g340CeMuuc3tIccr-_Ri-Uzjv2qwz5LJ_HF1Bna4TmPhVkUljzCmBx24A0S-0pF5Aa-gSoQf_A9djUc0FOP2Fa_3IN6UjPWcRRWm158FNqv3cpjZV8YepTJndwD42wcfwsP5Y2426SyyuikglhNp-y5FQ2iBBS3WlRcKc7xGLzqqpvDqWhcb7XNv7DzJKzObEwxFPlAFTP-k0Kbg5EcDuQ&h=sx3Rx7Xcwz846vPERn8_J-0kpdYo0g_jPziyz5G3n-M
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:07:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: B7A474BBBA35463DA7C0F4F43E65D520 Ref B: CO6AA3150217035 Ref C: 2024-05-07T19:07:56Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.0 (macOS-13.6.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/westus/provisioningserviceoperationresults/aWQ9b3NfaWRfMGM4ZGQ0ZjgtNzNmYS00ZDkxLWFjMmYtMGZhYTFjMzQ1NTEzO3JlZ2lvbj13ZXN0dXM=?api-version=2021-10-15&asyncinfo&t=638507056759399594&c=MIIHKjCCBhKgAwIBAgITfATLTVgL1TFPlLPYYgAABMtNWDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwNTAyMDIxNjQ3WhcNMjUwNDI3MDIxNjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6dMlyzLhfjTqgpK0ak7lUYlktWoaGVBDdCGjuh9_Tan7-jV2uWUD4RkOrtgvB4YkiFoRtBNBXjjoEonOoUYRurBtxwPFad9vRUZ_DI_rWbJtTLRFCWcfQsbif2PdKnEhJY516wQNDMEoBOEbnIc1y9YfB9bIs7IEiWk7D7-DM36qf95dLDczZrmlZVMcY1o7b0QfFKOdeEGIT7DFQmwZPqqXVAtXgfx_IuiPOV10h17_C8jj017DwYyrZGVUZW5NTL-UBzjwXP4PUzzjlSBKgS8P2JZ6UGJCcGsQxlk7UzoZsRpgASFkOI7Pb7iHNCdIVtzThnFpznmpGQl2zN3J0CAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBQsvTY45Tg0y5RD2QrGXKkZUewNfzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAEzzZuDjeQg8R2ZevaD977WxPr07WGdwdwx1NtB3dHN7TZJqRgyAYDoxNR0xq9dhHw-e4q6JwML6ihshb3p1gvbAgaMGJwdtOKgCcJGzu7LAe0hz_PEjtom9-pPSrNZSQ9F7EH3bR5EiHZiIHK3Hcc4Yc_h6bKy6olqJWcXv3k0_ExaKVUdG_vaMOD7ho3cjwWX4aN_0wIo0BwDrCe4bQoHWwM4Hz9_HjmbAWLb1O6Teyg5lxbP-gmxAzCQbUlqK_onCZrHPpqesdyo2xL2_XufGurmjllywMiRtQkPRV7qAAZxK35Iht_zPAJ9ZVWTWvIFt_f1gX1go1JEET0FJPcA&s=f8iTzmNXnvHvOrYpob2hk5buntSU7axTouH1e0PyAgRjoiZEb5kgR3jxt5CuOEGHM5c7qHogo-AvTkJCDvWXwJLBfOmHmIBWmKS9aEiBvXj7nXkaaHmGAR8kYUGu42R5g340CeMuuc3tIccr-_Ri-Uzjv2qwz5LJ_HF1Bna4TmPhVkUljzCmBx24A0S-0pF5Aa-gSoQf_A9djUc0FOP2Fa_3IN6UjPWcRRWm158FNqv3cpjZV8YepTJndwD42wcfwsP5Y2426SyyuikglhNp-y5FQ2iBBS3WlRcKc7xGLzqqpvDqWhcb7XNv7DzJKzObEwxFPlAFTP-k0Kbg5EcDuQ&h=sx3Rx7Xcwz846vPERn8_J-0kpdYo0g_jPziyz5G3n-M
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 May 2024 19:08:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 961FED8DE7D14CDEA3858E256B561AAF Ref B: CO6AA3150217035 Ref C: 2024-05-07T19:08:26Z'
+    status:
+      code: 200
+      message: OK
+version: 1

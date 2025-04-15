@@ -16,4 +16,4 @@ def extension_name_completion_list(cmd, prefix, namespace, **kwargs):  # pylint:
 
 @Completer
 def extension_name_from_index_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    return get_index_extensions().keys()
+    return get_index_extensions(cli_ctx=cmd.cli_ctx).keys()

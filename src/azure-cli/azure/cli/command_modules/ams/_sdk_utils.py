@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
-
+from azure.mgmt.media.models import (FaceRedactorMode, AudioAnalysisMode, BlurType, AccountEncryptionKeyType,
+                                     DefaultAction)
 models_module = importlib.import_module('azure.mgmt.media.models')
 
 
@@ -59,4 +60,37 @@ def get_media_type():
 
 
 def get_encoding_types():
-    return ['Basic', 'None', 'Standard']
+    return ['Premium1080p', 'None', 'Standard']
+
+
+def get_transcription_langauges():
+    return ['ca-ES', 'da-DK', 'de-DE', 'en-AU', 'en-CA', 'en-GB', 'en-IN', 'en-NZ', 'en-US', 'es-ES',
+            'es-MX', 'fi-FI', 'fr-CA', 'fr-FR', 'it-IT', 'nl-NL', 'pt-BR', 'pt-PT', 'sv-SE']
+
+
+def get_analysis_modes():
+    return AudioAnalysisMode
+
+
+def get_face_detector_modes():
+    return FaceRedactorMode
+
+
+def get_face_detector_blur_types():
+    return BlurType
+
+
+def get_stretch_mode_types():
+    return ['None', 'AutoSize', 'AutoFit']
+
+
+def get_encryption_key_types():
+    return AccountEncryptionKeyType
+
+
+def get_storage_authentication_allowed_values():
+    return ['System', 'ManagedIdentity']
+
+
+def get_default_action_allowed_values():
+    return [DefaultAction.ALLOW, DefaultAction.DENY]

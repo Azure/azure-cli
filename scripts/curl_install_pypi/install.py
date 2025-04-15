@@ -14,7 +14,6 @@
 
 #pylint: disable=line-too-long
 
-from __future__ import print_function
 import os
 import sys
 import platform
@@ -24,28 +23,16 @@ import tempfile
 import shutil
 import subprocess
 import hashlib
-try:
-    # Attempt to load python 3 module
-    from urllib.request import urlopen
-except ImportError:
-    # Import python 2 version
-    from urllib2 import urlopen
-
-try:
-    # Rename raw_input to input to support Python 2
-    input = raw_input
-except NameError:
-    # Python 3 doesn't have raw_input
-    pass
+from urllib.request import urlopen
 
 AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
 {install_dir}/bin/python -m azure.cli "$@"
 """
 
-VIRTUALENV_VERSION = '16.7.7'
+VIRTUALENV_VERSION = '16.7.11'
 VIRTUALENV_ARCHIVE = 'virtualenv-'+VIRTUALENV_VERSION+'.tar.gz'
 VIRTUALENV_DOWNLOAD_URL = 'https://pypi.python.org/packages/source/v/virtualenv/'+VIRTUALENV_ARCHIVE
-VIRTUALENV_ARCHIVE_SHA256 = 'd257bb3773e48cac60e475a19b608996c73f4d333b3ba2e4e57d5ac6134e0136'
+VIRTUALENV_ARCHIVE_SHA256 = '0f73ef551d889bf4b3241f1819aaf5f5c7e27259c1537255b1f63207552919b1'
 
 DEFAULT_INSTALL_DIR = os.path.expanduser(os.path.join('~', 'lib', 'azure-cli'))
 DEFAULT_EXEC_DIR = os.path.expanduser(os.path.join('~', 'bin'))
@@ -205,7 +192,7 @@ def _backup_rc(rc_file):
     try:
         shutil.copyfile(rc_file, rc_file+'.backup')
         print_status("Backed up '{}' to '{}'".format(rc_file, rc_file+'.backup'))
-    except (OSError, IOError):
+    except OSError:
         pass
 
 
@@ -234,7 +221,7 @@ def _find_line_in_file(file_path, search_pattern):
             for line in search_file:
                 if search_pattern in line:
                     return True
-    except (OSError, IOError):
+    except OSError:
         pass
     return False
 

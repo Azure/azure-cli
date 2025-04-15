@@ -39,7 +39,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             timeout=None,
             resource_group_name=None,
             platform=None,
-            auth_mode=None):
+            auth_mode=None,
+            log_template=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
@@ -57,7 +58,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
-        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
+        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties', operation_group='runs')
 
     if source_location:
         request = FileTaskRunRequest(
@@ -75,7 +76,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
                 cmd=cmd,
                 auth_mode=auth_mode
             ),
-            agent_pool_name=agent_pool_name
+            agent_pool_name=agent_pool_name,
+            log_template=log_template
         )
     else:
         yaml_template = get_yaml_template(cmd_value, timeout, file)
@@ -94,10 +96,11 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
                 cmd=cmd,
                 auth_mode=auth_mode
             ),
-            agent_pool_name=agent_pool_name
+            agent_pool_name=agent_pool_name,
+            log_template=log_template
         )
 
-    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
+    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.begin_schedule_run(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         run_request=request))
@@ -114,4 +117,4 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, no_format, True)

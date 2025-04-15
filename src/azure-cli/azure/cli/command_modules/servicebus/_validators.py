@@ -1,3 +1,4 @@
+
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -64,7 +65,7 @@ def _validate_auto_delete_on_idle(namespace):
 
 def validate_partner_namespace(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.partner_namespace:
         if not is_valid_resource_id(namespace.partner_namespace):
             namespace.partner_namespace = resource_id(
@@ -77,7 +78,7 @@ def validate_partner_namespace(cmd, namespace):
 
 def validate_target_namespace(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.target_namespace:
         if not is_valid_resource_id(namespace.target_namespace):
             namespace.target_namespace = resource_id(
@@ -95,7 +96,7 @@ def validate_premiumsku_capacity(namespace):
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     subnet = namespace.subnet
@@ -122,3 +123,21 @@ def validate_rights(namespace):
     if 'Manage' in namespace.rights:
         if 'Listen' not in namespace.rights or 'Send' not in namespace.rights:
             raise CLIError('Error : Assigning \'Manage\' to --rights requires \'Listen\' and \'Send\' to be included with. e.g. --rights Manage Send Listen')
+
+
+def validate_private_endpoint_connection_id(namespace):
+    from azure.cli.core.azclierror import RequiredArgumentMissingError
+    if namespace.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(namespace.connection_id)
+        namespace.resource_group_name = result['resource_group']
+        namespace.namespace_name = result['name']
+        namespace.private_endpoint_connection_name = result.get('child_name_1')
+
+#    if namespace.account_name and not namespace.resource_group_name:
+#        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
+
+    if not all([namespace.namespace_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
+        raise RequiredArgumentMissingError("Please provide either `--Id` or `-g` value `--namespace-name` vaule `--name` value")
+
+    del namespace.connection_id

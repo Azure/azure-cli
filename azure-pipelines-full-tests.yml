@@ -10,144 +10,133 @@ trigger:
 pr:
   branches:
     include:
-      - '*'
+    - '*'
+
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 
 jobs:
-  - job: ExtractMetadata
-    displayName: Extract Metadata
+- job: AutomationTest20200901
+  displayName: Automation Test (Profile 2020-09-01)
+  timeoutInMinutes: 120
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  strategy:
+    matrix:
+      Python39:
+        python.version: '3.9'
+      Python312:
+        python.version: '3.12'
+  steps:
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '$(python.version)'
+      profile: '2020-09-01-hybrid'
+      fullTest: true
+      jobName: 'FullTest'
 
-    condition: succeeded()
-    pool:
-      vmImage: 'ubuntu-16.04'
-    steps:
-      - task: Bash@3
-        displayName: 'Extract Version'
-        inputs:
-          targetType: 'filePath'
-          filePath: scripts/release/get_version.sh
-      - task: PublishPipelineArtifact@0
-        displayName: 'Publish Artifact: metadata'
-        inputs:
-          TargetPath: $(Build.ArtifactStagingDirectory)
-          ArtifactName: metadata
+- job: AutomationTest20190301
+  displayName: Automation Test (Profile 2019-03-01)
+  timeoutInMinutes: 120
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  strategy:
+    matrix:
+      Python39:
+        python.version: '3.9'
+      Python312:
+        python.version: '3.12'
+  steps:
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '$(python.version)'
+      profile: '2019-03-01-hybrid'
+      fullTest: true
+      jobName: 'FullTest'
 
-  - job: BuildPythonWheel
-    displayName: Build Python Wheels
-    dependsOn: ExtractMetadata
-    condition: succeeded()
-    pool:
-      vmImage: 'ubuntu-16.04'
-    steps:
-      - task: UsePythonVersion@0
-        displayName: 'Use Python 3.7'
-        inputs:
-          versionSpec: 3.7
+- job: AutomationTest20180301
+  displayName: Automation Test (Profile 2018-03-01)
+  timeoutInMinutes: 120
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  strategy:
+    matrix:
+      Python39:
+        python.version: '3.9'
+      Python312:
+        python.version: '3.12'
+  steps:
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '$(python.version)'
+      profile: '2018-03-01-hybrid'
+      fullTest: true
+      jobName: 'FullTest'
 
-      - task: Bash@3
-        displayName: 'Run Wheel Build Script'
-        inputs:
-          targetType: 'filePath'
-          filePath: scripts/release/pypi/build.sh
+- job: AutomationFullTestPython39ProfileLatest
+  displayName: Automation Full Test Python39 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 8
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '3.9'
+      profile: 'latest'
+      instance_cnt: '8'
+      instance_idx: '$(Instance_idx)'
+      fullTest: true
+      jobName: 'FullTest'
 
-      - task: PublishPipelineArtifact@0
-        displayName: 'Publish Artifact: pypi'
-        inputs:
-          TargetPath: $(Build.ArtifactStagingDirectory)
-          ArtifactName: pypi
-
-  - job: AutomationTest
-    displayName: Automation Test
-    dependsOn: BuildPythonWheel
-    condition: succeeded()
-    timeoutInMinutes: 90
-
-    pool:
-      vmImage: 'ubuntu-16.04'
-    strategy:
-      matrix:
-        Python36:
-          python.version: '3.6'
-        Python38:
-          python.version: '3.8'
-    steps:
-      - task: UsePythonVersion@0
-        displayName: 'Use Python $(python.version)'
-        inputs:
-          versionSpec: '$(python.version)'
-      - task: DownloadPipelineArtifact@1
-        displayName: 'Download Python Wheels'
-        inputs:
-          TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-          artifactName: pypi
-      - bash: |
-          pip install --force-reinstall wheel
-      - task: Bash@3
-        displayName: 'Run Test Automation'
-        inputs:
-          targetType: 'filePath'
-          filePath: ./scripts/ci/test_automation.sh
-
-  - job: RunAutomationReduced20190301
-    displayName: Run Automation Reduced, Profile 2019-03-01
-    dependsOn: BuildPythonWheel
-    condition: succeeded()
-    pool:
-      vmImage: 'ubuntu-16.04'
-    strategy:
-      matrix:
-        Python36:
-          python.version: '3.6'
-        Python38:
-          python.version: '3.8'
-    steps:
-      - task: UsePythonVersion@0
-        displayName: 'Use Python $(python.version)'
-        inputs:
-          versionSpec: '$(python.version)'
-      - task: DownloadPipelineArtifact@1
-        displayName: 'Download Python Wheels'
-        inputs:
-          TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-          artifactName: pypi
-      - bash: |
-          pip install --force-reinstall wheel
-      - task: Bash@3
-        displayName: 'Run Test Automation'
-        inputs:
-          targetType: 'filePath'
-          filePath: ./scripts/ci/test_automation.sh
-        env:
-          REDUCE_SDK: 'True'
-          AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
-
-  - job: RunAutomation20180301
-    displayName: Run Automation, Profile 2018-03-01
-    dependsOn: BuildPythonWheel
-    condition: succeeded()
-    pool:
-      vmImage: 'ubuntu-16.04'
-    strategy:
-      matrix:
-        Python36:
-          python.version: '3.6'
-        Python38:
-          python.version: '3.8'
-    steps:
-      - task: UsePythonVersion@0
-        displayName: 'Use Python $(python.version)'
-        inputs:
-          versionSpec: '$(python.version)'
-      - task: DownloadPipelineArtifact@1
-        displayName: 'Download Python Wheels'
-        inputs:
-          TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-          artifactName: pypi
-      - bash: |
-          pip install --force-reinstall wheel
-      - task: Bash@3
-        displayName: 'Run Test Automation'
-        inputs:
-          targetType: 'filePath'
-          filePath: ./scripts/ci/test_automation.sh
-        env:
-          AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
+- job: AutomationFullTestPython312ProfileLatest
+  displayName: Automation Full Test Python312 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 8
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '3.12'
+      profile: 'latest'
+      instance_cnt: '8'
+      instance_idx: '$(Instance_idx)'
+      fullTest: true
+      jobName: 'FullTest'

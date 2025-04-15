@@ -1,7 +1,7 @@
 ## Azure Data Lake Storage Gen2
 
-Azure Data Lake Storage Gen2 is a set of capabilities dedicated to big data analytics, built on Azure Blob storage. FOr more information, please refer to
-https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction?toc=/azure/storage/blobs/toc.json.
+Azure Data Lake Storage Gen2 is a set of capabilities dedicated to big data analytics, built on Azure Blob storage. For more information, please refer to
+https://learn.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction?toc=/azure/storage/blobs/toc.json.
 
 ### Included Features
 
@@ -76,7 +76,7 @@ For more specific examples, use: az find "az storage fs"
 
     4. Using account name and Azure AD credentials
 
-        Azure CLI commands for data operations against Blob storage support the `--auth-mode` parameter, which enables you to specify how to authorize a given operation. Set the `--auth-mode` parameter to login to authorize with Azure AD credentials. For more information, see [Authorize access to blob or queue data with Azure CLI](https://docs.microsoft.com/en-us/azure/storage/common/authorize-data-operations-cli?toc=/azure/storage/blobs/toc.json).
+        Azure CLI commands for data operations against Blob storage support the `--auth-mode` parameter, which enables you to specify how to authorize a given operation. Set the `--auth-mode` parameter to login to authorize with Azure AD credentials. For more information, see [Authorize access to blob or queue data with Azure CLI](https://learn.microsoft.com/en-us/azure/storage/common/authorize-data-operations-cli?toc=/azure/storage/blobs/toc.json).
 
         - Specify `--account-name` and `--auth-mode login` parameter in your command
             ```
@@ -210,7 +210,7 @@ az storage fs directory move \
 az storage fs directory move \
     -n mydir \
     -f myfilesystem \
-    -new-directory "mymewfilesystem/mydir"
+    -new-directory "mynewfilesystem/mydir"
 ```
 
 ##### Delete a directory in ADLS Gen2 file system
@@ -374,7 +374,7 @@ az storage fs file move \
 az storage fs file move \
     -p mydir/myfile \
     -f myfilesystem \
-    -new-path "mymewfilesystem/mynewfile"
+    -new-path "mynewfilesystem/mynewfile"
 ```
 
 ##### Delete a file in ADLS Gen2 file system
@@ -416,8 +416,11 @@ Group
         Command group 'storage fs' is in preview. It may be changed/removed in a future
         release.
 Commands:
-    set  : Set the access control properties of a path(directory or file) in Azure Data Lake        Storage Gen2 account.
-    show : Show the access control properties of a path (directory or file) in Azure Data           Lake Storage Gen2 account.
+    remove-recursive : Remove the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+    set              : Set the access control properties of a path(directory or file) in Azure Data Lake Storage Gen2 account.
+    set-recursive    : Set the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+    show             : Show the access control properties of a path (directory or file) in Azure Data Lake Storage Gen2 account.
+    update-recursive : Modify the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
 ```
 
 ##### Set access control list of a path
@@ -499,5 +502,32 @@ az storage fs access show \
 ```
 az storage fs access show \
     -p myfile \
+    -f myfilesystem
+```
+
+##### Set the Access Control on a path and sub-paths
+- Set the Access Control on a path and sub-paths
+```
+az storage fs access set-recursive \
+    --acl "default:user:[id]:rwx"\
+    -p mydir \
+    -f myfilesystem
+```
+
+##### Modify the Access Control on a path and sub-paths
+- Modify the Access Control on a path and sub-paths
+```
+az storage fs access update-recursive \
+    --acl "user::r-x"\
+    -p mydir \
+    -f myfilesystem
+```
+
+##### Remove the Access Control on a path and sub-paths
+- Remove the Access Control on a path and sub-paths
+```
+az storage fs access remove-recursive \
+    --acl "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923"\
+    -p mydir \
     -f myfilesystem
 ```

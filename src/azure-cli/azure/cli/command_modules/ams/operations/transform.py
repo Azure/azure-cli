@@ -13,37 +13,45 @@ from azure.cli.command_modules.ams._utils import show_resource_not_found_message
 
 from azure.mgmt.media.models import (BuiltInStandardEncoderPreset, EncoderNamedPreset,
                                      OnErrorType, Priority,
-                                     StandardEncoderPreset, TransformOutput)
+                                     StandardEncoderPreset, TransformOutput, Transform)
 
 
 def create_transform(client, account_name, resource_group_name, transform_name, preset,
-                     insights_to_extract=None, audio_language=None, on_error=None,
-                     relative_priority=None, description=None, resolution=None):
+                     insights_to_extract=None, video_analysis_mode=None, audio_language=None,
+                     audio_analysis_mode=None, on_error=None, relative_priority=None,
+                     description=None, resolution=None, face_detector_mode=None, blur_type=None):
 
-    outputs = [build_transform_output(preset, insights_to_extract, audio_language,
-                                      on_error, relative_priority, resolution)]
-
+    outputs = [build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language,
+                                      audio_analysis_mode, on_error, relative_priority, resolution,
+                                      face_detector_mode, blur_type)]
+    parameters = Transform(description=description, outputs=outputs)
     return client.create_or_update(resource_group_name, account_name, transform_name,
-                                   outputs, description)
+                                   parameters)
 
 
 def add_transform_output(client, account_name, resource_group_name, transform_name, preset,
-                         insights_to_extract=None, audio_language=None, on_error=None,
-                         relative_priority=None, resolution=None):
+                         insights_to_extract=None, video_analysis_mode=None, audio_language=None,
+                         audio_analysis_mode=None, on_error=None, relative_priority=None, resolution=None,
+                         face_detector_mode=None, blur_type=None):
 
     transform = client.get(resource_group_name, account_name, transform_name)
 
     if not transform:
         show_resource_not_found_message(resource_group_name, account_name, 'transforms', transform_name)
 
-    transform.outputs.append(build_transform_output(preset, insights_to_extract, audio_language,
-                                                    on_error, relative_priority, resolution))
+    transform.outputs.append(build_transform_output(preset, insights_to_extract, video_analysis_mode,
+                                                    audio_language, audio_analysis_mode, on_error,
+                                                    relative_priority, resolution,
+                                                    face_detector_mode, blur_type))
 
-    return client.create_or_update(resource_group_name, account_name, transform_name, transform.outputs)
+    parameters = Transform(outputs=transform.outputs)
+
+    return client.create_or_update(resource_group_name, account_name, transform_name, parameters)
 
 
-def build_transform_output(preset, insights_to_extract, audio_language, on_error,
-                           relative_priority, resolution):
+def build_transform_output(preset, insights_to_extract, video_analysis_mode,
+                           audio_language, audio_analysis_mode, on_error, relative_priority, resolution,
+                           face_detector_mode, blur_type):
 
     validate_arguments(preset, insights_to_extract, audio_language, resolution)
     transform_output = get_transform_output(preset)
@@ -51,10 +59,14 @@ def build_transform_output(preset, insights_to_extract, audio_language, on_error
     if preset == 'VideoAnalyzer':
         transform_output.preset.audio_language = audio_language
         transform_output.preset.insights_to_extract = insights_to_extract
+        transform_output.preset.mode = video_analysis_mode
     elif preset == 'AudioAnalyzer':
         transform_output.preset.audio_language = audio_language
+        transform_output.preset.mode = audio_analysis_mode
     elif preset == 'FaceDetector':
         transform_output.preset.resolution = resolution
+        transform_output.preset.mode = face_detector_mode
+        transform_output.preset.blur_type = blur_type
 
     if on_error is not None:
         transform_output.on_error = OnErrorType(on_error)
@@ -85,13 +97,15 @@ def remove_transform_output(client, account_name, resource_group_name, transform
     except IndexError:
         raise CLIError("index {} doesn't exist on outputs".format(output_index))
 
-    return client.create_or_update(resource_group_name, account_name, transform_name, transform.outputs)
+    parameters = Transform(outputs=transform.outputs)
+    return client.create_or_update(resource_group_name, account_name, transform_name, parameters)
 
 
 def transform_update_setter(client, resource_group_name,
                             account_name, transform_name, parameters):
+    parameters = Transform(outputs=parameters.outputs, description=parameters.description)
     return client.create_or_update(resource_group_name, account_name, transform_name,
-                                   parameters.outputs, parameters.description)
+                                   parameters)
 
 
 def update_transform(instance, description=None):

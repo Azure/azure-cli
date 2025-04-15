@@ -1,0 +1,65 @@
+interactions:
+- request:
+    body: '{"location": "eastus2euap", "zones": ["3"], "properties": {"platformFaultDomainCount":
+      1, "additionalCapabilities": {"ultraSSDEnabled": true}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '143'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --ultra-ssd-enabled -c -l --zone
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_ultra_ssd_000001/providers/Microsoft.Compute/hostGroups/host000002?api-version=2024-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"host000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_HOST_ULTRA_SSD_VJRABPUMBZBREXPTECNTOWKSSTARQYOTGPYUKQ4CTSL3W2X3/providers/Microsoft.Compute/hostGroups/host000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"zones\": [\r\n    \"3\"\r\n  ],\r\n  \"properties\": {\r\n    \"platformFaultDomainCount\":
+        1,\r\n    \"supportAutomaticPlacement\": false,\r\n    \"additionalCapabilities\":
+        {\r\n      \"ultraSSDEnabled\": true\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '508'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 Mar 2025 08:27:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japanwest/27419e5c-2f83-428b-8830-0093d0f430d9
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHostSubscriptionMaximum;119
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 3DD87A39FB6348F781289EC7F075B1E2 Ref B: TYO201100115049 Ref C: 2025-03-31T08:27:20Z'
+    status:
+      code: 201
+      message: ''
+version: 1
