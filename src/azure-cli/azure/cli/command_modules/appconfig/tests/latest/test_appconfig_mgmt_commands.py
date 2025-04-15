@@ -53,6 +53,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', developer_sku)])
 
+        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+        
         config_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
         standard_sku = 'standard'
         premium_sku = 'premium'
