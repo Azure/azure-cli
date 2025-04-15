@@ -1660,7 +1660,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             'allocationStrategy': skuprofile_allostrat
         }
         vmss_properties['skuProfile'] = sku_profile
-        
+
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
         'name': name,
