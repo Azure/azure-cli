@@ -495,7 +495,7 @@ class ContainerappScenarioTest(ScenarioTest):
         acr = self.create_random_name(prefix='acr', length=24)
         env = prepare_containerapp_env_for_app_e2e_tests(self)
 
-        self.cmd(f'containerapp create -g {resource_group} -n {app} --environment {env} --min-replicas 1 --ingress external --target-port 80')
+        self.cmd(f'containerapp create -g {resource_group} -n {app} --environment {env} --min-replicas 1 --ingress external --target-port 80 --system-assigned')
         self.cmd(f'acr create -g {resource_group} -n {acr} --sku basic --admin-enabled')
         # self.cmd(f'acr credential renew -n {acr} ')
         self.cmd(f'containerapp registry set --server {acr}.azurecr.io -g {resource_group} -n {app}')

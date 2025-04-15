@@ -1,0 +1,83 @@
+id: /subscriptions/23f95f0e-e782-47be-9f97-56035ec10e42/resourceGroups/xinyurepro1022/providers/Microsoft.App/containerapps/app17wkn7kkwgg36xronj6hp
+identity:
+  type: None
+location: East US
+name: app17wkn7kkwgg36xronj6hp
+properties:
+  configuration:
+    activeRevisionsMode: Single
+    dapr: null
+    identitySettings: []
+    ingress:
+      additionalPortMappings: null
+      allowInsecure: true
+      clientCertificateMode: null
+      corsPolicy: null
+      customDomains: null
+      exposedPort: 0
+      external: true
+      fqdn: app17wkn7kkwgg36xronj6hp.redpebble-edcb7a2b.eastus.azurecontainerapps.io
+      ipSecurityRestrictions: null
+      stickySessions: null
+      targetPort: 80
+      targetPortHttpScheme: null
+      traffic:
+      - latestRevision: true
+        weight: 100
+      transport: Auto
+    maxInactiveRevisions: 100
+    registries: null
+    runtime: null
+    secrets: null
+    service: null
+  customDomainVerificationId: D3F71C85EB6552E36A89A3E4A080C3CFB00181670B659B0003264FC673AA9B00
+  delegatedIdentities: []
+  environmentId: /subscriptions/23f95f0e-e782-47be-9f97-56035ec10e42/resourceGroups/xinyurepro1022/providers/Microsoft.App/managedEnvironments/envpka32bgbqwuqo5dnfsupk
+  eventStreamEndpoint: https://eastus.azurecontainerapps.dev/subscriptions/23f95f0e-e782-47be-9f97-56035ec10e42/resourceGroups/xinyurepro1022/containerApps/app17wkn7kkwgg36xronj6hp/eventstream
+  latestReadyRevisionName: app17wkn7kkwgg36xronj6hp--0000001
+  latestRevisionFqdn: app17wkn7kkwgg36xronj6hp--0000001.redpebble-edcb7a2b.eastus.azurecontainerapps.io
+  latestRevisionName: app17wkn7kkwgg36xronj6hp--0000001
+  managedEnvironmentId: /subscriptions/23f95f0e-e782-47be-9f97-56035ec10e42/resourceGroups/xinyurepro1022/providers/Microsoft.App/managedEnvironments/envpka32bgbqwuqo5dnfsupk
+  outboundIpAddresses:
+  - 57.152.63.243
+  patchingMode: Automatic
+  provisioningState: Succeeded
+  runningStatus: Running
+  template:
+    containers:
+    - image: mcr.microsoft.com/k8se/quickstart:latest
+      imageType: ContainerImage
+      name: acamounttest
+      resources:
+        cpu: 0.5
+        ephemeralStorage: 2Gi
+        memory: 1Gi
+      volumeMounts:
+      - mountPath: /mnt/data
+        subPath: sub2
+        volumeName: azure-files-volume
+    initContainers: null
+    revisionSuffix: ''
+    scale:
+      maxReplicas: 10
+      minReplicas: null
+      rules: null
+    serviceBinds: null
+    terminationGracePeriodSeconds: null
+    volumes:
+    - mountOptions: uid=1000,gid=1000
+      name: azure-files-volume
+      storageName: shareaxk2q
+      storageType: AzureFile
+    - name: my-test-volumn2
+      storageType: EmptyDir
+  workloadProfileName: Consumption
+resourceGroup: xinyurepro1022
+systemData:
+  createdAt: '2024-10-22T02:44:35.1243237'
+  createdBy: xinyupang@microsoft.com
+  createdByType: User
+  lastModifiedAt: '2024-10-22T02:45:06.3008991'
+  lastModifiedBy: xinyupang@microsoft.com
+  lastModifiedByType: User
+type: Microsoft.App/containerApps
