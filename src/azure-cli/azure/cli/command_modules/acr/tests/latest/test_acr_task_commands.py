@@ -3,12 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only, live_only
+from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 import os
 
 
 class AcrTaskCommandsTests(ScenarioTest):
 
+    # @unittest.skip("task.py line 250, BUG: Discriminator type is absent or null, use base class TaskStepProperties.")
     @ResourceGroupPreparer()
     def test_acr_task(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -26,8 +27,8 @@ class AcrTaskCommandsTests(ScenarioTest):
             'existing_image': 'bash',
             'trigger_enabled': 'False',
             'identity': '[system]',
-            'loginServer': 'test.azurecr.io',
-            'file_path': os.path.join(curr_dir, 'data//taskfilesample.yaml').replace('\\', '\\\\')
+            'loginServer': 'test.acr.com',
+            'file_path': os.path.join(curr_dir, 'taskfilesample.yaml').replace('\\', '\\\\')
         })
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
@@ -52,7 +53,7 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('step.isPushEnabled', True),
                          self.check('step.noCache', False),
                          self.check('step.type', 'Docker'),
-                         self.check('identity.type', 'SystemAssigned')])
+                         self.check('identity.type', 'SystemAssigned')]),
 
         # Create a contextless task using cmd.
         self.cmd('acr task create -n {task_no_context_cmd} -r {registry_name} --cmd {existing_image} -c {no_context}',
