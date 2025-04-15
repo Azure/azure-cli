@@ -486,6 +486,7 @@ class ContainerappScenarioTest(ScenarioTest):
         self.cmd(f'containerapp logs show -n {containerapp_name} -g {resource_group} --type system')
         self.cmd(f'containerapp env logs show -n {env_name} -g {env_rg} --tail 15 --follow false')
 
+    @live_only()  # Pass lively, But failed in playback mode with Role assignment error, which is expected: azure.cli.core.azclierror.UnauthorizedError: Role assignment failed with error
     @ResourceGroupPreparer(location="northeurope")
     @AllowLargeResponse()
     def test_containerapp_registry_msi(self, resource_group):
@@ -495,8 +496,21 @@ class ContainerappScenarioTest(ScenarioTest):
         acr = self.create_random_name(prefix='acr', length=24)
         env = prepare_containerapp_env_for_app_e2e_tests(self)
 
-        self.cmd(f'containerapp create -g {resource_group} -n {app} --environment {env} --min-replicas 1 --ingress external --target-port 80 --system-assigned')
         self.cmd(f'acr create -g {resource_group} -n {acr} --sku basic --admin-enabled')
+
+        # This command will create arcpull for the system-assigned containerapp
+        self.cmd(f'containerapp create -g {resource_group} -n {app} --environment {env} --min-replicas 1 --ingress external --target-port 80 --system-assigned --registry-server {acr}.azurecr.io --registry-identity system', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.configuration.registries[0].passwordSecretRef", ""),
+            JMESPathCheck("properties.configuration.registries[0].username", ""),
+            JMESPathCheck("properties.configuration.registries[0].identity", "system"),
+        ])
+        self.cmd(f'containerapp registry remove -g {resource_group} -n {app} --server {acr}.azurecr.io',expect_failure=False)
+        self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.configuration.registries", None),
+        ])
+
         # self.cmd(f'acr credential renew -n {acr} ')
         self.cmd(f'containerapp registry set --server {acr}.azurecr.io -g {resource_group} -n {app}')
         registry_list = self.cmd(f'containerapp registry list -g {resource_group} -n {app}', checks=[
@@ -507,18 +521,22 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('server', acr+'.azurecr.io'),
         ])
 
-        app_data = self.cmd(f'containerapp show -g {resource_group} -n {app}').get_output_in_json()
-        self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("server"), f'{acr}.azurecr.io')
+        app_data = self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.configuration.registries[0].server", f'{acr}.azurecr.io'),
+        ]).get_output_in_json()
         self.assertIsNotNone(app_data["properties"]["configuration"]["registries"][0].get("passwordSecretRef"))
         self.assertIsNotNone(app_data["properties"]["configuration"]["registries"][0].get("username"))
         self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("identity"), "")
 
         self.cmd(f'containerapp registry set --server {acr}.azurecr.io -g {resource_group} -n {app} --identity system')
-        app_data = self.cmd(f'containerapp show -g {resource_group} -n {app}').get_output_in_json()
-        self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("server"), f'{acr}.azurecr.io')
-        self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("passwordSecretRef"), "")
-        self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("username"), "")
-        self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("identity"), "system")
+        app_data = self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.configuration.registries[0].server", f'{acr}.azurecr.io'),
+            JMESPathCheck("properties.configuration.registries[0].passwordSecretRef", ""),
+            JMESPathCheck("properties.configuration.registries[0].username", ""),
+            JMESPathCheck("properties.configuration.registries[0].identity", "system"),
+        ]).get_output_in_json()
 
         self.cmd(f'containerapp registry remove -g {resource_group} -n {app} --server {registry_list[0]["server"]}',expect_failure=False)
 
