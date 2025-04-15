@@ -79,7 +79,7 @@ class HDInsightCompleter:
         self.timeout = timeout
         self.worker_result = []
 
-    def complete(self, cmd, prefix, namespace):  # pylint: disable=unused-argument
+    def complete(self, cmd, prefix, namespace):
         thread = threading.Thread(target=self.complete_worker, args=[self.worker, cmd, prefix, namespace])
         thread.daemon = True
         thread.start()

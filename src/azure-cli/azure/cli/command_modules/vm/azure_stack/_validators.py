@@ -1890,7 +1890,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_community_gallery_legal_agreement_acceptance(cmd, namespace)
 
 
-def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
+def validate_vmss_update_namespace(cmd, namespace):
     if not namespace.instance_id:
         if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
             raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
@@ -2213,7 +2213,7 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            'Microsoft.ManagedIdentity')
 
 
-def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unused-argument
+def process_set_applications_namespace(cmd, namespace):
     _validate_vm_vmss_set_applications(cmd, namespace)
 
 
@@ -2383,7 +2383,7 @@ def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
                        "To deallocate a VM, run: az vm deallocate.")
 
 
-def _validate_vmss_update_terminate_notification_related(cmd, namespace):  # pylint: disable=unused-argument
+def _validate_vmss_update_terminate_notification_related(cmd, namespace):
     """
     Validate vmss update enable_terminate_notification and terminate_notification_time.
     If terminate_notification_time is specified, enable_terminate_notification should not be false
@@ -2404,7 +2404,7 @@ def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=un
         namespace.terminate_notification_time = 'PT' + namespace.terminate_notification_time + 'M'
 
 
-def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
+def _validate_vmss_create_automatic_repairs(cmd, namespace):
     if namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None:
         if namespace.load_balancer is None or namespace.health_probe is None:
             raise ArgumentUsageError("usage error: --load-balancer and --health-probe are required "
@@ -2412,7 +2412,7 @@ def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
-def _validate_vmss_update_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
+def _validate_vmss_update_automatic_repairs(cmd, namespace):
     if namespace.enable_automatic_repairs is False and \
             (namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None):
         raise ArgumentUsageError("usage error: please enable --enable-automatic-repairs")

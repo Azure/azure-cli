@@ -78,7 +78,6 @@ def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern
     azcopy.remove(_add_url_sas(target, sas_token), flags=flags)
 
 
-# pylint: disable=unused-argument
 def storage_fs_directory_copy(cmd, source, destination, recursive=None, **kwargs):
     azcopy = AzCopy()
     if kwargs.get('token_credential'):
