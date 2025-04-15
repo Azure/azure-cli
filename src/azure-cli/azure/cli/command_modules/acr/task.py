@@ -8,14 +8,13 @@ import re
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import user_confirmation
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
     get_validate_platform,
-    get_custom_registry_credentials,
+    get_source_and_custom_registry_credentials,
     get_yaml_template,
     build_timers_info,
     remove_timer_trigger,
@@ -76,18 +75,20 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     target=None,
                     auth_mode=None,
                     log_template=None,
-                    is_system_task=False):
+                    is_system_task=False,
+                    source_acr_auth_id=None):
 
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
-    AgentProperties, AuthInfo, BaseImageTrigger, PlatformProperties, \
+    AgentProperties, AuthInfo, BaseImageTrigger, PlatformProperties, RoleAssignmentMode, \
         SourceControlType, SourceProperties, SourceTrigger, Task, TriggerStatus, \
         TriggerProperties = cmd.get_models(
             'AgentProperties',
             'AuthInfo',
             'BaseImageTrigger',
             'PlatformProperties',
+            'RoleAssignmentMode',
             'SourceControlType',
             'SourceProperties',
             'SourceTrigger',
@@ -105,10 +106,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             log_template=log_template,
             is_system_task=is_system_task)
         try:
-            return client.begin_create(resource_group_name=resource_group_name,
-                                       registry_name=registry_name,
-                                       task_name=task_name,
-                                       task_create_parameters=task_create_parameters)
+            return client.create(resource_group_name=resource_group_name,
+                                 registry_name=registry_name,
+                                 task_name=task_name,
+                                 task_create_parameters=task_create_parameters)
         except ValidationError as e:
             raise CLIError(e)
 
@@ -201,6 +202,29 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     if assign_identity is not None:
         identity = _build_identities_info(cmd, assign_identity)
 
+    if source_acr_auth_id and source_acr_auth_id.lower() != "none":
+        identity, _ = _update_identities_info(cmd, source_acr_auth_id, identity)
+
+    registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+
+    credentials = get_source_and_custom_registry_credentials(
+        cmd=cmd,
+        auth_mode=auth_mode,
+        source_acr_auth_id=source_acr_auth_id,
+        registry_abac_enabled=registry_abac_enabled,
+        deprecate_auth_mode=True
+    )
+
+    if source_acr_auth_id and source_acr_auth_id.lower() != "none":
+        logger.warning("The newly-created Task is configured to authenticate with the source registry '%s' using the "
+                       "identity '%s'. Please ensure the identity has proper role assignments for access to the "
+                       "registry.", registry_name, source_acr_auth_id)
+    elif registry_abac_enabled:
+        logger.warning("Warning: The newly-created Task does not have data plane permissions to the source registry "
+                       "'%s' to perform image push, pull, or delete. If you would like the Task to have such "
+                       "permissions, please specify '--source-acr-auth-id' when invoking 'az acr task create' or "
+                       "'az acr task update'", registry_name)
+
     task_create_parameters = Task(
         identity=identity,
         location=registry.location,
@@ -220,10 +244,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             timer_triggers=timer_triggers,
             base_image_trigger=base_image_trigger
         ),
-        credentials=get_custom_registry_credentials(
-            cmd=cmd,
-            auth_mode=auth_mode
-        ),
+        credentials=credentials,
         agent_pool_name=agent_pool_name,
         log_template=log_template,
         is_system_task=is_system_task
@@ -236,11 +257,11 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             if pipeline_response.http_response.status_code == 200:
                 return deserialized
             return pipeline_response
-        return client._create_initial(resource_group_name=resource_group_name,  # pylint: disable=protected-access
-                                      registry_name=registry_name,
-                                      task_name=task_name,
-                                      task_create_parameters=task_create_parameters,
-                                      cls=local_fix)
+        return client.create(resource_group_name=resource_group_name,  # pylint: disable=protected-access
+                             registry_name=registry_name,
+                             task_name=task_name,
+                             task_create_parameters=task_create_parameters,
+                             cls=local_fix)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -335,7 +356,7 @@ def acr_task_delete(cmd,
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     user_confirmation("Are you sure you want to delete the task '{}' ".format(task_name), yes)
-    return client.begin_delete(resource_group_name, registry_name, task_name)
+    return client.delete(resource_group_name, registry_name, task_name)
 
 
 def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
@@ -369,18 +390,20 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
                     target=None,
                     auth_mode=None,
                     log_template=None,
-                    cmd_value=None):
-    _, resource_group_name = validate_managed_registry(
+                    cmd_value=None,
+                    source_acr_auth_id=None):
+    registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     AgentProperties, AuthInfoUpdateParameters, BaseImageTriggerUpdateParameters, \
-        PlatformUpdateParameters, SourceControlType, SourceUpdateParameters, \
-        SourceTriggerUpdateParameters, TaskUpdateParameters, \
+        PlatformUpdateParameters, RoleAssignmentMode, SourceControlType, \
+        SourceUpdateParameters, SourceTriggerUpdateParameters, TaskUpdateParameters, \
         TriggerStatus, TriggerUpdateParameters = cmd.get_models(
             'AgentProperties',
             'AuthInfoUpdateParameters',
             'BaseImageTriggerUpdateParameters',
             'PlatformUpdateParameters',
+            'RoleAssignmentMode',
             'SourceControlType',
             'SourceUpdateParameters',
             'SourceTriggerUpdateParameters',
@@ -397,7 +420,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
             status=status,
             timeout=timeout,
             log_template=log_template)
-        return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+        return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
     step = task.step
     branch = None
@@ -501,6 +524,26 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     if platform:
         platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
+    if source_acr_auth_id and source_acr_auth_id.lower() != "none":
+        identity = client.get_details(resource_group_name, registry_name, task_name).identity
+        identity, update_identity = _update_identities_info(cmd, source_acr_auth_id, identity)
+
+        if update_identity:
+            taskUpdateParameters = TaskUpdateParameters(
+                identity=identity
+            )
+            client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
+    registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+
+    credentials = get_source_and_custom_registry_credentials(
+        cmd=cmd,
+        auth_mode=auth_mode,
+        source_acr_auth_id=source_acr_auth_id,
+        registry_abac_enabled=registry_abac_enabled,
+        deprecate_auth_mode=True
+    )
+
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
@@ -517,14 +560,11 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
             source_triggers=source_trigger_update_params,
             base_image_trigger=base_image_trigger_update_params
         ),
-        credentials=get_custom_registry_credentials(
-            cmd=cmd,
-            auth_mode=auth_mode
-        ),
+        credentials=credentials,
         agent_pool_name=agent_pool_name,
         log_template=log_template
     )
-    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def update_task_step(step,
@@ -624,7 +664,7 @@ def acr_task_identity_assign(cmd,
         identity=identity
     )
 
-    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def acr_task_identity_remove(cmd,
@@ -659,7 +699,7 @@ def acr_task_identity_remove(cmd,
         identity=identity
     )
 
-    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def acr_task_identity_show(cmd,
@@ -698,7 +738,7 @@ def acr_task_credential_add(cmd,
         raise CLIError("Login server '{}' already exists. You cannot add it again.".format(login_server))
 
     taskUpdateParameters = TaskUpdateParameters(
-        credentials=get_custom_registry_credentials(
+        credentials=get_source_and_custom_registry_credentials(
             cmd=cmd,
             login_server=login_server,
             username=username,
@@ -707,9 +747,7 @@ def acr_task_credential_add(cmd,
         )
     )
 
-    resp = LongRunningOperation(cmd.cli_ctx)(
-        client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
-    )
+    resp = client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
     resp = resp.credentials
     return {} if not resp else resp.custom_registries
 
@@ -737,7 +775,7 @@ def acr_task_credential_update(cmd,
         raise CLIError("Login server '{}' not found.".format(login_server))
 
     taskUpdateParameters = TaskUpdateParameters(
-        credentials=get_custom_registry_credentials(
+        credentials=get_source_and_custom_registry_credentials(
             cmd=cmd,
             login_server=login_server,
             username=username,
@@ -746,9 +784,7 @@ def acr_task_credential_update(cmd,
         )
     )
 
-    resp = LongRunningOperation(cmd.cli_ctx)(
-        client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
-    )
+    resp = client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
     resp = resp.credentials
     return {} if not resp else resp.custom_registries
 
@@ -764,16 +800,14 @@ def acr_task_credential_remove(cmd,
     TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
 
     taskUpdateParameters = TaskUpdateParameters(
-        credentials=get_custom_registry_credentials(
+        credentials=get_source_and_custom_registry_credentials(
             cmd=cmd,
             login_server=login_server,
             is_remove=True
         )
     )
 
-    resp = LongRunningOperation(cmd.cli_ctx)(
-        client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
-    )
+    resp = client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
     resp = resp.credentials
     return {} if not resp else resp.custom_registries
 
@@ -819,7 +853,7 @@ def acr_task_timer_add(cmd,
         )
     )
 
-    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def acr_task_timer_update(cmd,
@@ -855,7 +889,7 @@ def acr_task_timer_update(cmd,
         )
     )
 
-    return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
 def acr_task_timer_remove(cmd,
@@ -877,10 +911,10 @@ def acr_task_timer_remove(cmd,
         existingTask.trigger.timer_triggers = trimmed_timer_triggers
 
         try:
-            return client.begin_create(resource_group_name=resource_group_name,
-                                       registry_name=registry_name,
-                                       task_name=task_name,
-                                       task_create_parameters=existingTask)
+            return client.create(resource_group_name=resource_group_name,
+                                 registry_name=registry_name,
+                                 task_name=task_name,
+                                 task_create_parameters=existingTask)
         except ValidationError as e:
             raise CLIError(e)
 
@@ -912,10 +946,10 @@ def acr_task_update_run(cmd,
     is_archive_enabled = not no_archive if no_archive is not None else None
     run_update_parameters = {'is_archive_enabled': is_archive_enabled}
 
-    return client.begin_update(resource_group_name=resource_group_name,
-                               registry_name=registry_name,
-                               run_id=run_id,
-                               run_update_parameters=run_update_parameters)
+    return client.update(resource_group_name=resource_group_name,
+                         registry_name=registry_name,
+                         run_id=run_id,
+                         run_update_parameters=run_update_parameters)
 
 
 def acr_task_run(cmd,  # pylint: disable=too-many-locals
@@ -974,16 +1008,14 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         values=(set_value if set_value else []) + (set_secret if set_secret else []),
         update_trigger_token=update_trigger_token
     )
-    queued_run = LongRunningOperation(cmd.cli_ctx)(
-        client_registries.begin_schedule_run(
-            resource_group_name,
-            registry_name,
-            TaskRunRequest(
-                task_id=task_id,
-                override_task_step_properties=override_task_step_properties,
-                agent_pool_name=agent_pool_name,
-                log_template=log_template
-            )
+    queued_run = client_registries.schedule_run(
+        resource_group_name,
+        registry_name,
+        TaskRunRequest(
+            task_id=task_id,
+            override_task_step_properties=override_task_step_properties,
+            agent_pool_name=agent_pool_name,
+            log_template=log_template,
         )
     )
     run_id = queued_run.run_id
@@ -1018,7 +1050,7 @@ def acr_task_cancel_run(cmd,
                         resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    return client.begin_cancel(resource_group_name, registry_name, run_id)
+    return client.cancel(resource_group_name, registry_name, run_id)
 
 
 def acr_task_list_runs(cmd,
@@ -1109,6 +1141,54 @@ def _get_all_override_arguments(argument=None, secret_argument=None):
     else:
         arguments = (argument if argument else []) + (secret_argument if secret_argument else [])
     return arguments
+
+
+def _update_identities_info(cmd, new_identity, identity):
+    """
+    Add the new identity information to the existing IdentityProperties provided.
+
+    Args:
+        cmd (Any): The command context.
+        new_identity (str): The new identity to be added.
+        identity (IdentityProperties): The provided IdentityProperties.
+
+    Returns:
+        Tuple[IdentityProperties, bool]: The updated IdentityProperties and a boolean indicating if an update was made.
+    """
+    update_identity = False
+
+    if identity is None:
+        update_identity = True
+        return _build_identities_info(cmd, [new_identity]), update_identity
+
+    ResourceIdentityType, UserIdentityProperties = cmd.get_models(
+        'ResourceIdentityType',
+        'UserIdentityProperties',
+        operation_group='tasks')
+
+    assign_system_identity = IDENTITY_LOCAL_ID == new_identity
+    if assign_system_identity:
+        if identity.type not in {ResourceIdentityType.system_assigned.value,
+                                 ResourceIdentityType.system_assigned_user_assigned.value}:
+            update_identity = True
+            identity.type = (ResourceIdentityType.system_assigned.value
+                             if identity.type == ResourceIdentityType.none.value
+                             else ResourceIdentityType.system_assigned_user_assigned.value)
+    else:
+        if identity.user_assigned_identities is None or \
+                new_identity.lower() not in map(str.lower, identity.user_assigned_identities.keys()):
+            update_identity = True
+
+            # Update identity type if it is not already user-assigned
+            if identity.type == ResourceIdentityType.none.value:
+                identity.type = ResourceIdentityType.user_assigned.value
+            elif identity.type != ResourceIdentityType.user_assigned.value:
+                identity.type = ResourceIdentityType.system_assigned_user_assigned.value
+
+            identity.user_assigned_identities = identity.user_assigned_identities or {}
+            identity.user_assigned_identities[new_identity] = UserIdentityProperties()
+
+    return identity, update_identity
 
 
 def _build_identities_info(cmd, identities, is_remove=False):
