@@ -1219,6 +1219,7 @@ def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
         cmd, display_name=None,
         service_management_reference=None,
+        create_password=True,
         years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_in_json=None, skip_assignment=False, keyvault=None):
     import time
@@ -1278,7 +1279,7 @@ def create_service_principal_for_rbac(
 
     # Password credential is created *after* application creation.
     # https://learn.microsoft.com/en-us/graph/api/resources/passwordcredential
-    if not use_cert:
+    if create_password and not use_cert:
         result = _application_add_password(graph_client, aad_application, 'rbac', app_start_date, app_end_date)
         password = result['secretText']
 
@@ -1333,7 +1334,9 @@ def create_service_principal_for_rbac(
                                        ex.response.headers)  # pylint: disable=no-member
                     raise
 
-    logger.warning(CREDENTIAL_WARNING)
+    # No need to show warning if no credential is created
+    if password or cert_file:
+        logger.warning(CREDENTIAL_WARNING)
 
     if show_auth_in_json:
         from azure.cli.core._profile import Profile
