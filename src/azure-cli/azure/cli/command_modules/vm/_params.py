@@ -471,12 +471,16 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('user_data', help='UserData for the VM. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
+        c.argument('zone_placement_policy', arg_type=get_enum_type(self.get_models('ZonePlacementPolicyType')), min_api='2024-11-01', help="Specify the policy for virtual machine's placement in availability zone")
+        c.argument('include_zones', nargs='+', min_api='2024-11-01', help='If "--zone-placement-policy" is set to "Any", availability zone selected by the system must be present in the list of availability zones passed with "--include-zones". If "--include-zones" is not provided, all availability zones in region will be considered for selection.')
+        c.argument('exclude_zones', nargs='+', min_api='2024-11-01', help='If "--zone-placement-policy" is set to "Any", availability zone selected by the system must not be present in the list of availability zones passed with "excludeZones". If "--exclude-zones" is not provided, all availability zones in region will be considered for selection.')
 
     for scope in ['vm create', 'vm update']:
         with self.argument_context(scope) as c:
             c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
             c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
             c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
+            c.argument('align_regional_disks_to_vm_zone', options_list=['--align-regional-disks-to-vm-zone', '--align-regional-disks'], arg_type=get_three_state_flag(), min_api='2024-11-01', help='Specify whether the regional disks should be aligned/moved to the VM zone. This is applicable only for VMs with placement property set. Please note that this change is irreversible.')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
