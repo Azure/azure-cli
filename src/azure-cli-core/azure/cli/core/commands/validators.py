@@ -38,6 +38,19 @@ class IterateValue(list):
     pass  # pylint: disable=unnecessary-pass
 
 
+class ValidateResourceGroupName(argparse.Action):
+    """Action used to validate that resource group name is not empty.
+    """
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        non_empty_msg = "usage error: {} can't be an empty string. Either omit it or provide a non-empty string."
+
+        if not values:
+            raise CLIError(non_empty_msg.format(option_string))
+
+        setattr(namespace, self.dest, values)
+
+
 def validate_tags(ns):
     """ Extracts multiple space-separated tags in key[=value] format """
     if isinstance(ns.tags, list):

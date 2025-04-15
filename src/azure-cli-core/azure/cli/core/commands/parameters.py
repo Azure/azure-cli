@@ -9,7 +9,8 @@ import platform
 
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_PARAM_KWARGS
-from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
+from azure.cli.core.commands.validators import (
+    ValidateResourceGroupName, validate_tag, validate_tags, generate_deployment_name)
 from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
@@ -236,6 +237,7 @@ def get_enum_type(data, default=None):
 
 resource_group_name_type = CLIArgumentType(
     options_list=['--resource-group', '-g'],
+    action=ValidateResourceGroupName,
     completer=get_resource_group_completion_list,
     id_part='resource_group',
     help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",

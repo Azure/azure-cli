@@ -14,6 +14,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
 from azure.cli.core.util import get_file_json
 
+from knack.util import CLIError
 
 class ResourceGroupScenarioTest(ScenarioTest):
 
@@ -46,6 +47,17 @@ class ResourceGroupScenarioTest(ScenarioTest):
                  checks=self.check('tags.a', "{{'k': 'v'}}"))
         self.cmd('group update -g {rg} --set tags.b={tag} --force-string',
                  checks=self.check('tags.b', '{{\"k\":\"v\"}}'))
+
+    def test_resource_group_empty_string_arg(self):
+        expected_msg = "{} can't be an empty string"
+        with self.assertRaisesRegex(CLIError, expected_msg.format("-n")):
+            self.cmd('group create -n "" -l westus')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("-g")):
+            self.cmd('group exists -g ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--name")):
+            self.cmd('group show --name ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--resource-group")):
+            self.cmd('group delete --resource-group ""')
 
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):
