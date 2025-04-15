@@ -397,7 +397,7 @@ def validate_source_resource_id(cmd, namespace):
         source = get_source_resource_name(cmd)
 
         # For Web App, match slot pattern first:
-        if source == RESOURCE.WebApp:
+        if source == RESOURCE.WebApp or source == RESOURCE.FunctionApp:
             slotPattern = WEB_APP_SLOT_RESOURCE
             matched = re.match(get_resource_regex(slotPattern), namespace.source_id, re.IGNORECASE)
             if matched:
@@ -742,7 +742,7 @@ def apply_source_optional_args(cmd, namespace, arg_values):
     '''Set source resource id by optional arg_values
     '''
     source = get_source_resource_name(cmd)
-    if source == RESOURCE.WebApp:
+    if source == RESOURCE.WebApp or source == RESOURCE.FunctionApp:
         if arg_values.get('slot', None):
             resource = WEB_APP_SLOT_RESOURCE
             if check_required_args(resource, arg_values):
