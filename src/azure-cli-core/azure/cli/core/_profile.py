@@ -1009,6 +1009,8 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
     from .telemetry import set_broker_info
     set_broker_info(enable_broker_on_windows)
 
+    # On WSL, use core.enable_broker_on_wsl=true to use broker (WAM)
+    enable_broker_on_wsl = cli_ctx.config.getboolean('core', 'enable_broker_on_wsl', fallback=False)
     # PREVIEW: In Azure Stack environment, use core.instance_discovery=false to disable MSAL's instance discovery.
     instance_discovery = cli_ctx.config.getboolean('core', 'instance_discovery', True)
 
@@ -1016,6 +1018,7 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
                     encrypt=encrypt,
                     use_msal_http_cache=use_msal_http_cache,
                     enable_broker_on_windows=enable_broker_on_windows,
+                    enable_broker_on_wsl=enable_broker_on_wsl,
                     instance_discovery=instance_discovery)
 
 
