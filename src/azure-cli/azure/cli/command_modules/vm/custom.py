@@ -10,7 +10,7 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use, too-many-lines, no-else-return
+# pylint: disable=no-self-use, too-many-lines, no-else-return, too-many-boolean-expressions
 # pylint: disable=protected-access
 import json
 import os
@@ -826,7 +826,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None,
               additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
               enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
-              exclude_zones=None, align_regional_disks_to_vm_zone=None):
+              exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
+              key_incarnation_id=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1052,7 +1054,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
         enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
         zone_placement_policy=zone_placement_policy, include_zones=include_zones, exclude_zones=exclude_zones,
-        align_regional_disks_to_vm_zone=align_regional_disks_to_vm_zone)
+        align_regional_disks_to_vm_zone=align_regional_disks_to_vm_zone, wire_server_mode=wire_server_mode,
+        imds_mode=imds_mode,
+        wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
+        imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
+        key_incarnation_id=key_incarnation_id)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1581,7 +1587,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-              align_regional_disks_to_vm_zone=None, **kwargs):
+              align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
+              key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
@@ -1704,18 +1712,35 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
                                                          v_tpm_enabled=enable_vtpm)
 
-    if enable_proxy_agent is not None or proxy_agent_mode is not None:
+    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None or \
+            wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None or key_incarnation_id is not None:
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
+        HostEndpointSettings = cmd.get_models('HostEndpointSettings')
+        wire_server = HostEndpointSettings(
+            mode=wire_server_mode,
+            in_vm_access_control_profile_reference_id=wire_server_access_control_profile_reference_id
+        )
+        imds = HostEndpointSettings(
+            mode=imds_mode,
+            in_vm_access_control_profile_reference_id=imds_access_control_profile_reference_id
+        )
         if vm.security_profile is None:
             vm.security_profile = SecurityProfile()
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(enabled=enable_proxy_agent,
-                                                                          mode=proxy_agent_mode)
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(
+                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
         elif vm.security_profile.proxy_agent_settings is None:
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(enabled=enable_proxy_agent,
-                                                                          mode=proxy_agent_mode)
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(
+                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
         else:
             vm.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
-            vm.security_profile.proxy_agent_settings.mode = proxy_agent_mode
+            vm.security_profile.proxy_agent_settings.key_incarnation_id = key_incarnation_id
+            vm.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+            vm.security_profile.proxy_agent_settings.wire_server.in_vm_access_control_profile_reference_id = \
+                wire_server_access_control_profile_reference_id
+            vm.security_profile.proxy_agent_settings.imds.mode = imds_mode
+            vm.security_profile.proxy_agent_settings.imds.in_vm_access_control_profile_reference_id = \
+                imds_access_control_profile_reference_id
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -3193,7 +3218,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                 enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
-                security_posture_reference_is_overridable=None, zone_balance=None):
+                security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
+                imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                imds_access_control_profile_reference_id=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3509,7 +3536,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
             skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
-            zone_balance=zone_balance)
+            zone_balance=zone_balance, wire_server_mode=wire_server_mode, imds_mode=imds_mode,
+            wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
+            imds_access_control_profile_reference_id=imds_access_control_profile_reference_id)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3958,7 +3987,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
-                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, zone_balance=None, **kwargs):
+                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, zone_balance=None,
+                wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                imds_access_control_profile_reference_id=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4121,19 +4152,35 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'vTpmEnabled': enable_vtpm
             }}
 
-    if enable_proxy_agent is not None or proxy_agent_mode is not None:
+    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None or \
+            wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
         SecurityProfile = cmd.get_models('SecurityProfile')
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
+        HostEndpointSettings = cmd.get_models('HostEndpointSettings')
+        wire_server = HostEndpointSettings(
+            mode=wire_server_mode,
+            in_vm_access_control_profile_reference_id=wire_server_access_control_profile_reference_id
+        )
+        imds = HostEndpointSettings(
+            mode=imds_mode,
+            in_vm_access_control_profile_reference_id=imds_access_control_profile_reference_id
+        )
         if vmss.virtual_machine_profile.security_profile is None:
             vmss.virtual_machine_profile.security_profile = SecurityProfile()
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, mode=proxy_agent_mode)
+                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
         elif vmss.virtual_machine_profile.security_profile.proxy_agent_settings is None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, mode=proxy_agent_mode)
+                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
         else:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.mode = proxy_agent_mode
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server. \
+                in_vm_access_control_profile_reference_id = wire_server_access_control_profile_reference_id
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.mode = imds_mode
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds. \
+                in_vm_access_control_profile_reference_id = imds_access_control_profile_reference_id
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
         if vmss.orchestration_mode != 'Flexible':
