@@ -308,8 +308,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
         enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
-        enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None, wire_server_mode=None,
-        imds_mode=None, wire_server_access_control_profile_reference_id=None,
+        enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
+        zone_placement_policy=None, include_zones=None, exclude_zones=None, align_regional_disks_to_vm_zone=None,
+        wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
         imds_access_control_profile_reference_id=None, key_incarnation_id=None):
 
     os_caching = disk_info['os'].get('caching')
@@ -574,6 +575,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         if disk_controller_type is not None:
             profile['diskControllerType'] = disk_controller_type
 
+        if align_regional_disks_to_vm_zone is not None:
+            profile['alignRegionalDisksToVMZone'] = align_regional_disks_to_vm_zone
+
         return profile
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
@@ -747,6 +751,16 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     if edge_zone:
         vm['extendedLocation'] = edge_zone
+
+    placement = {}
+    if zone_placement_policy is not None:
+        placement['zonePlacementPolicy'] = zone_placement_policy
+    if include_zones is not None:
+        placement['includeZones'] = include_zones
+    if exclude_zones is not None:
+        placement['excludeZones'] = exclude_zones
+    if placement:
+        vm['Placement'] = placement
 
     return vm
 

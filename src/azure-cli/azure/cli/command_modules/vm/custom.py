@@ -825,7 +825,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               proxy_agent_mode=None, source_snapshots_or_disks=None, source_snapshots_or_disks_size_gb=None,
               source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None,
               additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-              enable_user_redeploy_scheduled_events=None, wire_server_mode=None, imds_mode=None,
+              enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
+              exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None):
 
@@ -1051,7 +1052,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         disk_controller_type=disk_controller_type, enable_proxy_agent=enable_proxy_agent,
         proxy_agent_mode=proxy_agent_mode, additional_scheduled_events=additional_scheduled_events,
         enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
-        enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events, wire_server_mode=wire_server_mode,
+        enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
+        zone_placement_policy=zone_placement_policy, include_zones=include_zones, exclude_zones=exclude_zones,
+        align_regional_disks_to_vm_zone=align_regional_disks_to_vm_zone, wire_server_mode=wire_server_mode,
         imds_mode=imds_mode,
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
@@ -1584,8 +1587,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-              wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
-              imds_access_control_profile_reference_id=None, key_incarnation_id=None, **kwargs):
+              align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
+              key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
@@ -1605,6 +1609,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             disk_name = os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
+
+    if align_regional_disks_to_vm_zone is not None:
+        vm.storage_profile.align_regional_disks_to_vm_zone = align_regional_disks_to_vm_zone
 
     from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
     if security_type == "TrustedLaunch":

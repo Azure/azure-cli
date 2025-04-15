@@ -11253,6 +11253,33 @@ class VMCreateFromACGToOtherSubScenarioTest(ScenarioTest):
         ])
 
 
+class VMPlacementScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_placement', location='EastUS2EUAP')
+    def test_vm_placement(self, resource_group):
+        self.kwargs.update({
+            'vm1': self.create_random_name('vm', 10),
+            'vm2': self.create_random_name('vm', 10),
+        })
+        self.cmd('vm create -g {rg} -n {vm1} --image ubuntu2204 --zone-placement-policy any --include-zones 1 3 --align-regional-disks-to-vm-zone True --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Any'),
+            self.check('placement.includeZones', ['1', '3']),
+            self.check('storageProfile.alignRegionalDisksToVmZone', True),
+        ])
+        self.cmd('vm update -g {rg} -n {vm1} --align-regional-disks-to-vm-zone False', checks=[
+            self.check('storageProfile.alignRegionalDisksToVmZone', False)
+        ])
+        self.cmd('vm create -g {rg} -n {vm2} --image ubuntu2204 --zone-placement-policy any --exclude-zones 2 --align-regional-disks-to-vm-zone False --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Any'),
+            self.check('placement.excludeZones', ['2']),
+            self.check('storageProfile.alignRegionalDisksToVmZone', False),
+        ])
+        self.cmd('vm update -g {rg} -n {vm2} --align-regional-disks-to-vm-zone True', checks=[
+            self.check('storageProfile.alignRegionalDisksToVmZone', True)
+        ])
+
+
 class VMAutoUpdateScenarioTest(ScenarioTest):
 
     @unittest.skip('The selected VM image is not supported for hotpatching')

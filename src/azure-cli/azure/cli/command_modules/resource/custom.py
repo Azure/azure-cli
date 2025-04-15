@@ -4007,7 +4007,7 @@ def _validate_lock_params_match_lock(
                     name, _resource_group))
         if _resource_namespace is None or _resource_namespace == 'Microsoft.Authorization':
             return
-        if resource_provider_namespace != _resource_namespace:
+        if resource_provider_namespace and resource_provider_namespace.lower() != _resource_namespace.lower():
             raise CLIError(
                 'Unexpected --namespace for lock {}, expected {}'.format(name, _resource_namespace))
         if resource.get('child_type_2', None) is None:
