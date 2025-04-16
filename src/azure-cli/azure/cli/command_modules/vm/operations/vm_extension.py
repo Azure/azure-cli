@@ -74,7 +74,7 @@ class VMExtensionShow(_VMExtensionShow):
                 serialized_name="suppressFailures",
             )
             properties.type = AAZStrType(
-                serialized_name="type_properties_type",
+                serialized_name="typePropertiesType",
             )
             properties.type_handler_version = AAZStrType(
                 serialized_name="typeHandlerVersion",
@@ -182,7 +182,7 @@ class VMExtensionCreate(_VMExtensionCreate):
                 serialized_name="suppressFailures",
             )
             properties.type = AAZStrType(
-                serialized_name="type_properties_type"
+                serialized_name="typePropertiesType"
             )
             properties.type_handler_version = AAZStrType(
                 serialized_name="typeHandlerVersion",
