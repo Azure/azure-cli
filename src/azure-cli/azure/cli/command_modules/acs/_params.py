@@ -52,7 +52,11 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_READONLY,
     CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_UNRESTRICTED,
     CONST_ARTIFACT_SOURCE_DIRECT,
-    CONST_ARTIFACT_SOURCE_CACHE)
+    CONST_ARTIFACT_SOURCE_CACHE,
+    CONST_APP_ROUTING_ANNOTATION_CONTROLLED_NGINX,
+    CONST_APP_ROUTING_EXTERNAL_NGINX,
+    CONST_APP_ROUTING_INTERNAL_NGINX,
+    CONST_APP_ROUTING_NONE_NGINX)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -283,6 +287,13 @@ bootstrap_artifact_source_types = [
     CONST_ARTIFACT_SOURCE_CACHE,
 ]
 
+# consts for app routing add-on
+app_routing_nginx_configs = [
+    CONST_APP_ROUTING_ANNOTATION_CONTROLLED_NGINX,
+    CONST_APP_ROUTING_EXTERNAL_NGINX,
+    CONST_APP_ROUTING_INTERNAL_NGINX,
+    CONST_APP_ROUTING_NONE_NGINX
+]
 
 def load_arguments(self, _):
 
@@ -416,6 +427,11 @@ def load_arguments(self, _):
         c.argument('rotation_poll_interval')
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_app_routing', action="store_true")
+        c.argument(
+            "app_routing_default_nginx_controller",
+            arg_type=get_enum_type(app_routing_nginx_configs),
+            options_list=["--app-routing-default-nginx-controller", "--ardnc"]
+        )
 
         # nodepool paramerters
         c.argument('nodepool_name', default='nodepool1',
@@ -969,10 +985,12 @@ def load_arguments(self, _):
     with self.argument_context('aks approuting enable') as c:
         c.argument('enable_kv', action='store_true')
         c.argument('keyvault_id', options_list=['--attach-kv'])
+        c.argument("nginx", arg_type=get_enum_type(app_routing_nginx_configs))
 
     with self.argument_context('aks approuting update') as c:
         c.argument('keyvault_id', options_list=['--attach-kv'])
         c.argument('enable_kv', action='store_true')
+        c.argument("nginx", arg_type=get_enum_type(app_routing_nginx_configs))
 
     with self.argument_context('aks approuting zone add') as c:
         c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)

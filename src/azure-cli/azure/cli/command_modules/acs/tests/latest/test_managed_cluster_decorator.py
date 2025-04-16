@@ -10676,6 +10676,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_ingress_profile_1 = self.models.ManagedClusterIngressProfile(
             web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
                 enabled=True,
+                nginx=None,
             )
         )
         ground_truth_mc_1 = self.models.ManagedCluster(
@@ -10938,6 +10939,31 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
 
         self.assertEqual(dec_mc_8, ground_truth_mc_8)
+
+                # enable app routing with nginx specified
+        dec_9 = AKSPreviewManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_app_routing": True, "enable_kv": False, "nginx": "AnnotationControlled"},
+            CUSTOM_MGMT_AKS_PREVIEW,
+        )
+        mc_9 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_9.context.attach_mc(mc_9)
+        dec_mc_9 = dec_9.update_app_routing_profile(mc_9)
+        ground_truth_ingress_profile_9 = self.models.ManagedClusterIngressProfile(
+            web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
+                enabled=True,
+                nginx=self.models.ManagedClusterIngressProfileNginx(
+                    default_ingress_controller_type="AnnotationControlled"
+                )
+            )
+        )
+        ground_truth_mc_9 = self.models.ManagedCluster(
+            location="test_location", ingress_profile=ground_truth_ingress_profile_9
+        )
+        self.assertEqual(dec_mc_9, ground_truth_mc_9)
 
     def test_enable_disable_cost_analysis(self):
         # Should not update mc if unset
@@ -11929,6 +11955,82 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             custom_ca_trust_certificates=[str.encode(CUSTOM_CA_TEST_CERT_STR) for _ in range(2)]
         )
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location", security_profile=sec_profile)
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+    
+    def test_set_up_ingress_web_app_routing(self):
+        dec_1 = AKSPreviewManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_addons": "web_application_routing",
+                "dns_zone_resource_ids": "test_dns_zone_resource_id",
+                "app_routing_default_nginx_controller": "External"
+            },
+            CUSTOM_MGMT_AKS_PREVIEW,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_ingress_web_app_routing(mc_1)
+        ground_truth_ingress_profile_1 = self.models.ManagedClusterIngressProfile(
+            web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
+                enabled=True,
+                dns_zone_resource_ids=["test_dns_zone_resource_id"],
+                nginx=self.models.ManagedClusterIngressProfileNginx(
+                    default_ingress_controller_type="External"
+                )
+            )
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location", ingress_profile=ground_truth_ingress_profile_1
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_set_up_app_routing_profile_with_no_nginx(self):
+        dec_1 = AKSPreviewManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_app_routing": True,
+            },
+            CUSTOM_MGMT_AKS_PREVIEW,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_ingress_web_app_routing(mc_1)
+        ground_truth_ingress_profile_1 = self.models.ManagedClusterIngressProfile(
+            web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
+                enabled=True,
+                nginx=None
+            )
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location", ingress_profile=ground_truth_ingress_profile_1
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_set_up_app_routing_profile_with_specified_nginx(self):
+        dec_1 = AKSPreviewManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_app_routing": True,
+                "app_routing_default_nginx_controller": "External",
+            },
+            CUSTOM_MGMT_AKS_PREVIEW,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_ingress_web_app_routing(mc_1)
+        ground_truth_ingress_profile_1 = self.models.ManagedClusterIngressProfile(
+            web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
+                enabled=True,
+                nginx=self.models.ManagedClusterIngressProfileNginx(default_ingress_controller_type="External")
+            )
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location", ingress_profile=ground_truth_ingress_profile_1
+        )
+
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_update_supportPlan(self):
