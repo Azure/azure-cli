@@ -10,7 +10,7 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use, too-many-lines, no-else-return, too-many-boolean-expressions
+# pylint: disable=no-self-use, too-many-lines, no-else-return
 # pylint: disable=protected-access
 import json
 import os
@@ -1712,9 +1712,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
                                                          v_tpm_enabled=enable_vtpm)
 
-    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None or \
-            wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None or key_incarnation_id is not None:
+    proxy_agent_parameters = [
+        enable_proxy_agent, wire_server_mode, imds_mode, key_incarnation_id,
+        wire_server_access_control_profile_reference_id, imds_access_control_profile_reference_id
+    ]
+    if any(parameter is not None for parameter in proxy_agent_parameters):
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
         wire_server = HostEndpointSettings(
