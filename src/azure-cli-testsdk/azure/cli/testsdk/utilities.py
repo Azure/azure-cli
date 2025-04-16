@@ -218,16 +218,7 @@ class EmailAddressReplacer(RecordingProcessor):
 
     def _replace_email_address(self, text):
         pattern = r'[\w.%#+-]+[%40|@|_]microsoft.com'
-        index = 0
-        replaced_text = ''
-        for match in re.finditer(pattern, text):
-            start = match.start()
-            end = match.end()
-            replaced_text += text[index:start] + self.EMAIL_REPLACEMENT
-            index = end
-        if index < len(text):
-            replaced_text += text[index:]
-        return replaced_text
+        return re.sub(pattern, self.EMAIL_REPLACEMENT, text)
 
     def process_request(self, request):
         request.uri = self._replace_email_address(request.uri)
