@@ -1541,7 +1541,28 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool_1 = self.create_initialized_agentpool_instance(upgrade_settings=self.models.AgentPoolUpgradeSettings(drain_timeout_in_minutes=123))
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_drain_timeout(), 123)
-    
+
+    def common_get_gateway_prefix_size(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"gateway_prefix_size": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_gateway_prefix_size(), None)
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"gateway_prefix_size": 30}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_gateway_prefix_size(), 30)
+
     def get_if_match(self):
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
@@ -1808,6 +1829,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_gpu_driver(self):
         self.common_get_gpu_driver()
 
+    def test_get_gateway_prefix_size(self):
+        self.common_get_gateway_prefix_size()
+
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1979,6 +2003,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_enable_secure_boot(self):
         self.common_get_enable_secure_boot()
+
+    def test_get_gateway_prefix_size(self):
+        self.common_get_gateway_prefix_size()
 
     def test_get_if_match(self):
         self.get_if_match()
@@ -2473,6 +2500,28 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+    def common_set_up_agentpool_gateway_profile(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"gateway_prefix_size": 30},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_agentpool_gateway_profile(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_agentpool_gateway_profile(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            gateway_profile=self.models.AgentPoolGatewayProfile(
+                public_ip_prefix_size=30
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
 class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -2628,6 +2677,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
     def test_set_up_gpu_propertes(self):
         self.common_set_up_gpu_propertes()
 
+    def test_set_up_agentpool_gateway_profile(self):
+        self.common_set_up_agentpool_gateway_profile()
+
 class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -2748,6 +2800,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
     def test_set_up_gpu_propertes(self):
         self.common_set_up_gpu_propertes()
+
+    def test_set_up_agentpool_gateway_profile(self):
+        self.common_set_up_agentpool_gateway_profile()
 
 class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
