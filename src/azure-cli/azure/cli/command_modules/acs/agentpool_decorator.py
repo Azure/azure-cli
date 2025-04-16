@@ -1588,7 +1588,6 @@ class AKSAgentPoolContext(BaseAKSContext):
         return self.raw_param.get('gateway_prefix_size')
 
 
-
 class AKSAgentPoolAddDecorator:
     def __init__(
         self,
@@ -1970,7 +1969,7 @@ class AKSAgentPoolAddDecorator:
 
     def set_up_agentpool_gateway_profile(self, agentpool: AgentPool) -> AgentPool:
         """Set up agentpool gateway profile for the AgentPool object.
-        
+
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
