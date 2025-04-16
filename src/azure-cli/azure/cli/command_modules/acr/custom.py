@@ -33,7 +33,7 @@ DOMAIN_NAME_LABEL_SCOPE_RESOURCE_GROUP_REUSE = 'ResourceGroupReuse'
 def acr_check_name(cmd, client, registry_name, resource_group_name=None, dnl_scope=DOMAIN_NAME_LABEL_SCOPE_UNSECURE):
     if dnl_scope.lower() == DOMAIN_NAME_LABEL_SCOPE_RESOURCE_GROUP_REUSE.lower() and resource_group_name is None:
         raise RequiredArgumentMissingError("Resource group name is required for domain name label scope " +
-                       DOMAIN_NAME_LABEL_SCOPE_RESOURCE_GROUP_REUSE)
+                                           DOMAIN_NAME_LABEL_SCOPE_RESOURCE_GROUP_REUSE)
     domain_name_label_scope = _get_domain_name_label_scope(cmd, dnl_scope)
     if domain_name_label_scope:
         RegistryNameCheckRequest = cmd.get_models('RegistryNameCheckRequest')
@@ -43,8 +43,8 @@ def acr_check_name(cmd, client, registry_name, resource_group_name=None, dnl_sco
             resource_group_name=resource_group_name,
             auto_generated_domain_name_label_scope=domain_name_label_scope)
     else:
-        raise RequiredArgumentMissingError("Invalid domain name label scope. The allowed values are 'Unsecure', 'TenantReuse'," +
-                       "'SubscriptionReuse', 'ResourceGroupReuse' or 'NoReuse'.")
+        raise RequiredArgumentMissingError("Invalid domain name label scope. The allowed values are 'Unsecure'," +
+                                           " 'TenantReuse', 'SubscriptionReuse', 'ResourceGroupReuse' or 'NoReuse'.")
     return client.check_name_availability(registry_check_name_request)
 
 
