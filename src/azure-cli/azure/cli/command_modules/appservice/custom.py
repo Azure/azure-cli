@@ -7295,6 +7295,8 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=
         ssh_user_name = 'root'
         ssh_user_password = 'Docker!'
         logger.warning('SSH is available { username: %s, password: %s }', ssh_user_name, ssh_user_password)
+        logger.warning('Enter a full SSH session with: ssh %s@%s -m hmac-sha1 -p %s', ssh_user_name,
+                       tunnel_server.local_addr, tunnel_server.local_port)
 
     logger.warning('Ctrl + C to close')
 

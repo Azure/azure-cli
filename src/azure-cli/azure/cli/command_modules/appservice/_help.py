@@ -1687,6 +1687,9 @@ examples:
 helps['webapp create-remote-connection'] = """
 type: command
 short-summary: Creates a remote connection using a tcp tunnel to your web app
+examples:
+  - name: Create a remote connection using a tcp tunnel to your web app
+    text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup
 """
 
 helps['webapp delete'] = """
