@@ -18,6 +18,8 @@ short-summary: Create an App Configuration.
 examples:
   - name: Create an App Configuration store with name, location, sku, tags and resource group.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --tags key1=value1 key2=value2
+  - name: Create an App Configuration store with Developer sku
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Developer
   - name: Create a premium sku App Configuration store with a replica
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Premium --replica-name MyReplica --replica-location eastus
   - name: Create a premium sku App Configuration store without a replica
