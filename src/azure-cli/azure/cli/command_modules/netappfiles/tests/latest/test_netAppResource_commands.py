@@ -85,3 +85,26 @@ class AzureNetAppFilesResourceServiceScenarioTest(ScenarioTest):
 
         region_info = self.cmd("az netappfiles resource region-info default show -l {loc}").get_output_in_json()
         assert region_info['name'] == LOCATION+ '/default'
+
+    @unittest.skip('Pending manifest update')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_resource_', additional_tags={'owner': 'cli_test'})
+    def test_usage_list(self):
+        self.kwargs.update({
+            'loc': LOCATION
+        })
+
+        usage_list = self.cmd("az netappfiles usage list -l {loc}").get_output_in_json()
+        assert len(usage_list) == 1
+    
+    @unittest.skip('Pending manifest update')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_resource_', additional_tags={'owner': 'cli_test'})
+    def test_usage_get(self):
+        self.kwargs.update({
+            'loc': LOCATION,
+            'usageType' : 'totalTibsPerSubscription'
+        })
+
+        usageResult = self.cmd("az netappfiles usage get -l {loc} --usage-type {usageType}").get_output_in_json()        
+        assert usageResult is not None
+        assert usageResult['name'] is not None
+        assert usageResult['name']['value'] == 'totalTibsPerSubscription'

@@ -24,9 +24,9 @@ class Volumes(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-09-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}/volumes", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}/volumes", "2025-01-01"],
         ]
     }
 
@@ -135,7 +135,7 @@ class Volumes(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -286,6 +286,7 @@ class Volumes(AAZCommand):
             )
             properties.is_restoring = AAZBoolType(
                 serialized_name="isRestoring",
+                flags={"read_only": True},
             )
             properties.kerberos_enabled = AAZBoolType(
                 serialized_name="kerberosEnabled",
@@ -415,6 +416,10 @@ class Volumes(AAZCommand):
             )
 
             replication = cls._schema_on_200.value.Element.properties.data_protection.replication
+            replication.destination_replications = AAZListType(
+                serialized_name="destinationReplications",
+                flags={"read_only": True},
+            )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
             )
@@ -434,6 +439,19 @@ class Volumes(AAZCommand):
             replication.replication_schedule = AAZStrType(
                 serialized_name="replicationSchedule",
             )
+
+            destination_replications = cls._schema_on_200.value.Element.properties.data_protection.replication.destination_replications
+            destination_replications.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.data_protection.replication.destination_replications.Element
+            _element.region = AAZStrType()
+            _element.replication_type = AAZStrType(
+                serialized_name="replicationType",
+            )
+            _element.resource_id = AAZStrType(
+                serialized_name="resourceId",
+            )
+            _element.zone = AAZStrType()
 
             remote_path = cls._schema_on_200.value.Element.properties.data_protection.replication.remote_path
             remote_path.external_host_name = AAZStrType(

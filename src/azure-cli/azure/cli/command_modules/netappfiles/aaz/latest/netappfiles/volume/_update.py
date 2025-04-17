@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-09-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-01-01"],
         ]
     }
 
@@ -232,13 +232,6 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.avs_data_store = AAZStrArg(
-            options=["--avs-data-store"],
-            arg_group="Properties",
-            help="Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purpose",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
         _args_schema.capacity_pool_resource_id = AAZStrArg(
             options=["--pool-resource-id", "--capacity-pool-resource-id"],
             arg_group="Properties",
@@ -275,16 +268,6 @@ class Update(AAZCommand):
                 minimum=2,
             ),
         )
-        _args_schema.creation_token = AAZStrArg(
-            options=["--creation-token"],
-            arg_group="Properties",
-            help="A unique file path for the volume. Used when creating mount targets",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
-                max_length=80,
-                min_length=1,
-            ),
-        )
         _args_schema.default_group_quota_in_ki_bs = AAZIntArg(
             options=["--default-group-quota", "--default-group-quota-in-ki-bs"],
             arg_group="Properties",
@@ -316,31 +299,6 @@ class Update(AAZCommand):
             help="Specifies if default quota is enabled for the volume.",
             nullable=True,
         )
-        _args_schema.is_large_volume = AAZBoolArg(
-            options=["--is-large-volume"],
-            arg_group="Properties",
-            help="Specifies whether volume is a Large Volume or Regular Volume.",
-            nullable=True,
-        )
-        _args_schema.is_restoring = AAZBoolArg(
-            options=["--is-restoring"],
-            arg_group="Properties",
-            help="Restoring",
-            nullable=True,
-        )
-        _args_schema.ldap_enabled = AAZBoolArg(
-            options=["--ldap-enabled"],
-            arg_group="Properties",
-            help="Specifies whether LDAP is enabled or not for a given NFS volume.",
-            nullable=True,
-        )
-        _args_schema.network_features = AAZStrArg(
-            options=["--network-features"],
-            arg_group="Properties",
-            help="Basic network, or Standard features available to the volume. hide me",
-            nullable=True,
-            enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
-        )
         _args_schema.placement_rules = AAZListArg(
             options=["--placement-rules"],
             arg_group="Properties",
@@ -358,13 +316,6 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="Proximity placement group associated with the volume",
             nullable=True,
-        )
-        _args_schema.security_style = AAZStrArg(
-            options=["--security-style"],
-            arg_group="Properties",
-            help="The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol",
-            nullable=True,
-            enum={"ntfs": "ntfs", "unix": "unix"},
         )
         _args_schema.service_level = AAZStrArg(
             options=["--service-level"],
@@ -439,12 +390,6 @@ class Update(AAZCommand):
             options=["--volume-spec-name"],
             arg_group="Properties",
             help="Volume spec name is the application specific designation or identifier for the particular volume in a volume group for e.g. data, log",
-            nullable=True,
-        )
-        _args_schema.volume_type = AAZStrArg(
-            options=["--volume-type"],
-            arg_group="Properties",
-            help="What type of volume is this. For destination volumes in Cross Region Replication, set type to DataProtection",
             nullable=True,
         )
 
@@ -605,7 +550,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -712,7 +657,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -775,13 +720,11 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("avsDataStore", AAZStrType, ".avs_data_store")
                 properties.set_prop("capacityPoolResourceId", AAZStrType, ".capacity_pool_resource_id")
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
                 properties.set_prop("coolAccessRetrievalPolicy", AAZStrType, ".cool_access_retrieval_policy")
                 properties.set_prop("coolAccessTieringPolicy", AAZStrType, ".cool_access_tiering_policy")
                 properties.set_prop("coolnessPeriod", AAZIntType, ".coolness_period")
-                properties.set_prop("creationToken", AAZStrType, ".creation_token", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("dataProtection", AAZObjectType)
                 properties.set_prop("defaultGroupQuotaInKiBs", AAZIntType, ".default_group_quota_in_ki_bs")
                 properties.set_prop("defaultUserQuotaInKiBs", AAZIntType, ".default_user_quota_in_ki_bs")
@@ -790,15 +733,10 @@ class Update(AAZCommand):
                 properties.set_prop("encryptionKeySource", AAZStrType, ".encryption_key_source")
                 properties.set_prop("exportPolicy", AAZObjectType)
                 properties.set_prop("isDefaultQuotaEnabled", AAZBoolType, ".is_default_quota_enabled")
-                properties.set_prop("isLargeVolume", AAZBoolType, ".is_large_volume")
-                properties.set_prop("isRestoring", AAZBoolType, ".is_restoring")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
-                properties.set_prop("ldapEnabled", AAZBoolType, ".ldap_enabled")
-                properties.set_prop("networkFeatures", AAZStrType, ".network_features")
                 properties.set_prop("placementRules", AAZListType, ".placement_rules")
                 properties.set_prop("protocolTypes", AAZListType, ".protocol_types")
                 properties.set_prop("proximityPlacementGroup", AAZStrType, ".proximity_placement_group")
-                properties.set_prop("securityStyle", AAZStrType, ".security_style")
                 properties.set_prop("serviceLevel", AAZStrType, ".service_level")
                 properties.set_prop("smbAccessBasedEnumeration", AAZStrType, ".smb_access_based_enumeration", typ_kwargs={"nullable": True})
                 properties.set_prop("smbContinuouslyAvailable", AAZBoolType, ".smb_continuously_available")
@@ -810,7 +748,6 @@ class Update(AAZCommand):
                 properties.set_prop("unixPermissions", AAZStrType, ".unix_permissions", typ_kwargs={"nullable": True})
                 properties.set_prop("usageThreshold", AAZIntType, ".usage_threshold", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("volumeSpecName", AAZStrType, ".volume_spec_name")
-                properties.set_prop("volumeType", AAZStrType, ".volume_type")
 
             data_protection = _builder.get(".properties.dataProtection")
             if data_protection is not None:
@@ -1028,6 +965,7 @@ class _UpdateHelper:
         )
         properties.is_restoring = AAZBoolType(
             serialized_name="isRestoring",
+            flags={"read_only": True},
         )
         properties.kerberos_enabled = AAZBoolType(
             serialized_name="kerberosEnabled",
@@ -1157,6 +1095,10 @@ class _UpdateHelper:
         )
 
         replication = _schema_volume_read.properties.data_protection.replication
+        replication.destination_replications = AAZListType(
+            serialized_name="destinationReplications",
+            flags={"read_only": True},
+        )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
         )
@@ -1176,6 +1118,19 @@ class _UpdateHelper:
         replication.replication_schedule = AAZStrType(
             serialized_name="replicationSchedule",
         )
+
+        destination_replications = _schema_volume_read.properties.data_protection.replication.destination_replications
+        destination_replications.Element = AAZObjectType()
+
+        _element = _schema_volume_read.properties.data_protection.replication.destination_replications.Element
+        _element.region = AAZStrType()
+        _element.replication_type = AAZStrType(
+            serialized_name="replicationType",
+        )
+        _element.resource_id = AAZStrType(
+            serialized_name="resourceId",
+        )
+        _element.zone = AAZStrType()
 
         remote_path = _schema_volume_read.properties.data_protection.replication.remote_path
         remote_path.external_host_name = AAZStrType(
