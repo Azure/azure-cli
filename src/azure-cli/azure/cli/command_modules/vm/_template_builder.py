@@ -1018,7 +1018,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                        enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
+                        enable_user_redeploy_scheduled_events=None,
+                        skuprofile_vmsizes=None, skuprofile_allostrat=None, skuprofile_rank=None,
                         security_posture_reference_is_overridable=None, zone_balance=None):
 
     # Build IP configuration
@@ -1595,6 +1596,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                 'name': vm_size
             }
             sku_profile_vmsizes_list.append(vmsize_obj)
+
+        if skuprofile_rank:
+            for vm_size, rank in zip(sku_profile_vmsizes_list, skuprofile_rank):
+                vm_size['rank'] = rank
+
         sku_profile = {
             'vmSizes': sku_profile_vmsizes_list,
             'allocationStrategy': skuprofile_allostrat
