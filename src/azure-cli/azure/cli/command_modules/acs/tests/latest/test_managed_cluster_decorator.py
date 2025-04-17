@@ -10945,7 +10945,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {"enable_app_routing": True, "enable_kv": False, "nginx": "AnnotationControlled"},
-            CUSTOM_MGMT_AKS_PREVIEW,
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_9 = self.models.ManagedCluster(
             location="test_location",
