@@ -10777,7 +10777,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         )
 
         create_cmd = (
-            "aks create --resource-group={resource_group} --name={aks_name} --location={location}"
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
             "--ssh-key-value={ssh_key_value} --enable-app-routing --app-routing-default-nginx-controller none"
         )
         self.cmd(
@@ -10819,7 +10819,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         )
 
         create_cmd = (
-            "aks create --resource-group={resource_group} --name={aks_name} --location={location}"
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
             "--ssh-key-value={ssh_key_value} --enable-app-routing --ardnc none"
         )
         self.cmd(
@@ -10924,7 +10924,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             }
         )
         create_cmd = (
-            "aks create --resource-group={resource_group} --name={aks_name} --location={location}"
+            "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
             "--ssh-key-value={ssh_key_value}"
         )
         self.cmd(

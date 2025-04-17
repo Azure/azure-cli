@@ -10941,7 +10941,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_8, ground_truth_mc_8)
 
                 # enable app routing with nginx specified
-        dec_9 = AKSPreviewManagedClusterUpdateDecorator(
+        dec_9 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
             {"enable_app_routing": True, "enable_kv": False, "nginx": "AnnotationControlled"},
@@ -11958,7 +11958,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
     
     def test_set_up_ingress_web_app_routing(self):
-        dec_1 = AKSPreviewManagedClusterCreateDecorator(
+        dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
             {
@@ -11986,7 +11986,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_set_up_app_routing_profile_with_no_nginx(self):
-        dec_1 = AKSPreviewManagedClusterCreateDecorator(
+        dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
             {
@@ -12009,7 +12009,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_set_up_app_routing_profile_with_specified_nginx(self):
-        dec_1 = AKSPreviewManagedClusterCreateDecorator(
+        dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
             {
