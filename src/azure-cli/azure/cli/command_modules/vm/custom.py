@@ -136,6 +136,19 @@ def _get_extension_instance_name(instance_view, publisher, extension_type_name,
                                  suggested_name=None):
     extension_instance_name = suggested_name or extension_type_name
     full_type_name = '.'.join([publisher, extension_type_name])
+    if instance_view.extensions:
+        ext = next((x for x in instance_view.extensions
+                    if x.type and (x.type.lower() == full_type_name.lower())), None)
+        if ext:
+            extension_instance_name = ext.name
+    return extension_instance_name
+
+
+# separated for aaz based implementation
+def _get_extension_instance_name1(instance_view, publisher, extension_type_name,
+                                  suggested_name=None):
+    extension_instance_name = suggested_name or extension_type_name
+    full_type_name = '.'.join([publisher, extension_type_name])
     if extensions := instance_view.get('extensions', []):
         ext = next((x for x in extensions if x.type and (x.type.lower() == full_type_name.lower())), None)
         if ext:
@@ -2127,14 +2140,11 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, 
 
 # region VirtualMachines Extensions
 def list_extensions(cmd, resource_group_name, vm_name):
-    from .aaz.latest.vm import Show as _VMShow
-    vm = _VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+    from .operations.vm_extension import VMExtensionList
+    return VMExtensionList(cli_ctx=cmd.cli_ctx)(command_args={
         'vm_name': vm_name,
         'resource_group': resource_group_name,
-    })
-    extension_type = 'Microsoft.Compute/virtualMachines/extensions'
-    result = [r for r in (vm.get('resources', [])) if r.get('type', None) == extension_type]
-    return result
+    })['value']
 
 
 def show_extensions(cmd, resource_group_name, vm_name, vm_extension_name, instance_view=False, expand=None):
@@ -2163,8 +2173,8 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if not extension_instance_name:
         extension_instance_name = vm_extension_name
 
-    instance_name = _get_extension_instance_name(vm['instanceView'], publisher, vm_extension_name,
-                                                 suggested_name=extension_instance_name)
+    instance_name = _get_extension_instance_name1(vm['instanceView'], publisher, vm_extension_name,
+                                                  suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
         msg = "A %s extension with name %s already exists. Updating it with your settings..."
         logger.warning(msg, vm_extension_name, instance_name)
