@@ -49,7 +49,8 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SQLDataBase': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
-                     'SAPASE': 'SAPAseDatabase'}
+                     'SAPASE': 'SAPAseDatabase',
+                     'SAPAseDatabase': 'SAPAseDatabase'}
 
 # Mapping of module name
 module_map = {'sqldatabase': 'sql_database',
@@ -203,8 +204,11 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
     backup_item_type = item_uri.split(';')[0]
-    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
-        raise InvalidArgumentValueError("Item must be either of type SQLDataBase or SAPHanaDatabase.")
+    if (not cust_help.is_sql(backup_item_type) and not
+        cust_help.is_hana(backup_item_type) and not
+            cust_help.is_sapase(backup_item_type)):
+        raise InvalidArgumentValueError("Item must be either of type SQLDataBase "
+                                        "or SAPHanaDatabase or SAPAseDatabase.")
 
     item_properties = _get_protected_item_instance(backup_item_type)
     item_properties.policy_id = policy.id
