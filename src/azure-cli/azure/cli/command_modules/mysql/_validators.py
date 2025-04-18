@@ -304,6 +304,8 @@ def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_
 
 
 def _mysql_backup_interval_validator(backup_interval):
+    if backup_interval is None:
+        return
     if backup_interval not in [6, 12, 24]:
         raise ArgumentUsageError("Incorrect value for --backup-interval. Allowed values: [6, 12, 24]")
 
