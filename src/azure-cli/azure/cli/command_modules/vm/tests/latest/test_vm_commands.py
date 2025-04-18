@@ -10360,6 +10360,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'pubip2': 'pubip2',
             'pubip3': 'pubip3',
             'pubip4': 'pubip4',
+            'nsg': 'nsg',
         })
         self.cmd('disk create -n {vm_disk} -g {rg} --hyper-v-generation v2 --size-gb 10')
 
@@ -10391,13 +10392,15 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n {vm2}')
         self.cmd('vm generalize -g {rg} -n {vm2}')
         self.cmd('image create -g {rg} -n {image} --source {vm2} --hyper-v-generation v2')
-        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --disk-controller-type scsi --admin-username sdk-test-admin --admin-password testPassword001!  --vm-sku Standard_E2bs_v5', checks=[
+
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --disk-controller-type scsi --admin-username sdk-test-admin --admin-password testPassword001! --vm-sku Standard_E2bs_v5 --nsg {nsg}', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
         ])
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip4} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --admin-username sdk-test-admin --admin-password testPassword001! --vm-sku Standard_E2bs_v5 --orchestration-mode Flexible --public-ip-address {pubip4}')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --admin-username sdk-test-admin --admin-password testPassword001! --vm-sku Standard_E2bs_v5 --orchestration-mode Flexible --public-ip-address {pubip4} --nsg {nsg}')
         self.cmd('vmss update -g {rg} -n {vmss1} --disk-controller-type scsi', checks=[
             self.check('virtualMachineProfile.storageProfile.diskControllerType', 'SCSI')
         ])
