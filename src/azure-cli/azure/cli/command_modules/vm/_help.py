@@ -852,6 +852,14 @@ examples:
         --gallery-image-version 1.0.0 \\
         --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
         --end-of-life-date 2024-08-02T00:00:00+00:00
+  - name: Add a new image version and block the deletion for this image version if its end of life has not expired
+    text: |
+        az sig image-version create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
+        --end-of-life-date 2024-08-02T00:00:00+00:00 \\
+        --block-deletion-before-end-of-life true
 """
 
 helps['sig image-version list-shared'] = """
@@ -913,6 +921,11 @@ examples:
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
         --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
         --set safetyProfile.allowDeletionOfReplicatedLocations=true
+  - name: Block the deletion for this gallery image version if its end of life has not expired.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
+        --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
+        --block-deletion-before-end-of-life true
 """
 
 helps['sig image-version undelete'] = """
