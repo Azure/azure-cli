@@ -58,6 +58,7 @@ deactivate
 
 # Fix up %{buildroot} appearing in some files...
 for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" $d; done;
+rm %{buildroot}%{cli_lib_dir}/pyvenv.cfg
 
 # Create executable (entry script)
 

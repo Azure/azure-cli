@@ -7,7 +7,7 @@ export USERNAME=azureuser
 
 dnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
 
-dnf install git gcc $PYTHON_PACKAGE-devel findutils -y
+dnf install git gcc $PYTHON_PACKAGE-devel findutils $PYTHON_PACKAGE-pip -y
 
 ln -s -f /usr/bin/$PYTHON_CMD /usr/bin/python
 ln -s -f /usr/bin/$PIP_CMD /usr/bin/pip
