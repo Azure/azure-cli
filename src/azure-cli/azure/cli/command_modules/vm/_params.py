@@ -434,7 +434,7 @@ def load_arguments(self, _):
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                    help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
-        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"], default=None), min_api='2022-11-01', help='Specify the security type of the virtual machine.')
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"], default=None), min_api='2022-11-01', help='Specify the security type of the virtual machine. The value Standard can be used if subscription has feature flag UseStandardSecurityType registered under Microsoft.Compute namespace. Refer to https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features for steps to enable required feature.')
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -466,7 +466,7 @@ def load_arguments(self, _):
                    help='Specify the scale set logical fault domain into which the virtual machine will be created. By default, the virtual machine will be automatically assigned to a fault domain that best maintains balance across available fault domains. This is applicable only if the virtualMachineScaleSet property of this virtual machine is set. The virtual machine scale set that is referenced, must have platform fault domain count. This property cannot be updated once the virtual machine is created. Fault domain assignment can be viewed in the virtual machine instance view')
         c.argument('count', type=int, is_preview=True,
                    help='Number of virtual machines to create. Value range is [2, 250], inclusive. Don\'t specify this parameter if you want to create a normal single VM. The VMs are created in parallel. The output of this command is an array of VMs instead of one single VM. Each VM has its own public IP, NIC. VNET and NSG are shared. It is recommended that no existing public IP, NIC, VNET and NSG are in resource group. When --count is specified, --attach-data-disks, --attach-os-disk, --boot-diagnostics-storage, --computer-name, --host, --host-group, --nics, --os-disk-name, --private-ip-address, --public-ip-address, --public-ip-address-dns-name, --storage-account, --storage-container-name, --subnet, --use-unmanaged-disk, --vnet-name are not allowed.')
-        c.argument('security_type', security_type)
+        c.argument('security_type', security_type, help='Specify the security type of the virtual machine. The value Standard can be used if subscription has feature flag UseStandardSecurityType registered under Microsoft.Compute namespace. Refer to https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features for steps to enable required feature.')
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('user_data', help='UserData for the VM. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
@@ -769,7 +769,7 @@ def load_arguments(self, _):
         c.argument('patch_mode', arg_type=get_enum_type(['AutomaticByOS', 'AutomaticByPlatform', 'Manual', 'ImageDefault']), min_api='2020-12-01',
                    help='Mode of in-guest patching to IaaS virtual machine. Allowed values for Windows VM: AutomaticByOS, AutomaticByPlatform, Manual. Allowed values for Linux VM: AutomaticByPlatform, ImageDefault. Manual - You control the application of patches to a virtual machine. You do this by applying patches manually inside the VM. In this mode, automatic updates are disabled; the paramater --enable-auto-update must be false. AutomaticByOS - The virtual machine will automatically be updated by the OS. The parameter --enable-auto-update must be true. AutomaticByPlatform - the virtual machine will automatically updated by the OS. ImageDefault - The virtual machine\'s default patching configuration is used. The parameter --enable-agent and --enable-auto-update must be true')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VMSS.')
-        c.argument('security_type', security_type)
+        c.argument('security_type', security_type, help='Specify the security type of the virtual machine scale set. The value Standard can be used if subscription has feature flag UseStandardSecurityType registered under Microsoft.Compute namespace. Refer to https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features for steps to enable required feature.')
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', arg_group='Storage', help='Specify whether OS disk should be deleted or detached upon VMSS Flex deletion (This feature is only for VMSS with flexible orchestration mode).')
@@ -820,7 +820,7 @@ def load_arguments(self, _):
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
-        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set. The value Standard can be used if subscription has feature flag UseStandardSecurityType registered under Microsoft.Compute namespace. Refer to https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features for steps to enable required feature.')
         c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2024-03-01', help='Allow you to specify the ephemeral disk settings for the operating system disk. Specify it to false to set ephemeral disk setting as empty and migrate it to non ephemeral')
         c.argument('ephemeral_os_disk_option', options_list=['--ephemeral-os-disk-option', '--ephemeral-option'], arg_type=get_enum_type(self.get_models('DiffDiskOptions')), min_api='2024-03-01', help='Specify the ephemeral disk settings for operating system disk.')
         c.argument('zones', zones_type, min_api='2023-03-01')
