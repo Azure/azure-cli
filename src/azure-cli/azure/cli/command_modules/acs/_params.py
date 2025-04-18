@@ -295,6 +295,7 @@ app_routing_nginx_configs = [
     CONST_APP_ROUTING_NONE_NGINX
 ]
 
+
 def load_arguments(self, _):
     acr_arg_type = CLIArgumentType(metavar='ACR_NAME_OR_RESOURCE_ID')
     k8s_support_plans = self.get_models("KubernetesSupportPlan", resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters')
