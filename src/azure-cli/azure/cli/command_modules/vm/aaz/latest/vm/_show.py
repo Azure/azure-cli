@@ -16,9 +16,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2024-11-01"],
         ]
     }
 
@@ -122,7 +122,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -175,6 +175,7 @@ class Show(AAZCommand):
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.placement = AAZObjectType()
             _schema_on_200.plan = AAZObjectType()
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
@@ -218,6 +219,23 @@ class Show(AAZCommand):
                 serialized_name="principalId",
                 flags={"read_only": True},
             )
+
+            placement = cls._schema_on_200.placement
+            placement.exclude_zones = AAZListType(
+                serialized_name="excludeZones",
+            )
+            placement.include_zones = AAZListType(
+                serialized_name="includeZones",
+            )
+            placement.zone_placement_policy = AAZStrType(
+                serialized_name="zonePlacementPolicy",
+            )
+
+            exclude_zones = cls._schema_on_200.placement.exclude_zones
+            exclude_zones.Element = AAZStrType()
+
+            include_zones = cls._schema_on_200.placement.include_zones
+            include_zones.Element = AAZStrType()
 
             plan = cls._schema_on_200.plan
             plan.name = AAZStrType()
@@ -1050,10 +1068,16 @@ class Show(AAZCommand):
 
             proxy_agent_settings = cls._schema_on_200.properties.security_profile.proxy_agent_settings
             proxy_agent_settings.enabled = AAZBoolType()
+            proxy_agent_settings.imds = AAZObjectType()
+            _ShowHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
             proxy_agent_settings.key_incarnation_id = AAZIntType(
                 serialized_name="keyIncarnationId",
             )
             proxy_agent_settings.mode = AAZStrType()
+            proxy_agent_settings.wire_server = AAZObjectType(
+                serialized_name="wireServer",
+            )
+            _ShowHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
             uefi_settings = cls._schema_on_200.properties.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -1064,6 +1088,9 @@ class Show(AAZCommand):
             )
 
             storage_profile = cls._schema_on_200.properties.storage_profile
+            storage_profile.align_regional_disks_to_vm_zone = AAZBoolType(
+                serialized_name="alignRegionalDisksToVMZone",
+            )
             storage_profile.data_disks = AAZListType(
                 serialized_name="dataDisks",
             )
@@ -1351,6 +1378,26 @@ class _ShowHelper:
         _schema.disk_encryption_key = cls._schema_disk_encryption_settings_read.disk_encryption_key
         _schema.enabled = cls._schema_disk_encryption_settings_read.enabled
         _schema.key_encryption_key = cls._schema_disk_encryption_settings_read.key_encryption_key
+
+    _schema_host_endpoint_settings_read = None
+
+    @classmethod
+    def _build_schema_host_endpoint_settings_read(cls, _schema):
+        if cls._schema_host_endpoint_settings_read is not None:
+            _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+            _schema.mode = cls._schema_host_endpoint_settings_read.mode
+            return
+
+        cls._schema_host_endpoint_settings_read = _schema_host_endpoint_settings_read = AAZObjectType()
+
+        host_endpoint_settings_read = _schema_host_endpoint_settings_read
+        host_endpoint_settings_read.in_vm_access_control_profile_reference_id = AAZStrType(
+            serialized_name="inVMAccessControlProfileReferenceId",
+        )
+        host_endpoint_settings_read.mode = AAZStrType()
+
+        _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+        _schema.mode = cls._schema_host_endpoint_settings_read.mode
 
     _schema_instance_view_status_read = None
 
