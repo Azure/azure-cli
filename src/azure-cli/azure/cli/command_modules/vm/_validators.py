@@ -1413,8 +1413,6 @@ def trusted_launch_set_default(namespace, generation_version, features):
                 if namespace.enable_secure_boot is None:
                     namespace.enable_secure_boot = True
         else:
-            if namespace.security_type is None:
-                namespace.security_type = COMPATIBLE_SECURITY_TYPE_VALUE
             logger.warning(UPGRADE_SECURITY_HINT)
 
 
