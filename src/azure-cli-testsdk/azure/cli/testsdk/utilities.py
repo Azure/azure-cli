@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import re
 from contextlib import contextmanager
 
 from .scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor)
@@ -207,6 +208,29 @@ class MSGraphNameReplacer(RecordingProcessor):
     def process_response(self, response):
         if response['body']['string']:
             response['body']['string'] = response['body']['string'].replace(self.test_name, self.mock_name)
+        return response
+
+
+class EmailAddressReplacer(RecordingProcessor):
+    """Replace email address like xxx@microsoft.com with test@example.com"""
+
+    EMAIL_REPLACEMENT = 'test@example.com'
+
+    def _replace_email_address(self, text):
+        pattern = r'[\w.%#+-]+[%40|@|_]microsoft.com'
+        return re.sub(pattern, self.EMAIL_REPLACEMENT, text)
+
+    def process_request(self, request):
+        request.uri = self._replace_email_address(request.uri)
+        if request.body:
+            body = _byte_to_str(request.body)
+            request.body = self._replace_email_address(body)
+        return request
+
+    def process_response(self, response):
+        if response['body']['string']:
+            body = _byte_to_str(response['body']['string'])
+            response['body']['string'] = self._replace_email_address(body)
         return response
 
 
