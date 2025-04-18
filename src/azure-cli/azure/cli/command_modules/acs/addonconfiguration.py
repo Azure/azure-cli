@@ -349,6 +349,7 @@ def ensure_container_insights_for_monitoring(
     is_private_cluster=False,
     ampls_resource_id=None,
     enable_high_log_scale_mode=False,
+    enable_retina_network_flow_logs=False,
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
@@ -486,6 +487,8 @@ def ensure_container_insights_for_monitoring(
             cistreams = ["Microsoft-ContainerInsights-Group-Default"]
             if enable_high_log_scale_mode:
                 cistreams = ContainerInsightsStreams
+                if enable_retina_network_flow_logs:
+                    cistreams.append("Microsoft-RetinaNetworkFlowLogs")
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
