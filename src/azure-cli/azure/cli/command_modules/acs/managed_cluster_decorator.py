@@ -814,7 +814,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         return self.raw_param.get("update_dns_zone")
-    
+
     def get_app_routing_default_nginx_controller(self) -> str:
         """Obtain the value of app_routing_default_nginx_controller.
         :return: str
@@ -6534,7 +6534,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.ingress_profile.web_app_routing = (
                 self.models.ManagedClusterIngressProfileWebAppRouting(enabled=True)  # pylint: disable=no-member
             )
-            
+
             nginx_ingress_controller = self.context.get_app_routing_default_nginx_controller()
 
             if nginx_ingress_controller:
@@ -7945,13 +7945,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         # modify DNS zone resource IDs
         if dns_zone_resource_ids:
             self._update_dns_zone_resource_ids(mc, dns_zone_resource_ids)
-        
+
         # modify default nic config
         if nginx:
             self._update_app_routing_nginx(mc, nginx)
 
         return mc
-    
+
     def _update_app_routing_nginx(self, mc: ManagedCluster, nginx) -> None:
         """Helper function to set default nginx ingress controller config for app routing
         :return: None
