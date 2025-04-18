@@ -182,10 +182,7 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
         except Exception as ex:  # pylint: disable=broad-except
             msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
             raise CLIError(msg)
-    auto_upgrade_msg = "You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. " \
-        "More details in https://learn.microsoft.com/cli/azure/update-azure-cli#automatic-update"
-    logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False)
-                   else auto_upgrade_msg)
+    logger.warning("Upgrade finished.")
 
 
 def _upgrade_on_windows():
