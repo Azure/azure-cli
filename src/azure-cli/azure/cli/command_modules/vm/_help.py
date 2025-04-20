@@ -852,6 +852,14 @@ examples:
         --gallery-image-version 1.0.0 \\
         --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
         --end-of-life-date 2024-08-02T00:00:00+00:00
+  - name: Add a new image version and block the deletion for this image version if its end of life has not expired
+    text: |
+        az sig image-version create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
+        --end-of-life-date 2024-08-02T00:00:00+00:00 \\
+        --block-deletion-before-end-of-life true
 """
 
 helps['sig image-version list-shared'] = """
@@ -913,6 +921,11 @@ examples:
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
         --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
         --set safetyProfile.allowDeletionOfReplicatedLocations=true
+  - name: Block the deletion for this gallery image version if its end of life has not expired.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
+        --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
+        --block-deletion-before-end-of-life true
 """
 
 helps['sig image-version undelete'] = """
@@ -1026,17 +1039,6 @@ examples:
     text: az vm list-sizes -l westus
 """
 
-helps['vm availability-set convert'] = """
-type: command
-short-summary: Convert an Azure Availability Set to contain VMs with managed disks.
-examples:
-  - name: Convert an availabiity set to use managed disks by name.
-    text: az vm availability-set convert -g MyResourceGroup -n MyAvSet
-  - name: Convert an availability set to use managed disks by ID.
-    text: >
-        az vm availability-set convert --ids $(az vm availability-set list -g MyResourceGroup --query "[].id" -o tsv)
-"""
-
 helps['vm availability-set create'] = """
 type: command
 short-summary: Create an Azure Availability Set.
@@ -1044,26 +1046,6 @@ long-summary: 'For more information, see https://learn.microsoft.com/azure/virtu
 examples:
   - name: Create an availability set.
     text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2
-"""
-
-helps['vm availability-set list'] = """
-type: command
-short-summary: List availability sets.
-examples:
-  - name: List availability sets.
-    text: az vm availability-set list -g MyResourceGroup
-"""
-
-helps['vm availability-set update'] = """
-type: command
-short-summary: Update an Azure Availability Set.
-examples:
-  - name: Update an availability set.
-    text: az vm availability-set update -n MyAvSet -g MyResourceGroup
-  - name: Update an availability set tag.
-    text: az vm availability-set update -n MyAvSet -g MyResourceGroup --set tags.foo=value
-  - name: Remove an availability set tag.
-    text: az vm availability-set update -n MyAvSet -g MyResourceGroup --remove tags.foo
 """
 
 helps['vm boot-diagnostics'] = """

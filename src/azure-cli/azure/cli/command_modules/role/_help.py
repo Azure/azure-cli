@@ -516,7 +516,9 @@ examples:
 
 helps['ad sp create-for-rbac'] = """
 type: command
-short-summary: Create a service principal and configure its access to Azure resources.
+short-summary: >
+    Create an application and its associated service principal, optionally configure the service principal's
+    RBAC role assignments.
 long-summary: >-
     The output includes credentials that you must protect. Be sure that you do not include these credentials
     in your code or check the credentials into your source control. As an alternative, consider using
@@ -534,6 +536,8 @@ examples:
   text: az ad sp create-for-rbac -n MyApp
 - name: Create with a Contributor role assignments on specified scopes. To retrieve current subscription ID, run `az account show --query id --output tsv`.
   text: az ad sp create-for-rbac -n MyApp --role Contributor --scopes /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup1 /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup2
+- name: Do not create password credential.
+  text: az ad sp create-for-rbac --create-password false
 - name: Create using a self-signed certificate.
   text: az ad sp create-for-rbac --create-cert
 - name: Create using an existing certificate string.
@@ -781,6 +785,8 @@ examples:
     text: az role assignment delete --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000
   - name: Delete all role assignments of an assignee at the subscription scope.
     text: az role assignment delete --assignee 00000000-0000-0000-0000-000000000000 --scope /subscriptions/00000000-0000-0000-0000-000000000000
+  - name: Delete all role assignments of an assignee (with its object ID) at the subscription scope.
+    text: az role assignment delete --assignee-object-id 00000000-0000-0000-0000-000000000000 --scope /subscriptions/00000000-0000-0000-0000-000000000000
 """
 
 helps['role assignment list'] = """
@@ -796,10 +802,16 @@ long-summary: >-
     Delete classic administrators who no longer need access or assign an Azure RBAC role for fine-grained access
     control. Learn more: https://go.microsoft.com/fwlink/?linkid=2238474
 examples:
-  - name: List all role assignments with "Reader" role at the subscription scope.
+  - name: List role assignments at the subscription scope.
+    text: az role assignment list --scope /subscriptions/00000000-0000-0000-0000-000000000000
+  - name: List role assignments at the subscription scope, without filling roleDefinitionName property.
+    text: az role assignment list --scope /subscriptions/00000000-0000-0000-0000-000000000000 --fill-role-definition-name false
+  - name: List role assignments with "Reader" role at the subscription scope.
     text: az role assignment list --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000
-  - name: List all role assignments of an assignee at the subscription scope.
+  - name: List role assignments of an assignee at the subscription scope.
     text: az role assignment list --assignee 00000000-0000-0000-0000-000000000000 --scope /subscriptions/00000000-0000-0000-0000-000000000000
+  - name: List role assignments of an assignee (with its object ID) at the subscription scope, without filling principalName property. This command does not query Microsoft Graph.
+    text: az role assignment list --assignee-object-id 00000000-0000-0000-0000-000000000000 --scope /subscriptions/00000000-0000-0000-0000-000000000000 --fill-principal-name false
 """
 
 helps['role assignment list-changelogs'] = """

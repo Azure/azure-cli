@@ -26,6 +26,10 @@ def load_command_table(self, _):
     from .operations.snapshot import SnapshotUpdate
     self.command_table['snapshot update'] = SnapshotUpdate(loader=self)
 
+    from .operations.vm_availability_set import AvailabilitySetUpdate, AvailabilitySetConvert
+    self.command_table['vm availability-set update'] = AvailabilitySetUpdate(loader=self)
+    self.command_table['vm availability-set convert'] = AvailabilitySetConvert(loader=self)
+
     VMSS = import_aaz_by_profile("vmss")
     self.command_table['vmss list'] = VMSS.List(loader=self,
                                                 table_transformer=transform_vmss_list_with_zones_table_output)
