@@ -6,6 +6,8 @@
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
+from azure.cli.core.commands.client_factory import get_subscription_id
+import time
 
 
 class AcrCommandsTests(ScenarioTest):
@@ -80,8 +82,21 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr check-name -n {name}', checks=[
             self.check('nameAvailable', True)
         ])
+        
+    def test_check_name_availability_dnl_scope(self):
+        # the chance of this randomly generated name has a duplication is rare
+        name = self.create_random_name('clireg', 20)
+        self.kwargs.update({
+            'name': name
+        })
 
+        self.cmd('acr check-name -n {name} --dnl-scope noreuse', checks=[
+            self.check('nameAvailable', True),
+            self.check_pattern('availableLoginServerName',r'{name}-[a-zA-Z0-9]+\.*')
+        ])
+        
     @ResourceGroupPreparer()
+    @live_only()
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
@@ -178,12 +193,12 @@ class AcrCommandsTests(ScenarioTest):
             'sku': 'Standard',
             'cr_name': 'test1',
             'cs_name': 'test1',
-            'source_repo': 'docker.io/library/ubuntu',
-            'target_repo': 'ubuntu',
+            'source_repo': 'mcr.microsoft.com/mcr/hello-world',
+            'target_repo': 'hello-world',
             'user_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPusername',
             'pass_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPpassword',
             'new_pass_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPusername',
-            'upstream': 'docker.io'
+            'upstream': 'mcr.microsoft.com'
 
         })
 
@@ -494,6 +509,7 @@ class AcrCommandsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
+    @live_only()
     @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
         self.kwargs.update({
@@ -504,19 +520,20 @@ class AcrCommandsTests(ScenarioTest):
             'identity_permissions': "get unwrapkey wrapkey",
             'registry_name': self.create_random_name('testreg', 20),
         })
-
         # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
         self.kwargs['key_id'] = result.get_output_in_json()['key']['kid']
-
+        self.kwargs['subscription_id'] = get_subscription_id(self.cli_ctx)
+        
         # create a user-assigned identity and give it access to the key
         result = self.cmd('identity create --name {identity_name} -g {rg}')
         self.kwargs['principal_id'] = result.get_output_in_json()['principalId']
         self.kwargs['identity_id'] = result.get_output_in_json()['id']
         self.kwargs['client_id'] = result.get_output_in_json()['clientId']
-
-        self.cmd('keyvault set-policy --object-id {principal_id} --name {key_vault} --key-permissions {identity_permissions}')
-
+        
+        time.sleep(15) # wait for ARM cache to populate 
+        self.cmd('role assignment create --role "Key Vault Crypto Service Encryption User" --assignee {principal_id} --scope /subscriptions/{subscription_id}/resourceGroups/{rg}/providers/Microsoft.KeyVault/vaults/{key_vault}')
+     
         # create the registry with CMK encryption enabled using the user-assigned identity
         result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium --identity {identity_id} --key-encryption-key {key_id}', checks=[
             self.check('identity.type', 'userAssigned'),
@@ -804,6 +821,7 @@ class AcrCommandsTests(ScenarioTest):
         self.assertEqual(sorted(result_identities), sorted(query_identities))
 
     @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_metadata_search_enabled(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
@@ -835,6 +853,7 @@ class AcrCommandsTests(ScenarioTest):
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
 
     @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_metadata_search_disabled(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
@@ -859,3 +878,56 @@ class AcrCommandsTests(ScenarioTest):
                     self.check('metadataSearch', 'Enabled')])
 
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
+        
+    @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
+    def test_acr_create_with_domain_name_label_scope_tenant_reuse(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --dnl-scope tenantreuse',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check_pattern('loginServer',r'{registry_name}-[a-zA-Z0-9]+\.*'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('autoGeneratedDomainNameLabelScope', 'TenantReuse')])
+
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)
+
+    @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
+    def test_acr_create_with_domain_name_label_scope_name_in_use(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'rg2': 'randomresourcegroupname',
+            'sku': 'Premium'
+        })
+
+        self.cmd('group create -n {rg2} -l {rg_loc}')
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --dnl-scope resourcegroupreuse',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check_pattern('loginServer',r'{registry_name}-[a-zA-Z0-9]+\.*'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('autoGeneratedDomainNameLabelScope', 'ResourceGroupReuse')])       
+
+        with self.assertRaises(Exception) as ex:
+            self.cmd('acr create -n {registry_name} -g {rg2} -l {rg_loc} --sku {sku} --dnl-scope resourcegroupreuse',
+                     checks=['code','RegistryNameAlreadyInUse'])
+

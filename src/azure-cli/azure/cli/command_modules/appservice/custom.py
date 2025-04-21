@@ -580,14 +580,6 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
                               share_name, access_key, mount_path=None, slot=None, slot_setting=False):
     AzureStorageInfoValue = cmd.get_models('AzureStorageInfoValue')
-    storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
-
-    # Check if the file share exists
-    try:
-        storage_client.file_shares.get(resource_group_name, account_name, share_name)
-    except:
-        raise ValidationError(f"The share '{share_name}' does not exist in the storage account '{account_name}'.")
-
     azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                                      'list_azure_storage_accounts', slot)
 
