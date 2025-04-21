@@ -4433,11 +4433,9 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     else:
                         end_of_life_dt = end_of_life
                 now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
-                print(f"DEBUG: Checking EOL for {getattr(runtime_setting, 'runtime_version', None)}: now={now_utc}, eol={end_of_life_dt}")
                 if now_utc >= end_of_life_dt:
                     return False
             except Exception as ex:
-                print(f"DEBUG: Failed to parse end_of_life_date: {end_of_life} ({ex})")
                 pass
         return True
 
