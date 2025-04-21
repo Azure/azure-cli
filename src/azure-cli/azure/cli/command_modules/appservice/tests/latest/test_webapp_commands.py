@@ -3139,7 +3139,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|11.0-java21"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT:11.0-java21"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status false'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('complete', True)
