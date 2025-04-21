@@ -488,7 +488,8 @@ class ContainerappScenarioTest(ScenarioTest):
 
     @live_only()  # Pass lively, But failed in playback mode with Role assignment error, which is expected: azure.cli.core.azclierror.UnauthorizedError: Role assignment failed with error
     @ResourceGroupPreparer(location="northeurope")
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=99999)
+    @live_only()
     def test_containerapp_registry_msi(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
