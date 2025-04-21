@@ -4435,7 +4435,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
                 if now_utc >= end_of_life_dt:
                     return False
-            except Exception as ex:
+            except Exception:
                 pass
         return True
 
