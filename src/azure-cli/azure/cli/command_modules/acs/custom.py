@@ -575,6 +575,7 @@ def aks_create(
     image_cleaner_interval_hours=None,
     enable_keda=False,
     enable_vpa=False,
+    custom_ca_trust_certificates=None,
     # advanced networking
     enable_acns=None,
     disable_acns_observability=None,
@@ -781,6 +782,7 @@ def aks_update(
     enable_force_upgrade=False,
     disable_force_upgrade=False,
     upgrade_override_until=None,
+    custom_ca_trust_certificates=None,
     # advanced networking
     disable_acns=None,
     enable_acns=None,
@@ -2424,6 +2426,8 @@ def aks_agentpool_add(
     # etag headers
     if_match=None,
     if_none_match=None,
+    # gpu driver
+    gpu_driver=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
