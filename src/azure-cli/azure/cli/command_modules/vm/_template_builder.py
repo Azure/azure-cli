@@ -1039,7 +1039,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                        enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, 
+                        enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
                         skuprofile_allostrat=None, skuprofile_rank=None,
                         security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                         imds_mode=None, wire_server_access_control_profile_reference_id=None,
