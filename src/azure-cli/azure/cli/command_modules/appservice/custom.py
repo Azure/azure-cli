@@ -4280,6 +4280,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         linux_auto_updates = [
             s.display_name for s in self.stacks if
             s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
+
+        def is_valid_runtime_name(name):
+            # Accepts names like "node|18-lts", "python|3.11", but not "NODE:lts" or "node"
+            parts = name.split(self.DEFAULT_DELIMETER)
+            return len(parts) == 2 and parts[1] and not parts[1].lower() in ("lts", "default", "stable")
+
+        windows_stacks = [n for n in windows_stacks if is_valid_runtime_name(n)]
+        linux_stacks = [n for n in linux_stacks if is_valid_runtime_name(n)]
+        windows_auto_updates = [n for n in windows_auto_updates if is_valid_runtime_name(n)]
+        linux_auto_updates = [n for n in linux_auto_updates if is_valid_runtime_name(n)]
+
         if delimiter is not None:
             windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
             linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
@@ -4402,7 +4413,33 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting):
-        return runtime_setting is not None and not runtime_setting.is_hidden and not runtime_setting.is_deprecated
+        from datetime import datetime, timezone
+        if runtime_setting is None or getattr(runtime_setting, 'is_hidden', False):
+            return False
+        if getattr(runtime_setting, 'is_deprecated', False):
+            return False
+        end_of_life = getattr(runtime_setting, 'end_of_life_date', None)
+        if end_of_life:
+            try:
+                if isinstance(end_of_life, str):
+                    try:
+                        end_of_life_dt = datetime.strptime(end_of_life, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                    except ValueError:
+                        end_of_life_dt = datetime.strptime(end_of_life, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                else:
+                    # If already a datetime, ensure it's timezone-aware
+                    if end_of_life.tzinfo is None:
+                        end_of_life_dt = end_of_life.replace(tzinfo=timezone.utc)
+                    else:
+                        end_of_life_dt = end_of_life
+                now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+                print(f"DEBUG: Checking EOL for {getattr(runtime_setting, 'runtime_version', None)}: now={now_utc}, eol={end_of_life_dt}")
+                if now_utc >= end_of_life_dt:
+                    return False
+            except Exception as ex:
+                print(f"DEBUG: Failed to parse end_of_life_date: {end_of_life} ({ex})")
+                pass
+        return True
 
     @classmethod
     def _get_runtime_setting(cls, minor_version, linux, java):
