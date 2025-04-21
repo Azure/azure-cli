@@ -160,7 +160,7 @@ def load_arguments(self, _):
                    'For more information, see https://learn.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
 
     with self.argument_context('appconfig create') as c:
-        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']), validator=validate_sku)
+        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Developer', 'Premium', 'Standard']), validator=validate_sku)
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
         c.argument('assign_identity', arg_type=identities_arg_type,
@@ -177,7 +177,7 @@ def load_arguments(self, _):
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
 
     with self.argument_context('appconfig update') as c:
-        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']))
+        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Developer', 'Premium', 'Standard']))
         c.argument('tags', arg_type=tags_type)
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
@@ -336,7 +336,7 @@ def load_arguments(self, _):
         c.argument('fields', arg_type=feature_fields_arg_type)
 
     with self.argument_context('appconfig feature set') as c:
-        c.argument('feature', validator=validate_feature, help="Name of the feature flag to be set. Feature name cannot contain the '%' character.")
+        c.argument('feature', validator=validate_feature, help="Name of the feature flag to be set. Feature name cannot contain the '%' or ':' characters.")
         c.argument('label', help="If no label specified, set the feature flag with null label by default")
         c.argument('description', help='Description of the feature flag to be set.')
         c.argument('key', validator=validate_feature_key, help='Key of the feature flag. Key must start with the ".appconfig.featureflag/" prefix. Key cannot contain the "%" character. Default key is the reserved prefix ".appconfig.featureflag/" + feature name.')
@@ -416,7 +416,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig snapshot create') as c:
         c.argument('filters', arg_type=snapshot_filter_arg_type)
         c.argument('composition_type', arg_type=get_enum_type(["key", "key_label"]), help='Composition type used in building App Configuration snapshots. If not specified, defaults to key.')
-        c.argument('retention_period', type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free tier stores and 90 days (7,776,000s) for standard and premium tier stores. If specified, retention period must be at least 1 hour (3600s)')
+        c.argument('retention_period', type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free and developer tier stores and 90 days (7,776,000s) for standard and premium tier stores. If specified, retention period must be at least 1 hour (3600s)')
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig snapshot show') as c:

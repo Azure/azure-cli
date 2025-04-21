@@ -41,6 +41,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_ARTIFACT_SOURCE_CACHE,
+    CONST_NONE_UPGRADE_CHANNEL,
 )
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
@@ -108,7 +109,7 @@ from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand, LongRunningOperation
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json
+from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json, read_file_content
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
@@ -883,6 +884,30 @@ class AKSManagedClusterContext(BaseAKSContext):
                 )
 
         return disable_keda
+
+    def get_custom_ca_trust_certificates(self) -> Union[List[bytes], None]:
+        """Obtain the value of custom ca trust certificates.
+        :return: List[str] or None
+        """
+        custom_ca_certs_file_path = self.raw_param.get("custom_ca_trust_certificates")
+        if not custom_ca_certs_file_path:
+            return None
+        if not os.path.isfile(custom_ca_certs_file_path):
+            raise InvalidArgumentValueError(
+                "{} is not valid file, or not accessible.".format(
+                    custom_ca_certs_file_path
+                )
+            )
+        # CAs are supposed to be separated with a new line, we filter out empty strings (e.g. some stray new line). We only allow up to 10 CAs
+        file_content = read_file_content(custom_ca_certs_file_path).split(os.linesep + os.linesep)
+        certs = [str.encode(x) for x in file_content if len(x) > 1]
+        if len(certs) > 10:
+            raise InvalidArgumentValueError(
+                "Only up to 10 new-line separated CAs can be passed, got {} instead.".format(
+                    len(certs)
+                )
+            )
+        return certs
 
     def get_snapshot_controller(self) -> Optional[ManagedClusterStorageProfileSnapshotController]:
         """Obtain the value of storage_profile.snapshot_controller
@@ -6150,6 +6175,22 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
         return mc
 
+    def set_up_custom_ca_trust_certificates(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up Custom CA Trust Certificates for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ca_certs = self.context.get_custom_ca_trust_certificates()
+        if ca_certs:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
+
+            mc.security_profile.custom_ca_trust_certificates = ca_certs
+
+        return mc
+
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up api server access profile and fqdn subdomain for the ManagedCluster object.
 
@@ -6607,6 +6648,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_workload_auto_scaler_profile(mc)
         # set up app routing profile
         mc = self.set_up_ingress_web_app_routing(mc)
+        # set up custom ca trust certificates
+        mc = self.set_up_custom_ca_trust_certificates(mc)
 
         # setup k8s support plan
         mc = self.set_up_k8s_support_plan(mc)
@@ -8066,6 +8109,22 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_custom_ca_trust_certificates(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update Custom CA Trust Certificates for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ca_certs = self.context.get_custom_ca_trust_certificates()
+        if ca_certs:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
+
+            mc.security_profile.custom_ca_trust_certificates = ca_certs
+
+        return mc
+
     def update_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update azure monitor profile for the ManagedCluster object.
         :return: the ManagedCluster object
@@ -8448,6 +8507,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_oidc_issuer_profile(mc)
         # update auto upgrade profile
         mc = self.update_auto_upgrade_profile(mc)
+        # update custom ca trust certificates
+        mc = self.update_custom_ca_trust_certificates(mc)
         # update identity
         mc = self.update_identity(mc)
         # update addon profiles
@@ -8482,6 +8543,38 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_node_resource_group_profile(mc)
         # update bootstrap profile
         mc = self.update_bootstrap_profile(mc)
+        # update kubernetes version and orchestrator version
+        mc = self.update_kubernetes_version_and_orchestrator_version(mc)
+        return mc
+
+    def update_kubernetes_version_and_orchestrator_version(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update kubernetes version and orchestrator version for the ManagedCluster object.
+
+        :param mc: The ManagedCluster object to be updated.
+        :return: The updated ManagedCluster object.
+        """
+        self._ensure_mc(mc)
+
+        # Check if auto_upgrade_channel is set to "none"
+        auto_upgrade_channel = self.context.get_auto_upgrade_channel()
+        if auto_upgrade_channel == CONST_NONE_UPGRADE_CHANNEL:
+            warning_message = (
+                "Since auto-upgrade-channel is set to none, cluster kubernetesVersion will be set to the value of "
+                "currentKubernetesVersion, all agent pools orchestratorVersion will be set to the value of "
+                "currentOrchestratorVersion respectively. Continue?"
+            )
+            if not self.context.get_yes() and not prompt_y_n(warning_message, default="n"):
+                raise DecoratorEarlyExitException()
+
+            # Set kubernetes version to match the current kubernetes version if it has a value
+            if mc.current_kubernetes_version:
+                mc.kubernetes_version = mc.current_kubernetes_version
+
+            # Set orchestrator version for each agent pool to match the current orchestrator version if it has a value
+            for agent_pool in mc.agent_pool_profiles:
+                if agent_pool.current_orchestrator_version:
+                    agent_pool.orchestrator_version = agent_pool.current_orchestrator_version
+
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
