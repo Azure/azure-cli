@@ -8,8 +8,8 @@ Release History
 
 **ACR**
 
-* Fix #31130: Fix extra version line in encodedTask created by file (#31153)
-* Move taskfilesample into data folder (#31211)
+* `az acr task show`: Fix #31130: Fix extra version line in encodedTask created by file (#31153)
+* `az acr create/check-name`: Add parameter `--dnl-scope` for domain name label hash (#30638)
 
 **AKS**
 
@@ -59,11 +59,6 @@ Release History
 **Consumption**
 
 * `az consumption usage list`: Enhanced handling of `usageStart` and `usageEnd` when missing (#31128)
-
-**Container Registry**
-
-* `az acr create/check-name`: Add parameter `--dnl-scope` for domain name label hash (#30638)
-* Upgrade default api version to 2024-11-01-preview (#30638)
 
 **Microsoft Entra ID**
 
