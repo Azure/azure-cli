@@ -4,11 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class AcrConnectedRegistryCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
     def test_acr_connectedregistry(self, resource_group):
         # Agentpool prerequisites for connected registry testing
         crName = 'connectedregistry'

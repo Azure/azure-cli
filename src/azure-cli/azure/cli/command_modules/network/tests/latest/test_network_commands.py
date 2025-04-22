@@ -491,7 +491,7 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         # test for private-ip-address-version
         self.cmd('network lb create -g {rg} -n {lb2} -l westcentralus --sku Standard')
-        self.cmd('network public-ip create -n {ip2} -g {rg} -l westcentralus --sku Standard --allocation-method Static --version IPv6')
+        self.cmd('network public-ip create -n {ip2} -g {rg} -l westcentralus --sku Standard --allocation-method Static --version IPv6 --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network lb frontend-ip create --lb-name {lb2} -n ipv6 -g {rg} --private-ip-address-version IPv6 --public-ip-address {ip2}', checks=[
             self.check('name', 'ipv6'),
             self.check('provisioningState', 'Succeeded')
@@ -535,14 +535,14 @@ class NetworkPublicIpWithSku(ScenarioTest):
             'ip4': 'pubip4'
         })
 
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1}')
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
-            self.check('sku.name', self.kwargs.get('basic_sku')),
+            self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('regional_tier')),
-            self.check('publicIPAllocationMethod', 'Dynamic')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
             self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('regional_tier')),
@@ -550,16 +550,12 @@ class NetworkPublicIpWithSku(ScenarioTest):
             self.check('tags.foo', 'doo')
         ])
 
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku} --tier {global_tier}')
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku} --tier {global_tier} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
             self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('global_tier')),
             self.check('publicIPAllocationMethod', 'Static')
         ])
-
-        from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegex(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
-            self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
 
 
 class NetworkCustomIPPrefix(ScenarioTest):
@@ -621,6 +617,7 @@ class NetworkCustomIPPrefix(ScenarioTest):
 
 class NetworkPublicIpPrefix(ScenarioTest):
 
+    @record_only()  # cannot assign both tags and a public IP prefix to a public IP address in Azure
     @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix', location='eastus2')
     def test_network_public_ip_prefix(self, resource_group):
 
@@ -694,6 +691,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
             self.check('length(zones)', 3)
         ])
 
+    @record_only()  # cannot assign both tags and a public IP prefix to a public IP address in Azure
     @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_with_ip_address', location='eastus2')
     def test_network_public_ip_prefix_with_ip_address(self, resource_group):
         self.kwargs.update({
@@ -749,8 +747,8 @@ class NetworkMultiIdsShowScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_multi_id')
     def test_network_multi_id_show(self, resource_group):
 
-        self.cmd('network public-ip create -g {rg} -n pip1')
-        self.cmd('network public-ip create -g {rg} -n pip2')
+        self.cmd('network public-ip create -g {rg} -n pip1 --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network public-ip create -g {rg} -n pip2 --ip-tags FirstPartyUsage=/NonProd')
 
         pip1 = self.cmd('network public-ip show -g {rg} -n pip1').get_output_in_json()
         pip2 = self.cmd('network public-ip show -g {rg} -n pip2').get_output_in_json()
@@ -799,7 +797,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic_with_waf_v2_sku')
     def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
-        self.cmd('network public-ip create -g {rg} -n pubip1 --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n pubip1 --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
         self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --waf-policy waf1 --priority 1001')
 
@@ -850,7 +848,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             "ip": "publicIP",
         })
 
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         self.cmd("network application-gateway create -g {rg} -n {appgw} "
                  "--sku Standard_v2 "
@@ -913,7 +911,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
             'secret_id': cert_result['sid']
         })
 
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         # create application-gateway with one_off_identity
         self.cmd('network application-gateway create '
@@ -984,7 +982,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
             'secret_id': cert_result['sid']
         })
 
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         # create application-gateway with one_off_identity
         self.cmd('network application-gateway create '
@@ -1014,7 +1012,7 @@ class NetworkAppGatewayTrustedClientCertScenarioTest(ScenarioTest):
         })
 
         # create an ag with trusted client cert
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network application-gateway create -g {rg} -n {gw} --sku Standard_v2 --public-ip-address {ip} '
                  '--trusted-client-cert name={cname} data="{cert}" --priority 1001',
                  checks=[self.check('length(applicationGateway.trustedClientCertificates)', 1)])
@@ -1050,7 +1048,7 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
         })
 
         # create an ag with ssl profile
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
             "network application-gateway create -n {gw} -g {rg} --public-ip-address {ip} --sku Standard_v2 --priority 1001 "
             "--ssl-profile name={name} min-protocol-version=TLSv1_0 cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom client-auth-configuration=True",
@@ -1097,7 +1095,7 @@ class NetworkAppGatewayZoneScenario(ScenarioTest):
         })
 
         # for public-ip after '2020-08-01', when set '-z 1 3', actually return 'zones:[1,2,3]'
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard -z 1 3', checks=[
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard -z 1 3 --ip-tags FirstPartyUsage=/NonProd', checks=[
             self.check('length(publicIp.zones)', 3)
         ])
         self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --max-capacity 4 --zones 1 3 --public-ip-address {ip} --priority 1001 --no-wait')
@@ -1162,7 +1160,7 @@ class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
             'settings': 'https_settings',
             'ip1': 'myip1'
         })
-        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --public-ip-address {ip1} --priority 1001')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}"')
@@ -1355,7 +1353,7 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
             'port': 8080
         })
 
-        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
                  '--public-ip-address {appgw_public_ip} --sku Standard_v2 '
@@ -2799,6 +2797,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 8: validate per rule action
         self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.2')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type Microsoft_DefaultRuleSet --version 2.1')
 
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.2 '
@@ -3857,6 +3857,8 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
             self.check('newVNet.name', '{vnet}'),
         ]).get_output_in_json()
 
+        self.cmd('network vnet subnet update -n {subnet} -g {rg2} --vnet-name {vnet} --default-outbound-access false --subscription {aux_sub}')
+
         self.kwargs['vnet_id'] = vnet['newVNet']['id']
         self.kwargs['subnet_id'] = vnet['newVNet']['subnets'][0]['id']
 
@@ -3864,7 +3866,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
             self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
         ])
 
-        public_ip_address_id = self.cmd('network public-ip create -g {rg2} -n {publicip} --subscription {aux_sub}', checks=[
+        public_ip_address_id = self.cmd('network public-ip create -g {rg2} -n {publicip} --subscription {aux_sub} --ip-tags FirstPartyUsage=/NonProd', checks=[
             self.check('publicIp.name', '{publicip}')
         ]).get_output_in_json()['publicIp']['id']
 
