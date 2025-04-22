@@ -11966,7 +11966,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 "dns_zone_resource_ids": "test_dns_zone_resource_id",
                 "app_routing_default_nginx_controller": "External"
             },
-            CUSTOM_MGMT_AKS_PREVIEW,
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         dec_1.context.attach_mc(mc_1)
@@ -11992,7 +11992,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             {
                 "enable_app_routing": True,
             },
-            CUSTOM_MGMT_AKS_PREVIEW,
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         dec_1.context.attach_mc(mc_1)
@@ -12016,7 +12016,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 "enable_app_routing": True,
                 "app_routing_default_nginx_controller": "External",
             },
-            CUSTOM_MGMT_AKS_PREVIEW,
+            ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_1 = self.models.ManagedCluster(location="test_location")
         dec_1.context.attach_mc(mc_1)
