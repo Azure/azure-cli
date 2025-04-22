@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* `az acr task show`: Fix #31130: Fix extra version line in encodedTask created by file (#31153)
+* Fix #31130: `az acr task show`: Fix extra version line in encodedTask created by file (#31153)
 * `az acr create/check-name`: Add parameter `--dnl-scope` for domain name label hash (#30638)
 
 **AKS**
@@ -28,12 +28,12 @@ Release History
 
 * Fix #20983: `az webapp config ssl import`: Make web app a non-required parameter (#30958)
 * `az appservice plan create`: Add Pv4/Pmv4 ASP support (#31021)
-* Fix: #20209: `az webapp create-remote-connection`: Add ssh command to output (#31155)
+* Fix #20209: `az webapp create-remote-connection`: Add ssh command to output (#31155)
 
 **ARM**
 
 * `az deployment`: Fix issue where Bicep is not found in CI environments (#31202)
-* Fix issue #31188: `az lock delete`: Fix the case sensitivity of `--namespace` parameter validation (#31274)
+* Fix #31188: `az lock delete`: Fix the case sensitivity of `--namespace` parameter validation (#31274)
 
 **ARO**
 
@@ -58,7 +58,7 @@ Release History
 
 **Consumption**
 
-* `az consumption usage list`: Enhanced handling of `usageStart` and `usageEnd` when missing (#31128)
+* `az consumption usage list`: Enhance handling of `usageStart` and `usageEnd` when missing (#31128)
 
 **Microsoft Entra ID**
 
@@ -92,11 +92,7 @@ Release History
 
 **Service Connector**
 
-* `az webapp connection create -h`: Clarify that system identity is a flag (#31263)
-
-**SQL**
-
-* Update azure-mgmt-sql Package from 4.0.0b20 to 4.0.0b21 (#31214)
+* `az webapp connection create`: Clarify that system identity is a flag (#31263)
 
 2.71.0
 ++++++
