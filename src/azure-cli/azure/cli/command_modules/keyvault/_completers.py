@@ -18,7 +18,7 @@ def get_keyvault_name_completion_list(resource_name):
         if resource_name == 'key':
             from azure.keyvault.keys import KeyClient
             from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
-            version = '7.5-preview.1' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
+            version = '7.6-preview.2' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
             client = KeyClient(vault_url=vault, credential=credential, api_version=version,
                                verify_challenge_resource=False)
         elif resource_name == 'secret':
@@ -52,7 +52,7 @@ def get_keyvault_version_completion_list(resource_name):
         if resource_name == 'key':
             from azure.keyvault.keys import KeyClient
             from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
-            version = '7.5-preview.1' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
+            version = '7.6-preview.2' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
             client = KeyClient(vault_url=vault, credential=credential, api_version=version,
                                verify_challenge_resource=False)
         elif resource_name == 'secret':
