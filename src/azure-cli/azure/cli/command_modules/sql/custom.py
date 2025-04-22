@@ -63,7 +63,6 @@ from azure.mgmt.sql.models import (
     ServerKey,
     ServerKeyType,
     ServerNetworkAccessFlag,
-    ServiceObjectiveName,
     ServerTrustGroup,
     ServicePrincipal,
     ShortTermRetentionPolicyName,
@@ -719,6 +718,13 @@ class AuthenticationType(str, Enum):
 
     sql = "SQL"
     ad_password = "ADPassword"
+    managed_identity = "ManagedIdentity"
+
+
+class FreemiumType(str, Enum):
+
+    Regular = "Regular"
+    Freemium = "Freemium"
 
 
 def _get_server_dns_suffx(cli_ctx):
@@ -1795,10 +1801,10 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
     # actually ignores the value of service objective name (!!). We are trying to protect the CLI
     # user from this unintuitive behavior.
     if (elastic_pool_id and service_objective and
-            service_objective != ServiceObjectiveName.ELASTIC_POOL):
+            service_objective != "ELASTIC_POOL"):
         raise CLIError('If elastic pool is specified, service objective must be'
                        ' unspecified or equal \'{}\'.'.format(
-                           ServiceObjectiveName.ELASTIC_POOL))
+                           "ELASTIC_POOL"))
 
     # Update both elastic pool and sku. The service treats elastic pool and sku properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
