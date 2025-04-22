@@ -4281,7 +4281,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         linux_auto_updates = [
             s.display_name for s in self.stacks if
             s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
-        
+
         def is_valid_runtime_name(name):
             # Accepts names like "node|18-lts", "python|3.11", but not "NODE:lts" or "node"
             parts = name.split(self.DEFAULT_DELIMETER)
