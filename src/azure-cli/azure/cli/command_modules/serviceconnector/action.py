@@ -88,7 +88,7 @@ class AddSecretAuthInfo(argparse.Action):
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. All possible '
                                       'keys are: name, secret/secret-uri/secret-name'.format(k))
-        if (is_mongodb_atlas_target(command_name)):
+        if is_mongodb_atlas_target(command_name):
             d['name'] = 'NA'
         if len(d) != 2:
             raise ValidationError('Required keys missing for parameter --secret.'

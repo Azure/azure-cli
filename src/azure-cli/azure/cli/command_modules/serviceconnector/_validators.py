@@ -231,6 +231,7 @@ def get_client_type(cmd, namespace):
     logger.warning('Client type is not specified, use %s one: --client-type %s', method, client_type.value)
     return client_type.value
 
+
 def interactive_input(arg, hint, cmd):
     '''Get interactive inputs from users
     '''
