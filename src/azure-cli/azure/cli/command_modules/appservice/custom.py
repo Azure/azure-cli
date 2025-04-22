@@ -15,7 +15,6 @@ from urllib.request import urlopen
 
 from binascii import hexlify
 from os import urandom
-from datetime import datetime as dt, timezone
 import json
 import ssl
 import sys
@@ -4414,8 +4413,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting):
-        import datetime
-        from datetime import timezone
+        # Using datetime module imported at the top level
         if runtime_setting is None or getattr(runtime_setting, 'is_hidden', False):
             return False
         if getattr(runtime_setting, 'is_deprecated', False):
@@ -4427,18 +4425,18 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     try:
                         end_of_life_dt = datetime.datetime.strptime(
                             end_of_life, "%Y-%m-%dT%H:%M:%S.%fZ"
-                        ).replace(tzinfo=timezone.utc)
+                        ).replace(tzinfo=datetime.timezone.utc)
                     except ValueError:
                         end_of_life_dt = datetime.datetime.strptime(
                             end_of_life, "%Y-%m-%dT%H:%M:%SZ"
-                        ).replace(tzinfo=timezone.utc)
+                        ).replace(tzinfo=datetime.timezone.utc)
                 else:
                     # If already a datetime, ensure it's timezone-aware
                     if end_of_life.tzinfo is None:
-                        end_of_life_dt = end_of_life.replace(tzinfo=timezone.utc)
+                        end_of_life_dt = end_of_life.replace(tzinfo=datetime.timezone.utc)
                     else:
                         end_of_life_dt = end_of_life
-                now_utc = datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
+                now_utc = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
                 if now_utc >= end_of_life_dt:
                     return False
             except (ValueError, AttributeError):
