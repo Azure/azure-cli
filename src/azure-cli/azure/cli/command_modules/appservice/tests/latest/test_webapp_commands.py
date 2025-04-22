@@ -163,7 +163,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '~16'),
+            JMESPathCheck('[0].value', '~20'),
         ])
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:8"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
@@ -775,9 +775,10 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('name', linux_webapp),
         ])
         # add
-        self.cmd('storage account create -n {} -g {} --public-network-access Disabled --allow-blob-public-access false'.format(storage_account, resource_group)).assert_with_checks([
+        self.cmd('storage account create -n {} -g {}'.format(storage_account, resource_group)).assert_with_checks([
             JMESPathCheck('name', storage_account)
         ])
+        # self.cmd('storage account update -n {} -g {} --allow-blob-public-access false'.format(storage_account, resource_group))
         time.sleep(60)
         self.cmd('storage share-rm create -g {} --storage-account {} --name {}'.format(resource_group, storage_account, file_share_name)).assert_with_checks([
             JMESPathCheck('name', file_share_name)

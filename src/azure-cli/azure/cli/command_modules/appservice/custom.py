@@ -7,6 +7,7 @@ import ast
 import threading
 import time
 import re
+import datetime
 from xml.etree import ElementTree
 
 from urllib.parse import urlparse
@@ -14,7 +15,7 @@ from urllib.request import urlopen
 
 from binascii import hexlify
 from os import urandom
-import datetime
+from datetime import datetime as dt, timezone
 import json
 import ssl
 import sys
@@ -4413,7 +4414,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting):
-        from datetime import datetime, timezone
+        import datetime
+        from datetime import timezone
         if runtime_setting is None or getattr(runtime_setting, 'is_hidden', False):
             return False
         if getattr(runtime_setting, 'is_deprecated', False):
@@ -4423,19 +4425,23 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             try:
                 if isinstance(end_of_life, str):
                     try:
-                        end_of_life_dt = datetime.strptime(end_of_life, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%S.%fZ"
+                        ).replace(tzinfo=timezone.utc)
                     except ValueError:
-                        end_of_life_dt = datetime.strptime(end_of_life, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%SZ"
+                        ).replace(tzinfo=timezone.utc)
                 else:
                     # If already a datetime, ensure it's timezone-aware
                     if end_of_life.tzinfo is None:
                         end_of_life_dt = end_of_life.replace(tzinfo=timezone.utc)
                     else:
                         end_of_life_dt = end_of_life
-                now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+                now_utc = datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
                 if now_utc >= end_of_life_dt:
                     return False
-            except Exception:
+            except (ValueError, AttributeError):
                 pass
         return True
 
