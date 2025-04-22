@@ -3086,7 +3086,8 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "TOMCAT|11.0-java21"'.format(resource_group, webapp_name, plan_name))
-        self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async'.format(resource_group, webapp_name, war_file)).assert_with_checks([
+        # Use '@' prefix to properly handle binary files
+        self.cmd('webapp deploy -g {} --n {} --src-path @"{}" --type war --async'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.errors', None),
             JMESPathCheck('properties.numberOfInstancesFailed', '0'),
