@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.profiles import ResourceType
 
 import azure.cli.command_modules.network._help  # pylint: disable=unused-import
 
@@ -51,5 +50,5 @@ class NetworkCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
-def get_command_loader(cli_ctx):
+def get_command_loader(_):
     return NetworkCommandsLoader

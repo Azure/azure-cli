@@ -370,5 +370,5 @@ def _merge_new_exception_handler(kwargs, handler):
     kwargs['exception_handler'] = new_handler
 
 
-def get_command_loader(cli_ctx):
+def get_command_loader(_):
     return StorageCommandsLoader

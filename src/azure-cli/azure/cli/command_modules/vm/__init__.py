@@ -64,5 +64,6 @@ class ComputeCommandsLoader(AzCommandsLoader):
         except ImportError:
             pass
 
-def get_command_loader(cli_ctx):
+
+def get_command_loader(_):
     return ComputeCommandsLoader
