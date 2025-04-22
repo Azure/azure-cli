@@ -904,8 +904,8 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             log_backup_size = args.log_backup_size.to_serialized_data()
         else:
             log_backup_size = None
-        
-        kv_private_endpoint_id = args.key_vault_private_endpoint_resource_id.to_serialized_data()        
+
+        kv_private_endpoint_id = args.key_vault_private_endpoint_resource_id.to_serialized_data()
         encryption_key_source = args.encryption_key_source.to_serialized_data()
 
         ppg = args.proximity_placement_group.to_serialized_data()
@@ -982,7 +982,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             for i in range(start_host_id, start_host_id + number_of_hosts):
                 log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, str(i), log_size,
                                                                 log_throughput, prefix, kv_private_endpoint_id, encryption_key_source,
-                                                                 smb_access_based_enumeration, smb_non_browsable, zones))
+                                                                smb_access_based_enumeration, smb_non_browsable, zones))
             total_data_volume_size = sum(int(vol["usage_threshold"]) for vol in data_volumes)
             total_log_volume_size = sum(int(vol["usage_threshold"]) for vol in log_volumes)
 
@@ -997,7 +997,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             args.volumes.append(create_data_backup_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, data_backup_size,
                                                                      data_backup_throughput, total_data_volume_size,
                                                                      total_log_volume_size, prefix, backup_nfsv3,
-                                                                     data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id,encryption_key_source,
+                                                                     data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id, encryption_key_source,
                                                                      smb_access_based_enumeration,
                                                                      smb_non_browsable, zones))
             args.volumes.append(create_log_backup_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, log_backup_size,
@@ -1009,7 +1009,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
 
 def create_data_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, add_snap_capacity, host_id,
                                   data_size, data_throughput, prefix, data_repl_skd=None, data_src_id=None, kv_private_endpoint_id=None,
-                                  encryption_key_source= None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None):
+                                  encryption_key_source=None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None):
     name = prefix + application_identifier + "-" + VolumeType.DATA.value + "-mnt" + (host_id.rjust(5, '0'))
 
     if data_size is None:
@@ -1042,7 +1042,7 @@ def create_data_volume_properties(subnet_id, application_identifier, pool_id, pp
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
-        "smb_non_browsable": smb_non_browsable,        
+        "smb_non_browsable": smb_non_browsable,
         "zones": zones
     }
 
@@ -1050,8 +1050,8 @@ def create_data_volume_properties(subnet_id, application_identifier, pool_id, pp
 
 
 def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_id, log_size,
-                                 log_throughput, prefix, kv_private_endpoint_id=None, encryption_key_source= None,
-                                  smb_access_based_enumeration=None, smb_non_browsable=None, zones=None):
+                                 log_throughput, prefix, kv_private_endpoint_id=None, encryption_key_source=None,
+                                 smb_access_based_enumeration=None, smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.LOG.value + "-mnt" + (host_id.rjust(5, '0'))
 
     if log_size is None:
@@ -1085,7 +1085,7 @@ def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_
 
 def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, shared_size,
                                     shared_throughput, number_of_hosts, prefix, shared_repl_skd=None,
-                                    shared_src_id=None, kv_private_endpoint_id=None, encryption_key_source= None, smb_access_based_enumeration=None,
+                                    shared_src_id=None, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
                                     smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.SHARED.value
 
@@ -1128,7 +1128,7 @@ def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, sh
 def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, data_backup_size,
                                          data_backup_throughput, total_data_volume_size, total_log_volume_size,
                                          prefix, backup_nfsv3, data_backup_repl_skd, data_backup_src_id,
-                                         kv_private_endpoint_id=None, encryption_key_source= None, smb_access_based_enumeration=None,
+                                         kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
                                          smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.DATA_BACKUP.value
 
@@ -1172,7 +1172,7 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
 
 def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, log_backup_size,
                                         log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
-                                        log_backup_src_id, kv_private_endpoint_id=None, encryption_key_source= None, smb_access_based_enumeration=None,
+                                        log_backup_src_id, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
                                         smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.LOG_BACKUP.value
 
@@ -1205,7 +1205,7 @@ def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
-        "smb_non_browsable": smb_non_browsable,        
+        "smb_non_browsable": smb_non_browsable,
         "zones": zones
     }
 
