@@ -49,7 +49,7 @@ examples:
   - name: Gets health state of the environment, without stopping on first error.
     text: >
         az acr check-health --ignore-errors
-  - name: Gets health state with target registry 'myregistry', and checked allowed permissions to the specific repository.
+  - name: Gets health state with target registry 'myregistry', and checks allowed permissions to the specific repository 'myrepo'.
     text: >
         az acr check-health -n myregistry --repository myrepo
 """
