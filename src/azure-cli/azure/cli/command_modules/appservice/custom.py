@@ -7,7 +7,6 @@ import ast
 import threading
 import time
 import re
-import datetime
 from xml.etree import ElementTree
 
 from urllib.parse import urlparse
@@ -4291,7 +4290,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         linux_stacks = [n for n in linux_stacks if is_valid_runtime_name(n)]
         windows_auto_updates = [n for n in windows_auto_updates if is_valid_runtime_name(n)]
         linux_auto_updates = [n for n in linux_auto_updates if is_valid_runtime_name(n)]
-        
+
         if delimiter is not None:
             windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
             linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
