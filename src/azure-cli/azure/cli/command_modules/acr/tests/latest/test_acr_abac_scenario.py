@@ -9,7 +9,6 @@ class AcrabacScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
     def test_acr_create_abac(self):
-
         self.kwargs.update({
             'name': self.create_random_name('clitestabac', length=16),
         })
@@ -21,6 +20,8 @@ class AcrabacScenarioTest(ScenarioTest):
         self.cmd('acr show -g {rg} -n {name}', checks=[
             self.check('roleAssignmentMode', 'AbacRepositoryPermissions')
         ])
+
+        self.cmd('acr check-health -n {name} --repository hello-world -y', expect_failure=True)
 
         self.cmd('acr update -g {rg} -n {name} --role-assignment-mode rbac', checks=[
             self.check('roleAssignmentMode', 'LegacyRegistryPermissions')
@@ -42,7 +43,6 @@ class AcrabacScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
     def test_acr_create_normal(self):
-
         self.kwargs.update({
             'name': self.create_random_name('clitestabac', length=16),
         })
