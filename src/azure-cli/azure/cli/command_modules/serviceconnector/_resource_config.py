@@ -159,7 +159,7 @@ TARGET_RESOURCES = {
 
     RESOURCE.FabricSql: 'https://api.fabric.microsoft.com/v1/workspaces/{fabric_workspace_uuid}/SqlDatabases/{fabric_sql_db_uuid}',
     RESOURCE.NeonPostgres: '/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/testrg/providers/Neon.Postgres/organizations/neontest',
-    RESOURCE.MongoDbAtlas: '/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/testrg/providers/MongoDB.Atlas/organizations/mongotest'
+    RESOURCE.MongoDbAtlas: '/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/{target_resource_group}/providers/MongoDB.Atlas/organizations/{server}'
 
 }
 
@@ -705,10 +705,10 @@ TARGET_RESOURCES_PARAMS = {
             'help': 'The resource group which contains the MongoDB Atlas',
             'placeholder': 'MongoDBAtlasRG'
         },
-        'target_service_name': {
-            'options': ['--target-service-name'],
-            'help': 'Name of the MongoDB Atlas service',
-            'placeholder': 'MongoDBAtlasService'
+        'server': {
+            'options': ['--server'],
+            'help': 'Name of the MongoDB Atlas server',
+            'placeholder': 'MongoDBAtlasServer'
         }
     }
 }
