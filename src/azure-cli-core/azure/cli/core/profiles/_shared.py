@@ -264,14 +264,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
         ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-02-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
-    },
-    '2020-09-01-hybrid': {
-    },
-    '2019-03-01-hybrid': {
-    },
-    '2018-03-01-hybrid': {
-    },
-    '2017-03-09-profile': {
     }
 }
 
