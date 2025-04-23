@@ -665,6 +665,9 @@ def aks_create(
     # trusted launch
     enable_vtpm=False,
     enable_secure_boot=False,
+    # apiserver vnet integration
+    enable_apiserver_vnet_integration=False,
+    apiserver_subnet_id=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -830,6 +833,9 @@ def aks_update(
     # metrics profile
     enable_cost_analysis=False,
     disable_cost_analysis=False,
+    # apiserver vnet integration
+    enable_apiserver_vnet_integration=False,
+    apiserver_subnet_id=None
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
