@@ -3830,7 +3830,6 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         :return: bool
         """
-        logger.warning("in test")
         return self._get_enable_apiserver_vnet_integration(enable_validation=True)
 
     def _get_apiserver_subnet_id(self, enable_validation: bool = False) -> Union[str, None]:
@@ -6373,6 +6372,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if self.context.get_enable_apiserver_vnet_integration():
             if api_server_access_profile is None:
                 api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
+            # todo(levimm): remove the additional_properties after 2025-03-01 sdk is generated
             api_server_access_profile.additional_properties['enableVnetIntegration'] = True
             api_server_access_profile.enable_additional_properties_sending()
             logger.warning("apiserverAccessProfile: %s", api_server_access_profile)
@@ -6380,8 +6380,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if api_server_access_profile is None:
                 # pylint: disable=no-member
                 api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
-            api_server_access_profile = self.context.get_apiserver_subnet_id()
+            api_server_access_profile.additional_properties['subnetId'] = self.context.get_apiserver_subnet_id()
             api_server_access_profile.enable_additional_properties_sending()
+            logger.warning("apiserverAccessProfile: %s", api_server_access_profile)
         mc.api_server_access_profile = api_server_access_profile
 
         fqdn_subdomain = self.context.get_fqdn_subdomain()
@@ -7516,13 +7517,19 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if private_dns_zone is not None:
             profile_holder.private_dns_zone = private_dns_zone
         if self.context.get_enable_apiserver_vnet_integration():
-            profile_holder.enable_vnet_integration = True
+            profile_holder.additional_properties['enableVnetIntegration'] = True
+            profile_holder.enable_additional_properties_sending()
         if self.context.get_apiserver_subnet_id():
-            profile_holder.subnet_id = self.context.get_apiserver_subnet_id()
+            profile_holder.additional_properties['subnetId'] = self.context.get_apiserver_subnet_id()
+            profile_holder.enable_additional_properties_sending()
         if self.context.get_enable_private_cluster():
             profile_holder.enable_private_cluster = True
+            # send additional properties when enable private cluster since enableVnetIntegration is required
+            profile_holder.enable_additional_properties_sending()
         if self.context.get_disable_private_cluster():
             profile_holder.enable_private_cluster = False
+            # send additional properties when enable private cluster since enableVnetIntegration is required
+            profile_holder.enable_additional_properties_sending()
 
         # keep api_server_access_profile empty if none of its properties are updated
         if (
@@ -7531,6 +7538,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         ):
             profile_holder = None
         mc.api_server_access_profile = profile_holder
+        logger.warning("apiserverAccessProfile after update: %s", profile_holder)
         return mc
 
     def update_windows_profile(self, mc: ManagedCluster) -> ManagedCluster:

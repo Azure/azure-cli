@@ -835,7 +835,9 @@ def aks_update(
     disable_cost_analysis=False,
     # apiserver vnet integration
     enable_apiserver_vnet_integration=False,
-    apiserver_subnet_id=None
+    apiserver_subnet_id=None,
+    enable_private_cluster=False,
+    disable_private_cluster=False
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()

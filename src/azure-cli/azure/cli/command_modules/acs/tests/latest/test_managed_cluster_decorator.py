@@ -3721,6 +3721,183 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_8.get_enable_private_cluster()
 
+        # update failure
+        ctx_9 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_private_cluster": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_9 = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile_9.additional_properties['enableVnetIntegration'] = False
+        api_server_access_profile_9.enable_additional_properties_sending()
+        mc_9 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_9,
+        )
+        ctx_9.attach_mc(mc_9)
+        # fail on ArgumentUsageError when trying to enable private cluster without apiserver vnet integration
+        with self.assertRaises(ArgumentUsageError):
+            ctx_9.get_enable_private_cluster()
+
+        # update succeeded
+        ctx_10 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_private_cluster": True,
+                    "enable_apiserver_vnet_integration": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_10 = (
+            self.models.ManagedClusterAPIServerAccessProfile()
+        )
+        mc_10 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_10,
+        )
+        ctx_10.attach_mc(mc_10)
+        self.assertEqual(ctx_10.get_enable_private_cluster(), True)
+
+        # update succeeded
+        ctx_11 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_private_cluster": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_11 = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile_11.additional_properties['enableVnetIntegration'] = True
+        api_server_access_profile_11.enable_additional_properties_sending()
+        mc_11 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_11,
+        )
+        ctx_11.attach_mc(mc_11)
+        self.assertEqual(ctx_11.get_enable_private_cluster(), True)
+
+    def test_get_disable_private_cluster(self):
+        # update failure
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                    "disable_public_fqdn": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_1 = self.models.ManagedClusterAPIServerAccessProfile()
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_1,
+        )
+        ctx_1.attach_mc(mc_1)
+        # fail on disable_public_fqdn specified when disable_private_cluster is also specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_1.get_disable_private_cluster()
+
+        # update failure
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                    "enable_public_fqdn": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_2 = self.models.ManagedClusterAPIServerAccessProfile()
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_2,
+        )
+        ctx_2.attach_mc(mc_2)
+        # fail on disable_public_fqdn specified when disable_private_cluster is also specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_disable_private_cluster()
+
+        # update failure
+        ctx_9 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_9 = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile_9.additional_properties['enableVnetIntegration'] = False
+        api_server_access_profile_9.enable_additional_properties_sending()
+        mc_9 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_9,
+        )
+        ctx_9.attach_mc(mc_9)
+        # fail on ArgumentUsageError when trying to disable private cluster without apiserver vnet integration
+        with self.assertRaises(ArgumentUsageError):
+            ctx_9.get_disable_private_cluster()
+
+        # update succeeded
+        ctx_10 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                    "enable_apiserver_vnet_integration": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_10 = (
+            self.models.ManagedClusterAPIServerAccessProfile()
+        )
+        mc_10 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_10,
+        )
+        ctx_10.attach_mc(mc_10)
+        self.assertEqual(ctx_10.get_disable_private_cluster(), True)
+
+        # update succeeded
+        ctx_11 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_11 = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile_11.additional_properties['enableVnetIntegration'] = True
+        api_server_access_profile_11.enable_additional_properties_sending()
+        mc_11 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_11,
+        )
+        ctx_11.attach_mc(mc_11)
+        self.assertEqual(ctx_11.get_disable_private_cluster(), True)
+
     def test_get_disable_public_fqdn(self):
         # default
         ctx_1 = AKSManagedClusterContext(

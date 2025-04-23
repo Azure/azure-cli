@@ -108,11 +108,8 @@ def check_is_apiserver_vnet_integration_cluster(mc: ManagedCluster) -> bool:
 
     :return: bool
     """
-    if mc != None:
-        logger.warning("api_server_access_profile: %s",  mc.api_server_access_profile)
     if mc and mc.api_server_access_profile:
         additional_properties = mc.api_server_access_profile.additional_properties
-        logger.warning("additional_properties: %s", additional_properties)
         if 'enableVnetIntegration' in additional_properties:
             return additional_properties['enableVnetIntegration']
         return False

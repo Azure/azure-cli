@@ -949,8 +949,6 @@ parameters:
   - name: --disable-private-cluster
     type: bool
     short-summary: Disable private cluster for apiserver vnet integration cluster.
-  - name: --enable-test
-    type: bool
   - name: --enable-keda
     type: bool
     short-summary: Enable KEDA workload auto-scaler.
