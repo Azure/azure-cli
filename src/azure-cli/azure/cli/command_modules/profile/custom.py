@@ -41,9 +41,15 @@ LOGIN_OUTPUT_WARNING = (
     "[Warning] The login output has been updated. Please be aware that it no longer displays the full list of "
     "available subscriptions by default.\n")
 
-USERNAME_PASSWORD_DEPRECATION_WARNING = (
-    "Authentication with username and password in the command line is strongly discouraged. "
-    "Use one of the recommended authentication methods based on your requirements. "
+USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD = (
+    "Starting July 01, 2025, MFA will be gradually enforced for Azure public cloud. "
+    "The authentication with username and password in the command line is not supported with MFA. "
+    "Consider using one of the compatible authentication methods. "
+    "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
+
+USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD = (
+    "Using authentication with username and password in the command line is strongly discouraged. "
+    "Consider using one of the recommended authentication methods. "
     "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
 
 
@@ -134,7 +140,10 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
     if username and not service_principal and not identity:
-        logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING)
+        if cmd.cli_ctx.cloud.endpoints.active_directory.startswith('https://login.microsoftonline.com'):
+            logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD)
+        else:
+            logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD)
 
     interactive = False
 
