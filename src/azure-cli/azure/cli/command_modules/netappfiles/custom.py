@@ -314,9 +314,16 @@ class VolumeCreate(_VolumeCreate):
             maximum=2457600,
             minimum=50
         )
-
+        
         # The API does only support setting Basic and Standard
         args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
+
+        # For backwards compat, in next breaking change window, those will be removed 
+        args_schema.is_restoring = AAZBoolArg(
+            options=["--is-restoring"],
+            arg_group="Properties",
+            help="Restoring. Deprecated, do not use will be removed in future version.",
+        )
 
         return args_schema
 
@@ -397,30 +404,16 @@ class VolumeCreate(_VolumeCreate):
         else:
             logger.debug("ANF log: Don't create export policy")
 
-# todo create export policy note no longer flatteneded
-    # def post_operations(self):
-    #     args = self.ctx.args
-    #     backupPolicyId = None
-    #     backupEnabled = None
-    #     backupVaultId = None
-    #     if has_value(args.backup_policy_id):
-    #         backupPolicyId = args.backup_policy_id.to_serialized_data()
-    #     if has_value(args.backup_enabled):
-    #         backupEnabled = args.backup_enabled.to_serialized_data()
-    #     if has_value(args.backup_vault_id):
-    #         backupVaultId = args.backup_vault_id.to_serialized_data()
-    #     if has_value(args.policy_enforced):
-    #         policyEnforced = args.policy_enforced.to_serialized_data()
-    #     if any(x is not None for x in [backupPolicyId, backupEnabled, backupVaultId]):
-    #         backup = VolumeBackupProperties(backup_enabled=backup_enabled,
-    #                                         backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
+        if has_value(args.is_restoring):
+            logger.warning("ANF log: is_restoring is deprecated, do not use it. It will be removed in future version.")
+            args.is_restoring = None
 
 
 # check if flattening dataprotection works
 class VolumeUpdate(_VolumeUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZIntArgFormat, AAZStrArg
+        from azure.cli.core.aaz import AAZIntArgFormat, AAZStrArg, AAZStrArgFormat, AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],
@@ -433,6 +426,56 @@ class VolumeUpdate(_VolumeUpdate):
             minimum=50
         )
 
+        # For backwards compat, in next breaking change window, those will be removed 
+        args_schema.avs_data_store = AAZStrArg(
+            options=["--avs-data-store"],
+            arg_group="Properties",
+            help="Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purpose. Deprecated, do not use will be removed in future version.",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        args_schema.creation_token = AAZStrArg(
+            options=["--creation-token"],
+            arg_group="Properties",
+            help="A unique file path for the volume. Used when creating mount targets",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
+                max_length=80,
+                min_length=1,
+            ),
+        )
+        args_schema.is_large_volume = AAZBoolArg(
+            options=["--is-large-volume"],
+            arg_group="Properties",
+            help="Specifies whether volume is a Large Volume or Regular Volume.",
+            nullable=True,
+        )
+        args_schema.is_restoring = AAZBoolArg(
+            options=["--is-restoring"],
+            arg_group="Properties",
+            help="Restoring",
+            nullable=True,
+        )
+        args_schema.ldap_enabled = AAZBoolArg(
+            options=["--ldap-enabled"],
+            arg_group="Properties",
+            help="Specifies whether LDAP is enabled or not for a given NFS volume.",
+            nullable=True,
+        )
+        args_schema.network_features = AAZStrArg(
+            options=["--network-features"],
+            arg_group="Properties",
+            help="Basic network, or Standard features available to the volume. hide me",
+            nullable=True,
+            enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
+        )
+        args_schema.security_style = AAZStrArg(
+            options=["--security-style"],
+            arg_group="Properties",
+            help="The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol",
+            nullable=True,
+            enum={"ntfs": "ntfs", "unix": "unix"},
+        )        
         return args_schema
 
     def pre_operations(self):
@@ -443,6 +486,28 @@ class VolumeUpdate(_VolumeUpdate):
         if has_value(args.usage_threshold) and args.usage_threshold.to_serialized_data() is not None:
             args.usage_threshold = int(args.usage_threshold.to_serialized_data()) * gib_scale
 
+        # For backwards compat, in next breaking change window, those will be removed 
+        if has_value(args.avs_data_store):
+            logger.warning("ANF log: avs_data_store is deprecated, do not use it. It will be removed in future version.")
+            args.avs_data_store = None
+        if has_value(args.creation_token):
+            logger.warning("ANF log: creation_token is deprecated, do not use it. It will be removed in future version.")
+            args.creation_token = None
+        if has_value(args.is_large_volume):
+            logger.warning("ANF log: is_large_volume is deprecated, do not use it. It will be removed in future version.")
+            args.is_large_volume = None
+        if has_value(args.is_restoring):    
+            logger.warning("ANF log: is_restoring is deprecated, do not use it. It will be removed in future version.")
+            args.is_restoring = None
+        if has_value(args.ldap_enabled):    
+            logger.warning("ANF log: ldap_enabled is deprecated, do not use it. It will be removed in future version.")
+            args.ldap_enabled = None    
+        if has_value(args.network_features):        
+            logger.warning("ANF log: network_features is deprecated, do not use it. It will be removed in future version.")
+            args.network_features = None
+        if has_value(args.security_style):  
+            logger.warning("ANF log: security_style is deprecated, do not use it. It will be removed in future version.")
+            args.security_style = None
 
 class VolumeBreakFileLocks(_BreakFileLocks):
     @classmethod
