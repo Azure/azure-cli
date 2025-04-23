@@ -3797,8 +3797,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         enable_apiserver_vnet_integration = self.raw_param.get("enable_apiserver_vnet_integration")
-        if self.mc and self.mc.api_server_access_profile and "enableVnetIntegration" in self.mc.api_server_access_profile.additional_properties:
-            logger.warning("_get_enable_apiserver_vnet_integration: %s", self.mc.api_server_access_profile.additional_properties['enableVnetIntegration'])
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
@@ -3813,7 +3811,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if self.decorator_mode == DecoratorMode.UPDATE:
                 is_apiserver_vnet_integration_cluster = check_is_apiserver_vnet_integration_cluster(self.mc)
-                logger.warning("is_apiserver_vnet_integration_cluster: %s", is_apiserver_vnet_integration_cluster)
                 if enable_apiserver_vnet_integration and not is_apiserver_vnet_integration_cluster:
                     if self._get_apiserver_subnet_id(enable_validation=False) is None:
                         raise RequiredArgumentMissingError(
