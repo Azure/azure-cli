@@ -16,6 +16,7 @@ from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissin
 from ._client_factory import cf_postgres_flexible_replica
 from ._flexible_server_util import run_subprocess, \
     fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
+from ._flexible_server_location_capabilities_util import get_postgres_server_capability_info
 from .validators import validate_public_access_server, validate_resource_group, check_resource_group, validate_citus_cluster
 
 logger = get_logger(__name__)
@@ -86,6 +87,8 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
         end_ip_address = start_ip_address
     elif start_ip_address is None and end_ip_address is not None:
         start_ip_address = end_ip_address
+    elif start_ip_address is None and end_ip_address is None:
+        raise CLIError("Incorrect Usage : Need to pass in value for either \'--start-ip-address\' or \'--end-ip-address\'.")
 
     if firewall_rule_name is None:
         now = datetime.now()
@@ -301,6 +304,19 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
                        "the option to select version 12 will be removed in the near future. "
                        "We recommend selecting PostgreSQL 13 or a later version for "
                        "all future operations.")
+
+    list_server_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name)
+    eligible_versions = list_server_capability_info['supported_server_versions'][str(current_version)]
+
+    if version not in eligible_versions:
+        # version not supported
+        error_message = ""
+        if len(eligible_versions) > 0:
+            error_message = "Server is running version {}. It can only be upgraded to the following versions: {} ".format(str(current_version), eligible_versions)
+        else:
+            error_message = "Server is running version {}. It cannot be upgraded to any higher version. ".format(str(current_version))
+
+        raise CLIError(error_message)
 
     replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
     version_mapped = version

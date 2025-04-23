@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import requests
 import random
 import string
 
@@ -104,11 +105,37 @@ def check_required_args(resource, cmd_arg_values):
     '''Check whether a resource's required arguments are in cmd_arg_values
     '''
     args = re.findall(r'\{([^\{\}]*)\}', resource)
-    args.remove('subscription')
+
+    if 'subscription' in args:
+        args.remove('subscription')
     for arg in args:
         if not cmd_arg_values.get(arg, None):
             return False
     return True
+
+
+def get_fabric_access_token():
+    get_fabric_token_cmd = 'az account get-access-token --output json --resource https://api.fabric.microsoft.com/'
+    return run_cli_cmd(get_fabric_token_cmd).get('accessToken')
+
+
+def generate_fabric_connstr_props(target_id):
+    fabric_token = get_fabric_access_token()
+    headers = {"Authorization": "Bearer {}".format(fabric_token)}
+    response = requests.get(target_id, headers=headers)
+
+    if response:
+        response_json = response.json()
+
+        if "properties" in response_json:
+            properties = response_json["properties"]
+            if "databaseName" in properties and "serverFqdn" in properties:
+                return {
+                    "Server": properties["serverFqdn"],
+                    "Database": properties["databaseName"]
+                }
+
+    return None
 
 
 def generate_connection_name(cmd):
@@ -370,7 +397,7 @@ def validate_source_resource_id(cmd, namespace):
         source = get_source_resource_name(cmd)
 
         # For Web App, match slot pattern first:
-        if source == RESOURCE.WebApp:
+        if source == RESOURCE.WebApp or source == RESOURCE.FunctionApp:
             slotPattern = WEB_APP_SLOT_RESOURCE
             matched = re.match(get_resource_regex(slotPattern), namespace.source_id, re.IGNORECASE)
             if matched:
@@ -715,7 +742,7 @@ def apply_source_optional_args(cmd, namespace, arg_values):
     '''Set source resource id by optional arg_values
     '''
     source = get_source_resource_name(cmd)
-    if source == RESOURCE.WebApp:
+    if source == RESOURCE.WebApp or source == RESOURCE.FunctionApp:
         if arg_values.get('slot', None):
             resource = WEB_APP_SLOT_RESOURCE
             if check_required_args(resource, arg_values):
@@ -940,6 +967,25 @@ def validate_kafka_params(cmd, namespace):
 
         if getattr(namespace, 'client_type', None) is None:
             namespace.client_type = get_client_type(cmd, namespace)
+
+
+def validate_connstr_props(cmd, namespace):
+    if 'create {}'.format(RESOURCE.FabricSql.value) in cmd.name:
+        if getattr(namespace, 'connstr_props', None) is None:
+            namespace.connstr_props = generate_fabric_connstr_props(namespace.target_id)
+
+            if namespace.connstr_props is None:
+                e = InvalidArgumentValueError("Fabric Connection String Properties must be provided")
+                telemetry.set_exception('fabric-connstr-props-unavailable')
+                raise e
+        else:
+            fabric_server = namespace.connstr_props.get('Server') or namespace.connstr_props.get('Data Source')
+            fabric_database = namespace.connstr_props.get('Database') or namespace.connstr_props.get('Initial Catalog')
+
+            if not fabric_server or not fabric_database:
+                e = InvalidArgumentValueError("Fabric Connection String Properties must contain Server and Database")
+                telemetry.set_exception('fabric-connstr-props-invalid')
+                raise e
 
 
 def validate_service_state(linker_parameters):

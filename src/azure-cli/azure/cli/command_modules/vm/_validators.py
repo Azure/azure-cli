@@ -359,11 +359,11 @@ def _validate_location(cmd, namespace, zone_info, size_info):
         get_default_location_from_resource_group(cmd, namespace)
         if zone_info and size_info:
             sku_infos = list_sku_info(cmd.cli_ctx, namespace.location)
-            temp = next((x for x in sku_infos if x.name.lower() == size_info.lower()), None)
+            temp = next((x for x in sku_infos if x['name'].lower() == size_info.lower()), None)
             # For Stack (compute - 2017-03-30), Resource_sku doesn't implement location_info property
-            if not hasattr(temp, 'location_info'):
+            if not temp.get('locationInfo', None):
                 return
-            if not temp or not [x for x in (temp.location_info or []) if x.zones]:
+            if not temp or not [x for x in temp.get('locationInfo', []) if x.get('zones', None)]:
                 raise CLIError("{}'s location can't be used to create the VM/VMSS because availability zone is not yet "
                                "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
                                "used to find such locations".format(namespace.resource_group_name))
@@ -514,19 +514,30 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             namespace.os_type = image_info.os_type
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
-                image_version_infos = compute_client.gallery_image_versions.list_by_gallery_image(
-                    resource_group_name=res['resource_group'], gallery_name=res['name'],
-                    gallery_image_name=res['child_name_1'])
-                image_version_infos = [x for x in image_version_infos if not x.publishing_profile.exclude_from_latest]
+                from .aaz.latest.sig.image_version import List as _SigImageVersionList
+                image_version_infos = _SigImageVersionList(cli_ctx=cmd.cli_ctx)(command_args={
+                    "resource_group": res['resource_group'],
+                    "gallery_name": res['name'],
+                    "gallery_image_definition": res['child_name_1']
+                })
+                image_version_infos = [x for x in image_version_infos
+                                       if not x.get("publishingProfile", {}).get("excludeFromLatest", None)]
                 if not image_version_infos:
                     raise CLIError('There is no latest image version exists for "{}"'.format(namespace.image))
-                image_version_info = sorted(image_version_infos, key=lambda x: x.publishing_profile.published_date)[-1]
+                image_version_info = sorted(image_version_infos,
+                                            key=lambda x: x["publishingProfile"]["publishedDate"])[-1]
+                image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", []) or []
+                image_data_disks = [{'lun': disk["lun"]} for disk in image_data_disks]
             else:
-                image_version_info = compute_client.gallery_image_versions.get(
-                    resource_group_name=res['resource_group'], gallery_name=res['name'],
-                    gallery_image_name=res['child_name_1'], gallery_image_version_name=res['child_name_2'])
-            image_data_disks = image_version_info.storage_profile.data_disk_images or []
-            image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
+                from .aaz.latest.sig.image_version import Show as _SigImageVersionShow
+                image_version_info = _SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
+                    "resource_group": res['resource_group'],
+                    "gallery_name": res['name'],
+                    "gallery_image_definition": res['child_name_1'],
+                    "gallery_image_version_name": res['child_name_2'],
+                })
+                image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", []) or []
+                image_data_disks = [{'lun': disk["lun"]} for disk in image_data_disks]
 
         else:
             raise CLIError('usage error: unrecognized image information "{}"'.format(namespace.image))
@@ -1402,8 +1413,6 @@ def trusted_launch_set_default(namespace, generation_version, features):
                 if namespace.enable_secure_boot is None:
                     namespace.enable_secure_boot = True
         else:
-            if namespace.security_type is None:
-                namespace.security_type = COMPATIBLE_SECURITY_TYPE_VALUE
             logger.warning(UPGRADE_SECURITY_HINT)
 
 
@@ -1413,11 +1422,6 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         return
     from ._vm_utils import validate_image_trusted_launch, validate_vm_disk_trusted_launch
     if namespace.image is not None:
-        from ._vm_utils import is_valid_image_version_id
-        if is_valid_image_version_id(namespace.image):
-            if namespace.security_type is None:
-                namespace.security_type = 'Standard'
-
         image_type = _parse_image_argument(cmd, namespace)
 
         if image_type == 'image_id':
@@ -2442,16 +2446,6 @@ def _disk_encryption_set_format(cmd, namespace, name):
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=name)
     return name
-# endregion
-
-
-def process_ppg_create_namespace(namespace):
-    validate_tags(namespace)
-    # The availability zone can be provided only when an intent is provided
-    if namespace.zone and not namespace.intent_vm_sizes:
-        raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
-                                           'Please use parameter --intent-vm-sizes to specify possible sizes of '
-                                           'virtual machines that can be created in the proximity placement group.')
 # endregion
 
 

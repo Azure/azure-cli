@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
 
 
@@ -57,28 +57,6 @@ class AcrCommandsTests(ScenarioTest):
         password = credential['passwords'][0]['value']
         password2 = credential['passwords'][1]['value']
         assert username and password and password2
-
-        # renew password
-        credential = self.cmd('acr credential renew -n {} -g {} --password-name {}'.format(
-            registry_name, resource_group, 'password')).get_output_in_json()
-        renewed_username = credential['username']
-        renewed_password = credential['passwords'][0]['value']
-        renewed_password2 = credential['passwords'][1]['value']
-        assert renewed_username and renewed_password and renewed_password2
-        assert username == renewed_username
-        assert password != renewed_password
-        assert password2 == renewed_password2
-
-        # renew password2
-        credential = self.cmd('acr credential renew -n {} -g {} --password-name {}'.format(
-            registry_name, resource_group, 'password2')).get_output_in_json()
-        renewed_username = credential['username']
-        renewed_password = credential['passwords'][0]['value']
-        renewed_password2 = credential['passwords'][1]['value']
-        assert renewed_username and renewed_password and renewed_password2
-        assert username == renewed_username
-        assert password != renewed_password
-        assert password2 != renewed_password2
 
         # test acr delete
         self.cmd('acr delete -n {} -g {} -y'.format(registry_name, resource_group))

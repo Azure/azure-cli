@@ -22,3 +22,16 @@ class PPGShow(_PPG.Show):
         args_schema.include_colocation_status.enum = AAZArgEnum({"True": "True", "False": "False"})
 
         return args_schema
+
+
+class PPGUpdate(_PPG.Update):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.tags._registered = False
+        args_schema.colocation_status._registered = False
+        args_schema.location._registered = False
+        args_schema.proximity_placement_group_name._id_part = None
+
+        return args_schema

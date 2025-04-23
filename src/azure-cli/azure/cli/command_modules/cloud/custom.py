@@ -62,6 +62,7 @@ def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         cloud_args = {to_snake_case(k): v for k, v in cloud_config.items()}
+    arm_endpoint = None
     if 'endpoints' in cloud_args:
         arm_endpoint = (cloud_args['endpoints'].get('resource_manager', None) or
                         cloud_args['endpoints'].get('resourceManager', None))

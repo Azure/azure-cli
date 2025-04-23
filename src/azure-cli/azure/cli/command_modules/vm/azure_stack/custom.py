@@ -1280,11 +1280,11 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
                 available_skus.append(sku_info)
         result = available_skus
     if resource_type:
-        result = [x for x in result if x.resource_type.lower() == resource_type.lower()]
+        result = [x for x in result if x['resourceType'].lower() == resource_type.lower()]
     if size:
-        result = [x for x in result if x.resource_type == 'virtualMachines' and size.lower() in x.name.lower()]
+        result = [x for x in result if x['resourceType'] == 'virtualMachines' and size.lower() in x['name'].lower()]
     if zone:
-        result = [x for x in result if x.location_info and x.location_info[0].zones]
+        result = [x for x in result if x['locationInfo'] and x['locationInfo'][0]['zones']]
     return result
 
 
@@ -1714,36 +1714,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
 
 # region VirtualMachines AvailabilitySets
-def _get_availset(cmd, resource_group_name, name):
-    return _compute_client_factory(cmd.cli_ctx).availability_sets.get(resource_group_name, name)
-
-
-def _set_availset(cmd, resource_group_name, name, **kwargs):
-    return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(resource_group_name, name, **kwargs)
-
-
-# pylint: disable=inconsistent-return-statements
-def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_name):
-    av_set = _get_availset(cmd, resource_group_name, availability_set_name)
-    if av_set.sku.name != 'Aligned':
-        av_set.sku.name = 'Aligned'
-
-        # let us double check whether the existing FD number is supported
-        skus = list_skus(cmd, av_set.location)
-        av_sku = next((s for s in skus if s.resource_type == 'availabilitySets' and s.name == 'Aligned'), None)
-        if av_sku and av_sku.capabilities:
-            max_fd = int(next((c.value for c in av_sku.capabilities if c.name == 'MaximumPlatformFaultDomainCount'),
-                              '0'))
-            if max_fd and max_fd < av_set.platform_fault_domain_count:
-                logger.warning("The fault domain count will be adjusted from %s to %s so to stay within region's "
-                               "limitation", av_set.platform_fault_domain_count, max_fd)
-                av_set.platform_fault_domain_count = max_fd
-
-        return _set_availset(cmd, resource_group_name=resource_group_name, name=availability_set_name,
-                             parameters=av_set)
-    logger.warning('Availability set %s is already configured for managed disks.', availability_set_name)
-
-
 def create_av_set(cmd, availability_set_name, resource_group_name, platform_fault_domain_count=2,
                   platform_update_domain_count=None, location=None, proximity_placement_group=None, unmanaged=False,
                   no_wait=False, tags=None, validate=False):
@@ -1784,21 +1754,9 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.begin_create_or_update,
                                                   resource_group_name, deployment_name, deployment))
 
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    return compute_client.availability_sets.get(resource_group_name, availability_set_name)
-
-
-def update_av_set(instance, resource_group_name, proximity_placement_group=None):
-    if proximity_placement_group is not None:
-        instance.proximity_placement_group = {'id': proximity_placement_group}
-    return instance
-
-
-def list_av_sets(cmd, resource_group_name=None):
-    op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
-    if resource_group_name:
-        return op_group.list(resource_group_name)
-    return op_group.list_by_subscription(expand='virtualMachines/$ref')
+    AvailSet = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, 'vm.availability_set')
+    return AvailSet.Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
+                                                            'availability_set_name': availability_set_name})
 
 
 # endregion
@@ -4977,43 +4935,6 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 # endregion
 
 
-# region proximity placement groups
-def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
-                                     ppg_type=None, location=None, tags=None, zone=None, intent_vm_sizes=None):
-    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    ProximityPlacementGroup = cmd.get_models('ProximityPlacementGroup')
-
-    ppg_params = ProximityPlacementGroup(name=proximity_placement_group_name, proximity_placement_group_type=ppg_type,
-                                         location=location, tags=(tags or {}), zones=zone)
-
-    if intent_vm_sizes:
-        Intent = cmd.get_models('ProximityPlacementGroupPropertiesIntent')
-        intent = Intent(vm_sizes=intent_vm_sizes)
-        ppg_params.intent = intent
-
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   proximity_placement_group_name=proximity_placement_group_name, parameters=ppg_params)
-
-
-def update_ppg(cmd, instance, intent_vm_sizes=None, ppg_type=None):
-    if intent_vm_sizes:
-        Intent = cmd.get_models('ProximityPlacementGroupPropertiesIntent')
-        intent = Intent(vm_sizes=intent_vm_sizes)
-        instance.intent = intent
-    if ppg_type:
-        instance.proximity_placement_group_type = ppg_type
-    return instance
-
-
-def list_proximity_placement_groups(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name=resource_group_name)
-    return client.list_by_subscription()
-
-
-# endregion
-
-
 # region dedicated host
 def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count,
                                 automatic_placement=None, location=None, zones=None, tags=None, ultra_ssd_enabled=None):
@@ -5285,27 +5206,6 @@ def remove_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
 def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_set_name):
     client = _compute_client_factory(cmd.cli_ctx)
     return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name).identity
-
-
-# endregion
-
-
-# region Disk Access
-def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
-    DiskAccess = cmd.get_models('DiskAccess')
-    disk_access = DiskAccess(location=location, tags=tags)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access)
-
-
-def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
-    location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    DiskAccess = cmd.get_models('DiskAccess')
-    disk_access = DiskAccess(location=location, tags=tags)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access)
-
-
 # endregion
 
 

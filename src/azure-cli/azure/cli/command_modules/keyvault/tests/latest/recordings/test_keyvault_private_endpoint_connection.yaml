@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"systemData":{"createdBy":"aaa@foo.com","createdByType":"User","createdAt":"2024-04-18T03:47:38.004Z","lastModifiedBy":"aaa@foo.com","lastModifiedByType":"User","lastModifiedAt":"2024-04-18T03:47:38.004Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"674368bb-7eaa-4100-aef7-138f65f50648","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2025-04-16T01:59:49.81Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2025-04-16T01:59:49.81Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"b5ee6c06-c2c2-4e3c-8606-5f170cee077a","accessPolicies":[{"tenantId":"b5ee6c06-c2c2-4e3c-8606-5f170cee077a","objectId":"9aec9bf7-7066-4c57-bc6d-3bc7935e826d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1017'
+      - '1029'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:17 GMT
+      - Wed, 16 Apr 2025 02:00:24 GMT
       expires:
       - '-1'
       pragma:
@@ -41,9 +41,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: CFA94C2039A64886A9FBEE645C7ECBBB Ref B: TYO201100116007 Ref C: 2024-04-18T03:48:15Z'
+      - 'Ref A: B13382CCA6944422931ED00B900EFA0C Ref B: TYO201151004062 Ref C: 2025-04-16T02:00:24Z'
     status:
       code: 200
       message: OK
@@ -67,38 +69,25 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2024-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"60e1262c-d0fc-4c70-9d11-80fe7ef9e9e4\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"8476c14d-1b14-4251-8469-9b211fe8af96\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
-        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
-        \     {\r\n        \"name\": \"cli-subnet-000004\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"60e1262c-d0fc-4c70-9d11-80fe7ef9e9e4\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: '{"name":"cli-vnet-000003","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003","etag":"W/\"044fc3b1-1d46-42a2-9bfd-1b5006b572a2\"","type":"Microsoft.Network/virtualNetworks","location":"eastus2","properties":{"provisioningState":"Updating","resourceGuid":"68485753-ca4d-409a-8f51-3d76279f280f","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"privateEndpointVNetPolicies":"Disabled","subnets":[{"name":"cli-subnet-000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004","etag":"W/\"044fc3b1-1d46-42a2-9bfd-1b5006b572a2\"","properties":{"provisioningState":"Updating","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/1fea564e-d604-4cd8-bf7b-deaeace93895?api-version=2022-01-01&t=638490089038018245&c=MIIHADCCBeigAwIBAgITHgPtKFZCSVesK0WPLAAAA-0oVjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAyMTQwMTAxWhcNMjUwMTI3MTQwMTAxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK91qXSatAXLDynhJ7OmG-j0vO0hqhAjRdFNuJg9SayOMQgzA-obKyjKzODz-eKOFoz6nV1rqHbnb7YUxvz5Ke74ZDjbxdnwYGhAju6jD9ThtiS78Bt0iUKpZpY2QDYxCrpC2DaO5kCSOWUb4PBGhVDkexnKJTTgzHe6iS1gE6V9VyO5bN14Lsq_45qNHoMXlm6258OEIXZ2gvBFpy3CkYEY1Arc4oCuWYWzDTjzP7FJj-v_gVsjhKFAqVWdVND8k982bhNvxjCDqvTMMy2wR4V0GDA6ur0EnTPCKX1N3S7GUf17d1gJdpMzlb_jeHKjnYWKYv0LNyFwaqnk7GeduL0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSg-6hed5hnNyz0o02J9YCREXHiLTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJqTNNAFYbI8tYZvhkWYcJR1aDHuYU1URw_WgivmBHLOfIAZaztxQqvdsxn7EbAcjcOcq9H3pjUKGr3BRtnBNY431tr6872Si1uhnA9Q0oY_Loy1TELqVVHSnZv5Ak_tfVj8WfIk_tPErWJFKYSyH5rm8Oib-ESxwUgReD_HF9MnY14bWX17k0lKxbWDXBozqanPn8qTmnfF9QP-lqUSWCaCx8-p8Ko_YAwLYsD8uPcZogm5XP6QN4UM88O0WhW2SbtydDRtmuU41k0j2byj3C2lK-JwND1w0CfKV6HlCFm_yKAdbmJUK50Y8Mkh2ebZhN0HOcoGcebh1hrMvD1lL1A&s=Z70mb-K3H6XEf8xv1o8qZCLWRxn6tQa_UhK3secpUc5Ysw6Lk85I0XQg6lyDRWifqG9wAElAQPdi0Ri0gzR3jqdkVho40ILjUvezQR-8E3QtEpvTe5Wjvjl4nvArSe8vP2xSRw-YZqHeOdreZPsqZRpiCOY-jr_aUpM5t4epIlEiIJltEEkXITmosg1-avQ6wzfS4_ZUjWH9ozwHZNzOnumg__w-LL24w7ldu8JVJ9qTTKoQSmtn1u0ioCU7-ZxkQt5ZVmrA4VKwmGkpsxnCONaINNiCiEsAMYmPmSX2w41ofOClK0bZKND3iNv0UR7vsVGL723ZhbrPPTfs-ENxEQ&h=V8O_a_GQWvjdtceU-bTw5kDXGniWR_XKcs1bn9qOAzI
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/0ca26e63-4c2b-46ae-b075-d8433325f929?api-version=2024-05-01&t=638803656284152962&c=MIIHhzCCBm-gAwIBAgITfAaYKeS_Y1hBpcE2bQAABpgp5DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTU0OTA5WhcNMjUwNzIyMTU0OTA5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJbiXA51hGktR2MNbSlroYAHe7pbqEWp0A-TCXSyvin2bII7xH08VxT-hAYBjJp17FiHgK9yK-xq6xfHxRSkMqVLkhWjjn4M5cKxT5b-z30Idwg-Fll_gejERu-ZctFls3HYGEJgA2O7dsco88yDNzLfiKSrydo3reGuee9BMkVU_0WnoEcz5QgETf6hOK5mSgOdhXRk6FrlEa0N4utrIz8wgMfqAkwy8FeWekNPgQSFLnP5qBUvtll1zGq1kC8A8eGNTNv4EJTXpmWf3UT7hYgMr3Pl5sGhjct9JtFcEqV9OKRhnaboSPU7Jgjus-w7zzWRiTHRXzpLe7MLqQkJDd0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSFhGHUx6qYRUgSEA_wnhKzeB4DBzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJoUa4AH2sOlm-m22mrE9jtxKT-RediVwcDUWanH-WJBU0CRfHD_ElVnglvs2wcg1EGK-SqbymEwPyLUqrR6H2nZZKQ7XBPyx6zIY7Nc8wfa2FAW3aeVbFd9A4SXuxuoo0bUde_rNuZkwwXKodh1x4WIOowJO51S7Rc7pCn0g_3e8LxMcDfqZTds4GBtPE6MfSLTANZlNO016j0gkCqgRCvlfg8_iJEyjnyI6oGBnX9mH-FXRvvC-5x2gki77aXS-NmKl72SQUmKv8-ygNzrrctb5cnfZRNo5nkoGtPgeEyxmqOk3fW5plNGaKviNHmUh3HM0BlcCpPyDaIev-fej44&s=PQjwg0zW1vZqpi1MtYdKUEBzdkrPcTRhnD0i1ydavxiqVq7so4X3YkVlSdqfIlJCq2r3Hsposlko0Wg-XckLNDm0-l3FZ-C55aowdkhBSPQCQcdvlBVimeCDDDeKFyFqvb7uY0K8LimbdRVPrKXHujqfwy0ah8Z9W9KU-8d89XpRvL7a2fmMbsMJLrlJCDvMIMQTvpAWUk43veRx6vK_HIb9RpcyFPUyMMX-P0mWkFMM_f-oBGDartfLKkxT-kzezkAanYOKOJ-d0_UnRwXtYtJN4lnhrLtAQNCS23-ucEKLJpXK19PgTl-6TA0sLxDUW7TJPtC583_5cxqh-Xtiww&h=8HFtqxbb4Dqd6QjU0xZBF--QRmw9o8RbRKwEld2RdvQ
       cache-control:
       - no-cache
       content-length:
-      - '1290'
+      - '1068'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:23 GMT
+      - Wed, 16 Apr 2025 02:00:28 GMT
       expires:
       - '-1'
       pragma:
@@ -110,11 +99,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9838ce8b-1f32-4c51-b639-0b4929049c1b
+      - 3aa9fa21-f26b-466a-b034-d49e166d92e2
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/7a8ce350-efe1-48d6-96c3-1c320577cf37
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 70A823E7923B4BE6A0075768B6B1A3BF Ref B: TYO201151002060 Ref C: 2024-04-18T03:48:22Z'
+      - 'Ref A: D10A452F68ED43A589A39EC7A3DD3A6D Ref B: TYO201151002029 Ref C: 2025-04-16T02:00:26Z'
     status:
       code: 201
       message: Created
@@ -132,21 +125,21 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/1fea564e-d604-4cd8-bf7b-deaeace93895?api-version=2022-01-01&t=638490089038018245&c=MIIHADCCBeigAwIBAgITHgPtKFZCSVesK0WPLAAAA-0oVjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAyMTQwMTAxWhcNMjUwMTI3MTQwMTAxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK91qXSatAXLDynhJ7OmG-j0vO0hqhAjRdFNuJg9SayOMQgzA-obKyjKzODz-eKOFoz6nV1rqHbnb7YUxvz5Ke74ZDjbxdnwYGhAju6jD9ThtiS78Bt0iUKpZpY2QDYxCrpC2DaO5kCSOWUb4PBGhVDkexnKJTTgzHe6iS1gE6V9VyO5bN14Lsq_45qNHoMXlm6258OEIXZ2gvBFpy3CkYEY1Arc4oCuWYWzDTjzP7FJj-v_gVsjhKFAqVWdVND8k982bhNvxjCDqvTMMy2wR4V0GDA6ur0EnTPCKX1N3S7GUf17d1gJdpMzlb_jeHKjnYWKYv0LNyFwaqnk7GeduL0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSg-6hed5hnNyz0o02J9YCREXHiLTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJqTNNAFYbI8tYZvhkWYcJR1aDHuYU1URw_WgivmBHLOfIAZaztxQqvdsxn7EbAcjcOcq9H3pjUKGr3BRtnBNY431tr6872Si1uhnA9Q0oY_Loy1TELqVVHSnZv5Ak_tfVj8WfIk_tPErWJFKYSyH5rm8Oib-ESxwUgReD_HF9MnY14bWX17k0lKxbWDXBozqanPn8qTmnfF9QP-lqUSWCaCx8-p8Ko_YAwLYsD8uPcZogm5XP6QN4UM88O0WhW2SbtydDRtmuU41k0j2byj3C2lK-JwND1w0CfKV6HlCFm_yKAdbmJUK50Y8Mkh2ebZhN0HOcoGcebh1hrMvD1lL1A&s=Z70mb-K3H6XEf8xv1o8qZCLWRxn6tQa_UhK3secpUc5Ysw6Lk85I0XQg6lyDRWifqG9wAElAQPdi0Ri0gzR3jqdkVho40ILjUvezQR-8E3QtEpvTe5Wjvjl4nvArSe8vP2xSRw-YZqHeOdreZPsqZRpiCOY-jr_aUpM5t4epIlEiIJltEEkXITmosg1-avQ6wzfS4_ZUjWH9ozwHZNzOnumg__w-LL24w7ldu8JVJ9qTTKoQSmtn1u0ioCU7-ZxkQt5ZVmrA4VKwmGkpsxnCONaINNiCiEsAMYmPmSX2w41ofOClK0bZKND3iNv0UR7vsVGL723ZhbrPPTfs-ENxEQ&h=V8O_a_GQWvjdtceU-bTw5kDXGniWR_XKcs1bn9qOAzI
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/0ca26e63-4c2b-46ae-b075-d8433325f929?api-version=2024-05-01&t=638803656284152962&c=MIIHhzCCBm-gAwIBAgITfAaYKeS_Y1hBpcE2bQAABpgp5DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTU0OTA5WhcNMjUwNzIyMTU0OTA5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJbiXA51hGktR2MNbSlroYAHe7pbqEWp0A-TCXSyvin2bII7xH08VxT-hAYBjJp17FiHgK9yK-xq6xfHxRSkMqVLkhWjjn4M5cKxT5b-z30Idwg-Fll_gejERu-ZctFls3HYGEJgA2O7dsco88yDNzLfiKSrydo3reGuee9BMkVU_0WnoEcz5QgETf6hOK5mSgOdhXRk6FrlEa0N4utrIz8wgMfqAkwy8FeWekNPgQSFLnP5qBUvtll1zGq1kC8A8eGNTNv4EJTXpmWf3UT7hYgMr3Pl5sGhjct9JtFcEqV9OKRhnaboSPU7Jgjus-w7zzWRiTHRXzpLe7MLqQkJDd0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSFhGHUx6qYRUgSEA_wnhKzeB4DBzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJoUa4AH2sOlm-m22mrE9jtxKT-RediVwcDUWanH-WJBU0CRfHD_ElVnglvs2wcg1EGK-SqbymEwPyLUqrR6H2nZZKQ7XBPyx6zIY7Nc8wfa2FAW3aeVbFd9A4SXuxuoo0bUde_rNuZkwwXKodh1x4WIOowJO51S7Rc7pCn0g_3e8LxMcDfqZTds4GBtPE6MfSLTANZlNO016j0gkCqgRCvlfg8_iJEyjnyI6oGBnX9mH-FXRvvC-5x2gki77aXS-NmKl72SQUmKv8-ygNzrrctb5cnfZRNo5nkoGtPgeEyxmqOk3fW5plNGaKviNHmUh3HM0BlcCpPyDaIev-fej44&s=PQjwg0zW1vZqpi1MtYdKUEBzdkrPcTRhnD0i1ydavxiqVq7so4X3YkVlSdqfIlJCq2r3Hsposlko0Wg-XckLNDm0-l3FZ-C55aowdkhBSPQCQcdvlBVimeCDDDeKFyFqvb7uY0K8LimbdRVPrKXHujqfwy0ah8Z9W9KU-8d89XpRvL7a2fmMbsMJLrlJCDvMIMQTvpAWUk43veRx6vK_HIb9RpcyFPUyMMX-P0mWkFMM_f-oBGDartfLKkxT-kzezkAanYOKOJ-d0_UnRwXtYtJN4lnhrLtAQNCS23-ucEKLJpXK19PgTl-6TA0sLxDUW7TJPtC583_5cxqh-Xtiww&h=8HFtqxbb4Dqd6QjU0xZBF--QRmw9o8RbRKwEld2RdvQ
   response:
     body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+      string: '{"status":"InProgress"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30'
+      - '23'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:24 GMT
+      - Wed, 16 Apr 2025 02:00:28 GMT
       expires:
       - '-1'
       pragma:
@@ -158,55 +151,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9b56d847-4893-4307-aa73-0c14a4e14815
+      - dde200b3-9e44-4f95-865e-8a4af6b1064a
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/82f5ed21-33e3-4e8f-aae1-e52e8ffca178
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 779F0A006FEF4D37B9074773935C5464 Ref B: TYO201151002060 Ref C: 2024-04-18T03:48:24Z'
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --subnet-name
-      User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/1fea564e-d604-4cd8-bf7b-deaeace93895?api-version=2022-01-01&t=638490089038018245&c=MIIHADCCBeigAwIBAgITHgPtKFZCSVesK0WPLAAAA-0oVjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAyMTQwMTAxWhcNMjUwMTI3MTQwMTAxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK91qXSatAXLDynhJ7OmG-j0vO0hqhAjRdFNuJg9SayOMQgzA-obKyjKzODz-eKOFoz6nV1rqHbnb7YUxvz5Ke74ZDjbxdnwYGhAju6jD9ThtiS78Bt0iUKpZpY2QDYxCrpC2DaO5kCSOWUb4PBGhVDkexnKJTTgzHe6iS1gE6V9VyO5bN14Lsq_45qNHoMXlm6258OEIXZ2gvBFpy3CkYEY1Arc4oCuWYWzDTjzP7FJj-v_gVsjhKFAqVWdVND8k982bhNvxjCDqvTMMy2wR4V0GDA6ur0EnTPCKX1N3S7GUf17d1gJdpMzlb_jeHKjnYWKYv0LNyFwaqnk7GeduL0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSg-6hed5hnNyz0o02J9YCREXHiLTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJqTNNAFYbI8tYZvhkWYcJR1aDHuYU1URw_WgivmBHLOfIAZaztxQqvdsxn7EbAcjcOcq9H3pjUKGr3BRtnBNY431tr6872Si1uhnA9Q0oY_Loy1TELqVVHSnZv5Ak_tfVj8WfIk_tPErWJFKYSyH5rm8Oib-ESxwUgReD_HF9MnY14bWX17k0lKxbWDXBozqanPn8qTmnfF9QP-lqUSWCaCx8-p8Ko_YAwLYsD8uPcZogm5XP6QN4UM88O0WhW2SbtydDRtmuU41k0j2byj3C2lK-JwND1w0CfKV6HlCFm_yKAdbmJUK50Y8Mkh2ebZhN0HOcoGcebh1hrMvD1lL1A&s=Z70mb-K3H6XEf8xv1o8qZCLWRxn6tQa_UhK3secpUc5Ysw6Lk85I0XQg6lyDRWifqG9wAElAQPdi0Ri0gzR3jqdkVho40ILjUvezQR-8E3QtEpvTe5Wjvjl4nvArSe8vP2xSRw-YZqHeOdreZPsqZRpiCOY-jr_aUpM5t4epIlEiIJltEEkXITmosg1-avQ6wzfS4_ZUjWH9ozwHZNzOnumg__w-LL24w7ldu8JVJ9qTTKoQSmtn1u0ioCU7-ZxkQt5ZVmrA4VKwmGkpsxnCONaINNiCiEsAMYmPmSX2w41ofOClK0bZKND3iNv0UR7vsVGL723ZhbrPPTfs-ENxEQ&h=V8O_a_GQWvjdtceU-bTw5kDXGniWR_XKcs1bn9qOAzI
-  response:
-    body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 18 Apr 2024 03:48:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - ae1e7734-4760-4671-8758-9dfbb0aa55aa
-      x-msedge-ref:
-      - 'Ref A: 9369D064A32947EB94EBB49A1CCB7ACE Ref B: TYO201151002060 Ref C: 2024-04-18T03:48:35Z'
+      - 'Ref A: 283E4EDCE08A49E886D5213FBFFB9512 Ref B: TYO201151002029 Ref C: 2025-04-16T02:00:28Z'
     status:
       code: 200
       message: OK
@@ -224,36 +175,73 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/0ca26e63-4c2b-46ae-b075-d8433325f929?api-version=2024-05-01&t=638803656284152962&c=MIIHhzCCBm-gAwIBAgITfAaYKeS_Y1hBpcE2bQAABpgp5DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTU0OTA5WhcNMjUwNzIyMTU0OTA5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJbiXA51hGktR2MNbSlroYAHe7pbqEWp0A-TCXSyvin2bII7xH08VxT-hAYBjJp17FiHgK9yK-xq6xfHxRSkMqVLkhWjjn4M5cKxT5b-z30Idwg-Fll_gejERu-ZctFls3HYGEJgA2O7dsco88yDNzLfiKSrydo3reGuee9BMkVU_0WnoEcz5QgETf6hOK5mSgOdhXRk6FrlEa0N4utrIz8wgMfqAkwy8FeWekNPgQSFLnP5qBUvtll1zGq1kC8A8eGNTNv4EJTXpmWf3UT7hYgMr3Pl5sGhjct9JtFcEqV9OKRhnaboSPU7Jgjus-w7zzWRiTHRXzpLe7MLqQkJDd0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSFhGHUx6qYRUgSEA_wnhKzeB4DBzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJoUa4AH2sOlm-m22mrE9jtxKT-RediVwcDUWanH-WJBU0CRfHD_ElVnglvs2wcg1EGK-SqbymEwPyLUqrR6H2nZZKQ7XBPyx6zIY7Nc8wfa2FAW3aeVbFd9A4SXuxuoo0bUde_rNuZkwwXKodh1x4WIOowJO51S7Rc7pCn0g_3e8LxMcDfqZTds4GBtPE6MfSLTANZlNO016j0gkCqgRCvlfg8_iJEyjnyI6oGBnX9mH-FXRvvC-5x2gki77aXS-NmKl72SQUmKv8-ygNzrrctb5cnfZRNo5nkoGtPgeEyxmqOk3fW5plNGaKviNHmUh3HM0BlcCpPyDaIev-fej44&s=PQjwg0zW1vZqpi1MtYdKUEBzdkrPcTRhnD0i1ydavxiqVq7so4X3YkVlSdqfIlJCq2r3Hsposlko0Wg-XckLNDm0-l3FZ-C55aowdkhBSPQCQcdvlBVimeCDDDeKFyFqvb7uY0K8LimbdRVPrKXHujqfwy0ah8Z9W9KU-8d89XpRvL7a2fmMbsMJLrlJCDvMIMQTvpAWUk43veRx6vK_HIb9RpcyFPUyMMX-P0mWkFMM_f-oBGDartfLKkxT-kzezkAanYOKOJ-d0_UnRwXtYtJN4lnhrLtAQNCS23-ucEKLJpXK19PgTl-6TA0sLxDUW7TJPtC583_5cxqh-Xtiww&h=8HFtqxbb4Dqd6QjU0xZBF--QRmw9o8RbRKwEld2RdvQ
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Apr 2025 02:00:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 32c7d2a1-3476-443d-be91-2c33efd90064
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/94a39c1f-0dce-4a97-8f21-0963767bc792
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 0B247423616F4C779578234E1682FD66 Ref B: TYO201151002029 Ref C: 2025-04-16T02:00:39Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2024-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"213d5458-8236-42ab-920f-485435409fd4\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"8476c14d-1b14-4251-8469-9b211fe8af96\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
-        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
-        \     {\r\n        \"name\": \"cli-subnet-000004\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"213d5458-8236-42ab-920f-485435409fd4\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: '{"name":"cli-vnet-000003","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003","etag":"W/\"91d4cfea-a445-4ddb-a1c6-5117e30818bf\"","type":"Microsoft.Network/virtualNetworks","location":"eastus2","properties":{"provisioningState":"Succeeded","resourceGuid":"68485753-ca4d-409a-8f51-3d76279f280f","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"privateEndpointVNetPolicies":"Disabled","subnets":[{"name":"cli-subnet-000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004","etag":"W/\"91d4cfea-a445-4ddb-a1c6-5117e30818bf\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1292'
+      - '1070'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:35 GMT
+      - Wed, 16 Apr 2025 02:00:39 GMT
       etag:
-      - W/"213d5458-8236-42ab-920f-485435409fd4"
+      - W/"91d4cfea-a445-4ddb-a1c6-5117e30818bf"
       expires:
       - '-1'
       pragma:
@@ -265,12 +253,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bc689239-9bab-47af-a100-df31b2043ba5
+      - 87d751fb-14ab-44b8-8e32-93ea88b4fda1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: E725CE724B584FCA940FA20EA3E6ACFA Ref B: TYO201151002060 Ref C: 2024-04-18T03:48:36Z'
+      - 'Ref A: 6E6AE370BC4245ED8CA46F583AB0BF68 Ref B: TYO201151002029 Ref C: 2025-04-16T02:00:40Z'
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -285,12 +275,12 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2024-01-01
   response:
     body:
-      string: '{"name":"cli-subnet-000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004","etag":"W/\"213d5458-8236-42ab-920f-485435409fd4\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+      string: '{"name":"cli-subnet-000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004","etag":"W/\"91d4cfea-a445-4ddb-a1c6-5117e30818bf\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       cache-control:
       - no-cache
@@ -299,9 +289,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:38 GMT
+      - Wed, 16 Apr 2025 02:00:41 GMT
       etag:
-      - W/"213d5458-8236-42ab-920f-485435409fd4"
+      - W/"91d4cfea-a445-4ddb-a1c6-5117e30818bf"
       expires:
       - '-1'
       pragma:
@@ -313,9 +303,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6d90c321-3a94-47fd-9b05-2c81f3e31ed0
+      - 12b02f8d-9623-4f3a-a2aa-61fcca394c1b
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/d7349db1-f10a-4eac-ba10-7851ac9bcb91
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: 8D23D4253A7F454086EA53BCDD94012E Ref B: TYO201100114047 Ref C: 2024-04-18T03:48:37Z'
+      - 'Ref A: C73D7DE4B7884B49B76C680C311D7F0B Ref B: TYO201151004060 Ref C: 2025-04-16T02:00:41Z'
     status:
       code: 200
       message: OK
@@ -340,17 +334,17 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2024-01-01
   response:
     body:
-      string: '{"name":"cli-subnet-000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004","etag":"W/\"6888406e-8fa7-42da-88c6-09941aec0861\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+      string: '{"name":"cli-subnet-000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004","etag":"W/\"fc065f1a-2906-479d-95ee-4ba218f6526d\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/436931a8-69a5-46de-ae73-674717eacd6d?api-version=2023-11-01&t=638490089197238107&c=MIIHADCCBeigAwIBAgITHgPpxUXboRMa1MKXpgAAA-nFRTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMTMxMDEyODE0WhcNMjUwMTI1MDEyODE0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALigL_YnYGZkISCK9BFT_dzpf963u9bRlY_IhMLl8TQ-WhRb_jA3SHowq9D2t_7jJQKGI6GCCp7rr_bZzTa8pQN0C79lTnY73uIO4_vOTLEbO-r_WF4dIaOg1uhvkHUiwSieW1h1jjj7k_SIuMHohy7tAM8iZ7-ZfFZtnQlOn2e3i4JeBaiEwNF6m94GOMe29LMbaearVgY8Q9dpoqHRILM6oc_lOriZ7rsNAjKOxUZcp1Fo9palZ-3PsJ20ivSPfnC4uawbHqM6z14aGUgr9gJQWitq-3CYzqxU1A3majqauDuR74sxRgfJpBe8xHH2ykGfx9eRrJVbo9gtcbtMplUCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQPt2y76WhKhKfsmhaKSl6_-ABVUzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKfiXIDVAa163uWLQJ_KFJsJINDdJsPSYCj10C9FzlRIDm8NLFTcqHUht2yzNYw9sA0XiYBlshas0NHr_NjnK0vPf1AFoIyNw9OdZs75NKY4kH247gfF_AS1HoQheB_afmz95Kg4gW5BkeRfe92S6InmCXmdMN7m4vzQEeTuhvRoGh2iXCWxstqVMx28FAQxHa3Prn8dFtxou7RnYaFULimejLV78X4z6uHJwh1OmW9uhn3qd1LDrR7JAljm4WMGkEGOhjJfM5_k-EZGiorRgudd5Jd9zM4oxFvG6mwyZy5dGBJRbH-yBernSv2B_wejt8UxccrqN-zuk7CfQWoYGh0&s=VIja5zk8d3dksxXKqUav901hh78lZzYGywDMxn2-zETLoPCzHxNnOsO7KYbeMQ2YtMRrXFE0Apx6o8nD_HVm1GHAfoaG_N4ioseCWCVz4qILXuqsaCLCnxkjm7eSqI81Gs9ZybONXfwVzxpZepZPGO0SfYNGXPPkQqZ7dK99yNirx8BuPxgzIIAxRpaa2_WQzzN3DSoLaRSgyNQMmm-qxlbM7FfQXyuXWSfRhXfmVlWE-fsHuGJ85GRozj39B3WSqIZYhLh171mZVqJwILv2CROfGtoAh0ITyX1DRZbbG7O4o5Z-mgZDNM6TjpVzzy-rz9bcpnncDs1jui_EVGenEw&h=ihCvlJglFR7gOPxunl1A0J-XfjVrnblU0qGmMN7t7sE
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a1cf6810-86cd-462d-8bf8-c5ac991d1ee3?api-version=2024-01-01&t=638803656424986774&c=MIIHhzCCBm-gAwIBAgITfAaYKeS_Y1hBpcE2bQAABpgp5DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTU0OTA5WhcNMjUwNzIyMTU0OTA5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJbiXA51hGktR2MNbSlroYAHe7pbqEWp0A-TCXSyvin2bII7xH08VxT-hAYBjJp17FiHgK9yK-xq6xfHxRSkMqVLkhWjjn4M5cKxT5b-z30Idwg-Fll_gejERu-ZctFls3HYGEJgA2O7dsco88yDNzLfiKSrydo3reGuee9BMkVU_0WnoEcz5QgETf6hOK5mSgOdhXRk6FrlEa0N4utrIz8wgMfqAkwy8FeWekNPgQSFLnP5qBUvtll1zGq1kC8A8eGNTNv4EJTXpmWf3UT7hYgMr3Pl5sGhjct9JtFcEqV9OKRhnaboSPU7Jgjus-w7zzWRiTHRXzpLe7MLqQkJDd0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSFhGHUx6qYRUgSEA_wnhKzeB4DBzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJoUa4AH2sOlm-m22mrE9jtxKT-RediVwcDUWanH-WJBU0CRfHD_ElVnglvs2wcg1EGK-SqbymEwPyLUqrR6H2nZZKQ7XBPyx6zIY7Nc8wfa2FAW3aeVbFd9A4SXuxuoo0bUde_rNuZkwwXKodh1x4WIOowJO51S7Rc7pCn0g_3e8LxMcDfqZTds4GBtPE6MfSLTANZlNO016j0gkCqgRCvlfg8_iJEyjnyI6oGBnX9mH-FXRvvC-5x2gki77aXS-NmKl72SQUmKv8-ygNzrrctb5cnfZRNo5nkoGtPgeEyxmqOk3fW5plNGaKviNHmUh3HM0BlcCpPyDaIev-fej44&s=MtJSUFzpYYH0vl-AUVCJWG2KfwMbMt9vZTf1hkJI22SD4xv6btmtN-3tOzIfF9mw2BXVbL-h6BTntevUtOVa16sK28AVTX90otK9oqgqfrO1GmswePP8BMvg3kDlmHaIRgF_c5xACC0d3dLMq8-D_Fhzz7F3AvbCIubqlKrIZu_wmLznnOJjbdNN_ibSuhKTCGIerJYmcHPVU4xWtPFnenuhOqc9tKNemCTdVJAPUXKjYuEaq-rJCpaz7sOuBhv6rn18OROh_wkBksguM1cDsmX1_QMvTkV0BwUKsZ6SLKpBCW5BWdBxLB0YtRNX46UBi9DUcgwdl8ASgVC41fqFwg&h=mYoHUCWp_XtWanbrp1o5YjQTJpIK15ez08xHRlKQ8oY
       cache-control:
       - no-cache
       content-length:
@@ -358,7 +352,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:39 GMT
+      - Wed, 16 Apr 2025 02:00:42 GMT
       expires:
       - '-1'
       pragma:
@@ -370,11 +364,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b60e48bd-f6d0-498e-966c-a9f26faa5e4f
+      - c2a2f9fc-29cc-4dcd-a625-095a28e5a8e0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/4bd1ef44-82ff-454c-a60f-0af58b998a43
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 67A17B701CF84B838F7396BDB422BB60 Ref B: TYO201100114047 Ref C: 2024-04-18T03:48:39Z'
+      - 'Ref A: 1A3A095B210A4B2E92CD26F5BC14B5BD Ref B: TYO201151004060 Ref C: 2025-04-16T02:00:41Z'
     status:
       code: 200
       message: OK
@@ -392,9 +390,9 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/436931a8-69a5-46de-ae73-674717eacd6d?api-version=2023-11-01&t=638490089197238107&c=MIIHADCCBeigAwIBAgITHgPpxUXboRMa1MKXpgAAA-nFRTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMTMxMDEyODE0WhcNMjUwMTI1MDEyODE0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALigL_YnYGZkISCK9BFT_dzpf963u9bRlY_IhMLl8TQ-WhRb_jA3SHowq9D2t_7jJQKGI6GCCp7rr_bZzTa8pQN0C79lTnY73uIO4_vOTLEbO-r_WF4dIaOg1uhvkHUiwSieW1h1jjj7k_SIuMHohy7tAM8iZ7-ZfFZtnQlOn2e3i4JeBaiEwNF6m94GOMe29LMbaearVgY8Q9dpoqHRILM6oc_lOriZ7rsNAjKOxUZcp1Fo9palZ-3PsJ20ivSPfnC4uawbHqM6z14aGUgr9gJQWitq-3CYzqxU1A3majqauDuR74sxRgfJpBe8xHH2ykGfx9eRrJVbo9gtcbtMplUCAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQPt2y76WhKhKfsmhaKSl6_-ABVUzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKfiXIDVAa163uWLQJ_KFJsJINDdJsPSYCj10C9FzlRIDm8NLFTcqHUht2yzNYw9sA0XiYBlshas0NHr_NjnK0vPf1AFoIyNw9OdZs75NKY4kH247gfF_AS1HoQheB_afmz95Kg4gW5BkeRfe92S6InmCXmdMN7m4vzQEeTuhvRoGh2iXCWxstqVMx28FAQxHa3Prn8dFtxou7RnYaFULimejLV78X4z6uHJwh1OmW9uhn3qd1LDrR7JAljm4WMGkEGOhjJfM5_k-EZGiorRgudd5Jd9zM4oxFvG6mwyZy5dGBJRbH-yBernSv2B_wejt8UxccrqN-zuk7CfQWoYGh0&s=VIja5zk8d3dksxXKqUav901hh78lZzYGywDMxn2-zETLoPCzHxNnOsO7KYbeMQ2YtMRrXFE0Apx6o8nD_HVm1GHAfoaG_N4ioseCWCVz4qILXuqsaCLCnxkjm7eSqI81Gs9ZybONXfwVzxpZepZPGO0SfYNGXPPkQqZ7dK99yNirx8BuPxgzIIAxRpaa2_WQzzN3DSoLaRSgyNQMmm-qxlbM7FfQXyuXWSfRhXfmVlWE-fsHuGJ85GRozj39B3WSqIZYhLh171mZVqJwILv2CROfGtoAh0ITyX1DRZbbG7O4o5Z-mgZDNM6TjpVzzy-rz9bcpnncDs1jui_EVGenEw&h=ihCvlJglFR7gOPxunl1A0J-XfjVrnblU0qGmMN7t7sE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a1cf6810-86cd-462d-8bf8-c5ac991d1ee3?api-version=2024-01-01&t=638803656424986774&c=MIIHhzCCBm-gAwIBAgITfAaYKeS_Y1hBpcE2bQAABpgp5DANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwMTIzMTU0OTA5WhcNMjUwNzIyMTU0OTA5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJbiXA51hGktR2MNbSlroYAHe7pbqEWp0A-TCXSyvin2bII7xH08VxT-hAYBjJp17FiHgK9yK-xq6xfHxRSkMqVLkhWjjn4M5cKxT5b-z30Idwg-Fll_gejERu-ZctFls3HYGEJgA2O7dsco88yDNzLfiKSrydo3reGuee9BMkVU_0WnoEcz5QgETf6hOK5mSgOdhXRk6FrlEa0N4utrIz8wgMfqAkwy8FeWekNPgQSFLnP5qBUvtll1zGq1kC8A8eGNTNv4EJTXpmWf3UT7hYgMr3Pl5sGhjct9JtFcEqV9OKRhnaboSPU7Jgjus-w7zzWRiTHRXzpLe7MLqQkJDd0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSFhGHUx6qYRUgSEA_wnhKzeB4DBzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJoUa4AH2sOlm-m22mrE9jtxKT-RediVwcDUWanH-WJBU0CRfHD_ElVnglvs2wcg1EGK-SqbymEwPyLUqrR6H2nZZKQ7XBPyx6zIY7Nc8wfa2FAW3aeVbFd9A4SXuxuoo0bUde_rNuZkwwXKodh1x4WIOowJO51S7Rc7pCn0g_3e8LxMcDfqZTds4GBtPE6MfSLTANZlNO016j0gkCqgRCvlfg8_iJEyjnyI6oGBnX9mH-FXRvvC-5x2gki77aXS-NmKl72SQUmKv8-ygNzrrctb5cnfZRNo5nkoGtPgeEyxmqOk3fW5plNGaKviNHmUh3HM0BlcCpPyDaIev-fej44&s=MtJSUFzpYYH0vl-AUVCJWG2KfwMbMt9vZTf1hkJI22SD4xv6btmtN-3tOzIfF9mw2BXVbL-h6BTntevUtOVa16sK28AVTX90otK9oqgqfrO1GmswePP8BMvg3kDlmHaIRgF_c5xACC0d3dLMq8-D_Fhzz7F3AvbCIubqlKrIZu_wmLznnOJjbdNN_ibSuhKTCGIerJYmcHPVU4xWtPFnenuhOqc9tKNemCTdVJAPUXKjYuEaq-rJCpaz7sOuBhv6rn18OROh_wkBksguM1cDsmX1_QMvTkV0BwUKsZ6SLKpBCW5BWdBxLB0YtRNX46UBi9DUcgwdl8ASgVC41fqFwg&h=mYoHUCWp_XtWanbrp1o5YjQTJpIK15ez08xHRlKQ8oY
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -406,7 +404,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:40 GMT
+      - Wed, 16 Apr 2025 02:00:43 GMT
       expires:
       - '-1'
       pragma:
@@ -418,12 +416,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ed461eaf-9672-4b58-b12e-b16a6a5da491
+      - 6b3c1060-462f-4550-b616-69e92088071e
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/7ea7bb9a-d286-4f35-9782-6ef741e1b15b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 2EB7325AED9E44C5B7ACFE08D232384A Ref B: TYO201100114047 Ref C: 2024-04-18T03:48:40Z'
+      - 'Ref A: EDCFC0505C0C4B3EA5BFB72281156805 Ref B: TYO201151004060 Ref C: 2025-04-16T02:00:42Z'
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -438,12 +440,12 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2024-01-01
   response:
     body:
-      string: '{"name":"cli-subnet-000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004","etag":"W/\"6888406e-8fa7-42da-88c6-09941aec0861\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+      string: '{"name":"cli-subnet-000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004","etag":"W/\"fc065f1a-2906-479d-95ee-4ba218f6526d\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       cache-control:
       - no-cache
@@ -452,9 +454,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:41 GMT
+      - Wed, 16 Apr 2025 02:00:43 GMT
       etag:
-      - W/"6888406e-8fa7-42da-88c6-09941aec0861"
+      - W/"fc065f1a-2906-479d-95ee-4ba218f6526d"
       expires:
       - '-1'
       pragma:
@@ -466,9 +468,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 07440e8b-3572-4746-9137-d6db3ce377aa
+      - 26043f7b-7d51-4477-8b47-08dc646c231d
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/3cffacec-b497-4e78-95c9-d0d86d82e8d4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 7F5517CD951740C38E84546C4261EECE Ref B: TYO201100114047 Ref C: 2024-04-18T03:48:41Z'
+      - 'Ref A: 42913FBCB2DA4C8D844FF3DEA122103D Ref B: TYO201151004060 Ref C: 2025-04-16T02:00:43Z'
     status:
       code: 200
       message: OK
@@ -494,43 +500,26 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"19696463-719f-4046-81f6-4446a88e6e06\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"26eb73cb-e059-4beb-9b9c-8587977a0a55\",\r\n    \"privateLinkServiceConnections\":
-        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
-        \       \"etag\": \"W/\\\"19696463-719f-4046-81f6-4446a88e6e06\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002\",\r\n
-        \         \"groupIds\": [\r\n            \"vault\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
-        {\r\n            \"status\": \"Approved\",\r\n            \"description\":
-        \"Auto Approved\",\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n
-        \       },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
-        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
-        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.65a7d11f-75cc-4cab-8300-97a2aeaf3ea7\"\r\n
-        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+      string: '{"name":"cli-pe-000005","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005","etag":"W/\"59ac8c4f-db0c-45db-ad41-ae6e4a7313dc\"","type":"Microsoft.Network/privateEndpoints","location":"eastus2","properties":{"provisioningState":"Updating","resourceGuid":"8b287db8-702a-47ed-8787-5ddb9f235b69","privateLinkServiceConnections":[{"name":"cli-pec-000006","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006","etag":"W/\"59ac8c4f-db0c-45db-ad41-ae6e4a7313dc\"","properties":{"provisioningState":"Succeeded","privateLinkServiceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","groupIds":["vault"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto
+        Approved","actionsRequired":"None"}},"type":"Microsoft.Network/privateEndpoints/privateLinkServiceConnections"}],"manualPrivateLinkServiceConnections":[],"customNetworkInterfaceName":"","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},"ipConfigurations":[],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.2a0c9880-358b-47df-8fbb-3db94fe45c70"}],"customDnsConfigs":[]}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/c74cd29c-7821-400d-9b94-7a63e6b52cc6?api-version=2022-01-01&t=638490089247258331&c=MIIHADCCBeigAwIBAgITHgPtKFZCSVesK0WPLAAAA-0oVjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAyMTQwMTAxWhcNMjUwMTI3MTQwMTAxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK91qXSatAXLDynhJ7OmG-j0vO0hqhAjRdFNuJg9SayOMQgzA-obKyjKzODz-eKOFoz6nV1rqHbnb7YUxvz5Ke74ZDjbxdnwYGhAju6jD9ThtiS78Bt0iUKpZpY2QDYxCrpC2DaO5kCSOWUb4PBGhVDkexnKJTTgzHe6iS1gE6V9VyO5bN14Lsq_45qNHoMXlm6258OEIXZ2gvBFpy3CkYEY1Arc4oCuWYWzDTjzP7FJj-v_gVsjhKFAqVWdVND8k982bhNvxjCDqvTMMy2wR4V0GDA6ur0EnTPCKX1N3S7GUf17d1gJdpMzlb_jeHKjnYWKYv0LNyFwaqnk7GeduL0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSg-6hed5hnNyz0o02J9YCREXHiLTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJqTNNAFYbI8tYZvhkWYcJR1aDHuYU1URw_WgivmBHLOfIAZaztxQqvdsxn7EbAcjcOcq9H3pjUKGr3BRtnBNY431tr6872Si1uhnA9Q0oY_Loy1TELqVVHSnZv5Ak_tfVj8WfIk_tPErWJFKYSyH5rm8Oib-ESxwUgReD_HF9MnY14bWX17k0lKxbWDXBozqanPn8qTmnfF9QP-lqUSWCaCx8-p8Ko_YAwLYsD8uPcZogm5XP6QN4UM88O0WhW2SbtydDRtmuU41k0j2byj3C2lK-JwND1w0CfKV6HlCFm_yKAdbmJUK50Y8Mkh2ebZhN0HOcoGcebh1hrMvD1lL1A&s=Vdc2GpAirezHdbVh_-bcabmI4US2vkv1q-k5FPSaLdqQaGqWo4KPjlS6TVKtdBdPF-nFfX-c22XveepjkITP96avUcHatC0JPe3gk6v6pQCxj9gqQ-KqcnCL5N49Ap1StQktJ_y87MFnKpmdM7W4ctU56PUM1HVGKaXjxEdVP4EzyR-SXy_UczlUcXo1c5uW_r7znFmARVx8J64oi0IzOHBxg2vkobL9l4qp7l8EneH6wynHzbKOLfC5cCBKx9eeqhx2tOJ8sTaeU9Dy8E8-4Zmln_fF0ZefEK-me57zoQSHh86Q_od6xjSGZ4k6qovH3QgqP6zaMa_US2rvYQJY8g&h=21Wg1DOKQ6etBNSQj-oM376GBQjJzon8-aU1Etx7kHk
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/1bfe9593-ce7e-4f09-b2a9-61997ffbead9?api-version=2022-01-01&t=638803656471220874&c=MIIHpTCCBo2gAwIBAgITOgSvQhYJhJv3upoQdAAEBK9CFjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwMTIyMDMwMTU5WhcNMjUwNzIxMDMwMTU5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAO17fDEiEOGH85D6qKUDJHIVDhcCjC2pu4JSSnkzGvOfrDCdUzVb55WbvUJigZShRYx9KK2Tifd8u0x9mEr-BqCG740-56xJ0FwyN5eybwhvEZ37UsLxhboIFxyx8uV2cqjMOs-Wr3aVNi8bKw0dtj3MtKzSA4Jq4N4u6-4-Ve8zwiJ_jiBJD5vLZNVRVztWgP8QjyVPSwjglbSddVuTWXJSQakaWh1cPVGHgxxfUaOmZDxb9JexQGcMwciHiIFG5kA_MAl6kb1azqKp2PFoOeWH8ByQpEwrsmsQWO7ccFQjKlu5nqLgOblLusGnyq9Vj9AEge3hXfM-KgADwgsXhYkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQqlNOqQcSYZM1Po0mRxKKD3_DOajAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFtR1erRcnsRy81VZmW7vRJcTBeMa0QB2qPhaTv9xWMZZOO66KX4BS-2T-NOp4JpCPxajSVb7F0sqEEzzC9vk-T0I_jwfthGmZIpEpGJ1TwIN6hgdxae4FN0YxjZilZ1-XJmRty4se4EkXWVaQcNOG5rxRK2CdhIkpt0W_PBONwCrQMdfpnbGiVXsZZWKvdCtsflEnI9H052zGSlCHXFA79czpOAtnaM2y7VpcgWWcwfQoxrlRc9j2iOK6k-5eQ4vR-2ax5Dz8pS4SjHx6OUFXJPIVjXWQ3Gy15ex5ORHBva_2bbIfAjhFE6f1KdMHw8ippUrN2jpPlixMwyULn6sdQ&s=fNc46iMBYmdbltlWge65tYBdyzDU7gNk_FyUiUsXajQDq2SaWhj4m75b9Y24b8YI12bq9ET3F2-kZJQioJ0k0PNsKjsgqqF1CXan-Ri8PbV0Snt18UbuIfFoBPBRBDXxBlkLshc30Dbe9mdgElHUWkw5H5JevaOMcUfREKEBam_EsGqK4wbuNFCPjFA0Bd0_W1NzSsqzHhh9mhHeZR7IZu3afG3UCAxculeWPdr4gLU17YpcX3C-wL-rn-4ytY0PfwP1jEIqFfTPkeQ8NcnStg42PfquFYXvH-yYspir5D0SKyD7acLFu5qyHbUB7FHOm4XYOqcsNIU_BGyfcBYM4A&h=-rbOdlgWmnIj6VW7-F22ZBrKbrwguhhJ4qJeHP-mOfQ
       cache-control:
       - no-cache
       content-length:
-      - '2066'
+      - '1697'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:43 GMT
+      - Wed, 16 Apr 2025 02:00:46 GMT
       expires:
       - '-1'
       pragma:
@@ -542,11 +531,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8667673b-37d4-44a5-9fb3-317c2a10ce7d
+      - 8489f7cf-5b4f-4d11-93e9-713eee018626
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/651db4a9-59c5-4b40-8068-6ac9e91e98f3
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: CBB91AA6BAA14910861B2534B128D0A3 Ref B: TYO201100114025 Ref C: 2024-04-18T03:48:42Z'
+      - 'Ref A: 44BB60546EE54A0BBCED08629F2E987D Ref B: TYO201100114017 Ref C: 2025-04-16T02:00:45Z'
     status:
       code: 201
       message: Created
@@ -565,21 +558,21 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/c74cd29c-7821-400d-9b94-7a63e6b52cc6?api-version=2022-01-01&t=638490089247258331&c=MIIHADCCBeigAwIBAgITHgPtKFZCSVesK0WPLAAAA-0oVjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAyMTQwMTAxWhcNMjUwMTI3MTQwMTAxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK91qXSatAXLDynhJ7OmG-j0vO0hqhAjRdFNuJg9SayOMQgzA-obKyjKzODz-eKOFoz6nV1rqHbnb7YUxvz5Ke74ZDjbxdnwYGhAju6jD9ThtiS78Bt0iUKpZpY2QDYxCrpC2DaO5kCSOWUb4PBGhVDkexnKJTTgzHe6iS1gE6V9VyO5bN14Lsq_45qNHoMXlm6258OEIXZ2gvBFpy3CkYEY1Arc4oCuWYWzDTjzP7FJj-v_gVsjhKFAqVWdVND8k982bhNvxjCDqvTMMy2wR4V0GDA6ur0EnTPCKX1N3S7GUf17d1gJdpMzlb_jeHKjnYWKYv0LNyFwaqnk7GeduL0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSg-6hed5hnNyz0o02J9YCREXHiLTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJqTNNAFYbI8tYZvhkWYcJR1aDHuYU1URw_WgivmBHLOfIAZaztxQqvdsxn7EbAcjcOcq9H3pjUKGr3BRtnBNY431tr6872Si1uhnA9Q0oY_Loy1TELqVVHSnZv5Ak_tfVj8WfIk_tPErWJFKYSyH5rm8Oib-ESxwUgReD_HF9MnY14bWX17k0lKxbWDXBozqanPn8qTmnfF9QP-lqUSWCaCx8-p8Ko_YAwLYsD8uPcZogm5XP6QN4UM88O0WhW2SbtydDRtmuU41k0j2byj3C2lK-JwND1w0CfKV6HlCFm_yKAdbmJUK50Y8Mkh2ebZhN0HOcoGcebh1hrMvD1lL1A&s=Vdc2GpAirezHdbVh_-bcabmI4US2vkv1q-k5FPSaLdqQaGqWo4KPjlS6TVKtdBdPF-nFfX-c22XveepjkITP96avUcHatC0JPe3gk6v6pQCxj9gqQ-KqcnCL5N49Ap1StQktJ_y87MFnKpmdM7W4ctU56PUM1HVGKaXjxEdVP4EzyR-SXy_UczlUcXo1c5uW_r7znFmARVx8J64oi0IzOHBxg2vkobL9l4qp7l8EneH6wynHzbKOLfC5cCBKx9eeqhx2tOJ8sTaeU9Dy8E8-4Zmln_fF0ZefEK-me57zoQSHh86Q_od6xjSGZ4k6qovH3QgqP6zaMa_US2rvYQJY8g&h=21Wg1DOKQ6etBNSQj-oM376GBQjJzon8-aU1Etx7kHk
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/1bfe9593-ce7e-4f09-b2a9-61997ffbead9?api-version=2022-01-01&t=638803656471220874&c=MIIHpTCCBo2gAwIBAgITOgSvQhYJhJv3upoQdAAEBK9CFjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwMTIyMDMwMTU5WhcNMjUwNzIxMDMwMTU5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAO17fDEiEOGH85D6qKUDJHIVDhcCjC2pu4JSSnkzGvOfrDCdUzVb55WbvUJigZShRYx9KK2Tifd8u0x9mEr-BqCG740-56xJ0FwyN5eybwhvEZ37UsLxhboIFxyx8uV2cqjMOs-Wr3aVNi8bKw0dtj3MtKzSA4Jq4N4u6-4-Ve8zwiJ_jiBJD5vLZNVRVztWgP8QjyVPSwjglbSddVuTWXJSQakaWh1cPVGHgxxfUaOmZDxb9JexQGcMwciHiIFG5kA_MAl6kb1azqKp2PFoOeWH8ByQpEwrsmsQWO7ccFQjKlu5nqLgOblLusGnyq9Vj9AEge3hXfM-KgADwgsXhYkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQqlNOqQcSYZM1Po0mRxKKD3_DOajAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFtR1erRcnsRy81VZmW7vRJcTBeMa0QB2qPhaTv9xWMZZOO66KX4BS-2T-NOp4JpCPxajSVb7F0sqEEzzC9vk-T0I_jwfthGmZIpEpGJ1TwIN6hgdxae4FN0YxjZilZ1-XJmRty4se4EkXWVaQcNOG5rxRK2CdhIkpt0W_PBONwCrQMdfpnbGiVXsZZWKvdCtsflEnI9H052zGSlCHXFA79czpOAtnaM2y7VpcgWWcwfQoxrlRc9j2iOK6k-5eQ4vR-2ax5Dz8pS4SjHx6OUFXJPIVjXWQ3Gy15ex5ORHBva_2bbIfAjhFE6f1KdMHw8ippUrN2jpPlixMwyULn6sdQ&s=fNc46iMBYmdbltlWge65tYBdyzDU7gNk_FyUiUsXajQDq2SaWhj4m75b9Y24b8YI12bq9ET3F2-kZJQioJ0k0PNsKjsgqqF1CXan-Ri8PbV0Snt18UbuIfFoBPBRBDXxBlkLshc30Dbe9mdgElHUWkw5H5JevaOMcUfREKEBam_EsGqK4wbuNFCPjFA0Bd0_W1NzSsqzHhh9mhHeZR7IZu3afG3UCAxculeWPdr4gLU17YpcX3C-wL-rn-4ytY0PfwP1jEIqFfTPkeQ8NcnStg42PfquFYXvH-yYspir5D0SKyD7acLFu5qyHbUB7FHOm4XYOqcsNIU_BGyfcBYM4A&h=-rbOdlgWmnIj6VW7-F22ZBrKbrwguhhJ4qJeHP-mOfQ
   response:
     body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+      string: '{"status":"InProgress"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30'
+      - '23'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:44 GMT
+      - Wed, 16 Apr 2025 02:00:46 GMT
       expires:
       - '-1'
       pragma:
@@ -591,9 +584,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b0e1d7fd-7191-48ed-9100-ff78c6d91979
+      - 7c21ea66-6f7f-4466-994a-cda8d59c3178
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/68bea69d-4d47-4d9a-b37b-f712e9f5f8aa
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: CBDD82995CCD40CD95046C1528C99697 Ref B: TYO201100114025 Ref C: 2024-04-18T03:48:45Z'
+      - 'Ref A: D5F200DAFE4B4BEB909D0DCAB2768E8F Ref B: TYO201100114017 Ref C: 2025-04-16T02:00:47Z'
     status:
       code: 200
       message: OK
@@ -612,21 +609,21 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/c74cd29c-7821-400d-9b94-7a63e6b52cc6?api-version=2022-01-01&t=638490089247258331&c=MIIHADCCBeigAwIBAgITHgPtKFZCSVesK0WPLAAAA-0oVjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAyMTQwMTAxWhcNMjUwMTI3MTQwMTAxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK91qXSatAXLDynhJ7OmG-j0vO0hqhAjRdFNuJg9SayOMQgzA-obKyjKzODz-eKOFoz6nV1rqHbnb7YUxvz5Ke74ZDjbxdnwYGhAju6jD9ThtiS78Bt0iUKpZpY2QDYxCrpC2DaO5kCSOWUb4PBGhVDkexnKJTTgzHe6iS1gE6V9VyO5bN14Lsq_45qNHoMXlm6258OEIXZ2gvBFpy3CkYEY1Arc4oCuWYWzDTjzP7FJj-v_gVsjhKFAqVWdVND8k982bhNvxjCDqvTMMy2wR4V0GDA6ur0EnTPCKX1N3S7GUf17d1gJdpMzlb_jeHKjnYWKYv0LNyFwaqnk7GeduL0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSg-6hed5hnNyz0o02J9YCREXHiLTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJqTNNAFYbI8tYZvhkWYcJR1aDHuYU1URw_WgivmBHLOfIAZaztxQqvdsxn7EbAcjcOcq9H3pjUKGr3BRtnBNY431tr6872Si1uhnA9Q0oY_Loy1TELqVVHSnZv5Ak_tfVj8WfIk_tPErWJFKYSyH5rm8Oib-ESxwUgReD_HF9MnY14bWX17k0lKxbWDXBozqanPn8qTmnfF9QP-lqUSWCaCx8-p8Ko_YAwLYsD8uPcZogm5XP6QN4UM88O0WhW2SbtydDRtmuU41k0j2byj3C2lK-JwND1w0CfKV6HlCFm_yKAdbmJUK50Y8Mkh2ebZhN0HOcoGcebh1hrMvD1lL1A&s=Vdc2GpAirezHdbVh_-bcabmI4US2vkv1q-k5FPSaLdqQaGqWo4KPjlS6TVKtdBdPF-nFfX-c22XveepjkITP96avUcHatC0JPe3gk6v6pQCxj9gqQ-KqcnCL5N49Ap1StQktJ_y87MFnKpmdM7W4ctU56PUM1HVGKaXjxEdVP4EzyR-SXy_UczlUcXo1c5uW_r7znFmARVx8J64oi0IzOHBxg2vkobL9l4qp7l8EneH6wynHzbKOLfC5cCBKx9eeqhx2tOJ8sTaeU9Dy8E8-4Zmln_fF0ZefEK-me57zoQSHh86Q_od6xjSGZ4k6qovH3QgqP6zaMa_US2rvYQJY8g&h=21Wg1DOKQ6etBNSQj-oM376GBQjJzon8-aU1Etx7kHk
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/1bfe9593-ce7e-4f09-b2a9-61997ffbead9?api-version=2022-01-01&t=638803656471220874&c=MIIHpTCCBo2gAwIBAgITOgSvQhYJhJv3upoQdAAEBK9CFjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwMTIyMDMwMTU5WhcNMjUwNzIxMDMwMTU5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAO17fDEiEOGH85D6qKUDJHIVDhcCjC2pu4JSSnkzGvOfrDCdUzVb55WbvUJigZShRYx9KK2Tifd8u0x9mEr-BqCG740-56xJ0FwyN5eybwhvEZ37UsLxhboIFxyx8uV2cqjMOs-Wr3aVNi8bKw0dtj3MtKzSA4Jq4N4u6-4-Ve8zwiJ_jiBJD5vLZNVRVztWgP8QjyVPSwjglbSddVuTWXJSQakaWh1cPVGHgxxfUaOmZDxb9JexQGcMwciHiIFG5kA_MAl6kb1azqKp2PFoOeWH8ByQpEwrsmsQWO7ccFQjKlu5nqLgOblLusGnyq9Vj9AEge3hXfM-KgADwgsXhYkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQqlNOqQcSYZM1Po0mRxKKD3_DOajAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFtR1erRcnsRy81VZmW7vRJcTBeMa0QB2qPhaTv9xWMZZOO66KX4BS-2T-NOp4JpCPxajSVb7F0sqEEzzC9vk-T0I_jwfthGmZIpEpGJ1TwIN6hgdxae4FN0YxjZilZ1-XJmRty4se4EkXWVaQcNOG5rxRK2CdhIkpt0W_PBONwCrQMdfpnbGiVXsZZWKvdCtsflEnI9H052zGSlCHXFA79czpOAtnaM2y7VpcgWWcwfQoxrlRc9j2iOK6k-5eQ4vR-2ax5Dz8pS4SjHx6OUFXJPIVjXWQ3Gy15ex5ORHBva_2bbIfAjhFE6f1KdMHw8ippUrN2jpPlixMwyULn6sdQ&s=fNc46iMBYmdbltlWge65tYBdyzDU7gNk_FyUiUsXajQDq2SaWhj4m75b9Y24b8YI12bq9ET3F2-kZJQioJ0k0PNsKjsgqqF1CXan-Ri8PbV0Snt18UbuIfFoBPBRBDXxBlkLshc30Dbe9mdgElHUWkw5H5JevaOMcUfREKEBam_EsGqK4wbuNFCPjFA0Bd0_W1NzSsqzHhh9mhHeZR7IZu3afG3UCAxculeWPdr4gLU17YpcX3C-wL-rn-4ytY0PfwP1jEIqFfTPkeQ8NcnStg42PfquFYXvH-yYspir5D0SKyD7acLFu5qyHbUB7FHOm4XYOqcsNIU_BGyfcBYM4A&h=-rbOdlgWmnIj6VW7-F22ZBrKbrwguhhJ4qJeHP-mOfQ
   response:
     body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+      string: '{"status":"InProgress"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30'
+      - '23'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:48:54 GMT
+      - Wed, 16 Apr 2025 02:00:57 GMT
       expires:
       - '-1'
       pragma:
@@ -638,12 +635,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c6a108c6-abeb-4ff8-8230-d8e30cd00b0f
+      - a08874cf-54b5-481d-8cbe-8fb7325d16d4
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/662645b6-1bcc-43dc-9866-4a0b639fcedc
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 460084E8AD4A4D50B78121231131B54F Ref B: TYO201100114025 Ref C: 2024-04-18T03:48:55Z'
+      - 'Ref A: 565914A28F704098A7BD8141056200B7 Ref B: TYO201100114017 Ref C: 2025-04-16T02:00:57Z'
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -659,21 +660,21 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/c74cd29c-7821-400d-9b94-7a63e6b52cc6?api-version=2022-01-01&t=638490089247258331&c=MIIHADCCBeigAwIBAgITHgPtKFZCSVesK0WPLAAAA-0oVjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwMjAyMTQwMTAxWhcNMjUwMTI3MTQwMTAxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK91qXSatAXLDynhJ7OmG-j0vO0hqhAjRdFNuJg9SayOMQgzA-obKyjKzODz-eKOFoz6nV1rqHbnb7YUxvz5Ke74ZDjbxdnwYGhAju6jD9ThtiS78Bt0iUKpZpY2QDYxCrpC2DaO5kCSOWUb4PBGhVDkexnKJTTgzHe6iS1gE6V9VyO5bN14Lsq_45qNHoMXlm6258OEIXZ2gvBFpy3CkYEY1Arc4oCuWYWzDTjzP7FJj-v_gVsjhKFAqVWdVND8k982bhNvxjCDqvTMMy2wR4V0GDA6ur0EnTPCKX1N3S7GUf17d1gJdpMzlb_jeHKjnYWKYv0LNyFwaqnk7GeduL0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSg-6hed5hnNyz0o02J9YCREXHiLTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJqTNNAFYbI8tYZvhkWYcJR1aDHuYU1URw_WgivmBHLOfIAZaztxQqvdsxn7EbAcjcOcq9H3pjUKGr3BRtnBNY431tr6872Si1uhnA9Q0oY_Loy1TELqVVHSnZv5Ak_tfVj8WfIk_tPErWJFKYSyH5rm8Oib-ESxwUgReD_HF9MnY14bWX17k0lKxbWDXBozqanPn8qTmnfF9QP-lqUSWCaCx8-p8Ko_YAwLYsD8uPcZogm5XP6QN4UM88O0WhW2SbtydDRtmuU41k0j2byj3C2lK-JwND1w0CfKV6HlCFm_yKAdbmJUK50Y8Mkh2ebZhN0HOcoGcebh1hrMvD1lL1A&s=Vdc2GpAirezHdbVh_-bcabmI4US2vkv1q-k5FPSaLdqQaGqWo4KPjlS6TVKtdBdPF-nFfX-c22XveepjkITP96avUcHatC0JPe3gk6v6pQCxj9gqQ-KqcnCL5N49Ap1StQktJ_y87MFnKpmdM7W4ctU56PUM1HVGKaXjxEdVP4EzyR-SXy_UczlUcXo1c5uW_r7znFmARVx8J64oi0IzOHBxg2vkobL9l4qp7l8EneH6wynHzbKOLfC5cCBKx9eeqhx2tOJ8sTaeU9Dy8E8-4Zmln_fF0ZefEK-me57zoQSHh86Q_od6xjSGZ4k6qovH3QgqP6zaMa_US2rvYQJY8g&h=21Wg1DOKQ6etBNSQj-oM376GBQjJzon8-aU1Etx7kHk
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/1bfe9593-ce7e-4f09-b2a9-61997ffbead9?api-version=2022-01-01&t=638803656471220874&c=MIIHpTCCBo2gAwIBAgITOgSvQhYJhJv3upoQdAAEBK9CFjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwMTIyMDMwMTU5WhcNMjUwNzIxMDMwMTU5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAO17fDEiEOGH85D6qKUDJHIVDhcCjC2pu4JSSnkzGvOfrDCdUzVb55WbvUJigZShRYx9KK2Tifd8u0x9mEr-BqCG740-56xJ0FwyN5eybwhvEZ37UsLxhboIFxyx8uV2cqjMOs-Wr3aVNi8bKw0dtj3MtKzSA4Jq4N4u6-4-Ve8zwiJ_jiBJD5vLZNVRVztWgP8QjyVPSwjglbSddVuTWXJSQakaWh1cPVGHgxxfUaOmZDxb9JexQGcMwciHiIFG5kA_MAl6kb1azqKp2PFoOeWH8ByQpEwrsmsQWO7ccFQjKlu5nqLgOblLusGnyq9Vj9AEge3hXfM-KgADwgsXhYkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQqlNOqQcSYZM1Po0mRxKKD3_DOajAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFtR1erRcnsRy81VZmW7vRJcTBeMa0QB2qPhaTv9xWMZZOO66KX4BS-2T-NOp4JpCPxajSVb7F0sqEEzzC9vk-T0I_jwfthGmZIpEpGJ1TwIN6hgdxae4FN0YxjZilZ1-XJmRty4se4EkXWVaQcNOG5rxRK2CdhIkpt0W_PBONwCrQMdfpnbGiVXsZZWKvdCtsflEnI9H052zGSlCHXFA79czpOAtnaM2y7VpcgWWcwfQoxrlRc9j2iOK6k-5eQ4vR-2ax5Dz8pS4SjHx6OUFXJPIVjXWQ3Gy15ex5ORHBva_2bbIfAjhFE6f1KdMHw8ippUrN2jpPlixMwyULn6sdQ&s=fNc46iMBYmdbltlWge65tYBdyzDU7gNk_FyUiUsXajQDq2SaWhj4m75b9Y24b8YI12bq9ET3F2-kZJQioJ0k0PNsKjsgqqF1CXan-Ri8PbV0Snt18UbuIfFoBPBRBDXxBlkLshc30Dbe9mdgElHUWkw5H5JevaOMcUfREKEBam_EsGqK4wbuNFCPjFA0Bd0_W1NzSsqzHhh9mhHeZR7IZu3afG3UCAxculeWPdr4gLU17YpcX3C-wL-rn-4ytY0PfwP1jEIqFfTPkeQ8NcnStg42PfquFYXvH-yYspir5D0SKyD7acLFu5qyHbUB7FHOm4XYOqcsNIU_BGyfcBYM4A&h=-rbOdlgWmnIj6VW7-F22ZBrKbrwguhhJ4qJeHP-mOfQ
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:16 GMT
+      - Wed, 16 Apr 2025 02:01:17 GMT
       expires:
       - '-1'
       pragma:
@@ -685,12 +686,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c99db648-2e5c-4499-97b2-8649115b1476
+      - d0270a32-82ca-45fb-a44d-c6ea1e6ee6b8
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/195cbfc2-310f-4d60-8489-ee048618b805
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: FFE8C31F67D54AE5A041F080A89599BA Ref B: TYO201100114025 Ref C: 2024-04-18T03:49:16Z'
+      - 'Ref A: 483E715FDA514031AFF4730A4A4011AF Ref B: TYO201100114017 Ref C: 2025-04-16T02:01:18Z'
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -706,43 +711,23 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"460edecc-be2e-4e0d-a261-b1348a21b2fd\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"26eb73cb-e059-4beb-9b9c-8587977a0a55\",\r\n    \"privateLinkServiceConnections\":
-        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
-        \       \"etag\": \"W/\\\"460edecc-be2e-4e0d-a261-b1348a21b2fd\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002\",\r\n
-        \         \"groupIds\": [\r\n            \"vault\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
-        {\r\n            \"status\": \"Approved\",\r\n            \"description\":
-        \"\",\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\n
-        \       \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
-        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
-        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.65a7d11f-75cc-4cab-8300-97a2aeaf3ea7\"\r\n
-        \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
-        \"cli-test-kv-pec-000002.vault.azure.net\",\r\n        \"ipAddresses\": [\r\n
-        \         \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+      string: '{"name":"cli-pe-000005","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005","etag":"W/\"7f497c04-ccd0-4669-ad6f-6dc4ed5eb3b9\"","type":"Microsoft.Network/privateEndpoints","location":"eastus2","properties":{"provisioningState":"Succeeded","resourceGuid":"8b287db8-702a-47ed-8787-5ddb9f235b69","privateLinkServiceConnections":[{"name":"cli-pec-000006","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006","etag":"W/\"7f497c04-ccd0-4669-ad6f-6dc4ed5eb3b9\"","properties":{"provisioningState":"Succeeded","privateLinkServiceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","groupIds":["vault"],"privateLinkServiceConnectionState":{"status":"Approved","description":"","actionsRequired":"None"}},"type":"Microsoft.Network/privateEndpoints/privateLinkServiceConnections"}],"manualPrivateLinkServiceConnections":[],"customNetworkInterfaceName":"","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},"ipConfigurations":[],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.2a0c9880-358b-47df-8fbb-3db94fe45c70"}],"customDnsConfigs":[{"fqdn":"cli-test-kv-pec-000002.vault.azure.net","ipAddresses":["10.0.0.4"]}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2196'
+      - '1761'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:18 GMT
+      - Wed, 16 Apr 2025 02:01:18 GMT
       etag:
-      - W/"460edecc-be2e-4e0d-a261-b1348a21b2fd"
+      - W/"7f497c04-ccd0-4669-ad6f-6dc4ed5eb3b9"
       expires:
       - '-1'
       pragma:
@@ -754,9 +739,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6d2ea05f-fa93-40eb-aead-68ccd1637592
+      - 1ef38128-c96f-424c-9d7b-d80c2e658608
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 7B4665FE3DC84FAAA39AB7ADF1D7D395 Ref B: TYO201100114025 Ref C: 2024-04-18T03:49:17Z'
+      - 'Ref A: D7085BD000704246A6333C3BAD3FC7DB Ref B: TYO201100114017 Ref C: 2025-04-16T02:01:18Z'
     status:
       code: 200
       message: OK
@@ -774,7 +761,7 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27%20and%20name%20eq%20%27cli-test-kv-pec-000002%27&api-version=2015-11-01
   response:
@@ -788,7 +775,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:19 GMT
+      - Wed, 16 Apr 2025 02:01:19 GMT
       expires:
       - '-1'
       pragma:
@@ -799,8 +786,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: DABBC58F23C4499486C92DB2111493F7 Ref B: TYO201151004042 Ref C: 2024-04-18T03:49:19Z'
+      - 'Ref A: B0C13432EA3D42FDBE1FB6DDC0ECCA46 Ref B: TYO201151006052 Ref C: 2025-04-16T02:01:20Z'
     status:
       code: 200
       message: OK
@@ -818,21 +807,21 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"systemData":{"createdBy":"aaa@foo.com","createdByType":"User","createdAt":"2024-04-18T03:47:38.004Z","lastModifiedBy":"aaa@foo.com","lastModifiedByType":"User","lastModifiedAt":"2024-04-18T03:47:38.004Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"674368bb-7eaa-4100-aef7-138f65f50648","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2025-04-16T01:59:49.81Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2025-04-16T01:59:49.81Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"b5ee6c06-c2c2-4e3c-8606-5f170cee077a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"b5ee6c06-c2c2-4e3c-8606-5f170cee077a","objectId":"9aec9bf7-7066-4c57-bc6d-3bc7935e826d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1564'
+      - '1576'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:22 GMT
+      - Wed, 16 Apr 2025 02:01:20 GMT
       expires:
       - '-1'
       pragma:
@@ -846,9 +835,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 944501CBA78B43D9A68A4F9EC0C9073C Ref B: TYO201100117011 Ref C: 2024-04-18T03:49:20Z'
+      - 'Ref A: 1241EC3B17C34292B1E727013126A901 Ref B: TYO201100114037 Ref C: 2025-04-16T02:01:20Z'
     status:
       code: 200
       message: OK
@@ -866,9 +857,9 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}'
@@ -880,7 +871,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:24 GMT
+      - Wed, 16 Apr 2025 02:01:22 GMT
       expires:
       - '-1'
       pragma:
@@ -894,9 +885,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/3c3c7d4e-e4bb-4e1c-b252-4729fd935c7e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 9E4128ED1B694AE480D087105FB91173 Ref B: TYO201100115023 Ref C: 2024-04-18T03:49:23Z'
+      - 'Ref A: 1A5D641B7BCD4D32B513854FEA3C6E0F Ref B: TYO201151001040 Ref C: 2025-04-16T02:01:22Z'
     status:
       code: 200
       message: OK
@@ -914,7 +909,7 @@ interactions:
       ParameterSetName:
       - --vault-name --name
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27%20and%20name%20eq%20%27cli-test-kv-pec-000002%27&api-version=2015-11-01
   response:
@@ -928,7 +923,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:25 GMT
+      - Wed, 16 Apr 2025 02:01:22 GMT
       expires:
       - '-1'
       pragma:
@@ -939,8 +934,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: A146D70834BA4466B6C062DF4FEC65B8 Ref B: TYO201151005029 Ref C: 2024-04-18T03:49:25Z'
+      - 'Ref A: 17F2A87EABB8409DAF4EC7BC338770B2 Ref B: TYO201100114045 Ref C: 2025-04-16T02:01:23Z'
     status:
       code: 200
       message: OK
@@ -958,9 +955,9 @@ interactions:
       ParameterSetName:
       - --vault-name --name
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}'
@@ -972,7 +969,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:27 GMT
+      - Wed, 16 Apr 2025 02:01:24 GMT
       expires:
       - '-1'
       pragma:
@@ -986,9 +983,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/05467255-81ef-4acf-8776-153d663fc36b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 557A217DB679463CBB6A5BC4096E5860 Ref B: TYO201100113027 Ref C: 2024-04-18T03:49:26Z'
+      - 'Ref A: 7DB6776DCD8E43C586A5AFF41B90750E Ref B: TYO201151001042 Ref C: 2025-04-16T02:01:23Z'
     status:
       code: 200
       message: OK
@@ -1006,7 +1007,7 @@ interactions:
       ParameterSetName:
       - --vault-name -n
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27%20and%20name%20eq%20%27cli-test-kv-pec-000002%27&api-version=2015-11-01
   response:
@@ -1020,7 +1021,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:28 GMT
+      - Wed, 16 Apr 2025 02:01:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1031,8 +1032,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: BA5EB9693217467EB2D1E9C91D4817BF Ref B: TYO201151006025 Ref C: 2024-04-18T03:49:28Z'
+      - 'Ref A: ECF2146982EB4FEDA8A24CA6F37F414A Ref B: TYO201151006040 Ref C: 2025-04-16T02:01:25Z'
     status:
       code: 200
       message: OK
@@ -1050,9 +1053,9 @@ interactions:
       ParameterSetName:
       - --vault-name -n
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}'
@@ -1064,7 +1067,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:30 GMT
+      - Wed, 16 Apr 2025 02:01:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1078,9 +1081,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/43e05c00-a7b5-45dc-8eb0-9180f6d6a088
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 8265283C3F5F4AA6AE722AF3E48606A1 Ref B: TYO201100114035 Ref C: 2024-04-18T03:49:29Z'
+      - 'Ref A: FCFDEAA18355465F802DE1B1DABC00FB Ref B: TYO201100117045 Ref C: 2025-04-16T02:01:25Z'
     status:
       code: 200
       message: OK
@@ -1098,21 +1105,21 @@ interactions:
       ParameterSetName:
       - -g -n --object-id --certificate-permissions
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"systemData":{"createdBy":"aaa@foo.com","createdByType":"User","createdAt":"2024-04-18T03:47:38.004Z","lastModifiedBy":"aaa@foo.com","lastModifiedByType":"User","lastModifiedAt":"2024-04-18T03:47:38.004Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"674368bb-7eaa-4100-aef7-138f65f50648","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2025-04-16T01:59:49.81Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2025-04-16T01:59:49.81Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"b5ee6c06-c2c2-4e3c-8606-5f170cee077a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"b5ee6c06-c2c2-4e3c-8606-5f170cee077a","objectId":"9aec9bf7-7066-4c57-bc6d-3bc7935e826d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1564'
+      - '1576'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:32 GMT
+      - Wed, 16 Apr 2025 02:01:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1126,20 +1133,23 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: D309F5C792F443CABFCC9D85A4EF93B5 Ref B: TYO201151002060 Ref C: 2024-04-18T03:49:31Z'
+      - 'Ref A: 6DBB14D62FDC483C9C872100FED91EFD Ref B: TYO201151006054 Ref C: 2025-04-16T02:01:27Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2", "tags": {}, "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+    body: '{"location": "eastus2", "tags": {}, "properties": {"tenantId": "b5ee6c06-c2c2-4e3c-8606-5f170cee077a",
       "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
-      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "674368bb-7eaa-4100-aef7-138f65f50648",
-      "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["get",
-      "list"], "storage": ["all"]}}], "vaultUri": "https://cli-test-kv-pec-000002.vault.azure.net/",
+      "b5ee6c06-c2c2-4e3c-8606-5f170cee077a", "objectId": "9aec9bf7-7066-4c57-bc6d-3bc7935e826d",
+      "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["list",
+      "get"], "storage": ["all"]}}], "vaultUri": "https://cli-test-kv-pec-000002.vault.azure.net/",
       "enabledForDeployment": false, "enableSoftDelete": true, "softDeleteRetentionInDays":
-      7, "provisioningState": "Succeeded", "publicNetworkAccess": "Enabled"}}'
+      7, "enableRbacAuthorization": false, "provisioningState": "Succeeded", "publicNetworkAccess":
+      "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -1150,27 +1160,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '600'
+      - '634'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --object-id --certificate-permissions
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"systemData":{"createdBy":"aaa@foo.com","createdByType":"User","createdAt":"2024-04-18T03:47:38.004Z","lastModifiedBy":"aaa@foo.com","lastModifiedByType":"User","lastModifiedAt":"2024-04-18T03:49:33.192Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"674368bb-7eaa-4100-aef7-138f65f50648","permissions":{"keys":["all"],"secrets":["all"],"certificates":["get","list"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2025-04-16T01:59:49.81Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2025-04-16T02:01:27.954Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"b5ee6c06-c2c2-4e3c-8606-5f170cee077a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"b5ee6c06-c2c2-4e3c-8606-5f170cee077a","objectId":"9aec9bf7-7066-4c57-bc6d-3bc7935e826d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["list","get"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1571'
+      - '1584'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:33 GMT
+      - Wed, 16 Apr 2025 02:01:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1184,11 +1194,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japanwest/e300b655-c9b8-45c2-b6c0-d00cc0dbe356
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: F98F1B2950FA4E71B04C55CD4A6EA1C2 Ref B: TYO201151002060 Ref C: 2024-04-18T03:49:32Z'
+      - 'Ref A: F6879E12FFFB4471A08BE1A9DF2C7A7A Ref B: TYO201151006054 Ref C: 2025-04-16T02:01:27Z'
     status:
       code: 200
       message: OK
@@ -1206,9 +1220,9 @@ interactions:
       ParameterSetName:
       - --id --description --no-wait
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}'
@@ -1220,7 +1234,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:35 GMT
+      - Wed, 16 Apr 2025 02:01:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1234,9 +1248,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/61ac0366-80d0-496d-912b-29bd65af78b7
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 992C3CFD892E49EAAEB42C85A3B8823E Ref B: TYO201151005054 Ref C: 2024-04-18T03:49:35Z'
+      - 'Ref A: BBC4D904C8EB4487AC6E420B7354A9B1 Ref B: TYO201100117031 Ref C: 2025-04-16T02:01:28Z'
     status:
       code: 200
       message: OK
@@ -1260,16 +1278,16 @@ interactions:
       ParameterSetName:
       - --id --description --no-wait
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"712746be1dc443bfa8016e483ab310a8","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"d957cebf0e714dff9a60230a1cd7b7b6","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01&kv-operation=eyJjb2RlIjoicHJpdmF0ZUVuZHBvaW50Q29ubmVjdGlvbnMvcmVqZWN0Iiwic3QiOiIyMDI0LTA0LTE4VDAzOjQ5OjM3Ljk1NDEwNzlaIiwiZXRhZyI6IjcxMjc0NmJlMWRjNDQzYmZhODAxNmU0ODNhYjMxMGE4In0
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01&kv-operation=eyJjb2RlIjoicHJpdmF0ZUVuZHBvaW50Q29ubmVjdGlvbnMvcmVqZWN0Iiwic3QiOiIyMDI1LTA0LTE2VDAyOjAxOjMwLjQzNzQ3NDZaIiwiZXRhZyI6ImQ5NTdjZWJmMGU3MTRkZmY5YTYwMjMwYTFjZDdiN2I2In0
       cache-control:
       - no-cache
       content-length:
@@ -1277,7 +1295,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:39 GMT
+      - Wed, 16 Apr 2025 02:01:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1291,11 +1309,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/3857d688-93a4-4a25-a582-7e80d8fe4a2c
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 81DD84F2CCF249F6BA7307EC82F6517E Ref B: TYO201151005054 Ref C: 2024-04-18T03:49:35Z'
+      - 'Ref A: 7375B513E77A48D398E58C6855832051 Ref B: TYO201100117031 Ref C: 2025-04-16T02:01:29Z'
     status:
       code: 200
       message: OK
@@ -1313,12 +1335,12 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"712746be1dc443bfa8016e483ab310a8","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"d957cebf0e714dff9a60230a1cd7b7b6","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1328,7 +1350,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:40 GMT
+      - Wed, 16 Apr 2025 02:01:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1342,9 +1364,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/926d9fb6-37e2-4661-9bda-8aab1c92b53b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 4595B4F7308C45CDA3FFE1B0982401CB Ref B: TYO201100117021 Ref C: 2024-04-18T03:49:41Z'
+      - 'Ref A: A4ED36EB28CF4B2491C26069525C062E Ref B: TYO201100113027 Ref C: 2025-04-16T02:01:32Z'
     status:
       code: 200
       message: OK
@@ -1362,12 +1388,12 @@ interactions:
       ParameterSetName:
       - --id --created
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"712746be1dc443bfa8016e483ab310a8","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"d957cebf0e714dff9a60230a1cd7b7b6","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1377,7 +1403,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:49:43 GMT
+      - Wed, 16 Apr 2025 02:01:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1391,9 +1417,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/f8a536c9-35f4-45e8-97be-1a6bf315941a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: EDE8C38C8881453D9F293E637ADB305A Ref B: TYO201151003011 Ref C: 2024-04-18T03:49:43Z'
+      - 'Ref A: 7EEA6CD148164B85A8CC4A61E9DF8F62 Ref B: TYO201100115021 Ref C: 2025-04-16T02:01:33Z'
     status:
       code: 200
       message: OK
@@ -1411,61 +1441,12 @@ interactions:
       ParameterSetName:
       - --id --created
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"712746be1dc443bfa8016e483ab310a8","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
-        are rejected!","actionsRequired":"None"}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '697'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 18 Apr 2024 03:50:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-keyvault-service-version:
-      - 1.5.1144.0
-      x-msedge-ref:
-      - 'Ref A: 3F51A5DCCF364A5DB249F7EE5193D160 Ref B: TYO201151003011 Ref C: 2024-04-18T03:50:14Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - keyvault private-endpoint-connection wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --id --created
-      User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"6b8c685547e1481686cd64cc1c7f31c4","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"f27f3cbfb8dc41c2ab9e6a089191038e","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1475,7 +1456,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:50:45 GMT
+      - Wed, 16 Apr 2025 02:02:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1489,9 +1470,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/d1c9765c-8290-4366-bc7a-98a8c43868f1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: F05333C6B1A344F5ABA8BA7DF1503BC6 Ref B: TYO201151003011 Ref C: 2024-04-18T03:50:45Z'
+      - 'Ref A: 9C8B7B310AD34F468DE6F19D22D79882 Ref B: TYO201100115021 Ref C: 2025-04-16T02:02:07Z'
     status:
       code: 200
       message: OK
@@ -1509,12 +1494,12 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"6b8c685547e1481686cd64cc1c7f31c4","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"f27f3cbfb8dc41c2ab9e6a089191038e","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1524,7 +1509,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:50:47 GMT
+      - Wed, 16 Apr 2025 02:02:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1538,9 +1523,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/2ab5cf9e-35e9-427f-af33-5c1034ba9720
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 6FAD5A19AA1840CDBC365354E8CB4473 Ref B: TYO201100115031 Ref C: 2024-04-18T03:50:47Z'
+      - 'Ref A: 04D0AA9A33E24EA5BFDDA35180A339CC Ref B: TYO201100117017 Ref C: 2025-04-16T02:02:10Z'
     status:
       code: 200
       message: OK
@@ -1558,7 +1547,7 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27%20and%20name%20eq%20%27cli-test-kv-pec-000002%27&api-version=2015-11-01
   response:
@@ -1572,7 +1561,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:50:48 GMT
+      - Wed, 16 Apr 2025 02:02:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1583,8 +1572,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: FE9B1B79080C4BF5B0EEE3548DCD4C7C Ref B: TYO201100116027 Ref C: 2024-04-18T03:50:48Z'
+      - 'Ref A: 41EA7020BBC044498FA25DE24BEE1FA0 Ref B: TYO201100116029 Ref C: 2025-04-16T02:02:11Z'
     status:
       code: 200
       message: OK
@@ -1602,12 +1593,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"6b8c685547e1481686cd64cc1c7f31c4","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"f27f3cbfb8dc41c2ab9e6a089191038e","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1617,7 +1608,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:50:50 GMT
+      - Wed, 16 Apr 2025 02:02:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1631,14 +1622,18 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/6ebc56f3-5275-446d-b3c2-f0a094648c23
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: BAEDBAE1976C4EE1ABA9BE58B6A4EF2C Ref B: TYO201100114021 Ref C: 2024-04-18T03:50:49Z'
+      - 'Ref A: 682847B534284D05A2806F3581AF9E35 Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:12Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"etag": "6b8c685547e1481686cd64cc1c7f31c4", "properties": {"privateEndpoint":
+    body: '{"etag": "f27f3cbfb8dc41c2ab9e6a089191038e", "properties": {"privateEndpoint":
       {}, "privateLinkServiceConnectionState": {"status": "Approved", "description":
       "You are approved!", "actionsRequired": "None"}, "provisioningState": "Succeeded"}}'
     headers:
@@ -1657,16 +1652,16 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01&kv-operation=eyJjb2RlIjoicHJpdmF0ZUVuZHBvaW50Q29ubmVjdGlvbnMvYXBwcm92ZSIsInN0IjoiMjAyNC0wNC0xOFQwMzo1MDo1Mi4yMjI4ODg0WiIsImV0YWciOiIwY2MwZTczNjhhNzY0ZWRlOTAwOTZiZDRmYTZmMDg2YyJ9
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01&kv-operation=eyJjb2RlIjoicHJpdmF0ZUVuZHBvaW50Q29ubmVjdGlvbnMvYXBwcm92ZSIsInN0IjoiMjAyNS0wNC0xNlQwMjowMjoxNC4wMjIxMzI3WiIsImV0YWciOiI5YjA0OGYxNWRjZjU0OGMwOGNkZThjMTBjMDc1N2QxZCJ9
       cache-control:
       - no-cache
       content-length:
@@ -1674,7 +1669,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:50:53 GMT
+      - Wed, 16 Apr 2025 02:02:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1688,11 +1683,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/655430f6-bf97-4ddb-8767-e32bd1018c6f
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: C3B907D905C04066A5908A34BE459481 Ref B: TYO201100114021 Ref C: 2024-04-18T03:50:50Z'
+      - 'Ref A: 6A6083F6F07142DA8813D625C9024757 Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:13Z'
     status:
       code: 200
       message: OK
@@ -1710,12 +1709,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1725,7 +1724,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:50:54 GMT
+      - Wed, 16 Apr 2025 02:02:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1739,9 +1738,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/f2a31fb4-9e8b-4e86-a3da-d46480d52f3c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: D5BE410E783A4EE49B274D91FFF2AEA2 Ref B: TYO201100114021 Ref C: 2024-04-18T03:50:54Z'
+      - 'Ref A: 66987FB3A02344D4886E254392705ECD Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:16Z'
     status:
       code: 200
       message: OK
@@ -1759,12 +1762,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1774,7 +1777,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:50:56 GMT
+      - Wed, 16 Apr 2025 02:02:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1788,9 +1791,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/b73d8476-5f59-4e03-aabd-da50e1872aae
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: 035B2CA5936B4DA68F114165B4B8453E Ref B: TYO201100114021 Ref C: 2024-04-18T03:50:55Z'
+      - 'Ref A: B6E5FC2A6FB941E6B908FE614B3B1213 Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:17Z'
     status:
       code: 200
       message: OK
@@ -1808,12 +1815,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1823,7 +1830,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:50:58 GMT
+      - Wed, 16 Apr 2025 02:02:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1837,9 +1844,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/674812e7-8e85-427c-9be6-a7aef8d595f1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3747'
       x-msedge-ref:
-      - 'Ref A: B3F05833E26D4FE8805D1909608A05AD Ref B: TYO201100114021 Ref C: 2024-04-18T03:50:57Z'
+      - 'Ref A: 6DD21110399147A88F2C5B58262DC876 Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:19Z'
     status:
       code: 200
       message: OK
@@ -1857,12 +1868,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1872,7 +1883,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:51:00 GMT
+      - Wed, 16 Apr 2025 02:02:20 GMT
       expires:
       - '-1'
       pragma:
@@ -1886,9 +1897,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/d5b90368-7b4c-4977-ba96-b5ebcf58d4c0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 059D9EE842484898B62A764358B7FE89 Ref B: TYO201100114021 Ref C: 2024-04-18T03:50:59Z'
+      - 'Ref A: 74CD9490E1474AB6A7F9F4A0A1F8BCF9 Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:20Z'
     status:
       code: 200
       message: OK
@@ -1906,12 +1921,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1921,7 +1936,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:51:01 GMT
+      - Wed, 16 Apr 2025 02:02:22 GMT
       expires:
       - '-1'
       pragma:
@@ -1935,9 +1950,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/cac16684-96b9-41d7-90a4-8b463a859722
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: E677EE53041641C9A5C419BEC1CA1F64 Ref B: TYO201100114021 Ref C: 2024-04-18T03:51:02Z'
+      - 'Ref A: 34EF863EC3534F34B3F3610C6C39287F Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:22Z'
     status:
       code: 200
       message: OK
@@ -1955,12 +1974,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1970,7 +1989,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:51:03 GMT
+      - Wed, 16 Apr 2025 02:02:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1984,9 +2003,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/bbb3b4b5-87bc-48f9-8e7f-90a42eab1559
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 8054218BB5324949B2FC4AEB71D52A4C Ref B: TYO201100114021 Ref C: 2024-04-18T03:51:03Z'
+      - 'Ref A: A8B21F33E1CB48A48DF671432E23FC34 Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:24Z'
     status:
       code: 200
       message: OK
@@ -2004,12 +2027,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -2019,7 +2042,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:51:05 GMT
+      - Wed, 16 Apr 2025 02:02:25 GMT
       expires:
       - '-1'
       pragma:
@@ -2033,9 +2056,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/262ea8c9-f423-4d1c-a366-58e9c0d0234e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 7E087C7A0A1F4852B7DF1D6BCA2D420E Ref B: TYO201100114021 Ref C: 2024-04-18T03:51:05Z'
+      - 'Ref A: 50CD88954A01412DA94F03CE2FB1D82C Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:26Z'
     status:
       code: 200
       message: OK
@@ -2053,12 +2080,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -2068,7 +2095,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:51:07 GMT
+      - Wed, 16 Apr 2025 02:02:27 GMT
       expires:
       - '-1'
       pragma:
@@ -2082,9 +2109,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/e5332763-446b-48f2-9acf-0dc3b91db411
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: D3F33CD13F5543EBB55DAA4BD118D487 Ref B: TYO201100114021 Ref C: 2024-04-18T03:51:07Z'
+      - 'Ref A: 8BD23905424443F4A221FA45B6162D87 Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:27Z'
     status:
       code: 200
       message: OK
@@ -2102,12 +2133,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -2117,7 +2148,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:51:09 GMT
+      - Wed, 16 Apr 2025 02:02:29 GMT
       expires:
       - '-1'
       pragma:
@@ -2131,9 +2162,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/228663cf-b435-4046-acda-828cf55085b2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: DA0370946DFE4542AA39CD7F5EB402D7 Ref B: TYO201100114021 Ref C: 2024-04-18T03:51:09Z'
+      - 'Ref A: CFCA61D2833F42AB949166754D16C2B5 Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:29Z'
     status:
       code: 200
       message: OK
@@ -2151,12 +2186,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0cc0e7368a764ede90096bd4fa6f086c","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"9b048f15dcf548c08cde8c10c0757d1d","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -2166,7 +2201,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2024 03:51:11 GMT
+      - Wed, 16 Apr 2025 02:02:31 GMT
       expires:
       - '-1'
       pragma:
@@ -2180,9 +2215,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.1144.0
+      - 2.2.55.0
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/japaneast/6d0b75d9-5bc1-44fe-80cb-06e08e71079a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 35DDD544751E45548B5B3C419C10145A Ref B: TYO201100114021 Ref C: 2024-04-18T03:51:11Z'
+      - 'Ref A: DAA28201E7AB446E9E5251AE190A3165 Ref B: TYO201100117025 Ref C: 2025-04-16T02:02:31Z'
     status:
       code: 200
       message: OK

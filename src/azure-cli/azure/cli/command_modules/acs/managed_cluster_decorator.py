@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_OUTBOUND_TYPE_NONE,
     CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
@@ -39,6 +40,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
     CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_DNS_ZONE_CONTRIBUTOR_ROLE,
+    CONST_ARTIFACT_SOURCE_CACHE,
+    CONST_NONE_UPGRADE_CHANNEL,
 )
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
@@ -106,7 +109,7 @@ from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand, LongRunningOperation
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json
+from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json, read_file_content
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
@@ -881,6 +884,30 @@ class AKSManagedClusterContext(BaseAKSContext):
                 )
 
         return disable_keda
+
+    def get_custom_ca_trust_certificates(self) -> Union[List[bytes], None]:
+        """Obtain the value of custom ca trust certificates.
+        :return: List[str] or None
+        """
+        custom_ca_certs_file_path = self.raw_param.get("custom_ca_trust_certificates")
+        if not custom_ca_certs_file_path:
+            return None
+        if not os.path.isfile(custom_ca_certs_file_path):
+            raise InvalidArgumentValueError(
+                "{} is not valid file, or not accessible.".format(
+                    custom_ca_certs_file_path
+                )
+            )
+        # CAs are supposed to be separated with a new line, we filter out empty strings (e.g. some stray new line). We only allow up to 10 CAs
+        file_content = read_file_content(custom_ca_certs_file_path).split(os.linesep + os.linesep)
+        certs = [str.encode(x) for x in file_content if len(x) > 1]
+        if len(certs) > 10:
+            raise InvalidArgumentValueError(
+                "Only up to 10 new-line separated CAs can be passed, got {} instead.".format(
+                    len(certs)
+                )
+            )
+        return certs
 
     def get_snapshot_controller(self) -> Optional[ManagedClusterStorageProfileSnapshotController]:
         """Obtain the value of storage_profile.snapshot_controller
@@ -2053,19 +2080,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         nat_gateway_managed_outbound_ip_count = self.raw_param.get("nat_gateway_managed_outbound_ip_count")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if nat_gateway_managed_outbound_ip_count is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.nat_gateway_profile and
-                self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile and
-                self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile.count is not None
-            ):
-                nat_gateway_managed_outbound_ip_count = (
-                    self.mc.network_profile.nat_gateway_profile.managed_outbound_ip_profile.count
-                )
-
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return nat_gateway_managed_outbound_ip_count
@@ -2079,17 +2093,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         nat_gateway_idle_timeout = self.raw_param.get("nat_gateway_idle_timeout")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if nat_gateway_idle_timeout is None and self.decorator_mode == DecoratorMode.UPDATE:
-            if (
-                self.mc and
-                self.mc.network_profile and
-                self.mc.network_profile.nat_gateway_profile and
-                self.mc.network_profile.nat_gateway_profile.idle_timeout_in_minutes is not None
-            ):
-                nat_gateway_idle_timeout = (
-                    self.mc.network_profile.nat_gateway_profile.idle_timeout_in_minutes
-                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -2171,15 +2174,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
 
         This function supports the option of enable_validation. When enabled, if the value of outbound_type is
-        CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY or
-        CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, the following checks will be performed. If load_balancer_sku is set
+        CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY
+        CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING or CONST_OUTBOUND_TYPE_NONE, the following checks will be performed. If load_balancer_sku is set
         to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not assigned,
         a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
-        load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
-        will be raised.
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
-        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
-        parameters, the value in load_balancer_profile will be used for validation.
 
         :return: string or None
         """
@@ -2187,7 +2186,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         outbound_type = self.raw_param.get("outbound_type")
         # try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if outbound_type is None and self.decorator_mode != DecoratorMode.CREATE:
+        if outbound_type is None:
             if (
                 self.mc and
                 self.mc.network_profile and
@@ -2200,58 +2199,79 @@ class AKSManagedClusterContext(BaseAKSContext):
         if read_only:
             return outbound_type
 
+        isBasicSKULb = safe_lower(self._get_load_balancer_sku(enable_validation=False)) == CONST_LOAD_BALANCER_SKU_BASIC
         # dynamic completion
-        if (
-            self.decorator_mode == DecoratorMode.CREATE and
-            not read_from_mc and
-            outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY and
-            outbound_type != CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY and
-            outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-        ):
+        if not read_from_mc and not isBasicSKULb and outbound_type is None:
             outbound_type = CONST_OUTBOUND_TYPE_LOAD_BALANCER
 
         # validation
         # Note: The parameters involved in the validation are not verified in their own getters.
         if enable_validation:
-            if outbound_type in [
-                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+            if not read_from_mc and outbound_type is not None and outbound_type not in [
+                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                 CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
                 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                CONST_OUTBOUND_TYPE_NONE,
             ]:
-                if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == CONST_LOAD_BALANCER_SKU_BASIC:
+                raise InvalidArgumentValueError(
+                    "Invalid outbound type, supported values are loadBalancer, managedNATGateway, userAssignedNATGateway, "
+                    "userDefinedRouting and none. Please refer to "
+                    "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
+                    "for more details."
+                )
+            if isBasicSKULb:
+                if outbound_type is not None:
                     raise InvalidArgumentValueError(
-                        "userDefinedRouting doesn't support basic load balancer sku"
+                        "{outbound_type} doesn't support basic load balancer sku".format(outbound_type=outbound_type)
                     )
+                return outbound_type  # basic sku lb doesn't support outbound type
 
-                if outbound_type in [
-                    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
-                    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
-                ]:
-                    if self.get_vnet_subnet_id() in ["", None]:
-                        raise RequiredArgumentMissingError(
-                            "--vnet-subnet-id must be specified for userDefinedRouting and it must "
-                            "be pre-configured with a route table with egress rules"
-                        )
-
-                if outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
-                    if (
-                        self.get_load_balancer_managed_outbound_ip_count() or
-                        self.get_load_balancer_managed_outbound_ipv6_count() or
-                        self.get_load_balancer_outbound_ips() or
-                        self.get_load_balancer_outbound_ip_prefixes()
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            outbound_type + " doesn't support customizing "
-                            "a standard load balancer with IP addresses"
-                        )
-                if outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
-                    if (
-                        self.get_nat_gateway_managed_outbound_ip_count()
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            outbound_type + " doesn't support customizing "
-                            "a standard nat gateway with IP addresses"
-                        )
+            if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+                if self.get_vnet_subnet_id() in ["", None]:
+                    raise RequiredArgumentMissingError(
+                        "--vnet-subnet-id must be specified for userDefinedRouting and it must "
+                        "be pre-configured with a route table with egress rules"
+                    )
+            if outbound_type == CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY:
+                if self.get_vnet_subnet_id() in ["", None]:
+                    raise RequiredArgumentMissingError(
+                        "--vnet-subnet-id must be specified for userAssignedNATGateway and it must "
+                        "be pre-configured with a NAT gateway with outbound ips"
+                    )
+            if outbound_type == CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
+                if self.get_vnet_subnet_id() not in ["", None]:
+                    raise InvalidArgumentValueError(
+                        "--vnet-subnet-id cannot be specified for managedNATGateway"
+                    )
+            if outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
+                if (
+                    self.get_load_balancer_managed_outbound_ip_count() or
+                    self.get_load_balancer_managed_outbound_ipv6_count() or
+                    self.get_load_balancer_outbound_ips() or
+                    self.get_load_balancer_outbound_ip_prefixes()
+                ):
+                    raise MutuallyExclusiveArgumentError(
+                        outbound_type + " type doesn't support customizing "
+                        "the standard load balancer ips"
+                    )
+                if (
+                    self.get_load_balancer_idle_timeout() or
+                    self.get_load_balancer_outbound_ports()
+                ):
+                    raise MutuallyExclusiveArgumentError(
+                        outbound_type + " type doesn't support customizing "
+                        "the standard load balancer config"
+                    )
+            if outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
+                if (
+                    self.get_nat_gateway_managed_outbound_ip_count() or
+                    self.get_nat_gateway_idle_timeout()
+                ):
+                    raise MutuallyExclusiveArgumentError(
+                        outbound_type + " type doesn't support customizing "
+                        "the standard nat gateway ips"
+                    )
         return outbound_type
 
     def get_outbound_type(
@@ -2263,16 +2283,6 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         When outbound_type is not assigned, dynamic completion will be triggerd. By default, the value is set to
         CONST_OUTBOUND_TYPE_LOAD_BALANCER.
-
-        This function will verify the parameter by default. If the value of outbound_type is
-        CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, the following checks will be performed. If load_balancer_sku is set
-        to basic, an InvalidArgumentValueError will be raised. If vnet_subnet_id is not assigned,
-        a RequiredArgumentMissingError will be raised. If any of load_balancer_managed_outbound_ip_count,
-        load_balancer_outbound_ips or load_balancer_outbound_ip_prefixes is assigned, a MutuallyExclusiveArgumentError
-        will be raised.
-
-        This function supports the option of load_balancer_profile, if provided, when verifying loadbalancer-related
-        parameters, the value in load_balancer_profile will be used for validation.
 
         :return: string or None
         """
@@ -5265,6 +5275,16 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return self.raw_param.get("if_none_match")
 
+    def get_bootstrap_artifact_source(self) -> Union[str, None]:
+        """Obtain the value of bootstrap_artifact_source.
+        """
+        return self.raw_param.get("bootstrap_artifact_source")
+
+    def get_bootstrap_container_registry_resource_id(self) -> Union[str, None]:
+        """Obtain the value of bootstrap_container_registry_resource_id.
+        """
+        return self.raw_param.get("bootstrap_container_registry_resource_id")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -6155,6 +6175,22 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
         return mc
 
+    def set_up_custom_ca_trust_certificates(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up Custom CA Trust Certificates for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ca_certs = self.context.get_custom_ca_trust_certificates()
+        if ca_certs:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
+
+            mc.security_profile.custom_ca_trust_certificates = ca_certs
+
+        return mc
+
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up api server access profile and fqdn subdomain for the ManagedCluster object.
 
@@ -6527,6 +6563,24 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.node_resource_group_profile = node_resource_group_profile
         return mc
 
+    def set_up_bootstrap_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        bootstrap_artifact_source = self.context.get_bootstrap_artifact_source()
+        bootstrap_container_registry_resource_id = self.context.get_bootstrap_container_registry_resource_id()
+        if hasattr(mc, "bootstrap_profile") and bootstrap_artifact_source is not None:
+            if bootstrap_artifact_source != CONST_ARTIFACT_SOURCE_CACHE and bootstrap_container_registry_resource_id:
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --bootstrap-container-registry-resource-id when "
+                    "--bootstrap-artifact-source is not Cache."
+                )
+            if mc.bootstrap_profile is None:
+                mc.bootstrap_profile = self.models.ManagedClusterBootstrapProfile()  # pylint: disable=no-member
+            mc.bootstrap_profile.artifact_source = bootstrap_artifact_source
+            mc.bootstrap_profile.container_registry_id = bootstrap_container_registry_resource_id
+
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -6594,6 +6648,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_workload_auto_scaler_profile(mc)
         # set up app routing profile
         mc = self.set_up_ingress_web_app_routing(mc)
+        # set up custom ca trust certificates
+        mc = self.set_up_custom_ca_trust_certificates(mc)
 
         # setup k8s support plan
         mc = self.set_up_k8s_support_plan(mc)
@@ -6607,6 +6663,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_metrics_profile(mc)
         # set up node resource group profile
         mc = self.set_up_node_resource_group_profile(mc)
+        # set up bootstrap profile
+        mc = self.set_up_bootstrap_profile(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -7189,29 +7247,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         outboundType = self.context.get_outbound_type()
         if outboundType:
-            vnet_subnet_id = self.context.get_vnet_subnet_id()
-            if vnet_subnet_id is None and outboundType not in [
-                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
-                CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
-                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-            ]:
-                raise InvalidArgumentValueError(
-                    "Invalid outbound type, supported values are loadBalancer, managedNATGateway and "
-                    "userDefinedRouting. Please refer to "
-                    "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
-                    "for more details."
-                )
-            if vnet_subnet_id is not None and outboundType not in [
-                CONST_OUTBOUND_TYPE_LOAD_BALANCER,
-                CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
-                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-            ]:
-                raise InvalidArgumentValueError(
-                    "Invalid outbound type, supported values are loadBalancer, userAssignedNATGateway and "
-                    "userDefinedRouting. Please refer to "
-                    "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
-                    "for more details."
-                )
             mc.network_profile.outbound_type = outboundType
         return mc
 
@@ -7262,9 +7297,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.network_profile.nat_gateway_profile = None
         else:
             mc.network_profile.nat_gateway_profile = _update_nat_gateway_profile(
-                self.context.get_nat_gateway_managed_outbound_ip_count(),
-                self.context.get_nat_gateway_idle_timeout(),
-                mc.network_profile.nat_gateway_profile,
+                managed_outbound_ip_count=self.context.get_nat_gateway_managed_outbound_ip_count(),
+                idle_timeout=self.context.get_nat_gateway_idle_timeout(),
+                profile=mc.network_profile.nat_gateway_profile,
                 models=self.models.nat_gateway_models,
             )
         return mc
@@ -8074,6 +8109,22 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_custom_ca_trust_certificates(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update Custom CA Trust Certificates for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ca_certs = self.context.get_custom_ca_trust_certificates()
+        if ca_certs:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
+
+            mc.security_profile.custom_ca_trust_certificates = ca_certs
+
+        return mc
+
     def update_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update azure monitor profile for the ManagedCluster object.
         :return: the ManagedCluster object
@@ -8391,6 +8442,24 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_bootstrap_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        bootstrap_artifact_source = self.context.get_bootstrap_artifact_source()
+        bootstrap_container_registry_resource_id = self.context.get_bootstrap_container_registry_resource_id()
+        if hasattr(mc, "bootstrap_profile") and bootstrap_artifact_source is not None:
+            if bootstrap_artifact_source != CONST_ARTIFACT_SOURCE_CACHE and bootstrap_container_registry_resource_id:
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --bootstrap-container-registry-resource-id when "
+                    "--bootstrap-artifact-source is not Cache."
+                )
+            if mc.bootstrap_profile is None:
+                mc.bootstrap_profile = self.models.ManagedClusterBootstrapProfile()  # pylint: disable=no-member
+            mc.bootstrap_profile.artifact_source = bootstrap_artifact_source
+            mc.bootstrap_profile.container_registry_id = bootstrap_container_registry_resource_id
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -8438,6 +8507,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_oidc_issuer_profile(mc)
         # update auto upgrade profile
         mc = self.update_auto_upgrade_profile(mc)
+        # update custom ca trust certificates
+        mc = self.update_custom_ca_trust_certificates(mc)
         # update identity
         mc = self.update_identity(mc)
         # update addon profiles
@@ -8470,6 +8541,40 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_metrics_profile(mc)
         # update node resource group profile
         mc = self.update_node_resource_group_profile(mc)
+        # update bootstrap profile
+        mc = self.update_bootstrap_profile(mc)
+        # update kubernetes version and orchestrator version
+        mc = self.update_kubernetes_version_and_orchestrator_version(mc)
+        return mc
+
+    def update_kubernetes_version_and_orchestrator_version(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update kubernetes version and orchestrator version for the ManagedCluster object.
+
+        :param mc: The ManagedCluster object to be updated.
+        :return: The updated ManagedCluster object.
+        """
+        self._ensure_mc(mc)
+
+        # Check if auto_upgrade_channel is set to "none"
+        auto_upgrade_channel = self.context.get_auto_upgrade_channel()
+        if auto_upgrade_channel == CONST_NONE_UPGRADE_CHANNEL:
+            warning_message = (
+                "Since auto-upgrade-channel is set to none, cluster kubernetesVersion will be set to the value of "
+                "currentKubernetesVersion, all agent pools orchestratorVersion will be set to the value of "
+                "currentOrchestratorVersion respectively. Continue?"
+            )
+            if not self.context.get_yes() and not prompt_y_n(warning_message, default="n"):
+                raise DecoratorEarlyExitException()
+
+            # Set kubernetes version to match the current kubernetes version if it has a value
+            if mc.current_kubernetes_version:
+                mc.kubernetes_version = mc.current_kubernetes_version
+
+            # Set orchestrator version for each agent pool to match the current orchestrator version if it has a value
+            for agent_pool in mc.agent_pool_profiles:
+                if agent_pool.current_orchestrator_version:
+                    agent_pool.orchestrator_version = agent_pool.current_orchestrator_version
+
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:

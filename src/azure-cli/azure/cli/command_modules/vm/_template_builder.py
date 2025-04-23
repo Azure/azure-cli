@@ -308,7 +308,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
         enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
-        enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None):
+        enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
+        zone_placement_policy=None, include_zones=None, exclude_zones=None, align_regional_disks_to_vm_zone=None,
+        wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
+        imds_access_control_profile_reference_id=None, key_incarnation_id=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -572,6 +575,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         if disk_controller_type is not None:
             profile['diskControllerType'] = disk_controller_type
 
+        if align_regional_disks_to_vm_zone is not None:
+            profile['alignRegionalDisksToVMZone'] = align_regional_disks_to_vm_zone
+
         return profile
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
@@ -664,22 +670,42 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
 
     proxy_agent_settings = {}
+    wire_server = {}
+    imds = {}
     if enable_proxy_agent is not None:
         proxy_agent_settings['enabled'] = enable_proxy_agent
 
     if proxy_agent_mode is not None:
         proxy_agent_settings['mode'] = proxy_agent_mode
 
+    if key_incarnation_id is not None:
+        proxy_agent_settings['keyIncarnationId'] = key_incarnation_id
+
+    if wire_server_mode is not None or wire_server_access_control_profile_reference_id is not None:
+        wire_server['mode'] = wire_server_mode
+        wire_server['inVMAccessControlProfileReferenceId'] = wire_server_access_control_profile_reference_id
+
+    if imds_mode is not None or imds_access_control_profile_reference_id is not None:
+        imds['mode'] = imds_mode
+        imds['inVMAccessControlProfileReferenceId'] = imds_access_control_profile_reference_id
+
+    if wire_server:
+        proxy_agent_settings['wireServer'] = wire_server
+
+    if imds:
+        proxy_agent_settings['imds'] = imds
+
     if proxy_agent_settings:
         vm_properties['securityProfile']['proxyAgentSettings'] = proxy_agent_settings
 
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
     # after changing the default values to Trusted Launch VMs in the future.
-    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
-    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+    if security_type is not None:
         vm_properties['securityProfile']['securityType'] = security_type
 
-    if enable_secure_boot is not None or enable_vtpm is not None:
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (
+            enable_secure_boot is not None or enable_vtpm is not None):
         vm_properties['securityProfile']['uefiSettings'] = {
             'secureBootEnabled': enable_secure_boot,
             'vTpmEnabled': enable_vtpm
@@ -725,6 +751,16 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     if edge_zone:
         vm['extendedLocation'] = edge_zone
+
+    placement = {}
+    if zone_placement_policy is not None:
+        placement['zonePlacementPolicy'] = zone_placement_policy
+    if include_zones is not None:
+        placement['includeZones'] = include_zones
+    if exclude_zones is not None:
+        placement['excludeZones'] = exclude_zones
+    if placement:
+        vm['Placement'] = placement
 
     return vm
 
@@ -1004,7 +1040,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                         enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
-                        security_posture_reference_is_overridable=None, zone_balance=None):
+                        security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
+                        imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                        imds_access_control_profile_reference_id=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1506,22 +1544,39 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
     # after changing the default values to Trusted Launch VMs in the future.
-    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
-    if security_type is not None and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+    if security_type is not None:
         security_profile['securityType'] = security_type
 
-    if enable_secure_boot is not None or enable_vtpm is not None:
+    from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
+    if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (
+            enable_secure_boot is not None or enable_vtpm is not None):
         security_profile['uefiSettings'] = {
             'secureBootEnabled': enable_secure_boot,
             'vTpmEnabled': enable_vtpm
         }
 
     proxy_agent_settings = {}
+    wire_server = {}
+    imds = {}
     if enable_proxy_agent is not None:
         proxy_agent_settings['enabled'] = enable_proxy_agent
 
     if proxy_agent_mode is not None:
         proxy_agent_settings['mode'] = proxy_agent_mode
+
+    if wire_server_mode is not None or wire_server_access_control_profile_reference_id is not None:
+        wire_server['mode'] = wire_server_mode
+        wire_server['inVMAccessControlProfileReferenceId'] = wire_server_access_control_profile_reference_id
+
+    if imds_mode is not None or imds_access_control_profile_reference_id is not None:
+        imds['mode'] = imds_mode
+        imds['inVMAccessControlProfileReferenceId'] = imds_access_control_profile_reference_id
+
+    if wire_server:
+        proxy_agent_settings['wireServer'] = wire_server
+
+    if imds:
+        proxy_agent_settings['imds'] = imds
 
     if proxy_agent_settings:
         security_profile['proxyAgentSettings'] = proxy_agent_settings
@@ -1614,16 +1669,16 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
 
 def build_av_set_resource(cmd, name, location, tags, platform_update_domain_count,
-                          platform_fault_domain_count, unmanaged, proximity_placement_group=None):
+                          platform_fault_domain_count, unmanaged, proximity_placement_group=None,
+                          additional_scheduled_events=None,
+                          enable_user_reboot_scheduled_events=None,
+                          enable_user_redeploy_scheduled_events=None):
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
         'location': location,
         'tags': tags,
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='availability_sets'),
-        "properties": {
-            'platformFaultDomainCount': platform_fault_domain_count,
-        }
     }
 
     if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='availability_sets'):
@@ -1631,13 +1686,40 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
             'name': 'Classic' if unmanaged else 'Aligned'
         }
 
+    properties = {"platformFaultDomainCount": platform_fault_domain_count}
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+
+    if scheduled_events_policy:
+        properties['scheduledEventsPolicy'] = scheduled_events_policy
+
     # server defaults the UD to 5 unless set otherwise
     if platform_update_domain_count is not None:
-        av_set['properties']['platformUpdateDomainCount'] = platform_update_domain_count
+        properties['platformUpdateDomainCount'] = platform_update_domain_count
 
     if proximity_placement_group:
-        av_set['properties']['proximityPlacementGroup'] = {'id': proximity_placement_group}
+        properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
+    av_set["properties"] = properties
     return av_set
 
 

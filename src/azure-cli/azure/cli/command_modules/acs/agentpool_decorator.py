@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import base64
 from math import isnan
 from types import SimpleNamespace
 from typing import Dict, List, Tuple, TypeVar, Union
@@ -41,7 +42,7 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import get_file_json, sdk_no_wait
+from azure.cli.core.util import get_file_json, sdk_no_wait, read_file_content
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -389,6 +390,37 @@ class AKSAgentPoolContext(BaseAKSContext):
         else:
             crg_id = raw_value
         return crg_id
+
+    def get_message_of_the_day(self) -> Union[str, None]:
+        """Obtain the value of message_of_the_day.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        message_of_the_day = None
+        message_of_the_day_file_path = self.raw_param.get("message_of_the_day")
+
+        if message_of_the_day_file_path:
+            if not os.path.isfile(message_of_the_day_file_path):
+                raise InvalidArgumentValueError(
+                    f"{message_of_the_day_file_path} is not valid file, or not accessible."
+                )
+            message_of_the_day = read_file_content(
+                message_of_the_day_file_path)
+            message_of_the_day = base64.b64encode(
+                bytes(message_of_the_day, 'ascii')).decode('ascii')
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "message_of_the_day") and
+            self.agentpool.message_of_the_day is not None
+        ):
+            message_of_the_day = self.agentpool.message_of_the_day
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return message_of_the_day
 
     def get_enable_vtpm(self) -> bool:
         return self._get_enable_vtpm(enable_validation=True)
@@ -1519,6 +1551,35 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self.raw_param.get("if_none_match")
 
+    def _get_gpu_driver(self) -> Union[str, None]:
+        """Obtain the value of gpu_driver.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        gpu_driver = self.raw_param.get("gpu_driver")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "gpu_profile") and      # backward compatibility
+                self.agentpool.gpu_profile and
+                self.agentpool.gpu_profile.driver is not None
+            ):
+                gpu_driver = self.agentpool.gpu_profile.driver
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return gpu_driver
+
+    def get_gpu_driver(self) -> Union[str, None]:
+        """Obtain the value of gpu_driver.
+
+        :return: string or None
+        """
+        return self._get_gpu_driver()
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1797,6 +1858,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
+    def set_up_motd(self, agentpool: AgentPool) -> AgentPool:
+        """Set up message of the day for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.message_of_the_day = self.context.get_message_of_the_day()
+        return agentpool
+
     def set_up_gpu_properties(self, agentpool: AgentPool) -> AgentPool:
         """Set up gpu related properties for the AgentPool object.
 
@@ -1873,6 +1944,22 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up gpu profile for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        gpu_driver = self.context.get_gpu_driver()
+
+        # Construct AgentPoolGPUProfile if one of the fields has been set
+        if gpu_driver:
+            agentpool.gpu_profile = self.models.GPUProfile()
+            agentpool.gpu_profile.driver = gpu_driver
+
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -1915,6 +2002,10 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_crg_id(agentpool)
         # set up agentpool security profile
         agentpool = self.set_up_agentpool_security_profile(agentpool)
+        # set up message of the day
+        agentpool = self.set_up_motd(agentpool)
+        # set up gpu profile
+        agentpool = self.set_up_gpu_profile(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)

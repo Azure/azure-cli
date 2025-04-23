@@ -7,7 +7,7 @@ trigger:
     include:
     - '*'
     exclude:
-    - 'release'
+    - 'release*'
 
 pr:
   branches:
@@ -27,10 +27,10 @@ parameters:
   default:
   - name: AMD64
     value: amd64
-    pool: pool-ubuntu-2004-multi-core
+    pool: pool-ubuntu-latest-multi-core
   - name: ARM64
     value: arm64
-    pool: ubuntu-arm64-2004-pool
+    pool: pool-ubuntu-latest-arm64
 
 jobs:
 - job: CheckPullRequest
@@ -210,7 +210,7 @@ jobs:
       artifactName: metadata
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -254,7 +254,7 @@ jobs:
         artifactName: metadata
 
     - task: PipAuthenticate@1
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
       displayName: 'Pip Authenticate'
       inputs:
         artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -444,7 +444,7 @@ jobs:
       versionSpec: 3.12
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -567,7 +567,7 @@ jobs:
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
-  timeoutInMinutes: 40
+  timeoutInMinutes: 80
 
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -732,7 +732,7 @@ jobs:
     displayName: Install Docker
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -828,7 +828,7 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -950,7 +950,7 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -1056,7 +1056,7 @@ jobs:
 
 - job: CheckHeaders
   displayName: "Check License, History, and DocMap"
-
+  condition: and(not(contains(variables['Build.SourceBranch'], 'lts')), not(contains(variables['System.PullRequest.TargetBranch'], 'lts')))
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:

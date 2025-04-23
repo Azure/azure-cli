@@ -9,6 +9,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 import time
+import unittest
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
@@ -607,6 +608,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['serviceLevel'] == "Standard"
 
     @serial_test()
+    @unittest.skip('Skip for sizing quotas on regions')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_volume_size_50Gib(self):
         # tests that adding export policy works with non-default service level/usage threshold

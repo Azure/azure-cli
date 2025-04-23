@@ -50,9 +50,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1V2 (Isolated V2 I1V2), I2V2 (Isolated V2 I2V2), I3V2 (Isolated V2 I3V2), I4V2 (Isolated V2 I4V2), I5V2 (Isolated V2 I5V2), I6V2 (Isolated V2 I6V2), I1MV2 (Isolated Memory Optimized V2 I1MV2), I2MV2 (Isolated Memory Optimized V2 I2MV2), I3MV2 (Isolated Memory Optimized V2 I3MV2), I4MV2 (Isolated Memory Optimized V2 I4MV2), I5MV2 (Isolated Memory Optimized V2 I5MV2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), P0V4(Premium V4 Extra Small), P1V4(Premium V4 Small), P2V4(Premium V4 Medium), P3V4(Premium V4 Large), P1MV4(Premium Memory Optimized V4 Small), P2MV4(Premium Memory Optimized V4 Medium), P3MV4(Premium Memory Optimized V4 Large), P4MV4(Premium Memory Optimized V4 Extra Large), P5MV4(Premium Memory Optimized V4 Extra Extra Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1V2 (Isolated V2 I1V2), I2V2 (Isolated V2 I2V2), I3V2 (Isolated V2 I3V2), I4V2 (Isolated V2 I4V2), I5V2 (Isolated V2 I5V2), I6V2 (Isolated V2 I6V2), I1MV2 (Isolated Memory Optimized V2 I1MV2), I2MV2 (Isolated Memory Optimized V2 I2MV2), I3MV2 (Isolated Memory Optimized V2 I3MV2), I4MV2 (Isolated Memory Optimized V2 I4MV2), I5MV2 (Isolated Memory Optimized V2 I5MV2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2', 'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2', 'WS1', 'WS2', 'WS3']))
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'P0V4', 'P1V4', 'P2V4', 'P3V4', 'P1MV4', 'P2MV4', 'P3MV4', 'P4MV4', 'P5MV4', 'I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2', 'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2', 'WS1', 'WS2', 'WS3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                                            id_part='name',
@@ -148,6 +148,7 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
+        c.argument('sitecontainers_app', help="If true, a webapp which supports sitecontainers will be created", arg_type=get_three_state_flag())
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
@@ -168,9 +169,43 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('acr_use_identity', action='store_true', help="Enable or disable pull image from acr use managed identity")
         c.argument('acr_identity', help='Accept system or user assigned identity which will be set for acr image pull. '
                                         'Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
+        c.argument('basic_auth', help='Enable or disable basic auth for both SCM and FTP Basic Auth Publishing Credentials. Defaults to Enabled if not specified. See https://aka.ms/app-service-basic-auth to learn more.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.ignore('language')
         c.ignore('using_webapp_up')
+
+    with self.argument_context("webapp sitecontainers") as c:
+        c.argument('name', arg_type=webapp_name_arg_type, help='Name of the linux webapp')
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument("container_name", help='Name of the SiteContainer')
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
+
+    with self.argument_context("webapp sitecontainers create") as c:
+        c.argument("image", help='Image Name')
+        c.argument("target_port", help='Target port for SiteContainer')
+        c.argument("startup_cmd", help='Startup Command for the SiteContainer')
+        c.argument("is_main", help="true if the container is the main SiteContainer; false otherwise",
+                   arg_type=get_three_state_flag())
+        c.argument("system_assigned_identity", options_list=['--system-assigned-identity', '--si'], help="If true, the system-assigned identity will be used for auth while pulling image",
+                   arg_type=get_three_state_flag())
+        c.argument("user_assigned_identity", options_list=['--user-assigned-identity', '--ui'], help='ClientID for the user-maganed identity which will be used for auth while pulling image')
+        c.argument("registry_username", help='Username used for image registry auth')
+        c.argument("registry_password", help='Password used for image registry auth')
+        c.argument("sitecontainers_spec_file", options_list=['--sitecontainers-spec-file', '--ssf'], help="Path to a json sitecontainer spec file containing a list of sitecontainers, other sitecontainer input args will be ignored if this arg is provided")
+
+    with self.argument_context("webapp sitecontainers update") as c:
+        c.argument("image", help='Image Name')
+        c.argument("target_port", help='Target port for SiteContainer')
+        c.argument("startup_cmd", help='Startup Command for the SiteContainer')
+        c.argument("is_main", help="true if the container is the main site container; false otherwise",
+                   arg_type=get_three_state_flag())
+        c.argument("system_assigned_identity", options_list=['--system-assigned-identity', '--si'], help="If true, the system-assigned identity will be used for auth while pulling image",
+                   arg_type=get_three_state_flag())
+        c.argument("user_assigned_identity", options_list=['--user-assigned-identity', '--ui'], help='ClientID for the user-maganed identity which will be used for auth while pulling image')
+        c.argument("registry_username", help='Username used for image registry auth')
+        c.argument("registry_password", help='Password used for image registry auth')
+
+    with self.argument_context("webapp sitecontainers list") as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None, help='Name of the linux webapp')
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
@@ -197,6 +232,9 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp list-flexconsumption-locations') as c:
         c.argument('zone_redundant', arg_type=get_three_state_flag(),
                    help='Filter the list to return only locations which support zone redundancy.', is_preview=True)
+        c.argument('show_details', options_list=['--show-details'], arg_type=get_three_state_flag(),
+                   help='Include the runtime details of the regions.', is_preview=True)
+        c.argument('runtime', help="limit the output to just the specified runtime", is_preview=True)
 
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -289,6 +327,7 @@ subscription than the app service environment, please use the resource ID for --
         with self.argument_context(scope + ' config ssl import') as c:
             c.argument('key_vault', help='The name or resource ID of the Key Vault')
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
+            c.argument('name', help='Name of the web app. This is used to set the location of the webspace for the certificate import. If not specified, the location of the resource group will be used. If you have apps in multiple regions/webspaces, you must specify the name of the app to set the location of the webspace for the certificate import.')
         with self.argument_context(scope + ' config ssl create') as c:
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
@@ -509,6 +548,8 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp deployment source config-zip')as c:
         c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
                    arg_type=get_three_state_flag())
+        c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('webapp log config') as c:
         c.argument('application_logging', help='configure application logging',
@@ -594,7 +635,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container',
                    options_list=['--container-url'])
-        c.argument('webapp_name', help='The name of the web app',
+        c.argument('webapp_name', help='The name of the web app', options_list=['--webapp-name', '-n'],
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
         c.argument('db_name', help='Name of the database in the backup', arg_group='Database')
         c.argument('db_connection_string', help='Connection string for the database in the backup',
@@ -740,6 +781,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
                    arg_type=get_three_state_flag())
+        c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
@@ -777,6 +820,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('timeout', type=int, help='Timeout for the deployment operation in milliseconds. Ignored when using "--src-url" since synchronous deployments are not yet supported when using "--src-url"')
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified.")
         c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
+                   arg_type=get_three_state_flag())
+        c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
                    arg_type=get_three_state_flag())
 
     with self.argument_context('functionapp deploy') as c:

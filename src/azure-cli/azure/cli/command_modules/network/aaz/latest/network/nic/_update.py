@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkinterfaces/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkinterfaces/{}", "2023-11-01"],
         ]
     }
 
@@ -175,6 +175,15 @@ class Update(AAZCommand):
             help="Private IP address of the IP configuration.",
             nullable=True,
         )
+        _element.private_ip_address_prefix_length = AAZIntArg(
+            options=["private-ip-address-prefix-length"],
+            help="The private IP address prefix length. If specified and the allocation method is dynamic, the service will allocate a CIDR block instead of a single IP address.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=128,
+                minimum=1,
+            ),
+        )
         _element.private_ip_address_version = AAZStrArg(
             options=["private-ip-address-version"],
             help="Whether the specific IP configuration is IPv4 or IPv6. Default is IPv4.",
@@ -288,6 +297,12 @@ class Update(AAZCommand):
             options=["location"],
             help="The location of the backend address pool.",
             nullable=True,
+        )
+        _element.sync_mode = AAZStrArg(
+            options=["sync-mode"],
+            help="Backend address synchronous mode for the backend pool",
+            nullable=True,
+            enum={"Automatic": "Automatic", "Manual": "Manual"},
         )
         _element.tunnel_interfaces = AAZListArg(
             options=["tunnel-interfaces"],
@@ -462,9 +477,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         _element.destination_load_balancer_front_end_ip_configuration = AAZObjectArg(
             options=["destination-load-balancer-front-end-ip-configuration"],
@@ -507,9 +519,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         nsg.flush_connection = AAZBoolArg(
             options=["flush-connection"],
@@ -688,9 +697,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         application_security_group_update.tags = AAZDictArg(
             options=["tags"],
@@ -837,6 +843,7 @@ class Update(AAZCommand):
             _schema.name = cls._args_network_interface_ip_configuration_update.name
             _schema.primary = cls._args_network_interface_ip_configuration_update.primary
             _schema.private_ip_address = cls._args_network_interface_ip_configuration_update.private_ip_address
+            _schema.private_ip_address_prefix_length = cls._args_network_interface_ip_configuration_update.private_ip_address_prefix_length
             _schema.private_ip_address_version = cls._args_network_interface_ip_configuration_update.private_ip_address_version
             _schema.private_ip_allocation_method = cls._args_network_interface_ip_configuration_update.private_ip_allocation_method
             _schema.public_ip_address = cls._args_network_interface_ip_configuration_update.public_ip_address
@@ -890,6 +897,15 @@ class Update(AAZCommand):
             options=["private-ip-address"],
             help="Private IP address of the IP configuration.",
             nullable=True,
+        )
+        network_interface_ip_configuration_update.private_ip_address_prefix_length = AAZIntArg(
+            options=["private-ip-address-prefix-length"],
+            help="The private IP address prefix length. If specified and the allocation method is dynamic, the service will allocate a CIDR block instead of a single IP address.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=128,
+                minimum=1,
+            ),
         )
         network_interface_ip_configuration_update.private_ip_address_version = AAZStrArg(
             options=["private-ip-address-version"],
@@ -1004,6 +1020,12 @@ class Update(AAZCommand):
             options=["location"],
             help="The location of the backend address pool.",
             nullable=True,
+        )
+        _element.sync_mode = AAZStrArg(
+            options=["sync-mode"],
+            help="Backend address synchronous mode for the backend pool",
+            nullable=True,
+            enum={"Automatic": "Automatic", "Manual": "Manual"},
         )
         _element.tunnel_interfaces = AAZListArg(
             options=["tunnel-interfaces"],
@@ -1178,9 +1200,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         _element.destination_load_balancer_front_end_ip_configuration = AAZObjectArg(
             options=["destination-load-balancer-front-end-ip-configuration"],
@@ -1218,6 +1237,7 @@ class Update(AAZCommand):
         _schema.name = cls._args_network_interface_ip_configuration_update.name
         _schema.primary = cls._args_network_interface_ip_configuration_update.primary
         _schema.private_ip_address = cls._args_network_interface_ip_configuration_update.private_ip_address
+        _schema.private_ip_address_prefix_length = cls._args_network_interface_ip_configuration_update.private_ip_address_prefix_length
         _schema.private_ip_address_version = cls._args_network_interface_ip_configuration_update.private_ip_address_version
         _schema.private_ip_allocation_method = cls._args_network_interface_ip_configuration_update.private_ip_allocation_method
         _schema.public_ip_address = cls._args_network_interface_ip_configuration_update.public_ip_address
@@ -1295,9 +1315,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         public_ip_address_update.ddos_settings = AAZObjectArg(
             options=["ddos-settings"],
@@ -1436,9 +1453,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         nat_gateway.idle_timeout_in_minutes = AAZIntArg(
             options=["idle-timeout-in-minutes"],
@@ -1571,6 +1585,7 @@ class Update(AAZCommand):
             _schema.address_prefix = cls._args_subnet_update.address_prefix
             _schema.address_prefixes = cls._args_subnet_update.address_prefixes
             _schema.application_gateway_ip_configurations = cls._args_subnet_update.application_gateway_ip_configurations
+            _schema.default_outbound_access = cls._args_subnet_update.default_outbound_access
             _schema.delegations = cls._args_subnet_update.delegations
             _schema.id = cls._args_subnet_update.id
             _schema.ip_allocations = cls._args_subnet_update.ip_allocations
@@ -1582,6 +1597,7 @@ class Update(AAZCommand):
             _schema.route_table = cls._args_subnet_update.route_table
             _schema.service_endpoint_policies = cls._args_subnet_update.service_endpoint_policies
             _schema.service_endpoints = cls._args_subnet_update.service_endpoints
+            _schema.sharing_scope = cls._args_subnet_update.sharing_scope
             _schema.type = cls._args_subnet_update.type
             return
 
@@ -1618,6 +1634,11 @@ class Update(AAZCommand):
             help="Application gateway IP configurations of virtual network resource.",
             nullable=True,
         )
+        subnet_update.default_outbound_access = AAZBoolArg(
+            options=["default-outbound-access"],
+            help="Set this property to false to disable default outbound connectivity for all VMs in the subnet. This property can only be set at the time of subnet creation and cannot be updated for an existing subnet.",
+            nullable=True,
+        )
         subnet_update.delegations = AAZListArg(
             options=["delegations"],
             help="An array of references to the delegations on the subnet.",
@@ -1644,7 +1665,7 @@ class Update(AAZCommand):
             options=["private-endpoint-network-policies"],
             help="Enable or Disable apply network policies on private end point in the subnet.",
             nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "NetworkSecurityGroupEnabled": "NetworkSecurityGroupEnabled", "RouteTableEnabled": "RouteTableEnabled"},
         )
         subnet_update.private_link_service_network_policies = AAZStrArg(
             options=["private-link-service-network-policies"],
@@ -1666,6 +1687,12 @@ class Update(AAZCommand):
             options=["service-endpoints"],
             help="An array of service endpoints.",
             nullable=True,
+        )
+        subnet_update.sharing_scope = AAZStrArg(
+            options=["sharing-scope"],
+            help="Set this property to Tenant to allow sharing subnet with other subscriptions in your AAD tenant. This property can only be set if defaultOutboundAccess is set to false, both properties can only be set if subnet is empty.",
+            nullable=True,
+            enum={"DelegatedServices": "DelegatedServices", "Tenant": "Tenant"},
         )
         subnet_update.type = AAZStrArg(
             options=["type"],
@@ -1747,9 +1774,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         route_table.disable_bgp_route_propagation = AAZBoolArg(
             options=["disable-bgp-route-propagation"],
@@ -1791,11 +1815,6 @@ class Update(AAZCommand):
             help="The destination CIDR to which the route applies.",
             nullable=True,
         )
-        _element.has_bgp_override = AAZBoolArg(
-            options=["has-bgp-override"],
-            help="A value indicating whether this route overrides overlapping BGP routes regardless of LPM.",
-            nullable=True,
-        )
         _element.next_hop_ip_address = AAZStrArg(
             options=["next-hop-ip-address"],
             help="The IP address packets should be forwarded to. Next hop values are only allowed in routes where the next hop type is VirtualAppliance.",
@@ -1835,9 +1854,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         _element.contextual_service_endpoint_policies = AAZListArg(
             options=["contextual-service-endpoint-policies"],
@@ -1940,6 +1956,7 @@ class Update(AAZCommand):
         _schema.address_prefix = cls._args_subnet_update.address_prefix
         _schema.address_prefixes = cls._args_subnet_update.address_prefixes
         _schema.application_gateway_ip_configurations = cls._args_subnet_update.application_gateway_ip_configurations
+        _schema.default_outbound_access = cls._args_subnet_update.default_outbound_access
         _schema.delegations = cls._args_subnet_update.delegations
         _schema.id = cls._args_subnet_update.id
         _schema.ip_allocations = cls._args_subnet_update.ip_allocations
@@ -1951,6 +1968,7 @@ class Update(AAZCommand):
         _schema.route_table = cls._args_subnet_update.route_table
         _schema.service_endpoint_policies = cls._args_subnet_update.service_endpoint_policies
         _schema.service_endpoints = cls._args_subnet_update.service_endpoints
+        _schema.sharing_scope = cls._args_subnet_update.sharing_scope
         _schema.type = cls._args_subnet_update.type
 
     def _execute_operations(self):
@@ -2031,7 +2049,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -2130,7 +2148,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -2229,6 +2247,7 @@ class Update(AAZCommand):
                 properties.set_prop("loadBalancerInboundNatRules", AAZListType, ".load_balancer_inbound_nat_rules")
                 properties.set_prop("primary", AAZBoolType, ".primary")
                 properties.set_prop("privateIPAddress", AAZStrType, ".private_ip_address")
+                properties.set_prop("privateIPAddressPrefixLength", AAZIntType, ".private_ip_address_prefix_length", typ_kwargs={"nullable": True})
                 properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
                 properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
                 _UpdateHelper._build_schema_public_ip_address_update(properties.set_prop("publicIPAddress", AAZObjectType, ".public_ip_address"))
@@ -2277,6 +2296,7 @@ class Update(AAZCommand):
                 properties.set_prop("drainPeriodInSeconds", AAZIntType, ".drain_period_in_seconds")
                 properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".load_balancer_backend_addresses")
                 properties.set_prop("location", AAZStrType, ".location")
+                properties.set_prop("syncMode", AAZStrType, ".sync_mode")
                 properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
                 _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("virtualNetwork", AAZObjectType, ".virtual_network"))
 
@@ -2493,6 +2513,7 @@ class _UpdateHelper:
             properties.set_prop("loadBalancerInboundNatRules", AAZListType, ".load_balancer_inbound_nat_rules")
             properties.set_prop("primary", AAZBoolType, ".primary")
             properties.set_prop("privateIPAddress", AAZStrType, ".private_ip_address")
+            properties.set_prop("privateIPAddressPrefixLength", AAZIntType, ".private_ip_address_prefix_length", typ_kwargs={"nullable": True})
             properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
             properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
             cls._build_schema_public_ip_address_update(properties.set_prop("publicIPAddress", AAZObjectType, ".public_ip_address"))
@@ -2541,6 +2562,7 @@ class _UpdateHelper:
             properties.set_prop("drainPeriodInSeconds", AAZIntType, ".drain_period_in_seconds")
             properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".load_balancer_backend_addresses")
             properties.set_prop("location", AAZStrType, ".location")
+            properties.set_prop("syncMode", AAZStrType, ".sync_mode")
             properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
             cls._build_schema_sub_resource_update(properties.set_prop("virtualNetwork", AAZObjectType, ".virtual_network"))
 
@@ -2737,6 +2759,7 @@ class _UpdateHelper:
             properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
             properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
             properties.set_prop("applicationGatewayIPConfigurations", AAZListType, ".application_gateway_ip_configurations")
+            properties.set_prop("defaultOutboundAccess", AAZBoolType, ".default_outbound_access")
             properties.set_prop("delegations", AAZListType, ".delegations")
             properties.set_prop("ipAllocations", AAZListType, ".ip_allocations")
             cls._build_schema_sub_resource_update(properties.set_prop("natGateway", AAZObjectType, ".nat_gateway"))
@@ -2746,6 +2769,7 @@ class _UpdateHelper:
             properties.set_prop("routeTable", AAZObjectType, ".route_table")
             properties.set_prop("serviceEndpointPolicies", AAZListType, ".service_endpoint_policies")
             properties.set_prop("serviceEndpoints", AAZListType, ".service_endpoints")
+            properties.set_prop("sharingScope", AAZStrType, ".sharing_scope")
 
         address_prefixes = _builder.get(".properties.addressPrefixes")
         if address_prefixes is not None:
@@ -2810,7 +2834,6 @@ class _UpdateHelper:
         properties = _builder.get(".properties.routeTable.properties.routes[].properties")
         if properties is not None:
             properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
-            properties.set_prop("hasBgpOverride", AAZBoolType, ".has_bgp_override")
             properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
             properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
 
@@ -3141,6 +3164,10 @@ class _UpdateHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
+        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -3149,6 +3176,7 @@ class _UpdateHelper:
         )
         properties.private_link_connection_properties = AAZObjectType(
             serialized_name="privateLinkConnectionProperties",
+            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -3248,6 +3276,7 @@ class _UpdateHelper:
         properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.outbound_rule)
         properties.outbound_rules = AAZListType(
@@ -3257,6 +3286,9 @@ class _UpdateHelper:
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
+        )
+        properties.sync_mode = AAZStrType(
+            serialized_name="syncMode",
         )
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
@@ -3300,6 +3332,7 @@ class _UpdateHelper:
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.network_interface_ip_configuration = AAZObjectType(
             serialized_name="networkInterfaceIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
         properties.subnet = AAZObjectType()
@@ -3363,6 +3396,7 @@ class _UpdateHelper:
         cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_network_interface_ip_configuration_read(properties.backend_ip_configuration)
         properties.backend_port = AAZIntType(
@@ -3518,6 +3552,7 @@ class _UpdateHelper:
         )
         properties.dscp_configuration = AAZObjectType(
             serialized_name="dscpConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
@@ -3552,6 +3587,7 @@ class _UpdateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service = AAZObjectType(
@@ -3571,6 +3607,7 @@ class _UpdateHelper:
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
         properties.vnet_encryption_supported = AAZBoolType(
@@ -3740,6 +3777,7 @@ class _UpdateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_endpoint_location = AAZStrType(
@@ -4220,6 +4258,7 @@ class _UpdateHelper:
         )
         properties.ip_configuration = AAZObjectType(
             serialized_name="ipConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_ip_configuration_read(properties.ip_configuration)
         properties.ip_tags = AAZListType(
@@ -4479,7 +4518,9 @@ class _UpdateHelper:
             _schema.id = cls._schema_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         sub_resource_read = _schema_sub_resource_read
         sub_resource_read.id = AAZStrType()
@@ -4520,6 +4561,9 @@ class _UpdateHelper:
         )
         properties.application_gateway_ip_configurations = AAZListType(
             serialized_name="applicationGatewayIPConfigurations",
+        )
+        properties.default_outbound_access = AAZBoolType(
+            serialized_name="defaultOutboundAccess",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(
@@ -4574,6 +4618,9 @@ class _UpdateHelper:
         )
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
+        )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
         )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes
@@ -4750,6 +4797,7 @@ class _UpdateHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",

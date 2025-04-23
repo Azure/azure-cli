@@ -7,6 +7,7 @@
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.core.paging import ItemPaged
 from ._client_factory import cf_postgres_flexible_location_capabilities, cf_postgres_flexible_server_capabilities
+from collections import defaultdict
 
 
 def get_postgres_location_capability_info(cmd, location):
@@ -51,6 +52,7 @@ def _postgres_parse_list_capability(result):
     restricted = offer_restricted[0].status if offer_restricted else None
     zone_redundant = [feature for feature in supported_features if feature.name == "ZoneRedundantHa"]
     geo_backup = [feature for feature in supported_features if feature.name == "GeoBackup"]
+    index_tuning = [feature for feature in supported_features if feature.name == "IndexTuning"]
 
     if restricted == "Enabled":
         raise InvalidArgumentValueError("The location is restricted for provisioning of flexible servers. Please try using another region.")
@@ -60,6 +62,7 @@ def _postgres_parse_list_capability(result):
 
     single_az = zone_redundant[0].status != "Enabled" if zone_redundant else True
     geo_backup_supported = geo_backup[0].status == "Enabled" if geo_backup else False
+    index_tuning_supported = index_tuning[0].status == "Enabled" if index_tuning else False
 
     tiers = result[0].supported_server_editions
     tiers_dict = {}
@@ -97,12 +100,18 @@ def _postgres_parse_list_capability(result):
     for version in result[0].supported_server_versions:
         versions.add(version.name)
 
+    supported_server_versions = defaultdict(list)
+    for version in result[0].supported_server_versions:
+        supported_server_versions[version.name] = version.supported_versions_to_upgrade
+
     return {
         'sku_info': tiers_dict,
         'single_az': single_az,
         'geo_backup_supported': geo_backup_supported,
         'zones': zones,
-        'server_versions': versions
+        'server_versions': versions,
+        'supported_server_versions': supported_server_versions,
+        'index_tuning_supported': index_tuning_supported
     }
 
 
