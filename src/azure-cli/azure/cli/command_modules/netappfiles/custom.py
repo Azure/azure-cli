@@ -507,7 +507,7 @@ class VolumeUpdate(_VolumeUpdate):
             args.is_restoring = None
         if has_value(args.ldap_enabled):
             logger.warning("ANF log: ldap_enabled is deprecated, do not use it. It will be removed in future version.")
-            args.ldap_enabled = None    
+            args.ldap_enabled = None
         if has_value(args.network_features):
             logger.warning("ANF log: network_features is deprecated, do not use it. It will be removed in future version.")
             args.network_features = None
