@@ -115,7 +115,7 @@ class Create(AAZCommand):
             help="ClientId of the multi-tenant AAD Application. Used to access cross-tenant keyvaults.",
         )
         _args_schema.user_assigned_identity = AAZStrArg(
-            options=["--user-assigned-identity"],
+            options=["-u", "--user-assigned-identity"],
             arg_group="EncryptionIdentity",
             help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has 'UserAssigned'. It should match key of identity.userAssignedIdentities.",
         )
