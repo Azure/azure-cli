@@ -55,6 +55,8 @@ class AcrabacScenarioTest(ScenarioTest):
             self.check('roleAssignmentMode', 'LegacyRegistryPermissions')
         ])
 
+        self.cmd('acr check-health -n {name} --repository hello-world -y', checks=self.is_empty())
+
         self.cmd('acr update -g {rg} -n {name} --role-assignment-mode RBAC-ABAC', checks=[
             self.check('roleAssignmentMode', 'AbacRepositoryPermissions')
         ])

@@ -115,6 +115,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry.{suffix}".format(suffix=default_allow_suffix))
             c.argument('allow_trusted_services', get_three_state_flag(), is_preview=True, help="Allow trusted Azure Services to access network restricted registries. For more information, please visit https://aka.ms/acr/trusted-services.{suffix}".format(suffix=default_allow_suffix))
 
+    for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group="Permissions and Role Assignment") as c:
             c.argument("role_assignment_mode", is_preview=True, arg_type=get_enum_type(AbacRoleAssignmentMode), help="Role assignment mode of the registry. For more information on this feature, see https://aka.ms/acr/abac/repository-permissions. The Default is rbac.")
 
