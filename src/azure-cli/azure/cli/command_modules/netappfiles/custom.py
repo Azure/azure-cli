@@ -475,6 +475,12 @@ class VolumeUpdate(_VolumeUpdate):
             help="The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol",
             nullable=True,
             enum={"ntfs": "ntfs", "unix": "unix"},
+        )
+        args_schema.volume_type = AAZStrArg(
+            options=["--volume-type"],
+            arg_group="Properties",
+            help="What type of volume is this. For destination volumes in Cross Region Replication, set type to DataProtection",
+            nullable=True,
         )        
         return args_schema
 
@@ -508,6 +514,9 @@ class VolumeUpdate(_VolumeUpdate):
         if has_value(args.security_style):  
             logger.warning("ANF log: security_style is deprecated, do not use it. It will be removed in future version.")
             args.security_style = None
+        if has_value(args.volume_type): 
+            logger.warning("ANF log: volume_type is deprecated, do not use it. It will be removed in future version.")
+            args.volume_type = None
 
 class VolumeBreakFileLocks(_BreakFileLocks):
     @classmethod
