@@ -21,7 +21,7 @@ class Create(AAZCommand):
         az netappfiles volume-group create -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname --vnet myvnet --ppg myppg --application-type SAP-HANA --application-identifier mysapsid
 
     :example: Create ANF volume group for Oracle
-        az netappfiles volume-group create -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname --vnet myvnet --zones 1 --application-type ORACLE --application-identifier OR2
+        az netappfiles volume-group create -g mygroup --account-name myaccountname --pool-name mypoolname --volume-group-name myvolumegroupname --vnet myvnet --zones 1 --application-type ORACLE --application-identifier OR2 --prefix ora
     """
 
     _aaz_info = {
