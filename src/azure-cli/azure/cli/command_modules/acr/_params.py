@@ -447,7 +447,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('ignore_errors', options_list=['--ignore-errors'], help='Provide all health checks, even if errors are found', action='store_true', required=False)
         c.argument('vnet', options_list=['--vnet'],
                    help="Virtual network ID so to run this command inside a VNET to verify the DNS routing to private endpoints", required=False)
-        c.argument('repository', help="The name of the repository")
+        c.argument('repository', is_preview=True, help="The name of the repository")
 
     with self.argument_context('acr scope-map') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
