@@ -145,12 +145,12 @@ def _get_extension_instance_name(instance_view, publisher, extension_type_name,
 
 
 # separated for aaz based implementation
-def _get_extension_instance_name1(instance_view, publisher, extension_type_name,
-                                  suggested_name=None):
+def _get_extension_instance_name_aaz(instance_view, publisher, extension_type_name,
+                                     suggested_name=None):
     extension_instance_name = suggested_name or extension_type_name
     full_type_name = '.'.join([publisher, extension_type_name])
     if extensions := instance_view.get('extensions', []):
-        ext = next((x for x in extensions if x.type and (x.type.lower() == full_type_name.lower())), None)
+        ext = next((x for x in extensions if x.get('type', '').lower() == full_type_name.lower()), None)
         if ext:
             extension_instance_name = ext['name']
     return extension_instance_name
@@ -2163,7 +2163,7 @@ def show_extensions(cmd, resource_group_name, vm_name, vm_extension_name, instan
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
                   protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,
                   extension_instance_name=None, enable_auto_upgrade=None):
-    from .aaz.latest.vm import Show as _VMShow
+    from .operations.vm import VMShow as _VMShow
     vm = _VMShow(cli_ctx=cmd.cli_ctx)(command_args={
         'vm_name': vm_name,
         'resource_group': resource_group_name,
@@ -2173,8 +2173,8 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if not extension_instance_name:
         extension_instance_name = vm_extension_name
 
-    instance_name = _get_extension_instance_name1(vm['instanceView'], publisher, vm_extension_name,
-                                                  suggested_name=extension_instance_name)
+    instance_name = _get_extension_instance_name_aaz(vm['instanceView'], publisher, vm_extension_name,
+                                                     suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
         msg = "A %s extension with name %s already exists. Updating it with your settings..."
         logger.warning(msg, vm_extension_name, instance_name)
