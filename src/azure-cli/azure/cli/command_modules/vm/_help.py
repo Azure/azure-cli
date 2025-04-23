@@ -695,31 +695,31 @@ examples:
         --release-note-uri path_to_release_notes
 """
 
-helps['sig image-definition list-shared'] = """
-type: command
-short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
-long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
-examples:
-  - name: List an image definition in a gallery shared directly to your subscription in the given location.
-    text: |
-        az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
-        --location myLocation
-  - name: List an image definition in a gallery shared directly to your tenant in the given location.
-    text: |
-        az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
-        --location myLocation --shared-to tenant
-"""
-
-helps['sig image-definition list-community'] = """
-type: command
-short-summary: List VM Image definitions in a gallery community
-long-summary: List VM Image definitions in a gallery community
-examples:
-  - name: List an image definition in a gallery community.
-    text: |
-        az sig image-definition list-community --public-gallery-name publicGalleryName \\
-        --location myLocation
-"""
+# helps['sig image-definition list-shared'] = """
+# type: command
+# short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
+# long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
+# examples:
+#   - name: List an image definition in a gallery shared directly to your subscription in the given location.
+#     text: |
+#         az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
+#         --location myLocation
+#   - name: List an image definition in a gallery shared directly to your tenant in the given location.
+#     text: |
+#         az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
+#         --location myLocation --shared-to tenant
+# """
+#
+# helps['sig image-definition list-community'] = """
+# type: command
+# short-summary: List VM Image definitions in a gallery community
+# long-summary: List VM Image definitions in a gallery community
+# examples:
+#   - name: List an image definition in a gallery community.
+#     text: |
+#         az sig image-definition list-community --public-gallery-name publicGalleryName \\
+#         --location myLocation
+# """
 
 helps['sig image-version create'] = """
 type: command

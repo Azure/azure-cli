@@ -496,11 +496,11 @@ def load_command_table(self, _):
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_gallery_list')
 
-    with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
-        g.custom_command('list-community', 'sig_community_image_definition_list')
-
-    with self.command_group('sig image-version', community_gallery_image_version_sdk, client_factory=cf_community_gallery_image_version, operation_group='shared_galleries', min_api='2022-01-03') as g:
-        g.custom_command('list-community', 'sig_community_image_version_list')
+    # with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
+    #     g.custom_command('list-community', 'sig_community_image_definition_list')
+    #
+    # with self.command_group('sig image-version', community_gallery_image_version_sdk, client_factory=cf_community_gallery_image_version, operation_group='shared_galleries', min_api='2022-01-03') as g:
+    #     g.custom_command('list-community', 'sig_community_image_version_list')
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
@@ -534,18 +534,18 @@ def load_command_table(self, _):
         '{}',
         client_factory=cf_shared_gallery_image,
         operation_group='shared_galleries')
-    with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30', operation_group='shared_galleries',
-                            client_factory=cf_shared_gallery_image) as g:
-        g.custom_command('list-shared', 'sig_shared_image_definition_list')
+    # with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30', operation_group='shared_galleries',
+    #                         client_factory=cf_shared_gallery_image) as g:
+    #     g.custom_command('list-shared', 'sig_shared_image_definition_list')
 
     vm_shared_gallery_image_version = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#SharedGalleryImageVersionsOperations.{}',
         client_factory=cf_shared_gallery_image_version,
         operation_group='shared_galleries')
-    with self.command_group('sig image-version', vm_shared_gallery_image_version, min_api='2020-09-30',
-                            operation_group='shared_galleries',
-                            client_factory=cf_shared_gallery_image_version) as g:
-        g.custom_command('list-shared', 'sig_shared_image_version_list')
+    # with self.command_group('sig image-version', vm_shared_gallery_image_version, min_api='2020-09-30',
+    #                         operation_group='shared_galleries',
+    #                         client_factory=cf_shared_gallery_image_version) as g:
+    #     g.custom_command('list-shared', 'sig_shared_image_version_list')
 
     with self.command_group('sig gallery-application', compute_gallery_application_profile, operation_group='gallery_applications') as g:
         from .operations.sig_gallery_application import SigGalleryApplicationCreate
