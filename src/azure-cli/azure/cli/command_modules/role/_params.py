@@ -340,8 +340,6 @@ def load_arguments(self, _):
                         "the logged-in account has no permission or the machine has no network access to query "
                         "Microsoft Graph.")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
-        c.argument('include_classic_administrators', arg_type=get_three_state_flag(),
-                   help='list default role assignments for subscription classic administrators, aka co-admins')
         c.argument('description', is_preview=True, min_api='2020-04-01-preview', help='Description of role assignment.')
         c.argument('condition', is_preview=True, min_api='2020-04-01-preview', help='Condition under which the user can be granted permission.')
         c.argument('condition_version', is_preview=True, min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
