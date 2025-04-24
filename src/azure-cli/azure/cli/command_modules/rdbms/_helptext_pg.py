@@ -845,14 +845,6 @@ examples:
     text: az postgres flexible-server replica list -g testGroup -n testserver
 """
 
-helps['postgres flexible-server replica stop-replication'] = """
-type: command
-short-summary: Stop replication to a read replica and make it a read/write server.
-examples:
-  - name: Stop replication to 'testreplicaserver' and make it a read/write server.
-    text: az postgres flexible-server replica stop-replication -g testGroup -n testreplicaserver
-"""
-
 helps['postgres flexible-server replica promote'] = """
 type: command
 short-summary: Stop replication of a read replica and promote it to an independent server or as a primary server.
