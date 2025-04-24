@@ -117,7 +117,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group="Permissions and Role Assignment") as c:
-            c.argument("role_assignment_mode", is_preview=True, arg_type=get_enum_type(AbacRoleAssignmentMode), help="Role assignment mode of the registry. For more information on this feature, see https://aka.ms/acr/abac/repository-permissions. The Default is rbac.")
+            c.argument("role_assignment_mode", is_preview=True, arg_type=get_enum_type(AbacRoleAssignmentMode), help="Role assignment mode of the registry. For more information on this feature, see https://aka.ms/acr/auth/abac. The Default is rbac.")
 
     with self.argument_context('acr create', arg_group="Customer managed key") as c:
         c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
