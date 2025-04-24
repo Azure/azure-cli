@@ -96,6 +96,7 @@ def load_arguments(self, _):
                         "'2017-12-31'). Default value is one year after current time")
         c.argument('key_value', arg_group='keyCredential',
                    help='the value for the key credentials associated with the application')
+        # Even in `az ad app update`, key_type and key_usage need to have default values if key_value is specified
         c.argument('key_type', arg_group='keyCredential',
                    help='the type of the key credentials associated with the application',
                    arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'],
@@ -263,7 +264,6 @@ def load_arguments(self, _):
     with self.argument_context('ad user') as c:
         c.ignore('_subscription')
         c.argument('mail_nickname', help='mail alias. Defaults to user principal name')
-        c.argument('force_change_password_next_login', arg_type=get_three_state_flag(), help='Require the user to change their password the next time they log in. Only valid when --password is specified')
         c.argument('account_enabled', arg_type=get_three_state_flag(), help='enable the user account')
         c.argument('password', help='user password')
         c.argument('upn_or_object_id', options_list=['--id'],
