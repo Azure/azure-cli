@@ -795,12 +795,6 @@ short-summary: List role assignments.
 long-summary: >-
     By default, only assignments scoped to subscription will be displayed.
     To view assignments scoped by resource or group, use `--all`.
-
-
-    [WARNING] Azure classic subscription administrators will be retired on August 31, 2024.
-    After August 31, 2024, all classic administrators risk losing access to the subscription.
-    Delete classic administrators who no longer need access or assign an Azure RBAC role for fine-grained access
-    control. Learn more: https://go.microsoft.com/fwlink/?linkid=2238474
 examples:
   - name: List role assignments at the subscription scope.
     text: az role assignment list --scope /subscriptions/00000000-0000-0000-0000-000000000000

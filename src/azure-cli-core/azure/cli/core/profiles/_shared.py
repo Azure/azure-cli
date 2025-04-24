@@ -191,7 +191,6 @@ AZURE_API_PROFILES = {
             'managed_hsms': '2024-11-01'
         }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
-            'classic_administrators': '2015-06-01',
             'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
