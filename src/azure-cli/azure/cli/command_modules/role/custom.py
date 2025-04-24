@@ -52,12 +52,6 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
-CLASSIC_ADMINISTRATOR_WARNING = (
-    "Azure classic subscription administrators will be retired on August 31, 2024. "
-    "After August 31, 2024, all classic administrators risk losing access to the subscription. "
-    "Delete classic administrators who no longer need access or assign an Azure RBAC role for fine-grained access "
-    "control. Learn more: https://go.microsoft.com/fwlink/?linkid=2238474")
-
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines, protected-access
@@ -209,7 +203,7 @@ def create_role_assignment(cmd, role, scope,
                                        assignment_name=assignment_name)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
-            return list_role_assignments(cmd, assignee=assignee, role=role, scope=scope)[0]
+            return list_role_assignments(cmd, assignee_object_id=object_id, role=role, scope=scope)[0]
         raise
 
 
@@ -232,16 +226,15 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
                                          condition=condition, condition_version=condition_version)
 
 
-def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
-                          scope=None, include_inherited=False,
-                          show_all=False, include_groups=False, include_classic_administrators=False,
-                          fill_principal_name=True):
-    '''
-    :param include_groups: include extra assignments to the groups of which the user is a
-    member(transitively).
-    '''
-    if include_classic_administrators:
-        logger.warning(CLASSIC_ADMINISTRATOR_WARNING)
+def list_role_assignments(cmd,  # pylint: disable=too-many-locals, too-many-branches
+                          assignee=None, assignee_object_id=None,
+                          role=None,
+                          resource_group_name=None, scope=None,
+                          include_inherited=False,
+                          show_all=False, include_groups=False,
+                          fill_role_definition_name=True, fill_principal_name=True):
+    if assignee and assignee_object_id:
+        raise CLIError('Usage error: Provide only one of --assignee or --assignee-object-id.')
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
     authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
@@ -256,34 +249,34 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
         scope = _build_role_scope(resource_group_name, scope,
                                   definitions_client._config.subscription_id)
 
+    if assignee and not assignee_object_id:
+        assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee, fallback_to_object_id=True)
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
-                                           scope, assignee, role,
+                                           scope, assignee_object_id, role,
                                            include_inherited, include_groups)
 
     results = todict(assignments) if assignments else []
-    if include_classic_administrators:
-        results += _backfill_assignments_for_co_admins(cmd.cli_ctx, authorization_client, assignee)
 
     if not results:
         return []
 
-    # 1. fill in logic names to get things understandable.
-    # (it's possible that associated roles and principals were deleted, and we just do nothing.)
-    # 2. fill in role names
-    role_defs = list(definitions_client.list(
-        scope=scope or ('/subscriptions/' + definitions_client._config.subscription_id)))
-    worker = MultiAPIAdaptor(cmd.cli_ctx)
-    role_dics = {i.id: worker.get_role_property(i, 'role_name') for i in role_defs}
-    for i in results:
-        if not i.get('roleDefinitionName'):
-            if role_dics.get(worker.get_role_property(i, 'roleDefinitionId')):
-                worker.set_role_property(i, 'roleDefinitionName',
-                                         role_dics[worker.get_role_property(i, 'roleDefinitionId')])
-            else:
-                i['roleDefinitionName'] = None  # the role definition might have been deleted
+    # Fill in role definition names
+    if fill_role_definition_name:
+        worker = MultiAPIAdaptor(cmd.cli_ctx)
+        role_defs = list(definitions_client.list(
+            scope=scope or ('/subscriptions/' + definitions_client._config.subscription_id)))
+        role_dics = {i.id: worker.get_role_property(i, 'role_name') for i in role_defs}
+        for i in results:
+            if not i.get('roleDefinitionName'):
+                if role_dics.get(worker.get_role_property(i, 'roleDefinitionId')):
+                    worker.set_role_property(i, 'roleDefinitionName',
+                                             role_dics[worker.get_role_property(i, 'roleDefinitionId')])
+                else:
+                    i['roleDefinitionName'] = None  # the role definition might have been deleted
 
-    # fill in principal names
+    # Fill in principal names
     if fill_principal_name:
+        worker = MultiAPIAdaptor(cmd.cli_ctx)
         principal_ids = set(worker.get_role_property(i, 'principalId')
                             for i in results if worker.get_role_property(i, 'principalId'))
 
@@ -464,53 +457,6 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     return result
 
 
-def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
-    worker = MultiAPIAdaptor(cli_ctx)
-    co_admins = auth_client.classic_administrators.list()  # known swagger bug on api-version handling
-    co_admins = [x for x in co_admins if x.email_address]
-    graph_client = _graph_client_factory(cli_ctx)
-    if assignee:  # apply assignee filter if applicable
-        if is_guid(assignee):
-            try:
-                result = _get_object_stubs(graph_client, [assignee])
-                if not result:
-                    return []
-                assignee = _get_displayable_name(result[0]).lower()
-            except ValueError:
-                pass
-        co_admins = [x for x in co_admins if assignee == x.email_address.lower()]
-
-    if not co_admins:
-        return []
-
-    result, users = [], []
-    for i in range(0, len(co_admins), 10):  # graph allows up to 10 query filters, so split into chunks here
-        upn_queries = ["userPrincipalName eq '{}'".format(x.email_address)
-                       for x in co_admins[i:i + 10]]
-        temp = list(list_users(graph_client, query_filter=' or '.join(upn_queries)))
-        users += temp
-    upns = {u['userPrincipalName']: u[ID] for u in users}
-    for admin in co_admins:
-        na_text = 'NA(classic admins)'
-        email = admin.email_address
-        result.append({
-            'id': na_text,
-            'name': na_text,
-        })
-        properties = {
-            'principalId': upns.get(email),
-            'principalName': email,
-            'roleDefinitionName': admin.role,
-            'roleDefinitionId': 'NA(classic admin role)',
-            'scope': '/subscriptions/' + auth_client._config.subscription_id
-        }
-        if worker.old_api:
-            result[-1]['properties'] = properties
-        else:
-            result[-1].update(properties)
-    return result
-
-
 def _get_displayable_name(graph_object):
     # user
     if 'userPrincipalName' in graph_object:
@@ -522,13 +468,19 @@ def _get_displayable_name(graph_object):
     return graph_object['displayName'] or ''
 
 
-def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_group_name=None,
-                            scope=None, include_inherited=False,
+def delete_role_assignments(cmd, ids=None,
+                            assignee=None, assignee_object_id=None,
+                            role=None,
+                            resource_group_name=None, scope=None,
+                            include_inherited=False,
                             yes=None):  # pylint: disable=unused-argument
     # yes is currently a no-op
-    if not any((ids, assignee, role, resource_group_name, scope)):
+    if not any((ids, assignee, assignee_object_id, role, resource_group_name, scope)):
         raise ArgumentUsageError('Please provide at least one of these arguments: '
-                                 '--ids, --assignee, --role, --resource-group, --scope')
+                                 '--ids, --assignee, --assignee-object-id, --role, --resource-group, --scope')
+
+    if assignee and assignee_object_id:
+        raise CLIError('Usage error: Provide only one of --assignee or --assignee-object-id.')
 
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
@@ -559,8 +511,11 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
 
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client._config.subscription_id)
+    # Delay resolving object ID, because if ids are provided, no need to resolve
+    if assignee and not assignee_object_id:
+        assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee, fallback_to_object_id=True)
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
-                                           scope, assignee, role, include_inherited,
+                                           scope, assignee_object_id, role, include_inherited,
                                            include_groups=False)
 
     if assignments:
@@ -571,11 +526,7 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
 
 
 def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
-                             scope, assignee, role, include_inherited, include_groups):
-    assignee_object_id = None
-    if assignee:
-        assignee_object_id = _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
-
+                             scope, assignee_object_id, role, include_inherited, include_groups):
     # https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-list-rest
     # "atScope()" and "principalId eq '{value}'" query cannot be used together (API limitation).
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
@@ -1205,7 +1156,10 @@ def list_service_principal_owners(client, identifier):
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
-        cmd, display_name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
+        cmd, display_name=None,
+        service_management_reference=None,
+        create_password=True,
+        years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_in_json=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1249,6 +1203,7 @@ def create_service_principal_for_rbac(
     aad_application = create_application(cmd,
                                          graph_client,
                                          app_display_name,
+                                         service_management_reference=service_management_reference,
                                          key_value=public_cert_string,
                                          start_date=app_start_date,
                                          end_date=app_end_date)
@@ -1263,7 +1218,7 @@ def create_service_principal_for_rbac(
 
     # Password credential is created *after* application creation.
     # https://learn.microsoft.com/en-us/graph/api/resources/passwordcredential
-    if not use_cert:
+    if create_password and not use_cert:
         result = _application_add_password(graph_client, aad_application, 'rbac', app_start_date, app_end_date)
         password = result['secretText']
 
@@ -1318,7 +1273,9 @@ def create_service_principal_for_rbac(
                                        ex.response.headers)  # pylint: disable=no-member
                     raise
 
-    logger.warning(CREDENTIAL_WARNING)
+    # No need to show warning if no credential is created
+    if password or cert_file:
+        logger.warning(CREDENTIAL_WARNING)
 
     if show_auth_in_json:
         from azure.cli.core._profile import Profile

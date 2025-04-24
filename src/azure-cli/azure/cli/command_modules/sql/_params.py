@@ -32,7 +32,6 @@ from azure.mgmt.sql.models import (
     ServerKeyType,
     StorageKeyType,
     TransparentDataEncryptionState,
-    FreemiumType,
     ManagedInstanceDatabaseFormat
 )
 
@@ -64,6 +63,7 @@ from .custom import (
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType,
+    FreemiumType,
     FreeLimitExhaustionBehavior,
     FailoverGroupDatabasesSecondaryType
 )

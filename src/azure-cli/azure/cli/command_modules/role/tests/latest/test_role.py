@@ -41,6 +41,15 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
         # Make sure no role assignment is created by default
         self.cmd('role assignment list --assignee {app_id} --all', checks=self.check('length(@)', 0))
 
+    def test_create_for_rbac_no_password(self):
+        self.kwargs['display_name'] = self.create_random_name('azure-cli-test-', 30)
+        result = self.cmd('ad sp create-for-rbac --display-name {display_name} --create-password false',
+                          checks=[
+                              self.check('displayName', '{display_name}'),
+                              self.check('password', None)
+                          ]).get_output_in_json()
+        self.kwargs['app_id'] = result['appId']
+
     def test_create_for_rbac_create_cert(self):
 
         self.kwargs['display_name'] = self.create_random_name('azure-cli-test-', 30)
@@ -195,6 +204,18 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
         with self.assertRaisesRegex(ArgumentUsageError, 'both'):
             self.cmd('ad sp create-for-rbac --role {role}')
 
+    def test_create_for_rbac_service_management_reference(self):
+        self.kwargs.update({
+            'display_name': self.create_random_name('azure-cli-test-', 30),
+            'service_management_reference': '96524024-75b0-497b-ab38-0381399a6a9d'
+        })
+        result = self.cmd('ad sp create-for-rbac --display-name {display_name} '
+                          '--service-management-reference {service_management_reference}',
+                          checks=self.check('displayName', '{display_name}')).get_output_in_json()
+        self.kwargs['app_id'] = result['appId']
+        self.cmd('ad app show --id {app_id}',
+                 checks=self.check('serviceManagementReference', '{service_management_reference}'))
+
 
 class RoleDefinitionScenarioTest(RoleScenarioTestBase):
 
@@ -310,7 +331,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             self.kwargs.update({
                 'upn': user + TEST_TENANT_DOMAIN,
                 'nsg': 'nsg1',
-                'role': 'reader',  # Use low-privileged role to make the test secure
+                'role': 'Reader',  # Use low-privileged role to make the test secure
                 # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
                 'reader_guid': 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
             })
@@ -349,10 +370,15 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment create --assignee {upn} --role {role} --scope {rg_id}',
                          self.check("principalName", self.kwargs["upn"]))
 
-                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
+                self.cmd('role assignment list -g {rg}', checks=[
+                    self.check("length([])", 1),
+                    self.check("[0].principalName", self.kwargs["upn"]),
+                    self.check("[0].roleDefinitionName", self.kwargs["role"])
+                ])
                 self.cmd('role assignment list --assignee {upn} --role {role} -g {rg}', checks=[
                     self.check("length([])", 1),
-                    self.check("[0].principalName", self.kwargs["upn"])
+                    self.check("[0].principalName", self.kwargs["upn"]),
+                    self.check("[0].roleDefinitionName", self.kwargs["role"])
                 ])
 
                 # Create role assignment for the group
@@ -368,25 +394,31 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment list -g {rg}',
                          checks=self.is_empty())
 
-                # From now on, directly use role definition ID to avoid querying definition ID and reduce recording
-                # YAML size.
+                # From now on, do not resolve role definition to reduce recording YAML size
+                # - role assignment create: Directly use role definition ID
+                # - role assignment list: Do not fill role definition name
 
                 # test role assignments on a resource
                 self.cmd('role assignment create --assignee {upn} --role {reader_guid} --scope {nsg_id}')
-                self.cmd('role assignment list --assignee {upn} --role {reader_guid} --scope {nsg_id}',
+                self.cmd('role assignment list --assignee {upn} --role {reader_guid} --scope {nsg_id} '
+                         '--fill-role-definition-name false',
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment delete --assignee {upn} --role {reader_guid} --scope {nsg_id}')
-                self.cmd('role assignment list --scope {nsg_id}',
+                self.cmd('role assignment list --scope {nsg_id} '
+                         '--fill-role-definition-name false',
                          checks=self.is_empty())
 
                 # test role assignment on subscription level
                 self.cmd('role assignment create --assignee {upn} --role {reader_guid} --scope {sub_id}')
-                self.cmd('role assignment list --assignee {upn} --role {reader_guid}',
+                self.cmd('role assignment list --assignee {upn} --role {reader_guid} '
+                         '--fill-role-definition-name false',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment list --assignee {upn}',
+                self.cmd('role assignment list --assignee {upn} '
+                         '--fill-role-definition-name false',
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment delete --assignee {upn} --role {reader_guid}')
-                self.cmd('role assignment list --assignee {upn}',
+                self.cmd('role assignment list --assignee {upn} '
+                         '--fill-role-definition-name false',
                          checks=self.check("length([])", 0))
 
                 # Test bring-your-own assignment name
@@ -397,7 +429,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 # Should be idempotent
                 self.cmd('role assignment create --assignee {upn} --role {reader_guid} --scope {rg_id} '
                          '--name {assignment_name}')
-                self.cmd('role assignment list --assignee {upn} --role {reader_guid} --all',
+                self.cmd('role assignment list --assignee {upn} --role {reader_guid} --all '
+                         '--fill-role-definition-name false',
                          checks=[self.check("length([])", 1), self.check("[0].name", '{assignment_name}')])
                 # Delete by assignment id
                 self.cmd('role assignment delete --ids {assignment_id}')
@@ -410,7 +443,9 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 # Besides --ids, all other arguments are ignored
                 self.cmd('role assignment delete --ids {assignment_id} '
                          '--assignee test --role test --resource-group test --scope test --include-inherit')
-                self.cmd('role assignment list --assignee {upn} --all', checks=self.check("length([])", 0))
+                self.cmd('role assignment list --assignee {upn} --all '
+                         '--fill-role-definition-name false',
+                         checks=self.check("length([])", 0))
 
                 # test create role assignment for invalid assignee
                 with self.assertRaisesRegex(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
@@ -692,6 +727,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
     def test_role_assignment_no_graph(self, resource_group):
+        # After live testing, manually verify the recording file that no HTTP request to
+        # https://graph.microsoft.com is made
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.kwargs.update({
                 'uami': self.create_random_name('clitest', 15),  # user-assigned managed identity
@@ -706,13 +743,19 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             self.cmd('role assignment create '
                      '--assignee-object-id {uami_object_id} --assignee-principal-type ServicePrincipal '
                      '--role {role_reader_guid} --scope {rg_id}')
-            # Verify '--fill-principal-name false' skips the Graph query for filling principalName.
-            self.cmd('role assignment list --scope {rg_id} --fill-principal-name false',
+            # --assignee-object-id bypasses Graph query for resolving assignee object ID
+            # '--fill-role-definition-name false' bypasses role definitions query for filling roleDefinitionName
+            # '--fill-principal-name false' bypasses Graph query for filling principalName
+            self.cmd('role assignment list --all --assignee-object-id {uami_object_id} '
+                     '--fill-role-definition-name false --fill-principal-name false',
                      checks=[
                          self.check("length([])", 1),
+                         self.not_exists("[0].roleDefinitionName"),
                          self.not_exists("[0].principalName")
                      ])
-            # Manually verify the recording file that no HTTP request to https://graph.microsoft.com is made
+            self.cmd('role assignment delete --scope {rg_id} --assignee-object-id {uami_object_id}')
+            self.cmd('role assignment list --all --assignee-object-id {uami_object_id}',
+                     checks=self.check("length([])", 0))
 
 
 class RoleAssignmentWithConfigScenarioTest(RoleScenarioTestBase):
@@ -776,15 +819,6 @@ class RoleAssignmentLiveScenarioTest(LiveScenarioTest):
 
         # There are role assignments inherited from subscription, so we can't tell the exact number.
         self.cmd('role assignment list -g {rg} --include-inherited', checks=[self.greater_than("length([])", 0)])
-
-    @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
-    def test_role_assignment_for_co_admins(self, resource_group):
-
-        result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
-        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
-
-        result = self.cmd('role assignment list -g {rg} --include-classic-administrator').get_output_in_json()
-        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
 
 
 if __name__ == '__main__':

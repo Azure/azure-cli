@@ -96,6 +96,7 @@ def load_arguments(self, _):
                         "'2017-12-31'). Default value is one year after current time")
         c.argument('key_value', arg_group='keyCredential',
                    help='the value for the key credentials associated with the application')
+        # Even in `az ad app update`, key_type and key_usage need to have default values if key_value is specified
         c.argument('key_type', arg_group='keyCredential',
                    help='the type of the key credentials associated with the application',
                    arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'],
@@ -186,6 +187,9 @@ def load_arguments(self, _):
         c.argument('display_name', options_list=['--display-name', '--name', '-n'],
                    help='Display name of the service principal. If not present, default to azure-cli-%Y-%m-%d-%H-%M-%S '
                         'where the suffix is the time of creation.')
+        c.argument('create_password', arg_type=get_three_state_flag(), arg_group='Credential',
+                   help='Create a password credential (secret) on the the application. This is the default behavior. '
+                        'Set this argument to false to disable creating password credential.')
         c.argument('scopes', nargs='+',
                    help="Space-separated list of scopes the service principal's role assignment applies to. e.g., "
                         "subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, "
@@ -198,6 +202,10 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--sdk-auth'),
                    help='Output service principal credential along with cloud endpoints in JSON format. ',
                    arg_type=get_three_state_flag())
+        c.argument('service_management_reference',
+                   help='Set the serviceManagementReference property of the created application. '
+                        'Reference application or service contact information from a Service or Asset Management '
+                        'database.')
 
     with self.argument_context('ad sp owner list') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')
@@ -256,7 +264,6 @@ def load_arguments(self, _):
     with self.argument_context('ad user') as c:
         c.ignore('_subscription')
         c.argument('mail_nickname', help='mail alias. Defaults to user principal name')
-        c.argument('force_change_password_next_login', arg_type=get_three_state_flag(), help='Require the user to change their password the next time they log in. Only valid when --password is specified')
         c.argument('account_enabled', arg_type=get_three_state_flag(), help='enable the user account')
         c.argument('password', help='user password')
         c.argument('upn_or_object_id', options_list=['--id'],
@@ -327,13 +334,12 @@ def load_arguments(self, _):
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
         c.argument('can_delegate', action='store_true', help='when set, the assignee will be able to create further role assignments to the same role')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
-        c.argument('assignee_object_id', help="Use this parameter instead of '--assignee' to bypass Graph API invocation in case of insufficient privileges. "
-                   "This parameter only works with object ids for users, groups, service principals, and "
-                   "managed identities. For managed identities use the principal id. For service principals, "
-                   "use the object id and not the app id.")
+        c.argument('assignee_object_id',
+                   help="The assignee's object ID (also known as principal ID). "
+                        "Use this argument instead of '--assignee' to bypass Microsoft Graph query in case "
+                        "the logged-in account has no permission or the machine has no network access to query "
+                        "Microsoft Graph.")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
-        c.argument('include_classic_administrators', arg_type=get_three_state_flag(),
-                   help='list default role assignments for subscription classic administrators, aka co-admins')
         c.argument('description', is_preview=True, min_api='2020-04-01-preview', help='Description of role assignment.')
         c.argument('condition', is_preview=True, min_api='2020-04-01-preview', help='Condition under which the user can be granted permission.')
         c.argument('condition_version', is_preview=True, min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
@@ -347,6 +353,11 @@ def load_arguments(self, _):
                         "principalName property with it. "
                         "If the logged-in account has no permission or the machine has no network access to query "
                         "Microsoft Graph, set this flag to false to avoid warning or error.")
+        c.argument('fill_role_definition_name', arg_type=get_three_state_flag(),
+                   help="Fill roleDefinitionName property in addition to roleDefinitionId. This operation is "
+                        "expensive. If you encounter performance issue, set this flag to false.")
+        c.argument('include_groups', action='store_true',
+                   help='Include extra assignments to the groups of which the user is a member (transitively).')
 
     time_help = 'The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}'
     with self.argument_context('role assignment list-changelogs') as c:
