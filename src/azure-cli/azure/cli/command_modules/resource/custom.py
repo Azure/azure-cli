@@ -408,7 +408,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
-    smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+    smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS,
                                   aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     deployment_client = smc.deployments  # This solves the multi-api for you
@@ -427,7 +427,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     from azure.core.exceptions import HttpResponseError
     Deployment = cmd.get_models('Deployment')
     deployment = Deployment(properties=properties)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS):
         try:
             validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as err:
@@ -553,7 +553,7 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     from azure.core.exceptions import HttpResponseError
     Deployment = cmd.get_models('Deployment')
     deployment = Deployment(properties=deployment_properties, location=deployment_location)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS):
         try:
             validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
         except HttpResponseError as err:
@@ -644,7 +644,7 @@ def _deploy_arm_template_at_resource_group(cmd,
     from azure.core.exceptions import HttpResponseError
     Deployment = cmd.get_models('Deployment')
     deployment = Deployment(properties=deployment_properties)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS):
         try:
             validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
         except HttpResponseError as err:
@@ -735,7 +735,7 @@ def _deploy_arm_template_at_management_group(cmd,
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
     deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS):
         try:
             validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
                                                                                      deployment_name, deployment)
@@ -819,7 +819,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
     deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS):
         try:
             validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
                                                                            parameters=deployment)
@@ -1186,7 +1186,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
 
 def _prepare_deployment_what_if_properties(cmd, deployment_scope, template_file, template_uri, parameters,
                                            mode, result_format, no_prompt, template_spec, query_string):
-    DeploymentWhatIfProperties, DeploymentWhatIfSettings = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+    DeploymentWhatIfProperties, DeploymentWhatIfSettings = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS,
                                                                    'DeploymentWhatIfProperties', 'DeploymentWhatIfSettings',
                                                                    mod='models')
 
@@ -1202,7 +1202,7 @@ def _prepare_deployment_what_if_properties(cmd, deployment_scope, template_file,
 # pylint: disable=protected-access
 def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenants=None, plug_pipeline=True):
 
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS,
                                   aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     deployment_client = smc.deployments  # This solves the multi-api for you
