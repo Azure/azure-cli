@@ -30,7 +30,7 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
     cf_postgres_flexible_private_endpoint_connections, \
     cf_postgres_flexible_tuning_options, \
-    cf_postgres_flexible_config, cf_postgres_flexible_adadmin
+    cf_postgres_flexible_config, cf_postgres_flexible_admin
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
@@ -174,7 +174,7 @@ def flexible_server_create(cmd, client,
 
     # Add Microsoft Entra Admin
     if is_microsoft_entra_auth_enabled and admin_name is not None or admin_id is not None:
-        server_admin_client = cf_postgres_flexible_adadmin(cmd.cli_ctx, '_')
+        server_admin_client = cf_postgres_flexible_admin(cmd.cli_ctx, '_')
         logger.warning("Add Microsoft Entra Admin '%s'.", admin_name)
         _create_admin(server_admin_client, resource_group_name, server_name, admin_name, admin_id, admin_type)
 
