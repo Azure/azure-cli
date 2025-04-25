@@ -5375,25 +5375,6 @@ def list_generator(pages, num_results=50):
     return result
 
 
-def sig_shared_image_definition_list(client, location, gallery_unique_name,
-                                     shared_to=None, marker=None, show_next_marker=None):
-    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
-    if shared_to == 'subscription':
-        shared_to = None
-    generator = client.list(location=location, gallery_unique_name=gallery_unique_name, shared_to=shared_to)
-    return get_page_result(generator, marker, show_next_marker)
-
-
-def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name,
-                                  shared_to=None, marker=None, show_next_marker=None):
-    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
-    if shared_to == 'subscription':
-        shared_to = None
-    generator = client.list(location=location, gallery_unique_name=gallery_unique_name,
-                            gallery_image_name=gallery_image_name, shared_to=shared_to)
-    return get_page_result(generator, marker, show_next_marker)
-
-
 def gallery_application_version_create(client,
                                        resource_group_name,
                                        gallery_name,
@@ -5937,18 +5918,6 @@ def _transform_community_gallery_list_output(result):
         output.append(output_item)
 
     return output
-
-
-def sig_community_image_definition_list(client, location, public_gallery_name, marker=None, show_next_marker=None):
-    generator = client.list(location=location, public_gallery_name=public_gallery_name)
-    return get_page_result(generator, marker, show_next_marker)
-
-
-def sig_community_image_version_list(client, location, public_gallery_name, gallery_image_name, marker=None,
-                                     show_next_marker=None):
-    generator = client.list(location=location, public_gallery_name=public_gallery_name,
-                            gallery_image_name=gallery_image_name)
-    return get_page_result(generator, marker, show_next_marker)
 
 
 def list_vm_sizes(cmd, location):
