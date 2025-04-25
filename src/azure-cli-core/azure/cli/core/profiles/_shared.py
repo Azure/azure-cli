@@ -57,6 +57,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks', 'ManagementLockClient')
     MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy', 'PolicyClient')
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
+    MGMT_RESOURCE_DEPLOYMENTS = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
     MGMT_RESOURCE_DEPLOYMENTSCRIPTS = ('azure.mgmt.resource.deploymentscripts', 'DeploymentScriptsClient')
     MGMT_RESOURCE_TEMPLATESPECS = ('azure.mgmt.resource.templatespecs', 'TemplateSpecsClient')
@@ -178,6 +179,7 @@ AZURE_API_PROFILES = {
             'policy_exemptions': '2020-07-01-preview'
         }),
         ResourceType.MGMT_RESOURCE_RESOURCES: '2022-09-01',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTS: '2024-11-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2022-12-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
@@ -285,6 +287,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2019-10-01',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTS: '2019-10-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
@@ -329,6 +332,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTS: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
@@ -368,6 +372,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-02-01',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTS: '2018-02-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
@@ -396,6 +401,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2015-10-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-02-01',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTS: '2016-02-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',

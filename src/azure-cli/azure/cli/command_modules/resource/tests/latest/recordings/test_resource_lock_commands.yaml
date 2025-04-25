@@ -13,32 +13,36 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001","name":"cli_test_resource_lock000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T11:14:40Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001","name":"cli_test_resource_lock000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_resource_lock_commands","date":"2025-04-24T12:13:33Z","module":"resource"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '334'
+      - '391'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:42 GMT
+      - Thu, 24 Apr 2025 12:13:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 2351B15F61914800967DBC715A0E7ED6 Ref B: BN1AA2051014025 Ref C: 2025-04-24T12:13:34Z'
     status:
       code: 200
       message: OK
@@ -61,48 +65,46 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002?api-version=2024-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli.lock.rsrc000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002\",\r\n
-        \ \"etag\": \"W/\\\"5a275ad6-74b2-409b-b490-b7aa68e11c3b\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"dd822850-c021-41d7-8d20-1a914db889ae\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
-        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
-        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
-        \ }\r\n}"
+      string: '{"name":"cli.lock.rsrc000002","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002","etag":"W/\"105421a6-0d4a-4b9d-a433-04d3f9e5232f\"","type":"Microsoft.Network/virtualNetworks","location":"westus","properties":{"provisioningState":"Updating","resourceGuid":"4faec0d1-9497-4828-8ce8-5828426f272a","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"privateEndpointVNetPolicies":"Disabled","subnets":[],"virtualNetworkPeerings":[],"enableDdosProtection":false}}'
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0da67705-df76-47ca-9f04-5e2048e711d9?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bf75d05a-01c3-4fec-9005-3d92c4949e6e?api-version=2024-05-01&t=638810936168410654&c=MIIHhzCCBm-gAwIBAgITHgbIFmDY79XLPJrDjgAABsgWYDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE3MDcxODAyWhcNMjUxMDE0MDcxODAyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmXL0h9ESvC4b92QYV7yPeOyC8nGJyORFUoUm7UdBjxDbKTdSt8SfTfQkW5HjszhiwurE_fjCMlYj9_ymGSwiuCaKmitW7pcXF-WPgkAU2dKPUrSPqJAyeDDvG5SbZOmYYKHttoh0ZCPxadX4ljJ_k6BiE0-a-tSIYI__abusYKDqLuE9uYszi2Ra_hhLOH8qi2TBg71Jc7Dasa4RRwHnwfYbhpKL0tyMrBwyvMUGO00Q_Lx0iRvtIyWhp0HLppX7M2gzHCkh37uEJaggrcqn2T1QHSLgt2AuneElzaS8_if-JVZWv8ZdwCW8Oa-9JXQCzDSFKFP-2yMm1KPtualuUCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSJ3ygYgt4NuGG8mfdBelaS0ABH_DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAI2X3AiLN4s7W-C4ho0tyyAJfaEptV5HLxJHbIHK4awoIyOC8pp8Ay2pGHpXZlTZAhmvEJBKPbB0dVv_cphT1EjWF5rgvvLTBfp9Roo8PqmTQxmvMefBGXnYPmtPgtKMi5nwH1Y4xayGTzvIjIz1ZwYW5_hkF8jKx3e9bGDWPlgyHm3bRRRSgD650gZ7x69myyaDo4tX8FNWbLk-7PYxKiDBeLyle73_kab63klBJc7ep-O2AIxEtxi2DhDGLlGADWVwyYhEhlcFAhxXcOjCETnpsvDfOiK7XD3hnEkdKsChwTT9Gp6wEmn6xu59Qm2DenO3AMiv6vEyP2-7F-bR5G4&s=ml3dXJ5JcLNKmvt0kKTwEPEmPmAQKmOLBIvgjlxDMmNq9vIiwSDPr5_8K_IoYclicdGzkiJpqlJcaqO289oL54FX0tYymE10QW17p1rIC4rayXOqeSoMtOaY8v80i8f0Zxxc4thxv7Mev5CKUK1-c108_vzA8F6Hur5ogCSUWqcg7X2js860sU-VuhJ0P89zu6WJDmwfcsLX5ZmLADUZislR1o5u5557OOFXsR94HZ2eQ9xu_MFdXyvJcsNEMiFji7G3fhcT-XYt1hFiPG7TUu1vIJr4K2frriwUbZ-EQqfupaQLpEfDwqlzC-f4Gg5YWsGP_1TZJ46Zp77rFPqHYA&h=RrVJbXIJKNIkKNSzzOIQ71kE6OX2L8GYmTQA0R92XoI
       cache-control:
       - no-cache
       content-length:
-      - '644'
+      - '574'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:44 GMT
+      - Thu, 24 Apr 2025 12:13:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f6396907-8fac-4f3f-be2e-1877c708843c
+      - b8e0e813-961a-4781-8584-bbec7038ed8c
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/19add702-b683-4365-85e3-beb521191f94
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: AC8B6D1ECE8D4BF58CFDD8BDD862ABAA Ref B: BN1AA2051015051 Ref C: 2025-04-24T12:13:35Z'
     status:
       code: 201
       message: Created
@@ -120,39 +122,40 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0da67705-df76-47ca-9f04-5e2048e711d9?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bf75d05a-01c3-4fec-9005-3d92c4949e6e?api-version=2024-05-01&t=638810936168410654&c=MIIHhzCCBm-gAwIBAgITHgbIFmDY79XLPJrDjgAABsgWYDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE3MDcxODAyWhcNMjUxMDE0MDcxODAyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmXL0h9ESvC4b92QYV7yPeOyC8nGJyORFUoUm7UdBjxDbKTdSt8SfTfQkW5HjszhiwurE_fjCMlYj9_ymGSwiuCaKmitW7pcXF-WPgkAU2dKPUrSPqJAyeDDvG5SbZOmYYKHttoh0ZCPxadX4ljJ_k6BiE0-a-tSIYI__abusYKDqLuE9uYszi2Ra_hhLOH8qi2TBg71Jc7Dasa4RRwHnwfYbhpKL0tyMrBwyvMUGO00Q_Lx0iRvtIyWhp0HLppX7M2gzHCkh37uEJaggrcqn2T1QHSLgt2AuneElzaS8_if-JVZWv8ZdwCW8Oa-9JXQCzDSFKFP-2yMm1KPtualuUCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSJ3ygYgt4NuGG8mfdBelaS0ABH_DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAI2X3AiLN4s7W-C4ho0tyyAJfaEptV5HLxJHbIHK4awoIyOC8pp8Ay2pGHpXZlTZAhmvEJBKPbB0dVv_cphT1EjWF5rgvvLTBfp9Roo8PqmTQxmvMefBGXnYPmtPgtKMi5nwH1Y4xayGTzvIjIz1ZwYW5_hkF8jKx3e9bGDWPlgyHm3bRRRSgD650gZ7x69myyaDo4tX8FNWbLk-7PYxKiDBeLyle73_kab63klBJc7ep-O2AIxEtxi2DhDGLlGADWVwyYhEhlcFAhxXcOjCETnpsvDfOiK7XD3hnEkdKsChwTT9Gp6wEmn6xu59Qm2DenO3AMiv6vEyP2-7F-bR5G4&s=ml3dXJ5JcLNKmvt0kKTwEPEmPmAQKmOLBIvgjlxDMmNq9vIiwSDPr5_8K_IoYclicdGzkiJpqlJcaqO289oL54FX0tYymE10QW17p1rIC4rayXOqeSoMtOaY8v80i8f0Zxxc4thxv7Mev5CKUK1-c108_vzA8F6Hur5ogCSUWqcg7X2js860sU-VuhJ0P89zu6WJDmwfcsLX5ZmLADUZislR1o5u5557OOFXsR94HZ2eQ9xu_MFdXyvJcsNEMiFji7G3fhcT-XYt1hFiPG7TUu1vIJr4K2frriwUbZ-EQqfupaQLpEfDwqlzC-f4Gg5YWsGP_1TZJ46Zp77rFPqHYA&h=RrVJbXIJKNIkKNSzzOIQ71kE6OX2L8GYmTQA0R92XoI
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: '{"status":"InProgress"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '23'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:48 GMT
+      - Thu, 24 Apr 2025 12:13:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f1a6a886-cfa4-4fc7-b942-cc2f2f5114eb
+      - d3434d95-5dbc-43df-8810-b49a9b354589
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/f74e6ead-de2d-4752-b3c7-2f083418554f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: FA1E8156DCA94559B5BEF46632B532F8 Ref B: BN1AA2051015051 Ref C: 2025-04-24T12:13:37Z'
     status:
       code: 200
       message: OK
@@ -170,48 +173,91 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bf75d05a-01c3-4fec-9005-3d92c4949e6e?api-version=2024-05-01&t=638810936168410654&c=MIIHhzCCBm-gAwIBAgITHgbIFmDY79XLPJrDjgAABsgWYDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE3MDcxODAyWhcNMjUxMDE0MDcxODAyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmXL0h9ESvC4b92QYV7yPeOyC8nGJyORFUoUm7UdBjxDbKTdSt8SfTfQkW5HjszhiwurE_fjCMlYj9_ymGSwiuCaKmitW7pcXF-WPgkAU2dKPUrSPqJAyeDDvG5SbZOmYYKHttoh0ZCPxadX4ljJ_k6BiE0-a-tSIYI__abusYKDqLuE9uYszi2Ra_hhLOH8qi2TBg71Jc7Dasa4RRwHnwfYbhpKL0tyMrBwyvMUGO00Q_Lx0iRvtIyWhp0HLppX7M2gzHCkh37uEJaggrcqn2T1QHSLgt2AuneElzaS8_if-JVZWv8ZdwCW8Oa-9JXQCzDSFKFP-2yMm1KPtualuUCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSJ3ygYgt4NuGG8mfdBelaS0ABH_DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAI2X3AiLN4s7W-C4ho0tyyAJfaEptV5HLxJHbIHK4awoIyOC8pp8Ay2pGHpXZlTZAhmvEJBKPbB0dVv_cphT1EjWF5rgvvLTBfp9Roo8PqmTQxmvMefBGXnYPmtPgtKMi5nwH1Y4xayGTzvIjIz1ZwYW5_hkF8jKx3e9bGDWPlgyHm3bRRRSgD650gZ7x69myyaDo4tX8FNWbLk-7PYxKiDBeLyle73_kab63klBJc7ep-O2AIxEtxi2DhDGLlGADWVwyYhEhlcFAhxXcOjCETnpsvDfOiK7XD3hnEkdKsChwTT9Gp6wEmn6xu59Qm2DenO3AMiv6vEyP2-7F-bR5G4&s=ml3dXJ5JcLNKmvt0kKTwEPEmPmAQKmOLBIvgjlxDMmNq9vIiwSDPr5_8K_IoYclicdGzkiJpqlJcaqO289oL54FX0tYymE10QW17p1rIC4rayXOqeSoMtOaY8v80i8f0Zxxc4thxv7Mev5CKUK1-c108_vzA8F6Hur5ogCSUWqcg7X2js860sU-VuhJ0P89zu6WJDmwfcsLX5ZmLADUZislR1o5u5557OOFXsR94HZ2eQ9xu_MFdXyvJcsNEMiFji7G3fhcT-XYt1hFiPG7TUu1vIJr4K2frriwUbZ-EQqfupaQLpEfDwqlzC-f4Gg5YWsGP_1TZJ46Zp77rFPqHYA&h=RrVJbXIJKNIkKNSzzOIQ71kE6OX2L8GYmTQA0R92XoI
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 24 Apr 2025 12:13:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 8faca5cd-dc02-45f5-8ae2-bfc7c210cdfc
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/b6f2de55-da6b-43f0-b1c4-80e47bc292ef
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+      x-msedge-ref:
+      - 'Ref A: 5A248FA3406F41C0A327AAEA5CCB0AA1 Ref B: BN1AA2051015051 Ref C: 2025-04-24T12:13:47Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002?api-version=2024-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli.lock.rsrc000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002\",\r\n
-        \ \"etag\": \"W/\\\"97e67e85-117b-4183-a429-e0f9b47e7cee\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"dd822850-c021-41d7-8d20-1a914db889ae\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
-        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
-        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
-        \ }\r\n}"
+      string: '{"name":"cli.lock.rsrc000002","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002","etag":"W/\"76073645-154b-4b59-8e9c-9ff5fa7aea7c\"","type":"Microsoft.Network/virtualNetworks","location":"westus","properties":{"provisioningState":"Succeeded","resourceGuid":"4faec0d1-9497-4828-8ce8-5828426f272a","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"privateEndpointVNetPolicies":"Disabled","subnets":[],"virtualNetworkPeerings":[],"enableDdosProtection":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '645'
+      - '575'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:48 GMT
+      - Thu, 24 Apr 2025 12:13:47 GMT
       etag:
-      - W/"97e67e85-117b-4183-a429-e0f9b47e7cee"
+      - W/"76073645-154b-4b59-8e9c-9ff5fa7aea7c"
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 345b2441-46b6-4b1e-8941-811f1da765dc
+      - f7d9b69a-13fd-49fc-8e85-48e573fff2b2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 9D0EAC29FF2446F5B8835D2944CFC375 Ref B: BN1AA2051015051 Ref C: 2025-04-24T12:13:48Z'
     status:
       code: 200
       message: OK
@@ -233,7 +279,7 @@ interactions:
       ParameterSetName:
       - -n -g --resource-type --resource-name --lock-type
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -248,17 +294,25 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:49 GMT
+      - Thu, 24 Apr 2025 12:13:48 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/c6c0c1d4-efcb-4d1f-a1e5-f030b90af66f
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: B716C779169945A7918E802D6A8A5C97 Ref B: BN1AA2051013023 Ref C: 2025-04-24T12:13:49Z'
     status:
       code: 201
       message: Created
@@ -276,133 +330,45 @@ interactions:
       ParameterSetName:
       - --name -g --resource-type --resource-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
     body:
-      string: '{"value":[{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv/providers/Microsoft.Authorization/locks/delete-kv","type":"Microsoft.Authorization/locks","name":"delete-kv"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/bez-id/providers/Microsoft.Authorization/locks/delete-id","type":"Microsoft.Authorization/locks","name":"delete-id"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Compute/images/bez-image/providers/Microsoft.Authorization/locks/r","type":"Microsoft.Authorization/locks","name":"r"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320008debd5bc/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":"contact
-        zhwen"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acctestRG-sentinel-221011134813007315/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fypurview/providers/Microsoft.Purview/accounts/fypurview/providers/Microsoft.Authorization/locks/d","type":"Microsoft.Authorization/locks","name":"d"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
+      string: '{"value":[{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/bez-rg/providers/Microsoft.Storage/storageAccounts/bezsharedstorage/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fypurview/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_group_lockrgwagzm22v4cfj5mslx4raxnijvhaamtlft5g2mmyte3ssnpw45ghtjw/providers/Microsoft.Authorization/locks/cli-test-lockgcxd3rdzssjobpnqlqn6tbyzs3wrsbhpk4f","type":"Microsoft.Authorization/locks","name":"cli-test-lockgcxd3rdzssjobpnqlqn6tbyzs3wrsbhpk4f"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lightning/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lock3cyeygkrtosacajli3otim3j6altiytn2o/providers/Microsoft.Authorization/locks/cli-test-locksnf4vuadrtx27bhkdzgek6vzpz5xb63bg7j","type":"Microsoft.Authorization/locks","name":"cli-test-locksnf4vuadrtx27bhkdzgek6vzpz5xb63bg7j"},{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_readonly_resource_lockqmzolqzlezu7q7z6q5gqnwfns7l7z7qcbh75y5ud54rq/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrcarsr6w3n4qqbvcvif/providers/Microsoft.Authorization/locks/cli-test-lockj7zakuqg4dhngeclqj2ke6iwa7hbimd5imuldpizwbszwq4ej75ermtjwvcov","type":"Microsoft.Authorization/locks","name":"cli-test-lockj7zakuqg4dhngeclqj2ke6iwa7hbimd5imuldpizwbszwq4ej75ermtjwvcov"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fybot/providers/Microsoft.Authorization/locks/delete-lock","type":"Microsoft.Authorization/locks","name":"delete-lock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/galleryappaccount/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AutoTagFunctionAppRG/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/queuetest/providers/Microsoft.Storage/storageAccounts/qteststac/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Storage/storageAccounts/hangstorage/providers/Microsoft.Authorization/locks/2","type":"Microsoft.Authorization/locks","name":"2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shiying-rg/providers/Microsoft.Authorization/locks/donotdelete","type":"Microsoft.Authorization/locks","name":"donotdelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_commands_with_idsvvj5j3j7mlet4rxc2rgzlxazqkyyi33intic3axolqmf/providers/Microsoft.Network/virtualNetworks/cli-lock-vnetkj4zew76vmcy3qobm/subnets/cli-lock-subnetd2zr7ud2w6dh2za/providers/Microsoft.Authorization/locks/cli-test-lockmggd4tg","type":"Microsoft.Authorization/locks","name":"cli-test-lockmggd4tg"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-live-test/providers/Microsoft.Authorization/locks/can
+        not delete","type":"Microsoft.Authorization/locks","name":"can not delete"},{"properties":{"level":"CanNotDelete","notes":"Public
+        preview - do not delete until after 6/15/24"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clis-login-preview/providers/Microsoft.Authorization/locks/preview","type":"Microsoft.Authorization/locks","name":"preview"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Authorization/locks/rg2","type":"Microsoft.Authorization/locks","name":"rg2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
         by Azure Backup for storage accounts registered with a Recovery Services Vault.
         This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgxp7uwuibs5/providers/microsoft.storage/storageAccounts/clitestzrwidkqplnw3jmz4z/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgawbqkye7l4/providers/microsoft.storage/storageAccounts/clitestlsjx67ujuhjr7zkah/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lightning/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbo2ure7pgp/providers/microsoft.storage/storageAccounts/clitestsnv7joygpazk23npj/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgy6swh3vebl/providers/microsoft.storage/storageAccounts/clitestaxq4uhxp4axa3uagg/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fybot/providers/Microsoft.Authorization/locks/delete-lock","type":"Microsoft.Authorization/locks","name":"delete-lock"},{"properties":{"level":"CanNotDelete","notes":"for
-        Asir"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/emerald-city-bookstore/providers/Microsoft.Authorization/locks/No-DELETE","type":"Microsoft.Authorization/locks","name":"No-DELETE"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgh5duq2f6uh/providers/microsoft.storage/storageAccounts/clitest2vjedutxs37ymp4ni/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg46ia57tmnz/providers/microsoft.storage/storageAccounts/clitestdlxtp24ycnjl3jui2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/galleryappaccount/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/queuetest/providers/Microsoft.Storage/storageAccounts/qteststac/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Authorization/locks/test-databricks","type":"Microsoft.Authorization/locks","name":"test-databricks"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Authorization/locks/1","type":"Microsoft.Authorization/locks","name":"1"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Storage/storageAccounts/hangstorage/providers/Microsoft.Authorization/locks/2","type":"Microsoft.Authorization/locks","name":"2"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_acctestRG-ibt-24_acctest-IBT-0710-2_4ebedb5a-e3b1-4675-aa4c-3c160fe70907/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgephuyzwt3d/providers/microsoft.storage/storageAccounts/clitesturpy433yg4s3cpou6/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbcjpbfrgst/providers/microsoft.storage/storageAccounts/clitest7y3z5tzoevqexrwmb/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shiying-rg/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgn6glpfa25c/providers/microsoft.storage/storageAccounts/clitestgt3fjzabc7taya5zo/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrgtest1/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":"ddos"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg2/providers/Microsoft.Authorization/locks/testrg2","type":"Microsoft.Authorization/locks","name":"testrg2"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgiudkrkxpl4/providers/microsoft.storage/storageAccounts/clitestbiegaggvgwivkqyyi/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Authorization/locks/rg2","type":"Microsoft.Authorization/locks","name":"rg2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgl6l3rg6atb/providers/microsoft.storage/storageAccounts/clitest4sjmiwke5nz3f67pu/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgptzwacrnwa/providers/microsoft.storage/storageAccounts/clitestivtrt5tp624n63ast/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-file-handle-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbbt37xr2le/providers/microsoft.storage/storageAccounts/clitest74vl6rwuxl5fbuklw/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbbt37xr2le/providers/microsoft.storage/storageAccounts/clitest5frikrzhxwryrkfel/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgu7jwflzo6g/providers/microsoft.storage/storageAccounts/clitestwqzjytdeun46rphfd/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/similar-bot/providers/Microsoft.Authorization/locks/1","type":"Microsoft.Authorization/locks","name":"1"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhwen-domain/providers/Microsoft.Authorization/locks/zhwen","type":"Microsoft.Authorization/locks","name":"zhwen"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rggrglkh7zr7/providers/microsoft.storage/storageAccounts/clitest2f63bh43aix4wcnlh/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgeghfcmpfiw/providers/microsoft.storage/storageAccounts/clitestkoxtfkf67yodgckyb/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dixue/providers/Microsoft.Authorization/locks/ForTest","type":"Microsoft.Authorization/locks","name":"ForTest"},{"properties":{"level":"ReadOnly","notes":"Prevent
-        this resource group from being edited"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzurePowerShellLiveTest/providers/Microsoft.Authorization/locks/ReadOnlyLock","type":"Microsoft.Authorization/locks","name":"ReadOnlyLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_cli_loadbalance/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgovptfsocfg/providers/microsoft.storage/storageAccounts/clitestz72bbbbv2cio2pmom/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Web/sites/webp2c/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Storage/storageAccounts/portal2clistorage/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/feng-cli-rg/providers/Microsoft.Storage/storageAccounts/fengtestsa/providers/Microsoft.Authorization/locks/salock","type":"Microsoft.Authorization/locks","name":"salock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg6i4hl6iakg/providers/microsoft.storage/storageAccounts/clitestu3p7a7ib4n4y7gt4m/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgzjznhcqaoh/providers/microsoft.storage/storageAccounts/clitestwznnmnfot33xjztmk/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/new-experiences/providers/Microsoft.Authorization/locks/NO-DELETE","type":"Microsoft.Authorization/locks","name":"NO-DELETE"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgaz5eufnx7d/providers/microsoft.storage/storageAccounts/clitestkj3e2bodztqdfqsa2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgp6ikwpcsq7/providers/microsoft.storage/storageAccounts/clitestggvkyebv5o55dhakj/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgrc4sjsrzt4/providers/microsoft.storage/storageAccounts/clitest63b5vtkhuf7auho6z/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Storage/storageAccounts/azurecliedge/providers/Microsoft.Authorization/locks/azurecliedge-dl","type":"Microsoft.Authorization/locks","name":"azurecliedge-dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ethan-rg/providers/Microsoft.Authorization/locks/msft","type":"Microsoft.Authorization/locks","name":"msft"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg4yns4yxisb/providers/microsoft.storage/storageAccounts/clitestyt6rxgad3kebqzh26/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Storage/storageAccounts/privatepackage/providers/Microsoft.Authorization/locks/private
-        package","type":"Microsoft.Authorization/locks","name":"private package"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgv3m577d7ho/providers/microsoft.storage/storageAccounts/clitestej2fvhoj3zogyp5e7/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xz3-test/providers/Microsoft.Authorization/locks/del","type":"Microsoft.Authorization/locks","name":"del"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kairu-persist/providers/Microsoft.Authorization/locks/antidelete","type":"Microsoft.Authorization/locks","name":"antidelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgltfej7yr4u/providers/microsoft.storage/storageAccounts/clitestwvsg2uskf4i7vjfto/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.Storage/storageAccounts/clitestresultstac/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.DBforMySQL/servers/clisqldbserver/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete","notes":"for
-        customer issue repro  (snowflake)"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/storage-v2rt-repro/providers/Microsoft.Authorization/locks/DontDelete","type":"Microsoft.Authorization/locks","name":"DontDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg23akmjlz2r/providers/microsoft.storage/storageAccounts/clitestdmmxq6bklh35yongi/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgdc25pvki6m/providers/microsoft.storage/storageAccounts/clitestkxu4ahsqaxv42cyyf/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgekim5ct43n/providers/microsoft.storage/storageAccounts/clitest6jusqp4qvczw52pql/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/qinkai-test/providers/Microsoft.Storage/storageAccounts/qinkaiwu/providers/Microsoft.Authorization/locks/privatepackage","type":"Microsoft.Authorization/locks","name":"privatepackage"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cannotdelete_resource_lockbfuaftaa7m4m77urywe56rs3yfr4sr3ybmrsclix/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrchikdj2r5lezlez4w6/providers/Microsoft.Authorization/locks/cli-test-locklxyko2yruqpd6z2mdw7bw43sff3nuyz2n5ygpm5opgtajrdjgyb7c7fau6kgw","type":"Microsoft.Authorization/locks","name":"cli-test-locklxyko2yruqpd6z2mdw7bw43sff3nuyz2n5ygpm5opgtajrdjgyb7c7fau6kgw"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/t-yakou2/providers/Microsoft.Web/sites/WebAppPortal2CLI20200827092707/providers/Microsoft.Authorization/locks/dont_delete_me","type":"Microsoft.Authorization/locks","name":"dont_delete_me"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgghkyqf7pb5/providers/microsoft.storage/storageAccounts/clitestpuea6vlqwxw6ihiws/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgrli6qx2bll/providers/microsoft.storage/storageAccounts/clitest2kskuzyfvkqd7xx4y/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg4chnkoo7ql/providers/microsoft.storage/storageAccounts/clitestmevgvn7p2e7ydqz44/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"noteslwo5pwze65snyu6"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_readonly_resource_group_lockgfjwap5dza42yxmg4ibvxl7coas3gif7cvyzjj/providers/Microsoft.Authorization/locks/cli-test-lockikxplguvr63fppjodp55tqktsuav2gyamw5","type":"Microsoft.Authorization/locks","name":"cli-test-lockikxplguvr63fppjodp55tqktsuav2gyamw5"}]}'
+        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/zhiyihuang-rg/providers/microsoft.storage/storageAccounts/sauserassignedidentity2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-file-handle-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"ReadOnly","notes":"notesshckaxq4q5olwp3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_group_lockysvg7gszppjdrtkjqar33v2xe574f33wf3pw3x563rwgrvi7253pjkpq/providers/Microsoft.Authorization/locks/cli-test-lockyaqz6xi2wzehlsoiunyzz57lkafiplztnxz","type":"Microsoft.Authorization/locks","name":"cli-test-lockyaqz6xi2wzehlsoiunyzz57lkafiplztnxz"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhwen-domain/providers/Microsoft.Authorization/locks/zhwen","type":"Microsoft.Authorization/locks","name":"zhwen"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vidai-rg-aca/providers/Microsoft.Authorization/locks/NoDeletion","type":"Microsoft.Authorization/locks","name":"NoDeletion"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_idiycqncfaivd2fp264n5fwdqdwset7oksu44tcvvu6x5si/providers/Microsoft.Network/virtualNetworks/cli-lock-vnetwaax3eiugp5ack6xo/subnets/cli-lock-subnetf3aapxx6txeb22y/providers/Microsoft.Authorization/locks/cli-test-lock3vny3yr","type":"Microsoft.Authorization/locks","name":"cli-test-lock3vny3yr"},{"properties":{"level":"CanNotDelete","notes":"Prevent
+        the resource group from being deleted."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzurePowerShellLiveTest/providers/Microsoft.Authorization/locks/CanNotDelete","type":"Microsoft.Authorization/locks","name":"CanNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgforaishellzips/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Web/sites/webp2c/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Storage/storageAccounts/portal2clistorage/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zelin-rg/providers/Microsoft.Authorization/locks/do-not-delete","type":"Microsoft.Authorization/locks","name":"do-not-delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Storage/storageAccounts/azurecliedge/providers/Microsoft.Authorization/locks/azurecliedge-dl","type":"Microsoft.Authorization/locks","name":"azurecliedge-dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lockpembndygj27seh3526ltophqdxgykxuiqr/providers/Microsoft.Authorization/locks/cli-test-lockwx6sud5iv4muguritoc5v7olcdzvnqy6tv2","type":"Microsoft.Authorization/locks","name":"cli-test-lockwx6sud5iv4muguritoc5v7olcdzvnqy6tv2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/liwang3_rg_7651/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Storage/storageAccounts/privatepackage/providers/Microsoft.Authorization/locks/private
+        package","type":"Microsoft.Authorization/locks","name":"private package"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lockrit2pstga6awvduw7jbo2rzoeytrg7czn4/providers/Microsoft.Authorization/locks/cli-test-lock54muowjnzxw35v4yes4rmacxpnnhcsyftvq","type":"Microsoft.Authorization/locks","name":"cli-test-lock54muowjnzxw35v4yes4rmacxpnnhcsyftvq"},{"properties":{"level":"CanNotDelete","notes":"notesmut447ip6bcayxj"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_readonly_resource_group_lock2jovaf37yqd237mis4cdywthsuzu3clyadhryo/providers/Microsoft.Authorization/locks/cli-test-lock6pbp4r52n4fhg6eoby7ulsge322he2kjuua","type":"Microsoft.Authorization/locks","name":"cli-test-lock6pbp4r52n4fhg6eoby7ulsge322he2kjuua"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xz3-test/providers/Microsoft.Authorization/locks/del","type":"Microsoft.Authorization/locks","name":"del"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kairu-persist/providers/Microsoft.Authorization/locks/antidelete","type":"Microsoft.Authorization/locks","name":"antidelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_locki3dsms5o52dt7hqqzk5ursevnq2cfyu2km/providers/Microsoft.Authorization/locks/cli-test-lock5di7wb5l4rsye4w6kegahfbywctwlsa2jbi","type":"Microsoft.Authorization/locks","name":"cli-test-lock5di7wb5l4rsye4w6kegahfbywctwlsa2jbi"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureCliBCD/providers/Microsoft.Authorization/locks/in-use","type":"Microsoft.Authorization/locks","name":"in-use"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/t-yakou2/providers/Microsoft.Web/sites/WebAppPortal2CLI20200827092707/providers/Microsoft.Authorization/locks/dont_delete_me","type":"Microsoft.Authorization/locks","name":"dont_delete_me"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-storagemover-rg2/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_commands_with_idsfmfzlg7jabxocfq2l3eump4y334uz5lqpy6ge5zknri3/providers/Microsoft.Authorization/locks/cli-test-lock5lwpicxuuxrduiw2wlhfbgyj5zr3lcjhhd5cu","type":"Microsoft.Authorization/locks","name":"cli-test-lock5lwpicxuuxrduiw2wlhfbgyj5zr3lcjhhd5cu"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/GitHubAction_CI_RG/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzSecPackAutoConfigRG/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30883'
+      - '14337'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:54 GMT
+      - Thu, 24 Apr 2025 12:13:54 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/020baa21-3897-4cde-85ad-a97fefbd857b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 7C688DFBFA6942FB861E904D318CA770 Ref B: BN1AA2051014021 Ref C: 2025-04-24T12:13:54Z'
     status:
       code: 200
       message: OK
@@ -420,7 +386,7 @@ interactions:
       ParameterSetName:
       - --name -g --resource-type --resource-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -435,17 +401,23 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:55 GMT
+      - Thu, 24 Apr 2025 12:13:54 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/30a15e3d-0a21-4f0e-8e2b-8e17ec1c3052
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+      x-msedge-ref:
+      - 'Ref A: 4A53030C4FF245A5B6BF03AB0CBB500C Ref B: BN1AA2051014021 Ref C: 2025-04-24T12:13:54Z'
     status:
       code: 200
       message: OK
@@ -463,7 +435,7 @@ interactions:
       ParameterSetName:
       - -g --resource-type --resource-name --query -o
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks?api-version=2016-09-01
@@ -478,19 +450,23 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:56 GMT
+      - Thu, 24 Apr 2025 12:13:54 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/82b3eebc-057c-449f-a03d-8bd14babc191
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 2DC2310D6EA64D95891A84D6CC965484 Ref B: BN1AA2051013033 Ref C: 2025-04-24T12:13:55Z'
     status:
       code: 200
       message: OK
@@ -508,135 +484,45 @@ interactions:
       ParameterSetName:
       - -n -g --resource-type --resource-name --notes --lock-type
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
     body:
-      string: '{"value":[{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv/providers/Microsoft.Authorization/locks/delete-kv","type":"Microsoft.Authorization/locks","name":"delete-kv"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/bez-id/providers/Microsoft.Authorization/locks/delete-id","type":"Microsoft.Authorization/locks","name":"delete-id"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Compute/images/bez-image/providers/Microsoft.Authorization/locks/r","type":"Microsoft.Authorization/locks","name":"r"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320008debd5bc/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":"contact
-        zhwen"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acctestRG-sentinel-221011134813007315/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fypurview/providers/Microsoft.Purview/accounts/fypurview/providers/Microsoft.Authorization/locks/d","type":"Microsoft.Authorization/locks","name":"d"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
+      string: '{"value":[{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/bez-rg/providers/Microsoft.Storage/storageAccounts/bezsharedstorage/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fypurview/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_group_lockrgwagzm22v4cfj5mslx4raxnijvhaamtlft5g2mmyte3ssnpw45ghtjw/providers/Microsoft.Authorization/locks/cli-test-lockgcxd3rdzssjobpnqlqn6tbyzs3wrsbhpk4f","type":"Microsoft.Authorization/locks","name":"cli-test-lockgcxd3rdzssjobpnqlqn6tbyzs3wrsbhpk4f"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lightning/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lock3cyeygkrtosacajli3otim3j6altiytn2o/providers/Microsoft.Authorization/locks/cli-test-locksnf4vuadrtx27bhkdzgek6vzpz5xb63bg7j","type":"Microsoft.Authorization/locks","name":"cli-test-locksnf4vuadrtx27bhkdzgek6vzpz5xb63bg7j"},{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_readonly_resource_lockqmzolqzlezu7q7z6q5gqnwfns7l7z7qcbh75y5ud54rq/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrcarsr6w3n4qqbvcvif/providers/Microsoft.Authorization/locks/cli-test-lockj7zakuqg4dhngeclqj2ke6iwa7hbimd5imuldpizwbszwq4ej75ermtjwvcov","type":"Microsoft.Authorization/locks","name":"cli-test-lockj7zakuqg4dhngeclqj2ke6iwa7hbimd5imuldpizwbszwq4ej75ermtjwvcov"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fybot/providers/Microsoft.Authorization/locks/delete-lock","type":"Microsoft.Authorization/locks","name":"delete-lock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/galleryappaccount/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AutoTagFunctionAppRG/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/queuetest/providers/Microsoft.Storage/storageAccounts/qteststac/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Storage/storageAccounts/hangstorage/providers/Microsoft.Authorization/locks/2","type":"Microsoft.Authorization/locks","name":"2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shiying-rg/providers/Microsoft.Authorization/locks/donotdelete","type":"Microsoft.Authorization/locks","name":"donotdelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_commands_with_idsvvj5j3j7mlet4rxc2rgzlxazqkyyi33intic3axolqmf/providers/Microsoft.Network/virtualNetworks/cli-lock-vnetkj4zew76vmcy3qobm/subnets/cli-lock-subnetd2zr7ud2w6dh2za/providers/Microsoft.Authorization/locks/cli-test-lockmggd4tg","type":"Microsoft.Authorization/locks","name":"cli-test-lockmggd4tg"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-live-test/providers/Microsoft.Authorization/locks/can
+        not delete","type":"Microsoft.Authorization/locks","name":"can not delete"},{"properties":{"level":"CanNotDelete","notes":"Public
+        preview - do not delete until after 6/15/24"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clis-login-preview/providers/Microsoft.Authorization/locks/preview","type":"Microsoft.Authorization/locks","name":"preview"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Authorization/locks/rg2","type":"Microsoft.Authorization/locks","name":"rg2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
         by Azure Backup for storage accounts registered with a Recovery Services Vault.
         This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgxp7uwuibs5/providers/microsoft.storage/storageAccounts/clitestzrwidkqplnw3jmz4z/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgawbqkye7l4/providers/microsoft.storage/storageAccounts/clitestlsjx67ujuhjr7zkah/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lightning/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbo2ure7pgp/providers/microsoft.storage/storageAccounts/clitestsnv7joygpazk23npj/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgy6swh3vebl/providers/microsoft.storage/storageAccounts/clitestaxq4uhxp4axa3uagg/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fybot/providers/Microsoft.Authorization/locks/delete-lock","type":"Microsoft.Authorization/locks","name":"delete-lock"},{"properties":{"level":"CanNotDelete","notes":"for
-        Asir"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/emerald-city-bookstore/providers/Microsoft.Authorization/locks/No-DELETE","type":"Microsoft.Authorization/locks","name":"No-DELETE"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgh5duq2f6uh/providers/microsoft.storage/storageAccounts/clitest2vjedutxs37ymp4ni/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg46ia57tmnz/providers/microsoft.storage/storageAccounts/clitestdlxtp24ycnjl3jui2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/galleryappaccount/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/queuetest/providers/Microsoft.Storage/storageAccounts/qteststac/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Authorization/locks/test-databricks","type":"Microsoft.Authorization/locks","name":"test-databricks"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Authorization/locks/1","type":"Microsoft.Authorization/locks","name":"1"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Storage/storageAccounts/hangstorage/providers/Microsoft.Authorization/locks/2","type":"Microsoft.Authorization/locks","name":"2"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_acctestRG-ibt-24_acctest-IBT-0710-2_4ebedb5a-e3b1-4675-aa4c-3c160fe70907/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgephuyzwt3d/providers/microsoft.storage/storageAccounts/clitesturpy433yg4s3cpou6/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbcjpbfrgst/providers/microsoft.storage/storageAccounts/clitest7y3z5tzoevqexrwmb/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shiying-rg/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgn6glpfa25c/providers/microsoft.storage/storageAccounts/clitestgt3fjzabc7taya5zo/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrgtest1/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":"ddos"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg2/providers/Microsoft.Authorization/locks/testrg2","type":"Microsoft.Authorization/locks","name":"testrg2"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgiudkrkxpl4/providers/microsoft.storage/storageAccounts/clitestbiegaggvgwivkqyyi/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Authorization/locks/rg2","type":"Microsoft.Authorization/locks","name":"rg2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgl6l3rg6atb/providers/microsoft.storage/storageAccounts/clitest4sjmiwke5nz3f67pu/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgptzwacrnwa/providers/microsoft.storage/storageAccounts/clitestivtrt5tp624n63ast/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-file-handle-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbbt37xr2le/providers/microsoft.storage/storageAccounts/clitest74vl6rwuxl5fbuklw/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbbt37xr2le/providers/microsoft.storage/storageAccounts/clitest5frikrzhxwryrkfel/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgu7jwflzo6g/providers/microsoft.storage/storageAccounts/clitestwqzjytdeun46rphfd/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/similar-bot/providers/Microsoft.Authorization/locks/1","type":"Microsoft.Authorization/locks","name":"1"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhwen-domain/providers/Microsoft.Authorization/locks/zhwen","type":"Microsoft.Authorization/locks","name":"zhwen"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rggrglkh7zr7/providers/microsoft.storage/storageAccounts/clitest2f63bh43aix4wcnlh/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgeghfcmpfiw/providers/microsoft.storage/storageAccounts/clitestkoxtfkf67yodgckyb/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dixue/providers/Microsoft.Authorization/locks/ForTest","type":"Microsoft.Authorization/locks","name":"ForTest"},{"properties":{"level":"ReadOnly","notes":"Prevent
-        this resource group from being edited"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzurePowerShellLiveTest/providers/Microsoft.Authorization/locks/ReadOnlyLock","type":"Microsoft.Authorization/locks","name":"ReadOnlyLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_cli_loadbalance/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgovptfsocfg/providers/microsoft.storage/storageAccounts/clitestz72bbbbv2cio2pmom/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Web/sites/webp2c/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Storage/storageAccounts/portal2clistorage/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/feng-cli-rg/providers/Microsoft.Storage/storageAccounts/fengtestsa/providers/Microsoft.Authorization/locks/salock","type":"Microsoft.Authorization/locks","name":"salock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg6i4hl6iakg/providers/microsoft.storage/storageAccounts/clitestu3p7a7ib4n4y7gt4m/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgzjznhcqaoh/providers/microsoft.storage/storageAccounts/clitestwznnmnfot33xjztmk/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/new-experiences/providers/Microsoft.Authorization/locks/NO-DELETE","type":"Microsoft.Authorization/locks","name":"NO-DELETE"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgaz5eufnx7d/providers/microsoft.storage/storageAccounts/clitestkj3e2bodztqdfqsa2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgp6ikwpcsq7/providers/microsoft.storage/storageAccounts/clitestggvkyebv5o55dhakj/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgrc4sjsrzt4/providers/microsoft.storage/storageAccounts/clitest63b5vtkhuf7auho6z/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Storage/storageAccounts/azurecliedge/providers/Microsoft.Authorization/locks/azurecliedge-dl","type":"Microsoft.Authorization/locks","name":"azurecliedge-dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ethan-rg/providers/Microsoft.Authorization/locks/msft","type":"Microsoft.Authorization/locks","name":"msft"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg4yns4yxisb/providers/microsoft.storage/storageAccounts/clitestyt6rxgad3kebqzh26/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Storage/storageAccounts/privatepackage/providers/Microsoft.Authorization/locks/private
-        package","type":"Microsoft.Authorization/locks","name":"private package"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgv3m577d7ho/providers/microsoft.storage/storageAccounts/clitestej2fvhoj3zogyp5e7/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xz3-test/providers/Microsoft.Authorization/locks/del","type":"Microsoft.Authorization/locks","name":"del"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kairu-persist/providers/Microsoft.Authorization/locks/antidelete","type":"Microsoft.Authorization/locks","name":"antidelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgltfej7yr4u/providers/microsoft.storage/storageAccounts/clitestwvsg2uskf4i7vjfto/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.Storage/storageAccounts/clitestresultstac/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.DBforMySQL/servers/clisqldbserver/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete","notes":"for
-        customer issue repro  (snowflake)"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/storage-v2rt-repro/providers/Microsoft.Authorization/locks/DontDelete","type":"Microsoft.Authorization/locks","name":"DontDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg23akmjlz2r/providers/microsoft.storage/storageAccounts/clitestdmmxq6bklh35yongi/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgdc25pvki6m/providers/microsoft.storage/storageAccounts/clitestkxu4ahsqaxv42cyyf/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgekim5ct43n/providers/microsoft.storage/storageAccounts/clitest6jusqp4qvczw52pql/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/qinkai-test/providers/Microsoft.Storage/storageAccounts/qinkaiwu/providers/Microsoft.Authorization/locks/privatepackage","type":"Microsoft.Authorization/locks","name":"privatepackage"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cannotdelete_resource_lockbfuaftaa7m4m77urywe56rs3yfr4sr3ybmrsclix/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrchikdj2r5lezlez4w6/providers/Microsoft.Authorization/locks/cli-test-locklxyko2yruqpd6z2mdw7bw43sff3nuyz2n5ygpm5opgtajrdjgyb7c7fau6kgw","type":"Microsoft.Authorization/locks","name":"cli-test-locklxyko2yruqpd6z2mdw7bw43sff3nuyz2n5ygpm5opgtajrdjgyb7c7fau6kgw"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/t-yakou2/providers/Microsoft.Web/sites/WebAppPortal2CLI20200827092707/providers/Microsoft.Authorization/locks/dont_delete_me","type":"Microsoft.Authorization/locks","name":"dont_delete_me"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgghkyqf7pb5/providers/microsoft.storage/storageAccounts/clitestpuea6vlqwxw6ihiws/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgrli6qx2bll/providers/microsoft.storage/storageAccounts/clitest2kskuzyfvkqd7xx4y/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg4chnkoo7ql/providers/microsoft.storage/storageAccounts/clitestmevgvn7p2e7ydqz44/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"noteslwo5pwze65snyu6"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_readonly_resource_group_lockgfjwap5dza42yxmg4ibvxl7coas3gif7cvyzjj/providers/Microsoft.Authorization/locks/cli-test-lockikxplguvr63fppjodp55tqktsuav2gyamw5","type":"Microsoft.Authorization/locks","name":"cli-test-lockikxplguvr63fppjodp55tqktsuav2gyamw5"}]}'
+        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/zhiyihuang-rg/providers/microsoft.storage/storageAccounts/sauserassignedidentity2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-file-handle-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"ReadOnly","notes":"notesshckaxq4q5olwp3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_group_lockysvg7gszppjdrtkjqar33v2xe574f33wf3pw3x563rwgrvi7253pjkpq/providers/Microsoft.Authorization/locks/cli-test-lockyaqz6xi2wzehlsoiunyzz57lkafiplztnxz","type":"Microsoft.Authorization/locks","name":"cli-test-lockyaqz6xi2wzehlsoiunyzz57lkafiplztnxz"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhwen-domain/providers/Microsoft.Authorization/locks/zhwen","type":"Microsoft.Authorization/locks","name":"zhwen"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vidai-rg-aca/providers/Microsoft.Authorization/locks/NoDeletion","type":"Microsoft.Authorization/locks","name":"NoDeletion"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_idiycqncfaivd2fp264n5fwdqdwset7oksu44tcvvu6x5si/providers/Microsoft.Network/virtualNetworks/cli-lock-vnetwaax3eiugp5ack6xo/subnets/cli-lock-subnetf3aapxx6txeb22y/providers/Microsoft.Authorization/locks/cli-test-lock3vny3yr","type":"Microsoft.Authorization/locks","name":"cli-test-lock3vny3yr"},{"properties":{"level":"CanNotDelete","notes":"Prevent
+        the resource group from being deleted."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzurePowerShellLiveTest/providers/Microsoft.Authorization/locks/CanNotDelete","type":"Microsoft.Authorization/locks","name":"CanNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgforaishellzips/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Web/sites/webp2c/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Storage/storageAccounts/portal2clistorage/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zelin-rg/providers/Microsoft.Authorization/locks/do-not-delete","type":"Microsoft.Authorization/locks","name":"do-not-delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Storage/storageAccounts/azurecliedge/providers/Microsoft.Authorization/locks/azurecliedge-dl","type":"Microsoft.Authorization/locks","name":"azurecliedge-dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lockpembndygj27seh3526ltophqdxgykxuiqr/providers/Microsoft.Authorization/locks/cli-test-lockwx6sud5iv4muguritoc5v7olcdzvnqy6tv2","type":"Microsoft.Authorization/locks","name":"cli-test-lockwx6sud5iv4muguritoc5v7olcdzvnqy6tv2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/liwang3_rg_7651/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Storage/storageAccounts/privatepackage/providers/Microsoft.Authorization/locks/private
+        package","type":"Microsoft.Authorization/locks","name":"private package"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lockrit2pstga6awvduw7jbo2rzoeytrg7czn4/providers/Microsoft.Authorization/locks/cli-test-lock54muowjnzxw35v4yes4rmacxpnnhcsyftvq","type":"Microsoft.Authorization/locks","name":"cli-test-lock54muowjnzxw35v4yes4rmacxpnnhcsyftvq"},{"properties":{"level":"CanNotDelete","notes":"notesmut447ip6bcayxj"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_readonly_resource_group_lock2jovaf37yqd237mis4cdywthsuzu3clyadhryo/providers/Microsoft.Authorization/locks/cli-test-lock6pbp4r52n4fhg6eoby7ulsge322he2kjuua","type":"Microsoft.Authorization/locks","name":"cli-test-lock6pbp4r52n4fhg6eoby7ulsge322he2kjuua"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xz3-test/providers/Microsoft.Authorization/locks/del","type":"Microsoft.Authorization/locks","name":"del"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kairu-persist/providers/Microsoft.Authorization/locks/antidelete","type":"Microsoft.Authorization/locks","name":"antidelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_locki3dsms5o52dt7hqqzk5ursevnq2cfyu2km/providers/Microsoft.Authorization/locks/cli-test-lock5di7wb5l4rsye4w6kegahfbywctwlsa2jbi","type":"Microsoft.Authorization/locks","name":"cli-test-lock5di7wb5l4rsye4w6kegahfbywctwlsa2jbi"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureCliBCD/providers/Microsoft.Authorization/locks/in-use","type":"Microsoft.Authorization/locks","name":"in-use"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/t-yakou2/providers/Microsoft.Web/sites/WebAppPortal2CLI20200827092707/providers/Microsoft.Authorization/locks/dont_delete_me","type":"Microsoft.Authorization/locks","name":"dont_delete_me"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-storagemover-rg2/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_commands_with_idsfmfzlg7jabxocfq2l3eump4y334uz5lqpy6ge5zknri3/providers/Microsoft.Authorization/locks/cli-test-lock5lwpicxuuxrduiw2wlhfbgyj5zr3lcjhhd5cu","type":"Microsoft.Authorization/locks","name":"cli-test-lock5lwpicxuuxrduiw2wlhfbgyj5zr3lcjhhd5cu"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/GitHubAction_CI_RG/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzSecPackAutoConfigRG/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30883'
+      - '14337'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:56 GMT
+      - Thu, 24 Apr 2025 12:13:54 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/230a0699-f1db-442d-ad53-aeee6ec8071f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: A87F7CEF3675449DAB0640A7923084ED Ref B: BN1AA2051014029 Ref C: 2025-04-24T12:13:55Z'
     status:
       code: 200
       message: OK
@@ -654,7 +540,7 @@ interactions:
       ParameterSetName:
       - -n -g --resource-type --resource-name --notes --lock-type
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -669,19 +555,23 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:57 GMT
+      - Thu, 24 Apr 2025 12:13:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/bfb022cb-2e39-4f5a-b4e5-43cb17a8afad
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 288A3977683B4CC198DACC81C8BF5D2D Ref B: BN1AA2051014029 Ref C: 2025-04-24T12:13:55Z'
     status:
       code: 200
       message: OK
@@ -703,7 +593,7 @@ interactions:
       ParameterSetName:
       - -n -g --resource-type --resource-name --notes --lock-type
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -718,21 +608,25 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:57 GMT
+      - Thu, 24 Apr 2025 12:13:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/b5295a7e-9223-4d08-8a0a-9bedd3b05462
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: F93AAF69D58F4A518BE323614609DEE6 Ref B: BN1AA2051014029 Ref C: 2025-04-24T12:13:55Z'
     status:
       code: 200
       message: OK
@@ -750,135 +644,45 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --resource-type
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
     body:
-      string: '{"value":[{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv/providers/Microsoft.Authorization/locks/delete-kv","type":"Microsoft.Authorization/locks","name":"delete-kv"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/bez-id/providers/Microsoft.Authorization/locks/delete-id","type":"Microsoft.Authorization/locks","name":"delete-id"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.Compute/images/bez-image/providers/Microsoft.Authorization/locks/r","type":"Microsoft.Authorization/locks","name":"r"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southeastasia/providers/Microsoft.Storage/storageAccounts/cs1100320008debd5bc/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":"contact
-        zhwen"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acctestRG-sentinel-221011134813007315/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fypurview/providers/Microsoft.Purview/accounts/fypurview/providers/Microsoft.Authorization/locks/d","type":"Microsoft.Authorization/locks","name":"d"},{"properties":{"level":"ReadOnly","notes":"notes000004"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003","type":"Microsoft.Authorization/locks","name":"cli-test-lock000003"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
+      string: '{"value":[{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/bez-rg/providers/Microsoft.Storage/storageAccounts/bezsharedstorage/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fypurview/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_group_lockrgwagzm22v4cfj5mslx4raxnijvhaamtlft5g2mmyte3ssnpw45ghtjw/providers/Microsoft.Authorization/locks/cli-test-lockgcxd3rdzssjobpnqlqn6tbyzs3wrsbhpk4f","type":"Microsoft.Authorization/locks","name":"cli-test-lockgcxd3rdzssjobpnqlqn6tbyzs3wrsbhpk4f"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lightning/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lock3cyeygkrtosacajli3otim3j6altiytn2o/providers/Microsoft.Authorization/locks/cli-test-locksnf4vuadrtx27bhkdzgek6vzpz5xb63bg7j","type":"Microsoft.Authorization/locks","name":"cli-test-locksnf4vuadrtx27bhkdzgek6vzpz5xb63bg7j"},{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_readonly_resource_lockqmzolqzlezu7q7z6q5gqnwfns7l7z7qcbh75y5ud54rq/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrcarsr6w3n4qqbvcvif/providers/Microsoft.Authorization/locks/cli-test-lockj7zakuqg4dhngeclqj2ke6iwa7hbimd5imuldpizwbszwq4ej75ermtjwvcov","type":"Microsoft.Authorization/locks","name":"cli-test-lockj7zakuqg4dhngeclqj2ke6iwa7hbimd5imuldpizwbszwq4ej75ermtjwvcov"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fybot/providers/Microsoft.Authorization/locks/delete-lock","type":"Microsoft.Authorization/locks","name":"delete-lock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/galleryappaccount/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AutoTagFunctionAppRG/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/queuetest/providers/Microsoft.Storage/storageAccounts/qteststac/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Storage/storageAccounts/hangstorage/providers/Microsoft.Authorization/locks/2","type":"Microsoft.Authorization/locks","name":"2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shiying-rg/providers/Microsoft.Authorization/locks/donotdelete","type":"Microsoft.Authorization/locks","name":"donotdelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_commands_with_idsvvj5j3j7mlet4rxc2rgzlxazqkyyi33intic3axolqmf/providers/Microsoft.Network/virtualNetworks/cli-lock-vnetkj4zew76vmcy3qobm/subnets/cli-lock-subnetd2zr7ud2w6dh2za/providers/Microsoft.Authorization/locks/cli-test-lockmggd4tg","type":"Microsoft.Authorization/locks","name":"cli-test-lockmggd4tg"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-live-test/providers/Microsoft.Authorization/locks/can
+        not delete","type":"Microsoft.Authorization/locks","name":"can not delete"},{"properties":{"level":"CanNotDelete","notes":"Public
+        preview - do not delete until after 6/15/24"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clis-login-preview/providers/Microsoft.Authorization/locks/preview","type":"Microsoft.Authorization/locks","name":"preview"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Authorization/locks/rg2","type":"Microsoft.Authorization/locks","name":"rg2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
         by Azure Backup for storage accounts registered with a Recovery Services Vault.
         This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgxp7uwuibs5/providers/microsoft.storage/storageAccounts/clitestzrwidkqplnw3jmz4z/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgawbqkye7l4/providers/microsoft.storage/storageAccounts/clitestlsjx67ujuhjr7zkah/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lightning/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbo2ure7pgp/providers/microsoft.storage/storageAccounts/clitestsnv7joygpazk23npj/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgy6swh3vebl/providers/microsoft.storage/storageAccounts/clitestaxq4uhxp4axa3uagg/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fybot/providers/Microsoft.Authorization/locks/delete-lock","type":"Microsoft.Authorization/locks","name":"delete-lock"},{"properties":{"level":"CanNotDelete","notes":"for
-        Asir"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/emerald-city-bookstore/providers/Microsoft.Authorization/locks/No-DELETE","type":"Microsoft.Authorization/locks","name":"No-DELETE"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgh5duq2f6uh/providers/microsoft.storage/storageAccounts/clitest2vjedutxs37ymp4ni/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg46ia57tmnz/providers/microsoft.storage/storageAccounts/clitestdlxtp24ycnjl3jui2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/galleryappaccount/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/queuetest/providers/Microsoft.Storage/storageAccounts/qteststac/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-rg/providers/Microsoft.Authorization/locks/test-databricks","type":"Microsoft.Authorization/locks","name":"test-databricks"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Authorization/locks/1","type":"Microsoft.Authorization/locks","name":"1"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.Storage/storageAccounts/hangstorage/providers/Microsoft.Authorization/locks/2","type":"Microsoft.Authorization/locks","name":"2"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_acctestRG-ibt-24_acctest-IBT-0710-2_4ebedb5a-e3b1-4675-aa4c-3c160fe70907/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgephuyzwt3d/providers/microsoft.storage/storageAccounts/clitesturpy433yg4s3cpou6/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbcjpbfrgst/providers/microsoft.storage/storageAccounts/clitest7y3z5tzoevqexrwmb/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shiying-rg/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgn6glpfa25c/providers/microsoft.storage/storageAccounts/clitestgt3fjzabc7taya5zo/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrgtest1/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":"ddos"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg2/providers/Microsoft.Authorization/locks/testrg2","type":"Microsoft.Authorization/locks","name":"testrg2"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgiudkrkxpl4/providers/microsoft.storage/storageAccounts/clitestbiegaggvgwivkqyyi/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg2/providers/Microsoft.Authorization/locks/rg2","type":"Microsoft.Authorization/locks","name":"rg2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgl6l3rg6atb/providers/microsoft.storage/storageAccounts/clitest4sjmiwke5nz3f67pu/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgptzwacrnwa/providers/microsoft.storage/storageAccounts/clitestivtrt5tp624n63ast/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-file-handle-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbbt37xr2le/providers/microsoft.storage/storageAccounts/clitest74vl6rwuxl5fbuklw/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgbbt37xr2le/providers/microsoft.storage/storageAccounts/clitest5frikrzhxwryrkfel/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgu7jwflzo6g/providers/microsoft.storage/storageAccounts/clitestwqzjytdeun46rphfd/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhiyihuang-rg-euap-east/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/similar-bot/providers/Microsoft.Authorization/locks/1","type":"Microsoft.Authorization/locks","name":"1"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhwen-domain/providers/Microsoft.Authorization/locks/zhwen","type":"Microsoft.Authorization/locks","name":"zhwen"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rggrglkh7zr7/providers/microsoft.storage/storageAccounts/clitest2f63bh43aix4wcnlh/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgeghfcmpfiw/providers/microsoft.storage/storageAccounts/clitestkoxtfkf67yodgckyb/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dixue/providers/Microsoft.Authorization/locks/ForTest","type":"Microsoft.Authorization/locks","name":"ForTest"},{"properties":{"level":"ReadOnly","notes":"Prevent
-        this resource group from being edited"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzurePowerShellLiveTest/providers/Microsoft.Authorization/locks/ReadOnlyLock","type":"Microsoft.Authorization/locks","name":"ReadOnlyLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_cli_loadbalance/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgovptfsocfg/providers/microsoft.storage/storageAccounts/clitestz72bbbbv2cio2pmom/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Web/sites/webp2c/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Storage/storageAccounts/portal2clistorage/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/feng-cli-rg/providers/Microsoft.Storage/storageAccounts/fengtestsa/providers/Microsoft.Authorization/locks/salock","type":"Microsoft.Authorization/locks","name":"salock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg6i4hl6iakg/providers/microsoft.storage/storageAccounts/clitestu3p7a7ib4n4y7gt4m/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgzjznhcqaoh/providers/microsoft.storage/storageAccounts/clitestwznnmnfot33xjztmk/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/new-experiences/providers/Microsoft.Authorization/locks/NO-DELETE","type":"Microsoft.Authorization/locks","name":"NO-DELETE"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgaz5eufnx7d/providers/microsoft.storage/storageAccounts/clitestkj3e2bodztqdfqsa2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgp6ikwpcsq7/providers/microsoft.storage/storageAccounts/clitestggvkyebv5o55dhakj/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgrc4sjsrzt4/providers/microsoft.storage/storageAccounts/clitest63b5vtkhuf7auho6z/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Storage/storageAccounts/azurecliedge/providers/Microsoft.Authorization/locks/azurecliedge-dl","type":"Microsoft.Authorization/locks","name":"azurecliedge-dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ethan-rg/providers/Microsoft.Authorization/locks/msft","type":"Microsoft.Authorization/locks","name":"msft"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg4yns4yxisb/providers/microsoft.storage/storageAccounts/clitestyt6rxgad3kebqzh26/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Storage/storageAccounts/privatepackage/providers/Microsoft.Authorization/locks/private
-        package","type":"Microsoft.Authorization/locks","name":"private package"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgv3m577d7ho/providers/microsoft.storage/storageAccounts/clitestej2fvhoj3zogyp5e7/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xz3-test/providers/Microsoft.Authorization/locks/del","type":"Microsoft.Authorization/locks","name":"del"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kairu-persist/providers/Microsoft.Authorization/locks/antidelete","type":"Microsoft.Authorization/locks","name":"antidelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgltfej7yr4u/providers/microsoft.storage/storageAccounts/clitestwvsg2uskf4i7vjfto/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.Authorization/locks/l","type":"Microsoft.Authorization/locks","name":"l"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.Storage/storageAccounts/clitestresultstac/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestresult/providers/Microsoft.DBforMySQL/servers/clisqldbserver/providers/Microsoft.Authorization/locks/l1","type":"Microsoft.Authorization/locks","name":"l1"},{"properties":{"level":"CanNotDelete","notes":"for
-        customer issue repro  (snowflake)"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/storage-v2rt-repro/providers/Microsoft.Authorization/locks/DontDelete","type":"Microsoft.Authorization/locks","name":"DontDelete"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg23akmjlz2r/providers/microsoft.storage/storageAccounts/clitestdmmxq6bklh35yongi/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgdc25pvki6m/providers/microsoft.storage/storageAccounts/clitestkxu4ahsqaxv42cyyf/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgekim5ct43n/providers/microsoft.storage/storageAccounts/clitest6jusqp4qvczw52pql/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"ReadOnly","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/qinkai-test/providers/Microsoft.Storage/storageAccounts/qinkaiwu/providers/Microsoft.Authorization/locks/privatepackage","type":"Microsoft.Authorization/locks","name":"privatepackage"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cannotdelete_resource_lockbfuaftaa7m4m77urywe56rs3yfr4sr3ybmrsclix/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrchikdj2r5lezlez4w6/providers/Microsoft.Authorization/locks/cli-test-locklxyko2yruqpd6z2mdw7bw43sff3nuyz2n5ygpm5opgtajrdjgyb7c7fau6kgw","type":"Microsoft.Authorization/locks","name":"cli-test-locklxyko2yruqpd6z2mdw7bw43sff3nuyz2n5ygpm5opgtajrdjgyb7c7fau6kgw"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/t-yakou2/providers/Microsoft.Web/sites/WebAppPortal2CLI20200827092707/providers/Microsoft.Authorization/locks/dont_delete_me","type":"Microsoft.Authorization/locks","name":"dont_delete_me"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgghkyqf7pb5/providers/microsoft.storage/storageAccounts/clitestpuea6vlqwxw6ihiws/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgrli6qx2bll/providers/microsoft.storage/storageAccounts/clitest2kskuzyfvkqd7xx4y/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
-        by Azure Backup for storage accounts registered with a Recovery Services Vault.
-        This lock is intended to guard against deletion of backups due to accidental
-        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg4chnkoo7ql/providers/microsoft.storage/storageAccounts/clitestmevgvn7p2e7ydqz44/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":"noteslwo5pwze65snyu6"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_readonly_resource_group_lockgfjwap5dza42yxmg4ibvxl7coas3gif7cvyzjj/providers/Microsoft.Authorization/locks/cli-test-lockikxplguvr63fppjodp55tqktsuav2gyamw5","type":"Microsoft.Authorization/locks","name":"cli-test-lockikxplguvr63fppjodp55tqktsuav2gyamw5"}]}'
+        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/zhiyihuang-rg/providers/microsoft.storage/storageAccounts/sauserassignedidentity2/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-file-handle-rg/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"ReadOnly","notes":"notesshckaxq4q5olwp3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_group_lockysvg7gszppjdrtkjqar33v2xe574f33wf3pw3x563rwgrvi7253pjkpq/providers/Microsoft.Authorization/locks/cli-test-lockyaqz6xi2wzehlsoiunyzz57lkafiplztnxz","type":"Microsoft.Authorization/locks","name":"cli-test-lockyaqz6xi2wzehlsoiunyzz57lkafiplztnxz"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhwen-domain/providers/Microsoft.Authorization/locks/zhwen","type":"Microsoft.Authorization/locks","name":"zhwen"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vidai-rg-aca/providers/Microsoft.Authorization/locks/NoDeletion","type":"Microsoft.Authorization/locks","name":"NoDeletion"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_idiycqncfaivd2fp264n5fwdqdwset7oksu44tcvvu6x5si/providers/Microsoft.Network/virtualNetworks/cli-lock-vnetwaax3eiugp5ack6xo/subnets/cli-lock-subnetf3aapxx6txeb22y/providers/Microsoft.Authorization/locks/cli-test-lock3vny3yr","type":"Microsoft.Authorization/locks","name":"cli-test-lock3vny3yr"},{"properties":{"level":"CanNotDelete","notes":"Prevent
+        the resource group from being deleted."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzurePowerShellLiveTest/providers/Microsoft.Authorization/locks/CanNotDelete","type":"Microsoft.Authorization/locks","name":"CanNotDelete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgforaishellzips/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Web/sites/webp2c/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/portal2cli/providers/Microsoft.Storage/storageAccounts/portal2clistorage/providers/Microsoft.Authorization/locks/lock","type":"Microsoft.Authorization/locks","name":"lock"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zelin-rg/providers/Microsoft.Authorization/locks/do-not-delete","type":"Microsoft.Authorization/locks","name":"do-not-delete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-edge/providers/Microsoft.Storage/storageAccounts/azurecliedge/providers/Microsoft.Authorization/locks/azurecliedge-dl","type":"Microsoft.Authorization/locks","name":"azurecliedge-dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lockpembndygj27seh3526ltophqdxgykxuiqr/providers/Microsoft.Authorization/locks/cli-test-lockwx6sud5iv4muguritoc5v7olcdzvnqy6tv2","type":"Microsoft.Authorization/locks","name":"cli-test-lockwx6sud5iv4muguritoc5v7olcdzvnqy6tv2"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/liwang3_rg_7651/providers/Microsoft.Authorization/locks/delete","type":"Microsoft.Authorization/locks","name":"delete"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureSDKTest_reserved/providers/Microsoft.Storage/storageAccounts/privatepackage/providers/Microsoft.Authorization/locks/private
+        package","type":"Microsoft.Authorization/locks","name":"private package"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_lockrit2pstga6awvduw7jbo2rzoeytrg7czn4/providers/Microsoft.Authorization/locks/cli-test-lock54muowjnzxw35v4yes4rmacxpnnhcsyftvq","type":"Microsoft.Authorization/locks","name":"cli-test-lock54muowjnzxw35v4yes4rmacxpnnhcsyftvq"},{"properties":{"level":"CanNotDelete","notes":"notesmut447ip6bcayxj"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_readonly_resource_group_lock2jovaf37yqd237mis4cdywthsuzu3clyadhryo/providers/Microsoft.Authorization/locks/cli-test-lock6pbp4r52n4fhg6eoby7ulsge322he2kjuua","type":"Microsoft.Authorization/locks","name":"cli-test-lock6pbp4r52n4fhg6eoby7ulsge322he2kjuua"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/xz3-test/providers/Microsoft.Authorization/locks/del","type":"Microsoft.Authorization/locks","name":"del"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kairu-persist/providers/Microsoft.Authorization/locks/antidelete","type":"Microsoft.Authorization/locks","name":"antidelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cannotdelete_resource_group_locki3dsms5o52dt7hqqzk5ursevnq2cfyu2km/providers/Microsoft.Authorization/locks/cli-test-lock5di7wb5l4rsye4w6kegahfbywctwlsa2jbi","type":"Microsoft.Authorization/locks","name":"cli-test-lock5di7wb5l4rsye4w6kegahfbywctwlsa2jbi"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureCliBCD/providers/Microsoft.Authorization/locks/in-use","type":"Microsoft.Authorization/locks","name":"in-use"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/t-yakou2/providers/Microsoft.Web/sites/WebAppPortal2CLI20200827092707/providers/Microsoft.Authorization/locks/dont_delete_me","type":"Microsoft.Authorization/locks","name":"dont_delete_me"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-storagemover-rg2/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_commands_with_idsfmfzlg7jabxocfq2l3eump4y334uz5lqpy6ge5zknri3/providers/Microsoft.Authorization/locks/cli-test-lock5lwpicxuuxrduiw2wlhfbgyj5zr3lcjhhd5cu","type":"Microsoft.Authorization/locks","name":"cli-test-lock5lwpicxuuxrduiw2wlhfbgyj5zr3lcjhhd5cu"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/GitHubAction_CI_RG/providers/Microsoft.Authorization/locks/dl","type":"Microsoft.Authorization/locks","name":"dl"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzSecPackAutoConfigRG/providers/Microsoft.Authorization/locks/DoNotDelete","type":"Microsoft.Authorization/locks","name":"DoNotDelete"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30901'
+      - '14002'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 11:14:57 GMT
+      - Thu, 24 Apr 2025 12:13:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus2/7f643c5b-cf8f-45ba-a254-a51475f645be
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 49BF488C52B44E21AFC8B20E98431D49 Ref B: BN1AA2051013033 Ref C: 2025-04-24T12:13:55Z'
     status:
       code: 200
       message: OK
@@ -898,7 +702,7 @@ interactions:
       ParameterSetName:
       - --name -g --resource-name --resource-type
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_lock000001/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrc000002/providers/Microsoft.Authorization/locks/cli-test-lock000003?api-version=2016-09-01
@@ -911,17 +715,25 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Feb 2023 11:14:57 GMT
+      - Thu, 24 Apr 2025 12:13:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/4e1c13d0-c24e-4460-9060-1816ed15927b
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
+      x-msedge-ref:
+      - 'Ref A: 4C3701FD260E41B0BA75626E67A34710 Ref B: BN1AA2051013033 Ref C: 2025-04-24T12:13:55Z'
     status:
       code: 200
       message: OK

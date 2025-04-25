@@ -160,13 +160,13 @@ def load_command_table(self, _):
     resource_deployment_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.resources.operations#DeploymentsOperations.{}',
         client_factory=cf_deployments,
-        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+        resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS
     )
 
     resource_deployment_operation_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.resources.operations#DeploymentOperationsOperations.{}',
         client_factory=cf_deployment_operations,
-        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+        resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS
     )
 
     resource_policy_definitions_sdk = CliCommandType(
@@ -350,7 +350,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_deployment_operations', client_factory=cf_deployment_operations)
 
     # az deployment
-    with self.command_group('deployment', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployments_at_subscription_scope', table_transformer=transform_deployments_list, deprecate_info=g.deprecate(redirect='deployment sub list', hide=True))
         g.custom_show_command('show', 'get_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub show', hide=True))
         g.custom_command('delete', 'delete_deployment_at_subscription_scope', supports_no_wait=True, deprecate_info=g.deprecate(redirect='deployment sub delete', hide=True))
@@ -363,14 +363,14 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'get_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub wait', hide=True))
         g.custom_command('cancel', 'cancel_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub cancel', hide=True))
 
-    with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployment_operations_at_subscription_scope',
                          deprecate_info=self.deprecate(redirect='deployment operation sub list', hide=True))
         g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations,
                               deprecate_info=self.deprecate(redirect='deployment operation sub show', hide=True))
 
     # az deployment sub
-    with self.command_group('deployment sub', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment sub', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployments_at_subscription_scope', table_transformer=transform_deployments_list)
         g.custom_show_command('show', 'get_deployment_at_subscription_scope', table_transformer=transform_deployment)
         g.custom_command('delete', 'delete_deployment_at_subscription_scope', supports_no_wait=True)
@@ -384,7 +384,7 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'get_deployment_at_subscription_scope')
         g.custom_command('cancel', 'cancel_deployment_at_subscription_scope')
 
-    with self.command_group('deployment operation sub', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment operation sub', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployment_operations_at_subscription_scope')
         g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations)
 
@@ -441,7 +441,7 @@ def load_command_table(self, _):
             exception_handler=handle_template_based_exception)
 
     # az deployment group
-    with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployments_at_resource_group', table_transformer=transform_deployments_list)
         g.custom_show_command('show', 'get_deployment_at_resource_group', table_transformer=transform_deployment)
         g.custom_command('delete', 'delete_deployment_at_resource_group', supports_no_wait=True)
@@ -455,12 +455,12 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'get_deployment_at_resource_group')
         g.custom_command('cancel', 'cancel_deployment_at_resource_group')
 
-    with self.command_group('deployment operation group', resource_deployment_operation_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment operation group', resource_deployment_operation_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployment_operations_at_resource_group')
         g.custom_show_command('show', 'get_deployment_operations_at_resource_group', client_factory=cf_deployment_operations)
 
     # az deployment mg
-    with self.command_group('deployment mg', resource_deployment_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment mg', resource_deployment_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployments_at_management_group', table_transformer=transform_deployments_list)
         g.custom_show_command('show', 'get_deployment_at_management_group', table_transformer=transform_deployment)
         g.custom_command('delete', 'delete_deployment_at_management_group', supports_no_wait=True)
@@ -474,12 +474,12 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'get_deployment_at_management_group')
         g.custom_command('cancel', 'cancel_deployment_at_management_group')
 
-    with self.command_group('deployment operation mg', resource_deployment_operation_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment operation mg', resource_deployment_operation_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployment_operations_at_management_group')
         g.custom_show_command('show', 'get_deployment_operations_at_management_group', client_factory=cf_deployment_operations)
 
     # az deployment tenant
-    with self.command_group('deployment tenant', resource_deployment_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment tenant', resource_deployment_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployments_at_tenant_scope', table_transformer=transform_deployments_list)
         g.custom_show_command('show', 'get_deployment_at_tenant_scope', table_transformer=transform_deployment)
         g.custom_command('delete', 'delete_deployment_at_tenant_scope', supports_no_wait=True)
@@ -493,7 +493,7 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'get_deployment_at_tenant_scope')
         g.custom_command('cancel', 'cancel_deployment_at_tenant_scope')
 
-    with self.command_group('deployment operation tenant', resource_deployment_operation_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment operation tenant', resource_deployment_operation_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS) as g:
         g.custom_command('list', 'list_deployment_operations_at_tenant_scope')
         g.custom_show_command('show', 'get_deployment_operations_at_tenant_scope', client_factory=cf_deployment_operations)
 
