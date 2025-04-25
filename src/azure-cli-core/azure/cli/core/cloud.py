@@ -602,10 +602,11 @@ def get_clouds(cli_ctx):
                 "2019-03-01-hybrid",
                 "2020-09-01-hybrid",
             ):
-                raise CLIError(
-                    "The azure stack profile '{}' has been deprecated and removed, please use the 'latest' profile instead."
-                    "To continue using Azure Stack please install the CLI 2.66.* (LTS) version.".format(c.profile)
+                logger.error(
+                    "The azure stack profile '{}' has been deprecated and removed, using the 'latest' profile instead.\n"
+                    "To continue using Azure Stack please install the CLI `2.66.*` (LTS) version.".format(c.profile)
                 )
+                c.profile = 'latest'
             else:
                 raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
         if not c.endpoints.has_endpoint_set('management') and \
