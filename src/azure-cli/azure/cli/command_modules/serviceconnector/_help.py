@@ -279,11 +279,11 @@ for source in SOURCE_RESOURCES:
             if target in {RESOURCE.MongoDbAtlas}:
                 secret_param = '''
             - name: --secret
-              short-summary: The secret auth info
+              short-summary: The connection string for secret auth 
               long-summary: |
                 Usage: --secret secret=XX
 
-                secret  : Connection string for secret auth.
+                secret  : Connection string for secret auth. Ex. mongodb://<db_username>:<db_password>@<host>:<port>/<optional params>
         '''
             elif source.value != RESOURCE.KubernetesCluster.value:
                 secret_param = '''
