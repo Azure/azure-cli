@@ -370,7 +370,7 @@ def cf_postgres_flexible_operations(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).flexible_server
 
 
-def cf_postgres_flexible_adadmin(cli_ctx, _):
+def cf_postgres_flexible_admin(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).administrators
 
 

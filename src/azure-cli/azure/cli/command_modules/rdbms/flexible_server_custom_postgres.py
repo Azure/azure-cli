@@ -1108,7 +1108,7 @@ def flexible_server_identity_show(cmd, client, resource_group_name, server_name,
 
 
 # Custom functions for ad-admin
-def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
+def flexible_server_microsoft_entra_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
     validate_resource_group(resource_group_name)
 
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
@@ -1132,7 +1132,7 @@ def _create_admin(client, resource_group_name, server_name, principal_name, sid,
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, sid, parameters)
 
 
-def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
+def flexible_server_microsoft_entra_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
     validate_resource_group(resource_group_name)
 
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
@@ -1145,7 +1145,7 @@ def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_nam
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, server_name, sid)
 
 
-def flexible_server_ad_admin_list(client, resource_group_name, server_name):
+def flexible_server_microsoft_entra_admin_list(client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
 
     return client.list_by_server(
@@ -1153,7 +1153,7 @@ def flexible_server_ad_admin_list(client, resource_group_name, server_name):
         server_name=server_name)
 
 
-def flexible_server_ad_admin_show(client, resource_group_name, server_name, sid):
+def flexible_server_microsoft_entra_admin_show(client, resource_group_name, server_name, sid):
     validate_resource_group(resource_group_name)
 
     return client.get(
