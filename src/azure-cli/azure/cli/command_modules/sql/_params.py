@@ -1896,7 +1896,7 @@ def load_arguments(self, _):
                    options_list=['--external-admin-principal-type'],
                    help='User, Group or Application')
 
-        c.argument('retention_days',
+        c.argument('retention_days_soft_delete',
                    options_list=['--retention-days-soft-delete', '--rd'],
                    required=False,
                    help='The number of days (from 0 to 7 inclusive) that your server will be'
@@ -1906,7 +1906,7 @@ def load_arguments(self, _):
         c.argument('administrator_login_password',
                    help='The administrator login password.')
 
-        c.argument('retention_days',
+        c.argument('retention_days_soft_delete',
                    options_list=['--retention-days-soft-delete', '--rd'],
                    required=False,
                    help='The number of days (from 0 to 7 inclusive) that your server will be'

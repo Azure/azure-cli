@@ -574,6 +574,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'server_create',
                          table_transformer=server_table_format,
                          supports_no_wait=True)
+        g.custom_command('restore', 'server_restore',
+                         table_transformer=server_table_format,
+                         supports_no_wait=True)
         g.command('delete', 'begin_delete',
                   confirmation=True)
         g.custom_show_command('show', 'server_get',
