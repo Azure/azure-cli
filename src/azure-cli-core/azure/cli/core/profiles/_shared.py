@@ -271,7 +271,7 @@ AZURE_API_PROFILES = {
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_IOTHUB: {
-        # src/azure-cli/azure/cli/command_modules/iot/custom.py:1206
+        # src/azure-cli/azure/cli/command_modules/iot/custom.py#iot_hub_devicestream_show
         'iot_hub_resource': '2019-07-01-preview',
     },
     ResourceType.MGMT_APPSERVICE: {
