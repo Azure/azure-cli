@@ -311,7 +311,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
-                           password_auth=None, active_directory_auth=None, microsoft_entra_auth=None,
+                           password_auth=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     is_create = not instance
@@ -352,8 +352,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
-    is_microsoft_entra_auth = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled') \
-        or bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
                                  admin_name, admin_id, admin_type, instance)
 

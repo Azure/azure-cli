@@ -526,12 +526,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             validator=validate_identities
         )
 
-        active_directory_auth_arg_type = CLIArgumentType(
-            options_list=['--active-directory-auth'],
-            arg_type=get_enum_type(['Enabled', 'Disabled']),
-            help='Whether Microsoft Entra authentication is enabled.'
-        )
-
         microsoft_entra_auth_arg_type = CLIArgumentType(
             options_list=['--microsoft-entra-auth'],
             arg_type=get_enum_type(['Enabled', 'Disabled']),
@@ -599,7 +593,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
                 c.argument('version', default='17', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
-                c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('microsoft_entra_auth', default='Disabled', arg_type=microsoft_entra_auth_arg_type)
                 c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
                 c.argument('admin_name', options_list=['--admin-display-name', '-m'], help='Display name of the Microsoft Entra administrator user or group.')
@@ -753,7 +746,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', default=None, arg_type=iops_v2_arg_type)
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
-                c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('microsoft_entra_auth', arg_type=microsoft_entra_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
                 c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
