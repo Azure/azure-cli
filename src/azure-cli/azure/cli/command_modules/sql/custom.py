@@ -1221,7 +1221,7 @@ def _backup_storage_redundancy_take_source_warning():
     To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
 
 
-def _check_forward_migration_and_links(
+def _should_show_forward_migration_with_links_warnings(
         cli_ctx,
         instance,
         server_name,
@@ -1233,7 +1233,7 @@ def _check_forward_migration_and_links(
     :param instance: The database instance object.
     :param server_name: The name of the server.
     :param resource_group_name: The name of the resource group.
-    :return: A tuple (is_forward_migration, links_exist).
+    :return: A boolean indicating if it is forward migration of database with geo-replication links.
     '''
 
     # Find the replication links for the database
@@ -1263,10 +1263,10 @@ def _check_forward_migration_and_links(
     )
     links_exist = links is not None and len(links) > 0
 
-    return is_forward_migration, links_exist
+    return is_forward_migration and links_exist
 
 
-def _forward_migration_with_geodr_warning():
+def _forward_migration_with_geodr_links_warning():
     print("""Changing the service tier to Hyperscale also converts the geo-secondary replica to Hyperscale.
     For more information, see https://go.microsoft.com/fwlink/?linkid=2314103""")
 
@@ -1892,10 +1892,9 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
     if instance.elastic_pool_id:
         instance.sku = None
 
-    # Check if database is being updated to Hyperscale and if there are existing geo-replicated links
-    is_forward_migration, links_exist = _check_forward_migration_and_links(cmd.cli_ctx, instance, server_name, resource_group_name)
-    if is_forward_migration and links_exist:
-        _forward_migration_with_geodr_warning()
+    # Display warning if database is being updated to Hyperscale and if geo-replication links exist
+    if _should_show_forward_migration_with_links_warnings(cmd.cli_ctx, instance, server_name, resource_group_name):
+        _forward_migration_with_geodr_links_warning()
 
     #####
     # Set other (non-sku related) properties
