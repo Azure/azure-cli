@@ -50,5 +50,4 @@ class NetworkCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
-def get_command_loader(_):
-    return NetworkCommandsLoader
+COMMAND_LOADER_CLS = NetworkCommandsLoader

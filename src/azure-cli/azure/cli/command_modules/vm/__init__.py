@@ -65,5 +65,4 @@ class ComputeCommandsLoader(AzCommandsLoader):
             pass
 
 
-def get_command_loader(_):
-    return ComputeCommandsLoader
+COMMAND_LOADER_CLS = ComputeCommandsLoader
