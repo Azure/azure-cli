@@ -380,10 +380,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
-        c.argument('source_acr_auth_id', is_preview=True, help="Assigns the managed identity used for source registry login. Use '[system]' to refer to the system-assigned identity or a client ID to refer to a user-assigned managed identity.")
+        c.argument('source_acr_auth_id', is_preview=True, help="Assigns the managed identity used for source registry login. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned managed identity.")
 
     with self.argument_context('acr task update') as c:
-        c.argument('source_acr_auth_id', is_preview=True, help="Assigns the managed identity used for source registry login. Use '[system]' to refer to the system-assigned identity or a client ID to refer to a user-assigned managed identity.")
+        c.argument('source_acr_auth_id', is_preview=True, help="Assigns the managed identity used for source registry login. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned managed identity.")
 
     with self.argument_context('acr task identity') as c:
         c.argument('identities', options_list=['--identities'], nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity.")
