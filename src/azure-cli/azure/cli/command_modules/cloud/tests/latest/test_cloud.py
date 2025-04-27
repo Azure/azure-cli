@@ -71,10 +71,6 @@ class CloudTests(ScenarioTest):
         result = self.cmd('cloud list-profiles').get_output_in_json()
         assert result == [
             "latest",
-            "2017-03-09-profile",
-            "2018-03-01-hybrid",
-            "2019-03-01-hybrid",
-            "2020-09-01-hybrid"
         ]
 
     @serial_test()
@@ -108,7 +104,7 @@ class CloudTests(ScenarioTest):
 
         # TODO: Test all arguments of `az cloud update`
 
-        self.cmd('cloud set --name {name} --profile 2020-09-01-hybrid')
+        self.cmd('cloud set --name {name} --profile latest')
         self.cli_ctx.cloud.name = self.kwargs['name']
 
         self.cmd('cloud show', checks=[self.check('name', '{name}'),
