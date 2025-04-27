@@ -147,7 +147,7 @@ class Create(AAZCommand):
         _args_schema.ipam_pool_prefix_allocations = AAZListArg(
             options=["--ipam-allocations", "--ipam-pool-prefix-allocations"],
             arg_group="AddressSpace",
-            help="A list of IPAM Pools allocating IP address prefixes. If provided, --address-prefixes would be empty and should not be specified.",
+            help="A list of IPAM Pools allocating IP address prefixes. If provided, --address-prefixes would be ignored and should not be specified.",
         )
 
         ipam_pool_prefix_allocations = cls._args_schema.ipam_pool_prefix_allocations

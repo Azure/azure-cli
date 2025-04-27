@@ -129,7 +129,7 @@ class Update(AAZCommand):
         _args_schema.ipam_pool_prefix_allocations = AAZListArg(
             options=["--ipam-allocations", "--ipam-pool-prefix-allocations"],
             arg_group="AddressSpace",
-            help="A list of IPAM Pools allocating IP address prefixes. If provided, --address-prefixes would be empty and should not be specified.",
+            help="A list of IPAM Pools allocating IP address prefixes. If a non-empty value is provided, --address-prefixes would be ignored.",
             nullable=True,
         )
 
