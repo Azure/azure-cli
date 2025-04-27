@@ -604,7 +604,7 @@ def get_clouds(cli_ctx):
             ):
                 logger.error(
                     "The azure stack profile '%s' has been deprecated and removed, using the 'latest' profile instead.\n"
-                    "To continue using Azure Stack please install the Azure CLI `2.66.*` (LTS) version.", c.profile
+                    "To continue using Azure Stack, please install the Azure CLI `2.66.*` (LTS) version. For more details, refer to: https://learn.microsoft.com/en-us/cli/azure/whats-new-overview#important-notice-for-azure-stack-hub-customers", c.profile
                 )
                 c.profile = 'latest'
             else:
