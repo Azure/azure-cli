@@ -194,7 +194,7 @@ AZURE_API_PROFILES = {
             'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2024-11-01-preview', {
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2025-03-01-preview', {
             'agent_pools': '2019-06-01-preview',
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
@@ -287,6 +287,7 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
         'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
         'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
+        'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
     },
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
