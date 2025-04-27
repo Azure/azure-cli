@@ -816,13 +816,13 @@ jobs:
           dockerfile: ubi
           image: registry.access.redhat.com/ubi8/ubi:8.4
           artifact: rpm-ubi8-${{ arch.value }}
-          python_package: python39
+          python_package: python3.12
           pool: ${{ arch.pool }}
         Red Hat Universal Base Image 9 ${{ arch.name }}:
           dockerfile: ubi
           image: registry.access.redhat.com/ubi9/ubi:9.0.0
           artifact: rpm-ubi9-${{ arch.value }}
-          python_package: python3.9
+          python_package: python3.12
           pool: ${{ arch.pool }}
   steps:
   - bash: ./scripts/ci/install_docker.sh
@@ -864,17 +864,17 @@ jobs:
           artifact: rpm-ubi8-${{ arch.value }}
           distro: el8
           image: registry.access.redhat.com/ubi8/ubi:8.4
-          python_package: python39
-          python_cmd: python3.9
-          pip_cmd: pip3.9
+          python_package: python3.12
+          python_cmd: python3.12
+          pip_cmd: pip3.12
           pool: ${{ arch.pool }}
         Red Hat Universal Base Image 9 ${{ arch.name }}:
           artifact: rpm-ubi9-${{ arch.value }}
           distro: el9
           image: registry.access.redhat.com/ubi9/ubi:9.0.0
-          python_package: python3.9
-          python_cmd: python3.9
-          pip_cmd: pip3.9
+          python_package: python3.12
+          python_cmd: python3.12
+          pip_cmd: pip3.12
           pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
@@ -913,12 +913,6 @@ jobs:
     matrix:
       ${{ each arch in parameters.architectures }}:
         # https://wiki.ubuntu.com/Releases
-        Focal ${{ arch.name }}:
-          # 20.04
-          deb_system: ubuntu
-          distro: focal
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
         Jammy ${{ arch.name }}:
           # 22.04
           deb_system: ubuntu
@@ -982,11 +976,6 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Focal ${{ arch.name }}:
-          deb_system: ubuntu
-          distro: focal
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
         Jammy ${{ arch.name }}:
           deb_system: ubuntu
           distro: jammy

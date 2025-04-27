@@ -88,27 +88,7 @@ class TestCloud(unittest.TestCase):
         cli = DummyCli()
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2017-03-09-profile'
-        c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
-        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
-                config_file:
-            add_cloud(cli, c)
-            config = configparser.ConfigParser()
-            config.read(config_file)
-            self.assertTrue(c.name in config.sections())
-            self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
-            self.assertEqual(config.get(c.name, 'profile'), profile)
-            custom_clouds = get_custom_clouds(cli)
-            self.assertEqual(len(custom_clouds), 1)
-            self.assertEqual(custom_clouds[0].name, c.name)
-            self.assertEqual(custom_clouds[0].endpoints.resource_manager, c.endpoints.resource_manager)
-            self.assertEqual(custom_clouds[0].profile, c.profile)
-
-    def test_add_get_cloud_with_hybrid_profile(self):
-        cli = DummyCli()
-        endpoint_rm = 'http://management.contoso.com'
-        endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2018-03-01-hybrid'
+        profile = 'latest'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
@@ -152,7 +132,7 @@ class TestCloud(unittest.TestCase):
         endpoint_rm = 'http://management.contoso.com'
         endpoint_mgmt = 'http://management.core.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm, management=endpoint_mgmt)
-        profile = '2017-03-09-profile'
+        profile = 'latest'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(cli, c)
@@ -169,7 +149,7 @@ class TestCloud(unittest.TestCase):
         cli = DummyCli()
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2017-03-09-profile'
+        profile = 'latest'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(cli, c)

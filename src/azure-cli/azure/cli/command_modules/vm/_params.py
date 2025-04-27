@@ -114,13 +114,6 @@ def load_arguments(self, _):
         min_api='2020-12-01'
     )
 
-    t_shared_to = self.get_models('SharedToValues', operation_group='shared_galleries')
-    shared_to_type = CLIArgumentType(
-        arg_type=get_enum_type(t_shared_to),
-        help='The query parameter to decide what shared galleries to fetch when doing listing operations. '
-             'If not specified, list by subscription id.'
-    )
-
     marker_type = CLIArgumentType(
         help='A string value that identifies the portion of the list of containers to be '
              'returned with the next listing operation. The operation returns the NextMarker value within '
@@ -1292,14 +1285,6 @@ def load_arguments(self, _):
         c.argument('features', help='A list of gallery image features. E.g. "IsSecureBootSupported=true IsMeasuredBootSupported=false"')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='gallery_images')), min_api='2021-10-01', help='CPU architecture.')
 
-    with self.argument_context('sig image-definition list-shared') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
-                   id_part='child_name_1')
-        c.argument('shared_to', shared_to_type)
-        c.argument('marker', arg_type=marker_type)
-        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
-
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:
@@ -1341,17 +1326,6 @@ def load_arguments(self, _):
                    options_list=['--target-edge-zone-encryption', '--zone-encryption'],
                    help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. '
                         'Format for each edge zone: `<edge zone>,<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>`.')
-
-    with self.argument_context('sig image-version list-shared') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
-                   id_part='child_name_1')
-        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
-                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
-                   id_part='child_name_2')
-        c.argument('shared_to', shared_to_type)
-        c.argument('marker', arg_type=marker_type)
-        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
@@ -1396,24 +1370,11 @@ def load_arguments(self, _):
         c.argument('public_gallery_name', public_gallery_name_type)
         c.argument('gallery_image_name', gallery_image_name_type)
 
-    with self.argument_context('sig image-definition list-community') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('public_gallery_name', public_gallery_name_type)
-        c.argument('marker', arg_type=marker_type)
-        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
-
     with self.argument_context('sig image-version show-community') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
         c.argument('public_gallery_name', public_gallery_name_type)
         c.argument('gallery_image_name', gallery_image_name_type)
         c.argument('gallery_image_version_name', gallery_image_name_version_type)
-
-    with self.argument_context('sig image-version list-community') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('public_gallery_name', public_gallery_name_type)
-        c.argument('gallery_image_name', gallery_image_name_type)
-        c.argument('marker', arg_type=marker_type)
-        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
     # endregion
 

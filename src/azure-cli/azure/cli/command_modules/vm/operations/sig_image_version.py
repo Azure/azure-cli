@@ -5,7 +5,7 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-branches
 from knack.log import get_logger
 
-from ..aaz.latest.sig.image_version import Show as _SigImageVersionShow
+from ..aaz.latest.sig.image_version import Show as _SigImageVersionShow, ListShared as _SigImageVersionListShared
 
 logger = get_logger(__name__)
 
@@ -185,3 +185,11 @@ def convert_show_result_to_sneak_case(result):
             executed_validation.pop("executionTime")
 
     return new_result
+
+
+class SigImageVersionListShared(_SigImageVersionListShared):
+    def pre_operations(self):
+        from azure.cli.core.aaz import has_value
+        args = self.ctx.args
+        if has_value(args.shared_to) and args.shared_to == 'subscription':
+            args.shared_to = None
