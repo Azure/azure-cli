@@ -1170,6 +1170,15 @@ jobs:
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
       pip install jinja2 -U
+      azdev extension list --query "[*].name" -o table | awk 'NR>2 {print $1}' | while read -r name; do
+        if [ -n "$name" ]; then
+          echo "Processing extension: $name"
+          if ! azdev statistics list-command-table "$name"; then
+              echo "Error: Failed to list command table for extension $name"
+              exit 1
+          fi
+        fi
+      done
       azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
       python s/scripts/ci/codegen_report.py
     env:
