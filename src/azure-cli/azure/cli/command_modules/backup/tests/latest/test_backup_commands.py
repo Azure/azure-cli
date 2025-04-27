@@ -1306,7 +1306,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(additional_params='--enable-rbac-authorization false')
     def test_backup_encryption(self, resource_group, resource_group_location, vault1, vault2, key_vault):
         self.kwargs.update({
             'loc' : resource_group_location,

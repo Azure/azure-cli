@@ -7155,7 +7155,7 @@ class VMDiskEncryptionTest(ScenarioTest):
             'key': 'KEK'
         })
         self.cmd(
-            'vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
+            'vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
         self.cmd('keyvault key create --vault-name {vault} --name {key} --protection software')
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --key-encryption-key {key}')
         self.cmd('vm encryption show -g {rg} -n {vm}',
