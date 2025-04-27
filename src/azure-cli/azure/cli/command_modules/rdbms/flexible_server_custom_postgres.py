@@ -1196,7 +1196,10 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
         raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
     else:
         start_ip, end_ip = prepare_public_network(public_access, yes=yes)
-        network.public_network_access = public_access if str(public_access).lower() in ['disabled', 'enabled'] else 'Enabled'
+        if public_access is not None and str(public_access).lower() in ['disabled', 'none']:
+            network.public_network_access = 'Disabled'
+        else:
+            network.public_network_access = 'Enabled'
 
     return network, start_ip, end_ip
 
