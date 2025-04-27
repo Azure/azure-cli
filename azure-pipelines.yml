@@ -1170,6 +1170,7 @@ jobs:
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
       pip install jinja2 -U
+      pip install azure-mgmt-core==1.5.0
       azdev statistics list-command-table aks-preview
       azdev extension list --query "[*].name" -o table | awk 'NR>2 {print $1}' | while read -r name; do
         if [ -n "$name" ]; then
