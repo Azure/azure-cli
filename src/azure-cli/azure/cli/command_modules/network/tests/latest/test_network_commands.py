@@ -2797,6 +2797,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 8: validate per rule action
         self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.2')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type Microsoft_DefaultRuleSet --version 2.1')
 
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.2 '

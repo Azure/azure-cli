@@ -144,6 +144,18 @@ def _get_extension_instance_name(instance_view, publisher, extension_type_name,
     return extension_instance_name
 
 
+# separated for aaz based implementation
+def _get_extension_instance_name_aaz(instance_view, publisher, extension_type_name,
+                                     suggested_name=None):
+    extension_instance_name = suggested_name or extension_type_name
+    full_type_name = '.'.join([publisher, extension_type_name])
+    if extensions := instance_view.get('extensions', []):
+        ext = next((x for x in extensions if x.get('type', '').lower() == full_type_name.lower()), None)
+        if ext:
+            extension_instance_name = ext['name']
+    return extension_instance_name
+
+
 def _get_storage_management_client(cli_ctx):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
 
@@ -826,7 +838,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None,
               additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
               enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
-              exclude_zones=None, align_regional_disks_to_vm_zone=None):
+              exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
+              key_incarnation_id=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1052,7 +1066,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
         enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
         zone_placement_policy=zone_placement_policy, include_zones=include_zones, exclude_zones=exclude_zones,
-        align_regional_disks_to_vm_zone=align_regional_disks_to_vm_zone)
+        align_regional_disks_to_vm_zone=align_regional_disks_to_vm_zone, wire_server_mode=wire_server_mode,
+        imds_mode=imds_mode,
+        wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
+        imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
+        key_incarnation_id=key_incarnation_id)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1581,7 +1599,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-              align_regional_disks_to_vm_zone=None, **kwargs):
+              align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
+              key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
@@ -1704,18 +1724,37 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
                                                          v_tpm_enabled=enable_vtpm)
 
-    if enable_proxy_agent is not None or proxy_agent_mode is not None:
+    proxy_agent_parameters = [
+        enable_proxy_agent, wire_server_mode, imds_mode, key_incarnation_id,
+        wire_server_access_control_profile_reference_id, imds_access_control_profile_reference_id
+    ]
+    if any(parameter is not None for parameter in proxy_agent_parameters):
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
+        HostEndpointSettings = cmd.get_models('HostEndpointSettings')
+        wire_server = HostEndpointSettings(
+            mode=wire_server_mode,
+            in_vm_access_control_profile_reference_id=wire_server_access_control_profile_reference_id
+        )
+        imds = HostEndpointSettings(
+            mode=imds_mode,
+            in_vm_access_control_profile_reference_id=imds_access_control_profile_reference_id
+        )
         if vm.security_profile is None:
             vm.security_profile = SecurityProfile()
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(enabled=enable_proxy_agent,
-                                                                          mode=proxy_agent_mode)
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(
+                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
         elif vm.security_profile.proxy_agent_settings is None:
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(enabled=enable_proxy_agent,
-                                                                          mode=proxy_agent_mode)
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(
+                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
         else:
             vm.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
-            vm.security_profile.proxy_agent_settings.mode = proxy_agent_mode
+            vm.security_profile.proxy_agent_settings.key_incarnation_id = key_incarnation_id
+            vm.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+            vm.security_profile.proxy_agent_settings.wire_server.in_vm_access_control_profile_reference_id = \
+                wire_server_access_control_profile_reference_id
+            vm.security_profile.proxy_agent_settings.imds.mode = imds_mode
+            vm.security_profile.proxy_agent_settings.imds.in_vm_access_control_profile_reference_id = \
+                imds_access_control_profile_reference_id
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -2135,36 +2174,41 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, 
 
 # region VirtualMachines Extensions
 def list_extensions(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    extension_type = 'Microsoft.Compute/virtualMachines/extensions'
-    result = [r for r in (vm.resources or []) if r.type == extension_type]
-    return result
+    from .operations.vm_extension import VMExtensionList
+    return VMExtensionList(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_name': vm_name,
+        'resource_group': resource_group_name,
+    })['value']
 
 
 def show_extensions(cmd, resource_group_name, vm_name, vm_extension_name, instance_view=False, expand=None):
+    from .operations.vm_extension import VMExtensionShow
     if instance_view:
         expand = 'instanceView'
-    client = _compute_client_factory(cmd.cli_ctx).virtual_machine_extensions
-    return client.get(resource_group_name=resource_group_name,
-                      vm_name=vm_name,
-                      vm_extension_name=vm_extension_name,
-                      expand=expand)
+
+    return VMExtensionShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_extension_name': vm_extension_name,
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'expand': expand
+    })
 
 
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
                   protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,
                   extension_instance_name=None, enable_auto_upgrade=None):
-    vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    client = _compute_client_factory(cmd.cli_ctx)
+    from .operations.vm import VMShow as _VMShow
+    vm = _VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_name': vm_name,
+        'resource_group': resource_group_name,
+        'expand': 'instanceView'
+    })
 
     if not extension_instance_name:
         extension_instance_name = vm_extension_name
 
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension',
-                                             resource_type=ResourceType.MGMT_COMPUTE,
-                                             operation_group='virtual_machines')
-    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
-                                                 suggested_name=extension_instance_name)
+    instance_name = _get_extension_instance_name_aaz(vm['instanceView'], publisher, vm_extension_name,
+                                                     suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
         msg = "A %s extension with name %s already exists. Updating it with your settings..."
         logger.warning(msg, vm_extension_name, instance_name)
@@ -2178,19 +2222,26 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if vm_extension_name in auto_upgrade_extensions and enable_auto_upgrade is None:
         enable_auto_upgrade = True
 
-    version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
-    ext = VirtualMachineExtension(location=vm.location,
-                                  publisher=publisher,
-                                  type_properties_type=vm_extension_name,
-                                  protected_settings=protected_settings,
-                                  type_handler_version=version,
-                                  settings=settings,
-                                  auto_upgrade_minor_version=(not no_auto_upgrade),
-                                  enable_automatic_upgrade=enable_auto_upgrade)
+    version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm['location'])
+
+    from .operations.vm_extension import VMExtensionCreate as ExtensionSet
+    ext_args = {
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'vm_extension_name': instance_name,
+        'location': vm['location'],
+        'publisher': publisher,
+        'type': vm_extension_name,
+        'protected_settings': protected_settings,
+        'type_handler_version': version,
+        'settings': settings,
+        'auto_upgrade_minor_version': (not no_auto_upgrade),
+        'enable_automatic_upgrade': enable_auto_upgrade,
+        'no_wait': no_wait
+    }
     if force_update:
-        ext.force_update_tag = str(_gen_guid())
-    return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
-                       resource_group_name, vm_name, instance_name, ext)
+        ext_args['force_update_tag'] = str(_gen_guid())
+    return ExtensionSet(cli_ctx=cmd.cli_ctx)(command_args=ext_args)
 # endregion
 
 
@@ -3193,7 +3244,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                 enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
-                security_posture_reference_is_overridable=None, zone_balance=None):
+                security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
+                imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                imds_access_control_profile_reference_id=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3509,7 +3562,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
             skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
-            zone_balance=zone_balance)
+            zone_balance=zone_balance, wire_server_mode=wire_server_mode, imds_mode=imds_mode,
+            wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
+            imds_access_control_profile_reference_id=imds_access_control_profile_reference_id)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3958,7 +4013,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
-                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, zone_balance=None, **kwargs):
+                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, zone_balance=None,
+                wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                imds_access_control_profile_reference_id=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4121,19 +4178,35 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'vTpmEnabled': enable_vtpm
             }}
 
-    if enable_proxy_agent is not None or proxy_agent_mode is not None:
+    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None or \
+            wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
         SecurityProfile = cmd.get_models('SecurityProfile')
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
+        HostEndpointSettings = cmd.get_models('HostEndpointSettings')
+        wire_server = HostEndpointSettings(
+            mode=wire_server_mode,
+            in_vm_access_control_profile_reference_id=wire_server_access_control_profile_reference_id
+        )
+        imds = HostEndpointSettings(
+            mode=imds_mode,
+            in_vm_access_control_profile_reference_id=imds_access_control_profile_reference_id
+        )
         if vmss.virtual_machine_profile.security_profile is None:
             vmss.virtual_machine_profile.security_profile = SecurityProfile()
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, mode=proxy_agent_mode)
+                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
         elif vmss.virtual_machine_profile.security_profile.proxy_agent_settings is None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, mode=proxy_agent_mode)
+                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
         else:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.mode = proxy_agent_mode
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server. \
+                in_vm_access_control_profile_reference_id = wire_server_access_control_profile_reference_id
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.mode = imds_mode
+            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds. \
+                in_vm_access_control_profile_reference_id = imds_access_control_profile_reference_id
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
         if vmss.orchestration_mode != 'Flexible':
@@ -5302,25 +5375,6 @@ def list_generator(pages, num_results=50):
     return result
 
 
-def sig_shared_image_definition_list(client, location, gallery_unique_name,
-                                     shared_to=None, marker=None, show_next_marker=None):
-    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
-    if shared_to == 'subscription':
-        shared_to = None
-    generator = client.list(location=location, gallery_unique_name=gallery_unique_name, shared_to=shared_to)
-    return get_page_result(generator, marker, show_next_marker)
-
-
-def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name,
-                                  shared_to=None, marker=None, show_next_marker=None):
-    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
-    if shared_to == 'subscription':
-        shared_to = None
-    generator = client.list(location=location, gallery_unique_name=gallery_unique_name,
-                            gallery_image_name=gallery_image_name, shared_to=shared_to)
-    return get_page_result(generator, marker, show_next_marker)
-
-
 def gallery_application_version_create(client,
                                        resource_group_name,
                                        gallery_name,
@@ -5864,18 +5918,6 @@ def _transform_community_gallery_list_output(result):
         output.append(output_item)
 
     return output
-
-
-def sig_community_image_definition_list(client, location, public_gallery_name, marker=None, show_next_marker=None):
-    generator = client.list(location=location, public_gallery_name=public_gallery_name)
-    return get_page_result(generator, marker, show_next_marker)
-
-
-def sig_community_image_version_list(client, location, public_gallery_name, gallery_image_name, marker=None,
-                                     show_next_marker=None):
-    generator = client.list(location=location, public_gallery_name=public_gallery_name,
-                            gallery_image_name=gallery_image_name)
-    return get_page_result(generator, marker, show_next_marker)
 
 
 def list_vm_sizes(cmd, location):

@@ -636,19 +636,6 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['user']['type'], 'servicePrincipal')
         self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIClient-{}'.format(test_client_id))
 
-        # Old way of using identity_id
-        subscriptions = profile.login_with_managed_identity(identity_id=test_client_id)
-
-        self.assertEqual(len(subscriptions), 1)
-        s = subscriptions[0]
-        self.assertEqual(s['name'], self.display_name1)
-        self.assertEqual(s['id'], self.id1.split('/')[-1])
-        self.assertEqual(s['tenantId'], self.test_mi_tenant)
-
-        self.assertEqual(s['user']['name'], 'userAssignedIdentity')
-        self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIClient-{}'.format(test_client_id))
-
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     def test_login_with_mi_user_assigned_object_id(self, create_subscription_client_mock,
@@ -689,14 +676,6 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['user']['type'], 'servicePrincipal')
         self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIObject-{}'.format(test_object_id))
 
-        # Old way of using identity_id
-        subscriptions = profile.login_with_managed_identity(identity_id=test_object_id)
-
-        s = subscriptions[0]
-        self.assertEqual(s['user']['name'], 'userAssignedIdentity')
-        self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIObject-{}'.format(test_object_id))
-
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     def test_login_with_mi_user_assigned_resource_id(self, create_subscription_client_mock,
@@ -724,14 +703,6 @@ class TestProfile(unittest.TestCase):
         mock_get.return_value = good_response
 
         subscriptions = profile.login_with_managed_identity(resource_id=test_res_id)
-
-        s = subscriptions[0]
-        self.assertEqual(s['user']['name'], 'userAssignedIdentity')
-        self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIResource-{}'.format(test_res_id))
-
-        # Old way of using identity_id
-        subscriptions = profile.login_with_managed_identity(identity_id=test_res_id)
 
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'userAssignedIdentity')

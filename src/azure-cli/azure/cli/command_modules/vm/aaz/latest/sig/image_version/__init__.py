@@ -12,6 +12,8 @@ from .__cmd_group import *
 from ._create import *
 from ._delete import *
 from ._list import *
+from ._list_community import *
+from ._list_shared import *
 from ._show import *
 from ._show_community import *
 from ._show_shared import *
