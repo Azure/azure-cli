@@ -2341,7 +2341,7 @@ def validate_ip_address(namespace):
     if not ip_address:
         return
 
-    ip_address_networks = [ip_network(ip) for ip in ip_address]
+    ip_address_networks = [ip_network(ip, False) for ip in ip_address]
     for idx, ip_address_network in enumerate(ip_address_networks):
         for idx2, ip_address_network2 in enumerate(ip_address_networks):
             if idx == idx2:

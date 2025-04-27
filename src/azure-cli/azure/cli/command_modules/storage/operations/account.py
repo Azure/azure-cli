@@ -709,8 +709,8 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         for ip in ip_address:
             to_modify = True
             for x in rules.ip_rules:
-                existing_ip_network = ip_network(x.ip_address_or_range)
-                new_ip_network = ip_network(ip)
+                existing_ip_network = ip_network(x.ip_address_or_range, False)
+                new_ip_network = ip_network(ip, False)
                 if new_ip_network.overlaps(existing_ip_network):
                     logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
                                    ip, x.ip_address_or_range)
@@ -739,8 +739,8 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
                                        if not x.virtual_network_resource_id.endswith(subnet)]
     if ip_address:
-        to_remove = [ip_network(x) for x in ip_address]
-        rules.ip_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range) != i for i in to_remove),
+        to_remove = [ip_network(x, False) for x in ip_address]
+        rules.ip_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range, False) != i for i in to_remove),
                                      rules.ip_rules))
 
     if resource_id:
