@@ -56,6 +56,7 @@ class RepoAccessTokenPermission(Enum):
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
     DELETED_READ_RESTORE = '{},{}'.format(DELETED_READ, DELETED_RESTORE)
+    PULL_PUSH_META_WRITE_META_READ_DELETE = '{},{},{},{},{}'.format(PULL, PUSH, METADATA_WRITE, METADATA_READ, DELETE)
 
 
 class RegistryAccessTokenPermission(Enum):
@@ -134,7 +135,8 @@ def _get_aad_token_after_challenge(cli_ctx,
                                    artifact_repository,
                                    permission,
                                    is_diagnostics_context,
-                                   use_acr_audience):
+                                   use_acr_audience,
+                                   verify_user_permissions):
     authurl = urlparse(token_params['realm'])
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
 
@@ -147,8 +149,7 @@ def _get_aad_token_after_challenge(cli_ctx,
         scope = "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
 
     # this might be a cross tenant scenario, so pass subscription to get_raw_token
-    subscription = get_subscription_id(cli_ctx)
-    creds, _, tenant = profile.get_raw_token(subscription=subscription,
+    creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
                                              resource=scope)
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
@@ -206,7 +207,57 @@ def _get_aad_token_after_challenge(cli_ctx,
         raise CLIError(CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)
                        .get_error_message())
 
-    return loads(response.content.decode("utf-8"))["access_token"]
+    access_token = loads(response.content.decode("utf-8"))["access_token"]
+    if verify_user_permissions:
+        return _verify_allowed_actions(access_token, permission, is_diagnostics_context)
+
+    return access_token
+
+
+def _verify_allowed_actions(access_token, permission, is_diagnostics_context):
+    actions_value = None
+    try:
+        import jwt
+        decoded_token = jwt.decode(access_token, options={"verify_signature": False})
+        access_list = decoded_token.get("access", [])
+        if isinstance(access_list, list):
+            access_value = access_list[0] if access_list else {}
+            actions_value = access_value.get('actions', [])
+    except Exception as err:
+        raise CLIError(f"Failed to decode access token: {str(err)}")
+
+    required_actions = permission.split(',')
+
+    if not actions_value or not isinstance(actions_value, list):
+        missing_actions_value_str = _convert_action_list_to_str(required_actions)
+        from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
+
+        if is_diagnostics_context:
+            return CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message("no", missing_actions_value_str)
+        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message("no", missing_actions_value_str)
+                       .get_error_message())
+
+    missing_actions_value = [action for action in required_actions if action not in actions_value]
+    if missing_actions_value:
+        missing_actions_value_str = _convert_action_list_to_str(missing_actions_value)
+        allowed_actions_value_str = _convert_action_list_to_str(actions_value)
+        from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
+
+        if is_diagnostics_context:
+            return CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(
+                allowed_actions_value_str, missing_actions_value_str)
+        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(
+            allowed_actions_value_str, missing_actions_value_str).get_error_message())
+
+    return access_token
+
+
+def _convert_action_list_to_str(actions):
+    if len(actions) > 1:
+        res = ', '.join(actions[:-1]) + ' and ' + actions[-1]
+    else:
+        res = ''.join(actions)
+    return res
 
 
 def _get_aad_token(cli_ctx,
@@ -216,13 +267,17 @@ def _get_aad_token(cli_ctx,
                    artifact_repository=None,
                    permission=None,
                    is_diagnostics_context=False,
-                   use_acr_audience=False):
-    """Obtains refresh and access tokens for an AAD-enabled registry.
+                   use_acr_audience=False,
+                   verify_user_permissions=False):
+    """Obtains refresh and access tokens for an AAD-enabled registry. Will return the allowed actions if
+    verify_user_permissions is set to True.
     :param str login_server: The registry login server URL to log in to
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
     :param str repository: Repository for which the access token is requested
     :param str artifact_repository: Artifact repository for which the access token is requested
-    :param str permission: The requested permission on the repository, '*' or 'pull'
+    :param str permission: The requested permission on the repository
+    :param bool verify_user_permissions: Specifies whether to verify the allowed permissions in the access token.
+    This is set to True when the --repository flag is used with the check-health command.
     """
     token_params = _handle_challenge_phase(
         login_server, repository, artifact_repository, permission, True, is_diagnostics_context
@@ -241,7 +296,8 @@ def _get_aad_token(cli_ctx,
                                           artifact_repository,
                                           permission,
                                           is_diagnostics_context,
-                                          use_acr_audience)
+                                          use_acr_audience,
+                                          verify_user_permissions)
 
 
 def _get_token_with_username_and_password(login_server,

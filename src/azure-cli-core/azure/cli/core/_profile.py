@@ -220,13 +220,9 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity(self, client_id=None, object_id=None, resource_id=None,
-                                    allow_no_subscriptions=None):
-        if _use_msal_managed_identity(self.cli_ctx):
-            return self.login_with_managed_identity_msal(
-                client_id=client_id, object_id=object_id, resource_id=resource_id,
-                allow_no_subscriptions=allow_no_subscriptions)
-
+    def login_with_managed_identity_msrestazure(self, client_id=None, object_id=None, resource_id=None,
+                                                allow_no_subscriptions=None):
+        # Old way of using msrestazure for managed identity
         import jwt
         from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -274,8 +270,13 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity_msal(self, client_id=None, object_id=None, resource_id=None,
-                                         allow_no_subscriptions=None):
+    def login_with_managed_identity(self, client_id=None, object_id=None, resource_id=None,
+                                    allow_no_subscriptions=None):
+        if not _use_msal_managed_identity(self.cli_ctx):
+            return self.login_with_managed_identity_msrestazure(
+                client_id=client_id, object_id=object_id, resource_id=resource_id,
+                allow_no_subscriptions=allow_no_subscriptions)
+
         import jwt
         from .auth.constants import ACCESS_TOKEN
 
@@ -986,10 +987,8 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
 
 
 def _use_msal_managed_identity(cli_ctx):
-    # This indicates an Azure Arc-enabled server
-    from msal.managed_identity import get_managed_identity_source, AZURE_ARC
     from azure.cli.core.telemetry import set_use_msal_managed_identity
-    # PREVIEW: Use core.use_msal_managed_identity=true to enable managed identity authentication with MSAL
-    use_msal_managed_identity = cli_ctx.config.getboolean('core', 'use_msal_managed_identity', fallback=False)
+    # Use core.use_msal_managed_identity=false to use the old msrestazure implementation
+    use_msal_managed_identity = cli_ctx.config.getboolean('core', 'use_msal_managed_identity', fallback=True)
     set_use_msal_managed_identity(use_msal_managed_identity)
-    return use_msal_managed_identity or get_managed_identity_source() == AZURE_ARC
+    return use_msal_managed_identity

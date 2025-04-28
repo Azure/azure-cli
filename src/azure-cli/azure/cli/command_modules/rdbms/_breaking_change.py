@@ -4,8 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.breaking_change import register_command_group_deprecate, register_default_value_breaking_change, \
-    register_argument_deprecate, register_other_breaking_change, register_logic_breaking_change, \
-    register_command_deprecate
+    register_argument_deprecate, register_other_breaking_change, register_logic_breaking_change
 
 
 register_logic_breaking_change('postgres flexible-server create', 'Update default value of "--sku-name"',
@@ -14,8 +13,6 @@ register_logic_breaking_change('postgres flexible-server create', 'Update defaul
 register_default_value_breaking_change('postgres flexible-server create', '--version', '16', '17')
 register_default_value_breaking_change('postgres flexible-server create', '--create-default-database', 'Enabled',
                                        'Disabled')
-register_command_deprecate('postgres flexible-server replica stop-replication',
-                           redirect='postgres flexible-server replica promote', hide=True)
 register_other_breaking_change('postgres flexible-server update',
                                message='User confirmation will be needed for compute and storage updates '
                                'that trigger a restart of the server.')
