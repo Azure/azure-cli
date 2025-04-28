@@ -1042,7 +1042,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
                         security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                         imds_mode=None, wire_server_access_control_profile_reference_id=None,
-                        imds_access_control_profile_reference_id=None):
+                        imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
+                        automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1530,12 +1531,26 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if scale_in_policy:
         vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
 
-    if enable_resilient_vm_creation is not None or enable_resilient_vm_deletion is not None:
-        resiliency_policy = {}
-        if enable_resilient_vm_creation is not None:
-            resiliency_policy['resilientVMCreationPolicy'] = {'enabled': enable_resilient_vm_creation}
-        if enable_resilient_vm_deletion is not None:
-            resiliency_policy['resilientVMDeletionPolicy'] = {'enabled': enable_resilient_vm_deletion}
+    resiliency_policy = {}
+    if enable_resilient_vm_creation is not None:
+        resiliency_policy['resilientVMCreationPolicy'] = {'enabled': enable_resilient_vm_creation}
+    if enable_resilient_vm_deletion is not None:
+        resiliency_policy['resilientVMDeletionPolicy'] = {'enabled': enable_resilient_vm_deletion}
+
+    automatic_zone_rebalancing_policy = {}
+    if enable_automatic_zone_balancing is not None:
+        automatic_zone_rebalancing_policy['enabled'] = enable_automatic_zone_balancing
+
+    if automatic_zone_balancing_strategy is not None:
+        automatic_zone_rebalancing_policy['rebalanceStrategy'] = automatic_zone_balancing_strategy
+
+    if automatic_zone_balancing_behavior is not None:
+        automatic_zone_rebalancing_policy['rebalanceBehavior'] = automatic_zone_balancing_behavior
+
+    if automatic_zone_rebalancing_policy:
+        resiliency_policy['automaticZoneRebalancingPolicy'] = automatic_zone_rebalancing_policy
+
+    if resiliency_policy:
         vmss_properties['resiliencyPolicy'] = resiliency_policy
 
     security_profile = {}
