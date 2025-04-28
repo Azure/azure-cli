@@ -536,6 +536,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_login_with_mi_system_assigned(self, create_subscription_client_mock, mock_get):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -569,6 +570,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_login_with_mi_no_subscriptions(self, create_subscription_client_mock, mock_get):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = []
@@ -604,6 +606,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_login_with_mi_user_assigned_client_id(self, create_subscription_client_mock, mock_get):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -638,6 +641,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_login_with_mi_user_assigned_object_id(self, create_subscription_client_mock,
                                                                            mock_msi_auth):
         mock_subscription_client = mock.MagicMock()
@@ -678,6 +682,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_login_with_mi_user_assigned_resource_id(self, create_subscription_client_mock,
                                                                         mock_get):
 
@@ -711,7 +716,6 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_login_with_mi_system_assigned_msal(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -739,7 +743,6 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_login_with_mi_system_assigned_no_subscriptions_msal(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = []
@@ -769,7 +772,6 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_login_with_mi_user_assigned_client_id_msal(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -798,7 +800,6 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_login_with_mi_user_assigned_object_id_msal(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -822,7 +823,6 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_login_with_mi_user_assigned_resource_id_msal(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -1158,6 +1158,7 @@ class TestProfile(unittest.TestCase):
                                                                      aux_tenants=[test_tenant_id2])
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_get_login_credentials_mi_system_assigned(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties('systemAssignedIdentity',
@@ -1177,6 +1178,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.token_read_count)
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_get_login_credentials_mi_user_assigned_with_client_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         test_client_id = '12345678-38d6-4fb2-bad9-b7b93a3e8888'
@@ -1198,6 +1200,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.client_id, test_client_id)
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_get_login_credentials_mi_user_assigned_with_object_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         test_object_id = '12345678-38d6-4fb2-bad9-b7b93a3e9999'
@@ -1219,6 +1222,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.object_id, test_object_id)
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_get_login_credentials_mi_user_assigned_with_res_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         test_res_id = ('/subscriptions/{}/resourceGroups/r1/providers/Microsoft.ManagedIdentity/'
@@ -1241,7 +1245,6 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.msi_res_id, test_res_id)
 
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_get_login_credentials_mi_system_assigned_msal(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties('systemAssignedIdentity',
@@ -1258,7 +1261,6 @@ class TestProfile(unittest.TestCase):
         assert cred._credential.resource_id is None
 
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_get_login_credentials_mi_user_assigned_client_id_msal(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties(
@@ -1277,7 +1279,6 @@ class TestProfile(unittest.TestCase):
         assert cred._credential.resource_id is None
 
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_get_login_credentials_mi_user_assigned_object_id_msal(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties(
@@ -1296,7 +1297,6 @@ class TestProfile(unittest.TestCase):
         assert cred._credential.resource_id is None
 
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_get_login_credentials_mi_user_assigned_resource_id_msal(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties(
@@ -1403,6 +1403,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
+    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'false'})
     def test_get_raw_token_mi_system_assigned(self, mock_msi_auth):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties('systemAssignedIdentity',
@@ -1442,7 +1443,6 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_get_raw_token_mi_system_assigned_msal(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties('systemAssignedIdentity',
@@ -1477,7 +1477,6 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_get_raw_token_mi_user_assigned_client_id_msal(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties(
@@ -1509,7 +1508,6 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_get_raw_token_mi_user_assigned_object_id_msal(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties(
@@ -1541,7 +1539,6 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    @mock.patch.dict('os.environ', {'AZURE_CORE_USE_MSAL_MANAGED_IDENTITY': 'true'})
     def test_get_raw_token_mi_user_assigned_resource_id_msal(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties(
