@@ -39,10 +39,6 @@ class AcrabacScenarioTest(ScenarioTest):
             self.check('roleAssignmentMode', 'AbacRepositoryPermissions')
         ])
 
-        self.cmd('acr show -g {rg} -n {name}', checks=[
-            self.check('roleAssignmentMode', 'AbacRepositoryPermissions')
-        ])
-
         self.cmd('acr delete -g {rg} -n {name} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
