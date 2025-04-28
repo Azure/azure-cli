@@ -7148,14 +7148,14 @@ class VMDiskEncryptionTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='eastus2')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, location='eastus2', key='vault',
-                      additional_params='--enabled-for-disk-encryption')
+                      additional_params='--enabled-for-disk-encryption --enable-rbac-authorization false')
     def test_vm_disk_encryption_with_key(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
             'key': 'KEK'
         })
         self.cmd(
-            'vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
+            'vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789! --nsg-rule NONE')
         self.cmd('keyvault key create --vault-name {vault} --name {key} --protection software')
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --key-encryption-key {key}')
         self.cmd('vm encryption show -g {rg} -n {vm}',
@@ -7851,8 +7851,8 @@ class VMGalleryImage(ScenarioTest):
             self.check('storageProfile.osDiskImage.source.uri', '{vhd_uri}')
         ])
 
-    @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
+    @ResourceGroupPreparer(random_name_length=15, location='westus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus',
                       additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_create_image_version_with_region_cvm_encryption(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
@@ -7903,7 +7903,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_VMGuestStateOnlyEncryptedWithPlatformKey --disk-encryption-set {des1_id}')
         self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --target-region-cvm-encryption EncryptedVMGuestStateOnlyWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
+            self.check('publishingProfile.targetRegions[0].name', 'West US'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
@@ -13037,7 +13037,7 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('sourceRestorePoint.id', '{point_id}')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_local', location='EastUS2EUAP')
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_local')
     def test_restore_point_encryption_local(self, resource_group):
         self.kwargs.update({
             'vault1': self.create_random_name('vault', 15),
