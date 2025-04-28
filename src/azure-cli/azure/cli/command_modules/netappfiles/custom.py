@@ -404,10 +404,6 @@ class VolumeCreate(_VolumeCreate):
         else:
             logger.debug("ANF log: Don't create export policy")
 
-        if has_value(args.is_restoring):
-            logger.warning("ANF log: is_restoring is deprecated, do not use it. It will be removed in future version.")
-            args.is_restoring = None
-
 
 # check if flattening dataprotection works
 class VolumeUpdate(_VolumeUpdate):
@@ -491,32 +487,6 @@ class VolumeUpdate(_VolumeUpdate):
         logger.debug("ANF-Extension log: usage_threshold: %s", args.usage_threshold)
         if has_value(args.usage_threshold) and args.usage_threshold.to_serialized_data() is not None:
             args.usage_threshold = int(args.usage_threshold.to_serialized_data()) * gib_scale
-
-        # For backwards compat, in next breaking change window, those will be removed
-        if has_value(args.avs_data_store):
-            logger.warning("ANF log: avs_data_store is deprecated, do not use it. It will be removed in future version.")
-            args.avs_data_store = None
-        if has_value(args.creation_token):
-            logger.warning("ANF log: creation_token is deprecated, do not use it. It will be removed in future version.")
-            args.creation_token = None
-        if has_value(args.is_large_volume):
-            logger.warning("ANF log: is_large_volume is deprecated, do not use it. It will be removed in future version.")
-            args.is_large_volume = None
-        if has_value(args.is_restoring):
-            logger.warning("ANF log: is_restoring is deprecated, do not use it. It will be removed in future version.")
-            args.is_restoring = None
-        if has_value(args.ldap_enabled):
-            logger.warning("ANF log: ldap_enabled is deprecated, do not use it. It will be removed in future version.")
-            args.ldap_enabled = None
-        if has_value(args.network_features):
-            logger.warning("ANF log: network_features is deprecated, do not use it. It will be removed in future version.")
-            args.network_features = None
-        if has_value(args.security_style):
-            logger.warning("ANF log: security_style is deprecated, do not use it. It will be removed in future version.")
-            args.security_style = None
-        if has_value(args.volume_type):
-            logger.warning("ANF log: volume_type is deprecated, do not use it. It will be removed in future version.")
-            args.volume_type = None
 
 
 class VolumeBreakFileLocks(_BreakFileLocks):
