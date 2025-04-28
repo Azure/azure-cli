@@ -58,16 +58,16 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         ase_client_factory_mock.return_value = ase_client
         host_env1 = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name_1/Microsoft.Web/hostingEnvironments/mock_ase_name_1')
         host_env1.name = ase_name_1
-        host_env1.kind = 'ASEv2'
+        host_env1.kind = 'ASEv3'
         host_env2 = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name_2/Microsoft.Web/hostingEnvironments/mock_ase_name_2')
         host_env2.name = ase_name_2
         host_env2.kind = 'ASEv3'
         ase_client.list.return_value = [host_env1, host_env2]
 
         ase_client.get.return_value = host_env1
-        # Assert listvips is called (ASEv2)
+        # Assert get_ase_v3_networking_configuration is called (ASEv3)
         list_appserviceenvironment_addresses(self.mock_cmd, ase_name_1)
-        ase_client.get_vip_info.assert_called_with(rg_name_1, ase_name_1)
+        ase_client.get_ase_v3_networking_configuration.assert_called_with(rg_name_1, ase_name_1)
 
         ase_client.get.return_value = host_env2
         # Assert get_ase_v3_networking_configuration is called (ASEv3)
@@ -105,60 +105,26 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         show = mock.MagicMock()
         subnet_show_mock.return_value = show
 
-        fake_data = {"id": "1", "addressPrefix": "10.10.10.10/25"}
+        fake_data = {"id": "1", "addressPrefix": "10.10.10.10/25", "delegations": [{"id": "1", "serviceName": "Microsoft.Web/hostingEnvironments"}]}
         show.return_value = fake_data
 
         # assert that ValidationError raised when called with small subnet
         with self.assertRaises(ValidationError):
             create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                              subnet=subnet_name, vnet_name=vnet_name,
-                                             ignore_network_security_group=True, ignore_route_table=True,
-                                             location='westeurope', kind='ASEv2')
+                                             location='westeurope', kind='ASEv3')
 
-        fake_data = {"id": "1", "addressPrefix": "10.10.10.10/24"}
+        fake_data = {"id": "1", "addressPrefix": "10.10.10.10/24", "delegations": [{"id": "1", "serviceName": "Microsoft.Web/hostingEnvironments"}]}
         show.return_value = fake_data
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                          subnet=subnet_name, vnet_name=vnet_name,
-                                         ignore_network_security_group=True, ignore_route_table=True,
-                                         location='westeurope', kind='ASEv2')
+                                         location='westeurope', kind='ASEv3')
 
         # Assert begin_create_or_update is called with correct rg and deployment name
         resource_client_mock.deployments.begin_create_or_update.assert_called_once()
         call_args = resource_client_mock.deployments.begin_create_or_update.call_args
         self.assertEqual(call_args[0][0], rg_name)
         self.assertEqual(call_args[0][1], deployment_name)
-
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
-    def test_app_service_environment_update(self, ase_client_factory_mock, resource_group_mock):
-        ase_name = 'mock_ase_name'
-        rg_name = 'mock_rg_name'
-
-        ase_client = mock.MagicMock()
-        ase_client_factory_mock.return_value = ase_client
-
-        resource_group_mock.return_value = rg_name
-
-        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
-        host_env.name = ase_name
-        host_env.kind = 'ASEv2'
-        ase_client.get.return_value = host_env
-        ase_client.list.return_value = [host_env]
-
-        update_appserviceenvironment(self.mock_cmd, ase_name, front_end_scale_factor=10)
-
-        # Assert that ValidationError raised when called with not supported parameters
-        with self.assertRaises(ValidationError):
-            update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True, allow_remote_debugging=True,allow_incoming_ftp_connections=True)
-
-        # Assert create_or_update is called with correct properties
-        assert_host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
-        assert_host_env.name = ase_name
-        assert_host_env.kind = 'ASEv2'
-        assert_host_env.internal_load_balancing_mode = None
-        assert_host_env.front_end_scale_factor = 10
-        ase_client.begin_create_or_update.assert_called_once_with(resource_group_name=rg_name, name=ase_name,
-                                                                  hosting_environment_envelope=assert_host_env)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
@@ -179,11 +145,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         ase_networking_conf = AseV3NetworkingConfiguration(allow_new_private_endpoint_connections=False, allow_remote_debugging=False, allow_incoming_ftp_connections=False)
         ase_client.get_ase_v3_networking_configuration.return_value = ase_networking_conf
 
-        update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True, allow_remote_debugging=True,allow_incoming_ftp_connections=True)
-
-        # assert that ValidationError raised when called with not supported parameters
-        with self.assertRaises(ValidationError):
-            update_appserviceenvironment(self.mock_cmd, ase_name, front_end_scale_factor=10)
+        update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True, allow_remote_debugging=True, allow_incoming_ftp_connections=True)
 
         # Assert create_or_update is called with correct properties
         ase_client.update_ase_networking_configuration.assert_called_once_with(resource_group_name=rg_name,
@@ -346,27 +308,6 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         host_env.upgrade_availability = None
 
         # Assert that ValidationError raised when upgrade_availability None
-        with self.assertRaises(ValidationError):
-            upgrade_appserviceenvironment(self.mock_cmd, ase_name)
-
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
-    def test_app_service_environment_upgrade(self, ase_client_factory_mock, resource_group_mock):
-        ase_name = 'mock_ase_name'
-        rg_name = 'mock_rg_name'
-
-        ase_client = mock.MagicMock()
-        ase_client_factory_mock.return_value = ase_client
-
-        resource_group_mock.return_value = rg_name
-
-        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
-        host_env.name = ase_name
-        host_env.kind = 'ASEv2'
-        ase_client.get.return_value = host_env
-        ase_client.list.return_value = [host_env]
-
-        # Assert that ValidationError raised when ASEv2
         with self.assertRaises(ValidationError):
             upgrade_appserviceenvironment(self.mock_cmd, ase_name)
 

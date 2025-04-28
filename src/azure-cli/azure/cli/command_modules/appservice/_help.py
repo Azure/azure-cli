@@ -52,13 +52,13 @@ examples:
   - name: Create a Windows container app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --hyper-v --sku P1V3
-  - name: Create an app service plan for app service environment.
+  - name: Create an app service plan for App Service Environment.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment MyAppServiceEnvironment --sku I1
-  - name: Create an app service plan for app service environment in different subscription.
+        az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment MyAppServiceEnvironment --sku I1v2
+  - name: Create an app service plan for App Service Environment in different subscription.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Web/hostingEnvironments/test-ase' --sku I1V2
-  - name: Create an app service plan for app service environment in different subscription and the resource group in different region than app service environment.
+  - name: Create an app service plan for App Service Environment in different subscription and the resource group in different region than App Service Environment.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Web/hostingEnvironments/test-ase' --sku I1V2 --location ase-region
 """
@@ -2521,43 +2521,43 @@ short-summary: Manage App Service Environments
 
 helps['appservice ase list'] = """
     type: command
-    short-summary: List app service environments.
+    short-summary: List App Service Environments.
     examples:
-    - name: List all app service environments in subscription.
+    - name: List all App Service Environments in subscription.
       text: az appservice ase list
-    - name: List all app service environment in resource group.
+    - name: List all App Service Environment in resource group.
       text: az appservice ase list --resource-group MyResourceGroup
 """
 
 helps['appservice ase show'] = """
     type: command
-    short-summary: Show details of an app service environment.
+    short-summary: Show details of an App Service Environment.
     examples:
-    - name: Show app service environment.
+    - name: Show App Service Environment.
       text: az appservice ase show --name MyAseName
 """
 
 helps['appservice ase list-addresses'] = """
     type: command
-    short-summary: List VIPs associated with an app service environment v2.
+    short-summary: List IP addresses associated with an App Service Environment.
     examples:
-    - name: List VIPs for an app service environments.
+    - name: List IPs for an App Service Environment.
       text: az appservice ase list-addresses --name MyAseName
 """
 
 helps['appservice ase list-plans'] = """
     type: command
-    short-summary: List app service plans associated with an app service environment.
+    short-summary: List app service plans associated with an App Service Environment.
     examples:
-    - name: List app service plans for an app service environments.
+    - name: List app service plans for an App Service Environments.
       text: az appservice ase list-plans --name MyAseName
 """
 
 helps['appservice ase create'] = """
     type: command
-    short-summary: Create app service environment.
+    short-summary: Create App Service Environment.
     examples:
-    - name: Create resource group, Virtual Network and App Service Environment v3 with default values.
+    - name: Create resource group, Virtual Network and App Service Environment with default values.
       text: |
           az group create -g MyResourceGroup --location westeurope
 
@@ -2565,22 +2565,22 @@ helps['appservice ase create'] = """
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --kind asev3
-    - name: Create external App Service Environments v3 in existing resource group and Virtual Network.
+            --subnet MyAseSubnet
+    - name: Create external App Service Environments in existing resource group and Virtual Network.
       text: |
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --virtual-ip-type External --kind asev3
-    - name: Create Virtual Network and App Service Environment v3 in a smaller than recommended subnet in existing resource group.
+            --subnet MyAseSubnet --virtual-ip-type External
+    - name: Create Virtual Network and App Service Environment in a smaller than recommended subnet in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/26
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --ignore-subnet-size-validation --kind asev3
-    - name: Create external zone redundant App Service Environment v3 with default values.
+            --subnet MyAseSubnet --ignore-subnet-size-validation
+    - name: Create external zone redundant App Service Environment with default values.
       text: |
-          az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
-            --vnet-name MyASEv3VirtualNetwork --subnet MyASEv3Subnet --kind asev3 \\
+          az appservice ase create -n MyASEName -g ASEResourceGroup \\
+            --vnet-name MyASEVirtualNetwork --subnet MyASESubnet \\
             --zone-redundant --virtual-ip-type External
 """
 
@@ -2596,46 +2596,42 @@ helps['appservice ase create-inbound-services'] = """
 
 helps['appservice ase upgrade'] = """
     type: command
-    short-summary: Upgrade app service environment v3.
+    short-summary: Upgrade App Service Environment.
     examples:
-    - name: Upgrade app service environment v3.
+    - name: Upgrade App Service Environment.
       text: |
-          az appservice ase upgrade -n MyAseV3Name -g MyResourceGroup
+          az appservice ase upgrade -n MyAseName -g MyResourceGroup
 """
 
 helps['appservice ase send-test-notification'] = """
     type: command
-    short-summary: Send a test upgrade notification in app service environment v3.
+    short-summary: Send a test upgrade notification in App Service Environment.
     examples:
-    - name: Send a test upgrade notification in app service environment v3.
+    - name: Send a test upgrade notification in App Service Environment.
       text: |
-          az appservice ase send-test-notification -n MyAseV3Name -g MyResourceGroup
+          az appservice ase send-test-notification -n MyAseName -g MyResourceGroup
 """
 
 helps['appservice ase update'] = """
     type: command
-    short-summary: Update app service environment.
+    short-summary: Update App Service Environment.
     examples:
-    - name: Update app service environment v2 with medium front-ends and scale factor of 10.
+    - name: Update App Service Environment to allow new private endpoint connections.
       text: |
-          az appservice ase update -n MyAseV2Name -g MyResourceGroup --front-end-sku I2 \\
-            --front-end-scale-factor 10
-    - name: Update app service environment v3 to allow new private endpoint connections.
+          az appservice ase update -n MyAseName -g MyResourceGroup --allow-new-private-endpoint-connections
+    - name: Update App Service Environment to allow incoming ftp connections.
       text: |
-          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-new-private-endpoint-connections
-    - name: Update app service environment v3 to allow incoming ftp connections.
+          az appservice ase update -n MyAseName -g MyResourceGroup --allow-incoming-ftp-connections
+    - name: Update App Service Environment to allow remote debugging.
       text: |
-          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-incoming-ftp-connections
-    - name: Update app service environment v3 to allow remote debugging.
-      text: |
-          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-remote-debugging
+          az appservice ase update -n MyAseName -g MyResourceGroup --allow-remote-debugging
 """
 
 helps['appservice ase delete'] = """
     type: command
-    short-summary: Delete app service environment.
+    short-summary: Delete App Service Environment.
     examples:
-    - name: Delete app service environment.
+    - name: Delete App Service Environment.
       text: az appservice ase delete -n MyAseName
 """
 

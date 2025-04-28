@@ -19,7 +19,7 @@ from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WI
                          DEPLOYMENT_STORAGE_AUTH_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
+                          validate_ase_create, validate_ip_address,
                           validate_service_tag, validate_public_cloud)
 
 AUTH_TYPES = {
@@ -35,8 +35,7 @@ FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
 ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
-ASE_KINDS = ['ASEv2', 'ASEv3']
-ASE_OS_PREFERENCE_TYPES = ['Windows', 'Linux']
+ASE_KINDS = ['ASEv3']
 PUBLIC_NETWORK_ACCESS_MODES = ['Enabled', 'Disabled']
 BASIC_AUTH_TYPES = ['Enabled', 'Disabled']
 DAPR_LOG_LEVELS = ['debug', 'error', 'info', 'warn']
@@ -50,9 +49,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), P0V4(Premium V4 Extra Small), P1V4(Premium V4 Small), P2V4(Premium V4 Medium), P3V4(Premium V4 Large), P1MV4(Premium Memory Optimized V4 Small), P2MV4(Premium Memory Optimized V4 Medium), P3MV4(Premium Memory Optimized V4 Large), P4MV4(Premium Memory Optimized V4 Extra Large), P5MV4(Premium Memory Optimized V4 Extra Extra Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1V2 (Isolated V2 I1V2), I2V2 (Isolated V2 I2V2), I3V2 (Isolated V2 I3V2), I4V2 (Isolated V2 I4V2), I5V2 (Isolated V2 I5V2), I6V2 (Isolated V2 I6V2), I1MV2 (Isolated Memory Optimized V2 I1MV2), I2MV2 (Isolated Memory Optimized V2 I2MV2), I3MV2 (Isolated Memory Optimized V2 I3MV2), I4MV2 (Isolated Memory Optimized V2 I4MV2), I5MV2 (Isolated Memory Optimized V2 I5MV2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), P0V4(Premium V4 Extra Small), P1V4(Premium V4 Small), P2V4(Premium V4 Medium), P3V4(Premium V4 Large), P1MV4(Premium Memory Optimized V4 Small), P2MV4(Premium Memory Optimized V4 Medium), P3MV4(Premium Memory Optimized V4 Large), P4MV4(Premium Memory Optimized V4 Extra Large), P5MV4(Premium Memory Optimized V4 Extra Extra Large), I1V2 (Isolated V2 I1V2), I2V2 (Isolated V2 I2V2), I3V2 (Isolated V2 I3V2), I4V2 (Isolated V2 I4V2), I5V2 (Isolated V2 I5V2), I6V2 (Isolated V2 I6V2), I1MV2 (Isolated Memory Optimized V2 I1MV2), I2MV2 (Isolated Memory Optimized V2 I2MV2), I3MV2 (Isolated Memory Optimized V2 I3MV2), I4MV2 (Isolated Memory Optimized V2 I4MV2), I5MV2 (Isolated Memory Optimized V2 I5MV2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'P0V4', 'P1V4', 'P2V4', 'P3V4', 'P1MV4', 'P2MV4', 'P3MV4', 'P4MV4', 'P5MV4', 'I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2', 'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2', 'WS1', 'WS2', 'WS3']))
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'P0V4', 'P1V4', 'P2V4', 'P3V4', 'P1MV4', 'P2MV4', 'P3MV4', 'P4MV4', 'P5MV4', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2', 'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2', 'WS1', 'WS2', 'WS3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                                            id_part='name',
@@ -72,9 +71,6 @@ def load_arguments(self, _):
         'functionapp': functionapp_name_arg_type,
         'logicapp': logicapp_name_arg_type
     }
-    isolated_sku_arg_type = CLIArgumentType(
-        help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
-        arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
     static_web_app_sku_arg_type = CLIArgumentType(
         help='The pricing tiers for Static Web App',
@@ -1181,22 +1177,8 @@ subscription than the app service environment, please use the resource ID for --
                    help="Specify if app service environment should be accessible from internet")
         c.argument('ignore_subnet_size_validation', arg_type=get_three_state_flag(),
                    help='Do not check if subnet is sized according to recommendations.')
-        c.argument('ignore_route_table', arg_type=get_three_state_flag(),
-                   help='Configure route table manually. Applies to ASEv2 only.')
-        c.argument('ignore_network_security_group', arg_type=get_three_state_flag(),
-                   help='Configure network security group manually. Applies to ASEv2 only.')
-        c.argument('force_route_table', arg_type=get_three_state_flag(),
-                   help='Override route table for subnet. Applies to ASEv2 only.')
-        c.argument('force_network_security_group', arg_type=get_three_state_flag(),
-                   help='Override network security group for subnet. Applies to ASEv2 only.')
-        c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
-                   help='Scale of front ends to app service plan instance ratio. Applies to ASEv2 only.', default=15)
-        c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
-                   help='Size of front end servers. Applies to ASEv2 only.')
-        c.argument('os_preference', arg_type=get_enum_type(ASE_OS_PREFERENCE_TYPES),
-                   help='Determine if app service environment should start with Linux workers. Applies to ASEv2 only.')
         c.argument('zone_redundant', arg_type=get_three_state_flag(),
-                   help='Configure App Service Environment as Zone Redundant. Applies to ASEv3 only.')
+                   help='Configure App Service Environment as Zone Redundant.')
     with self.argument_context('appservice ase delete') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase upgrade') as c:
@@ -1206,10 +1188,6 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('appservice ase update') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
-        c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
-                   help='(ASEv2 only) Scale of front ends to app service plan instance ratio between 5 and 15.')
-        c.argument('front_end_sku', arg_type=isolated_sku_arg_type,
-                   help='(ASEv2 only) Size of front end servers.')
         c.argument('allow_new_private_endpoint_connections', arg_type=get_three_state_flag(),
                    options_list=['--allow-new-private-endpoint-connections', '-p'],
                    help='(ASEv3 only) Configure Apps in App Service Environment to allow new private endpoint connections.')
