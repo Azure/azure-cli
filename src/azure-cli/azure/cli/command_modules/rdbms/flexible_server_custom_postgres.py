@@ -804,29 +804,6 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
-def flexible_replica_stop(cmd, client, resource_group_name, server_name):
-    validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
-
-    try:
-        server_object = client.get(resource_group_name, server_name)
-    except Exception as e:
-        raise ResourceNotFoundError(e)
-
-    if server_object.replica.role is not None and "replica" not in server_object.replica.role.lower():
-        raise CLIError('Server {} is not a replica server.'.format(server_name))
-
-    params = postgresql_flexibleservers.models.ServerForUpdate(
-        replica=postgresql_flexibleservers.models.Replica(
-            role='None',
-            promote_mode='standalone',
-            promote_option='planned'
-        )
-    )
-
-    return client.begin_update(resource_group_name, server_name, params)
-
-
 def flexible_replica_promote(cmd, client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
@@ -1196,7 +1173,10 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
         raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
     else:
         start_ip, end_ip = prepare_public_network(public_access, yes=yes)
-        network.public_network_access = public_access if str(public_access).lower() in ['disabled', 'enabled'] else 'Enabled'
+        if public_access is not None and str(public_access).lower() in ['disabled', 'none']:
+            network.public_network_access = 'Disabled'
+        else:
+            network.public_network_access = 'Enabled'
 
     return network, start_ip, end_ip
 

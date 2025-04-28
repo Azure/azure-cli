@@ -596,7 +596,19 @@ def get_clouds(cli_ctx):
             # If profile isn't set, use latest
             setattr(c, 'profile', 'latest')
         if c.profile not in API_PROFILES:
-            raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
+            if c.profile in (
+                "2017-03-09-profile",
+                "2018-03-01-hybrid",
+                "2019-03-01-hybrid",
+                "2020-09-01-hybrid",
+            ):
+                logger.error(
+                    "The azure stack profile '%s' has been deprecated and removed, using the 'latest' profile instead.\n"
+                    "To continue using Azure Stack, please install the Azure CLI `2.66.*` (LTS) version. For more details, refer to: https://learn.microsoft.com/en-us/cli/azure/whats-new-overview#important-notice-for-azure-stack-hub-customers", c.profile
+                )
+                c.profile = 'latest'
+            else:
+                raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
         if not c.endpoints.has_endpoint_set('management') and \
                 c.endpoints.has_endpoint_set('resource_manager'):
             # If management endpoint not set, use resource manager endpoint
