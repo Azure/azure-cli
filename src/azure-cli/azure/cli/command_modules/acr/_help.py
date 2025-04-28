@@ -52,6 +52,9 @@ examples:
   - name: Gets health state of the environment, without stopping on first error.
     text: >
         az acr check-health --ignore-errors
+  - name: Gets health state with target registry 'myregistry', and checks allowed permissions to the specific repository 'myrepo'.
+    text: >
+        az acr check-health -n myregistry --repository myrepo
 """
 
 helps['acr check-name'] = """
@@ -173,6 +176,9 @@ examples:
   - name: Create a managed container registry with the Standard SKU.
     text: >
         az acr create -n myregistry -g MyResourceGroup --sku Standard
+  - name: Create a registry with ABAC-based Repository Permission enabled.
+    text: >
+        az acr create -n myregistry -g MyResourceGroup --sku Standard --role-assignment-mode rbac-abac
 """
 
 helps['acr credential'] = """
@@ -880,6 +886,9 @@ examples:
   - name: Get the details of an Azure Container Registry
     text: az acr show --name myregistry --resource-group MyResourceGroup
     crafted: true
+  - name: Check status of ABAC-based Repository Permission on a registry.
+    text: >
+        az acr show --name myregistry --resource-group MyResourceGroup --query roleAssignmentMode
 """
 
 helps['acr show-usage'] = """
@@ -1493,6 +1502,9 @@ examples:
   - name: Enable the administrator user account for an Azure Container Registry.
     text: >
         az acr update -n myregistry --admin-enabled true
+  - name: Turn on ABAC-based Repository Permission on an existing registry.
+    text: >
+        az acr update -n myregistry --role-assignment-mode rbac-abac
 """
 
 helps['acr webhook'] = """

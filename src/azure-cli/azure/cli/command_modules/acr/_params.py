@@ -22,6 +22,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from .policy import RetentionType
 
 from ._constants import (
+    AbacRoleAssignmentMode,
     REGISTRY_RESOURCE_TYPE,
     WEBHOOK_RESOURCE_TYPE,
     REPLICATION_RESOURCE_TYPE,
@@ -113,6 +114,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
             c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry.{suffix}".format(suffix=default_allow_suffix))
             c.argument('allow_trusted_services', get_three_state_flag(), is_preview=True, help="Allow trusted Azure Services to access network restricted registries. For more information, please visit https://aka.ms/acr/trusted-services.{suffix}".format(suffix=default_allow_suffix))
+
+    for scope in ['acr create', 'acr update']:
+        with self.argument_context(scope, arg_group="Permissions and Role Assignment") as c:
+            c.argument("role_assignment_mode", is_preview=True, arg_type=get_enum_type(AbacRoleAssignmentMode), help="Role assignment mode of the registry. For more information on this feature, see https://aka.ms/acr/auth/abac. The Default is rbac.")
 
     with self.argument_context('acr create', arg_group="Customer managed key") as c:
         c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
@@ -449,6 +454,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('ignore_errors', options_list=['--ignore-errors'], help='Provide all health checks, even if errors are found', action='store_true', required=False)
         c.argument('vnet', options_list=['--vnet'],
                    help="Virtual network ID so to run this command inside a VNET to verify the DNS routing to private endpoints", required=False)
+        c.argument('repository', is_preview=True, help="The name of the repository")
 
     with self.argument_context('acr scope-map') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -557,6 +563,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
         c.argument('sync_message_ttl', help='Determine how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
         c.argument('notifications', options_list=['--notifications'], nargs='+', help='List of artifact pattern for which notifications need to be generated. Use the format "--notifications [PATTERN1 PATTERN2 ...]".')
+        c.argument('garbage_collection_enabled', options_list=['--gc-enabled'],
+                   help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag(), required=False, default="true")
+        c.argument('garbage_collection_schedule', options_list=['--gc-schedule'],
+                   help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.', required=False, default="0 0 * * *")
 
     with self.argument_context('acr connected-registry update') as c:
         c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.')
@@ -571,7 +581,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='List of artifact pattern to be added to notifications list. Use the format "--add-notifications [PATTERN1 PATTERN2 ...]".')
         c.argument('remove_notifications', options_list=['--remove-notifications'], nargs='*',
                    help='List of artifact pattern to be removed from notifications list. Use the format "--remove-notifications [PATTERN1 PATTERN2 ...]".')
-
+        c.argument('garbage_collection_enabled', options_list=['--gc-enabled'],
+                   help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag())
+        c.argument('garbage_collection_schedule', options_list=['--gc-schedule'], help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.')
     with self.argument_context('acr connected-registry permissions') as c:
         c.argument('add_repos', options_list=['--add'], nargs='*',
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)

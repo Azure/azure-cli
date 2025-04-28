@@ -330,7 +330,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         create_default_db_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--create-default-database', '-c'],
-            help='Enable or disable the creation of default database flexibleserverdb. Default value is Enabled.'
+            help='Enable or disable the creation of default database flexibleserverdb. Default value is Disabled.'
         )
 
         cluster_option_arg_type = CLIArgumentType(
@@ -597,7 +597,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('tier', default='GeneralPurpose', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_D2s_v3', arg_type=sku_name_arg_type)
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
-                c.argument('version', default='16', arg_type=version_arg_type)
+                c.argument('version', default='17', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('microsoft_entra_auth', default='Disabled', arg_type=microsoft_entra_auth_arg_type)
@@ -611,7 +611,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', default=None, arg_type=iops_v2_arg_type)
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
-                c.argument('create_default_db', default='Enabled', arg_type=create_default_db_arg_type)
+                c.argument('create_default_db', default='Disabled', arg_type=create_default_db_arg_type)
                 c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
                 c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
             elif command_group == 'mysql':
