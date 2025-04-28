@@ -9533,7 +9533,8 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
     def test_vm_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'vm1': self.create_random_name('vm', 10),
-            'vm2': self.create_random_name('vm', 10)
+            'vm2': self.create_random_name('vm', 10),
+            'vm3': self.create_random_name('vm', 10),
         })
         self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --enable-reboot True --enable-redeploy True --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
@@ -9564,6 +9565,18 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
         ])
+        self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n {vm3}', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
+            self.check('scheduledEventsPolicy.userInitiatedReboot', None)
+        ])
+        self.cmd('vm update -g {rg} -n {vm3} --enable-reboot True', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable',True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+        ])
+
 
 class VMPriorityEvictionBillingTest(ScenarioTest):
 

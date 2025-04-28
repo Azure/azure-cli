@@ -1815,15 +1815,19 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                 enable_user_reboot_scheduled_events if enable_user_reboot_scheduled_events is not None else False
         else:
             if additional_scheduled_events is not None:
-                vm.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
-                    event_grid_and_resource_graph.enable = additional_scheduled_events
+                vm.scheduled_events_policy.scheduled_events_additional_publishing_targets = {
+                    "eventGridAndResourceGraph": {
+                        "enable": additional_scheduled_events
+                    }
+                }
             if enable_user_redeploy_scheduled_events is not None:
-                vm.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
-                    enable_user_redeploy_scheduled_events
+                vm.scheduled_events_policy.user_initiated_redeploy = {
+                    "automaticallyApprove": enable_user_redeploy_scheduled_events
+                }
             if enable_user_reboot_scheduled_events is not None:
-                vm.scheduled_events_policy.user_initiated_reboot.automatically_approve = \
-                    enable_user_reboot_scheduled_events
-
+                vm.scheduled_events_policy.user_initiated_reboot = {
+                    "automaticallyApprove": enable_user_reboot_scheduled_events
+                }
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
