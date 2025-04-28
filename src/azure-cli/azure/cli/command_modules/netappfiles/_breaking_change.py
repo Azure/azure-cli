@@ -13,6 +13,7 @@ register_argument_deprecate('netappfiles volume update', '--ldap-enabled', targe
 register_argument_deprecate('netappfiles volume update', '--network-features', target_version='2.73.0')
 register_argument_deprecate('netappfiles volume update', '--security-style', target_version='2.73.0')
 register_argument_deprecate('netappfiles volume update', '--volume-type', target_version='2.73.0')
+register_argument_deprecate('netappfiles volume update', '--endpoint-type', target_version='2.73.0')
 
 # register_required_flag_breaking_change('bar foo', '--name')
 # register_default_value_breaking_change('bar foo baz', '--foobar', 'A', 'B', target_version='May 2025')
