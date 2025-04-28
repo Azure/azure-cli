@@ -23,9 +23,6 @@ from azure.cli.core.azclierror import (
     UnclassifiedUserFault,
 )
 from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestError, ServiceResponseError
-from knack.log import get_logger
-
-logger = get_logger(__name__)
 
 # type variables
 ManagedCluster = TypeVar("ManagedCluster")
@@ -106,6 +103,8 @@ def check_is_private_cluster(mc: ManagedCluster) -> bool:
 def check_is_apiserver_vnet_integration_cluster(mc: ManagedCluster) -> bool:
     """Check `mc` object to determine whether apiserver vnet integration is enabled.
 
+    Note: enableVnetIntegration is still in preview api so we use additional_properties here
+    
     :return: bool
     """
     if mc and mc.api_server_access_profile:
