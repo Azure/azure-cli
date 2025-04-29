@@ -33,7 +33,7 @@ def load_arguments(self, _):
 
     ExemptionCategory = self.get_models('ExemptionCategory', resource_type=ResourceType.MGMT_RESOURCE_POLICY,
                                         operation_group='policy_exemptions')
-    DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
+    DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType', operation_group='deployments')
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -617,7 +617,7 @@ def load_arguments(self, _):
             c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
             c.argument('create_ui_definition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
             c.argument('main_template', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
-            c.argument('deployment_mode', arg_type=get_enum_type(self.get_models('DeploymentMode')), help='The managed application deployment mode.')
+            c.argument('deployment_mode', arg_type=get_enum_type(self.get_models('DeploymentMode', operation_group='deployments')), help='The managed application deployment mode.', operation_group='deployments')
 
     with self.argument_context('account') as c:
         c.argument('subscription', options_list=['--subscription', '-s'], help='Name or ID of subscription.', completer=get_subscription_id_list)

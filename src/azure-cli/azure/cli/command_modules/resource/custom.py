@@ -378,7 +378,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
                                          mode=None, rollback_on_error=None, validate_only=False, no_wait=False,
                                          aux_subscriptions=None, aux_tenants=None, no_prompt=False):
     DeploymentProperties, TemplateLink, OnErrorDeployment = cmd.get_models('DeploymentProperties', 'TemplateLink',
-                                                                           'OnErrorDeployment')
+                                                                           'OnErrorDeployment', operation_group='deployments')
     template_link = None
     template_obj = None
     on_error_deployment = None
@@ -425,7 +425,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         )
 
     from azure.core.exceptions import HttpResponseError
-    Deployment = cmd.get_models('Deployment')
+    Deployment = cmd.get_models('Deployment', operation_group='deployments')
     deployment = Deployment(properties=properties)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
@@ -509,7 +509,7 @@ def deploy_arm_template_at_subscription_scope(cmd,
         if what_if:
             return None
 
-        ChangeType = cmd.get_models('ChangeType')
+        ChangeType = cmd.get_models('ChangeType', operation_group='deployments')
         has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
@@ -551,7 +551,7 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     from azure.core.exceptions import HttpResponseError
-    Deployment = cmd.get_models('Deployment')
+    Deployment = cmd.get_models('Deployment', operation_group='deployments')
     deployment = Deployment(properties=deployment_properties, location=deployment_location)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
@@ -594,7 +594,7 @@ def deploy_arm_template_at_resource_group(cmd,
         if what_if:
             return None
 
-        ChangeType = cmd.get_models('ChangeType')
+        ChangeType = cmd.get_models('ChangeType', operation_group='deployments')
         has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
@@ -642,7 +642,7 @@ def _deploy_arm_template_at_resource_group(cmd,
                                                     aux_tenants=aux_tenants, plug_pipeline=deployment_properties.template_link is None)
 
     from azure.core.exceptions import HttpResponseError
-    Deployment = cmd.get_models('Deployment')
+    Deployment = cmd.get_models('Deployment', operation_group='deployments')
     deployment = Deployment(properties=deployment_properties)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
@@ -685,7 +685,7 @@ def deploy_arm_template_at_management_group(cmd,
         if what_if:
             return None
 
-        ChangeType = cmd.get_models('ChangeType')
+        ChangeType = cmd.get_models('ChangeType', operation_group='deployments')
         has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
@@ -733,7 +733,7 @@ def _deploy_arm_template_at_management_group(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=deployment_properties.template_link is None)
 
     from azure.core.exceptions import HttpResponseError
-    ScopedDeployment = cmd.get_models('ScopedDeployment')
+    ScopedDeployment = cmd.get_models('ScopedDeployment', operation_group='deployments')
     deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
@@ -777,7 +777,7 @@ def deploy_arm_template_at_tenant_scope(cmd,
         if what_if:
             return None
 
-        ChangeType = cmd.get_models('ChangeType')
+        ChangeType = cmd.get_models('ChangeType', operation_group='deployments')
         has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
@@ -817,7 +817,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=deployment_properties.template_link is None)
 
     from azure.core.exceptions import HttpResponseError
-    ScopedDeployment = cmd.get_models('ScopedDeployment')
+    ScopedDeployment = cmd.get_models('ScopedDeployment', operation_group='deployments')
     deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
@@ -865,7 +865,7 @@ def _what_if_deploy_arm_template_at_resource_group_core(cmd, resource_group_name
                                                                 parameters, mode, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants,
                                                     plug_pipeline=what_if_properties.template_link is None)
-    DeploymentWhatIf = cmd.get_models('DeploymentWhatIf')
+    DeploymentWhatIf = cmd.get_models('DeploymentWhatIf', operation_group='deployments')
     deployment_what_if = DeploymentWhatIf(properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if(resource_group_name, deployment_name,
                                                parameters=deployment_what_if)
@@ -895,7 +895,7 @@ def _what_if_deploy_arm_template_at_subscription_scope_core(cmd,
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'subscription', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=what_if_properties.template_link is None)
-    ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
+    ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf', operation_group='deployments')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_subscription_scope(deployment_name,
                                                                      parameters=scoped_deployment_what_if)
@@ -925,7 +925,7 @@ def _what_if_deploy_arm_template_at_management_group_core(cmd, management_group_
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'managementGroup', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec=template_spec, query_string=query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=what_if_properties.template_link is None)
-    ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
+    ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf', operation_group='deployments')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_management_group_scope(management_group_id, deployment_name,
                                                                          parameters=scoped_deployment_what_if)
@@ -955,7 +955,7 @@ def _what_if_deploy_arm_template_at_tenant_scope_core(cmd,
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'tenant', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=what_if_properties.template_link is None)
-    ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
+    ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf', operation_group='deployments')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_tenant_scope(deployment_name, parameters=scoped_deployment_what_if)
     what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
@@ -1110,7 +1110,7 @@ def _load_template_spec_template(cmd, template_spec):
 
 def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_file=None, template_uri=None, parameters=None,
                                               mode=None, rollback_on_error=None, no_prompt=False, template_spec=None, query_string=None):
-    DeploymentProperties, TemplateLink, OnErrorDeployment = cmd.get_models('DeploymentProperties', 'TemplateLink', 'OnErrorDeployment')
+    DeploymentProperties, TemplateLink, OnErrorDeployment = cmd.get_models('DeploymentProperties', 'TemplateLink', 'OnErrorDeployment', operation_group='deployments')
 
     if template_file:
         pass
@@ -1319,7 +1319,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
     t_spec, t_uri = None, None
     template_obj = None
 
-    DeploymentStacksTemplateLink = cmd.get_models('DeploymentStacksTemplateLink')
+    DeploymentStacksTemplateLink = cmd.get_models('DeploymentStacksTemplateLink', operation_group='deployments')
 
     if template_file:
         pass
@@ -1646,7 +1646,7 @@ def create_resource_group(cmd, rg_name, location, tags=None, managed_by=None):
     """
     rcf = _resource_client_factory(cmd.cli_ctx)
 
-    ResourceGroup = cmd.get_models('ResourceGroup')
+    ResourceGroup = cmd.get_models('ResourceGroup', operation_group='resource_groups')
     parameters = ResourceGroup(
         location=location,
         tags=tags
@@ -1700,7 +1700,7 @@ def export_group_as_template(
 
     options = ','.join(export_options) if export_options else None
 
-    ExportTemplateRequest = cmd.get_models('ExportTemplateRequest')
+    ExportTemplateRequest = cmd.get_models('ExportTemplateRequest', operation_group='deployments')
     export_template_request = ExportTemplateRequest(resources=resources, options=options)
 
     # Exporting a resource group as a template is async since API version 2019-08-01.
@@ -3101,7 +3101,7 @@ def list_resources(cmd, resource_group_name=None,
 def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
     properties = None
     if cmd.supported_api_version(min_api='2021-04-01') and consent_to_permissions:
-        ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest', 'ProviderConsentDefinition')
+        ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest', 'ProviderConsentDefinition', operation_group='providers')
         properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
     _update_provider(cmd, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
@@ -3153,7 +3153,7 @@ def move_resource(cmd, ids, destination_group, destination_subscription_id=None)
     target = _build_resource_id(subscription=(destination_subscription_id or default_subscription_id),
                                 resource_group=destination_group)
 
-    ResourcesMoveInfo = cmd.get_models('ResourcesMoveInfo')
+    ResourcesMoveInfo = cmd.get_models('ResourcesMoveInfo', operation_group='resources')
     resources_move_info = ResourcesMoveInfo(resources=ids, target_resource_group=target)
     return rcf.resources.begin_move_resources(resources[0]['resource_group'], parameters=resources_move_info)
 
@@ -4301,9 +4301,9 @@ def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=Non
     if resource_id is not None:
         if not tags:
             raise IncorrectUsageError("Tags could not be empty.")
-        Tags = cmd.get_models('Tags')
+        Tags = cmd.get_models('Tags', operation_group='tags')
         tag_obj = Tags(tags=tags)
-        TagsResource = cmd.get_models('TagsResource')
+        TagsResource = cmd.get_models('TagsResource', operation_group='tags')
         tags_resource = TagsResource(properties=tag_obj)
         return rcf.tags.begin_create_or_update_at_scope(scope=resource_id, parameters=tags_resource)
 
@@ -4322,9 +4322,9 @@ def update_tag_at_scope(cmd, resource_id, tags, operation):
     rcf = _resource_client_factory(cmd.cli_ctx)
     if not tags:
         raise IncorrectUsageError("Tags could not be empty.")
-    Tags = cmd.get_models('Tags')
+    Tags = cmd.get_models('Tags', operation_group='tags')
     tag_obj = Tags(tags=tags)
-    TagsPatchResource = cmd.get_models('TagsPatchResource')
+    TagsPatchResource = cmd.get_models('TagsPatchResource', operation_group='tags')
     tags_resource = TagsPatchResource(properties=tag_obj, operation=operation)
     return rcf.tags.begin_update_at_scope(scope=resource_id, parameters=tags_resource)
 # endregion

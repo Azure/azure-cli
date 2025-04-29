@@ -1087,9 +1087,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     deployment_name = 'vm_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                      aux_subscriptions=aux_subscriptions).deployments
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     deployment = Deployment(properties=properties)
 
     if validate:
@@ -1737,9 +1737,9 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     # deploy ARM template
     deployment_name = 'av_set_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     deployment = Deployment(properties=properties)
 
     if validate:
@@ -3464,7 +3464,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                      aux_subscriptions=aux_subscriptions).deployments
 
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
 
     if validate:
@@ -3472,7 +3472,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         log_pprint_template(template)
         log_pprint_template(parameters)
 
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     deployment = Deployment(properties=properties)
     if validate:
         if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):

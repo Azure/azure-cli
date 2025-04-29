@@ -20,6 +20,7 @@ cmd = AzCliCommand(loader, "test", None, resource_type=ResourceType.MGMT_RESOURC
 
 WhatIfOperationResult, WhatIfChange, WhatIfPropertyChange, ChangeType, PropertyChangeType = cmd.get_models(
     "WhatIfOperationResult", "WhatIfChange", "WhatIfPropertyChange", "ChangeType", "PropertyChangeType",
+    operation_group='deployments'
 )
 
 

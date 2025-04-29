@@ -1281,11 +1281,11 @@ def _deploy_arm_template_core(cmd,
                               mode='incremental',
                               validate_only=False,
                               no_wait=False):
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
     client = resource_client_factory(cmd.cli_ctx)
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     deployment = Deployment(properties=properties)
 
     if validate_only:

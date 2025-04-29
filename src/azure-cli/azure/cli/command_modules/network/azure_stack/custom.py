@@ -790,7 +790,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     from azure.cli.command_modules.network.azure_stack._template_builder import (
         build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
 
     if public_ip_address is None:
         logger.warning(
@@ -854,7 +854,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     deployment_name = 'lb_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     deployment = Deployment(properties=properties)
 
     if validate:
@@ -909,7 +909,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network.azure_stack._template_builder import build_vpn_connection_resource
 
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     tags = tags or {}
 
     # Build up the ARM template
@@ -933,7 +933,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='deployments')
     deployment = Deployment(properties=properties)
 
     if validate:

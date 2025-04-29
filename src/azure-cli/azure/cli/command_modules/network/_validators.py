@@ -48,7 +48,7 @@ def get_vnet_validator(dest):
     from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     def _validate_vnet_name_or_id(cmd, namespace):
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group='resources')
         subscription_id = get_subscription_id(cmd.cli_ctx)
 
         resource_group = namespace.resource_group_name

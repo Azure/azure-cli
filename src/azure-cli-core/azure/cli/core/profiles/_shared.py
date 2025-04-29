@@ -177,7 +177,10 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: SDKProfile('2021-06-01', {
             'policy_exemptions': '2020-07-01-preview'
         }),
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2022-09-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: SDKProfile('2022-09-01', {
+            'deployments': '2024-11-01',
+            'deployment_operations': '2024-11-01',
+        }),
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2022-12-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',

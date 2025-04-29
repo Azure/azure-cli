@@ -283,7 +283,7 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         )
 
     GenericResource = cmd.get_models(
-        "GenericResource", resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+        "GenericResource", resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, operation_group="resources"
     )
     generic_resource = GenericResource(
         location=workspace_region, properties={"sku": {"name": "standalone"}}

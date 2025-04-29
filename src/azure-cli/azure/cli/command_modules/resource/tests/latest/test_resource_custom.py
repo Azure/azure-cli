@@ -46,7 +46,8 @@ cmd.command_kwargs = {'resource_type': ResourceType.MGMT_RESOURCE_RESOURCES}
 cmd.cli_ctx = cli_ctx
 
 WhatIfOperationResult, WhatIfChange, ChangeType = cmd.get_models(
-    'WhatIfOperationResult', 'WhatIfChange', 'ChangeType'
+    'WhatIfOperationResult', 'WhatIfChange', 'ChangeType',
+    operation_group='deployments'
 )
 
 def _simulate_no_tty():
