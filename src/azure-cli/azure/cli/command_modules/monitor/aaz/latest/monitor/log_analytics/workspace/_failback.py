@@ -12,25 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics workspace delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "monitor log-analytics workspace failback",
 )
-class Delete(AAZCommand):
-    """Deletes a workspace resource.
+class Failback(AAZCommand):
+    """Deactivates failover for the specified workspace.The failback operation is asynchronous and can take up to 30 minutes to complete.The status of the operation can be checked using the operationId returned in the response.
 
-    The name is kept for 14 days and cannot be used for another workspace. To remove the workspace completely and release the name, use the --force flag.
-
-    :example: Soft delete a workspace instance.
-        az monitor log-analytics workspace delete --resource-group MyResourceGroup --workspace-name MyWorkspace
-
-    :example: Completely delete a workspace instance.
-        az monitor log-analytics workspace delete --force --resource-group MyResourceGroup --workspace-name MyWorkspace
+    :example: Deactive failover for specified workspace
+        az monitor log-analytics workspace failback --resource-group oiautorest6685 --workspace-name oiautorest6685
     """
 
     _aaz_info = {
         "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2025-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}/failback", "2025-02-01"],
         ]
     }
 
@@ -55,8 +49,8 @@ class Delete(AAZCommand):
             required=True,
         )
         _args_schema.workspace_name = AAZStrArg(
-            options=["-n", "--name", "--workspace-name"],
-            help="Name of the Log Analytics Workspace.",
+            options=["--name", "--workspace-name"],
+            help="The name of the workspace.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
@@ -65,15 +59,11 @@ class Delete(AAZCommand):
                 min_length=4,
             ),
         )
-        _args_schema.force = AAZBoolArg(
-            options=["-f", "--force"],
-            help="Deletes the workspace without the recovery option. A workspace that was deleted with this flag cannot be recovered.",
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.WorkspacesDelete(ctx=self.ctx)()
+        yield self.WorkspacesFailback(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -84,7 +74,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class WorkspacesDelete(AAZHttpOperation):
+    class WorkspacesFailback(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -108,28 +98,19 @@ class Delete(AAZCommand):
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/failback",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -157,9 +138,6 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "force", self.ctx.args.force,
-                ),
-                **self.serialize_query_param(
                     "api-version", "2025-02-01",
                     required=True,
                 ),
@@ -169,12 +147,9 @@ class Delete(AAZCommand):
         def on_200(self, session):
             pass
 
-        def on_204(self, session):
-            pass
+
+class _FailbackHelper:
+    """Helper class for Failback"""
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
-
-
-__all__ = ["Delete"]
+__all__ = ["Failback"]
