@@ -2314,7 +2314,7 @@ class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0]))])
 
-        admins = self.cmd('{} flexible-server ad-admin list -g {} -s {}'
+        admins = self.cmd('{} flexible-server microsoft-entra-admin list -g {} -s {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(0, len(admins))
 

@@ -975,19 +975,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('database_names', options_list=['--database-names', '-d'], nargs='+',
                                help='Space-separated list of the database names to be mirrored. Required if --mirroring is enabled.')
 
-        # ad-admin - Rename and deprecate group
-        with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
-            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-
-        for scope in ['create', 'show', 'delete', 'wait']:
-            with self.argument_context('{} flexible-server ad-admin {}'.format(command_group, scope)) as c:
-                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
-
-        with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
-            c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Microsoft Entra administrator user or group.')
-            c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
-            c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
-
         # microsoft-entra-admin
         with self.argument_context('{} flexible-server microsoft-entra-admin'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
