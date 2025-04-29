@@ -573,7 +573,6 @@ def _get_cloud_name(cli_ctx, cloud_name):
 
 
 def get_clouds(cli_ctx):
-    active_cloud_name = get_active_cloud_name(cli_ctx)
     clouds = []
     config = configparser.ConfigParser()
     # Start off with known clouds and apply config file on top of current config
@@ -584,6 +583,7 @@ def get_clouds(cli_ctx):
     except configparser.MissingSectionHeaderError:
         os.remove(CLOUD_CONFIG_FILE)
         logger.warning("'%s' is in bad format and has been removed.", CLOUD_CONFIG_FILE)
+    active_cloud_name = get_active_cloud_name(cli_ctx)
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):
