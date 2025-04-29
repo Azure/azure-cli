@@ -573,6 +573,7 @@ def _get_cloud_name(cli_ctx, cloud_name):
 
 
 def get_clouds(cli_ctx):
+    active_cloud_name = get_active_cloud_name(cli_ctx)
     clouds = []
     config = configparser.ConfigParser()
     # Start off with known clouds and apply config file on top of current config
@@ -602,11 +603,13 @@ def get_clouds(cli_ctx):
                 "2019-03-01-hybrid",
                 "2020-09-01-hybrid",
             ):
-                logger.error(
-                    "The azure stack profile '%s' has been deprecated and removed, using the 'latest' profile instead.\n"
-                    "To continue using Azure Stack, please install the Azure CLI `2.66.*` (LTS) version. For more details, refer to: https://learn.microsoft.com/en-us/cli/azure/whats-new-overview#important-notice-for-azure-stack-hub-customers", c.profile
-                )
-                c.profile = 'latest'
+                if c.name == active_cloud_name:
+                    # only apply to the active cloud
+                    logger.error(
+                        "The azure stack profile '%s' has been deprecated and removed, using the 'latest' profile instead.\n"
+                        "To continue using Azure Stack, please install the Azure CLI `2.66.*` (LTS) version. For more details, refer to: https://learn.microsoft.com/en-us/cli/azure/whats-new-overview#important-notice-for-azure-stack-hub-customers", c.profile
+                    )
+                    c.profile = 'latest'
             else:
                 raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
         if not c.endpoints.has_endpoint_set('management') and \
@@ -614,7 +617,6 @@ def get_clouds(cli_ctx):
             # If management endpoint not set, use resource manager endpoint
             c.endpoints.management = c.endpoints.resource_manager
         clouds.append(c)
-    active_cloud_name = get_active_cloud_name(cli_ctx)
     for c in clouds:
         if c.name == active_cloud_name:
             c.is_active = True
