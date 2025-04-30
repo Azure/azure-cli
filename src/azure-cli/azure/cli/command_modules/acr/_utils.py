@@ -331,7 +331,7 @@ def get_source_and_custom_registry_credentials(cmd,
             raise CLIError('Error: Invalid value for --source-acr-auth-id.')
 
     source_registry_credentials = None
-    if auth_mode or source_acr_auth_id:
+    if auth_mode or source_registry_identity:
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode, identity=source_registry_identity)
 
