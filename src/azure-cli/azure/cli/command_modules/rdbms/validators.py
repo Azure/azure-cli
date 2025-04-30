@@ -990,6 +990,7 @@ def validate_backup_name(backup_name):
     if len(backup_name) > 128:
         raise CLIError('Backup name cannot exceed 128 characters.')
 
+
 def database_name_validator(ns):
     if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]{0,30}$', ns.database_name):
         raise ValidationError("Database name must begin with a letter (a-z) or underscore (_). "
