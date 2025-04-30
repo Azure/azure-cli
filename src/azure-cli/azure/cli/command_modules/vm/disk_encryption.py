@@ -9,7 +9,7 @@ from knack.log import get_logger
 
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory, _is_linux_os, _is_linux_os_aaz
+from azure.cli.command_modules.vm.custom import _compute_client_factory, _is_linux_os, _is_linux_os_aaz
 from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_data_plane_keyvault_key_client
 
 _DATA_VOLUME_TYPE = 'DATA'
@@ -36,20 +36,6 @@ vm_extension_info = {
 
 def _find_existing_ade(vm, use_instance_view=False, ade_ext_info=None):
     if not ade_ext_info:
-        ade_ext_info = vm_extension_info['Linux'] if _is_linux_os(vm) else vm_extension_info['Windows']
-    if use_instance_view:
-        exts = vm.instance_view.extensions or []
-        r = next((e for e in exts if e.type and e.type.lower().startswith(ade_ext_info['publisher'].lower()) and
-                  e.name.lower() == ade_ext_info['name'].lower()), None)
-    else:
-        exts = vm.resources or []
-        r = next((e for e in exts if (e.publisher.lower() == ade_ext_info['publisher'].lower() and
-                                      e.type_properties_type.lower() == ade_ext_info['name'].lower())), None)
-    return r
-
-
-def _find_existing_ade_aaz(vm, use_instance_view=False, ade_ext_info=None):
-    if not ade_ext_info:
         ade_ext_info = vm_extension_info['Linux'] if _is_linux_os_aaz(vm) else vm_extension_info['Windows']
     if use_instance_view:
         exts = vm['instanceView'].get('extensions', [])
@@ -63,22 +49,10 @@ def _find_existing_ade_aaz(vm, use_instance_view=False, ade_ext_info=None):
 
 
 def _detect_ade_status(vm):
-    if vm.storage_profile.os_disk.encryption_settings:
-        return False, True
-    ade_ext_info = vm_extension_info['Linux'] if _is_linux_os(vm) else vm_extension_info['Windows']
-    ade = _find_existing_ade(vm, ade_ext_info=ade_ext_info)
-    if ade is None:
-        return False, False
-    if ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.', maxsplit=1)[0]:
-        return False, True
-
-    return True, False   # we believe impossible to have both old & new ADE
-
-def _detect_ade_status_aaz(vm):
     if vm.get('storageProfile', {}).get('osDisk', {}).get('encryptionSettings', []):
         return False, True
     ade_ext_info = vm_extension_info['Linux'] if _is_linux_os_aaz(vm) else vm_extension_info['Windows']
-    ade = _find_existing_ade_aaz(vm, ade_ext_info=ade_ext_info)
+    ade = _find_existing_ade(vm, ade_ext_info=ade_ext_info)
     if ade is None:
         return False, False
     if ade['typeHandlerVersion'].split('.')[0] == ade_ext_info['legacy_version'].split('.', maxsplit=1)[0]:
@@ -88,37 +62,6 @@ def _detect_ade_status_aaz(vm):
 
 
 def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity):
-    from azure.cli.core.azclierror import ArgumentUsageError
-    if vm.identity is None or vm.identity.user_assigned_identities is None or encryption_identity.lower() not in \
-            (k.lower() for k in vm.identity.user_assigned_identities.keys()):
-        raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
-                                 "user assigned identities associated to the resource")
-
-    SecurityProfile, EncryptionIdentity = cmd.get_models('SecurityProfile', 'EncryptionIdentity')
-    updateVm = False
-
-    if vm.security_profile is None:
-        vm.security_profile = SecurityProfile()
-    if vm.security_profile.encryption_identity is None:
-        vm.security_profile.encryption_identity = EncryptionIdentity()
-    if vm.security_profile.encryption_identity.user_assigned_identity_resource_id is None \
-            or vm.security_profile.encryption_identity.user_assigned_identity_resource_id.lower() \
-            != encryption_identity:
-        vm.security_profile.encryption_identity.user_assigned_identity_resource_id = encryption_identity
-        updateVm = True
-
-    if updateVm:
-        compute_client = _compute_client_factory(cmd.cli_ctx)
-        updateEncryptionIdentity \
-            = compute_client.virtual_machines.begin_create_or_update(resource_group_name, vm_name, vm)
-        LongRunningOperation(cmd.cli_ctx)(updateEncryptionIdentity)
-        result = updateEncryptionIdentity.result()
-        return result is not None and result.provisioning_state == 'Succeeded'
-    logger.info("No changes in identity")
-    return True
-
-
-def updateVmEncryptionSettingAAZ(cmd, vm, resource_group_name, vm_name, encryption_identity):
     from azure.cli.core.azclierror import ArgumentUsageError
     if encryption_identity.lower() not in (k.lower() for k in vm.get('identity', {}).get('userAssignedIdentities', {}).keys()):
         raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
@@ -131,14 +74,17 @@ def updateVmEncryptionSettingAAZ(cmd, vm, resource_group_name, vm_name, encrypti
         updateVm = True
 
     if updateVm:
-        from .operations.vm import VMUpdate
-        class UpdateEncryptionIdentity(VMUpdate):
-            def pre_instance_update(self, instance):
-                instance.properties.security_profile.encryption_identity.user_assigned_identity_resource_id = encryption_identity
-
-        updateEncryptionIdentity = UpdateEncryptionIdentity(cli_ctx=cmd.cli_ctx)(command_args={
+        from .aaz.latest.vm import Patch as VMPatchUpdate
+        security_profile = {
+            'encryption_identity': {
+                'user_assigned_identity_resource_id': encryption_identity
+            }
+        }
+        updateEncryptionIdentity = VMPatchUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': vm['location'],
             'vm_name': vm_name,
             'resource_group': resource_group_name,
+            'security_profile': security_profile
         })
         result = LongRunningOperation(cmd.cli_ctx)(updateEncryptionIdentity)
         return result is not None and result['provisioningState'] == 'Succeeded'
@@ -204,158 +150,6 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     from azure.mgmt.core.tools import parse_resource_id
     from knack.util import CLIError
 
-    # pylint: disable=no-member
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-    is_linux = _is_linux_os(vm)
-    backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
-    vm_encrypted = backup_encryption_settings.enabled if backup_encryption_settings else False
-    _, has_old_ade = _detect_ade_status(vm)
-    use_new_ade = not aad_client_id and not has_old_ade
-    extension = vm_extension_info['Linux' if is_linux else 'Windows']
-
-    if not use_new_ade and not aad_client_id:
-        raise CLIError('Please provide --aad-client-id')
-
-    # 1. First validate arguments
-    if not use_new_ade and not aad_client_cert_thumbprint and not aad_client_secret:
-        raise CLIError('Please provide either --aad-client-cert-thumbprint or --aad-client-secret')
-
-    if volume_type is None:
-        if not is_linux:
-            volume_type = _ALL_VOLUME_TYPE
-        elif vm.storage_profile.data_disks:
-            raise CLIError('VM has data disks, please supply --volume-type')
-        else:
-            volume_type = 'OS'
-
-    # sequence_version should be unique
-    sequence_version = uuid.uuid4()
-
-    # retrieve keyvault details
-    disk_encryption_keyvault_url = get_key_vault_base_url(
-        cmd.cli_ctx, (parse_resource_id(disk_encryption_keyvault))['name'])
-
-    # disk encryption key itself can be further protected, so let us verify
-    if key_encryption_key:
-        key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
-    if encryption_identity and isVersionSuppprtedForEncryptionIdentity(cmd):
-        result = updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity)
-        if result:
-            logger.info("Encryption Identity successfully set in virtual machine")
-        else:
-            raise CLIError("Failed to update encryption Identity to the VM")
-
-    #  to avoid bad server errors, ensure the vault has the right configurations
-    _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vm, force)
-
-    # if key name and not key url, get url.
-    if key_encryption_key and '://' not in key_encryption_key:  # if key name and not key url
-        key_encryption_key = _get_keyvault_key_url(
-            cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
-
-    # 2. we are ready to provision/update the disk encryption extensions
-    # The following logic was mostly ported from xplat-cli
-    public_config = {
-        'KeyVaultURL': disk_encryption_keyvault_url,
-        'VolumeType': volume_type,
-        'EncryptionOperation': 'EnableEncryption' if not encrypt_format_all else 'EnableEncryptionFormatAll',
-        'KeyEncryptionKeyURL': key_encryption_key,
-        'KeyEncryptionAlgorithm': key_encryption_algorithm,
-        'SequenceVersion': sequence_version,
-    }
-    if use_new_ade:
-        public_config.update({
-            "KeyVaultResourceId": disk_encryption_keyvault,
-            "KekVaultResourceId": key_encryption_keyvault if key_encryption_key else '',
-        })
-    else:
-        public_config.update({
-            'AADClientID': aad_client_id,
-            'AADClientCertThumbprint': aad_client_cert_thumbprint,
-        })
-
-    ade_legacy_private_config = {
-        'AADClientSecret': aad_client_secret if is_linux else (aad_client_secret or '')
-    }
-
-    VirtualMachineExtension, DiskEncryptionSettings, KeyVaultSecretReference, KeyVaultKeyReference, SubResource = \
-        cmd.get_models('VirtualMachineExtension', 'DiskEncryptionSettings', 'KeyVaultSecretReference',
-                       'KeyVaultKeyReference', 'SubResource')
-
-    ext = VirtualMachineExtension(
-        location=vm.location,  # pylint: disable=no-member
-        publisher=extension['publisher'],
-        type_properties_type=extension['name'],
-        protected_settings=None if use_new_ade else ade_legacy_private_config,
-        type_handler_version=extension['version'] if use_new_ade else extension['legacy_version'],
-        settings=public_config,
-        auto_upgrade_minor_version=True)
-
-    poller = compute_client.virtual_machine_extensions.begin_create_or_update(
-        resource_group_name, vm_name, extension['name'], ext)
-    LongRunningOperation(cmd.cli_ctx)(poller)
-    poller.result()
-
-    # verify the extension was ok
-    extension_result = compute_client.virtual_machine_extensions.get(
-        resource_group_name, vm_name, extension['name'], expand='instanceView')
-    if extension_result.provisioning_state != 'Succeeded':
-        raise CLIError('Extension needed for disk encryption was not provisioned correctly')
-
-    if not use_new_ade:
-        if not (extension_result.instance_view.statuses and
-                extension_result.instance_view.statuses[0].message):
-            raise CLIError('Could not find url pointing to the secret for disk encryption')
-
-        # 3. update VM's storage profile with the secrets
-        status_url = extension_result.instance_view.statuses[0].message
-
-        vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-        secret_ref = KeyVaultSecretReference(secret_url=status_url,
-                                             source_vault=SubResource(id=disk_encryption_keyvault))
-
-        key_encryption_key_obj = None
-        if key_encryption_key:
-            key_encryption_key_obj = KeyVaultKeyReference(key_url=key_encryption_key,
-                                                          source_vault=SubResource(id=key_encryption_keyvault))
-
-        disk_encryption_settings = DiskEncryptionSettings(disk_encryption_key=secret_ref,
-                                                          key_encryption_key=key_encryption_key_obj,
-                                                          enabled=True)
-        if vm_encrypted:
-            # stop the vm before update if the vm is already encrypted
-            logger.warning("Deallocating the VM before updating encryption settings...")
-            compute_client.virtual_machines.deallocate(resource_group_name, vm_name).result()
-            vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-
-        vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
-        set_vm(cmd, vm)
-
-        if vm_encrypted:
-            # and start after the update
-            logger.warning("Restarting the VM after the update...")
-            compute_client.virtual_machines.start(resource_group_name, vm_name).result()
-
-    if is_linux and volume_type != _DATA_VOLUME_TYPE:
-        old_ade_msg = "If you see 'VMRestartPending', please restart the VM, and the encryption will finish shortly"
-        logger.warning("The encryption request was accepted. Please use 'show' command to monitor "
-                       "the progress. %s", "" if use_new_ade else old_ade_msg)
-
-
-def encrypt_vm2(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
-               disk_encryption_keyvault,
-               aad_client_id=None,
-               aad_client_secret=None, aad_client_cert_thumbprint=None,
-               key_encryption_keyvault=None,
-               key_encryption_key=None,
-               key_encryption_algorithm='RSA-OAEP',
-               volume_type=None,
-               encrypt_format_all=False,
-               force=False, encryption_identity=None):
-    from azure.mgmt.core.tools import parse_resource_id
-    from knack.util import CLIError
-
     from .operations.vm import VMShow
     vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
         'vm_name': vm_name,
@@ -363,7 +157,7 @@ def encrypt_vm2(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-l
     })
     is_linux = _is_linux_os_aaz(vm)
     vm_encrypted = bool(vm['storageProfile']['osDisk'].get('encryptionSettings', {}).get('enabled', False))
-    _, has_old_ade = _detect_ade_status_aaz(vm)
+    _, has_old_ade = _detect_ade_status(vm)
 
     use_new_ade = not aad_client_id and not has_old_ade
     extension = vm_extension_info['Linux' if is_linux else 'Windows']
@@ -394,7 +188,7 @@ def encrypt_vm2(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-l
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
     if encryption_identity and isVersionSuppprtedForEncryptionIdentity(cmd):
-        result = updateVmEncryptionSettingAAZ(cmd, vm, resource_group_name, vm_name, encryption_identity)
+        result = updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity)
         if result:
             logger.info("Encryption Identity successfully set in virtual machine")
         else:
@@ -433,7 +227,7 @@ def encrypt_vm2(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-l
         'AADClientSecret': aad_client_secret if is_linux else (aad_client_secret or '')
     }
 
-    from .operations.vm_extension import VMExtensionCreate, VMExtensionShow
+    from .operations.vm_extension import VMExtensionCreate
     poller = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'vm_name': vm_name,
@@ -449,12 +243,6 @@ def encrypt_vm2(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-l
     extension_result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     # verify the extension was ok
-    # extension_result = VMExtensionShow(cli_ctx=cmd.cli_ctx)(command_args={
-    #     'vm_name': vm_name,
-    #     'resource_group': resource_group_name,
-    #     'name': extension['name'],
-    #     'expand': 'instanceView'
-    # })
     if extension_result['provisioningState'] != 'Succeeded':
         raise CLIError('Extension needed for disk encryption was not provisioned correctly')
 
@@ -516,13 +304,16 @@ def encrypt_vm2(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-l
 def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False):
     from knack.util import CLIError
 
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_name': vm_name,
+        'resource_group': resource_group_name,
+    })
     has_new_ade, has_old_ade = _detect_ade_status(vm)
     if not has_new_ade and not has_old_ade:
         logger.warning('Azure Disk Encryption is not enabled')
         return
-    is_linux = _is_linux_os(vm)
+    is_linux = _is_linux_os_aaz(vm)
     # pylint: disable=no-member
 
     # 1. be nice, figure out the default volume type and also verify VM will not be busted
@@ -548,38 +339,37 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         'SequenceVersion': sequence_version,
     }
 
-    VirtualMachineExtension, DiskEncryptionSettings = cmd.get_models(
-        'VirtualMachineExtension', 'DiskEncryptionSettings')
-
-    ext = VirtualMachineExtension(
-        location=vm.location,  # pylint: disable=no-member
-        publisher=extension['publisher'],
-        virtual_machine_extension_type=extension['name'],
-        type_handler_version=extension['version'] if has_new_ade else extension['legacy_version'],
-        settings=public_config,
-        auto_upgrade_minor_version=True)
-
-    poller = compute_client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
-                                                                              vm_name,
-                                                                              extension['name'], ext)
-    LongRunningOperation(cmd.cli_ctx)(poller)
-    poller.result()
-    extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
-                                                                     extension['name'],
-                                                                     expand='instanceView')
-    if extension_result.provisioning_state != 'Succeeded':
+    from .operations.vm_extension import VMExtensionCreate
+    poller = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'vm_extension_name': extension['name'],
+        'location': vm['location'],
+        'publisher': extension['publisher'],
+        'type': extension['name'] if has_new_ade else extension['legacy_version'],
+        'settings': public_config,
+        'auto_upgrade_minor_version': True,
+    })
+    extension_result = LongRunningOperation(cmd.cli_ctx)(poller)
+    if extension_result['provisioningState'] != 'Succeeded':
         raise CLIError("Extension updating didn't succeed")
 
     if not has_new_ade:
         # 3. Remove the secret from VM's storage profile
-        vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-        disk_encryption_settings = DiskEncryptionSettings(enabled=False)
-        vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
-        set_vm(cmd, vm)
+        from .operations.vm import VMUpdate
+        class RemoveSecret(VMUpdate):
+            def pre_instance_update(self, instance):
+                instance.properties.storage_profile.os_disk.encryption_settings = {'enabled': False}
+        LongRunningOperation(cmd.cli_ctx)(
+            RemoveSecret(cli_ctx=cmd.cli_ctx)(command_args={
+                'vm_name': vm_name,
+                'resource_group': resource_group_name
+            })
+        )
 
 
 def _show_vm_encryption_status_thru_new_ade(vm_instance_view):
-    ade = _find_existing_ade_aaz(vm_instance_view, use_instance_view=True)
+    ade = _find_existing_ade(vm_instance_view, use_instance_view=True)
     disk_infos = []
     for div in vm_instance_view.get('instanceView', {}).get('disks', []):
         disk_infos.append({
@@ -609,7 +399,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
         'resource_group': resource_group_name,
         'expand': 'instanceView'
     })
-    has_new_ade, has_old_ade = _detect_ade_status_aaz(vm)
+    has_new_ade, has_old_ade = _detect_ade_status(vm)
     if not has_new_ade and not has_old_ade:
         logger.warning('Azure Disk Encryption is not enabled')
         return None
@@ -904,7 +694,9 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
         _report_client_side_validation_error(
             "{} {}'s region does not match keyvault's region.".format(resource_type, vm_vmss_resource_info['name']))
 
+
 # todo: support vmss
+# separated for aaz implementation
 def _verify_keyvault_good_for_encryption_aaz(cli_ctx, disk_vault_id, key_vault_id, vm_or_vmss, force):
     def _report_client_side_validation_error(msg):
         if force:

@@ -343,7 +343,7 @@ def load_command_table(self, _):
         g.custom_command('detach', 'detach_managed_data_disk', validator=process_vm_disk_detach_namespace)
 
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
-        g.custom_command('enable', 'encrypt_vm2', validator=process_disk_encryption_namespace)
+        g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
         g.custom_command('disable', 'decrypt_vm')
         g.custom_show_command('show', 'show_vm_encryption_status', table_transformer=transform_vm_encryption_show_table_output)
 
