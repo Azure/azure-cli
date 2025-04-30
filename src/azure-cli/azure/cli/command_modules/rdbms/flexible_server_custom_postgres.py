@@ -41,7 +41,7 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
-    validate_virtual_endpoint_name_availability
+    validate_virtual_endpoint_name_availability, validate_database_name
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -87,6 +87,7 @@ def flexible_server_create(cmd, client,
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
+                           database_name=database_name,
                            location=location,
                            tier=tier, sku_name=sku_name,
                            storage_gb=storage_gb,
@@ -891,6 +892,7 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
 
 
 def database_create_func(cmd, client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
+    validate_database_name(database_name)
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 

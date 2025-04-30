@@ -17,8 +17,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
-    virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator, \
-    database_name_validator
+    virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -266,7 +265,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             metavar='NAME',
             options_list=['--database-name', '-d'],
             id_part='child_name_1',
-            validator=database_name_validator,
             help='The name of the database to be created when provisioning the database server. '
                  'Database name must begin with a letter (a-z) or underscore (_). Subsequent characters '
                  'in a name can be letters, digits (0-9), or underscores. Database name length must be less '
