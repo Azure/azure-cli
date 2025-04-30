@@ -48,6 +48,9 @@ examples:
   - name: Create a federated identity credential under a specific user assigned identity.
     text: |
         az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+  - name: Create a federated identity credential with claims matching expression
+    text: |
+        az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer https://tokens.githubusercontent.com --audiences api://AzureADTokenExchange --claims-matching-expression-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads'" --claims-matching-expression-version 1
 """
 
 helps['identity federated-credential update'] = """
@@ -57,6 +60,9 @@ examples:
   - name: Update a federated identity credential under a specific user assigned identity.
     text: |
         az identity federated-credential update --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+  - name: Update a federated identity credential with claims matching expression
+    text: |
+        az identity federated-credential update --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer https://tokens.githubusercontent.com --audiences api://AzureADTokenExchange --claims-matching-expression-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads'" --claims-matching-expression-version 1
 """
 
 helps['identity federated-credential delete'] = """

@@ -22,7 +22,7 @@ def load_arguments(self, _):
         c.argument('location', get_location_type(self.cli_ctx), required=False)
         c.argument('tags', tags_type)
 
-    with self.argument_context('identity federated-credential', min_api='2022-01-31-preview') as c:
+    with self.argument_context('identity federated-credential', min_api='2025-01-31-PREVIEW') as c:
         c.argument('federated_credential_name', options_list=('--name', '-n'), help='The name of the federated identity credential resource.')
         c.argument('identity_name', help='The name of the identity resource.')
 
@@ -31,3 +31,5 @@ def load_arguments(self, _):
             c.argument('issuer', help='The openId connect metadata URL of the issuer of the identity provider that Azure AD would use in the token exchange protocol for validating tokens before issuing a token as the user-assigned managed identity.')
             c.argument('subject', help='The sub value in the token sent to Azure AD for getting the user-assigned managed identity token. The value configured in the federated credential and the one in the incoming token must exactly match for Azure AD to issue the access token.')
             c.argument('audiences', nargs='+', help='The aud value in the token sent to Azure for getting the user-assigned managed identity token. The value configured in the federated credential and the one in the incoming token must exactly match for Azure to issue the access token.')
+            c.argument('claims_matching_expression_value', options_list=['--claims-matching-expression-value'], help='The claims expression value that will be evaluated by Azure AD to issue a token. For example, claims[\'sub\'] startswith \'repo:contoso-org/contoso-repo:ref:refs/heads\'.')
+            c.argument('claims_matching_expression_version', options_list=['--claims-matching-expression-version'], help='The version of claims expression language. For example, 1.')
