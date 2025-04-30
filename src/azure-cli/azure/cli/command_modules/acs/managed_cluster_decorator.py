@@ -3949,7 +3949,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                         raise InvalidArgumentValueError(
                             "--enable-public-fqdn can only be used for private cluster"
                         )
-                    
+
                 # new validation added for vnet integration
                 if enable_private_cluster and not enable_apiserver_vnet_integration:
                     if not is_apiserver_vnet_integration_cluster:
