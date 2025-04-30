@@ -1652,6 +1652,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             sku_profile_vmsizes_list.append(vmsize_obj)
 
         if skuprofile_rank:
+            if len(skuprofile_rank) != len(skuprofile_vmsizes):
+                raise ValidationError(
+                    'The SKU profile rank list does not specify a rank for every VM size. ' +
+                    'The number of ranks must match the number of VM sizes.')
+
             for vm_size, rank in zip(sku_profile_vmsizes_list, skuprofile_rank):
                 vm_size['rank'] = rank
 

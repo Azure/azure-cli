@@ -10839,6 +10839,17 @@ class SkuProfileTest(ScenarioTest):
             self.check('skuProfile.vmSizes[1].name', 'Standard_D2s_v4'),
             self.check('skuProfile.vmSizes[1].rank', '0')
         ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile_prioritized_validation', location='eastus2')
+    def test_vmss_create_sku_profile_prioritized_validation(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        with self.assertRaisesRegex(CLIError, "The SKU profile rank list does not specify a rank for every VM size."):
+            self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4' +
+                ' --skuprofile-rank 1' +
+                ' --skuprofile-allocation-strategy Prioritized')
 
 
 class VMCreateNSGRule(ScenarioTest):
