@@ -17,7 +17,8 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
-    virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator
+    virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator, \
+    database_name_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -261,14 +262,28 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             arg_group='Authentication'
         )
 
+        database_name_create_arg_type = CLIArgumentType(
+            metavar='NAME',
+            options_list=['--database-name', '-d'],
+            id_part='child_name_1',
+            validator=database_name_validator,
+            help='The name of the database to be created when provisioning the database server. '
+                 'Database name must begin with a letter (a-z) or underscore (_). Subsequent characters '
+                 'in a name can be letters, digits (0-9), or underscores. Database name length must be less '
+                 'than 32 characters.',
+            local_context_attribute=LocalContextAttribute(
+                name='database_name',
+                actions=[LocalContextAction.SET],
+                scopes=['{} flexible-server'.format(command_group)]))
+
         database_name_arg_type = CLIArgumentType(
             metavar='NAME',
             options_list=['--database-name', '-d'],
             id_part='child_name_1',
-            help='The name of the database to be created when provisioning the database server',
+            help='The name of the database',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
-                actions=[LocalContextAction.GET, LocalContextAction.SET],
+                actions=[LocalContextAction.GET],
                 scopes=['{} flexible-server'.format(command_group)]))
 
         tier_arg_type = CLIArgumentType(
@@ -641,7 +656,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('zone', zone_arg_type)
             c.argument('tags', tags_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
-            c.argument('database_name', arg_type=database_name_arg_type)
+            c.argument('database_name', arg_type=database_name_create_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server list'.format(command_group)) as c:
@@ -824,6 +839,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             argument_context_string = '{} flexible-server db {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+        for scope in ['delete', 'list', 'show', 'update']:
+            with self.argument_context(argument_context_string) as c:
                 c.argument('database_name', arg_type=database_name_arg_type)
 
         with self.argument_context('{} flexible-server db list'.format(command_group)) as c:
@@ -832,6 +850,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
             c.argument('charset', help='The charset of the database. The default value is UTF8')
             c.argument('collation', help='The collation of the database.')
+            c.argument('database_name', arg_type=database_name_create_arg_type)
 
         with self.argument_context('{} flexible-server db delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
