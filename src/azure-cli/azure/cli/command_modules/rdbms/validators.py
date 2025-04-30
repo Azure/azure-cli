@@ -305,9 +305,9 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
         logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
 
 
-def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None, zone=None,
-                           standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
-                           version=None, instance=None, geo_redundant_backup=None,
+def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
+                           zone=None, standby_availability_zone=None, high_availability=None, subnet=None,
+                           public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
