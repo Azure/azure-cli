@@ -818,6 +818,13 @@ class FunctionAppFlex(LiveScenarioTest):
         locations = self.cmd('functionapp list-flexconsumption-locations --zone-redundant').get_output_in_json()
         self.assertTrue(len(locations) > 0)
 
+    def test_functionapp_list_flexconsumption_locations_details(self):
+        locations = self.cmd('functionapp list-flexconsumption-locations --show-details --runtime java').get_output_in_json()
+        self.assertTrue(len(locations) > 0)
+        self.assertTrue(locations[0]['name'] is not None)
+        self.assertTrue(locations[0]['details'][0]['runtime'] is not None)
+        self.assertTrue(locations[0]['details'][0]['runtime'] == 'java') 
+
     def test_functionapp_list_flexconsumption_runtimes(self):
         runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
         self.assertTrue(len(runtimes) == 2)
@@ -1517,7 +1524,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~20')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~22')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()

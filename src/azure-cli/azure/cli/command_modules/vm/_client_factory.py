@@ -12,10 +12,6 @@ def _compute_client_factory(cli_ctx, **kwargs):
                                    aux_subscriptions=kwargs.get('aux_subscriptions'))
 
 
-def cf_avail_set(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).availability_sets
-
-
 def cf_vm(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machines
 
@@ -130,10 +126,6 @@ def cf_log_analytics_data_plane(cli_ctx, _):
     api_version = 'v1'
     return LogsQueryClient(cred, endpoint=cli_ctx.cloud.endpoints.log_analytics_resource_id + '/' + api_version,
                            audience=cli_ctx.cloud.endpoints.log_analytics_resource_id)
-
-
-def cf_disk_encryption_set(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).disk_encryption_sets
 
 
 def cf_vm_cl(cli_ctx, *_):

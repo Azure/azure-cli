@@ -12,7 +12,7 @@ import socket
 from knack.log import get_logger
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client
+from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
 from azure.cli.core.aaz._client import AAZMgmtClient
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
@@ -4473,6 +4473,10 @@ class NICIPConfigCreate(_NICIPConfigCreate):
     def pre_operations(self):
         args = self.ctx.args
         args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
         args.asgs_obj = assign_aaz_list_arg(
             args.asgs_obj,
@@ -4614,6 +4618,11 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             else:
                 # if specific address provided, allocation is static
                 args.private_ip_allocation_method = "Static"
+
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
     def pre_instance_update(self, instance):
         args = self.ctx.args
@@ -5916,11 +5925,19 @@ class VnetGatewayRevokedCertCreate(_VnetGatewayRevokedCertCreate):
         return args_schema
 
 
+class RootCertFormat(AAZFileArgTextFormat):
+    def read_file(self, file_path):
+        with open(file_path, 'r', encoding=self._encoding) as cert_file:
+            lines = cert_file.readlines()
+
+        cert_data = ''.join(line.strip() for line in lines if not line.startswith('-----'))
+        return cert_data
+
+
 class VnetGatewayCreate(_VnetGatewayCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat, \
-            AAZFileArgBase64EncodeFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_addresses = AAZListArg(options=['--public-ip-addresses', '--public-ip-address'],
                                                      help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.")
@@ -5947,7 +5964,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         )
         args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
                                                 help="Base64 contents of the root certificate file or file path.",
-                                                fmt=AAZFileArgBase64EncodeFormat())
+                                                fmt=RootCertFormat())
         args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
                                                help="Root certificate name.")
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
@@ -6010,13 +6027,12 @@ class VnetGatewayCreate(_VnetGatewayCreate):
             args.nat_rules = rules
 
         if has_value(args.address_prefixes) or has_value(args.client_protocol):
-            import os
             if has_value(args.root_cert_data):
-                path = os.path.expanduser(args.root_cert_data.to_serialized_data())
+                data = args.root_cert_data.to_serialized_data()
             else:
-                path = None
+                data = None
             if has_value(args.root_cert_name):
-                args.vpn_client_root_certificates = [{'name': args.root_cert_name, 'public_cert_data': path}]
+                args.vpn_client_root_certificates = [{'name': args.root_cert_name, 'public_cert_data': data}]
             else:
                 args.vpn_client_root_certificates = []
 
@@ -6039,8 +6055,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
 class VnetGatewayUpdate(_VnetGatewayUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat, \
-            AAZFileArgBase64EncodeFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_addresses = AAZListArg(options=['--public-ip-addresses', '--public-ip-address'],
                                                      help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.",
@@ -6060,7 +6075,7 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         )
         args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
                                                 help="Base64 contents of the root certificate file or file path.",
-                                                fmt=AAZFileArgBase64EncodeFormat(), nullable=True)
+                                                fmt=RootCertFormat(), nullable=True)
         args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
                                                help="Root certificate name.", nullable=True,)
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
@@ -6075,10 +6090,6 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.root_cert_data):
-            import os
-            path = os.path.expanduser(args.root_cert_data.to_serialized_data())
-            args.root_cert_data = path
 
         if has_value(args.sku):
             args.sku_tier = args.sku
@@ -6189,6 +6200,14 @@ class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
 
 # region VirtualNetworkGatewayConnections
 # pylint: disable=too-many-locals
+def _get_vpn_connection_aux_subscriptions(local_gateway, vnet_gateway):
+    aux_subscriptions = []
+    _add_aux_subscription(aux_subscriptions, local_gateway)
+    _add_aux_subscription(aux_subscriptions, vnet_gateway)
+
+    return aux_subscriptions
+
+
 def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gateway1,
                           location=None, tags=None, no_wait=False, validate=False,
                           vnet_gateway2=None, express_route_circuit2=None, local_gateway2=None,
@@ -6220,9 +6239,11 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     template = master_template.build()
     parameters = master_template.build_parameters()
 
+    aux_subscriptions = _get_vpn_connection_aux_subscriptions(local_gateway2, vnet_gateway2)
+
     # deploy ARM template
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     deployment = Deployment(properties=properties)

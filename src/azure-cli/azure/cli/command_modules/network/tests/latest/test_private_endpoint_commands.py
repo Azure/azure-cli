@@ -69,7 +69,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='uksouth')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='uksouth', additional_params='--enable-rbac-authorization false')
     def test_private_endpoint_connection_keyvault(self, resource_group):
         self.kwargs.update({
             'loc': 'uksouth',
@@ -2537,7 +2537,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self)
 
-    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="eastus")
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="westus")
     def test_private_endpoint_connection_sql_server(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,

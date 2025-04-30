@@ -555,6 +555,7 @@ def create_hsm(cmd, client,
 
     if not sku:
         sku = 'Standard_B1'
+    sku_family = sku.split('_')[1][0]
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT,
                                 operation_group='managed_hsms')
@@ -574,7 +575,7 @@ def create_hsm(cmd, client,
                                       public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
-                            sku=ManagedHsmSku(name=sku, family='B'),
+                            sku=ManagedHsmSku(name=sku, family=sku_family),
                             properties=properties)
 
     if user_identities:

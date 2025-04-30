@@ -2,6 +2,10 @@
 
 This article aims to provide a guide for CLI developers and contributors to bump SDK version in Azure CLI.
 
+## Prerequisites
+
+We assume the [swagger](https://github.com/Azure/azure-rest-api-specs) has been updated and the related Python SDK has been generated.
+
 ## Overview
 
 Developers need to do several things for bumping version:
@@ -52,6 +56,7 @@ For scenario b, variables `PACKAGE`, `TARGET_PACKAGE_VERSION`, `RESOURCE_TYPE` a
 - TARGET_PACKAGE_VERSION: The SDK new version, e.g., `19.3.0`. **Required for scenario b**. Leave it as empty for scenario a.
 - RESOURCE_TYPE: The resource type enum name define in [CLI Core](https://github.com/Azure/azure-cli/blob/ce74ae358b51aedfdfb6c32042b515d949618e33/src/azure-cli-core/azure/cli/core/profiles/_shared.py#L38), e.g., `MGMT_NETWORK`. Required if you want to update the API version definition in CLI Core. Usually used for multi-API SDKs. Leave it as empty for scenario a.
 - TARGET_API_VERSION: The new API version(s):
+    - Leave this variable as empty if the SDK contains single target API version, else
     - If the AZURE_API_PROFILES['latest'][RESOURCE_TYPE] definition is `str` type, then just fulfill this variable with new API version. For example, to update API version for [ResourceType.MGMT_NETWORK](https://github.com/Azure/azure-cli/blob/ce74ae358b51aedfdfb6c32042b515d949618e33/src/azure-cli-core/azure/cli/core/profiles/_shared.py#L150), use `2021-10-01` as variable value.
     - If the  AZURE_API_PROFILES['latest'][RESOURCE_TYPE] definition is `SDKProfile` type, then fulfill this variable with 'operation=version' pairs separated by space. For example, to update API version for [ResourceType.MGMT_COMPUTE](https://github.com/Azure/azure-cli/blob/ce74ae358b51aedfdfb6c32042b515d949618e33/src/azure-cli-core/azure/cli/core/profiles/_shared.py#L151-L164), use `default=2022-05-01 snapshots=2022-03-01 gallery_images=2021-12-01` as variable value. `default` means other operations except for explicitly listed ones.
     

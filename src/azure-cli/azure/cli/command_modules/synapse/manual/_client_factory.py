@@ -105,8 +105,7 @@ def cf_kusto_pool(cli_ctx, *_):
 def synapse_spark_factory(cli_ctx, workspace_name, sparkpool_name):
     from azure.synapse.spark import SparkClient
     from azure.cli.core._profile import Profile
-    # Uncomment this line after SparkClient is fixed. See https://github.com/Azure/azure-cli/pull/30788
-    # from azure.cli.core.auth.util import resource_to_scopes
+    from azure.cli.core.auth.util import resource_to_scopes
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cli_ctx)
     profile = Profile(cli_ctx=cli_ctx)
@@ -115,8 +114,7 @@ def synapse_spark_factory(cli_ctx, workspace_name, sparkpool_name):
         credential=cred,
         endpoint='{}{}{}'.format("https://", workspace_name, cli_ctx.cloud.suffixes.synapse_analytics_endpoint),
         spark_pool_name=sparkpool_name,
-        # Uncomment this line after SparkClient is fixed
-        # credential_scopes=resource_to_scopes(cli_ctx.cloud.endpoints.synapse_analytics_resource_id)
+        credential_scopes=resource_to_scopes(cli_ctx.cloud.endpoints.synapse_analytics_resource_id)
     )
 
 

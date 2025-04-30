@@ -91,9 +91,13 @@ secondary_region_map = {
     "southafricanorth": "southafricawest",
     "southafricawest": "southafricanorth",
     "southcentralus": "northcentralus",
+    "southcentralus2": "westcentralus",
     "southeastasia": "eastasia",
     "southeastus": "westus3",
+    "southeastus3": "westus3",
+    "southeastus5": "centralus",
     "southindia": "centralindia",
+    "southwestus": "centralus",
     "swedencentral": "swedensouth",
     "swedensouth": "swedencentral",
     "switzerlandnorth": "switzerlandwest",
@@ -868,11 +872,8 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
-    logger.warning('Ignite (November) 2023 onwards Virtual Machine deployments using PS and CLI will default to '
-                   'security type Trusted Launch. Please ensure Policy Name used with "az backup '
-                   'protection enable-for-vm" command is of type Enhanced Policy for Trusted Launch VMs. Non-Trusted '
-                   'Launch Virtual Machines will not be impacted by this change. To know more about default change '
-                   'and Trusted Launch, please visit https://aka.ms/TLaD.')
+    logger.warning('Starting in May 2025, Trusted Launch virtual machines can be protected with both'
+                   ' standard and enhanced policies via PS and CLI')
 
     # throw error if policy has more than 1000 protected VMs.
     if policy.properties.protected_items_count >= 1000:
