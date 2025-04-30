@@ -283,7 +283,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='The name of the database',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
-                actions=[LocalContextAction.GET],
+                actions=[LocalContextAction.GET, LocalContextAction.SET],
                 scopes=['{} flexible-server'.format(command_group)]))
 
         tier_arg_type = CLIArgumentType(
@@ -841,6 +841,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
         for scope in ['delete', 'list', 'show', 'update']:
+            argument_context_string = '{} flexible-server db {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('database_name', arg_type=database_name_arg_type)
 
