@@ -44,7 +44,7 @@ class TestIdentity(ScenarioTest):
 
         self.cmd('identity create -n {identity} -g {rg}')
 
-        # create a federated identity credential
+        # test federated identity credential with basic parameters
         self.cmd('identity federated-credential create --name {fic1} --identity-name {identity} --resource-group {rg} '
                  '--subject {subject1} --issuer {issuer} --audiences {audience}',
                  checks=[
@@ -54,14 +54,21 @@ class TestIdentity(ScenarioTest):
                      self.check('subject', '{subject1}')
                  ])
 
-        # create a federated identity credential
+        # test federated identity credential with claims matching expression
+        self.kwargs.update({
+            'claims_expr': "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads'",
+            'claims_ver': '1'
+        })
         self.cmd('identity federated-credential create --name {fic2} --identity-name {identity} --resource-group {rg} '
-                 '--subject {subject2} --issuer {issuer} --audiences {audience}',
+                 '--issuer https://token.actions.githubusercontent.com --audiences {audience} '
+                 '--claims-matching-expression-value "{claims_expr}" '
+                 '--claims-matching-expression-version {claims_ver}',
                  checks=[
                      self.check('length(audiences)', 1),
                      self.check('audiences[0]', '{audience}'),
-                     self.check('issuer', '{issuer}'),
-                     self.check('subject', '{subject2}')
+                     self.check('issuer', 'https://token.actions.githubusercontent.com'),
+                     self.check('claimsMatchingExpressionValue', '{claims_expr}'),
+                     self.check('claimsMatchingExpressionVersion', '{claims_ver}')
                  ])
 
         # show the federated identity credential
@@ -84,16 +91,23 @@ class TestIdentity(ScenarioTest):
                      self.check('[0].subject', '{subject1}'),
                      self.check('length([1].audiences)', '1'),
                      self.check('[1].audiences[0]', '{audience}'),
-                     self.check('[1].issuer', '{issuer}'),
-                     self.check('[1].subject', '{subject2}'),
+                     self.check('[1].issuer', 'https://token.actions.githubusercontent.com'),
+                     self.check('[1].claimsMatchingExpressionValue', '{claims_expr}'),
+                     self.check('[1].claimsMatchingExpressionVersion', '{claims_ver}'),
                  ])
 
-        # update a federated identity credential
+        # test updating federated identity credential with claims matching expression
+        self.kwargs.update({
+            'new_claims_expr': "claims['sub'] startswith 'repo:contoso-org/updated-repo:ref:refs/heads'"
+        })
         self.cmd('identity federated-credential update --name {fic1} --identity-name {identity} --resource-group {rg} '
-                 '--subject {subject3} --issuer {issuer} --audiences {audience}',
+                 '--issuer https://token.actions.githubusercontent.com --audiences {audience} '
+                 '--claims-matching-expression-value "{new_claims_expr}" '
+                 '--claims-matching-expression-version {claims_ver}',
                  checks=[
                      self.check('name', '{fic1}'),
-                     self.check('subject', '{subject3}')
+                     self.check('claimsMatchingExpressionValue', '{new_claims_expr}'),
+                     self.check('claimsMatchingExpressionVersion', '{claims_ver}')
                  ])
 
         # delete a federated identity credential
@@ -106,8 +120,9 @@ class TestIdentity(ScenarioTest):
                      self.check('[0].name', '{fic2}'),
                      self.check('length([0].audiences)', '1'),
                      self.check('[0].audiences[0]', '{audience}'),
-                     self.check('[0].issuer', '{issuer}'),
-                     self.check('[0].subject', '{subject2}'),
+                     self.check('[0].issuer', 'https://token.actions.githubusercontent.com'),
+                     self.check('[0].claimsMatchingExpressionValue', '{claims_expr}'),
+                     self.check('[0].claimsMatchingExpressionVersion', '{claims_ver}'),
                  ])
 
         # delete a federated identity credential
