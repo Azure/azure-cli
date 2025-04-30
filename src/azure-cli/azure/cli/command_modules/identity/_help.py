@@ -39,10 +39,12 @@ short-summary: List the associated resources for the identity.
 helps['identity federated-credential'] = """
 type: group
 short-summary: Manage federated identity credentials under user assigned identities.
+min_api: 2025-01-31-PREVIEW
 """
 
 helps['identity federated-credential create'] = """
 type: command
+min_api: 2025-01-31-PREVIEW
 short-summary: Create a federated identity credential under an existing user assigned identity.
 examples:
   - name: Create a federated identity credential under a specific user assigned identity.
@@ -54,6 +56,7 @@ examples:
 """
 
 helps['identity federated-credential update'] = """
+min_api: 2025-01-31-PREVIEW
 type: command
 short-summary: Update a federated identity credential under an existing user assigned identity.
 examples:
@@ -63,6 +66,7 @@ examples:
 """
 
 helps['identity federated-credential delete'] = """
+min_api: 2025-01-31-PREVIEW
 type: command
 short-summary: Delete a federated identity credential under an existing user assigned identity.
 examples:
@@ -72,6 +76,7 @@ examples:
 """
 
 helps['identity federated-credential show'] = """
+min_api: 2025-01-31-PREVIEW
 type: command
 short-summary: Show a federated identity credential under an existing user assigned identity.
 examples:
@@ -81,6 +86,7 @@ examples:
 """
 
 helps['identity federated-credential list'] = """
+min_api: 2025-01-31-PREVIEW
 type: command
 short-summary: List all federated identity credentials under an existing user assigned identity.
 examples:
