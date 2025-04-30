@@ -4,13 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
-import time
+import os, time
 
 class AcrTaskAbacCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
     @live_only()
     def test_acr_abac_task(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'registry_name': self.create_random_name('clireg', 20),
             'task_name': 'testTask',
@@ -25,7 +26,9 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
             'identity': '[system]',
             'role_assignment_mode': 'rbac-abac',
             'uami_name': self.create_random_name('acr', 10),
-            'auth_mode': 'None'
+            'auth_mode': 'None',
+            'tf': os.path.join(curr_dir, 'task_abac_taskrun_manualrun.json').replace('\\', '\\\\'),
+            'taskrun_name': 'taskrun1',
         })
 
         # Create a user-assigned managed identity
@@ -72,24 +75,42 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
                          self.check('step.type', 'Docker'),
                          self.check('identity.type', 'SystemAssigned')]).get_output_in_json()
         identity = response['identity']['principalId']
+        task_resource_id = response['id']
         self.kwargs.update({
-            'principal_id': identity
+            'principal_id': identity,
+            'task_resource_id': task_resource_id
         })
 
         # Trigger a run from the task without the necessary permissions, expect failure
         self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs', expect_failure=True)
+
+        # Trigger a taskrun without the necessary permissions, expect failure
+        self.cmd('group deployment create --resource-group {rg} --template-file "{tf}" --parameters registryName={registry_name} taskRunName={taskrun_name} taskName={task_name} taskRunId={task_resource_id}',
+                 expect_failure=True)
 
         # Assign "Container Registry Repository Contributor" role to the system-assigned identity for the registry.
         self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
                  checks=[self.check('principalId', '{principal_id}')])
 
         # Wait for the role assignment to propagate
-        time.sleep(60)
+        time.sleep(45)
 
         # Trigger a run from the task with necessary permissions
         self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
                  checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
                          self.check('status', 'Succeeded')])
+
+        # Trigger a taskrun with the necessary permissions
+        self.cmd('group deployment create --resource-group {rg} --template-file "{tf}" --parameters registryName={registry_name} taskRunName={taskrun_name} taskName={task_name} taskRunId={task_resource_id}',
+                 checks=[self.check('type', 'Microsoft.Resources/deployments'),
+                         self.check('properties.provisioningState', 'Succeeded')])
+
+        self.cmd('acr taskrun show -r {registry_name} -n {taskrun_name} -g {rg}',
+                 checks=[self.check('name', '{taskrun_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('runRequest.type', 'TaskRunRequest')])
+
+        self.cmd('acr taskrun delete -r {registry_name} -n {taskrun_name} -g {rg} -y')
 
         # Update the task with user-assigned managed identity
         response = self.cmd('acr task update -n {task_name} -r {registry_name} --source-acr-auth-id {uami_resource_id}',
@@ -163,6 +184,105 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
 
+    @ResourceGroupPreparer(name_prefix='cli_test_acrrbac_')
+    @live_only()
+    def test_acr_rbac_auto_task(self):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('clireg', 20),
+            'task_name': 'timerTask',
+            'rg_loc': 'westus',
+            'sku': 'Standard',
+            'context': '/dev/null',
+            'command': 'mcr.microsoft.com/hello-world',
+            'identity': '[system]',
+            'role_assignment_mode': 'rbac',
+            'auth_mode': 'Default',
+            'schedule': '\"0 21 * * *\"',
+        })
+
+        # Create a RBAC registry
+        response = self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --role-assignment-mode {role_assignment_mode}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('roleAssignmentMode', 'LegacyRegistryPermissions')]).get_output_in_json()
+        self.kwargs.update({
+            'registry_resource_id': response['id']
+        })
+
+        # Create a timer task with system source auth identity and default auth mode
+        response = self.cmd('acr task create -n {task_name} -r {registry_name} --source-acr-auth-id {identity} --cmd {command} --context {context} --schedule {schedule} --auth-mode {auth_mode}',
+                 checks=[self.check('name', '{task_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('platform.os', 'linux'),
+                         self.check('agentConfiguration.cpu', 2),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('credentials.sourceRegistry.identity', '{identity}'),
+                         self.check('credentials.sourceRegistry.loginMode', '{auth_mode}'),
+                         self.check('trigger.timerTriggers[0].status', 'Enabled'),
+                         self.check('status', 'Enabled'),
+                         self.check('timeout', 3600),
+                         self.check('identity.type', 'SystemAssigned')]).get_output_in_json()
+        identity = response['identity']['principalId']
+        self.kwargs.update({
+            'principal_id': identity
+        })
+
+        # Trigger a run from the task without the necessary permissions, expect failure
+        self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs', expect_failure=True)
+
+        # Assign Data Plane permissions
+        self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
+                 checks=[self.check('principalId', '{principal_id}')])
+        
+        # Wait for the role assignment to propagate
+        time.sleep(45)
+
+        # Trigger a run from the task without the necessary permissions, rbac registry needs control plane permission
+        # instead of data plane permission, expect failure
+        self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs', expect_failure=True)
+
+        # Assign Control Plane permissions
+        self.cmd('role assignment create --role "AcrPush" --assignee {principal_id} --scope {registry_resource_id}',
+                 checks=[self.check('principalId', '{principal_id}')])
+
+        # Wait for the role assignment to propagate
+        time.sleep(45)
+
+        # Trigger a run from the task with necessary permissions
+        self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
+                 checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
+                         self.check('status', 'Succeeded')])
+
+        # Update the task and set source auth identity to none
+        self.kwargs.update({
+            'identity': 'None'
+        })
+        self.cmd('acr task update -n {task_name} -r {registry_name} --source-acr-auth-id {identity}',
+                 checks=[self.check('name', '{task_name}'),
+                         self.check('credentials.sourceRegistry.identity', '{identity}'),
+                         self.check('credentials.sourceRegistry.loginMode', '{auth_mode}')])
+
+        # Remove role assignement
+        self.cmd('role assignment delete --role "AcrPush" --assignee {principal_id} --scope {registry_resource_id}', expect_failure=False)
+        self.cmd('role assignment delete --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}', expect_failure=False)
+        time.sleep(45)
+
+        # Trigger a run from the task
+        self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
+                 checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
+                         self.check('status', 'Succeeded')])
+
+        # test task delete
+        self.cmd('acr task delete -n {task_name} -r {registry_name} -y')
+
+        # test acr delete
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
     @live_only()
     def test_acr_abac_run(self):
@@ -192,6 +312,12 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
             'registry_resource_id': response['id']
         })
 
+        # Expect failure due to incorrect parameter value
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('acr run -r {registry_name} --source-acr-auth-id [system] -f {file} {source_location}')
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('acr run -r {registry_name} --source-acr-auth-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uami" -f {file} {source_location}')
+
         # Expect failure due to missing permissions
         self.cmd('acr run -r {registry_name} --source-acr-auth-id {identity} -f {file} {source_location} --no-logs', expect_failure=True)
 
@@ -200,7 +326,7 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
                  checks=[self.check('scope', '{registry_resource_id}')])
 
         # Wait for the role assignment to propagate
-        time.sleep(60)
+        time.sleep(45)
         
         # Queues a quick run with necessary permissions
         self.cmd('acr run -r {registry_name} --source-acr-auth-id {identity} -f {file} {source_location} --no-logs', 
@@ -251,6 +377,12 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
             'registry_resource_id': response['id']
         })
 
+        # Expect failure due to incorrect parameter value
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('acr build -r {registry_name} --source-acr-auth-id [system] --image {image} {source_location}')
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('acr build -r {registry_name} --source-acr-auth-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uami" --image {image} {source_location}')
+
         # Expect failure due to missing permissions
         self.cmd('acr build -r {registry_name} --source-acr-auth-id {identity} --image {image} {source_location} --no-logs', expect_failure=True)
 
@@ -259,7 +391,7 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
                  checks=[self.check('scope', '{registry_resource_id}')])
 
         # Wait for the role assignment to propagate
-        time.sleep(60)
+        time.sleep(45)
 
         # Queues a quick build with necessary permissions
         self.cmd('acr build -r {registry_name} --source-acr-auth-id {identity} --image {image} {source_location} --no-logs', 
