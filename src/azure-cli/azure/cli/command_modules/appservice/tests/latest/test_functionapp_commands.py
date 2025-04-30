@@ -1477,7 +1477,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
-    @live_only() # azure.cli.core.azclierror.ValidationError: Use node version 22 as 18 has reached end-of-life on 2025-04-30 and is no longer supported.
+    @live_only() # ValidationError: Use node version 22 as 18 has reached end-of-life on 2025-04-30 and is no longer supported.
     def test_functionapp_windows_runtime_version(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
@@ -1800,7 +1800,7 @@ class FunctionAppOnLinux(ScenarioTest):
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
-    @live_only() # azure.cli.core.azclierror.ValidationError: Use node version 22 as 18 has reached end-of-life on 2025-04-30 and is no longer supported.
+    @live_only() # ValidationError: Use node version 22 as 18 has reached end-of-life on 2025-04-30 and is no longer supported.
     def test_functionapp_on_linux_version(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         functionapp = self.create_random_name(
