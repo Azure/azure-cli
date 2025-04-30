@@ -3,13 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 import os, time
+from unittest import mock
 
 class AcrTaskAbacCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
-    @live_only()
     def test_acr_abac_task(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -32,7 +33,7 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         })
 
         # Create a user-assigned managed identity
-        response = self.cmd('identity create --name {uami_name} --resource-group {rg}', 
+        response = self.cmd('identity create --name {uami_name} --resource-group {rg}',
                  checks=[self.check('name', '{uami_name}')]).get_output_in_json()
         uami_resource_id = response['id']
         uami_client_id = response['clientId']
@@ -55,8 +56,9 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         })
 
         # Assign "Container Registry Repository Contributor" role to the user-assigned managed identity for the registry.
-        self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {uami_client_id} --scope {registry_resource_id}',
-                 checks=[self.check('scope', '{registry_resource_id}')])
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {uami_client_id} --scope {registry_resource_id}',
+                     checks=[self.check('scope', '{registry_resource_id}')])
 
         # Create a Docker build task with a system-assigned identity for source registry authentication.
         response = self.cmd('acr task create -n {task_name} -r {registry_name} --source-acr-auth-id {identity} --context {context} --image {image} -f {file} --commit-trigger-enabled {trigger_enabled}',
@@ -89,11 +91,13 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
                  expect_failure=True)
 
         # Assign "Container Registry Repository Contributor" role to the system-assigned identity for the registry.
-        self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
-                 checks=[self.check('principalId', '{principal_id}')])
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
+                     checks=[self.check('principalId', '{principal_id}')])
 
         # Wait for the role assignment to propagate
-        time.sleep(45)
+        if os.environ.get(ENV_LIVE_TEST, False):
+            time.sleep(45)
 
         # Trigger a run from the task with necessary permissions
         self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
@@ -122,7 +126,7 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
                  checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
                          self.check('status', 'Succeeded')])
-        
+
         # Create a Docker build task with a user-assigned identity for source registry authentication.
         self.cmd('acr task create -n {task_name2} -r {registry_name} --source-acr-auth-id {uami_resource_id} --context {context} --image {image} -f {file} --commit-trigger-enabled {trigger_enabled}',
                  checks=[self.check('name', '{task_name2}'),
@@ -139,12 +143,12 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
                          self.check('step.noCache', False),
                          self.check('step.type', 'Docker'),
                          self.check('identity.type', 'UserAssigned')])
-        
+
         # Trigger a run from the task with necessary permissions
         self.cmd('acr task run -n {task_name2} -r {registry_name} --no-logs',
                  checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
                          self.check('status', 'Succeeded')])
-        
+
         # Create a Docker build task without a managed identity for source registry authentication for an ABAC-enabled registry
         self.cmd('acr task create -n {task_name3} -r {registry_name} --context {context} --image {image} -f {file} --commit-trigger-enabled {trigger_enabled}',
                  checks=[self.check('name', '{task_name3}'),
@@ -185,7 +189,6 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_acrrbac_')
-    @live_only()
     def test_acr_rbac_auto_task(self):
         self.kwargs.update({
             'registry_name': self.create_random_name('clireg', 20),
@@ -235,22 +238,26 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs', expect_failure=True)
 
         # Assign Data Plane permissions
-        self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
-                 checks=[self.check('principalId', '{principal_id}')])
-        
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
+                     checks=[self.check('principalId', '{principal_id}')])
+
         # Wait for the role assignment to propagate
-        time.sleep(45)
+        if os.environ.get(ENV_LIVE_TEST, False):
+            time.sleep(45)
 
         # Trigger a run from the task without the necessary permissions, rbac registry needs control plane permission
         # instead of data plane permission, expect failure
         self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs', expect_failure=True)
 
         # Assign Control Plane permissions
-        self.cmd('role assignment create --role "AcrPush" --assignee {principal_id} --scope {registry_resource_id}',
-                 checks=[self.check('principalId', '{principal_id}')])
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "AcrPush" --assignee {principal_id} --scope {registry_resource_id}',
+                     checks=[self.check('principalId', '{principal_id}')])
 
         # Wait for the role assignment to propagate
-        time.sleep(45)
+        if os.environ.get(ENV_LIVE_TEST, False):
+            time.sleep(45)
 
         # Trigger a run from the task with necessary permissions
         self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
@@ -269,7 +276,8 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         # Remove role assignement
         self.cmd('role assignment delete --role "AcrPush" --assignee {principal_id} --scope {registry_resource_id}', expect_failure=False)
         self.cmd('role assignment delete --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}', expect_failure=False)
-        time.sleep(45)
+        if os.environ.get(ENV_LIVE_TEST, False):
+            time.sleep(45)
 
         # Trigger a run from the task
         self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
@@ -284,7 +292,6 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
-    @live_only()
     def test_acr_abac_run(self):
         user_id = self.cmd("az ad signed-in-user show").get_output_in_json()["id"]
         self.kwargs.update({
@@ -322,14 +329,16 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         self.cmd('acr run -r {registry_name} --source-acr-auth-id {identity} -f {file} {source_location} --no-logs', expect_failure=True)
 
         # Assign "Container Registry Repository Contributor" role to the user identity
-        self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {user_id} --scope {registry_resource_id}',
-                 checks=[self.check('scope', '{registry_resource_id}')])
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {user_id} --scope {registry_resource_id}',
+                     checks=[self.check('scope', '{registry_resource_id}')])
 
         # Wait for the role assignment to propagate
-        time.sleep(45)
-        
+        if os.environ.get(ENV_LIVE_TEST, False):
+            time.sleep(45)
+
         # Queues a quick run with necessary permissions
-        self.cmd('acr run -r {registry_name} --source-acr-auth-id {identity} -f {file} {source_location} --no-logs', 
+        self.cmd('acr run -r {registry_name} --source-acr-auth-id {identity} -f {file} {source_location} --no-logs',
                  checks=[self.check('status', 'Succeeded'),
                          self.check('type', 'Microsoft.ContainerRegistry/registries/runs')])
 
@@ -349,7 +358,6 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
-    @live_only()
     def test_acr_abac_build(self):
         user_id = self.cmd("az ad signed-in-user show").get_output_in_json()["id"]
         self.kwargs.update({
@@ -363,7 +371,7 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
             'user_id': user_id,
             'auth_mode': 'None'
         })
-        
+
         # Create an ABAC-enabled registry
         response = self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --role-assignment-mode {role_assignment_mode}',
                  checks=[self.check('name', '{registry_name}'),
@@ -387,14 +395,16 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         self.cmd('acr build -r {registry_name} --source-acr-auth-id {identity} --image {image} {source_location} --no-logs', expect_failure=True)
 
         # Assign "Container Registry Repository Contributor" role to the user identity
-        self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {user_id} --scope {registry_resource_id}',
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {user_id} --scope {registry_resource_id}',
                  checks=[self.check('scope', '{registry_resource_id}')])
 
         # Wait for the role assignment to propagate
-        time.sleep(45)
+        if os.environ.get(ENV_LIVE_TEST, False):
+            time.sleep(45)
 
         # Queues a quick build with necessary permissions
-        self.cmd('acr build -r {registry_name} --source-acr-auth-id {identity} --image {image} {source_location} --no-logs', 
+        self.cmd('acr build -r {registry_name} --source-acr-auth-id {identity} --image {image} {source_location} --no-logs',
                  checks=[self.check('status', 'Succeeded'),
                          self.check('type', 'Microsoft.ContainerRegistry/registries/runs')])
 
@@ -405,7 +415,7 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         self.cmd('acr update -n {registry_name} -g {rg} --role-assignment-mode {role_assignment_mode}', checks=[
             self.check('roleAssignmentMode', 'LegacyRegistryPermissions')
         ])
-        
+
         # Expect failure due to conflicting authentication parameters.
         self.cmd('acr build -r {registry_name} --source-acr-auth-id {identity} --auth-mode {auth_mode} --image {image} {source_location} --no-logs', expect_failure=True)
 
