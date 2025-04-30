@@ -39,7 +39,7 @@ def load_command_table(self, _):
 
     with self.command_group('identity federated-credential', federated_identity_credentials_sdk,
                         client_factory=_msi_federated_identity_credentials_operations,
-                        min_api='2025-01-31-PREVIEW') as g:
+                        , min_api='2025-01-31-PREVIEW') as g:
         g.custom_command('create', 'create_or_update_federated_credential')
         g.custom_command('update', 'create_or_update_federated_credential')
         g.custom_show_command('show', 'show_federated_credential')
