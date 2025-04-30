@@ -88,12 +88,14 @@ class TestIdentity(ScenarioTest):
                      self.check('[1].subject', '{subject2}'),
                  ])
 
-        # update a federated identity credential
+        # update a federated identity credential with subject (should clear CME)
         self.cmd('identity federated-credential update --name {fic1} --identity-name {identity} --resource-group {rg} '
                  '--subject {subject3} --issuer {issuer} --audiences {audience}',
                  checks=[
                      self.check('name', '{fic1}'),
-                     self.check('subject', '{subject3}')
+                     self.check('subject', '{subject3}'),
+                     self.check('claimsMatchingExpressionValue', None),
+                     self.check('claimsMatchingExpressionVersion', None)
                  ])
 
         # delete a federated identity credential
@@ -118,3 +120,66 @@ class TestIdentity(ScenarioTest):
                      self.check('type(@)', 'array'),
                      self.check('length(@)', 0)
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_federated_identity_credential_cme_', location='eastus2euap')
+    def test_federated_identity_credential_cme(self, resource_group):
+        self.kwargs.update({
+            'identity': 'ide',
+            'fic': 'fic1',
+            'issuer': 'https://tokens.githubusercontent.com',
+            'subject': None,
+            'audience': 'api://AzureADTokenExchange',
+            'expression_value': "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads'",
+            'expression_version': '1',
+            'new_expression_value': "claims['sub'] startswith 'repo:contoso-org/contoso-repo:environment:Production'"
+        })
+
+        self.cmd('identity create -n {identity} -g {rg}')
+
+        # create a federated identity credential with CME
+        self.cmd('identity federated-credential create --name {fic} --identity-name {identity} --resource-group {rg} '
+                 '--issuer {issuer} --audiences {audience} '
+                 '--claims-matching-expression-value "{expression_value}" '
+                 '--claims-matching-expression-version {expression_version}',
+                 checks=[
+                     self.check('length(audiences)', 1),
+                     self.check('audiences[0]', '{audience}'),
+                     self.check('issuer', '{issuer}'),
+                     self.check('subject', None),
+                     self.check('claimsMatchingExpressionValue', '{expression_value}'),
+                     self.check('claimsMatchingExpressionVersion', '{expression_version}')
+                 ])
+
+        # show the federated identity credential with CME
+        self.cmd('identity federated-credential show --name {fic} --identity-name {identity} --resource-group {rg}',
+                 checks=[
+                     self.check('length(audiences)', 1),
+                     self.check('audiences[0]', '{audience}'),
+                     self.check('issuer', '{issuer}'),
+                     self.check('subject', None),
+                     self.check('claimsMatchingExpressionValue', '{expression_value}'),
+                     self.check('claimsMatchingExpressionVersion', '{expression_version}')
+                 ])
+
+        # update federated identity credential with new CME
+        self.cmd('identity federated-credential update --name {fic} --identity-name {identity} --resource-group {rg} '
+                 '--claims-matching-expression-value "{new_expression_value}"',
+                 checks=[
+                     self.check('name', '{fic}'),
+                     self.check('claimsMatchingExpressionValue', '{new_expression_value}'),
+                     self.check('claimsMatchingExpressionVersion', '{expression_version}')
+                 ])
+
+        # list the federated identity credentials and verify CME
+        self.cmd('identity federated-credential list --identity-name {identity} --resource-group {rg}',
+                 checks=[
+                     self.check('type(@)', 'array'),
+                     self.check('length(@)', 1),
+                     self.check('[0].name', '{fic}'),
+                     self.check('[0].claimsMatchingExpressionValue', '{new_expression_value}'),
+                     self.check('[0].claimsMatchingExpressionVersion', '{expression_version}')
+                 ])
+
+        # cleanup
+        self.cmd('identity federated-credential delete --name {fic} '
+                 '--identity-name {identity} --resource-group {rg} --yes')
