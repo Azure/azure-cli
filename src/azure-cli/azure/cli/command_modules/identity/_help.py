@@ -38,36 +38,59 @@ short-summary: List the associated resources for the identity.
 
 helps['identity federated-credential'] = """
 type: group
-short-summary: Manage federated identity credentials under user assigned identities.
+short-summary: "[Preview] Manage federated identity credentials under user assigned identities."
 min_api: 2025-01-31-PREVIEW
 """
 
 helps['identity federated-credential create'] = """
 type: command
+short-summary: "[Preview] Create a federated identity credential under an existing user assigned identity."
 min_api: 2025-01-31-PREVIEW
-short-summary: Create a federated identity credential under an existing user assigned identity.
+examples:
+  - name: Create a federated identity credential under a specific user assigned identity.
+    text: |
+        az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+  - name: Create a federated identity credential with claims matching expressions.
+    text: |
+        az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer https://tokens.githubusercontent.com --audiences api://AzureADTokenExchange --claims-matching-expression-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads'" --claims-matching-expression-version 1
 """
 
 helps['identity federated-credential update'] = """
-min_api: 2025-01-31-PREVIEW
 type: command
-short-summary: Update a federated identity credential under an existing user assigned identity.
+short-summary: "[Preview] Update a federated identity credential under an existing user assigned identity."
+min_api: 2025-01-31-PREVIEW
+examples:
+  - name: Update a federated identity credential under a specific user assigned identity.
+    text: |
+        az identity federated-credential update --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
 """
 
 helps['identity federated-credential delete'] = """
-min_api: 2025-01-31-PREVIEW
 type: command
-short-summary: Delete a federated identity credential under an existing user assigned identity.
+short-summary: "[Preview] Delete a federated identity credential under an existing user assigned identity."
+min_api: 2025-01-31-PREVIEW
+examples:
+  - name: Delete a federated identity credential under a specific user assigned identity.
+    text: |
+        az identity federated-credential delete --name myFicName --identity-name myIdentityName --resource-group myResourceGroup
 """
 
 helps['identity federated-credential show'] = """
-min_api: 2025-01-31-PREVIEW
 type: command
-short-summary: Show a federated identity credential under an existing user assigned identity.
+short-summary: "[Preview] Show a federated identity credential under an existing user assigned identity."
+min_api: 2025-01-31-PREVIEW
+examples:
+  - name: Show a federated identity credential under a specific user assigned identity.
+    text: |
+        az identity federated-credential show --name myFicName --identity-name myIdentityName --resource-group myResourceGroup
 """
 
 helps['identity federated-credential list'] = """
-min_api: 2025-01-31-PREVIEW
 type: command
-short-summary: List all federated identity credentials under an existing user assigned identity.
+short-summary: "[Preview] List all federated identity credentials under an existing user assigned identity."
+min_api: 2025-01-31-PREVIEW
+examples:
+  - name: List all federated identity credentials under an existing user assigned identity.
+    text: |
+        az identity federated-credential list --identity-name myIdentityName --resource-group myResourceGroup
 """
