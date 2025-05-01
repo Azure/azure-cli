@@ -47,18 +47,21 @@ def create_or_update_federated_credential(cmd, client, resource_group_name, iden
 
     return client.create_or_update(resource_group_name=resource_group_name, resource_name=identity_name,
                                    federated_identity_credential_resource_name=federated_credential_name,
-                                   parameters=parameters)
+                                   parameters=parameters, api_version='2025-01-31-preview')
 
 
 def delete_federated_credential(client, resource_group_name, identity_name, federated_credential_name):
     return client.delete(resource_group_name=resource_group_name, resource_name=identity_name,
-                         federated_identity_credential_resource_name=federated_credential_name)
+                         federated_identity_credential_resource_name=federated_credential_name,
+                         api_version='2025-01-31-preview')
 
 
 def show_federated_credential(client, resource_group_name, identity_name, federated_credential_name):
     return client.get(resource_group_name=resource_group_name, resource_name=identity_name,
-                      federated_identity_credential_resource_name=federated_credential_name)
+                      federated_identity_credential_resource_name=federated_credential_name,
+                      api_version='2025-01-31-preview')
 
 
 def list_federated_credential(client, resource_group_name, identity_name):
-    return client.list(resource_group_name=resource_group_name, resource_name=identity_name)
+    return client.list(resource_group_name=resource_group_name, resource_name=identity_name,
+                      api_version='2025-01-31-preview')
