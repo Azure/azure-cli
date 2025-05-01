@@ -39,24 +39,33 @@ short-summary: List the associated resources for the identity.
 helps['identity federated-credential'] = """
 type: group
 short-summary: Manage federated identity credentials under user assigned identities.
+long-summary: |
+    Federated identity credentials enable user-assigned managed identities to be authenticated using external identity providers.
+    Credentials can be configured using either a subject identifier or a claims matching expression for more complex token validation scenarios.
 """
 
 helps['identity federated-credential create'] = """
 type: command
 short-summary: Create a federated identity credential under an existing user assigned identity.
 examples:
-  - name: Create a federated identity credential under a specific user assigned identity.
+  - name: Create a federated identity credential using subject identifier
     text: |
-        az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+        az identity federated-credential create --name $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --subject 'system:serviceaccount:ns:svcaccount' --audiences 'api://AzureADTokenExchange'
+  - name: Create a federated identity credential using claims matching expression
+    text: |
+        az identity federated-credential create --name $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --claims-matching-expression-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --claims-matching-expression-version 1 --audiences 'api://AzureADTokenExchange'
 """
 
 helps['identity federated-credential update'] = """
 type: command
 short-summary: Update a federated identity credential under an existing user assigned identity.
 examples:
-  - name: Update a federated identity credential under a specific user assigned identity.
+  - name: Update a federated identity credential using subject identifier
     text: |
-        az identity federated-credential update --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+        az identity federated-credential update --name $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --subject 'system:serviceaccount:ns:svcaccount' --audiences 'api://AzureADTokenExchange'
+  - name: Update a federated identity credential using claims matching expression
+    text: |
+        az identity federated-credential update --name $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --claims-matching-expression-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --claims-matching-expression-version 1 --audiences 'api://AzureADTokenExchange'
 """
 
 helps['identity federated-credential delete'] = """
