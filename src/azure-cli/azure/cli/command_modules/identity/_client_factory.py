@@ -26,5 +26,9 @@ def _msi_operations_operations(cli_ctx, _):
     return _msi_client_factory(cli_ctx).operations
 
 
-def _msi_federated_identity_credentials_operations(cli_ctx, _):
-    return _msi_client_factory(cli_ctx).federated_identity_credentials
+def _msi_federated_identity_credentials_operations(cli_ctx, **_):
+    """
+    api version is specified for federated identity credentials command because new api version (2023-01-31) of MSI does not support
+    flexible fic command. In order to avoid a breaking change, multi-api package is used.
+    """
+    return _msi_client_factory(cli_ctx, api_version='2025-01-31-PREVIEW').federated_identity_credentials
