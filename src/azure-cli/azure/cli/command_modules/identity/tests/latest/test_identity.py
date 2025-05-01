@@ -35,11 +35,17 @@ class TestIdentity(ScenarioTest):
             'identity': 'ide',
             'fic1': 'fic1',
             'fic2': 'fic2',
+            'fic3': 'fic3',
+            'fic4': 'fic4',
             'subject1': 'system:serviceaccount:ns:svcaccount1',
             'subject2': 'system:serviceaccount:ns:svcaccount2',
             'subject3': 'system:serviceaccount:ns:svcaccount3',
             'issuer': 'https://oidc.prod-aks.azure.com/IssuerGUID',
             'audience': 'api://AzureADTokenExchange',
+            'claims_expr1': "claims['sub'] startswith 'repo:org/repo:ref:refs/heads/'",
+            'claims_expr2': "claims['sub'] startswith 'repo:org/repo:ref:refs/tags/'",
+            'claims_expr3': "claims['sub'] startswith 'repo:org/repo:ref:refs/pulls/'",
+            'claims_expr4': "claims['sub'] startswith 'repo:org/repo:ref:refs/main/'",
         })
 
         self.cmd('identity create -n {identity} -g {rg}')
@@ -110,8 +116,42 @@ class TestIdentity(ScenarioTest):
                      self.check('[0].subject', '{subject2}'),
                  ])
 
-        # delete a federated identity credential
+        # create federated identity credentials with claims matching expression using short form
+        self.cmd('identity federated-credential create -f {fic3} --identity-name {identity} --resource-group {rg} '
+                 '-v {claims_expr1} -e 1 --issuer {issuer} --audiences {audience}',
+                 checks=[
+                     self.check('length(audiences)', 1),
+                     self.check('audiences[0]', '{audience}'),
+                     self.check('issuer', '{issuer}'),
+                     self.check('claimsMatchingExpressionValue', '{claims_expr1}'),
+                     self.check('claimsMatchingExpressionVersion', '1')
+                 ])
+
+        # create federated identity credentials with claims matching expression using -cv/-cvr syntax
+        self.cmd('identity federated-credential create --fed-name {fic4} --identity-name {identity} --resource-group {rg} '
+                 '-cv {claims_expr2} -cvr 1 --issuer {issuer} --audiences {audience}',
+                 checks=[
+                     self.check('length(audiences)', 1),
+                     self.check('audiences[0]', '{audience}'),
+                     self.check('issuer', '{issuer}'),
+                     self.check('claimsMatchingExpressionValue', '{claims_expr2}'),
+                     self.check('claimsMatchingExpressionVersion', '1')
+                 ])
+
+        # update federated identity credential with claims matching expression using -cv/-cvr syntax
+        self.cmd('identity federated-credential update -f {fic3} --identity-name {identity} --resource-group {rg} '
+                 '-cv {claims_expr3} -cvr 1 --issuer {issuer} --audiences {audience}',
+                 checks=[
+                     self.check('name', '{fic3}'),
+                     self.check('claimsMatchingExpressionValue', '{claims_expr3}')
+                 ])
+
+        # delete all federated identity credentials
         self.cmd('identity federated-credential delete --name {fic2}'
+                 ' --identity-name {identity} --resource-group {rg} --yes')
+        self.cmd('identity federated-credential delete --name {fic3}'
+                 ' --identity-name {identity} --resource-group {rg} --yes')
+        self.cmd('identity federated-credential delete --name {fic4}'
                  ' --identity-name {identity} --resource-group {rg} --yes')
         self.cmd('identity federated-credential list --identity-name {identity} --resource-group {rg}',
                  checks=[
