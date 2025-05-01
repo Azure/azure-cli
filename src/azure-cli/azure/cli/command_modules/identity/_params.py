@@ -23,7 +23,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
 
     with self.argument_context('identity federated-credential', min_api='2025-01-31-preview') as c:
-        c.argument('federated_credential_name', options_list=('--name', '-n'), help='The name of the federated identity credential resource.')
+        c.argument('federated_credential_name', options_list=['--federated-credential-name', '--fed-name', '-f'], help='The name of the federated identity credential resource.')
         c.argument('identity_name', help='The name of the identity resource.')
 
     for scope in ['identity federated-credential create', 'identity federated-credential update']:
@@ -31,5 +31,5 @@ def load_arguments(self, _):
             c.argument('issuer', help='The openId connect metadata URL of the issuer of the identity provider that Azure AD would use in the token exchange protocol for validating tokens before issuing a token as the user-assigned managed identity.')
             c.argument('subject', help='The sub value in the token sent to Azure AD for getting the user-assigned managed identity token. The value configured in the federated credential and the one in the incoming token must exactly match for Azure AD to issue the access token. Cannot be used with --claims-matching-expression-value.')
             c.argument('audiences', nargs='+', help='The aud value in the token sent to Azure for getting the user-assigned managed identity token. The value configured in the federated credential and the one in the incoming token must exactly match for Azure to issue the access token.')
-            c.argument('claims_matching_expression_value', options_list=['--claims-matching-expression-value', '--cme-value', '-cv'], help='A claims matching expression that is evaluated against incoming tokens for access token requests. Cannot be used with --subject.')
-            c.argument('claims_matching_expression_version', options_list=['--claims-matching-expression-version', '--cme-version', '-cvr'], help='Version of the claims matching expression language. Required when using --claims-matching-expression-value.')
+            c.argument('claims_matching_expression_value', options_list=['--claims-matching-expression-value', '--cme-value', '-v'], help='A claims matching expression that is evaluated against incoming tokens for access token requests. Cannot be used with --subject.')
+            c.argument('claims_matching_expression_version', options_list=['--claims-matching-expression-version', '--cme-version', '-e'], help='Version of the claims matching expression language. Required when using --claims-matching-expression-value.')
