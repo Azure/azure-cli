@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, too-many-lines
-
 from knack.help_files import helps
 
 helps['identity'] = """
@@ -14,7 +12,7 @@ short-summary: Managed Identities
 
 helps['identity create'] = """
 type: command
-short-summary: Create Identities.
+short-summary: Create an identity.
 examples:
   - name: Create an identity.
     text: |
@@ -36,61 +34,71 @@ type: command
 short-summary: List the associated resources for the identity.
 """
 
+helps['identity show'] = """
+type: command
+short-summary: Show the details of a managed identity.
+"""
+
+helps['identity delete'] = """
+type: command
+short-summary: Delete a managed identity.
+"""
+
 helps['identity federated-credential'] = """
 type: group
-short-summary: "[Preview] Manage federated identity credentials under user assigned identities."
-min_api: 2025-01-31-PREVIEW
+short-summary: [Preview] Manage federated credentials under managed identities.
 """
 
 helps['identity federated-credential create'] = """
 type: command
-short-summary: "[Preview] Create a federated identity credential under an existing user assigned identity."
-min_api: 2025-01-31-PREVIEW
+short-summary: [Preview] Create a federated credential.
+parameters:
+  - name: --name -n
+    type: string
+    short-summary: Name of the federated credential.
+    long-summary: Must start with a letter or number, and can contain letters, numbers, underscores, and hyphens. Length must be between 3-120 characters.
+  - name: --identity-name
+    type: string
+    short-summary: Name of the managed identity.
+  - name: --issuer 
+    type: string
+    short-summary: The URL of the issuer to be trusted.
+    long-summary: For GitHub Actions, use 'https://token.actions.githubusercontent.com'
+  - name: --subject
+    type: string
+    short-summary: The identifier of the external identity.
+    long-summary: Cannot be used with claims-matching-expression-* parameters.
+  - name: --audiences
+    type: array
+    short-summary: List of audiences that can appear in the issued token.
 examples:
-  - name: Create a federated identity credential under a specific user assigned identity.
+  - name: Create a federated identity credential with subject matching
     text: |
-        az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
-  - name: Create a federated identity credential with claims matching expressions.
-    text: |
-        az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer https://tokens.githubusercontent.com --audiences api://AzureADTokenExchange --claims-matching-expression-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads'" --claims-matching-expression-version 1
+        az identity federated-credential create -g MyResourceGroup --identity-name MyIdentity -n MyFicName \\
+            --issuer https://token.actions.githubusercontent.com \\
+            --subject "system:serviceaccount:ns:svcaccount" \\
+            --audiences api://AzureADTokenExchange
 """
 
 helps['identity federated-credential update'] = """
 type: command
-short-summary: "[Preview] Update a federated identity credential under an existing user assigned identity."
-min_api: 2025-01-31-PREVIEW
-examples:
-  - name: Update a federated identity credential under a specific user assigned identity.
-    text: |
-        az identity federated-credential update --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+short-summary: [Preview] Update a federated credential.
 """
 
 helps['identity federated-credential delete'] = """
 type: command
-short-summary: "[Preview] Delete a federated identity credential under an existing user assigned identity."
-min_api: 2025-01-31-PREVIEW
+short-summary: [Preview] Delete a federated credential.
 examples:
-  - name: Delete a federated identity credential under a specific user assigned identity.
-    text: |
-        az identity federated-credential delete --name myFicName --identity-name myIdentityName --resource-group myResourceGroup
+  - name: Delete a federated credential
+    text: az identity federated-credential delete -g MyResourceGroup --identity-name MyIdentity -n MyFicName
 """
 
 helps['identity federated-credential show'] = """
 type: command
-short-summary: "[Preview] Show a federated identity credential under an existing user assigned identity."
-min_api: 2025-01-31-PREVIEW
-examples:
-  - name: Show a federated identity credential under a specific user assigned identity.
-    text: |
-        az identity federated-credential show --name myFicName --identity-name myIdentityName --resource-group myResourceGroup
+short-summary: [Preview] Show details of a federated credential.
 """
 
 helps['identity federated-credential list'] = """
 type: command
-short-summary: "[Preview] List all federated identity credentials under an existing user assigned identity."
-min_api: 2025-01-31-PREVIEW
-examples:
-  - name: List all federated identity credentials under an existing user assigned identity.
-    text: |
-        az identity federated-credential list --identity-name myIdentityName --resource-group myResourceGroup
+short-summary: [Preview] List all federated credentials for a managed identity.
 """
