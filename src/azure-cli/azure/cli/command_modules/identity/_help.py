@@ -51,9 +51,12 @@ examples:
   - name: Create a federated identity credential using subject identifier
     text: |
         az identity federated-credential create --name $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --subject 'system:serviceaccount:ns:svcaccount' --audiences 'api://AzureADTokenExchange'
-  - name: Create a federated identity credential using claims matching expression
+  - name: Create a federated identity credential using claims matching expression (long form)
     text: |
         az identity federated-credential create --name $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --claims-matching-expression-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --claims-matching-expression-version 1 --audiences 'api://AzureADTokenExchange'
+  - name: Create a federated identity credential using claims matching expression (short form)
+    text: |
+        az identity federated-credential create -n $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --cme-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --cme-version 1 --audiences 'api://AzureADTokenExchange'
 """
 
 helps['identity federated-credential update'] = """
@@ -63,9 +66,12 @@ examples:
   - name: Update a federated identity credential using subject identifier
     text: |
         az identity federated-credential update --name $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --subject 'system:serviceaccount:ns:svcaccount' --audiences 'api://AzureADTokenExchange'
-  - name: Update a federated identity credential using claims matching expression
+  - name: Update a federated identity credential using claims matching expression (long form)
     text: |
         az identity federated-credential update --name $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --claims-matching-expression-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --claims-matching-expression-version 1 --audiences 'api://AzureADTokenExchange'
+  - name: Update a federated identity credential using claims matching expression (short form)
+    text: |
+        az identity federated-credential update -n $ficId --identity-name $uaId --resource-group $rg --issuer 'https://aks.azure.com/issuerGUID' --cme-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --cme-version 1 --audiences 'api://AzureADTokenExchange'
 """
 
 helps['identity federated-credential delete'] = """
