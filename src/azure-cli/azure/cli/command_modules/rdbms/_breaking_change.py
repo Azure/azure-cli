@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import register_command_group_deprecate, register_default_value_breaking_change, \
+from azure.cli.core.breaking_change import register_command_group_deprecate, \
     register_argument_deprecate, register_other_breaking_change, register_logic_breaking_change
 
 

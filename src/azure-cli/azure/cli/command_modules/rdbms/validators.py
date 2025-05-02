@@ -350,7 +350,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
+    _pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
     is_microsoft_entra_auth = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled') \
         or bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
@@ -510,7 +510,7 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
-def _pg_version_validator(version, versions, is_create):
+def _pg_version_validator(version, versions):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
