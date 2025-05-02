@@ -71,7 +71,11 @@ def set_feature(cmd,
     default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
 
     if requirement_type:
-        default_conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
+        default_conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = (
+            FeatureFlagConstants.REQUIREMENT_TYPE_ALL
+            if requirement_type.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ALL.lower()
+            else FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+        )
 
     default_value = {
         FeatureFlagConstants.ID: feature,
@@ -125,7 +129,11 @@ def set_feature(cmd,
                     feature_flag_value.description = description
 
                 if requirement_type is not None:
-                    feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
+                    feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = (
+                        FeatureFlagConstants.REQUIREMENT_TYPE_ALL
+                        if requirement_type.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ALL.lower()
+                        else FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+                    )
 
                 set_kv = KeyValue(key=key,
                                   label=label,
