@@ -7,30 +7,37 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - backup recoverypoint list
+      - backup protection backup-now
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -v -c -i --workload-type --backup-management-type --query
+      - -g -v -c -i --backup-type --enable-compression --backup-management-type
       User-Agent:
       - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupProtectedItems?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureWorkLoad%27+and+itemType+eq+%27SAPAseDatabase%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupProtectedItems?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureWorkLoad%27
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2025-04-29T10:06:43.9794285Z","protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb2","name":"SAPAseDatabase;ab4;asetestdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb2","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2025-04-29T10:04:06.2786166Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
-        Azure Backup encountered an internal error.","recommendations":["Wait for
-        a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"404621923039925","protectedItemHealthStatus":"IRPending","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-05-02T09:41:21.608368Z","lastBackupErrorDetail":{"code":"WorkloadExtensionNotReachable","message":"AzureBackup
+        workload extension operation failed.","recommendations":["Please make sure
+        that the VM is up and running and has internet connectivity. Use the re-register
+        option available in the Backup Infrastructure pane in the vault to re-register
+        the virtual machine with Azure Backup service. If the re-registration fails,
+        please contact Microsoft support."]},"protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Unhealthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb2","name":"SAPAseDatabase;ab4;asetestdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb2","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"IRPending","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-05-02T09:41:26.8786277Z","lastBackupErrorDetail":{"code":"WorkloadExtensionNotReachable","message":"AzureBackup
+        workload extension operation failed.","recommendations":["Please make sure
+        that the VM is up and running and has internet connectivity. Use the re-register
+        option available in the Backup Infrastructure pane in the vault to re-register
+        the virtual machine with Azure Backup service. If the re-registration fails,
+        please contact Microsoft support."]},"protectedItemDataSourceId":"404621923039925","protectedItemHealthStatus":"Unhealthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-vm-crr1/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-vm-crr1","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2025-05-02T10:01:29.4369147Z","protectedItemDataSourceId":"404620546121812","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-vm-crr1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-vm-crr1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-vm-crr1/protectedItems/SAPAseDatabase;ab4;asetestdb2","name":"SAPAseDatabase;ab4;asetestdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb2","serverName":"ase-vm-crr1","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2025-05-02T10:01:23.670387Z","protectedItemDataSourceId":"404621424400378","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-vm-crr1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-vm-crr1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3297'
+      - '6945'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:40 GMT
+      - Fri, 02 May 2025 10:04:27 GMT
       expires:
       - '-1'
       pragma:
@@ -42,11 +49,225 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/4ab61502-541f-4eee-b5cd-6fd7ef5bbb7a
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/584c41b0-740d-4369-8655-d470adb8f76c
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: AE6457F30EB54819962229F56FBFBFF1 Ref B: MAA201060515037 Ref C: 2025-04-29T11:12:38Z'
+      - 'Ref A: BB9034DCD2074A58B80EABAF6CC28EA9 Ref B: MAA201060515031 Ref C: 2025-05-02T10:04:26Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"objectType": "AzureWorkloadBackupRequest", "backupType":
+      "Full", "enableCompression": false, "recoveryPointExpiryTimeInUTC": "2025-06-16T10:04:26.534594Z"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection backup-now
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '173'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -v -c -i --backup-type --enable-compression --backup-management-type
+      User-Agent:
+      - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Base-rg-ccy%3Base-ccy-vm5/protectedItems/SAPAseDatabase%3Bab4%3Basetestdb1/backup?api-version=2025-02-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1/operationsStatus/91955099-83db-424b-b1b2-f9c85506e55c?api-version=2025-02-01&t=638817770685232668&c=MIIHhzCCBm-gAwIBAgITHgbO7uoaMgs7D03eGwAABs7u6jANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDIxMTk0NzU4WhcNMjUxMDE4MTk0NzU4WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANbMTIfsosr-e2nhsYNc2S0BYTm_Z7GagFw0ZlQEJG5FsiXVrA_5xrkW-roFwVxI7Ywu8tA1XPPFxJkRGt5GehtEtKB37IgztbtYsIjtoNU40Xc1bQhz7nvp-X2X4tbm7hl6ESrMeP5FWuWU8Z7MWm2Gcps1d1Cs5LO7Uk1ADbfJkV_9YdyIhP0FOhfTSiPvPY57EOh5ULUAhNTf82udNEtKlDgfMYVLXXIcqTbK7JWz3_UjBtNGSVFPABuNjfUAOYaG9USwE098YJAIP2w85Rxm1FUEaDsF3Omqkph3OvEpY_65DAhz12_07hxuc2wM2AzA3AgdbUF8Qo6b7teNMf0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT5JDf47TxYPD9hhG08aVfLa6AK2jAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJLaq4Zr75ddZokhkTocSjBLgmkkDJoMYWmwgDsEUyVKlJh4NIHCdpqWe1D1fZA9Bzygrcl2xG3JW3y8_tM05nYAPZl5nmrQMbLynhZKhBEx2FeToUtzwl8aV1ghjTcHxwQPOpCDVbzSqFEWHN3M8u5Lnq07vLSyuKea1SvsIdgtjBJ6IUPa0-5L1gGL9dSPw9FKwVvQa4hGVExiSyj3LDUqlEBADVvmtMJ0uW9A5WYI4SHZ-36KJu5igoF8yTMACt4G2ZSPZTFySV9T_lrNhXahU6X2qrKR7Z9drL_wT5IecO-3Ib6jbSkCb3TGdL-tsQNvYUOF2_MnQN63BWbmFkM&s=fCUYCjCCrBmVYk5Hfv0Jaga3WNHMkIgokdEetqeSAREItQnEOdbi5NhJml9JJtdDjWo0AJmOv7mE1Ae7ZtVFdheQQGlzawGC2hCXe-5zlIZI26L4-cN00ux-GJWTxsmrSHZ8kyOPpoRXW6Yx1Qtzl0znxUwWVeNfqzm4oQ2TtGxqWGZLmtzW5X6HaCPTyalgY5W4qyZl8qum-KGtaM-4ysaUGJ3nL45ZkKiBeIQpM7Xqw0SVSnA46TfZ7g-LXn3SAhUMh_Yt4H9FXJc9OsJlUzh-TbMupWbrqYvG62afkV1SoO7RoklJezC5CVmqGQw_p9jyp8QHS7RDV3mb84p9wg&h=Wae18k8PflylKq300BodnspoPyHPiqQjvbb2jW4zu9c
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 02 May 2025 10:04:28 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1/operationResults/91955099-83db-424b-b1b2-f9c85506e55c?api-version=2025-02-01&t=638817770685232668&c=MIIHhzCCBm-gAwIBAgITHgbO7uoaMgs7D03eGwAABs7u6jANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDIxMTk0NzU4WhcNMjUxMDE4MTk0NzU4WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANbMTIfsosr-e2nhsYNc2S0BYTm_Z7GagFw0ZlQEJG5FsiXVrA_5xrkW-roFwVxI7Ywu8tA1XPPFxJkRGt5GehtEtKB37IgztbtYsIjtoNU40Xc1bQhz7nvp-X2X4tbm7hl6ESrMeP5FWuWU8Z7MWm2Gcps1d1Cs5LO7Uk1ADbfJkV_9YdyIhP0FOhfTSiPvPY57EOh5ULUAhNTf82udNEtKlDgfMYVLXXIcqTbK7JWz3_UjBtNGSVFPABuNjfUAOYaG9USwE098YJAIP2w85Rxm1FUEaDsF3Omqkph3OvEpY_65DAhz12_07hxuc2wM2AzA3AgdbUF8Qo6b7teNMf0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT5JDf47TxYPD9hhG08aVfLa6AK2jAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJLaq4Zr75ddZokhkTocSjBLgmkkDJoMYWmwgDsEUyVKlJh4NIHCdpqWe1D1fZA9Bzygrcl2xG3JW3y8_tM05nYAPZl5nmrQMbLynhZKhBEx2FeToUtzwl8aV1ghjTcHxwQPOpCDVbzSqFEWHN3M8u5Lnq07vLSyuKea1SvsIdgtjBJ6IUPa0-5L1gGL9dSPw9FKwVvQa4hGVExiSyj3LDUqlEBADVvmtMJ0uW9A5WYI4SHZ-36KJu5igoF8yTMACt4G2ZSPZTFySV9T_lrNhXahU6X2qrKR7Z9drL_wT5IecO-3Ib6jbSkCb3TGdL-tsQNvYUOF2_MnQN63BWbmFkM&s=ixhpgoxLQyhxh6Eopgq9GDxrfgGHHJSbcJ6jgVMGMrem7w7tdMXjtcnKPI6wfkz6L2RM65PsQDpcK4AICTxKNhmJ-gady7YcLD3oHHURaIfOdRWa8wkEShCHVracq7CL-pC5iyA2pvhsndQeaZKahfuKhFzgIbhnwBu6h5BA1n9M_Gmxw1Sgzaw_W-FIPOHBen0O1ve3mol9Qs6WHpsfjF8wQ26PDDlH-Xu7VYZ9PW6oHarh28vdRZI6dws6-7RuYJGkg5hrw9UXDO1Y7jlMUI5XVleJvTs9xd-mPUjR7MRLI2l0dEX3G2KQB6cfj7YVwuzeE7ib1uWHBBhWu1tyNA&h=Vb-hqvq50cI0qyrHh3KwAR3WASnLqINGFICe0MILV9g
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/2b682a06-99f3-4c9e-8042-f32f79547bef
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: E4F743F92B5B439B95D0EC0A1C2BB324 Ref B: MAA201060513045 Ref C: 2025-05-02T10:04:27Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection backup-now
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --backup-type --enable-compression --backup-management-type
+      User-Agent:
+      - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupOperations/91955099-83db-424b-b1b2-f9c85506e55c?api-version=2025-02-01
+  response:
+    body:
+      string: '{"id":"91955099-83db-424b-b1b2-f9c85506e55c","name":"91955099-83db-424b-b1b2-f9c85506e55c","status":"Succeeded","startTime":"2025-05-02T10:04:28.3458047Z","endTime":"2025-05-02T10:04:28.3458047Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"1e51e477-b293-4349-8e98-52aea35f7532"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 02 May 2025 10:04:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/e847ccd6-92c0-4fe7-8dc8-b4aa389f1013
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-msedge-ref:
+      - 'Ref A: 2AC98D86CF234EBDAFE5A05FB7AD1D5C Ref B: MAA201060516009 Ref C: 2025-05-02T10:04:28Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup protection backup-now
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --backup-type --enable-compression --backup-management-type
+      User-Agent:
+      - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupJobs/1e51e477-b293-4349-8e98-52aea35f7532?api-version=2025-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupJobs/1e51e477-b293-4349-8e98-52aea35f7532","name":"1e51e477-b293-4349-8e98-52aea35f7532","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":["Cancellable"],"workloadType":"SAPAseDatabase","duration":"PT2.382802S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data to vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{}},"isUserTriggered":true,"entityFriendlyName":"ab4;asetestdb1
+        [ase-ccy-vm5]","backupManagementType":"AzureWorkload","operation":"Backup
+        (Full)","status":"InProgress","startTime":"2025-05-02T10:04:28.3458047Z","activityId":"d32644fa-273c-11f0-b5e2-6ca10057228e"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '806'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 02 May 2025 10:04:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/ddb7e68e-0ded-49a4-8ce5-e745409ed5a0
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '449'
+      x-msedge-ref:
+      - 'Ref A: 6BBC67E0E93143D299F38E2C38B741D4 Ref B: MAA201060515023 Ref C: 2025-05-02T10:04:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type --backup-management-type --query
+      User-Agent:
+      - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupProtectedItems?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureWorkLoad%27+and+itemType+eq+%27SAPAseDatabase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-05-02T09:41:21.608368Z","lastBackupErrorDetail":{"code":"WorkloadExtensionNotReachable","message":"AzureBackup
+        workload extension operation failed.","recommendations":["Please make sure
+        that the VM is up and running and has internet connectivity. Use the re-register
+        option available in the Backup Infrastructure pane in the vault to re-register
+        the virtual machine with Azure Backup service. If the re-registration fails,
+        please contact Microsoft support."]},"protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Unhealthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb2","name":"SAPAseDatabase;ab4;asetestdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb2","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"IRPending","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-05-02T09:41:26.8786277Z","lastBackupErrorDetail":{"code":"WorkloadExtensionNotReachable","message":"AzureBackup
+        workload extension operation failed.","recommendations":["Please make sure
+        that the VM is up and running and has internet connectivity. Use the re-register
+        option available in the Backup Infrastructure pane in the vault to re-register
+        the virtual machine with Azure Backup service. If the re-registration fails,
+        please contact Microsoft support."]},"protectedItemDataSourceId":"404621923039925","protectedItemHealthStatus":"Unhealthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-vm-crr1/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-vm-crr1","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2025-05-02T10:01:29.4369147Z","protectedItemDataSourceId":"404620546121812","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-vm-crr1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-vm-crr1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-vm-crr1/protectedItems/SAPAseDatabase;ab4;asetestdb2","name":"SAPAseDatabase;ab4;asetestdb2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb2","serverName":"ase-vm-crr1","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2025-05-02T10:01:23.670387Z","protectedItemDataSourceId":"404621424400378","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-vm-crr1","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-vm-crr1","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6945'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 02 May 2025 10:04:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/8fb89e5f-4eba-4bc3-916a-630457ddd3c1
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-msedge-ref:
+      - 'Ref A: 7A8B1AC8113943BCB409B62AB221F10F Ref B: MAA201060513035 Ref C: 2025-05-02T10:04:30Z'
     status:
       code: 200
       message: OK
@@ -71,16 +292,16 @@ interactions:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1/recoveryPoints/519635394458366","name":"519635394458366","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadRecoveryPoint","recoveryPointTimeInUTC":"2025-04-29T10:06:08.416Z","type":"Full","crossRegionRestoreState":"Supported","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
         still determining if this Recovery Point can be moved.. Please check again
-        after some time."}}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2025-06-14T10:05:28.0000000Z","ruleName":"On-Demand","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1425'
+      - '1542'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:42 GMT
+      - Fri, 02 May 2025 10:04:33 GMT
       expires:
       - '-1'
       pragma:
@@ -92,11 +313,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/centralindia/a3a16c94-fc95-43ba-802a-c14b4ede04ab
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/1dc47e9b-6719-47cf-99c2-786a66e11990
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: AD2D33BC67D94C23A82D2B0AAC2B3C70 Ref B: MAA201060513045 Ref C: 2025-04-29T11:12:40Z'
+      - 'Ref A: 3B5132501945444C884EEB209ECC308F Ref B: MAA201060516009 Ref C: 2025-05-02T10:04:32Z'
     status:
       code: 200
       message: OK
@@ -119,16 +340,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupProtectionContainers?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureWorkload%27+and+status+eq+%27Registered%27
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5","name":"VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","lastUpdatedTime":"2025-04-29T09:58:50.5690464Z","extendedInfo":{"hostServerName":"ase-ccy-vm5","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPAse","itemCount":11,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"ase-ccy-vm5","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5","name":"VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","lastUpdatedTime":"2025-04-29T09:58:50.5690464Z","extendedInfo":{"hostServerName":"ase-ccy-vm5","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPAse","itemCount":11,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"ase-ccy-vm5","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;ase-rg-ccy;ase-vm-crr1","name":"VMAppContainer;Compute;ase-rg-ccy;ase-vm-crr1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-vm-crr1","lastUpdatedTime":"2025-04-30T05:37:08.961185Z","extendedInfo":{"hostServerName":"ase-vm-crr1","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SAPAse","itemCount":11,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":""}}]}},"friendlyName":"ase-vm-crr1","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1130'
+      - '2248'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:43 GMT
+      - Fri, 02 May 2025 10:04:34 GMT
       expires:
       - '-1'
       pragma:
@@ -140,11 +361,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/200313f6-45f1-4619-a838-2ab9ad314247
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/b9794ed9-7485-46e5-b49d-fbb92ef5475e
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: 33EEA9C6DFA842D89A6EE18700FB153A Ref B: MAA201060516009 Ref C: 2025-04-29T11:12:42Z'
+      - 'Ref A: C1BF2E6815C7450082B50F665034E19C Ref B: MAA201060513017 Ref C: 2025-05-02T10:04:34Z'
     status:
       code: 200
       message: OK
@@ -167,16 +388,21 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Base-rg-ccy%3Base-ccy-vm5/protectedItems/SAPAseDatabase%3Bab4%3Basetestdb1?api-version=2025-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2025-04-29T10:06:43.9794285Z","protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2025-04-29T10:06:08.416Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","lastRecoveryPoint":"2025-04-29T10:06:08.416Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-05-02T09:41:21.608368Z","lastBackupErrorDetail":{"code":"WorkloadExtensionNotReachable","message":"AzureBackup
+        workload extension operation failed.","recommendations":["Please make sure
+        that the VM is up and running and has internet connectivity. Use the re-register
+        option available in the Backup Infrastructure pane in the vault to re-register
+        the virtual machine with Azure Backup service. If the re-registration fails,
+        please contact Microsoft support."]},"protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2025-04-29T10:06:08.416Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","lastRecoveryPoint":"2025-04-29T10:06:08.416Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1675'
+      - '2116'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:44 GMT
+      - Fri, 02 May 2025 10:04:35 GMT
       expires:
       - '-1'
       pragma:
@@ -188,11 +414,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/southindia/ff7f20d7-2a71-42d0-8a40-1efa5895d4f6
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/bfe21461-4ab4-4a38-adb0-b6427ea5e041
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: 2EACBA59268746839A22F066A164B061 Ref B: MAA201060514037 Ref C: 2025-04-29T11:12:44Z'
+      - 'Ref A: CCAA8F11797A421B9752834A383F58D6 Ref B: MAA201060515021 Ref C: 2025-05-02T10:04:35Z'
     status:
       code: 200
       message: OK
@@ -215,16 +441,21 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Base-rg-ccy%3Base-ccy-vm5/protectedItems/SAPAseDatabase%3Bab4%3Basetestdb1?api-version=2025-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2025-04-29T10:06:43.9794285Z","protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2025-04-29T10:06:08.416Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","lastRecoveryPoint":"2025-04-29T10:06:08.416Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-05-02T09:41:21.608368Z","lastBackupErrorDetail":{"code":"WorkloadExtensionNotReachable","message":"AzureBackup
+        workload extension operation failed.","recommendations":["Please make sure
+        that the VM is up and running and has internet connectivity. Use the re-register
+        option available in the Backup Infrastructure pane in the vault to re-register
+        the virtual machine with Azure Backup service. If the re-registration fails,
+        please contact Microsoft support."]},"protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2025-04-29T10:06:08.416Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","lastRecoveryPoint":"2025-04-29T10:06:08.416Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1675'
+      - '2116'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:46 GMT
+      - Fri, 02 May 2025 10:04:37 GMT
       expires:
       - '-1'
       pragma:
@@ -236,11 +467,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/c9866f3a-c793-400f-bee8-810c2bfbeb54
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/9a198100-e056-49f6-a493-8fc4fa88f258
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: CC3BDB5902BB4971B7A24CE172AF856E Ref B: MAA201060513011 Ref C: 2025-04-29T11:12:45Z'
+      - 'Ref A: E3F4AD04DB424E61AD9A1C843EB5D405 Ref B: MAA201060513033 Ref C: 2025-05-02T10:04:36Z'
     status:
       code: 200
       message: OK
@@ -274,7 +505,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:48 GMT
+      - Fri, 02 May 2025 10:04:39 GMT
       expires:
       - '-1'
       pragma:
@@ -286,11 +517,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/d869f0a9-8627-4f95-9869-d540959d4779
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/5e3a9a9b-a1ba-4f46-9939-0a1a6629ae53
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: AD8EEC0BA3DD4D2592EFC98D8CBFBFEB Ref B: MAA201060515031 Ref C: 2025-04-29T11:12:46Z'
+      - 'Ref A: 607A427FE5C7416182B0506D03564956 Ref B: MAA201060516031 Ref C: 2025-05-02T10:04:37Z'
     status:
       code: 200
       message: OK
@@ -313,16 +544,21 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Base-rg-ccy%3Base-ccy-vm5/protectedItems/SAPAseDatabase%3Bab4%3Basetestdb1?api-version=2025-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2025-04-29T10:06:43.9794285Z","protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2025-04-29T10:06:08.416Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","lastRecoveryPoint":"2025-04-29T10:06:08.416Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-05-02T09:41:21.608368Z","lastBackupErrorDetail":{"code":"WorkloadExtensionNotReachable","message":"AzureBackup
+        workload extension operation failed.","recommendations":["Please make sure
+        that the VM is up and running and has internet connectivity. Use the re-register
+        option available in the Backup Infrastructure pane in the vault to re-register
+        the virtual machine with Azure Backup service. If the re-registration fails,
+        please contact Microsoft support."]},"protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2025-04-29T10:06:08.416Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","lastRecoveryPoint":"2025-04-29T10:06:08.416Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1675'
+      - '2116'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:48 GMT
+      - Fri, 02 May 2025 10:04:40 GMT
       expires:
       - '-1'
       pragma:
@@ -334,11 +570,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/75122325-dff3-4f63-b7c9-16cbf102ac67
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/d5f1a2b6-b59a-4819-9b43-ad74f496eb24
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: 845B50087CB34681B7AB901113BC9969 Ref B: MAA201060515033 Ref C: 2025-04-29T11:12:48Z'
+      - 'Ref A: 590D35BD91A8406393B27B3CEBEF8B17 Ref B: MAA201060514011 Ref C: 2025-05-02T10:04:39Z'
     status:
       code: 200
       message: OK
@@ -361,16 +597,21 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Base-rg-ccy%3Base-ccy-vm5/protectedItems/SAPAseDatabase%3Bab4%3Basetestdb1?api-version=2025-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2025-04-29T10:06:43.9794285Z","protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2025-04-29T10:06:08.416Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","lastRecoveryPoint":"2025-04-29T10:06:08.416Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1","name":"SAPAseDatabase;ab4;asetestdb1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"asetestdb1","serverName":"ase-ccy-vm5","parentName":"AB4","parentType":"AzureVmWorkloadSAPAseSystem","protectionStatus":"Unhealthy","protectionState":"Protected","lastBackupStatus":"Unhealthy","lastBackupTime":"2025-05-02T09:41:21.608368Z","lastBackupErrorDetail":{"code":"WorkloadExtensionNotReachable","message":"AzureBackup
+        workload extension operation failed.","recommendations":["Please make sure
+        that the VM is up and running and has internet connectivity. Use the re-register
+        option available in the Backup Infrastructure pane in the vault to re-register
+        the virtual machine with Azure Backup service. If the re-registration fails,
+        please contact Microsoft support."]},"protectedItemDataSourceId":"404620823563901","protectedItemHealthStatus":"Unhealthy","extendedInfo":{"oldestRecoveryPoint":"2025-04-29T10:06:08.416Z","recoveryPointCount":1,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSAPAseDatabase","backupManagementType":"AzureWorkload","workloadType":"SAPAseDatabase","containerName":"VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm5","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupPolicies/DailyPolicy-ma2c99lv","lastRecoveryPoint":"2025-04-29T10:06:08.416Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1675'
+      - '2116'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:50 GMT
+      - Fri, 02 May 2025 10:04:41 GMT
       expires:
       - '-1'
       pragma:
@@ -382,11 +623,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/201b8c79-2edd-4eb1-8cac-99771fb6ef74
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/822ea28d-a72b-45d9-baff-e247fa9da516
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: 540600A407E54B6C8A789125F6B6EE81 Ref B: MAA201060515009 Ref C: 2025-04-29T11:12:49Z'
+      - 'Ref A: DABA5E63AE3D41B19311A1487C007734 Ref B: MAA201060513031 Ref C: 2025-05-02T10:04:40Z'
     status:
       code: 200
       message: OK
@@ -420,7 +661,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:51 GMT
+      - Fri, 02 May 2025 10:04:43 GMT
       expires:
       - '-1'
       pragma:
@@ -432,11 +673,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/jioindiacentral/b254ed20-2c20-48f3-b033-f026f47ea307
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/adef6d03-f5c0-4167-8588-6d037d309394
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: 1E7CFE92269E46AD8FCCD98DA217C988 Ref B: MAA201060513021 Ref C: 2025-04-29T11:12:50Z'
+      - 'Ref A: 82009DA3F50A4016BC3A53D94D1CB52A Ref B: MAA201060516017 Ref C: 2025-05-02T10:04:42Z'
     status:
       code: 200
       message: OK
@@ -468,7 +709,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:53 GMT
+      - Fri, 02 May 2025 10:04:43 GMT
       expires:
       - '-1'
       pragma:
@@ -480,11 +721,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/66d07027-c81d-4d39-a67a-5b82650f6f15
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/2a9445a2-7c56-4469-819a-dfa327c6953a
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 07974A9A17E540B69B1BC94F60D2D3C3 Ref B: MAA201060513045 Ref C: 2025-04-29T11:12:52Z'
+      - 'Ref A: 8882CF47A0F0450EA36F894CC50DA943 Ref B: MAA201060515035 Ref C: 2025-05-02T10:04:43Z'
     status:
       code: 200
       message: OK
@@ -515,17 +756,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1/operationsStatus/ae98c7b1-f074-4427-af90-f9bb303e4524?api-version=2025-02-01&t=638815219753315717&c=MIIHhzCCBm-gAwIBAgITHgbO7uoaMgs7D03eGwAABs7u6jANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDIxMTk0NzU4WhcNMjUxMDE4MTk0NzU4WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANbMTIfsosr-e2nhsYNc2S0BYTm_Z7GagFw0ZlQEJG5FsiXVrA_5xrkW-roFwVxI7Ywu8tA1XPPFxJkRGt5GehtEtKB37IgztbtYsIjtoNU40Xc1bQhz7nvp-X2X4tbm7hl6ESrMeP5FWuWU8Z7MWm2Gcps1d1Cs5LO7Uk1ADbfJkV_9YdyIhP0FOhfTSiPvPY57EOh5ULUAhNTf82udNEtKlDgfMYVLXXIcqTbK7JWz3_UjBtNGSVFPABuNjfUAOYaG9USwE098YJAIP2w85Rxm1FUEaDsF3Omqkph3OvEpY_65DAhz12_07hxuc2wM2AzA3AgdbUF8Qo6b7teNMf0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT5JDf47TxYPD9hhG08aVfLa6AK2jAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJLaq4Zr75ddZokhkTocSjBLgmkkDJoMYWmwgDsEUyVKlJh4NIHCdpqWe1D1fZA9Bzygrcl2xG3JW3y8_tM05nYAPZl5nmrQMbLynhZKhBEx2FeToUtzwl8aV1ghjTcHxwQPOpCDVbzSqFEWHN3M8u5Lnq07vLSyuKea1SvsIdgtjBJ6IUPa0-5L1gGL9dSPw9FKwVvQa4hGVExiSyj3LDUqlEBADVvmtMJ0uW9A5WYI4SHZ-36KJu5igoF8yTMACt4G2ZSPZTFySV9T_lrNhXahU6X2qrKR7Z9drL_wT5IecO-3Ib6jbSkCb3TGdL-tsQNvYUOF2_MnQN63BWbmFkM&s=Kb4ogC59dPpp1-_uhMvmdQEYduNCyPcVxc5px-EGyk_UY7twOjYDANblgtOqXYbObxU3-uwuPsxR-2XJwc0zrJuOXGs5LgGGo9TVrVTw7JD7Xu9EcjWrhGfRbmHwOJv6QAZdTE_Tllu5Nbl-97-T4vdPb3TwQhZYECVStd0EWyuLOu2syPmv_MpleBr4c9LfWqP6K6sPmL3jsdgrVeQUc3iQz6S7wJZd7HnhxwqRZAMfEoijzgDHCkPIZHS8ScubM3rd-W_8wwys_wlPfXuk4jSMr6T7rX_mLSDH6MC9zc8IVT6JTYaKYcd0JU8n1P3VWkVEJBnDkWNJyNSKCctY9w&h=Mbn_dj6tGtom_hcjfQ066LaLMNVJ-zmFbbLWKTUfTqM
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1/operationsStatus/d70836a5-8248-4596-955b-c66a8cb92018?api-version=2025-02-01&t=638817770863166652&c=MIIHhzCCBm-gAwIBAgITHgbO7uoaMgs7D03eGwAABs7u6jANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDIxMTk0NzU4WhcNMjUxMDE4MTk0NzU4WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANbMTIfsosr-e2nhsYNc2S0BYTm_Z7GagFw0ZlQEJG5FsiXVrA_5xrkW-roFwVxI7Ywu8tA1XPPFxJkRGt5GehtEtKB37IgztbtYsIjtoNU40Xc1bQhz7nvp-X2X4tbm7hl6ESrMeP5FWuWU8Z7MWm2Gcps1d1Cs5LO7Uk1ADbfJkV_9YdyIhP0FOhfTSiPvPY57EOh5ULUAhNTf82udNEtKlDgfMYVLXXIcqTbK7JWz3_UjBtNGSVFPABuNjfUAOYaG9USwE098YJAIP2w85Rxm1FUEaDsF3Omqkph3OvEpY_65DAhz12_07hxuc2wM2AzA3AgdbUF8Qo6b7teNMf0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT5JDf47TxYPD9hhG08aVfLa6AK2jAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJLaq4Zr75ddZokhkTocSjBLgmkkDJoMYWmwgDsEUyVKlJh4NIHCdpqWe1D1fZA9Bzygrcl2xG3JW3y8_tM05nYAPZl5nmrQMbLynhZKhBEx2FeToUtzwl8aV1ghjTcHxwQPOpCDVbzSqFEWHN3M8u5Lnq07vLSyuKea1SvsIdgtjBJ6IUPa0-5L1gGL9dSPw9FKwVvQa4hGVExiSyj3LDUqlEBADVvmtMJ0uW9A5WYI4SHZ-36KJu5igoF8yTMACt4G2ZSPZTFySV9T_lrNhXahU6X2qrKR7Z9drL_wT5IecO-3Ib6jbSkCb3TGdL-tsQNvYUOF2_MnQN63BWbmFkM&s=hFQ-E_HM1cCoT10qtag2iiob35EHoDFfbeECpsuLJKrGZa1HrUP5myRVsSB9aMs6cVPdzzzIm2WpqnZk1Uh62PPT57lPMNaIx0NAU2Tg52wrF2JXZ2gaLNsEpz-XShA_5yfpt-XWf0KV4g_PCfroZRwOfalmVPHoVWDfMUtcWDXl_m9UVj8ku20ATG615_97MqufZjjs2xDxG653ZUBh8PvKjY0f21Fj-7Nn1eTtnL6mujT2MYO16aCq2D6TfAilUR_pYH_RuM5ERQwICBWXBvfptgMRzAi1zdMCYVFL-JcLaC0LkUDZrNH5dYjBl2HaWNrTxTYYJYjxK3_TExITEw&h=Pc-Ztb8uRhaNqwmV0ZTcD271T4RZyZLc9_4514KAk2E
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 29 Apr 2025 11:12:54 GMT
+      - Fri, 02 May 2025 10:04:46 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1/operationResults/ae98c7b1-f074-4427-af90-f9bb303e4524?api-version=2025-02-01&t=638815219753471965&c=MIIHhzCCBm-gAwIBAgITHgbO7uoaMgs7D03eGwAABs7u6jANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDIxMTk0NzU4WhcNMjUxMDE4MTk0NzU4WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANbMTIfsosr-e2nhsYNc2S0BYTm_Z7GagFw0ZlQEJG5FsiXVrA_5xrkW-roFwVxI7Ywu8tA1XPPFxJkRGt5GehtEtKB37IgztbtYsIjtoNU40Xc1bQhz7nvp-X2X4tbm7hl6ESrMeP5FWuWU8Z7MWm2Gcps1d1Cs5LO7Uk1ADbfJkV_9YdyIhP0FOhfTSiPvPY57EOh5ULUAhNTf82udNEtKlDgfMYVLXXIcqTbK7JWz3_UjBtNGSVFPABuNjfUAOYaG9USwE098YJAIP2w85Rxm1FUEaDsF3Omqkph3OvEpY_65DAhz12_07hxuc2wM2AzA3AgdbUF8Qo6b7teNMf0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT5JDf47TxYPD9hhG08aVfLa6AK2jAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJLaq4Zr75ddZokhkTocSjBLgmkkDJoMYWmwgDsEUyVKlJh4NIHCdpqWe1D1fZA9Bzygrcl2xG3JW3y8_tM05nYAPZl5nmrQMbLynhZKhBEx2FeToUtzwl8aV1ghjTcHxwQPOpCDVbzSqFEWHN3M8u5Lnq07vLSyuKea1SvsIdgtjBJ6IUPa0-5L1gGL9dSPw9FKwVvQa4hGVExiSyj3LDUqlEBADVvmtMJ0uW9A5WYI4SHZ-36KJu5igoF8yTMACt4G2ZSPZTFySV9T_lrNhXahU6X2qrKR7Z9drL_wT5IecO-3Ib6jbSkCb3TGdL-tsQNvYUOF2_MnQN63BWbmFkM&s=WT3Tv22jlxhu86I52-4wifOhQKmBaCrnAWh9q8s556POzihtsZMCZKPUAhqMP7Z0GlVcAjC81XWFdHgt7OXo9RdVPfEXqSO2ir8GFkFv-JaZfjX1W9N8PoL_ui7FCPeGv98OQACzcIUC67Jq4i1Ch4pUzmPtiRjQaVD2Ux8LuXmSMTIIX18GQ4IDqiIC4r__Z2iQZ4HK8wmEme78Yg3Hfg0H9LgooBGshsVMdMu6OkvVUVo8xJwNJkRX21p9lI4zccMnL9bXtfO6tCZ_BnY-O6Kq-jz64XXgH9GmVCYt539v_8fP2GQ4Hl8e4quNZUHHmshBqXpnoHXdZwWljIFOOQ&h=pzfatOtYCDEGQEtxY7lxGHk-HPVajAeIkjOnn70XFsI
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;ase-rg-ccy;ase-ccy-vm5/protectedItems/SAPAseDatabase;ab4;asetestdb1/operationResults/d70836a5-8248-4596-955b-c66a8cb92018?api-version=2025-02-01&t=638817770863166652&c=MIIHhzCCBm-gAwIBAgITHgbO7uoaMgs7D03eGwAABs7u6jANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDIxMTk0NzU4WhcNMjUxMDE4MTk0NzU4WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANbMTIfsosr-e2nhsYNc2S0BYTm_Z7GagFw0ZlQEJG5FsiXVrA_5xrkW-roFwVxI7Ywu8tA1XPPFxJkRGt5GehtEtKB37IgztbtYsIjtoNU40Xc1bQhz7nvp-X2X4tbm7hl6ESrMeP5FWuWU8Z7MWm2Gcps1d1Cs5LO7Uk1ADbfJkV_9YdyIhP0FOhfTSiPvPY57EOh5ULUAhNTf82udNEtKlDgfMYVLXXIcqTbK7JWz3_UjBtNGSVFPABuNjfUAOYaG9USwE098YJAIP2w85Rxm1FUEaDsF3Omqkph3OvEpY_65DAhz12_07hxuc2wM2AzA3AgdbUF8Qo6b7teNMf0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBT5JDf47TxYPD9hhG08aVfLa6AK2jAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJLaq4Zr75ddZokhkTocSjBLgmkkDJoMYWmwgDsEUyVKlJh4NIHCdpqWe1D1fZA9Bzygrcl2xG3JW3y8_tM05nYAPZl5nmrQMbLynhZKhBEx2FeToUtzwl8aV1ghjTcHxwQPOpCDVbzSqFEWHN3M8u5Lnq07vLSyuKea1SvsIdgtjBJ6IUPa0-5L1gGL9dSPw9FKwVvQa4hGVExiSyj3LDUqlEBADVvmtMJ0uW9A5WYI4SHZ-36KJu5igoF8yTMACt4G2ZSPZTFySV9T_lrNhXahU6X2qrKR7Z9drL_wT5IecO-3Ib6jbSkCb3TGdL-tsQNvYUOF2_MnQN63BWbmFkM&s=Ku1V_BSq7ncRpVau0PUQLpCP1rPM4KxIA-D7WKUi9-_bYwW_hmhLZUcJt244vEqlNZd-C2_LtkEE2Z69eDTkQz9fJupTtgbCfYClcCAv6wkg3QFsBdCbdEAihJeBOGf3MKRTYVLKO7ReMii9VoBBhCkN0x8WJvv0cbUffk1yAfz68Uin4YTCmClfggZxsmz7UYeC6phN_DHGvrvCcVL_maW03mx2c4bod7OYwTCwzfZgP8fZUR2rurzqylRwNzvR6l-f2kxn95VlIQPIAS6W-9ssyliplZ46AE1Jp6-4PqFoo7Sywg6nznFQgdTR1ZosA4k-mVRwWksh-kvQ_lCxpQ&h=n0OakZ69o0SNWvk2a9cdZd2OeS2Pt07lZJSiec6cRU0
       pragma:
       - no-cache
       strict-transport-security:
@@ -535,13 +776,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/21dae96d-8d81-4776-bee7-c79e3eb0e121
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/a5658f81-2b7a-412a-a0f0-1dc9a2c37f06
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: C79B7512BC1746CB93DA995A31C740DD Ref B: MAA201060513023 Ref C: 2025-04-29T11:12:53Z'
+      - 'Ref A: BF1E33D9695D40C6B603367A9D44E2BE Ref B: MAA201060514033 Ref C: 2025-05-02T10:04:44Z'
     status:
       code: 202
       message: Accepted
@@ -561,10 +802,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupOperations/ae98c7b1-f074-4427-af90-f9bb303e4524?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupOperations/d70836a5-8248-4596-955b-c66a8cb92018?api-version=2025-02-01
   response:
     body:
-      string: '{"id":"ae98c7b1-f074-4427-af90-f9bb303e4524","name":"ae98c7b1-f074-4427-af90-f9bb303e4524","status":"Succeeded","startTime":"2025-04-29T11:12:55.1259099Z","endTime":"2025-04-29T11:12:55.1259099Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"ae98c7b1-f074-4427-af90-f9bb303e4524"}}'
+      string: '{"id":"d70836a5-8248-4596-955b-c66a8cb92018","name":"d70836a5-8248-4596-955b-c66a8cb92018","status":"Succeeded","startTime":"2025-05-02T10:04:46.1053488Z","endTime":"2025-05-02T10:04:46.1053488Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"d70836a5-8248-4596-955b-c66a8cb92018"}}'
     headers:
       cache-control:
       - no-cache
@@ -573,7 +814,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:57 GMT
+      - Fri, 02 May 2025 10:04:47 GMT
       expires:
       - '-1'
       pragma:
@@ -585,11 +826,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/6c88e8a6-dad6-4dd4-a3c9-0496db3689c0
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/f127f9c6-9c43-4c68-86e6-6cd2f1b80bd3
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-msedge-ref:
-      - 'Ref A: DB9D3FEE50C44312998C9AD5B39104F7 Ref B: MAA201060515039 Ref C: 2025-04-29T11:12:55Z'
+      - 'Ref A: 62A8CAE12E224C00A4E0CF4C952E8862 Ref B: MAA201060515037 Ref C: 2025-05-02T10:04:46Z'
     status:
       code: 200
       message: OK
@@ -609,13 +850,13 @@ interactions:
       User-Agent:
       - AZURECLI/2.71.0 (MSI) azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupJobs/ae98c7b1-f074-4427-af90-f9bb303e4524?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupJobs/d70836a5-8248-4596-955b-c66a8cb92018?api-version=2025-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupJobs/ae98c7b1-f074-4427-af90-f9bb303e4524","name":"ae98c7b1-f074-4427-af90-f9bb303e4524","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":["Cancellable"],"workloadType":"SAPAseDatabase","duration":"PT3.3802495S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ase-rg-ccy/providers/Microsoft.RecoveryServices/vaults/ase-rsv-grs/backupJobs/d70836a5-8248-4596-955b-c66a8cb92018","name":"d70836a5-8248-4596-955b-c66a8cb92018","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","actionsInfo":["Cancellable"],"workloadType":"SAPAseDatabase","duration":"PT2.3972045S","extendedInfo":{"tasksList":[{"taskId":"Transfer
         data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"Job
         Type":"Recovery to the original database"}},"isUserTriggered":true,"entityFriendlyName":"ab4;asetestdb1
-        [ase-ccy-vm5]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2025-04-29T11:12:55.1259099Z","activityId":"e199b6f2-24ea-11f0-b92a-6ca10057228e"}}'
+        [ase-ccy-vm5]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2025-05-02T10:04:46.1053488Z","activityId":"dbe3af63-273c-11f0-bdcf-6ca10057228e"}}'
     headers:
       cache-control:
       - no-cache
@@ -624,7 +865,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 29 Apr 2025 11:12:58 GMT
+      - Fri, 02 May 2025 10:04:48 GMT
       expires:
       - '-1'
       pragma:
@@ -636,11 +877,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/a91539e0-56a8-4090-8731-64dae7744230
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=e4b0ef2e-1eff-4f7a-9410-567fbb1e226e/westindia/de375f0f-1128-4a38-832a-36974d7fd785
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '449'
       x-msedge-ref:
-      - 'Ref A: D935399522E64ACBBD208C82F650B8D4 Ref B: MAA201060513045 Ref C: 2025-04-29T11:12:57Z'
+      - 'Ref A: 8E2543431A824E87B5133F9BD918EE3B Ref B: MAA201060515027 Ref C: 2025-05-02T10:04:47Z'
     status:
       code: 200
       message: OK
