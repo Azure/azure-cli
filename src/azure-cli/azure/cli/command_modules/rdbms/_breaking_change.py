@@ -10,9 +10,6 @@ from azure.cli.core.breaking_change import register_command_group_deprecate, reg
 register_logic_breaking_change('postgres flexible-server create', 'Update default value of "--sku-name"',
                                detail='The default value will be changed from "Standard_D2s_v3" to a '
                                'supported sku based on regional capabilities.')
-register_default_value_breaking_change('postgres flexible-server create', '--version', '16', '17')
-register_default_value_breaking_change('postgres flexible-server create', '--create-default-database', 'Enabled',
-                                       'Disabled')
 register_argument_deprecate('postgres flexible-server create', '--active-directory-auth', '--microsoft-entra-auth')
 register_argument_deprecate('postgres flexible-server update', '--active-directory-auth', '--microsoft-entra-auth')
 register_command_group_deprecate('postgres flexible-server ad-admin', redirect='microsoft-entra-admin')
