@@ -5232,7 +5232,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None):
+                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None,
+                       auto_generated_domain_name_label_scope=None):
     # pylint: disable=too-many-statements, too-many-branches
 
     if functions_version is None and flexconsumption_location is None:
@@ -5324,7 +5325,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     disable_app_insights = disable_app_insights == "true"
 
-    site_config = SiteConfig(app_settings=[])
+    settings = []
+    site_config = SiteConfig(app_settings=settings)
     client = web_client_factory(cmd.cli_ctx)
 
     if vnet or subnet:
@@ -5363,7 +5365,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
-                           vnet_route_all_enabled=vnet_route_all_enabled)
+                           vnet_route_all_enabled=vnet_route_all_enabled,
+                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
 
     plan_info = None
     if runtime is not None:
