@@ -23,7 +23,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
 
     with self.argument_context('identity federated-credential', min_api='2025-01-31-preview') as c:
-        c.argument('fed_credential_name', options_list=['--fed-name', '-f'], help='The name of the federated identity credential resource.')
+        c.argument('federated_credential_name', options_list=['--fc-name', '-f'], help='The name of the federated identity credential resource.')
         c.argument('identity_name', help='The name of the identity resource.')
 
     for scope in ['identity federated-credential create', 'identity federated-credential update']:

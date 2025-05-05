@@ -50,10 +50,10 @@ short-summary: Create a federated identity credential under an existing user ass
 examples:
   - name: Create a federated identity credential using subject identifier
     text: |
-        az identity federated-credential create --fed-name myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' --subject 'system:serviceaccount:ns:svcaccount' --audiences 'api://AzureADTokenExchange'
+        az identity federated-credential create --fc-name myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' --subject 'system:serviceaccount:ns:svcaccount' --audiences 'api://AzureADTokenExchange'
   - name: Create a federated identity credential using claims matching expression (long form)
     text: |
-        az identity federated-credential create --fed-name myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' --cme-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --cme-version 1 --audiences 'api://AzureADTokenExchange'
+        az identity federated-credential create --fc-name myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' --cme-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --cme-version 1 --audiences 'api://AzureADTokenExchange'
   - name: Create a federated identity credential using claims matching expression (short form)
     text: |
         az identity federated-credential create -f myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' -v "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" -e 1 --audiences 'api://AzureADTokenExchange'
@@ -65,10 +65,10 @@ short-summary: Update a federated identity credential under an existing user ass
 examples:
   - name: Update a federated identity credential using subject identifier
     text: |
-        az identity federated-credential update --fed-name myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' --subject 'system:serviceaccount:ns:svcaccount' --audiences 'api://AzureADTokenExchange'
+        az identity federated-credential update --fc-name myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' --subject 'system:serviceaccount:ns:svcaccount' --audiences 'api://AzureADTokenExchange'
   - name: Update a federated identity credential using claims matching expression (long form)
     text: |
-        az identity federated-credential update --fed-name myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' --cme-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --cme-version 1 --audiences 'api://AzureADTokenExchange'
+        az identity federated-credential update --fc-name myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' --cme-value "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" --cme-version 1 --audiences 'api://AzureADTokenExchange'
   - name: Update a federated identity credential using claims matching expression (short form)
     text: |
         az identity federated-credential update -f myFedCredential --name myIdentity --resource-group myResourceGroup --issuer 'https://aks.azure.com/issuerGUID' -v "claims['sub'] startswith 'repo:contoso-org/contoso-repo:ref:refs/heads/'" -e 1 --audiences 'api://AzureADTokenExchange'
@@ -80,7 +80,7 @@ short-summary: Delete a federated identity credential under an existing user ass
 examples:
   - name: Delete a federated identity credential using long form
     text: |
-        az identity federated-credential delete --fed-name myFedCredential --name myIdentity --resource-group myResourceGroup
+        az identity federated-credential delete --fc-name myFedCredential --name myIdentity --resource-group myResourceGroup
   - name: Delete a federated identity credential using short form
     text: |
         az identity federated-credential delete -f myFedCredential --name myIdentity --resource-group myResourceGroup
@@ -92,7 +92,7 @@ short-summary: Show a federated identity credential under an existing user assig
 examples:
   - name: Show a federated identity credential using long form
     text: |
-        az identity federated-credential show --fed-name myFedCredential --name myIdentity --resource-group myResourceGroup
+        az identity federated-credential show --fc-name myFedCredential --name myIdentity --resource-group myResourceGroup
   - name: Show a federated identity credential using short form
     text: |
         az identity federated-credential show -f myFedCredential --name myIdentity --resource-group myResourceGroup
