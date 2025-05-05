@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-09-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-01-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -222,6 +222,14 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
             properties.encryption = AAZObjectType()
+            properties.multi_ad_status = AAZStrType(
+                serialized_name="multiAdStatus",
+                flags={"read_only": True},
+            )
+            properties.nfs_v4_id_domain = AAZStrType(
+                serialized_name="nfsV4IDDomain",
+                nullable=True,
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -324,6 +332,9 @@ class Show(AAZCommand):
             )
 
             identity = cls._schema_on_200.properties.encryption.identity
+            identity.federated_client_id = AAZStrType(
+                serialized_name="federatedClientId",
+            )
             identity.principal_id = AAZStrType(
                 serialized_name="principalId",
                 flags={"read_only": True},
