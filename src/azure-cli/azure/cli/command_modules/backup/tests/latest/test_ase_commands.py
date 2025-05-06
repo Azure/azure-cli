@@ -19,8 +19,11 @@ res_vm_friendly_name = 'ase-ccy-vm5'
 vm5_friendly_name = 'ase-ccy-vm5'
 rg_ase = 'ase-rg-ccy'
 item_friendly_name = 'asetestdb1'
+reg_backup_policy = 'DailyPolicy-m9aya1dh'
 backup_item_name_db1 = 'SAPAseDatabase;ab4;asetestdb1'
 backup_item_name_db2 = 'SAPAseDatabase;ab4;asetestdb2'
+backup_item_name_db3 = 'SAPAseDatabase;ab4;asetestdb3'
+backup_item_name_db3_friendly_name = 'asetestdb3'
 reg_vm_id = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/ase-rg-ccy/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm2'
 
 # reg_vm_id = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/ASE-RG-CCY/providers/Microsoft.Compute/virtualMachines/ase-ccy-vm2'
@@ -128,13 +131,41 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
             'vm': reg_vm_friendly_name,
             'rg': rg_ase,
             'reg_vm_id': reg_vm_id,
+            'backup_policy': reg_backup_policy,
+            'backup_item': backup_item_name_db3,
+            'backup_item_friendly_name': backup_item_name_db3_friendly_name
         })
 
         self.cmd('backup container register -v {vault} -g {rg} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --resource-id {reg_vm_id}')
 
-        # configure protection
-        # stop protection
+        # az backup protectable-item show -g ase-rg-ccy --vault-name ase-rsv-ccy --name asetestdb3 --workload-type SAPAseDatabase --protectable-item-type SAPAseDatabase --server-name ase-ccy-vm2
 
-        # self.cmd('backup container unregister -v {vault} -g {rg} -c {vm} --backup-management-type AzureWorkload -y')
-        # az backup container unregister -v ase-rsv-ccy -g ase-rg-ccy -c ase-ccy-vm2 --backup-management-type AzureWorkload -y
-        # az backup container unregister -v ase-rsv-ccy -g ase-rg-ccy -c VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm2
+        # az backup container unregister -v ase-rsv-ccy -g ase-rg-ccy -c VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm2 -y
+        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+
+    @unittest.skip("Unit test is currently blocked as soft delete is enabled by default")
+    def test_policy_add_del(self):
+        self.kwargs.update({
+            'vault': vault_ase_reg,
+            'vm': reg_vm_friendly_name,
+            'rg': rg_ase,
+            'reg_vm_id': reg_vm_id,
+            'backup_policy': reg_backup_policy,
+            'backup_item': 'SAPAseDatabase;ab4;master',
+            'backup_item_friendly_name': 'master'
+        })
+
+        # configure protection
+        # az backup protection enable-for-azurewl -v ase-rsv-ccy -g ase-rg-ccy -p DailyPolicy-m9aya1dh --protectable-item-type SAPAseDatabase --protectable-item-name SAPAseDatabase;ab4;asetestdb3 --server-name ase-ccy-vm2 --workload-type SAPAseDatabase
+        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {backup_policy} --protectable-item-type SAPAseDatabase --protectable-item-name {backup_item} --server-name {vm} --workload-type SAPAseDatabase', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+        
+        # # stop protection
+        # # az backup protection disable -v ase-rsv-ccy -g ase-rg-ccy -c VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm2 --backup-management-type AzureWorkload --workload-type SAPAseDatabase -y -i SAPAseDatabase;ab4;asetestdb3 --delete-backup-data true
+        self.cmd('backup protection disable -v {vault} -g {rg} -c {vm} --backup-management-type AzureWorkload --workload-type SAPAseDatabase -i {backup_item} -y --delete-backup-data true -y')
+
+     
