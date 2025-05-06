@@ -318,13 +318,6 @@ class VolumeCreate(_VolumeCreate):
         # The API does only support setting Basic and Standard
         args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
 
-        # For backwards compat, in next breaking change window, those will be removed
-        args_schema.is_restoring = AAZBoolArg(
-            options=["--is-restoring"],
-            arg_group="Properties",
-            help="Restoring. Deprecated, do not use will be removed in future version.",
-        )
-
         return args_schema
 
     def pre_operations(self):
@@ -420,63 +413,6 @@ class VolumeUpdate(_VolumeUpdate):
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2457600,
             minimum=50
-        )
-
-        # For backwards compat, in next breaking change window, those will be removed
-        args_schema.avs_data_store = AAZStrArg(
-            options=["--avs-data-store"],
-            arg_group="Properties",
-            help="Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purpose. Deprecated, do not use will be removed in future version.",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-        args_schema.creation_token = AAZStrArg(
-            options=["--creation-token"],
-            arg_group="Properties",
-            help="A unique file path for the volume. Used when creating mount targets",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
-                max_length=80,
-                min_length=1,
-            ),
-        )
-        args_schema.is_large_volume = AAZBoolArg(
-            options=["--is-large-volume"],
-            arg_group="Properties",
-            help="Specifies whether volume is a Large Volume or Regular Volume.",
-            nullable=True,
-        )
-        args_schema.is_restoring = AAZBoolArg(
-            options=["--is-restoring"],
-            arg_group="Properties",
-            help="Restoring",
-            nullable=True,
-        )
-        args_schema.ldap_enabled = AAZBoolArg(
-            options=["--ldap-enabled"],
-            arg_group="Properties",
-            help="Specifies whether LDAP is enabled or not for a given NFS volume.",
-            nullable=True,
-        )
-        args_schema.network_features = AAZStrArg(
-            options=["--network-features"],
-            arg_group="Properties",
-            help="Basic network, or Standard features available to the volume. hide me",
-            nullable=True,
-            enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
-        )
-        args_schema.security_style = AAZStrArg(
-            options=["--security-style"],
-            arg_group="Properties",
-            help="The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol",
-            nullable=True,
-            enum={"ntfs": "ntfs", "unix": "unix"},
-        )
-        args_schema.volume_type = AAZStrArg(
-            options=["--volume-type"],
-            arg_group="Properties",
-            help="What type of volume is this. For destination volumes in Cross Region Replication, set type to DataProtection",
-            nullable=True,
         )
         return args_schema
 
