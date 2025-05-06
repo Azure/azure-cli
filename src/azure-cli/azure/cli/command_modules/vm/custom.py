@@ -258,7 +258,7 @@ def _is_linux_os(vm):
 
 # separated for aaz implementation
 def _is_linux_os_aaz(vm):
-    if os_type:= vm.get('storageProfile', {}).get('osDisk', {}).get('osType', None):
+    if os_type := vm.get('storageProfile', {}).get('osDisk', {}).get('osType', None):
         return os_type.lower() == 'linux'
     # the os_type could be None for VM scaleset, let us check out os configurations
     if linux_config := vm.get('osProfile', {}).get('linuxConfiguration', ''):

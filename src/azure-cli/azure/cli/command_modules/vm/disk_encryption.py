@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 import uuid
 import os
 
@@ -70,7 +71,7 @@ def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_
     updateVm = False
 
     if not (_encrypt_userid := vm.get('securityProfile', {}).get('encryptionIdentity', {}).get('userAssignedIdentityResourceId', None)) \
-        or _encrypt_userid.lower() != encryption_identity.lower():
+       or _encrypt_userid.lower() != encryption_identity.lower():
         updateVm = True
 
     if updateVm:
@@ -357,9 +358,11 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     if not has_new_ade:
         # 3. Remove the secret from VM's storage profile
         from .operations.vm import VMUpdate
+
         class RemoveSecret(VMUpdate):
             def pre_instance_update(self, instance):
                 instance.properties.storage_profile.os_disk.encryption_settings = {'enabled': False}
+
         LongRunningOperation(cmd.cli_ctx)(
             RemoveSecret(cli_ctx=cmd.cli_ctx)(command_args={
                 'vm_name': vm_name,
