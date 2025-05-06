@@ -222,6 +222,7 @@ def load_arguments(self, _):
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all feature flags will be imported from file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('content_type', help='Content type of all imported items.')
         c.argument('import_mode', arg_type=get_enum_type([ImportMode.ALL, ImportMode.IGNORE_MATCH]), help='If import mode is "ignore-match", only source key-values that do not already exist or whose value, content-type or tags are different from that of an existing key-value with the same key and label, will be written. Import mode "all" writes all key-values to the destination regardless of whether they exist or not.')
+        c.argument('dry_run', help="Perform a dry-run to validate the import operation without making changes to the App Configurations store. Any updates that would normally occur will be printed to the console for review.")
 
     with self.argument_context('appconfig kv import', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -257,6 +258,7 @@ def load_arguments(self, _):
         c.argument('skip_keyvault', help="Export items excluding all key vault references. By default, all key vault references with the specified label will be exported.", arg_type=get_three_state_flag())
         c.argument('snapshot', validator=validate_snapshot_export,
                    help="Export all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are exported based on the specified key and label filters.")
+        c.argument('dry_run', help="Perform a dry-run to validate the import operation without making changes. Any updates that would normally occur will be printed to the console for review.")
 
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -312,6 +314,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv restore') as c:
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, restore all key-value pairs with all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
+        c.argument('dry_run', help="Perform a dry-run to validate the import operation without making changes to the App Configurations store. Any updates that would normally occur will be printed to the console for review.")
 
     with self.argument_context('appconfig kv lock') as c:
         c.argument('key', help='Key to be locked.')
