@@ -103,21 +103,15 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection backup-now -g {rg} -v {vault} -c {vm5_friendly_name} -i {backup_item_name_db1} --backup-type Full  --enable-compression false --backup-management-type AzureWorkload')
 
-        # az backup recoverypoint list --backup-management-type AzureWorkload --workload-type SAPAseDatabase -g ase-rg-ccy -v ase-rsv-grs -c ase-ccy-vm5 -i SAPAseDatabase;ab4;asetestdb2
-        # rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureWorkload --workload-type SAPAseDatabase -g {rg} -v {vault} -c {vm5_friendly_name} -i SAPAseDatabase;ab4;asetestdb2', checks=[
-        # ]).get_output_in_json()
-
-        self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {backup_item_name_db1} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --query [0]').get_output_in_json()
         # az backup recoverypoint list -g ase-rg-ccy -v ase-rsv-grs -c ase-ccy-vm5 -i SAPAseDatabase;ab4;asetestdb1 --workload-type SAPAseDatabase --backup-management-type AzureWorkload
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {backup_item_name_db1} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --query [0]').get_output_in_json()
 
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
-        # az backup container show -n VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5 -v ase-rsv-grs -g ase-rg-ccy  --backup-management-type AzureWorkload --query name
-
+        # OLR : az backup recoveryconfig show --vault-name ase-rsv-grs -g ase-rg-ccy --restore-mode OriginalWorkloadRestore --rp-name DefaultRangeRecoveryPoint --item-name SAPAseDatabase;ab4;asetestdb1 --container-name VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --rp-name {rp} --item-name {backup_item_name_db1} --container-name {vm5_full_name}').get_output_in_json(), separators=(',', ':'))
         with open("recoveryconfig_ase_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
-        # OLR : az backup recoveryconfig show --vault-name ase-rsv-grs -g ase-rg-ccy --restore-mode OriginalWorkloadRestore --rp-name DefaultRangeRecoveryPoint --item-name SAPAseDatabase;ab4;asetestdb1 --container-name VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5
 
         self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_ase_restore.json', checks=[
             self.check("properties.operation", "Restore"),
@@ -137,8 +131,6 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
         })
 
         self.cmd('backup container register -v {vault} -g {rg} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --resource-id {reg_vm_id}')
-
-        # az backup protectable-item show -g ase-rg-ccy --vault-name ase-rsv-ccy --name asetestdb3 --workload-type SAPAseDatabase --protectable-item-type SAPAseDatabase --server-name ase-ccy-vm2
 
         # az backup container unregister -v ase-rsv-ccy -g ase-rg-ccy -c VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm2 -y
         self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
