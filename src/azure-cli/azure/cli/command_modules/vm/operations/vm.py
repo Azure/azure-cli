@@ -37,6 +37,7 @@ class VMUpdate(_VMUpdate):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
+
 class VMShow(_VMShow):
     class VirtualMachinesGet(_VMShow.VirtualMachinesGet):
         # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
