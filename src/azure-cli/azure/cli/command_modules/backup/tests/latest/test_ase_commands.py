@@ -125,15 +125,16 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
             'vm': reg_vm_friendly_name,
             'rg': rg_ase,
             'reg_vm_id': reg_vm_id,
+            'vm_full_name': reg_vm_name_ase,
             'backup_policy': reg_backup_policy,
             'backup_item': backup_item_name_db3,
             'backup_item_friendly_name': backup_item_name_db3_friendly_name
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --resource-id {reg_vm_id}')
+        # self.cmd('backup container register -v {vault} -g {rg} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --resource-id {reg_vm_id}')
 
         # az backup container unregister -v ase-rsv-ccy -g ase-rg-ccy -c VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm2 -y
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        self.cmd('backup container unregister -v {vault} -g {rg} -c {vm_full_name} -y')
 
     @unittest.skip("Unit test is currently blocked as soft delete is enabled by default")
     def test_policy_add_del(self):
