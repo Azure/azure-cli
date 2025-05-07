@@ -30,7 +30,7 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
     cf_postgres_flexible_private_endpoint_connections, \
     cf_postgres_flexible_tuning_options, \
-    cf_postgres_flexible_config, cf_postgres_flexible_adadmin
+    cf_postgres_flexible_config, cf_postgres_flexible_admin
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
@@ -41,7 +41,7 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
-    validate_virtual_endpoint_name_availability
+    validate_virtual_endpoint_name_availability, validate_database_name
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -58,7 +58,7 @@ def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
                            sku_name=None, tier=None,
-                           storage_gb=None, version=None, active_directory_auth=None, microsoft_entra_auth=None,
+                           storage_gb=None, version=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None,
                            password_auth=None, administrator_login=None, administrator_login_password=None,
                            tags=None, database_name=None,
@@ -87,6 +87,7 @@ def flexible_server_create(cmd, client,
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
+                           database_name=database_name,
                            location=location,
                            tier=tier, sku_name=sku_name,
                            storage_gb=storage_gb,
@@ -106,7 +107,7 @@ def flexible_server_create(cmd, client,
                            backup_byok_key=backup_byok_key,
                            performance_tier=performance_tier,
                            create_cluster=create_cluster,
-                           password_auth=password_auth, active_directory_auth=active_directory_auth, microsoft_entra_auth=microsoft_entra_auth,
+                           password_auth=password_auth, microsoft_entra_auth=microsoft_entra_auth,
                            admin_name=admin_name, admin_id=admin_id, admin_type=admin_type,)
 
     cluster = None
@@ -140,8 +141,7 @@ def flexible_server_create(cmd, client,
                                                                            standby_availability_zone=standby_availability_zone)
 
     is_password_auth_enabled = bool(password_auth is not None and password_auth.lower() == 'enabled')
-    is_microsoft_entra_auth_enabled = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled') or \
-        bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    is_microsoft_entra_auth_enabled = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     if is_password_auth_enabled:
         administrator_login_password = generate_password(administrator_login_password)
 
@@ -175,7 +175,7 @@ def flexible_server_create(cmd, client,
 
     # Add Microsoft Entra Admin
     if is_microsoft_entra_auth_enabled and admin_name is not None or admin_id is not None:
-        server_admin_client = cf_postgres_flexible_adadmin(cmd.cli_ctx, '_')
+        server_admin_client = cf_postgres_flexible_admin(cmd.cli_ctx, '_')
         logger.warning("Add Microsoft Entra Admin '%s'.", admin_name)
         _create_admin(server_admin_client, resource_group_name, server_name, admin_name, admin_id, admin_type)
 
@@ -312,7 +312,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
                                        backup_byok_identity=None, backup_byok_key=None,
-                                       active_directory_auth=None, microsoft_entra_auth=None, password_auth=None,
+                                       microsoft_entra_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
                                        public_access=None,
                                        tags=None,
@@ -426,8 +426,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     auth_config = instance.auth_config
     administrator_login = instance.administrator_login if instance.administrator_login else None
-    if active_directory_auth or microsoft_entra_auth:
-        auth_config.active_directory_auth = active_directory_auth if active_directory_auth else microsoft_entra_auth
+    if microsoft_entra_auth:
+        auth_config.active_directory_auth = microsoft_entra_auth
     if password_auth:
         administrator_login, administrator_login_password = _update_login(server_name, resource_group_name, auth_config,
                                                                           password_auth, administrator_login, administrator_login_password)
@@ -891,6 +891,7 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
 
 
 def database_create_func(cmd, client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
+    validate_database_name(database_name)
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
@@ -1086,7 +1087,7 @@ def flexible_server_identity_show(cmd, client, resource_group_name, server_name,
 
 
 # Custom functions for ad-admin
-def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
+def flexible_server_microsoft_entra_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
     validate_resource_group(resource_group_name)
 
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
@@ -1110,7 +1111,7 @@ def _create_admin(client, resource_group_name, server_name, principal_name, sid,
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, sid, parameters)
 
 
-def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
+def flexible_server_microsoft_entra_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
     validate_resource_group(resource_group_name)
 
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
@@ -1123,7 +1124,7 @@ def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_nam
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, server_name, sid)
 
 
-def flexible_server_ad_admin_list(client, resource_group_name, server_name):
+def flexible_server_microsoft_entra_admin_list(client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
 
     return client.list_by_server(
@@ -1131,7 +1132,7 @@ def flexible_server_ad_admin_list(client, resource_group_name, server_name):
         server_name=server_name)
 
 
-def flexible_server_ad_admin_show(client, resource_group_name, server_name, sid):
+def flexible_server_microsoft_entra_admin_show(client, resource_group_name, server_name, sid):
     validate_resource_group(resource_group_name)
 
     return client.get(

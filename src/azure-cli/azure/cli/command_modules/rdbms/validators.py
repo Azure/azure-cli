@@ -305,15 +305,16 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
         logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
 
 
-def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
-                           standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
-                           version=None, instance=None, geo_redundant_backup=None,
+def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
+                           zone=None, standby_availability_zone=None, high_availability=None, subnet=None,
+                           public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
-                           password_auth=None, active_directory_auth=None, microsoft_entra_auth=None,
+                           password_auth=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+    validate_database_name(database_name)
     is_create = not instance
     if is_create:
         list_location_capability_info = get_postgres_location_capability_info(
@@ -352,8 +353,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
-    is_microsoft_entra_auth = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled') \
-        or bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
                                  admin_name, admin_id, admin_type, instance)
 
@@ -515,8 +515,7 @@ def _pg_version_validator(version, versions):
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
         if version == '12':
-            logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
-                           "the option to select version 12 will be removed in the near future. "
+            raise CLIError("Support for PostgreSQL 12 has officially ended. "
                            "We recommend selecting PostgreSQL 13 or a later version for "
                            "all future operations.")
 
@@ -984,3 +983,10 @@ def validate_backup_name(backup_name):
     # check if backup_name exceeds 128 characters
     if len(backup_name) > 128:
         raise CLIError('Backup name cannot exceed 128 characters.')
+
+
+def validate_database_name(database_name):
+    if database_name is not None and not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]{0,30}$', database_name):
+        raise ValidationError("Database name must begin with a letter (a-z) or underscore (_). "
+                              "Subsequent characters in a name can be letters, digits (0-9), or underscores. "
+                              "Database name length must be less than 32 characters.")

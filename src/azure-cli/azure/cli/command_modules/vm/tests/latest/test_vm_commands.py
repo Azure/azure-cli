@@ -7197,7 +7197,7 @@ class VMDiskEncryptionTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='eastus2')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, location='eastus2', key='vault',
-                      additional_params='--enabled-for-disk-encryption')
+                      additional_params='--enabled-for-disk-encryption --enable-rbac-authorization false')
     def test_vm_disk_encryption_with_key(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -7900,8 +7900,8 @@ class VMGalleryImage(ScenarioTest):
             self.check('storageProfile.osDiskImage.source.uri', '{vhd_uri}')
         ])
 
-    @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
+    @ResourceGroupPreparer(random_name_length=15, location='westus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus',
                       additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_create_image_version_with_region_cvm_encryption(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
@@ -7952,7 +7952,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_VMGuestStateOnlyEncryptedWithPlatformKey --disk-encryption-set {des1_id}')
         self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --target-region-cvm-encryption EncryptedVMGuestStateOnlyWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
+            self.check('publishingProfile.targetRegions[0].name', 'West US'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
@@ -10813,6 +10813,43 @@ class SkuProfileTest(ScenarioTest):
             self.check('skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
             self.check('skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
         ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile_prioritized', location='eastus2')
+    def test_vmss_create_sku_profile_prioritized(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4' +
+                ' --skuprofile-rank "" 1' +
+                ' --skuprofile-allocation-strategy Prioritized', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.skuProfile.allocationStrategy', 'Prioritized'),
+            self.check('vmss.skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('vmss.skuProfile.vmSizes[0].rank', 'None'),
+            self.check('vmss.skuProfile.vmSizes[1].name', 'Standard_D2s_v4'),
+            self.check('vmss.skuProfile.vmSizes[1].rank', '1')
+        ])
+
+        self.cmd('vmss update -n {vmss} -g {rg} ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --skuprofile-rank 1 0', checks=[
+            self.check('skuProfile.allocationStrategy', 'Prioritized'),
+            self.check('skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('skuProfile.vmSizes[0].rank', '1'),
+            self.check('skuProfile.vmSizes[1].name', 'Standard_D2s_v4'),
+            self.check('skuProfile.vmSizes[1].rank', '0')
+        ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile_prioritized_validation', location='eastus2')
+    def test_vmss_create_sku_profile_prioritized_validation(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        with self.assertRaisesRegex(CLIError, "The SKU profile rank list does not specify a rank for every VM size."):
+            self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4' +
+                ' --skuprofile-rank 1' +
+                ' --skuprofile-allocation-strategy Prioritized')
 
 
 class VMCreateNSGRule(ScenarioTest):
@@ -13099,7 +13136,7 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('sourceRestorePoint.id', '{point_id}')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_local', location='EastUS2EUAP')
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_local')
     def test_restore_point_encryption_local(self, resource_group):
         self.kwargs.update({
             'vault1': self.create_random_name('vault', 15),
