@@ -16,7 +16,6 @@ reg_vm_name_ase = 'VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm2'
 res_vm_name_ase = 'VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5'
 reg_vm_friendly_name = 'ase-ccy-vm2'
 res_vm_friendly_name = 'ase-ccy-vm5'
-vm5_friendly_name = 'ase-ccy-vm5'
 rg_ase = 'ase-rg-ccy'
 item_friendly_name = 'asetestdb1'
 reg_backup_policy = 'DailyPolicy-m9aya1dh'
@@ -34,7 +33,7 @@ reg_vm_id = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/
 
 class ASEBackupTests(ScenarioTest, unittest.TestCase):
 
-    def test_backup_wl_ase_container(self):
+    def test_backup_wl_ase_container_policy_operations(self):
         self.kwargs.update({
             'vault': vault_ase_restore,
             'vm_full_name': res_vm_name_ase,
@@ -94,17 +93,16 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
             'vault': vault_ase_restore,
             'backup_item_name_db1': backup_item_name_db1,
             'backup_item_name_db2': backup_item_name_db2,
-            'vm5_friendly_name': vm5_friendly_name,
+            'vm_friendly_name': res_vm_friendly_name,
             'vm5_full_name': 'VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5',
-            'name' : vm5_friendly_name
 
             # 'container': "VMAppContainer;Compute;ArchiveResourceGroup;ArchHanaVM1"
         })
 
-        self.cmd('backup protection backup-now -g {rg} -v {vault} -c {vm5_friendly_name} -i {backup_item_name_db1} --backup-type Full  --enable-compression false --backup-management-type AzureWorkload')
+        self.cmd('backup protection backup-now -g {rg} -v {vault} -c {vm_friendly_name} -i {backup_item_name_db1} --backup-type Full  --enable-compression false --backup-management-type AzureWorkload')
 
         # az backup recoverypoint list -g ase-rg-ccy -v ase-rsv-grs -c ase-ccy-vm5 -i SAPAseDatabase;ab4;asetestdb1 --workload-type SAPAseDatabase --backup-management-type AzureWorkload
-        self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {backup_item_name_db1} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --query [0]').get_output_in_json()
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {vm_friendly_name} -i {backup_item_name_db1} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --query [0]').get_output_in_json()
 
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
@@ -137,7 +135,7 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -v {vault} -g {rg} -c {vm_full_name} -y')
 
     @unittest.skip("Unit test is currently blocked as soft delete is enabled by default")
-    def test_policy_add_del(self):
+    def test_conf_prot_add_del(self):
         self.kwargs.update({
             'vault': vault_ase_reg,
             'vm': reg_vm_friendly_name,
