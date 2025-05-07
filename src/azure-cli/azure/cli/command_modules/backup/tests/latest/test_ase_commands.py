@@ -19,6 +19,9 @@ res_vm_friendly_name = 'ase-ccy-vm5'
 rg_ase = 'ase-rg-ccy'
 item_friendly_name = 'asetestdb1'
 reg_backup_policy = 'DailyPolicy-m9aya1dh'
+policy_operations_bkp_policy = 'DailyPolicy-ma2c99lv'
+conf_prot_bi_full_name = 'SAPAseDatabase;ab4;master'
+conf_prot_bi_friendly_name = 'master'
 backup_item_name_db1 = 'SAPAseDatabase;ab4;asetestdb1'
 backup_item_name_db2 = 'SAPAseDatabase;ab4;asetestdb2'
 backup_item_name_db3 = 'SAPAseDatabase;ab4;asetestdb3'
@@ -41,7 +44,7 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
             'rg': rg_ase,
             'backup_item_friendly_name': item_friendly_name,
             'backup_item_protection_state': 'Protected',
-            'backup_policy': 'DailyPolicy-ma2c99lv',
+            'backup_policy': policy_operations_bkp_policy,
             'policy_new': self.create_random_name('clitest-policy', 24),
             'reg_vm_id': reg_vm_id,
         })
@@ -94,9 +97,7 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
             'backup_item_name_db1': backup_item_name_db1,
             'backup_item_name_db2': backup_item_name_db2,
             'vm_friendly_name': res_vm_friendly_name,
-            'vm5_full_name': 'VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5',
-
-            # 'container': "VMAppContainer;Compute;ArchiveResourceGroup;ArchHanaVM1"
+            'vm_full_name': res_vm_name_ase
         })
 
         self.cmd('backup protection backup-now -g {rg} -v {vault} -c {vm_friendly_name} -i {backup_item_name_db1} --backup-type Full  --enable-compression false --backup-management-type AzureWorkload')
@@ -107,7 +108,7 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
         # OLR : az backup recoveryconfig show --vault-name ase-rsv-grs -g ase-rg-ccy --restore-mode OriginalWorkloadRestore --rp-name DefaultRangeRecoveryPoint --item-name SAPAseDatabase;ab4;asetestdb1 --container-name VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm5
-        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --rp-name {rp} --item-name {backup_item_name_db1} --container-name {vm5_full_name}').get_output_in_json(), separators=(',', ':'))
+        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --rp-name {rp} --item-name {backup_item_name_db1} --container-name {vm_full_name}').get_output_in_json(), separators=(',', ':'))
         with open("recoveryconfig_ase_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
@@ -142,8 +143,8 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
             'rg': rg_ase,
             'reg_vm_id': reg_vm_id,
             'backup_policy': reg_backup_policy,
-            'backup_item': 'SAPAseDatabase;ab4;master',
-            'backup_item_friendly_name': 'master'
+            'backup_item': conf_prot_bi_full_name,
+            'backup_item_friendly_name': conf_prot_bi_friendly_name
         })
 
         # configure protection
