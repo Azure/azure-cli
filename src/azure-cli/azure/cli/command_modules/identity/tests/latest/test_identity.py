@@ -35,11 +35,14 @@ class TestIdentity(ScenarioTest):
             'identity': 'ide',
             'fic1': 'fic1',
             'fic2': 'fic2',
+            'fic3': 'fic3',
             'subject1': 'system:serviceaccount:ns:svcaccount1',
             'subject2': 'system:serviceaccount:ns:svcaccount2',
             'subject3': 'system:serviceaccount:ns:svcaccount3',
             'issuer': 'https://oidc.prod-aks.azure.com/IssuerGUID',
             'audience': 'api://AzureADTokenExchange',
+            'cme_value': 'value.matches(\'test\')',
+            'cme_version': '1'
         })
 
         self.cmd('identity create -n {identity} -g {rg}')
@@ -118,3 +121,56 @@ class TestIdentity(ScenarioTest):
                      self.check('type(@)', 'array'),
                      self.check('length(@)', 0)
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_federated_identity_credential_cme_', location='eastus2euap')
+    def test_federated_identity_credential_claims_matching(self, resource_group):
+        self.kwargs.update({
+            'identity': 'ide',
+            'fic1': 'fic1',
+            'issuer': 'https://oidc.prod-aks.azure.com/IssuerGUID',
+            'audience': 'api://AzureADTokenExchange',
+            'cme_value': 'value.matches(\'test\')',
+            'cme_version': '1',
+            'subject': 'system:serviceaccount:ns:svcaccount1'
+        })
+
+        self.cmd('identity create -n {identity} -g {rg}')
+
+        # create a federated identity credential with claims matching expression
+        self.cmd('identity federated-credential create --name {fic1} --identity-name {identity} --resource-group {rg} '
+                 '--issuer {issuer} --audiences {audience} --cme-value {cme_value} --cme-version {cme_version}',
+                 checks=[
+                     self.check('length(audiences)', 1),
+                     self.check('audiences[0]', '{audience}'),
+                     self.check('issuer', '{issuer}'),
+                     self.check('claimsMatchingExpression.value', '{cme_value}'),
+                     self.check('claimsMatchingExpression.languageVersion', '{cme_version}')
+                 ])
+
+        # update to use subject instead of claims matching expression
+        self.cmd('identity federated-credential update --name {fic1} --identity-name {identity} --resource-group {rg} '
+                 '--issuer {issuer} --audiences {audience} --subject {subject}',
+                 checks=[
+                     self.check('subject', '{subject}'),
+                     self.check('claimsMatchingExpression', None)
+                 ])
+
+        # update back to claims matching expression
+        self.cmd('identity federated-credential update --name {fic1} --identity-name {identity} --resource-group {rg} '
+                 '--issuer {issuer} --audiences {audience} --cme-value {cme_value} --cme-version {cme_version}',
+                 checks=[
+                     self.check('claimsMatchingExpression.value', '{cme_value}'),
+                     self.check('claimsMatchingExpression.languageVersion', '{cme_version}'),
+                     self.check('subject', None)
+                 ])
+
+    def test_federated_identity_credential_validation(self):
+        # Test missing claims matching expression version
+        with self.assertRaisesRegex(
+            Exception, '--claims-matching-expression-language-version must be specified when using --claims-matching-expression-value'):
+            self.cmd('identity federated-credential create -g rg1 --identity-name testid --name testfic --issuer https://test.com --cme-value "test"')
+
+        # Test version without value
+        with self.assertRaisesRegex(
+            Exception, '--subject or --claims-matching-expression-value is required'):
+            self.cmd('identity federated-credential create -g rg1 --identity-name testid --name testfic --issuer https://test.com --cme-version 1')
