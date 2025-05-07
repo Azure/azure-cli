@@ -88,7 +88,8 @@ def acr_agentpool_delete(cmd,
     user_confirmation("Are you sure you want to delete the agentpool '{}' in registry '{}'?".format(
         agent_pool_name, registry_name), yes)
     try:
-        response = sdk_no_wait(no_wait, client.begin_delete, resource_group_name, registry_name, agent_pool_name).result()
+        response = sdk_no_wait(
+            no_wait, client.begin_delete, resource_group_name, registry_name, agent_pool_name).result()
 
         if no_wait:
             logger.warning("Started to delete the agent pool '%s': %s", agent_pool_name, response.status())
