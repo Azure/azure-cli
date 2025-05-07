@@ -102,7 +102,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_allowed_host_ports, validate_application_security_groups,
     validate_node_public_ip_tags,
     validate_disable_windows_outbound_nat,
-    validate_crg_id,
+    validate_crg_id, validate_apiserver_subnet_id,
     validate_azure_service_mesh_revision,
     validate_message_of_the_day,
     validate_custom_ca_trust_certificates,
@@ -346,6 +346,8 @@ def load_arguments(self, _):
         c.argument('fqdn_subdomain')
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
         c.argument('enable_private_cluster', action='store_true')
+        c.argument('enable_apiserver_vnet_integration', action='store_true')
+        c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
         c.argument('private_dns_zone')
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('service_principal')
@@ -538,6 +540,10 @@ def load_arguments(self, _):
         c.argument('disable_acns_observability', action='store_true')
         c.argument('disable_acns_security', action='store_true')
         # private cluster parameters
+        c.argument('enable_apiserver_vnet_integration', action='store_true')
+        c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
+        c.argument('enable_private_cluster', action='store_true')
+        c.argument('disable_private_cluster', action='store_true')
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('private_dns_zone')
