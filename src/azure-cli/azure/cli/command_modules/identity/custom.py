@@ -36,16 +36,18 @@ def list_identity_resources(cmd, resource_group_name, resource_name):
 
 def create_or_update_federated_credential(cmd, client, resource_group_name, identity_name, federated_credential_name,
                                           issuer=None, subject=None, audiences=None, claims_matching_expression_value=None,
-                                          claims_matching_expression_language_version=1):
+                                          claims_matching_expression_language_version=None):
     _default_audiences = ['api://AzureADTokenExchange']
     audiences = _default_audiences if not audiences else audiences
     
     if not issuer:
-        raise RequiredArgumentMissingError('usage error: --issuer parameter is required')
+        raise RequiredArgumentMissingError('usage error: --issuer is required')
     if subject and claims_matching_expression_value:
-        raise RequiredArgumentMissingError('usage error: --subject and --claims_matching_expression_value cannot be used together')
+        raise RequiredArgumentMissingError('usage error: --subject and --claims-matching-expression-value cannot be used together')
     if not subject and not claims_matching_expression_value:
-        raise RequiredArgumentMissingError('usage error: either --subject or --claims_matching_expression_value must be specified')
+        raise RequiredArgumentMissingError('usage error: --subject or --claims-matching-expression-value is required')
+    if claims_matching_expression_value and claims_matching_expression_language_version is None:
+        raise RequiredArgumentMissingError('usage error: --claims-matching-expression-language-version must be specified when using --claims-matching-expression-value')
                                            
     FederatedIdentityCredential = cmd.get_models('FederatedIdentityCredential', resource_type=ResourceType.MGMT_MSI,
                                                  operation_group='federated_identity_credentials')
