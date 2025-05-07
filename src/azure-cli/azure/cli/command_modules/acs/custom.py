@@ -601,6 +601,7 @@ def aks_create(
     enable_secret_rotation=False,
     rotation_poll_interval=None,
     enable_app_routing=False,
+    app_routing_default_nginx_controller=None,
     # nodepool paramerters
     nodepool_name="nodepool1",
     node_vm_size=None,
@@ -3201,7 +3202,8 @@ def aks_approuting_enable(
         resource_group_name,
         name,
         enable_kv=False,
-        keyvault_id=None
+        keyvault_id=None,
+        nginx=None
 ):
     return _aks_approuting_update(
         cmd,
@@ -3210,7 +3212,8 @@ def aks_approuting_enable(
         name,
         enable_app_routing=True,
         keyvault_id=keyvault_id,
-        enable_kv=enable_kv)
+        enable_kv=enable_kv,
+        nginx=nginx)
 
 
 def aks_approuting_disable(
@@ -3233,7 +3236,8 @@ def aks_approuting_update(
         resource_group_name,
         name,
         keyvault_id=None,
-        enable_kv=False
+        enable_kv=False,
+        nginx=None
 ):
     return _aks_approuting_update(
         cmd,
@@ -3241,7 +3245,8 @@ def aks_approuting_update(
         resource_group_name,
         name,
         keyvault_id=keyvault_id,
-        enable_kv=enable_kv)
+        enable_kv=enable_kv,
+        nginx=nginx)
 
 
 def aks_approuting_zone_add(
@@ -3336,7 +3341,8 @@ def _aks_approuting_update(
         delete_dns_zone=None,
         update_dns_zone=None,
         dns_zone_resource_ids=None,
-        attach_zones=None
+        attach_zones=None,
+        nginx=None
 ):
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
 
