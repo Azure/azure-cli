@@ -47,7 +47,8 @@ def create_or_update_federated_credential(cmd, client, resource_group_name, iden
     if not subject and not claims_matching_expression_value:
         raise RequiredArgumentMissingError('usage error: either --subject or --claims_matching_expression_value must be specified')
                                            
-    FederatedIdentityCredential = cmd.get_models('FederatedIdentityCredential', resource_type=ResourceType.MGMT_MSI)
+    FederatedIdentityCredential = cmd.get_models('FederatedIdentityCredential', resource_type=ResourceType.MGMT_MSI,
+                                                 operation_group='federated_identity_credentials')
 
     parameters = FederatedIdentityCredential(
         issuer=issuer,
