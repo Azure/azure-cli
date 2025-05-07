@@ -627,12 +627,19 @@ def api_export_result_to_dict(api_export_result):
         'value': api_export_result.value
     }
 
+def _get_policy_context(client, api_id, operation_id):
+    if api_id is None and operation_id is not None:
+        raise RequiredArgumentMissingError(
+            "Please specify api-id when operation-id is specified.")
+
+    if api_id and operation_id:
+        return client.api_operation_policy
+    elif api_id:
+        return client.api_policy
+    else:
+        return client.policy
+
 # Api Policy Operations
-def apim_api_policy_list(client , resource_group_name, service_name, api_id):
-    """List all policies of an API. """
-
-    return client.api_policy.list_by_api(resource_group_name, service_name, api_id)
-
 def apim_api_policy_set(client, resource_group_name, service_name, value_path, api_id=None, operation_id=None, policy_id="policy", policy_format=None, no_wait=False):
     """Sets or updates an API policy. """
     try:
@@ -646,17 +653,8 @@ def apim_api_policy_set(client, resource_group_name, service_name, value_path, a
         value=content_value
     )
 
-    if api_id is None and operation_id is not None:
-        raise RequiredArgumentMissingError(
-            "Please specify api-id when operation-id is specified.")
-
     #Select the method based on the presence of api_id and operation_id
-    if api_id and operation_id:
-        method = client.api_operation_policy.create_or_update
-    elif api_id:
-        method = client.api_policy.create_or_update
-    else:
-        method = client.policy.create_or_update
+    module_context = _get_policy_context(client, api_id, operation_id)
 
     # Prepare the arguments dynamically based on use case
     arguments = {
@@ -672,39 +670,55 @@ def apim_api_policy_set(client, resource_group_name, service_name, value_path, a
         arguments["operation_id"] = operation_id
 
     # Use the selected method
-    return sdk_no_wait(no_wait, method, **arguments)
+    return sdk_no_wait(no_wait, module_context.create_or_update, **arguments)
 
 
 def apim_api_policy_delete(client, resource_group_name, service_name, api_id, operation_id=None, policy_id="policy",if_match=None, no_wait=False):
     """Deletes an API policy. """
-    if operation_id is None:
-        return sdk_no_wait(
-            no_wait,
-            client.api_policy.delete,
-            resource_group_name=resource_group_name,
-            service_name=service_name,
-            api_id=api_id,
-            policy_id=policy_id,
-            if_match="*" if if_match is None else if_match)
 
-    else:
-        return sdk_no_wait(
-            no_wait,
-            client.api_operation_policy.delete,
-            resource_group_name=resource_group_name,
-            service_name=service_name,
-            api_id=api_id,
-            operation_id=operation_id,
-            policy_id=policy_id,
-            if_match="*" if if_match is None else if_match)
+    module_context = _get_policy_context(client, api_id, operation_id)
+    
+    arguments = {
+        "resource_group_name": resource_group_name,
+        "service_name": service_name,
+        "policy_id": policy_id,
+        "if_match": "*" if if_match is None else if_match
+    }
 
-def apim_api_policy_get(client, resource_group_name, service_name, api_id, policy_id="policy", file_path=None):
+    if api_id:
+        arguments["api_id"] = api_id
+    if operation_id:
+        arguments["operation_id"] = operation_id
+
+    return sdk_no_wait(
+            no_wait,
+            module_context.delete,
+            **arguments)
+
+def apim_api_policy_get(client, resource_group_name, service_name, api_id=None, operation_id=None, policy_id="policy", file_path=None):
     """Get the policy configuration at the API level. """
 
-    return client.api_policy.get(resource_group_name=resource_group_name,
-                                 service_name=service_name,
-                                 api_id=api_id,
-                                 policy_id=policy_id).value
+    module_context = _get_policy_context(client, api_id, operation_id)
+
+    arguments= {
+        "resource_group_name": resource_group_name,
+        "service_name": service_name,
+        "policy_id": policy_id
+    }
+
+    policy = module_context.get(**arguments).value
+
+    if file_path is not None:
+        logger.warning("Writing policy to file: %s", file_path)
+        try:
+            with open(file_path, 'w') as f:
+                f.write(policy)
+        except OSError as e:
+            logger.warning("Error writing policy to file: %s", e)
+
+        return logger.warning("Policy export complete. Policy written to file: %s", file_path)
+    else:
+        return policy
 
 # Product API Operations
 def apim_product_api_list(client, resource_group_name, service_name, product_id):
