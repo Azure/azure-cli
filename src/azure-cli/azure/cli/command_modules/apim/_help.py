@@ -252,6 +252,67 @@ examples:
         az apim api export -g MyResourceGroup --service-name MyApim --api-id MyApi --export-format OpenApiJson --file-path path
 """
 
+helps['apim api policy set'] = """
+type: command
+short-summary: Create or update policy for the given Scope
+examples:
+  - name: Create or update policy for API Operation
+    text: |-
+        az apim api policy set -g MyResourceGroup --service-name MyApim --api-id MyApi --operation-id MyOp --specification-path PathToXmlFile
+  - name: Create or update policy for API
+    text: |-
+        az apim api policy set -g MyResourceGroup --service-name MyApim --api-id MyApi --specification-path PathToXmlFile
+  - name: Create or update global policy
+    text: |-
+        az apim api policy set -g MyResourceGroup --service-name MyApim --specification-path PathToXmlFile
+"""
+
+helps['apim api policy get'] = """
+type: command
+short-summary: Get policy for the given Scope
+examples:
+  - name: Get policy for API Operation
+    text: |-
+        az apim api policy get -g MyResourceGroup --service-name MyApim --api-id MyApi --operation-id MyOp
+  - name: Get policy for API
+    text: |-
+        az apim api policy get -g MyResourceGroup --service-name MyApim --api-id MyApi
+  - name: Get global policy
+    text: |-
+        az apim api policy get -g MyResourceGroup --service-name MyApim
+"""
+
+helps['apim api policy delete'] = """
+type: command
+short-summary: Delete policy for the given Scope
+examples:
+  - name: Delete policy for API Operation
+    text: |-
+        az apim api policy delete -g MyResourceGroup --service-name MyApim --api-id MyApi --operation-id MyOp
+  - name: Delete policy for API
+    text: |-
+        az apim api policy delete -g MyResourceGroup --service-name MyApim --api-id MyApi
+  - name: Delete global policy
+    text: |-
+        az apim api policy delete -g MyResourceGroup --service-name MyApim
+"""
+
+helps['apim api policy list'] = """
+type: command
+short-summary: List policies for the given Scope
+examples:
+  - name: List policies for API Operation
+    text: |-
+        az apim api policy list -g MyResourceGroup --service-name MyApim --api-id MyApi --operation-id MyOp
+  - name: List policies for API
+    text: |-
+        az apim api policy list -g MyResourceGroup --service-name MyApim --api-id MyApi
+  - name: List global policies
+    text: |-
+        az apim api policy list -g MyResourceGroup --service-name MyApim
+"""
+
+
 helps['apim product api list'] = """
 type: command
 short-summary: Lists a collection of the APIs associated with a product.
