@@ -22,7 +22,7 @@ def load_arguments(self, _):
         c.argument('location', get_location_type(self.cli_ctx), required=False)
         c.argument('tags', tags_type)
 
-    with self.argument_context('identity federated-credential', min_api='2025-01-31-preview') as c:
+    with self.argument_context('identity federated-credential') as c:
         c.argument('federated_credential_name', options_list=('--name', '-n'), help='The name of the federated identity credential resource.')
         c.argument('identity_name', help='The name of the identity resource.')
 

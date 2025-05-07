@@ -221,7 +221,10 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: None,
-        ResourceType.MGMT_MSI: '2023-01-31',
+        ResourceType.MGMT_MSI: SDKProfile('2023-01-31', {
+            'federated_identity_credentials': '2025-01-31-preview',
+            'user_assigned_identities': '2022-01-31-preview'
+        }),
         ResourceType.MGMT_APPSERVICE: '2023-01-01',
         ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
@@ -263,6 +266,7 @@ AD_HOC_API_VERSIONS = {
     },
     ResourceType.MGMT_MSI: {
         'user_assigned_identities': '2022-01-31-preview',
+        'federated_identity_credentials': '2025-01-31-preview'
     }
 }
 
