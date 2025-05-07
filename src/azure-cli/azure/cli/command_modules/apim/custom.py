@@ -628,31 +628,83 @@ def api_export_result_to_dict(api_export_result):
     }
 
 # Api Policy Operations
+def apim_api_policy_list(client , resource_group_name, service_name, api_id):
+    """List all policies of an API. """
 
-def apim_api_policy_create(client, resource_group_name, service_name, api_id, value_path, policy_format=None, no_wait=False):
-    """Creates a new API policy. """
-    with open(value_path, 'r') as api_file:
-        content_value = api_file.read()
+    return client.api_policy.list_by_api(resource_group_name, service_name, api_id)
+
+def apim_api_policy_set(client, resource_group_name, service_name, value_path, api_id=None, operation_id=None, policy_id="policy", policy_format=None, no_wait=False):
+    """Sets or updates an API policy. """
+    try:
+        with open(value_path, 'r') as api_file:
+            content_value = api_file.read()
+    except OSError as e:
+        logger.warning("Error opening policy file: %s", e)
 
     parameters = PolicyContract(
         format=policy_format,
         value=content_value
     )
 
-    return sdk_no_wait(no_wait, client.api_policy.create_or_update,
-                       resource_group_name=resource_group_name,
-                       service_name=service_name,
-                       api_id=api_id,
-                       policy_id="policy",
-                       parameters=parameters)
+    if api_id is None and operation_id is not None:
+        raise RequiredArgumentMissingError(
+            "Please specify api-id when operation-id is specified.")
 
-def apim_api_policy_get(client, resource_group_name, service_name, api_id, file_path=None):
+    #Select the method based on the presence of api_id and operation_id
+    if api_id and operation_id:
+        method = client.api_operation_policy.create_or_update
+    elif api_id:
+        method = client.api_policy.create_or_update
+    else:
+        method = client.policy.create_or_update
+
+    # Prepare the arguments dynamically based on use case
+    arguments = {
+        "resource_group_name": resource_group_name,
+        "service_name": service_name,
+        "policy_id": policy_id,
+        "parameters": parameters
+    }
+
+    if api_id:
+        arguments["api_id"] = api_id
+    if operation_id:
+        arguments["operation_id"] = operation_id
+
+    # Use the selected method
+    return sdk_no_wait(no_wait, method, **arguments)
+
+
+def apim_api_policy_delete(client, resource_group_name, service_name, api_id, operation_id=None, policy_id="policy",if_match=None, no_wait=False):
+    """Deletes an API policy. """
+    if operation_id is None:
+        return sdk_no_wait(
+            no_wait,
+            client.api_policy.delete,
+            resource_group_name=resource_group_name,
+            service_name=service_name,
+            api_id=api_id,
+            policy_id=policy_id,
+            if_match="*" if if_match is None else if_match)
+
+    else:
+        return sdk_no_wait(
+            no_wait,
+            client.api_operation_policy.delete,
+            resource_group_name=resource_group_name,
+            service_name=service_name,
+            api_id=api_id,
+            operation_id=operation_id,
+            policy_id=policy_id,
+            if_match="*" if if_match is None else if_match)
+
+def apim_api_policy_get(client, resource_group_name, service_name, api_id, policy_id="policy", file_path=None):
     """Get the policy configuration at the API level. """
 
     return client.api_policy.get(resource_group_name=resource_group_name,
                                  service_name=service_name,
                                  api_id=api_id,
-                                 policy_id='policy').value
+                                 policy_id=policy_id).value
 
 # Product API Operations
 def apim_product_api_list(client, resource_group_name, service_name, product_id):

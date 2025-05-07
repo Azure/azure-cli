@@ -314,6 +314,14 @@ def load_arguments(self, _):
         c.argument('file_path', options_list=['--file-path', '-f'],
                    help='File path specified to export the API.')
 
+    with self.argument_context('apim api policy') as c:
+        c.argument('api_id', arg_type=api_id)
+        c.argument('operation_id',
+            help='Operation identifier within an API. Must be unique in the current API Management service instance.')
+        c.argument('value_path', help='Contents of the Policy as defined by the format.')
+        c.argument('policy_format', help='Format of the policy content. Allowed formats: rawxml, rawxml-link, xml, xml-link')
+        c.argument('policy_id', help='Policy identifier within an API. Must be unique in the current API context.')
+
     with self.argument_context('apim product api list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help="The name of the api management service instance", id_part=None)
