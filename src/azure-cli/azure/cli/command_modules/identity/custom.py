@@ -35,15 +35,29 @@ def list_identity_resources(cmd, resource_group_name, resource_name):
 
 
 def create_or_update_federated_credential(cmd, client, resource_group_name, identity_name, federated_credential_name,
-                                          issuer=None, subject=None, audiences=None):
+                                          issuer=None, subject=None, audiences=None, claims_matching_expression_value=None,
+                                          claims_matching_expression_language_version=1):
     _default_audiences = ['api://AzureADTokenExchange']
     audiences = _default_audiences if not audiences else audiences
-    if not issuer or not subject:
-        raise RequiredArgumentMissingError('usage error: please provide both --issuer and --subject parameters')
+    
+    if not issuer:
+        raise RequiredArgumentMissingError('usage error: --issuer parameter is required')
+    if subject and claims_matching_expression_value:
+        raise RequiredArgumentMissingError('usage error: --subject and --claims_matching_expression_value cannot be used together')
+    if not subject and not claims_matching_expression_value:
+        raise RequiredArgumentMissingError('usage error: either --subject or --claims_matching_expression_value must be specified')
+                                           
+    FederatedIdentityCredential = cmd.get_models('FederatedIdentityCredential', resource_type=ResourceType.MGMT_MSI)
 
-    FederatedIdentityCredential = cmd.get_models('FederatedIdentityCredential', resource_type=ResourceType.MGMT_MSI,
-                                                 operation_group='federated_identity_credentials')
-    parameters = FederatedIdentityCredential(issuer=issuer, subject=subject, audiences=audiences)
+    parameters = FederatedIdentityCredential(
+        issuer=issuer,
+        subject=subject if subject else None,
+        audiences=audiences,
+        claims_matching_expression={
+            'value': claims_matching_expression_value,
+            'languageVersion': claims_matching_expression_language_version
+        } if claims_matching_expression_value else None
+    )
 
     return client.create_or_update(resource_group_name=resource_group_name, resource_name=identity_name,
                                    federated_identity_credential_resource_name=federated_credential_name,

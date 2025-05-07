@@ -27,4 +27,4 @@ def _msi_operations_operations(cli_ctx, _):
 
 
 def _msi_federated_identity_credentials_operations(cli_ctx, _):
-    return _msi_client_factory(cli_ctx).federated_identity_credentials
+    return _msi_client_factory(cli_ctx, api_version='2025-01-31-preview').federated_identity_credentials

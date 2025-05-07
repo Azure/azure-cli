@@ -45,18 +45,24 @@ helps['identity federated-credential create'] = """
 type: command
 short-summary: Create a federated identity credential under an existing user assigned identity.
 examples:
-  - name: Create a federated identity credential under a specific user assigned identity.
+  - name: Create a federated identity credential using subject.
     text: |
         az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+  - name: Create a federated identity credential using claims matching expression.
+    text: |
+        az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --cme-value "expression" --cme-version 1 --audiences myAudiences
 """
 
 helps['identity federated-credential update'] = """
 type: command
 short-summary: Update a federated identity credential under an existing user assigned identity.
 examples:
-  - name: Update a federated identity credential under a specific user assigned identity.
+  - name: Update a federated identity credential using subject.
     text: |
         az identity federated-credential update --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+  - name: Update a federated identity credential using claims matching expression.
+    text: |
+        az identity federated-credential update --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --cme-value "expression" --cme-version 1 --audiences myAudiences
 """
 
 helps['identity federated-credential delete'] = """
