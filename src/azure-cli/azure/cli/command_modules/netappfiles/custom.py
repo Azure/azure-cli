@@ -402,7 +402,7 @@ class VolumeCreate(_VolumeCreate):
 class VolumeUpdate(_VolumeUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZIntArgFormat, AAZStrArg, AAZStrArgFormat, AAZBoolArg
+        from azure.cli.core.aaz import AAZIntArgFormat, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],
