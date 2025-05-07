@@ -120,7 +120,9 @@ def validate_registry_name(cmd, namespace):
         acr_suffix = suffixes.acr_login_server_endpoint
         pos = registry.find(acr_suffix)
         if pos > 0:
-            logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
+            logger.warning("Registry name is %s. The login server endpoint suffix '%s' is automatically omitted.",
+                registry[:pos],
+                acr_suffix)
             namespace.registry_name = registry[:pos]
             registry = registry[:pos]
     # If registry contains '-' due to Domain Name Label Scope,
