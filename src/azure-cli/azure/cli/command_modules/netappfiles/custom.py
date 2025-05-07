@@ -12,7 +12,7 @@ from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.aaz import has_value, AAZJsonSelector
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
-from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
+# from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
 from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List as _ActiveDirectoryList, Update as _ActiveDirectoryUpdate
 from .aaz.latest.netappfiles.volume import Create as _VolumeCreate, Update as _VolumeUpdate, BreakFileLocks as _BreakFileLocks
 from .aaz.latest.netappfiles.volume_group import Create as _VolumeGroupCreate
@@ -57,70 +57,70 @@ class UpdateNetworkSiblingSet(_UpdateNetworkSiblingSet):
 
 
 # region account
-class AccountCreate(_AccountCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        # args_schema.user_assigned_identity = AAZStrArg(
-        #     options=["--user-assigned-identity u"],
-        #     arg_group="Identity",
-        #     help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
-        #     required=False
-        # )
+# class AccountCreate(_AccountCreate):
+#     @classmethod
+#     def _build_arguments_schema(cls, *args, **kwargs):
+#         from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+#         args_schema = super()._build_arguments_schema(*args, **kwargs)
+#         # args_schema.user_assigned_identity = AAZStrArg(
+#         #     options=["--user-assigned-identity u"],
+#         #     arg_group="Identity",
+#         #     help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
+#         #     required=False
+#         # )
 
-        args_schema.user_assigned_identity = AAZResourceIdArg(
-            options=["--user-assigned-identity", "-u"],
-            help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
-            required=False,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
-                         "/userAssignedIdentities/{}",
-            ),
-        )
+#         args_schema.user_assigned_identity = AAZResourceIdArg(
+#             options=["--user-assigned-identity", "-u"],
+#             help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
+#             required=False,
+#             fmt=AAZResourceIdArgFormat(
+#                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
+#                          "/userAssignedIdentities/{}",
+#             ),
+#         )
 
-        args_schema.user_assigned_identities._registered = False
-        args_schema.encryption_identity._registered = False
-        return args_schema
+#         args_schema.user_assigned_identities._registered = False
+#         args_schema.encryption_identity._registered = False
+#         return args_schema
 
-    def pre_operations(self):
-        args = self.ctx.args
-        logger.debug("ANF log: AccountCreate.pre_operations user_assigned_identity: %s", args.user_assigned_identity)
-        if has_value(args.user_assigned_identity):
-            # args.user_assigned_identities[args.user_assigned_identity.to_serialized_data()] = "None"
-            args.user_assigned_identities = {args.user_assigned_identity.to_serialized_data(): {}}
-            logger.debug("ANF log: AccountCreate.pre_operations setting user_assigned_identities: %s", args.user_assigned_identities.to_serialized_data())
-            args.encryption_identity.user_assigned_identity = args.user_assigned_identity.to_serialized_data()
+#     def pre_operations(self):
+#         args = self.ctx.args
+#         logger.debug("ANF log: AccountCreate.pre_operations user_assigned_identity: %s", args.user_assigned_identity)
+#         if has_value(args.user_assigned_identity):
+#             # args.user_assigned_identities[args.user_assigned_identity.to_serialized_data()] = "None"
+#             args.user_assigned_identities = {args.user_assigned_identity.to_serialized_data(): {}}
+#             logger.debug("ANF log: AccountCreate.pre_operations setting user_assigned_identities: %s", args.user_assigned_identities.to_serialized_data())
+#             args.encryption_identity.user_assigned_identity = args.user_assigned_identity.to_serialized_data()
 
 
-class AccountUpdate(_AccountUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
+# class AccountUpdate(_AccountUpdate):
+#     @classmethod
+#     def _build_arguments_schema(cls, *args, **kwargs):
+#         from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+#         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
-        args_schema.user_assigned_identity = AAZResourceIdArg(
-            options=["--user-assigned-identity", "-u"],
-            help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
-            required=False,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
-                         "/userAssignedIdentities/{}",
-            ),
-        )
+#         args_schema.user_assigned_identity = AAZResourceIdArg(
+#             options=["--user-assigned-identity", "-u"],
+#             help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has UserAssigned. It should match key of identity.userAssignedIdentities.",
+#             required=False,
+#             fmt=AAZResourceIdArgFormat(
+#                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
+#                          "/userAssignedIdentities/{}",
+#             ),
+#         )
 
-        args_schema.user_assigned_identities._registered = False
-        args_schema.encryption_identity._registered = False
-        return args_schema
+#         args_schema.user_assigned_identities._registered = False
+#         args_schema.encryption_identity._registered = False
+#         return args_schema
 
-    def pre_operations(self):
-        args = self.ctx.args
-        logger.debug("ANF log: AccountCreate.pre_operations user_assigned_identity: %s", args.user_assigned_identity)
-        if has_value(args.user_assigned_identity):
-            # args.user_assigned_identities[args.user_assigned_identity.to_serialized_data()] = "None"
-            args.user_assigned_identities = {args.user_assigned_identity.to_serialized_data(): {}}
-            logger.debug("ANF log: AccountCreate.pre_operations setting user_assigned_identities: %s", args.user_assigned_identities.to_serialized_data())
-            args.encryption_identity.user_assigned_identity = args.user_assigned_identity.to_serialized_data()
+#     def pre_operations(self):
+#         args = self.ctx.args
+#         logger.debug("ANF log: AccountCreate.pre_operations user_assigned_identity: %s", args.user_assigned_identity)
+#         if has_value(args.user_assigned_identity):
+#             # args.user_assigned_identities[args.user_assigned_identity.to_serialized_data()] = "None"
+#             args.user_assigned_identities = {args.user_assigned_identity.to_serialized_data(): {}}
+#             logger.debug("ANF log: AccountCreate.pre_operations setting user_assigned_identities: %s", args.user_assigned_identities.to_serialized_data())
+#             args.encryption_identity.user_assigned_identity = args.user_assigned_identity.to_serialized_data()
 # endregion
 
 
@@ -318,6 +318,13 @@ class VolumeCreate(_VolumeCreate):
         # The API does only support setting Basic and Standard
         args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
 
+        # For backwards compat, in next breaking change window, those will be removed
+        args_schema.is_restoring = AAZBoolArg(
+            options=["--is-restoring"],
+            arg_group="Properties",
+            help="Restoring. Deprecated, do not use will be removed in future version.",
+        )
+
         return args_schema
 
     def pre_operations(self):
@@ -397,30 +404,12 @@ class VolumeCreate(_VolumeCreate):
         else:
             logger.debug("ANF log: Don't create export policy")
 
-# todo create export policy note no longer flatteneded
-    # def post_operations(self):
-    #     args = self.ctx.args
-    #     backupPolicyId = None
-    #     backupEnabled = None
-    #     backupVaultId = None
-    #     if has_value(args.backup_policy_id):
-    #         backupPolicyId = args.backup_policy_id.to_serialized_data()
-    #     if has_value(args.backup_enabled):
-    #         backupEnabled = args.backup_enabled.to_serialized_data()
-    #     if has_value(args.backup_vault_id):
-    #         backupVaultId = args.backup_vault_id.to_serialized_data()
-    #     if has_value(args.policy_enforced):
-    #         policyEnforced = args.policy_enforced.to_serialized_data()
-    #     if any(x is not None for x in [backupPolicyId, backupEnabled, backupVaultId]):
-    #         backup = VolumeBackupProperties(backup_enabled=backup_enabled,
-    #                                         backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
-
 
 # check if flattening dataprotection works
 class VolumeUpdate(_VolumeUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZIntArgFormat, AAZStrArg
+        from azure.cli.core.aaz import AAZIntArgFormat, AAZStrArg, AAZStrArgFormat, AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],
@@ -433,6 +422,62 @@ class VolumeUpdate(_VolumeUpdate):
             minimum=50
         )
 
+        # For backwards compat, in next breaking change window, those will be removed
+        args_schema.avs_data_store = AAZStrArg(
+            options=["--avs-data-store"],
+            arg_group="Properties",
+            help="Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purpose. Deprecated, do not use will be removed in future version.",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        args_schema.creation_token = AAZStrArg(
+            options=["--creation-token"],
+            arg_group="Properties",
+            help="A unique file path for the volume. Used when creating mount targets",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
+                max_length=80,
+                min_length=1,
+            ),
+        )
+        args_schema.is_large_volume = AAZBoolArg(
+            options=["--is-large-volume"],
+            arg_group="Properties",
+            help="Specifies whether volume is a Large Volume or Regular Volume.",
+            nullable=True,
+        )
+        args_schema.is_restoring = AAZBoolArg(
+            options=["--is-restoring"],
+            arg_group="Properties",
+            help="Restoring",
+            nullable=True,
+        )
+        args_schema.ldap_enabled = AAZBoolArg(
+            options=["--ldap-enabled"],
+            arg_group="Properties",
+            help="Specifies whether LDAP is enabled or not for a given NFS volume.",
+            nullable=True,
+        )
+        args_schema.network_features = AAZStrArg(
+            options=["--network-features"],
+            arg_group="Properties",
+            help="Basic network, or Standard features available to the volume. hide me",
+            nullable=True,
+            enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
+        )
+        args_schema.security_style = AAZStrArg(
+            options=["--security-style"],
+            arg_group="Properties",
+            help="The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol",
+            nullable=True,
+            enum={"ntfs": "ntfs", "unix": "unix"},
+        )
+        args_schema.volume_type = AAZStrArg(
+            options=["--volume-type"],
+            arg_group="Properties",
+            help="What type of volume is this. For destination volumes in Cross Region Replication, set type to DataProtection",
+            nullable=True,
+        )
         return args_schema
 
     def pre_operations(self):
@@ -632,7 +677,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             options=["--proximity-placement-group", "--ppg"],
             arg_group="Volumes",
             help="The resource id of the Proximity Placement Group for volume placement.",
-            required=True
+            required=False
         )
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],
@@ -904,7 +949,10 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             log_backup_size = args.log_backup_size.to_serialized_data()
         else:
             log_backup_size = None
+
         kv_private_endpoint_id = args.key_vault_private_endpoint_resource_id.to_serialized_data()
+        encryption_key_source = args.encryption_key_source.to_serialized_data()
+
         ppg = args.proximity_placement_group.to_serialized_data()
 
         if has_value(args.zones):
@@ -971,13 +1019,15 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             for i in range(start_host_id, start_host_id + number_of_hosts):
                 data_volumes.append(create_data_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory,
                                                                   add_snapshot_capacity, str(i), data_size, data_throughput,
-                                                                  prefix, data_repl_skd, data_src_id, kv_private_endpoint_id, zones))
+                                                                  prefix, data_repl_skd, data_src_id, kv_private_endpoint_id, encryption_key_source,
+                                                                  smb_access_based_enumeration, smb_non_browsable, zones))
 
             # Create log volume(s)
             log_volumes = []
             for i in range(start_host_id, start_host_id + number_of_hosts):
                 log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, str(i), log_size,
-                                                                log_throughput, prefix, kv_private_endpoint_id, zones))
+                                                                log_throughput, prefix, kv_private_endpoint_id, encryption_key_source,
+                                                                smb_access_based_enumeration, smb_non_browsable, zones))
             total_data_volume_size = sum(int(vol["usage_threshold"]) for vol in data_volumes)
             total_log_volume_size = sum(int(vol["usage_threshold"]) for vol in log_volumes)
 
@@ -987,24 +1037,24 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             args.volumes.extend(log_volumes)
 
             args.volumes.append(create_shared_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, shared_size,
-                                                                shared_throughput, number_of_hosts, prefix, shared_repl_skd, shared_src_id, kv_private_endpoint_id, smb_access_based_enumeration,
-                                                                smb_non_browsable, zones))
+                                                                shared_throughput, number_of_hosts, prefix, shared_repl_skd, shared_src_id, kv_private_endpoint_id, encryption_key_source,
+                                                                smb_access_based_enumeration, smb_non_browsable, zones))
             args.volumes.append(create_data_backup_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, data_backup_size,
                                                                      data_backup_throughput, total_data_volume_size,
                                                                      total_log_volume_size, prefix, backup_nfsv3,
-                                                                     data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id,
+                                                                     data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id, encryption_key_source,
                                                                      smb_access_based_enumeration,
                                                                      smb_non_browsable, zones))
             args.volumes.append(create_log_backup_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, log_backup_size,
                                                                     log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
-                                                                    log_backup_src_id, kv_private_endpoint_id,
+                                                                    log_backup_src_id, kv_private_endpoint_id, encryption_key_source,
                                                                     smb_access_based_enumeration,
                                                                     smb_non_browsable, zones))
 
 
 def create_data_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, add_snap_capacity, host_id,
                                   data_size, data_throughput, prefix, data_repl_skd=None, data_src_id=None, kv_private_endpoint_id=None,
-                                  zones=None):
+                                  encryption_key_source=None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None):
     name = prefix + application_identifier + "-" + VolumeType.DATA.value + "-mnt" + (host_id.rjust(5, '0'))
 
     if data_size is None:
@@ -1035,6 +1085,9 @@ def create_data_volume_properties(subnet_id, application_identifier, pool_id, pp
         "export_policy": create_default_export_policy_for_vg(),
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
+        "encryption_key_source": encryption_key_source,
+        "smb_access_based_enumeration": smb_access_based_enumeration,
+        "smb_non_browsable": smb_non_browsable,
         "zones": zones
     }
 
@@ -1042,7 +1095,8 @@ def create_data_volume_properties(subnet_id, application_identifier, pool_id, pp
 
 
 def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_id, log_size,
-                                 log_throughput, prefix, kv_private_endpoint_id=None, zones=None):
+                                 log_throughput, prefix, kv_private_endpoint_id=None, encryption_key_source=None,
+                                 smb_access_based_enumeration=None, smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.LOG.value + "-mnt" + (host_id.rjust(5, '0'))
 
     if log_size is None:
@@ -1065,6 +1119,9 @@ def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_
         "throughput_mibps": log_throughput,
         "export_policy": create_default_export_policy_for_vg(),
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
+        "encryption_key_source": encryption_key_source,
+        "smb_access_based_enumeration": smb_access_based_enumeration,
+        "smb_non_browsable": smb_non_browsable,
         "zones": zones
     }
 
@@ -1073,7 +1130,7 @@ def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_
 
 def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, shared_size,
                                     shared_throughput, number_of_hosts, prefix, shared_repl_skd=None,
-                                    shared_src_id=None, kv_private_endpoint_id=None, smb_access_based_enumeration=None,
+                                    shared_src_id=None, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
                                     smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.SHARED.value
 
@@ -1104,6 +1161,7 @@ def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, sh
         "export_policy": create_default_export_policy_for_vg(),
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
+        "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
         "zones": zones
@@ -1115,7 +1173,7 @@ def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, sh
 def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, data_backup_size,
                                          data_backup_throughput, total_data_volume_size, total_log_volume_size,
                                          prefix, backup_nfsv3, data_backup_repl_skd, data_backup_src_id,
-                                         kv_private_endpoint_id=None, smb_access_based_enumeration=None,
+                                         kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
                                          smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.DATA_BACKUP.value
 
@@ -1148,6 +1206,7 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
         "export_policy": create_default_export_policy_for_vg(backup_nfsv3),
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
+        "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
         "zones": zones
@@ -1158,7 +1217,7 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
 
 def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, log_backup_size,
                                         log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
-                                        log_backup_src_id, kv_private_endpoint_id=None, smb_access_based_enumeration=None,
+                                        log_backup_src_id, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
                                         smb_non_browsable=None, zones=None):
     name = prefix + sap_sid + "-" + VolumeType.LOG_BACKUP.value
 
@@ -1189,6 +1248,7 @@ def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory
         "export_policy": create_default_export_policy_for_vg(backup_nfsv3),
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
+        "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
         "zones": zones

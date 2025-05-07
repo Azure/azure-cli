@@ -4491,6 +4491,55 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('resiliencyPolicy.resilientVmDeletionPolicy.enabled', True),
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_vmss_with_automatic_zone_rebalancing_policy', location='eastus2')
+    def test_vmss_with_automatic_zone_rebalancing_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'nsg': self.create_random_name('nsg', 10),
+            'lb1': self.create_random_name('lb', 10),
+            'probe1': self.create_random_name('probe', 10),
+            'rule1': self.create_random_name('rule', 10),
+            'lb2': self.create_random_name('lb', 10),
+            'probe2': self.create_random_name('probe', 10),
+            'rule2': self.create_random_name('rule', 10),
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network lb create -g {rg} -n {lb1}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb1} -n {probe1} --protocol http --port 80 --path /')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb1} -n {rule1} --probe-name {probe1} --protocol tcp --frontend-port 80 --backend-port 80')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --zone-balance true --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 '
+                 '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', True),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate'),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceBehavior', 'CreateBeforeDelete')
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss1} --enable-automatic-zone-balancing False')
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', False),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate'),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceBehavior', 'CreateBeforeDelete')
+        ])
+        self.cmd('network lb create -g {rg} -n {lb2}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n {probe2} --protocol http --port 80 --path /')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb2} -n {rule2} --probe-name {probe2} --protocol tcp --frontend-port 80 --backend-port 80')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image {image} --vm-sku Standard_D1_v2 --load-balancer {lb2} --health-probe {probe2} --zone-balance true --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 --location eastus2')
+
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', True),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss2} --automatic-zone-balancing-behavior CreateBeforeDelete')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', True),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate'),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceBehavior', 'CreateBeforeDelete')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_max_surge')
     def test_vmss_with_max_surge(self, resource_group):
         self.kwargs.update({
@@ -7148,7 +7197,7 @@ class VMDiskEncryptionTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='eastus2')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, location='eastus2', key='vault',
-                      additional_params='--enabled-for-disk-encryption')
+                      additional_params='--enabled-for-disk-encryption --enable-rbac-authorization false')
     def test_vm_disk_encryption_with_key(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -7851,8 +7900,8 @@ class VMGalleryImage(ScenarioTest):
             self.check('storageProfile.osDiskImage.source.uri', '{vhd_uri}')
         ])
 
-    @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
+    @ResourceGroupPreparer(random_name_length=15, location='westus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus',
                       additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_create_image_version_with_region_cvm_encryption(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
@@ -7903,7 +7952,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_VMGuestStateOnlyEncryptedWithPlatformKey --disk-encryption-set {des1_id}')
         self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --target-region-cvm-encryption EncryptedVMGuestStateOnlyWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
+            self.check('publishingProfile.targetRegions[0].name', 'West US'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
@@ -10764,6 +10813,43 @@ class SkuProfileTest(ScenarioTest):
             self.check('skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
             self.check('skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
         ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile_prioritized', location='eastus2')
+    def test_vmss_create_sku_profile_prioritized(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4' +
+                ' --skuprofile-rank "" 1' +
+                ' --skuprofile-allocation-strategy Prioritized', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.skuProfile.allocationStrategy', 'Prioritized'),
+            self.check('vmss.skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('vmss.skuProfile.vmSizes[0].rank', 'None'),
+            self.check('vmss.skuProfile.vmSizes[1].name', 'Standard_D2s_v4'),
+            self.check('vmss.skuProfile.vmSizes[1].rank', '1')
+        ])
+
+        self.cmd('vmss update -n {vmss} -g {rg} ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --skuprofile-rank 1 0', checks=[
+            self.check('skuProfile.allocationStrategy', 'Prioritized'),
+            self.check('skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('skuProfile.vmSizes[0].rank', '1'),
+            self.check('skuProfile.vmSizes[1].name', 'Standard_D2s_v4'),
+            self.check('skuProfile.vmSizes[1].rank', '0')
+        ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile_prioritized_validation', location='eastus2')
+    def test_vmss_create_sku_profile_prioritized_validation(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        with self.assertRaisesRegex(CLIError, "The SKU profile rank list does not specify a rank for every VM size."):
+            self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4' +
+                ' --skuprofile-rank 1' +
+                ' --skuprofile-allocation-strategy Prioritized')
 
 
 class VMCreateNSGRule(ScenarioTest):
@@ -13050,7 +13136,7 @@ class RestorePointScenarioTest(ScenarioTest):
             self.check('sourceRestorePoint.id', '{point_id}')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_local', location='EastUS2EUAP')
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_local')
     def test_restore_point_encryption_local(self, resource_group):
         self.kwargs.update({
             'vault1': self.create_random_name('vault', 15),

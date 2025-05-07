@@ -5575,7 +5575,7 @@ class VNetUpdate(_VNetUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.ipam_pool_prefix_allocations):
+        if args.ipam_pool_prefix_allocations.to_serialized_data():
             args.address_prefixes = []
 
     def post_instance_update(self, instance):

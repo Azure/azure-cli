@@ -89,6 +89,8 @@ from ._util import (
     get_sql_managed_instances_operations,
     get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
     get_sql_managed_database_restore_details_operations,
+    get_sql_replication_links_operations,
+    get_sql_elastic_pools_operations,
 )
 
 
@@ -1219,6 +1221,56 @@ def _backup_storage_redundancy_take_source_warning():
     To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
 
 
+def _should_show_forward_migration_with_links_warnings(
+        cli_ctx,
+        instance,
+        server_name,
+        resource_group_name):
+    '''
+    Checks if the database update operation is a forward migration to Hyperscale and if geo-replication links exist.
+
+    :param cli_ctx: The CLI context object to interact with Azure SQL.
+    :param instance: The database instance object.
+    :param server_name: The name of the server.
+    :param resource_group_name: The name of the resource group.
+    :return: A boolean indicating if it is forward migration of database with geo-replication links.
+    '''
+
+    # Find the replication links for the database
+    replication_links_client = get_sql_replication_links_operations(cli_ctx, None)
+    links = list(replication_links_client.list_by_database(
+        database_name=instance.name,
+        server_name=server_name,
+        resource_group_name=resource_group_name))
+
+    elastic_pools_client = get_sql_elastic_pools_operations(cli_ctx, None)
+    elastic_pool = None
+    if instance.elastic_pool_id:
+        elastic_pool = elastic_pools_client.get(
+            elastic_pool_name=instance.elastic_pool_id.split('/')[-1],
+            server_name=server_name,
+            resource_group_name=resource_group_name)
+
+    # Check if the current SKU is not Hyperscale and the target SKU is Hyperscale
+    # This is to verify forward migration to Hyperscale
+    current_sku = instance.current_sku.name if instance.current_sku else None
+    target_sku = instance.sku.name if instance.sku else None
+    is_target_hyperscale_pool = elastic_pool is not None and elastic_pool.sku.tier == "Hyperscale"
+
+    is_forward_migration = (
+        current_sku is not None and "HS" not in current_sku and
+        ((target_sku is not None and "HS" in target_sku) or is_target_hyperscale_pool)
+    )
+    links_exist = links is not None and len(links) > 0
+
+    return is_forward_migration and links_exist
+
+
+def _forward_migration_with_geodr_links_warning():
+    print("""Changing the service tier to Hyperscale also converts the geo-secondary replica to Hyperscale.
+    For more information, see https://go.microsoft.com/fwlink/?linkid=2314103""")
+
+
 def db_create(
         cmd,
         client,
@@ -1839,6 +1891,10 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
     # TODO Temporary workaround for elastic pool sku name issue
     if instance.elastic_pool_id:
         instance.sku = None
+
+    # Display warning if database is being updated to Hyperscale and if geo-replication links exist
+    if _should_show_forward_migration_with_links_warnings(cmd.cli_ctx, instance, server_name, resource_group_name):
+        _forward_migration_with_geodr_links_warning()
 
     #####
     # Set other (non-sku related) properties

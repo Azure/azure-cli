@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/customdomains/{}", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/customdomains/{}", "2025-04-15"],
         ]
     }
 
@@ -51,6 +51,11 @@ class Wait(AAZWaitCommand):
             help="Name of the Azure Front Door Standard or Azure Front Door Premium profile which is unique within the resource group.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$",
+                max_length=260,
+                min_length=1,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -126,7 +131,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-04-15",
                     required=True,
                 ),
             }
@@ -224,11 +229,31 @@ class Wait(AAZWaitCommand):
                 serialized_name="certificateType",
                 flags={"required": True},
             )
+            tls_settings.cipher_suite_set_type = AAZStrType(
+                serialized_name="cipherSuiteSetType",
+            )
+            tls_settings.customized_cipher_suite_set = AAZObjectType(
+                serialized_name="customizedCipherSuiteSet",
+            )
             tls_settings.minimum_tls_version = AAZStrType(
                 serialized_name="minimumTlsVersion",
             )
             tls_settings.secret = AAZObjectType()
             _WaitHelper._build_schema_resource_reference_read(tls_settings.secret)
+
+            customized_cipher_suite_set = cls._schema_on_200.properties.tls_settings.customized_cipher_suite_set
+            customized_cipher_suite_set.cipher_suite_set_for_tls12 = AAZListType(
+                serialized_name="cipherSuiteSetForTls12",
+            )
+            customized_cipher_suite_set.cipher_suite_set_for_tls13 = AAZListType(
+                serialized_name="cipherSuiteSetForTls13",
+            )
+
+            cipher_suite_set_for_tls12 = cls._schema_on_200.properties.tls_settings.customized_cipher_suite_set.cipher_suite_set_for_tls12
+            cipher_suite_set_for_tls12.Element = AAZStrType()
+
+            cipher_suite_set_for_tls13 = cls._schema_on_200.properties.tls_settings.customized_cipher_suite_set.cipher_suite_set_for_tls13
+            cipher_suite_set_for_tls13.Element = AAZStrType()
 
             validation_properties = cls._schema_on_200.properties.validation_properties
             validation_properties.expiration_date = AAZStrType(
