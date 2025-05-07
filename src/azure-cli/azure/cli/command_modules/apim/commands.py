@@ -112,6 +112,9 @@ def load_command_table(self, _):
 
     with self.command_group('apim api policy', api_sdk) as g:
         g.custom_command('get', 'apim_api_policy_get')
+        g.custom_command('set', 'apim_api_policy_set', supports_no_wait=True)
+        g.custom_command('delete', 'apim_api_policy_delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('list', 'apim_api_policy_list')
         g.wait_command('wait')
 
     with self.command_group('apim product api', api_sdk) as g:
