@@ -16,15 +16,18 @@ def load_command_table(self, _):
 
     identity_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.msi.operations#UserAssignedIdentitiesOperations.{}',
-        client_factory=_msi_user_identities_operations
+        client_factory=_msi_user_identities_operations,
+        operation_group='user_assigned_identities'
     )
     msi_operations_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.msi.operations#Operations.{}',
-        client_factory=_msi_operations_operations
+        client_factory=_msi_operations_operations,
+        operation_group='operations'
     )
     federated_identity_credentials_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.msi.operations#FederatedIdentityCredentialsOperations.{}',
-        client_factory=_msi_federated_identity_credentials_operations
+        client_factory=_msi_federated_identity_credentials_operations,
+        operation_group='federated_identity_credentials'
     )
 
     with self.command_group('identity', identity_sdk, client_factory=_msi_user_identities_operations) as g:

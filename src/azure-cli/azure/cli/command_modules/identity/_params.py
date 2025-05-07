@@ -15,19 +15,19 @@ name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME',
 
 def load_arguments(self, _):
 
-    with self.argument_context('identity') as c:
+    with self.argument_context('identity', operation_group='user_assigned_identities') as c:
         c.argument('resource_name', arg_type=name_arg_type, id_part='name')
 
-    with self.argument_context('identity create') as c:
+    with self.argument_context('identity create', operation_group='user_assigned_identities') as c:
         c.argument('location', get_location_type(self.cli_ctx), required=False)
         c.argument('tags', tags_type)
 
-    with self.argument_context('identity federated-credential') as c:
+    with self.argument_context('identity federated-credential', operation_group='federated_identity_credentials') as c:
         c.argument('federated_credential_name', options_list=('--name', '-n'), help='The name of the federated identity credential resource.')
         c.argument('identity_name', help='The name of the identity resource.')
 
     for scope in ['identity federated-credential create', 'identity federated-credential update']:
-        with self.argument_context(scope) as c:
+        with self.argument_context(scope, operation_group='federated_identity_credentials') as c:
             c.argument('issuer', help='The openId connect metadata URL of the issuer of the identity provider that Azure AD would use in the token exchange protocol for validating tokens before issuing a token as the user-assigned managed identity.')
             c.argument('subject', help='The sub value in the token sent to Azure AD for getting the user-assigned managed identity token. The value configured in the federated credential and the one in the incoming token must exactly match for Azure AD to issue the access token. Cannot be used with --claims-matching-expression-value.')
             c.argument('audiences', nargs='+', help='The aud value in the token sent to Azure for getting the user-assigned managed identity token. The value configured in the federated credential and the one in the incoming token must exactly match for Azure to issue the access token.')
