@@ -56,7 +56,7 @@ def create_or_update_federated_credential(cmd, client, resource_group_name, iden
         issuer=issuer,
         subject=subject if subject else None,
         audiences=audiences,
-        claims_matching_expression={
+        claimsMatchingExpression={
             'value': claims_matching_expression_value,
             'languageVersion': claims_matching_expression_language_version
         } if claims_matching_expression_value else None
