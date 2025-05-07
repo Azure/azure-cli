@@ -10,8 +10,7 @@ import argparse
 from knack.arguments import CLIArgumentType
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.command_modules.monitor.util import (
-    get_aggregation_map, get_operator_map, get_autoscale_scale_direction_map)
+from azure.cli.command_modules.monitor.util import get_autoscale_scale_direction_map
 
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.aaz._arg import AAZCompoundTypeArg, AAZListType
@@ -209,54 +208,6 @@ class MetricAlertAddAction(argparse._AppendAction):
         action["odatatype"] = "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights." \
                               "Nexus.DataContracts.Resources.ScheduledQueryRules.Action"
         super().__call__(parser, namespace, action, option_string)
-
-
-# pylint: disable=too-few-public-methods
-class ConditionAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        from azure.mgmt.monitor.models import ThresholdRuleCondition, RuleMetricDataSource
-        # get default description if not specified
-        if namespace.description is None:
-            namespace.description = ' '.join(values)
-        if len(values) == 1:
-            # workaround because CMD.exe eats > character... Allows condition to be
-            # specified as a quoted expression
-            values = values[0].split(' ')
-        if len(values) < 5:
-            raise InvalidArgumentValueError(
-                '--condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
-        metric_name = ' '.join(values[:-4])
-        operator = get_operator_map()[values[-4]]
-        threshold = int(values[-3])
-        aggregation = get_aggregation_map()[values[-2].lower()]
-        window = get_period_type()(values[-1])
-        metric = RuleMetricDataSource(resource_uri=None, metric_name=metric_name)  # target URI will be filled in later
-        condition = ThresholdRuleCondition(
-            operator=operator, threshold=threshold, data_source=metric,
-            window_size=window, time_aggregation=aggregation)
-        namespace.condition = condition
-
-
-# pylint: disable=protected-access
-class AlertAddAction(argparse._AppendAction):
-    def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
-        super().__call__(parser, namespace, action, option_string)
-
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
-        _type = values[0].lower()
-        if _type == 'email':
-            from azure.mgmt.monitor.models import RuleEmailAction
-            return RuleEmailAction(custom_emails=values[1:])
-        if _type == 'webhook':
-            from azure.mgmt.monitor.models import RuleWebhookAction
-            uri = values[1]
-            try:
-                properties = dict(x.split('=', 1) for x in values[2:])
-            except ValueError:
-                raise InvalidArgumentValueError('{} webhook URI [KEY=VALUE ...]'.format(option_string))
-            return RuleWebhookAction(service_uri=uri, properties=properties)
-        raise InvalidArgumentValueError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
 
 class AlertRemoveAction(argparse._AppendAction):

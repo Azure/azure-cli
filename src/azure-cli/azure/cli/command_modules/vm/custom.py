@@ -3247,10 +3247,12 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
+                enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
+                skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                 imds_mode=None, wire_server_access_control_profile_reference_id=None,
-                imds_access_control_profile_reference_id=None):
+                imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
+                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3565,10 +3567,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
             skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
+            skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
             zone_balance=zone_balance, wire_server_mode=wire_server_mode, imds_mode=imds_mode,
             wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
-            imds_access_control_profile_reference_id=imds_access_control_profile_reference_id)
+            imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
+            enable_automatic_zone_balancing=enable_automatic_zone_balancing,
+            automatic_zone_balancing_strategy=automatic_zone_balancing_strategy,
+            automatic_zone_balancing_behavior=automatic_zone_balancing_behavior)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -4017,9 +4023,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
-                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, zone_balance=None,
+                skuprofile_allostrat=None, skuprofile_rank=None,
+                security_posture_reference_is_overridable=None, zone_balance=None,
                 wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
-                imds_access_control_profile_reference_id=None, **kwargs):
+                imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
+                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4281,6 +4289,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 }
                 sku_profile_vmsizes_list.append(vmsize_obj)
             sku_profile['vmSizes'] = sku_profile_vmsizes_list
+
+            if skuprofile_rank:
+                for vm_size, rank in zip(sku_profile_vmsizes_list, skuprofile_rank):
+                    vm_size['rank'] = rank
+
         if skuprofile_allostrat is not None:
             sku_profile['allocationStrategy'] = skuprofile_allostrat
         vmss.sku_profile = sku_profile
@@ -4335,6 +4348,28 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_creation}
         if enable_resilient_deletion is not None:
             resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_deletion}
+
+    if enable_automatic_zone_balancing is not None or automatic_zone_balancing_strategy is not None or \
+            automatic_zone_balancing_behavior is not None:
+        resiliency_policy = vmss.resiliency_policy
+        if resiliency_policy is None:
+            ResiliencyPolicy = cmd.get_models('ResiliencyPolicy')
+            AutomaticZoneRebalancingPolicy = cmd.get_models('AutomaticZoneRebalancingPolicy')
+            resiliency_policy = ResiliencyPolicy()
+            resiliency_policy.automatic_zone_rebalancing_policy = AutomaticZoneRebalancingPolicy()
+        elif resiliency_policy.automatic_zone_rebalancing_policy is None:
+            AutomaticZoneRebalancingPolicy = cmd.get_models('AutomaticZoneRebalancingPolicy')
+            resiliency_policy.automatic_zone_rebalancing_policy = AutomaticZoneRebalancingPolicy()
+
+        if enable_automatic_zone_balancing is not None:
+            resiliency_policy.automatic_zone_rebalancing_policy.enabled = enable_automatic_zone_balancing
+
+        if automatic_zone_balancing_strategy is not None:
+            resiliency_policy.automatic_zone_rebalancing_policy.rebalance_strategy = automatic_zone_balancing_strategy
+
+        if automatic_zone_balancing_behavior is not None:
+            resiliency_policy.automatic_zone_rebalancing_policy.rebalance_behavior = automatic_zone_balancing_behavior
+        vmss.resiliency_policy = resiliency_policy
 
     if zones is not None:
         vmss.zones = zones
