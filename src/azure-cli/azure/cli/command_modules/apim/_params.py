@@ -322,6 +322,12 @@ def load_arguments(self, _):
         c.argument('policy_format', help='Format of the policy content. Allowed formats: rawxml, rawxml-link, xml, xml-link')
         c.argument('policy_id', help='Policy identifier within an API. Must be unique in the current API context.')
 
+    with self.argument_context('apim api policy get') as c:
+        c.argument('file-path', help='Path to the file where the policy content will be saved. If not specified, the policy content will be printed to the standard output.')
+
+    with self.argument_context('apim api policy delete') as c:
+        c.argument('if_match', help='ETag of the Entity.')
+
     with self.argument_context('apim product api list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help="The name of the api management service instance", id_part=None)
