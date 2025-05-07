@@ -131,7 +131,7 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
             'backup_item_friendly_name': backup_item_name_db3_friendly_name
         })
 
-        # self.cmd('backup container register -v {vault} -g {rg} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --resource-id {reg_vm_id}')
+        self.cmd('backup container register -v {vault} -g {rg} --workload-type SAPAseDatabase --backup-management-type AzureWorkload --resource-id {reg_vm_id}')
 
         # az backup container unregister -v ase-rsv-ccy -g ase-rg-ccy -c VMAppContainer;Compute;ase-rg-ccy;ase-ccy-vm2 -y
         self.cmd('backup container unregister -v {vault} -g {rg} -c {vm_full_name} -y')
