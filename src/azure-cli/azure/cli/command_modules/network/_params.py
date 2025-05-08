@@ -226,7 +226,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway waf-policy') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
         c.argument('rule_set_type', options_list='--type',
-                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'Microsoft_DefaultRuleSet', 'OWASP']),
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',

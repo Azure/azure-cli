@@ -121,7 +121,7 @@ def list_sku_info(cli_ctx, location=None):
     from .aaz.latest.vm import ListSkus as _ListSkus
 
     def _match_location(loc, locations):
-        return next((x for x in locations if x.lower() == loc.lower()), None)
+        return next((x for x in locations if str(x).lower() == str(loc).lower()), None)
 
     result = _ListSkus(cli_ctx=cli_ctx)(command_args={})
     if location:
@@ -653,23 +653,20 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
         return
 
     security_type = disk_security_profile.security_type if hasattr(disk_security_profile, 'security_type') else None
-    if security_type.lower() == 'trustedlaunch':
+    if security_type and security_type.lower() == 'trustedlaunch':
         if namespace.enable_secure_boot is None:
             namespace.enable_secure_boot = True
         if namespace.enable_vtpm is None:
             namespace.enable_vtpm = True
         namespace.security_type = 'TrustedLaunch'
-    elif security_type.lower() == 'standard':
+    elif security_type and security_type.lower() == 'standard':
         logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def validate_image_trusted_launch(namespace):
     from ._constants import UPGRADE_SECURITY_HINT
 
-    # set securityType to Standard by default if no inputs by end user
-    if namespace.security_type is None:
-        namespace.security_type = 'Standard'
-    if namespace.security_type.lower() != 'trustedlaunch':
+    if namespace.security_type and namespace.security_type.lower() != 'trustedlaunch':
         logger.warning(UPGRADE_SECURITY_HINT)
 
 

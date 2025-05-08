@@ -496,7 +496,7 @@ class Update(AAZCommand):
             help="The id of the gallery artifact version source. Can specify a disk uri, snapshot uri, user image or storage account resource.",
             nullable=True,
         )
-        gallery_disk_image_source_update.storage_account_id = AAZStrArg(
+        gallery_disk_image_source_update.storage_account_id = AAZResourceIdArg(
             options=["storage-account-id"],
             help="The Storage Account Id that contains the vhd blob being used as a source for this artifact version.",
             nullable=True,

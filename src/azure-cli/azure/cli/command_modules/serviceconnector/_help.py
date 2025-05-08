@@ -320,7 +320,7 @@ for source in SOURCE_RESOURCES:
             else:
                 system_identity_param = '''
             - name: --system-identity
-              short-summary: The system assigned identity auth info
+              short-summary: The flag to use system assigned identity auth info. No additional parameters are needed.
               long-summary: |
                 Usage: --system-identity
 

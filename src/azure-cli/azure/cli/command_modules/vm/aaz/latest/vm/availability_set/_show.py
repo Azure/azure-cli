@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/availabilitysets/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/availabilitysets/{}", "2024-07-01"],
         ]
     }
 
@@ -120,7 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -182,11 +182,43 @@ class Show(AAZCommand):
                 serialized_name="proximityPlacementGroup",
             )
             _ShowHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
+            properties.scheduled_events_policy = AAZObjectType(
+                serialized_name="scheduledEventsPolicy",
+            )
             properties.statuses = AAZListType(
                 flags={"read_only": True},
             )
             properties.virtual_machines = AAZListType(
                 serialized_name="virtualMachines",
+            )
+
+            scheduled_events_policy = cls._schema_on_200.properties.scheduled_events_policy
+            scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectType(
+                serialized_name="scheduledEventsAdditionalPublishingTargets",
+            )
+            scheduled_events_policy.user_initiated_reboot = AAZObjectType(
+                serialized_name="userInitiatedReboot",
+            )
+            scheduled_events_policy.user_initiated_redeploy = AAZObjectType(
+                serialized_name="userInitiatedRedeploy",
+            )
+
+            scheduled_events_additional_publishing_targets = cls._schema_on_200.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets
+            scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectType(
+                serialized_name="eventGridAndResourceGraph",
+            )
+
+            event_grid_and_resource_graph = cls._schema_on_200.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
+            event_grid_and_resource_graph.enable = AAZBoolType()
+
+            user_initiated_reboot = cls._schema_on_200.properties.scheduled_events_policy.user_initiated_reboot
+            user_initiated_reboot.automatically_approve = AAZBoolType(
+                serialized_name="automaticallyApprove",
+            )
+
+            user_initiated_redeploy = cls._schema_on_200.properties.scheduled_events_policy.user_initiated_redeploy
+            user_initiated_redeploy.automatically_approve = AAZBoolType(
+                serialized_name="automaticallyApprove",
             )
 
             statuses = cls._schema_on_200.properties.statuses

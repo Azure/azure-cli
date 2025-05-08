@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.71.0"
+__version__ = "2.72.0"
 
 import os
 import sys
@@ -220,7 +220,8 @@ class MainCommandsLoader(CLICommandsLoader):
             _load_module_command_loader, _load_extension_command_loader, BLOCKED_MODS, ExtensionCommandSource)
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
-        from azure.cli.core.breaking_change import (import_module_breaking_changes, import_extension_breaking_changes)
+        from azure.cli.core.breaking_change import (
+            import_core_breaking_changes, import_module_breaking_changes, import_extension_breaking_changes)
 
         def _update_command_table_from_modules(args, command_modules=None):
             """Loads command tables from modules and merge into the main command table.
@@ -415,6 +416,9 @@ class MainCommandsLoader(CLICommandsLoader):
         # Clear the tables to make this method idempotent
         self.command_group_table.clear()
         self.command_table.clear()
+
+        # Import announced breaking changes in azure.cli.core._breaking_change.py
+        import_core_breaking_changes()
 
         command_index = None
         # Set fallback=False to turn off command index in case of regression
