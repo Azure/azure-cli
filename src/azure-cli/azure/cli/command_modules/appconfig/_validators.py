@@ -389,13 +389,23 @@ def validate_snapshot_import(namespace):
 def validate_sku(namespace):
     if namespace.sku.lower() == 'free':
         if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica or namespace.enable_arm_private_network_access):  # pylint: disable=too-many-boolean-expressions
-            logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a free store.")
+            logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' , 'enable-arm-private-network-access' and '--retention-days' will be ignored when creating a free store.")
             namespace.retention_days = None
             namespace.enable_purge_protection = None
             namespace.replica_name = None
             namespace.replica_location = None
             namespace.no_replica = None
             namespace.enable_arm_private_network_access = None
+            return
+
+    if namespace.sku.lower() == 'developer':
+        if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica):  # pylint: disable=too-many-boolean-expressions
+            logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a developer store.")
+            namespace.retention_days = None
+            namespace.enable_purge_protection = None
+            namespace.replica_name = None
+            namespace.replica_location = None
+            namespace.no_replica = None
             return
 
     if namespace.sku.lower() == 'premium' and not namespace.no_replica:

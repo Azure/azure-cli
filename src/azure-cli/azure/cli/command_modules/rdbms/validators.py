@@ -19,7 +19,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations \
     as MySqlFirewallRulesOperations
-from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
+from ._client_factory import (cf_mysql_flexible_servers, cf_postgres_flexible_servers,
+                              cf_postgres_check_resource_availability)
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
@@ -304,13 +305,16 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
         logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
 
 
-def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
-                           standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
-                           version=None, instance=None, geo_redundant_backup=None,
+def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
+                           zone=None, standby_availability_zone=None, high_availability=None, subnet=None,
+                           public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None):
+                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
+                           password_auth=None, microsoft_entra_auth=None,
+                           admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+    validate_database_name(database_name)
     is_create = not instance
     if is_create:
         list_location_capability_info = get_postgres_location_capability_info(
@@ -347,8 +351,11 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
+    _pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+    is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
+                                 admin_name, admin_id, admin_type, instance)
 
 
 def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
@@ -503,20 +510,14 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
-def _pg_version_validator(version, versions, is_create):
+def _pg_version_validator(version, versions):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
         if version == '12':
-            logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
-                           "the option to select version 12 will be removed in the near future. "
+            raise CLIError("Support for PostgreSQL 12 has officially ended. "
                            "We recommend selecting PostgreSQL 13 or a later version for "
                            "all future operations.")
-
-    if is_create:
-        # Warning for upcoming breaking change to default value of pg version
-        logger.warning("The default value for the PostgreSQL server major version "
-                       "will be updating to 17 in the near future.")
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
@@ -730,6 +731,14 @@ def validate_server_name(db_context, server_name, type_):
         raise ValidationError(result.message)
 
 
+def validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name):
+    client = cf_postgres_check_resource_availability(cmd.cli_ctx, '_')
+    resource_type = 'Microsoft.DBforPostgreSQL/flexibleServers/virtualendpoints'
+    result = client.execute(name_availability_request={'name': virtual_endpoint_name, 'type': resource_type})
+    if result and result.name_available is False:
+        raise ValidationError("Virtual endpoint's base name is not available.")
+
+
 def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_resource_group_name, target_server_name):
     id_comps = parse_resource_id(migrationInstanceResourceId)
     runtime_server_resource_resource_type = id_comps['resource_type'].lower()
@@ -922,6 +931,22 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
 
 
+def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,
+                                 admin_name, admin_id, admin_type, instance):
+    if instance is None:
+        if (password_auth is not None and password_auth.lower() == 'disabled') and not is_microsoft_entra_auth_enabled:
+            raise CLIError('Need to have an authentication method enabled, please set --microsoft-entra-auth '
+                           'to "Enabled" or --password-auth to "Enabled".')
+
+        if not is_microsoft_entra_auth_enabled and (admin_name or admin_id or admin_type):
+            raise CLIError('To provide values for --admin-object-id, --admin-display-name, and --admin-type '
+                           'please set --microsoft-entra-auth to "Enabled".')
+        if (admin_name is not None or admin_id is not None or admin_type is not None) and \
+           not (admin_name is not None and admin_id is not None and admin_type is not None):
+            raise CLIError('To add Microsoft Entra admin, please provide values for --admin-object-id, '
+                           '--admin-display-name, and --admin-type.')
+
+
 def check_resource_group(resource_group_name):
     # check if rg is already null originally
     if not resource_group_name:
@@ -958,3 +983,10 @@ def validate_backup_name(backup_name):
     # check if backup_name exceeds 128 characters
     if len(backup_name) > 128:
         raise CLIError('Backup name cannot exceed 128 characters.')
+
+
+def validate_database_name(database_name):
+    if database_name is not None and not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]{0,30}$', database_name):
+        raise ValidationError("Database name must begin with a letter (a-z) or underscore (_). "
+                              "Subsequent characters in a name can be letters, digits (0-9), or underscores. "
+                              "Database name length must be less than 32 characters.")

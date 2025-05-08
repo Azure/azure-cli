@@ -25,7 +25,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_key_validation(self, resource_group, location):
         config_store_prefix = get_resource_name_prefix('KVTest')
-        config_store_name = self.create_random_name(prefix=config_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'

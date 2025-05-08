@@ -36,6 +36,7 @@ CONST_OS_SKU_MARINER = "Mariner"
 CONST_OS_SKU_WINDOWS2019 = "Windows2019"
 CONST_OS_SKU_WINDOWS2022 = "Windows2022"
 CONST_OS_SKU_AZURELINUX = "AzureLinux"
+CONST_OS_SKU_UBUNTU2204 = "Ubuntu2204"
 
 # vm set type
 CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
@@ -52,6 +53,10 @@ CONST_GPU_INSTANCE_PROFILE_MIG3_G = "MIG3g"
 CONST_GPU_INSTANCE_PROFILE_MIG4_G = "MIG4g"
 CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
 
+# gpu driver install
+CONST_GPU_DRIVER_INSTALL = "Install"
+CONST_GPU_DRIVER_NONE = "None"
+
 # consts for ManagedCluster
 # load balancer sku
 CONST_LOAD_BALANCER_SKU_BASIC = "basic"
@@ -67,6 +72,7 @@ CONST_OUTBOUND_TYPE_LOAD_BALANCER = "loadBalancer"
 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING = "userDefinedRouting"
 CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY = "managedNATGateway"
 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY = "userAssignedNATGateway"
+CONST_OUTBOUND_TYPE_NONE = "none"
 
 # load balancer backend pool type
 CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP = "nodeIP"
@@ -161,6 +167,13 @@ CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
 
+# app routing nginx config options
+CONST_WEB_APPLICATION_ROUTING_KEY_NAME = "ingress/webApplicationRouting"
+CONST_APP_ROUTING_ANNOTATION_CONTROLLED_NGINX = "AnnotationControlled"
+CONST_APP_ROUTING_EXTERNAL_NGINX = "External"
+CONST_APP_ROUTING_INTERNAL_NGINX = "Internal"
+CONST_APP_ROUTING_NONE_NGINX = "None"
+
 # all supported addons
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
@@ -171,7 +184,8 @@ ADDONS = {
     'ingress-appgw': CONST_INGRESS_APPGW_ADDON_NAME,
     "confcom": CONST_CONFCOM_ADDON_NAME,
     'open-service-mesh': CONST_OPEN_SERVICE_MESH_ADDON_NAME,
-    'azure-keyvault-secrets-provider': CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+    'azure-keyvault-secrets-provider': CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
+    "web_application_routing": CONST_WEB_APPLICATION_ROUTING_KEY_NAME,
 }
 
 # consts for check-acr command
@@ -205,6 +219,10 @@ CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK = "Rollback"
 # Dns zone contributor role
 CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE = "Private DNS Zone Contributor"
 CONST_DNS_ZONE_CONTRIBUTOR_ROLE = "DNS Zone Contributor"
+
+# consts for network isolated cluster
+CONST_ARTIFACT_SOURCE_DIRECT = "Direct"
+CONST_ARTIFACT_SOURCE_CACHE = "Cache"
 
 
 # consts for decorator pattern

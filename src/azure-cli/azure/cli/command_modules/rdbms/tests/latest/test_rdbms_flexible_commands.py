@@ -53,7 +53,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = 'az {} flexible-server create -l {} -g {} -n {} --public-access none'
+        template = 'az {} flexible-server create -l {} -g {} -n {} --public-access none --create-default-database Enabled'
         execute(self.cli_ctx, template.format(self.engine_type,
                                               self.location,
                                               group, name))
@@ -145,7 +145,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
                   --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
-                  --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
+                  --public-access None --create-default-database Enabled'.format(database_engine, resource_group, server_name, backup_retention,
                                                sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
@@ -680,7 +680,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         def invalid_input_tests():
             # key or identity only
-            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {}'.format(
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --create-default-database Enabled'.format(
                 resource_group,
                 server_name,
                 tier,
@@ -688,7 +688,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 key['key']['kid']
             ), expect_failure=True)
 
-            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --identity {}'.format(
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --identity {} --create-default-database Enabled'.format(
                 resource_group,
                 server_name,
                 tier,
@@ -697,7 +697,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             ), expect_failure=True)
 
             # geo-redundant server with data encryption needs backup_key and backup_identity
-            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --geo-redundant-backup Enabled'.format(
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --geo-redundant-backup Enabled --create-default-database Enabled'.format(
                 resource_group,
                 server_name,
                 tier,
@@ -711,7 +711,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             backup_key_id_flags = '--backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id']) if geo_redundant_backup else ''
             primary_server_name = server_with_geo_name if geo_redundant_backup else server_name
             # create primary flexible server with data encryption
-            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {} --create-default-database Enabled'.format(
                         resource_group,
                         primary_server_name,
                         tier,
@@ -828,7 +828,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         main_tests(True)
 
         # try to update key and identity in a server without data encryption
-        self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --location {}'.format(
+        self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --location {} --create-default-database Enabled'.format(
                 resource_group,
                 server_2_name,
                 tier,
@@ -1332,7 +1332,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
             replica_vnet_check = [[]] * 2
 
         # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --yes --create-default-database Enabled'
                  .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
@@ -1360,8 +1360,8 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
-        # test replica stop-replication
-        self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
+        # test replica promote
+        self.cmd('{} flexible-server replica promote -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
@@ -1463,7 +1463,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
             # test virtual-endpoint list
             self.cmd('{} flexible-server virtual-endpoint list -g {} --server-name {}'
                     .format(database_engine, resource_group, master_server),
-                    checks=[JMESPathCheck('length(@)', 0)])
+                    expect_failure=True)
 
             # delete standalone server
             self.cmd('{} flexible-server delete -g {} --name {} --yes'
@@ -2173,7 +2173,7 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
         new_version = '16'
         location = self.postgres_location
 
-        create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name {} --location {} --version {} --yes'.format(
+        create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name {} --location {} --version {} --yes --create-default-database Enabled'.format(
             database_engine, resource_group, server_name, "Standard_D2s_v3", location, current_version)
         if public_access:
             create_command += ' --public-access none'
@@ -2261,29 +2261,29 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
         self.assertTrue(backups_length == len(backups_update))
 
 
-class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
+class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_postgresql_flexible_server_identity_aad_admin_mgmt(self, resource_group):
-        self._test_identity_aad_admin_mgmt('postgres', resource_group, 'enabled')
+    def test_postgresql_flexible_server_identity_microsoft_entra_admin_mgmt(self, resource_group):
+        self._test_identity_microsoft_entra_admin_mgmt('postgres', resource_group, 'enabled')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_postgresql_flexible_server_identity_aad_admin_only_mgmt(self, resource_group):
-        self._test_identity_aad_admin_mgmt('postgres', resource_group, 'disabled')
+    def test_postgresql_flexible_server_identity_microsoft_entra_admin_only_mgmt(self, resource_group):
+        self._test_identity_microsoft_entra_admin_mgmt('postgres', resource_group, 'disabled')
 
-    def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth, location=postgres_location):
+    def _test_identity_microsoft_entra_admin_mgmt(self, database_engine, resource_group, password_auth, location=postgres_location):
         login = 'aaa@foo.com'
         sid = '894ef8da-7971-4f68-972c-f561441eb329'
-        auth_args = '--password-auth {} --active-directory-auth enabled'.format(password_auth)
+        auth_args = '--password-auth {} --microsoft-entra-auth enabled'.format(password_auth)
         admin_id_arg = '-i {}'.format(sid) if database_engine == 'postgres' else ''
         server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH) for _ in range(2)]
 
         # create server
-        self.cmd('{} flexible-server create --location {} -g {} -n {} --public-access none --tier {} --sku-name {} {}'
+        self.cmd('{} flexible-server create --location {} -g {} -n {} --public-access none --tier {} --sku-name {} {} --create-default-database Enabled'
                  .format(database_engine, location, resource_group, server, 'GeneralPurpose', 'Standard_D2s_v3', auth_args))
 
         # create 3 identities
@@ -2314,7 +2314,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0]))])
 
-        admins = self.cmd('{} flexible-server ad-admin list -g {} -s {}'
+        admins = self.cmd('{} flexible-server microsoft-entra-admin list -g {} -s {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(0, len(admins))
 
@@ -2331,21 +2331,21 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                         checks=[
                             JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
 
-        # try to add AAD admin to replica 1
-        self.cmd('{} flexible-server ad-admin create -g {} -s {} -u {} -i {}'
+        # try to add Microsoft Entra admin to replica 1
+        self.cmd('{} flexible-server microsoft-entra-admin create -g {} -s {} -u {} -i {}'
                     .format(database_engine, resource_group, replica[0], login, sid),
                     expect_failure=True)
         
-        # add AAD admin to primary server
+        # add Microsoft Entra admin to primary server
         admin_checks = [JMESPathCheck('principalType', 'User'),
                         JMESPathCheck('principalName', login),
                         JMESPathCheck('objectId', sid)]
 
-        self.cmd('{} flexible-server ad-admin create -g {} -s {} -u {} -i {}'
+        self.cmd('{} flexible-server microsoft-entra-admin create -g {} -s {} -u {} -i {}'
                     .format(database_engine, resource_group, server, login, sid))
 
         for server_name in [server, replica[0]]:
-            self.cmd('{} flexible-server ad-admin show -g {} -s {} {}'
+            self.cmd('{} flexible-server microsoft-entra-admin show -g {} -s {} {}'
                     .format(database_engine, resource_group, server_name, admin_id_arg),
                     checks=admin_checks)
 
@@ -2370,7 +2370,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0])),
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
 
-        self.cmd('{} flexible-server ad-admin show -g {} -s {} {}'
+        self.cmd('{} flexible-server microsoft-entra-admin show -g {} -s {} {}'
                     .format(database_engine, resource_group, replica[1], admin_id_arg),
                     checks=admin_checks)
 
@@ -2380,17 +2380,17 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                         JMESPathCheck('authConfig.passwordAuth', password_auth, False)]
             self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name), checks=list_checks)
 
-        # try to remove AAD admin from replica 2
-        self.cmd('{} flexible-server ad-admin delete -g {} -s {} {} --yes'
+        # try to remove Microsoft Entra admin from replica 2
+        self.cmd('{} flexible-server microsoft-entra-admin delete -g {} -s {} {} --yes'
                  .format(database_engine, resource_group, replica[1], admin_id_arg),
                  expect_failure=True)
 
-        # remove AAD admin from primary server
-        self.cmd('{} flexible-server ad-admin delete -g {} -s {} {} --yes'
+        # remove Microsoft Entra admin from primary server
+        self.cmd('{} flexible-server microsoft-entra-admin delete -g {} -s {} {} --yes'
                  .format(database_engine, resource_group, server, admin_id_arg))
 
         for server_name in [server, replica[0], replica[1]]:
-            admins = self.cmd('{} flexible-server ad-admin list -g {} -s {}'
+            admins = self.cmd('{} flexible-server microsoft-entra-admin list -g {} -s {}'
                               .format(database_engine, resource_group, server_name)).get_output_in_json()
             self.assertEqual(0, len(admins))
 

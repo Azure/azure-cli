@@ -157,7 +157,7 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2024-01-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2024-07-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2024-11-01', {
             'resource_skus': '2019-04-01',
             'disks': '2023-04-02',
             'disk_encryption_sets': '2022-03-02',
@@ -165,11 +165,11 @@ AZURE_API_PROFILES = {
             'snapshots': '2023-10-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2023-07-03',
+            'gallery_image_versions': '2024-03-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2024-07-01',
+            'virtual_machine_scale_sets': '2024-11-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -186,16 +186,15 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
-        ResourceType.MGMT_KEYVAULT: SDKProfile('2023-07-01', {
+        ResourceType.MGMT_KEYVAULT: SDKProfile('2024-11-01', {
             'vaults': '2023-02-01',
-            'managed_hsms': '2023-07-01'
+            'managed_hsms': '2024-11-01'
         }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
-            'classic_administrators': '2015-06-01',
             'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2023-11-01-preview', {
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2025-03-01-preview', {
             'agent_pools': '2019-06-01-preview',
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
@@ -216,44 +215,12 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2022-11-02',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-08-06',
-        ResourceType.DATA_STORAGE_FILESHARE: '2024-08-04',
+        ResourceType.DATA_STORAGE_FILESHARE: '2025-05-05',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
-            'action_groups': '2022-06-01',
-            'activity_log_alerts': '2017-04-01',
-            'activity_logs': '2015-04-01',
-            'alert_rule_incidents': '2016-03-01',
-            'alert_rules': '2016-03-01',
-            'autoscale_settings': '2022-10-01',
-            'baseline': '2018-09-01',
-            'baselines': '2019-03-01',
-            'diagnostic_settings': '2021-05-01-preview',
-            'diagnostic_settings_category': '2017-05-01-preview',
-            'event_categories': '2015-04-01',
-            'guest_diagnostics_settings': '2018-06-01-preview',
-            'guest_diagnostics_settings_association': '2018-06-01-preview',
-            'log_profiles': '2016-03-01',
-            'metric_alerts': '2018-03-01',
-            'metric_alerts_status': '2018-03-01',
-            'metric_baseline': '2018-09-01',
-            'metric_definitions': '2018-01-01',
-            'metric_namespaces': '2017-12-01-preview',
-            'metrics': '2018-01-01',
-            'operations': '2015-04-01',
-            'scheduled_query_rules': '2018-04-16',
-            'service_diagnostic_settings': '2016-09-01',
-            'tenant_activity_logs': '2015-04-01',
-            'vm_insights': '2018-11-27-preview',
-            'private_link_resources': '2019-10-17-preview',
-            'private_link_scoped_resources': '2019-10-17-preview',
-            'private_link_scope_operation_status': '2019-10-17-preview',
-            'private_link_scopes': '2019-10-17-preview',
-            'private_endpoint_connections': '2019-10-17-preview',
-            'subscription_diagnostic_settings': '2017-05-01-preview'
-        }),
+        ResourceType.MGMT_MONITOR: None,
         ResourceType.MGMT_MSI: '2023-01-31',
         ResourceType.MGMT_APPSERVICE: '2024-04-01',
         ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
@@ -262,164 +229,8 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-10-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-02-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
-    },
-    '2020-09-01-hybrid': {
-        ResourceType.MGMT_STORAGE: '2019-06-01',
-        ResourceType.MGMT_NETWORK: '2018-11-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
-            'resource_skus': '2019-04-01',
-            'disks': '2019-07-01',
-            'disk_encryption_sets': '2019-07-01',
-            'disk_accesses': '2020-05-01',
-            'snapshots': '2019-07-01',
-            'galleries': '2019-12-01',
-            'gallery_images': '2019-12-01',
-            'gallery_image_versions': '2019-12-01',
-            'virtual_machine_scale_sets': '2020-06-01'
-        }),
-        ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_MSI: '2018-11-30',
-        ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
-        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2019-10-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
-        ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
-        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
-        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
-            'classic_administrators': '2015-06-01',
-            'policy_assignments': '2016-12-01',
-            'policy_definitions': '2016-12-01'
-        }),
-        # The order does make things different.
-        # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
-        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
-        ResourceType.DATA_KEYVAULT_KEYS: None,
-        ResourceType.DATA_KEYVAULT_SECRETS: None,
-        ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2019-07-07',
-        ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
-        ResourceType.DATA_STORAGE_QUEUE: '2019-07-07',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
-        ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
-        ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
-        ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2020-11-01', {
-            'container_services': '2017-07-01',
-            'open_shift_managed_clusters': '2019-09-30-preview'
-        })
-    },
-    '2019-03-01-hybrid': {
-        ResourceType.MGMT_STORAGE: '2017-10-01',
-        ResourceType.MGMT_NETWORK: '2017-10-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
-            'resource_skus': '2017-09-01',
-            'disks': '2017-03-30',
-            'snapshots': '2017-03-30'
-        }),
-        ResourceType.MGMT_MSI: '2018-11-30',
-        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
-        ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
-        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
-        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
-        ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
-            'classic_administrators': '2015-06-01',
-            'policy_assignments': '2016-12-01',
-            'policy_definitions': '2016-12-01'
-        }),
-        # The order does make things different.
-        # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
-        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
-        ResourceType.DATA_KEYVAULT_KEYS: None,
-        ResourceType.DATA_KEYVAULT_SECRETS: None,
-        ResourceType.DATA_STORAGE: '2017-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2017-11-09',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-11-09',
-        ResourceType.DATA_STORAGE_FILESHARE: '2017-11-09',
-        ResourceType.DATA_STORAGE_QUEUE: '2017-11-09',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        # Full MultiAPI support is not done in AppService, the line below is merely
-        # to have commands show up in the hybrid profile which happens to have the latest
-        # API versions
-        ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
-        ResourceType.MGMT_IOTHUB: '2019-03-22',
-        ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
-    },
-    '2018-03-01-hybrid': {
-        ResourceType.MGMT_STORAGE: '2016-01-01',
-        ResourceType.MGMT_NETWORK: '2017-10-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2017-03-30'),
-        ResourceType.MGMT_MSI: '2018-11-30',
-        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2018-02-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
-        ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
-        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
-        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
-        ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
-            'classic_administrators': '2015-06-01'
-        }),
-        # The order does make things different.
-        # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
-        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
-        ResourceType.DATA_KEYVAULT_KEYS: None,
-        ResourceType.DATA_KEYVAULT_SECRETS: None,
-        ResourceType.DATA_STORAGE: '2017-04-17',
-        ResourceType.DATA_STORAGE_BLOB: '2017-04-17',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-04-17',
-        ResourceType.DATA_STORAGE_FILESHARE: '2017-04-17',
-        ResourceType.DATA_STORAGE_QUEUE: '2017-04-17',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
-    },
-    '2017-03-09-profile': {
-        ResourceType.MGMT_STORAGE: '2016-01-01',
-        ResourceType.MGMT_NETWORK: '2015-06-15',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2016-03-30'),
-        ResourceType.MGMT_MSI: '2018-11-30',
-        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_LOCKS: '2015-01-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2015-10-01-preview',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2016-02-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
-        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
-        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
-        ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
-            'classic_administrators': '2015-06-01'
-        }),
-        # The order does make things different.
-        # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
-        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
-        ResourceType.DATA_KEYVAULT_KEYS: None,
-        ResourceType.DATA_KEYVAULT_SECRETS: None,
-        ResourceType.DATA_STORAGE: '2015-04-05',
-        ResourceType.DATA_STORAGE_BLOB: '2015-04-05',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2015-04-05',
-        ResourceType.DATA_STORAGE_FILESHARE: '2015-04-05',
-        ResourceType.DATA_STORAGE_QUEUE: '2015-04-05'
     }
 }
 
@@ -427,6 +238,10 @@ AZURE_API_PROFILES = {
 # We should avoid using ad hoc API versions,
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
+    ResourceType.MGMT_IOTHUB: {
+        # src/azure-cli/azure/cli/command_modules/iot/custom.py#iot_hub_devicestream_show
+        'iot_hub_resource': '2019-07-01-preview',
+    },
     ResourceType.MGMT_APPSERVICE: {
         # src/azure-cli/azure/cli/command_modules/appservice/_constants.py:68
         'app_service_certificate_orders': '2022-09-01'
@@ -439,6 +254,8 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
         'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
         'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
+        'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
+        'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
     },
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50

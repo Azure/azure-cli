@@ -1537,10 +1537,12 @@ helps['webapp config ssl import'] = """
 type: command
 short-summary: Import an SSL or App Service Certificate to a web app from Key Vault.
 examples:
-  - name: Import an SSL or App Service Certificate certificate to a web app from Key Vault.
+  - name: Import an SSL or App Service Certificate certificate to a web app from Key Vault. Note that all webapps in the webspace will also be able to use the certificate.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
-  - name: Import an SSL or App Service Certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
+  - name: Import an SSL or App Service Certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription). Note that all webapps in the webspace will also be able to use the certificate.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
+  - name: Import an SSL or App Service Certificate certificate to a webspace from Key Vault. Note that all webapps in the webspace will also be able to use the certificate.
+    text: az webapp config ssl import --resource-group MyResourceGroup --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
 """
 
 helps['webapp config ssl create'] = """
@@ -1685,6 +1687,9 @@ examples:
 helps['webapp create-remote-connection'] = """
 type: command
 short-summary: Creates a remote connection using a tcp tunnel to your web app
+examples:
+  - name: Create a remote connection using a tcp tunnel to your web app
+    text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup
 """
 
 helps['webapp delete'] = """

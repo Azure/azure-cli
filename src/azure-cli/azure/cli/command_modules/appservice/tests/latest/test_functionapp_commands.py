@@ -818,6 +818,13 @@ class FunctionAppFlex(LiveScenarioTest):
         locations = self.cmd('functionapp list-flexconsumption-locations --zone-redundant').get_output_in_json()
         self.assertTrue(len(locations) > 0)
 
+    def test_functionapp_list_flexconsumption_locations_details(self):
+        locations = self.cmd('functionapp list-flexconsumption-locations --show-details --runtime java').get_output_in_json()
+        self.assertTrue(len(locations) > 0)
+        self.assertTrue(locations[0]['name'] is not None)
+        self.assertTrue(locations[0]['details'][0]['runtime'] is not None)
+        self.assertTrue(locations[0]['details'][0]['runtime'] == 'java') 
+
     def test_functionapp_list_flexconsumption_runtimes(self):
         runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
         self.assertTrue(len(runtimes) == 2)
@@ -1474,7 +1481,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 18'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 22'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1486,7 +1493,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~18')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~22')])
 
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
@@ -1517,7 +1524,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~20')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~22')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1801,7 +1808,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node --runtime-version 18'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node --runtime-version 22'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -1813,7 +1820,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')])
+            JMESPathCheck('linuxFxVersion', 'Node|22')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()

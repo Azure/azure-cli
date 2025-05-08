@@ -35,7 +35,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
 
 from knack.log import get_logger
-from knack.util import CLIError
+from knack.util import CLIError, todict
 
 
 logger = get_logger(__name__)
@@ -555,6 +555,7 @@ def create_hsm(cmd, client,
 
     if not sku:
         sku = 'Standard_B1'
+    sku_family = sku.split('_')[1][0]
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT,
                                 operation_group='managed_hsms')
@@ -574,7 +575,7 @@ def create_hsm(cmd, client,
                                       public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
-                            sku=ManagedHsmSku(name=sku, family='B'),
+                            sku=ManagedHsmSku(name=sku, family=sku_family),
                             properties=properties)
 
     if user_identities:
@@ -1099,6 +1100,25 @@ def list_keys(client, maxresults=None, include_managed=False):
     if not include_managed:
         return [_ for _ in result if not getattr(_, 'managed')] if result else result
     return result
+
+
+def get_key_attestation(client, name, version=None, file_path=None):
+    key = client.get_key_attestation(name=name, version=version)
+    key_attestation = key.properties.attestation
+    if not file_path:
+        return key_attestation
+
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
+    try:
+        from ._command_type import _encode_hex
+        with open(file_path, 'w') as outfile:
+            json.dump(todict(_encode_hex(key_attestation)), outfile)
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
 
 
 def delete_key(client, name):
@@ -2115,7 +2135,6 @@ def full_backup(cmd, client, storage_resource_uri=None, storage_account_name=Non
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     poller = client.begin_backup(storage_resource_uri, sas_token=token, use_managed_identity=use_managed_identity)
-    from knack.util import todict
     result = todict(poller.result())
     result['status'] = poller.status()
     return result
