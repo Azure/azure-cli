@@ -6,7 +6,7 @@
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.util import user_confirmation
+from azure.cli.core.util import sdk_no_wait, user_confirmation
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -88,20 +88,13 @@ def acr_agentpool_delete(cmd,
     user_confirmation("Are you sure you want to delete the agentpool '{}' in registry '{}'?".format(
         agent_pool_name, registry_name), yes)
     try:
-        response = client.begin_delete(resource_group_name=resource_group_name,
-                                       registry_name=registry_name,
-                                       agent_pool_name=agent_pool_name)
+        response = sdk_no_wait(
+            no_wait, client.begin_delete, resource_group_name, registry_name, agent_pool_name).result()
 
         if no_wait:
             logger.warning("Started to delete the agent pool '%s': %s", agent_pool_name, response.status())
             return response
 
-        # Since agent pool is a tracked resource in arm, arm also pings the async deletion api at the
-        # same time to get the status. If arm gets the 200 status first and knows that the resource is deleted,
-        # it marks the resource as deleted and stop routing further requests to the resource including the
-        # async deletion status api. Hence arm will directly return 404. Consider this as successful delete.
-        from ._agentpool_polling import delete_agentpool_with_polling
-        return delete_agentpool_with_polling(cmd, client, agent_pool_name, registry_name, resource_group_name)
     except ValidationError as e:
         raise CLIError(e)
 
