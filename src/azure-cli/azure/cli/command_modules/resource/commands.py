@@ -16,7 +16,7 @@ from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_feature_registrations, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links, cf_resource_deploymentstacks,
-    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_groups_mixin, cf_management_group_subscriptions, cf_management_group_entities, cf_hierarchy_settings, cf_resource_templatespecs, cf_resource_resourcemanagementprivatelinks, cf_resource_privatelinkassociations)
+    cf_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_groups_mixin, cf_management_group_subscriptions, cf_management_group_entities, cf_hierarchy_settings, cf_resource_templatespecs, cf_resource_resourcemanagementprivatelinks, cf_resource_privatelinkassociations)
 from azure.cli.command_modules.resource._validators import (
     process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out,
     process_assign_identity_namespace, process_assignment_create_namespace, validate_deployment_stack_files)
@@ -200,7 +200,7 @@ def load_command_table(self, _):
 
     resource_deploymentscripts_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.deploymentscripts.operations#ResourceLinksOperations.{}',
-        client_factory=cf_resource_deploymentscripts,
+        client_factory=cf_deploymentscripts,
         resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS
     )
 
