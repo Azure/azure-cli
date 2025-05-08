@@ -123,8 +123,8 @@ def validate_registry_name(cmd, namespace):
         pos = registry.find(acr_suffix)
         if pos > 0:
             logger.warning("Registry name is %s. The following suffix '%s' is automatically omitted.",
-                registry[:pos],
-                acr_suffix)
+                           registry[:pos],
+                           acr_suffix)
             namespace.registry_name = registry[:pos]
             registry = registry[:pos]
 
