@@ -16,11 +16,13 @@ from knack.log import get_logger
 from azure.mgmt.recoveryservicesbackup.activestamp.models import AzureVMAppContainerProtectionContainer, \
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
-    ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, AzureWorkloadSAPAseRestoreRequest, \
-    AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, AzureWorkloadSAPAsePointInTimeRestoreRequest, \
-    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, AzureVmWorkloadSAPAseDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
+    ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, \
+    AzureWorkloadSAPAseRestoreRequest, AzureWorkloadSAPHanaPointInTimeRestoreRequest, \
+    AzureWorkloadSQLPointInTimeRestoreRequest, AzureWorkloadSAPAsePointInTimeRestoreRequest, \
+    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, \
     RecoveryPointRehydrationInfo, AzureWorkloadSAPHanaRestoreWithRehydrateRequest, \
-    AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState
+    AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState, AzureVmWorkloadSAPAseDatabaseProtectedItem, \
+    MoveRPAcrossTiersRequest \
 
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
@@ -439,10 +441,12 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     # Get protectable item.
     protectable_item_object = protectable_item
     protectable_item_type = protectable_item_object.properties.protectable_item_type
-    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase", "saphanasystem", "sapasedatabase"]:
+    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase", "saphanasystem",
+                                             "sapasedatabase"]:
         raise CLIError(
             """
-            Protectable Item must be either of type SQLDataBase, HANADatabase, HANAInstance, SAPAseDatabase or SQLInstance.
+            Protectable Item must be either of type SQLDataBase, HANADatabase, HANAInstance, SAPAseDatabase or
+            SQLInstance.
             """)
 
     item_name = protectable_item_object.name
@@ -865,7 +869,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'item_uri': item_name,
         'recovery_point_id': recovery_point.name,
         'log_point_in_time': log_point_in_time,
-        'item_type': 'SQL' if 'sql' in item_type.lower() else 'SAPASE' if 'sapase' in item_type.lower()  else 'SAPHana',
+        'item_type': 'SQL' if 'sql' in item_type.lower() else 'SAPASE' if 'sapase' in item_type.lower() else 'SAPHana',
         'workload_type': item_type,
         'source_resource_id': item.properties.source_resource_id,
         'database_name': db_name,
