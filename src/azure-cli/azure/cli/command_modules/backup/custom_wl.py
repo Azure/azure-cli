@@ -938,23 +938,23 @@ def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondar
     _check_none_and_many(paged_recovery_points, "Log time range")
     return paged_recovery_points.properties.time_ranges
 
-
 def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
+    workload_restore_request_map = {
+        "saphana": AzureWorkloadSAPHanaRestoreRequest,
+        "sql": AzureWorkloadSQLRestoreRequest,
+        "sapase": AzureWorkloadSAPAseRestoreRequest
+    }
+
+    workload_pit_restore_request_map = {
+        "saphana": AzureWorkloadSAPHanaPointInTimeRestoreRequest,
+        "sql": AzureWorkloadSQLPointInTimeRestoreRequest,
+        "sapase": AzureWorkloadSAPAsePointInTimeRestoreRequest
+    }
+
     if rehydration_priority is None:
-        if item_type.lower() == "saphana":
-            if log_point_in_time is not None:
-                return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
-            return AzureWorkloadSAPHanaRestoreRequest()
-
-        if item_type.lower() == "sql":
-            if log_point_in_time is not None:
-                return AzureWorkloadSQLPointInTimeRestoreRequest()
-            return AzureWorkloadSQLRestoreRequest()
-
-        if item_type.lower() == "sapase":
-            if log_point_in_time is not None:
-                return AzureWorkloadSAPAsePointInTimeRestoreRequest()
-            return AzureWorkloadSAPAseRestoreRequest()
+        if log_point_in_time is not None:
+            return workload_pit_restore_request_map[item_type.lower()]()
+        return workload_restore_request_map[item_type.lower()]()
 
     if item_type.lower() == "saphana":
         if log_point_in_time is not None:
