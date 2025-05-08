@@ -460,6 +460,13 @@ helps['keyvault key get-attestation'] = """
 type: command
 short-summary: Get a key's attestation blob.
 long-summary: This command is applicable to any key stored in Azure Key Vault Managed HSM. This operation requires the keys/get permission.
+examples:
+  - name: Get a key's attestation.
+    text: |
+        az keyvault key get-attestation --hsm-name myhsm -n mykey
+  - name: Save the key's attestation to local file.
+    text: |
+        az keyvault key get-attestation --hsm-name myhsm -n mykey -f mykeyattestation.json
 """
 
 helps['keyvault key show-deleted'] = """

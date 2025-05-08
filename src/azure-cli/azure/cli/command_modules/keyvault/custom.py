@@ -1101,6 +1101,7 @@ def list_keys(client, maxresults=None, include_managed=False):
         return [_ for _ in result if not getattr(_, 'managed')] if result else result
     return result
 
+
 def get_key_attestation(client, name, version=None, file_path=None):
     key = client.get_key_attestation(name=name, version=version)
     key_attestation = key.properties.attestation
@@ -1118,6 +1119,7 @@ def get_key_attestation(client, name, version=None, file_path=None):
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex
+
 
 def delete_key(client, name):
     return client.begin_delete_key(name).result()
@@ -2133,7 +2135,6 @@ def full_backup(cmd, client, storage_resource_uri=None, storage_account_name=Non
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     poller = client.begin_backup(storage_resource_uri, sas_token=token, use_managed_identity=use_managed_identity)
-    from knack.util import todict
     result = todict(poller.result())
     result['status'] = poller.status()
     return result

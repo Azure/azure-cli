@@ -317,7 +317,7 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key get-attestation') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help="File to receive the key's attestation contents.")
+                   help="File to receive the key's attestation if you want to save it.")
         c.extra('hsm_name', data_plane_hsm_name_type, required=False, arg_group='Id',
                 help='Name of the HSM. Required if --id is not specified.')
         c.ignore('vault_base_url')
