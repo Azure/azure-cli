@@ -35,7 +35,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
 
 from knack.log import get_logger
-from knack.util import CLIError
+from knack.util import CLIError, todict
 
 
 logger = get_logger(__name__)
@@ -1101,6 +1101,23 @@ def list_keys(client, maxresults=None, include_managed=False):
         return [_ for _ in result if not getattr(_, 'managed')] if result else result
     return result
 
+def get_key_attestation(client, name, version=None, file_path=None):
+    key = client.get_key_attestation(name=name, version=version)
+    key_attestation = key.properties.attestation
+    if not file_path:
+        return key_attestation
+
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
+    try:
+        from ._command_type import _encode_hex
+        with open(file_path, 'w') as outfile:
+            json.dump(todict(_encode_hex(key_attestation)), outfile)
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
 
 def delete_key(client, name):
     return client.begin_delete_key(name).result()

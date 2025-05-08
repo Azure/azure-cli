@@ -456,6 +456,12 @@ long-summary: In order to perform this operation, the key must already exist in 
     material of a key itself cannot be changed. This operation requires the keys/update permission.
 """
 
+helps['keyvault key get-attestation'] = """
+type: command
+short-summary: Get a key's attestation blob.
+long-summary: This command is applicable to any key stored in Azure Key Vault Managed HSM. This operation requires the keys/get permission.
+"""
+
 helps['keyvault key show-deleted'] = """
 type: command
 short-summary: Get the public part of a deleted key.
