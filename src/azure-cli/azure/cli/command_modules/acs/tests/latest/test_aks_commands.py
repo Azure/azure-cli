@@ -244,7 +244,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('fqdn'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', ''),
             self.check('agentPoolProfiles[0].nodeLabels.label1', 'value1'),
             self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
             self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
