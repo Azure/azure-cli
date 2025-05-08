@@ -938,6 +938,7 @@ def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondar
     _check_none_and_many(paged_recovery_points, "Log time range")
     return paged_recovery_points.properties.time_ranges
 
+
 def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
     workload_restore_request_map = {
         "saphana": AzureWorkloadSAPHanaRestoreRequest,
