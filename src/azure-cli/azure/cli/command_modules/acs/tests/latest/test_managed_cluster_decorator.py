@@ -59,6 +59,7 @@ from azure.cli.command_modules.acs.managed_cluster_decorator import (
     AKSManagedClusterParamDict,
     AKSManagedClusterUpdateDecorator,
 )
+from azure.cli.command_modules.acs.tests.latest.data.certs import CUSTOM_CA_TEST_CERT_STR
 from azure.cli.command_modules.acs.tests.latest.mocks import (
     MockCLI,
     MockClient,
@@ -3720,6 +3721,183 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_8.get_enable_private_cluster()
 
+        # update failure
+        ctx_9 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_private_cluster": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_9 = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile_9.additional_properties['enableVnetIntegration'] = False
+        api_server_access_profile_9.enable_additional_properties_sending()
+        mc_9 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_9,
+        )
+        ctx_9.attach_mc(mc_9)
+        # fail on ArgumentUsageError when trying to enable private cluster without apiserver vnet integration
+        with self.assertRaises(ArgumentUsageError):
+            ctx_9.get_enable_private_cluster()
+
+        # update succeeded
+        ctx_10 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_private_cluster": True,
+                    "enable_apiserver_vnet_integration": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_10 = (
+            self.models.ManagedClusterAPIServerAccessProfile()
+        )
+        mc_10 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_10,
+        )
+        ctx_10.attach_mc(mc_10)
+        self.assertEqual(ctx_10.get_enable_private_cluster(), True)
+
+        # update succeeded
+        ctx_11 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_private_cluster": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_11 = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile_11.additional_properties['enableVnetIntegration'] = True
+        api_server_access_profile_11.enable_additional_properties_sending()
+        mc_11 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_11,
+        )
+        ctx_11.attach_mc(mc_11)
+        self.assertEqual(ctx_11.get_enable_private_cluster(), True)
+
+    def test_get_disable_private_cluster(self):
+        # update failure
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                    "disable_public_fqdn": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_1 = self.models.ManagedClusterAPIServerAccessProfile()
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_1,
+        )
+        ctx_1.attach_mc(mc_1)
+        # fail on disable_public_fqdn specified when disable_private_cluster is also specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_1.get_disable_private_cluster()
+
+        # update failure
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                    "enable_public_fqdn": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_2 = self.models.ManagedClusterAPIServerAccessProfile()
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_2,
+        )
+        ctx_2.attach_mc(mc_2)
+        # fail on disable_public_fqdn specified when disable_private_cluster is also specified
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_disable_private_cluster()
+
+        # update failure
+        ctx_9 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_9 = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile_9.additional_properties['enableVnetIntegration'] = False
+        api_server_access_profile_9.enable_additional_properties_sending()
+        mc_9 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_9,
+        )
+        ctx_9.attach_mc(mc_9)
+        # fail on ArgumentUsageError when trying to disable private cluster without apiserver vnet integration
+        with self.assertRaises(ArgumentUsageError):
+            ctx_9.get_disable_private_cluster()
+
+        # update succeeded
+        ctx_10 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                    "enable_apiserver_vnet_integration": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_10 = (
+            self.models.ManagedClusterAPIServerAccessProfile()
+        )
+        mc_10 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_10,
+        )
+        ctx_10.attach_mc(mc_10)
+        self.assertEqual(ctx_10.get_disable_private_cluster(), True)
+
+        # update succeeded
+        ctx_11 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_private_cluster": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_11 = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile_11.additional_properties['enableVnetIntegration'] = True
+        api_server_access_profile_11.enable_additional_properties_sending()
+        mc_11 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_11,
+        )
+        ctx_11.attach_mc(mc_11)
+        self.assertEqual(ctx_11.get_disable_private_cluster(), True)
+
     def test_get_disable_public_fqdn(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -3852,6 +4030,256 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # fail on private cluster not enabled in update mode
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(ctx_3.get_enable_public_fqdn(), True)
+
+    def test_get_enable_apiserver_vnet_integration(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertIsNone(ctx_0.get_enable_apiserver_vnet_integration())
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_apiserver_vnet_integration": False,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_apiserver_vnet_integration(), False)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_apiserver_vnet_integration": False,
+                    "enable_private_cluster": False,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile.additional_properties['enableVnetIntegration'] = True
+        api_server_access_profile.enable_additional_properties_sending()
+        api_server_access_profile.enable_private_cluster = True
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile,
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_enable_apiserver_vnet_integration(), True)
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_apiserver_vnet_integration": True,
+                    "enable_private_cluster": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_enable_apiserver_vnet_integration(), True)
+
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_apiserver_vnet_integration": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_5.get_enable_apiserver_vnet_integration()
+
+        ctx_6 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_apiserver_vnet_integration": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        
+        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile.additional_properties['enableVnetIntegration'] = True
+        api_server_access_profile.enable_additional_properties_sending()
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile,
+        )
+        ctx_6.attach_mc(mc)
+        self.assertEqual(ctx_6.get_enable_apiserver_vnet_integration(), True)
+
+    def test_get_apiserver_subnet_id(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        agentpool_ctx_0 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_0.attach_agentpool_context(agentpool_ctx_0)
+        self.assertIsNone(ctx_0.get_apiserver_subnet_id())
+
+        apiserver_subnet_id = "/subscriptions/fakesub/resourceGroups/fakerg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/apiserver"
+        vnet_subnet_id = "/subscriptions/fakesub/resourceGroups/fakerg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/node"
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_apiserver_vnet_integration": True,
+                    "enable_private_cluster": True,
+                    "apiserver_subnet_id": apiserver_subnet_id,
+                    "vnet_subnet_id": vnet_subnet_id,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        agentpool_ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_1.attach_agentpool_context(agentpool_ctx_1)
+        self.assertEqual(ctx_1.get_apiserver_subnet_id(), apiserver_subnet_id)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_apiserver_vnet_integration": True,
+                    "enable_private_cluster": True,
+                    "vnet_subnet_id": vnet_subnet_id,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        agentpool_ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": vnet_subnet_id}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_2.attach_agentpool_context(agentpool_ctx_2)
+        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
+        api_server_access_profile.subnet_id = apiserver_subnet_id
+        api_server_access_profile.enable_additional_properties_sending()
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile,
+        )
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_apiserver_subnet_id(), apiserver_subnet_id)
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_apiserver_vnet_integration": True,
+                    "apiserver_subnet_id": apiserver_subnet_id,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        agentpool_ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.UPDATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_3.attach_agentpool_context(agentpool_ctx_3)
+        self.assertEqual(ctx_3.get_apiserver_subnet_id(), apiserver_subnet_id)
+
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_private_cluster": True,
+                    "apiserver_subnet_id": apiserver_subnet_id,
+                    "vnet_subnet_id": vnet_subnet_id,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        agentpool_ctx_4 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_4.attach_agentpool_context(agentpool_ctx_4)
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_4.get_apiserver_subnet_id()
+
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_apiserver_vnet_integration": False,
+                    "apiserver_subnet_id": apiserver_subnet_id,
+                    "vnet_subnet_id": vnet_subnet_id,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        agentpool_ctx_5 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_5.attach_agentpool_context(agentpool_ctx_5)
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_5.get_apiserver_subnet_id()
+
+        ctx_6 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "apiserver_subnet_id": apiserver_subnet_id,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        agentpool_ctx_6 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_6.attach_agentpool_context(agentpool_ctx_6)
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_6.get_apiserver_subnet_id()
 
     def test_get_private_dns_zone(self):
         # default
@@ -10675,6 +11103,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_ingress_profile_1 = self.models.ManagedClusterIngressProfile(
             web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
                 enabled=True,
+                nginx=None,
             )
         )
         ground_truth_mc_1 = self.models.ManagedCluster(
@@ -10937,6 +11366,31 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
 
         self.assertEqual(dec_mc_8, ground_truth_mc_8)
+
+                # enable app routing with nginx specified
+        dec_9 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_app_routing": True, "enable_kv": False, "nginx": "AnnotationControlled"},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_9 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_9.context.attach_mc(mc_9)
+        dec_mc_9 = dec_9.update_app_routing_profile(mc_9)
+        ground_truth_ingress_profile_9 = self.models.ManagedClusterIngressProfile(
+            web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
+                enabled=True,
+                nginx=self.models.ManagedClusterIngressProfileNginx(
+                    default_ingress_controller_type="AnnotationControlled"
+                )
+            )
+        )
+        ground_truth_mc_9 = self.models.ManagedCluster(
+            location="test_location", ingress_profile=ground_truth_ingress_profile_9
+        )
+        self.assertEqual(dec_mc_9, ground_truth_mc_9)
 
     def test_enable_disable_cost_analysis(self):
         # Should not update mc if unset
@@ -11208,6 +11662,123 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
         dec_1.context.raw_param.print_usage_statistics()
+
+    def test_update_kubernetes_version_and_orchestrator_version(self):
+        # First test case
+        raw_param_dict = {
+            "auto_upgrade_channel": "none",
+        }
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            raw_param_dict,
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            kubernetes_version="1.18.14",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="agentpool1",
+                    orchestrator_version="1.18.14"
+                ),
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="agentpool2",
+                    orchestrator_version="1.19.7"
+                )
+            ]
+        )
+        # Set current kubernetes version in the managed cluster
+        mc_1.current_kubernetes_version = "1.21.2"
+
+        # Set current orchestrator version in agent pool profiles
+        mc_1.agent_pool_profiles[0].current_orchestrator_version = "1.21.2"
+        mc_1.agent_pool_profiles[1].current_orchestrator_version = "1.21.2"
+
+        dec_1.context.attach_mc(mc_1)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ):
+            updated_mc_1 = dec_1.update_kubernetes_version_and_orchestrator_version(mc_1)
+
+        # Check if kubernetes_version is updated
+        self.assertEqual(updated_mc_1.kubernetes_version, "1.21.2")
+        # Check if orchestrator_version for each agent pool is updated
+        for agent_pool in updated_mc_1.agent_pool_profiles:
+            self.assertEqual(agent_pool.orchestrator_version, "1.21.2")
+
+        # Second test case with both current_kubernetes_version and current_orchestrator_version as None
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            raw_param_dict,
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            kubernetes_version="1.18.14",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="agentpool1",
+                    orchestrator_version="1.18.14"
+                ),
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="agentpool2",
+                    orchestrator_version="1.19.7"
+                )
+            ]
+        )
+        # Set current kubernetes version and orchestrator version to None
+        mc_2.current_kubernetes_version = None
+        mc_2.agent_pool_profiles[0].current_orchestrator_version = None
+        mc_2.agent_pool_profiles[1].current_orchestrator_version = None
+
+        dec_2.context.attach_mc(mc_2)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+            return_value=True,
+        ):
+            updated_mc_2 = dec_2.update_kubernetes_version_and_orchestrator_version(mc_2)
+
+        # Check if kubernetes_version and orchestrator_version remain unchanged
+        self.assertEqual(updated_mc_2.kubernetes_version, "1.18.14")
+        self.assertEqual(updated_mc_2.agent_pool_profiles[0].orchestrator_version, "1.18.14")
+        self.assertEqual(updated_mc_2.agent_pool_profiles[1].orchestrator_version, "1.19.7")
+
+        # Third test case with both current_kubernetes_version and current_orchestrator_version as None
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            kubernetes_version="1.18.14",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="agentpool1",
+                    orchestrator_version="1.18.14"
+                ),
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="agentpool2",
+                    orchestrator_version="1.19.7"
+                )
+            ]
+        )
+        # Set current kubernetes version and orchestrator version to 1.21.2
+        mc_3.current_kubernetes_version = "1.21.2"
+        mc_3.agent_pool_profiles[0].current_orchestrator_version = "1.21.2"
+        mc_3.agent_pool_profiles[1].current_orchestrator_version = "1.21.2"
+
+        dec_3.context.attach_mc(mc_3) # no prompt 
+        updated_mc_3 = dec_3.update_kubernetes_version_and_orchestrator_version(mc_3)
+
+        # Check if kubernetes_version and orchestrator_version remain unchanged
+        self.assertEqual(updated_mc_3.kubernetes_version, "1.18.14")
+        self.assertEqual(updated_mc_3.agent_pool_profiles[0].orchestrator_version, "1.18.14")
+        self.assertEqual(updated_mc_3.agent_pool_profiles[1].orchestrator_version, "1.19.7")
 
     def test_check_is_postprocessing_required(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
@@ -11797,6 +12368,98 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(nonLTSClusterCalculated, expectedNonLTSCluster)
 
+    def test_set_up_custom_ca_trust_certificates(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"custom_ca_trust_certificates": get_test_data_file_path("certs.txt")},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_custom_ca_trust_certificates(mc_1)
+        sec_profile = self.models.ManagedClusterSecurityProfile(
+            custom_ca_trust_certificates=[str.encode(CUSTOM_CA_TEST_CERT_STR) for _ in range(2)]
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(location="test_location", security_profile=sec_profile)
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+    
+    def test_set_up_ingress_web_app_routing(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_addons": "web_application_routing",
+                "dns_zone_resource_ids": "test_dns_zone_resource_id",
+                "app_routing_default_nginx_controller": "External"
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_ingress_web_app_routing(mc_1)
+        ground_truth_ingress_profile_1 = self.models.ManagedClusterIngressProfile(
+            web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
+                enabled=True,
+                dns_zone_resource_ids=["test_dns_zone_resource_id"],
+                nginx=self.models.ManagedClusterIngressProfileNginx(
+                    default_ingress_controller_type="External"
+                )
+            )
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location", ingress_profile=ground_truth_ingress_profile_1
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_set_up_app_routing_profile_with_no_nginx(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_app_routing": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_ingress_web_app_routing(mc_1)
+        ground_truth_ingress_profile_1 = self.models.ManagedClusterIngressProfile(
+            web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
+                enabled=True,
+                nginx=None
+            )
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location", ingress_profile=ground_truth_ingress_profile_1
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_set_up_app_routing_profile_with_specified_nginx(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_app_routing": True,
+                "app_routing_default_nginx_controller": "External",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_ingress_web_app_routing(mc_1)
+        ground_truth_ingress_profile_1 = self.models.ManagedClusterIngressProfile(
+            web_app_routing=self.models.ManagedClusterIngressProfileWebAppRouting(
+                enabled=True,
+                nginx=self.models.ManagedClusterIngressProfileNginx(default_ingress_controller_type="External")
+            )
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location", ingress_profile=ground_truth_ingress_profile_1
+        )
+
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
     def test_update_supportPlan(self):
         # default value in `aks_create`
         noopDecorator = AKSManagedClusterUpdateDecorator(
@@ -12023,6 +12686,60 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
+    
+    def test_update_custom_ca_certificates(self):
+        # set to non-empty
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "custom_ca_trust_certificates": get_test_data_file_path("certs.txt"),
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_1.context.set_intermediate(
+            "subscription_id", "test_subscription_id"
+        )
+
+        dec_mc_1 = dec_1.update_custom_ca_trust_certificates(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=[str.encode(CUSTOM_CA_TEST_CERT_STR) for _ in range(2)]
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # set to empty
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"custom_ca_trust_certificates": None},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=None
+            ),
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_2.context.set_intermediate(
+            "subscription_id", "test_subscription_id"
+        )
+
+        dec_mc_2 = dec_2.update_custom_ca_trust_certificates(mc_2)
+
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=None
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
 if __name__ == "__main__":
     unittest.main()

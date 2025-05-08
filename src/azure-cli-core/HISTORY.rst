@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.72.0
+++++++
+* Minor fixes
+
 2.71.0
 ++++++
 * PREVIEW: Support managed identity authentication with MSAL. Run `az config set core.use_msal_managed_identity=true` or set environment variable `AZURE_CORE_USE_MSAL_MANAGED_IDENTITY` to enable it (#31092)

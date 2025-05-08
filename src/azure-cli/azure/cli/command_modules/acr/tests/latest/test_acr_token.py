@@ -11,7 +11,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 class AcrTokenCommandsTests(ScenarioTest):
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_repository_token_create(self):
         self.kwargs.update({

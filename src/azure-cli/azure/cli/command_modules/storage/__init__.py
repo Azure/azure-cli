@@ -42,29 +42,6 @@ class StorageCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
-class AzureStackStorageCommandsLoader(AzCommandsLoader):
-    def __init__(self, cli_ctx=None):
-        from azure.cli.core.commands import CliCommandType
-
-        storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
-        super().__init__(cli_ctx=cli_ctx,
-                         resource_type=ResourceType.DATA_STORAGE,
-                         custom_command_type=storage_custom,
-                         command_group_cls=AzureStackStorageCommandGroup,
-                         argument_context_cls=StorageArgumentContext)
-
-    def load_command_table(self, args):
-        super().load_command_table(args)
-        from azure.cli.command_modules.storage.commands_azure_stack import load_command_table
-        load_command_table(self, args)
-        return self.command_table
-
-    def load_arguments(self, command):
-        super().load_arguments(command)
-        from azure.cli.command_modules.storage._params_azure_stack import load_arguments
-        load_arguments(self, command)
-
-
 class StorageArgumentContext(AzArgumentContext):
     def register_sas_arguments(self):
         from azure.cli.command_modules.storage._validators import ipv4_range_type, get_datetime_type
@@ -382,44 +359,6 @@ Authentication failure. This may be caused by either invalid account key, connec
                              'allowed data actions, even if there are ACLs in place for those files/directories.')
 
 
-class AzureStackStorageCommandGroup(StorageCommandGroup):
-
-    @classmethod
-    def get_handler_suppress_some_400(cls):
-        def handler(ex):
-            if hasattr(ex, 'status_code') and ex.status_code == 403:
-                # TODO: Revisit the logic here once the service team updates their response
-                if 'AuthorizationPermissionMismatch' in ex.args[0]:
-                    message = """
-You do not have the required permissions needed to perform this operation.
-Depending on your operation, you may need to be assigned one of the following roles:
-    "Storage Blob Data Contributor"
-    "Storage Blob Data Reader"
-    "Storage Queue Data Contributor"
-    "Storage Queue Data Reader"
-    "Storage Table Data Contributor"
-    "Storage Table Data Reader"
-
-If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
-                    """
-                    ex.args = (message,)
-                elif 'AuthorizationFailure' in ex.args[0]:
-                    message = """
-The request may be blocked by network rules of storage account. Please check network rule set using 'az storage account show -n accountname --query networkRuleSet'.
-If you want to change the default action to apply when no rule matches, please use 'az storage account update'.
-                    """
-                    ex.args = (message,)
-                elif 'AuthenticationFailed' in ex.args[0]:
-                    message = """
-Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
-                    """
-                    ex.args = (message,)
-            if hasattr(ex, 'status_code') and ex.status_code == 409 and 'NoPendingCopyOperation' in ex.args[0]:
-                pass
-
-        return handler
-
-
 def _merge_new_exception_handler(kwargs, handler):
     first = kwargs.get('exception_handler')
 
@@ -431,8 +370,4 @@ def _merge_new_exception_handler(kwargs, handler):
     kwargs['exception_handler'] = new_handler
 
 
-def get_command_loader(cli_ctx):
-    if cli_ctx.cloud.profile.lower() != 'latest':
-        return AzureStackStorageCommandsLoader
-
-    return StorageCommandsLoader
+COMMAND_LOADER_CLS = StorageCommandsLoader

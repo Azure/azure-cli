@@ -7,6 +7,7 @@
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.core.paging import ItemPaged
 from ._client_factory import cf_postgres_flexible_location_capabilities, cf_postgres_flexible_server_capabilities
+from collections import defaultdict
 
 
 def get_postgres_location_capability_info(cmd, location):
@@ -99,12 +100,17 @@ def _postgres_parse_list_capability(result):
     for version in result[0].supported_server_versions:
         versions.add(version.name)
 
+    supported_server_versions = defaultdict(list)
+    for version in result[0].supported_server_versions:
+        supported_server_versions[version.name] = version.supported_versions_to_upgrade
+
     return {
         'sku_info': tiers_dict,
         'single_az': single_az,
         'geo_backup_supported': geo_backup_supported,
         'zones': zones,
         'server_versions': versions,
+        'supported_server_versions': supported_server_versions,
         'index_tuning_supported': index_tuning_supported
     }
 

@@ -40,7 +40,7 @@ class CloudCommandsLoader(AzCommandsLoader):
         # pylint: disable=line-too-long
         with self.argument_context('cloud') as c:
             c.argument('cloud_name', options_list=('--name', '-n'), help='Name of a registered cloud', completer=get_cloud_name_completion_list)
-            c.argument('profile', help='Profile to use for this cloud', choices=list(API_PROFILES))
+            c.argument('profile', help='Profile to use for this cloud. The azure stack profiles `2017-03-09-profile` `2018-03-01-hybrid` `2019-03-01-hybrid` and `2020-09-01-hybrid` have been deprecated and removed. To continue using Azure Stack, please install the Azure CLI `2.66.*` (LTS) version. For more details, refer to: https://learn.microsoft.com/en-us/cli/azure/whats-new-overview#important-notice-for-azure-stack-hub-customers', choices=list(API_PROFILES))
             c.argument('cloud_config', options_list=('--cloud-config',), help='JSON encoded cloud configuration. Use @{file} to load from a file.', type=shell_safe_json_parse)
             c.argument('endpoint_management', help='The management service endpoint')
             c.argument('endpoint_resource_manager', help='The resource management endpoint')

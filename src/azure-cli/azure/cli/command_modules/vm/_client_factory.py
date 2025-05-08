@@ -12,10 +12,6 @@ def _compute_client_factory(cli_ctx, **kwargs):
                                    aux_subscriptions=kwargs.get('aux_subscriptions'))
 
 
-def cf_avail_set(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).availability_sets
-
-
 def cf_vm(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machines
 

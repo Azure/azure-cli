@@ -323,6 +323,12 @@ parameters:
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --enable-apiserver-vnet-integration
+    type: bool
+    short-summary: Enable integration of user vnet with control plane apiserver pods.
+  - name: --apiserver-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
@@ -435,6 +441,10 @@ parameters:
   - name: --k8s-support-plan
     type: string
     short-summary: Choose from "KubernetesOfficial" or "AKSLongTermSupport", with "AKSLongTermSupport" you get 1 extra year of CVE patchs.
+  - name: --ca-certs --custom-ca-trust-certificates
+    type: string
+    short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
+    long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
   - name: --enable-defender
     type: bool
     short-summary: Enable Microsoft Defender security profile.
@@ -532,6 +542,9 @@ parameters:
   - name: --enable-app-routing
     type: bool
     short-summary: Enable Application Routing addon.
+  - name: --app-routing-default-nginx-controller --ardnc
+    type: string
+    short-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
   - name: --revision
     type: string
     short-summary: Azure Service Mesh revision to install.
@@ -865,6 +878,10 @@ parameters:
   - name: --disable-defender
     type: bool
     short-summary: Disable defender profile.
+  - name: --ca-certs --custom-ca-trust-certificates
+    type: string
+    short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
+    long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
   - name: --defender-config
     type: string
     short-summary: Path to JSON file containing Microsoft Defender profile configurations.
@@ -923,6 +940,18 @@ parameters:
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.
+  - name: --enable-apiserver-vnet-integration
+    type: bool
+    short-summary: Enable integration of user vnet with control plane apiserver pods.
+  - name: --apiserver-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
+  - name: --enable-private-cluster
+    type: bool
+    short-summary: Enable private cluster for apiserver vnet integration cluster.
+  - name: --disable-private-cluster
+    type: bool
+    short-summary: Disable private cluster for apiserver vnet integration cluster.
   - name: --enable-keda
     type: bool
     short-summary: Enable KEDA workload auto-scaler.
@@ -1566,7 +1595,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner for Linux. Windows2019 or Windows2022 for Windows.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, AzureLinux or Ubuntu2204 for Linux. Windows2019 or Windows2022 for Windows.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -1663,6 +1692,9 @@ parameters:
   - name: --if-none-match
     type: string
     short-summary: Set to '*' to allow a new agentpool to be created, but to prevent updating an existing agentpool. Other values will be ignored.
+  - name: --gpu-driver
+    type: string
+    short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None". Default is "Install".
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -2440,6 +2472,10 @@ helps['aks approuting enable'] = """
         type: string
         short-summary: Attach a keyvault id to access secrets and certificates.
         long-summary: This optional flag attaches a keyvault id to access secrets and certificates.
+      - name: --nginx
+        type: string
+        short-summary: Configure default NginxIngressController resource
+        long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
 helps['aks approuting disable'] = """
@@ -2461,6 +2497,10 @@ helps['aks approuting update'] = """
         type: bool
         short-summary: Enable the keyvault secrets provider addon.
         long-summary: This optional flag enables the keyvault-secrets-provider addon in given cluster. This is required for most App Routing use-cases.
+      - name: --nginx
+        type: string
+        short-summary: Configure default NginxIngressController resource
+        long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
 helps['aks approuting zone'] = """

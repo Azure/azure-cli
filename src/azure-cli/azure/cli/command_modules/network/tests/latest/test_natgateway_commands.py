@@ -25,7 +25,7 @@ class NatGatewayScenarioTests(ScenarioTest):
         })
 
         # create public ip address
-        self.cmd('az network public-ip create -g {rg} -n {ip_addr} --location {location} --zone {zone} --sku Standard ')
+        self.cmd('az network public-ip create -g {rg} -n {ip_addr} --location {location} --zone {zone} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         # create public ip prefix
         self.cmd('az network public-ip prefix create --length 29 --location {location} --name {ip_prefix} --resource-group {rg} --zone {zone}')

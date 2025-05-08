@@ -12,7 +12,10 @@ pip install $ALL_MODULES
 
 set -ev
 
-output=$(az cloud list-profiles -otsv)
+output=$(
+    # only the latest profile left after droping all the azure stack profiles.
+    echo latest
+)
 
 azdev verify package $share_folder/build/
 

@@ -21,6 +21,9 @@ ad app create:
         requested_access_token_version:
             rule_exclusions:
             - option_length_too_long
+        required_resource_accesses:
+            rule_exclusions:
+            - option_length_too_long
 ad app update:
     parameters:
         enable_access_token_issuance:
@@ -39,6 +42,15 @@ ad app update:
             rule_exclusions:
             - option_length_too_long
         requested_access_token_version:
+            rule_exclusions:
+            - option_length_too_long
+        key_type:
+            rule_exclusions:
+            - no_parameter_defaults_for_update_commands
+        key_usage:
+            rule_exclusions:
+            - no_parameter_defaults_for_update_commands
+        required_resource_accesses:
             rule_exclusions:
             - option_length_too_long
 ad user create:
@@ -64,6 +76,31 @@ ad app federated-credential update:
 ad app federated-credential delete:
     parameters:
         federated_identity_credential_id_or_name:
+            rule_exclusions:
+            - option_length_too_long
+ad sp create-for-rbac:
+    parameters:
+        service_management_reference:
+            rule_exclusions:
+            - option_length_too_long
+role assignment list:
+    parameters:
+        fill_role_definition_name:
+            rule_exclusions:
+            - option_length_too_long
+role assignment create:
+    parameters:
+        assignee_principal_type:
+            rule_exclusions:
+            - option_length_too_long
+ad group get-member-groups:
+    parameters:
+        security_enabled_only:
+            rule_exclusions:
+            - option_length_too_long
+ad user get-member-groups:
+    parameters:
+        security_enabled_only:
             rule_exclusions:
             - option_length_too_long
 ...

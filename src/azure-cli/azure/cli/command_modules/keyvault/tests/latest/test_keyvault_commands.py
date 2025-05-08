@@ -544,7 +544,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.kwargs.update({
             'hsm_name': self.create_random_name('test-mhsm-sd1', 24),
             'next_hsm_name': self.create_random_name('test-mhsm-sd2', 24),
-            'loc': 'uksouth',
+            'loc': 'canadaeast',
             'init_admin': logged_in_user,
             'key_name': self.create_random_name('key', 10),
             'sdtest_dir': sdtest_dir
@@ -568,7 +568,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
                  '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"',
                  checks=[self.check('status', 'Success')])
-        time.sleep(180)
+        time.sleep(300)
         with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {hsm_name} '
                      '--role "Managed HSM Crypto User" --scope "/"')
@@ -591,17 +591,17 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.cmd('az keyvault security-domain init-recovery --hsm-name {next_hsm_name} '
                  '--sd-exchange-key "{exchange_key}"')
 
-        time.sleep(180)
+        time.sleep(600)
         # upload the blob
         self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
                  '--sd-exchange-key "{exchange_key}" '
                  '--sd-wrapping-keys "{key1_path}" "{key2_path}"',
                  checks=[self.check('status', 'Success')])
-        time.sleep(180)
+        time.sleep(300)
         with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {next_hsm_name} '
                      '--role "Managed HSM Crypto User" --scope "/"')
-        time.sleep(180)
+        time.sleep(300)
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
 
@@ -1594,7 +1594,7 @@ class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
 
 class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_kv_key_download')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-key-d-', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-d-', location='eastus2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_key_download(self, resource_group, key_vault):
         import OpenSSL.crypto
 
