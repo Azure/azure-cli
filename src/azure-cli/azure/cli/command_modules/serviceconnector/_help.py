@@ -284,7 +284,7 @@ for source in SOURCE_RESOURCES:
                 Usage: --secret secret=XX
 
                 secret  : Connection string for secret auth.
-                          Example: mongodb://<db_username>:<db_password>@<host>:<port>/<optional params>
+                          Example: mongodb://user1:pwd@host/mydatabase
         '''
             elif source.value != RESOURCE.KubernetesCluster.value:
                 secret_param = '''
