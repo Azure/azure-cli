@@ -8,7 +8,7 @@ import json
 from knack.util import CLIError
 from azure.cli.core.azclierror import BadRequestError
 from azure.cli.core.util import read_file_content, shell_safe_json_parse
-from azure.cli.command_modules.resource.custom import _remove_comments_from_json
+from azure.cli.command_modules.resource.custom_deployments import _remove_comments_from_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 
