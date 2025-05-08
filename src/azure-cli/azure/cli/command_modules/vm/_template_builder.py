@@ -1039,7 +1039,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                        enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
+                        enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
+                        skuprofile_allostrat=None, skuprofile_rank=None,
                         security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                         imds_mode=None, wire_server_access_control_profile_reference_id=None,
                         imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
@@ -1649,6 +1650,16 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                 'name': vm_size
             }
             sku_profile_vmsizes_list.append(vmsize_obj)
+
+        if skuprofile_rank:
+            if len(skuprofile_rank) != len(skuprofile_vmsizes):
+                raise ValidationError(
+                    'The SKU profile rank list does not specify a rank for every VM size. ' +
+                    'The number of ranks must match the number of VM sizes.')
+
+            for vm_size, rank in zip(sku_profile_vmsizes_list, skuprofile_rank):
+                vm_size['rank'] = rank
+
         sku_profile = {
             'vmSizes': sku_profile_vmsizes_list,
             'allocationStrategy': skuprofile_allostrat
