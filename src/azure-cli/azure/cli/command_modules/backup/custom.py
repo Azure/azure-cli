@@ -892,16 +892,6 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
             Use the relevant get-default policy command and use it to protect the workload.
             """)
 
-    if (hasattr(vm, 'security_profile') and hasattr(vm.security_profile, 'security_type') and
-            vm.security_profile.security_type is not None and
-            vm.security_profile.security_type.lower() == 'trustedlaunch'):
-        if policy.properties.policy_type != 'V2':
-            raise InvalidArgumentValueError(
-                """
-                Trusted VM can only be protected using Enhanced Policy. Please provide a valid IaasVM Enhanced Policy
-                in --policy-name argument.
-                """)
-
     # Get protectable item.
     protectable_item = _get_protectable_item_for_vm(cmd.cli_ctx, vault_name, resource_group_name, vm_name, vm_rg)
     if protectable_item is None:
