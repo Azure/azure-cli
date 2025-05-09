@@ -8,7 +8,8 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
-from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_api_policy, cf_product, cf_nv, cf_apiops,
+from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_api_policy,
+                                                            cf_product, cf_nv, cf_apiops,
                                                             cf_apirelease, cf_apirevision, cf_apiversionset,
                                                             cf_apischema, cf_ds, cf_graphqlapiresolver,
                                                             cf_graphqlapiresolverpolicy)
@@ -109,15 +110,14 @@ def load_command_table(self, _):
                          confirmation=True, supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='apim_api_update',
                                  setter_name='begin_create_or_update', getter_name='get', supports_no_wait=True)
+        g.wait_command('wait')
 
-    with self.command_group('apim api policy', api_sdk) as g:
+    with self.command_group('apim api policy', api_policy_sdk) as g:
         g.custom_command('show', 'apim_api_policy_show')
         g.custom_command('set', 'apim_api_policy_set', supports_no_wait=True)
         g.custom_command('delete', 'apim_api_policy_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('list', 'apim_api_policy_list')
         g.custom_command('get-etag', 'apim_api_policy_get_entity')
-
-        g.wait_command('wait')
 
     with self.command_group('apim product api', api_sdk) as g:
         g.custom_command('list', 'apim_product_api_list')
