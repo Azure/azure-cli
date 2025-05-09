@@ -2270,11 +2270,14 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     try:
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
-    except Exception as ex:
-        if "Conflict" in str(ex):
-            logger.error("Operation returned an invalid status 'Conflict'. For more details, run the command with the --debug parameter.")
-        elif "Bad Request" in str(ex):
-            logger.error("Operation returned an invalid status 'Bad Request'. For more details, run the command with the --debug parameter.")
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        error_message = str(ex)
+        if "Conflict" in error_message:
+            logger.error("Operation returned an invalid status 'Conflict'. "
+                         "For more details, run the command with the --debug parameter.")
+        elif "Bad Request" in error_message:
+            logger.error("Operation returned an invalid status 'Bad Request'. "
+                         "For more details, run the command with the --debug parameter.")
         else:
             raise
 
