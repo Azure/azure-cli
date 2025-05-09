@@ -12,31 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics workspace update",
+    "monitor log-analytics workspace identity remove",
 )
-class Update(AAZCommand):
-    """Update a workspace instance.
-
-    :example: Update a workspace instance.
-        az monitor log-analytics workspace update --resource-group myresourcegroup --retention-time 30 --workspace-name myworkspace
-
-    :example: Update the defaultDataCollectionRuleResourceId of the workspace
-        az monitor log-analytics workspace update --resource-group myresourcegroup --workspace-name myworkspace --data-collection-rule "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dcrName}".
+class Remove(AAZCommand):
+    """Remove the user or system managed identities.
     """
 
     _aaz_info = {
         "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2025-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2025-02-01", "identity"],
         ]
     }
 
     AZ_SUPPORT_NO_WAIT = True
 
-    AZ_SUPPORT_GENERIC_UPDATE = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
@@ -57,7 +50,6 @@ class Update(AAZCommand):
             options=["-n", "--name", "--workspace-name"],
             help="Name of the Log Analytics Workspace.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -65,114 +57,32 @@ class Update(AAZCommand):
             ),
         )
 
-        # define Arg Group "Identity"
+        # define Arg Group "Parameters.identity"
 
         _args_schema = cls._args_schema
-        _args_schema.identity_type = AAZStrArg(
-            options=["--type", "--identity-type"],
-            arg_group="Identity",
-            help="Type of managed service identity.",
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Parameters.identity",
+            help="Set the system managed identity.",
+            blank="True",
         )
-        _args_schema.user_assigned = AAZDictArg(
-            options=["--user-assigned"],
-            arg_group="Identity",
-            help="The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
-            nullable=True,
-        )
-
-        user_assigned = cls._args_schema.user_assigned
-        user_assigned.Element = AAZObjectArg(
-            nullable=True,
-            blank={},
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Parameters.identity",
+            help="Set the user managed identities.",
+            blank=[],
         )
 
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Parameters",
-            help="Resource tags.",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.data_collection_rule = AAZStrArg(
-            options=["--data-collection-rule"],
-            arg_group="Properties",
-            help="The resource ID of the default Data Collection Rule to use for this workspace. Expected format is - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dcrName}.",
-            nullable=True,
-        )
-        _args_schema.ingestion_access = AAZStrArg(
-            options=["--ingestion-access"],
-            arg_group="Properties",
-            help="The public network access type to access workspace ingestion.",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-        _args_schema.query_access = AAZStrArg(
-            options=["--query-access"],
-            arg_group="Properties",
-            help="The public network access type to access workspace query.",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-        _args_schema.retention_time = AAZIntArg(
-            options=["--retention-time"],
-            arg_group="Properties",
-            help="The workspace data retention in days. Allowed values are per pricing plan. See pricing tiers documentation for details.",
-            nullable=True,
-        )
-        _args_schema.quota = AAZFloatArg(
-            options=["--quota"],
-            arg_group="Properties",
-            help="The workspace daily quota for ingestion in gigabytes. The minimum value is 0.023 and default is -1 which means unlimited.",
-            nullable=True,
-        )
-
-        # define Arg Group "Replication"
-
-        _args_schema = cls._args_schema
-        _args_schema.replication_enabled = AAZBoolArg(
-            options=["--replication-enabled"],
-            arg_group="Replication",
-            help="Specifies whether the replication is enabled or not. When true, workspace configuration and data is replicated to the specified location. If replication is been enabled, location must be provided.",
-            nullable=True,
-        )
-
-        # define Arg Group "Sku"
-
-        _args_schema = cls._args_schema
-        _args_schema.capacity_reservation_level = AAZIntArg(
-            options=["--level", "--capacity-reservation-level"],
-            arg_group="Sku",
-            help="The capacity reservation level for this workspace, when CapacityReservation sku is selected. The maximum value is 1000 and must be in multiples of 100. If you want to increase the limit, please contact LAIngestionRate@microsoft.com.",
-            nullable=True,
-            enum={"100": 100, "1000": 1000, "10000": 10000, "200": 200, "2000": 2000, "25000": 25000, "300": 300, "400": 400, "500": 500, "5000": 5000, "50000": 50000},
-        )
-        _args_schema.sku_name = AAZStrArg(
-            options=["--sku", "--sku-name"],
-            arg_group="Sku",
-            help="The name of the SKU.",
-            enum={"CapacityReservation": "CapacityReservation", "Free": "Free", "LACluster": "LACluster", "PerGB2018": "PerGB2018", "PerNode": "PerNode", "Premium": "Premium", "Standalone": "Standalone", "Standard": "Standard"},
-        )
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.WorkspacesGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
+        self.post_instance_update(self.ctx.selectors.subresource.get())
         yield self.WorkspacesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -193,8 +103,19 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            return result.identity
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result.identity = value
+            return
 
     class WorkspacesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -275,7 +196,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_workspace_read(cls._schema_on_200)
+            _RemoveHelper._build_schema_workspace_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -386,74 +307,33 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_workspace_read(cls._schema_on_200_201)
+            _RemoveHelper._build_schema_workspace_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
+            self._update_instance(self.ctx.selectors.subresource.get())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 value=instance,
-                typ=AAZObjectType
+                typ=AAZIdentityObjectType
             )
-            _builder.set_prop("identity", AAZIdentityObjectType)
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("tags", AAZDictType, ".tags")
+            _builder.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "remove"}})
+            _builder.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "remove"}})
 
-            identity = _builder.get(".identity")
-            if identity is not None:
-                identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
-                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned")
-
-            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
-            if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".")
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("defaultDataCollectionRuleResourceId", AAZStrType, ".data_collection_rule")
-                properties.set_prop("publicNetworkAccessForIngestion", AAZStrType, ".ingestion_access")
-                properties.set_prop("publicNetworkAccessForQuery", AAZStrType, ".query_access")
-                properties.set_prop("replication", AAZObjectType)
-                properties.set_prop("retentionInDays", AAZIntType, ".retention_time", typ_kwargs={"nullable": True})
-                properties.set_prop("sku", AAZObjectType)
-                properties.set_prop("workspaceCapping", AAZObjectType)
-
-            replication = _builder.get(".properties.replication")
-            if replication is not None:
-                replication.set_prop("enabled", AAZBoolType, ".replication_enabled")
-
-            sku = _builder.get(".properties.sku")
-            if sku is not None:
-                sku.set_prop("capacityReservationLevel", AAZIntType, ".capacity_reservation_level")
-                sku.set_prop("name", AAZStrType, ".sku_name", typ_kwargs={"flags": {"required": True}})
-
-            workspace_capping = _builder.get(".properties.workspaceCapping")
-            if workspace_capping is not None:
-                workspace_capping.set_prop("dailyQuotaGb", AAZFloatType, ".quota")
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
+            user_assigned = _builder.get(".userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             return _instance_value
 
-    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
-        def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
-            )
-
-
-class _UpdateHelper:
-    """Helper class for Update"""
+class _RemoveHelper:
+    """Helper class for Remove"""
 
     _schema_workspace_read = None
 
@@ -666,4 +546,4 @@ class _UpdateHelper:
         _schema.type = cls._schema_workspace_read.type
 
 
-__all__ = ["Update"]
+__all__ = ["Remove"]

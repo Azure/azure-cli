@@ -12,30 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor log-analytics cluster update",
+    "monitor log-analytics cluster identity remove",
 )
-class Update(AAZCommand):
-    """Update a cluster instance.
-
-    Update a cluster instance.
-
-    :example: Update a cluster instance.
-        az monitor log-analytics cluster update -g MyResourceGroup -n MyCluster --key-vault-uri https://myvault.vault.azure.net/ --key-name my-key --key-version fe0adcedd8014aed9c22e9aefb81a1ds --sku-capacity 1000
+class Remove(AAZCommand):
+    """Remove the user or system managed identities.
     """
 
     _aaz_info = {
         "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2025-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2025-02-01", "identity"],
         ]
     }
 
     AZ_SUPPORT_NO_WAIT = True
 
-    AZ_SUPPORT_GENERIC_UPDATE = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
@@ -53,117 +47,37 @@ class Update(AAZCommand):
             options=["-n", "--name", "--cluster-name"],
             help="Name of the Log Analytics Cluster.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
 
-        # define Arg Group "Identity"
+        # define Arg Group "Parameters.identity"
 
         _args_schema = cls._args_schema
-        _args_schema.identity_type = AAZStrArg(
-            options=["--type", "--identity-type"],
-            arg_group="Identity",
-            help="Type of managed service identity.",
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned,UserAssigned": "SystemAssigned,UserAssigned", "UserAssigned": "UserAssigned"},
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Parameters.identity",
+            help="Set the system managed identity.",
+            blank="True",
         )
-        _args_schema.user_assigned = AAZDictArg(
-            options=["--user-assigned"],
-            arg_group="Identity",
-            help="The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
-            nullable=True,
-        )
-
-        user_assigned = cls._args_schema.user_assigned
-        user_assigned.Element = AAZObjectArg(
-            nullable=True,
-            blank={},
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Parameters.identity",
+            help="Set the user managed identities.",
+            blank=[],
         )
 
-        # define Arg Group "Key Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.key_name = AAZStrArg(
-            options=["--key-name"],
-            arg_group="Key Properties",
-            help="The name of the key associated with the Log Analytics cluster.",
-            nullable=True,
-        )
-        _args_schema.key_rsa_size = AAZIntArg(
-            options=["--key-rsa-size"],
-            arg_group="Key Properties",
-            help="Selected key minimum required size.",
-            nullable=True,
-        )
-        _args_schema.key_vault_uri = AAZStrArg(
-            options=["--key-vault-uri"],
-            arg_group="Key Properties",
-            help="The Key Vault uri which holds they key associated with the Log Analytics cluster.",
-            nullable=True,
-        )
-        _args_schema.key_version = AAZStrArg(
-            options=["--key-version"],
-            arg_group="Key Properties",
-            help="The version of the key associated with the Log Analytics cluster.",
-            nullable=True,
-        )
-
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Parameters",
-            help="Resource tags.",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.billing_type = AAZStrArg(
-            options=["--billing-type"],
-            arg_group="Properties",
-            help="The cluster's billing type.",
-            nullable=True,
-            enum={"Cluster": "Cluster", "Workspaces": "Workspaces"},
-        )
-
-        # define Arg Group "Replication"
-
-        _args_schema = cls._args_schema
-        _args_schema.replication_enabled = AAZBoolArg(
-            options=["--replication-enabled"],
-            arg_group="Replication",
-            help="Specifies whether the replication is enabled or not. When true the cluster is replicate to the specified location.",
-            nullable=True,
-        )
-
-        # define Arg Group "Sku"
-
-        _args_schema = cls._args_schema
-        _args_schema.sku_capacity = AAZIntArg(
-            options=["--sku-capacity"],
-            arg_group="Sku",
-            help="The capacity of the SKU. It can be decreased only after 31 days.",
-            nullable=True,
-            enum={"100": 100, "1000": 1000, "10000": 10000, "200": 200, "2000": 2000, "25000": 25000, "300": 300, "400": 400, "500": 500, "5000": 5000, "50000": 50000},
-        )
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.ClustersGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
+        self.post_instance_update(self.ctx.selectors.subresource.get())
         yield self.ClustersCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -184,8 +98,19 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            return result.identity
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result.identity = value
+            return
 
     class ClustersGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -266,7 +191,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_cluster_read(cls._schema_on_200)
+            _RemoveHelper._build_schema_cluster_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -377,73 +302,33 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_cluster_read(cls._schema_on_200)
+            _RemoveHelper._build_schema_cluster_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
+            self._update_instance(self.ctx.selectors.subresource.get())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 value=instance,
-                typ=AAZObjectType
+                typ=AAZIdentityObjectType
             )
-            _builder.set_prop("identity", AAZIdentityObjectType)
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("sku", AAZObjectType)
-            _builder.set_prop("tags", AAZDictType, ".tags")
+            _builder.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "remove"}})
+            _builder.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "remove"}})
 
-            identity = _builder.get(".identity")
-            if identity is not None:
-                identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
-                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned")
-
-            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
-            if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".", typ_kwargs={"nullable": True})
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("billingType", AAZStrType, ".billing_type")
-                properties.set_prop("keyVaultProperties", AAZObjectType)
-                properties.set_prop("replication", AAZObjectType)
-
-            key_vault_properties = _builder.get(".properties.keyVaultProperties")
-            if key_vault_properties is not None:
-                key_vault_properties.set_prop("keyName", AAZStrType, ".key_name")
-                key_vault_properties.set_prop("keyRsaSize", AAZIntType, ".key_rsa_size")
-                key_vault_properties.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
-                key_vault_properties.set_prop("keyVersion", AAZStrType, ".key_version")
-
-            replication = _builder.get(".properties.replication")
-            if replication is not None:
-                replication.set_prop("enabled", AAZBoolType, ".replication_enabled")
-
-            sku = _builder.get(".sku")
-            if sku is not None:
-                sku.set_prop("capacity", AAZIntType, ".sku_capacity")
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
+            user_assigned = _builder.get(".userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             return _instance_value
 
-    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
-        def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
-            )
-
-
-class _UpdateHelper:
-    """Helper class for Update"""
+class _RemoveHelper:
+    """Helper class for Remove"""
 
     _schema_cluster_read = None
 
@@ -632,4 +517,4 @@ class _UpdateHelper:
         _schema.type = cls._schema_cluster_read.type
 
 
-__all__ = ["Update"]
+__all__ = ["Remove"]
