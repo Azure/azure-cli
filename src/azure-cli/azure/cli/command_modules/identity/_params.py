@@ -11,6 +11,7 @@ from azure.cli.core.commands.parameters import get_location_type, tags_type
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME',
                                 help='The name of the identity resource.')
 
+
 def load_arguments(self, _):
 
     with self.argument_context('identity') as c:

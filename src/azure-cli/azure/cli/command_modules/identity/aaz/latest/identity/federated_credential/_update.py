@@ -76,11 +76,13 @@ class Update(AAZCommand):
             options=["--cme-version", "--claims-matching-expression-version"],
             arg_group="ClaimsMatchingExpression",
             help="Specifies the version of the claims matching expression used in the expression.",
+            is_preview=True,
         )
         _args_schema.claims_matching_expression_value = AAZStrArg(
             options=["--cme-value", "--claims-matching-expression-value"],
             arg_group="ClaimsMatchingExpression",
             help="The wildcard-based expression for matching incoming claims. Cannot be used with --subject.",
+            is_preview=True,
         )
 
         # define Arg Group "Properties"
