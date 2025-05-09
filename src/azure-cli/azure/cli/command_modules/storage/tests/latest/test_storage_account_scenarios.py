@@ -1798,7 +1798,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'sa': storage_account
         })
-        self.cmd('az storage account migration start --account-name {sa} -g {rg} --sku Standard_ZRS --no-wait')
+        self.cmd('az storage account migration start --account-name {sa} -g {rg} --sku Standard_ZRS --no-wait --yes')
         # other status would take days to months
         self.cmd('az storage account migration show -n default -g {rg} --account-name {sa}',
                  checks=[JMESPathCheck('migrationStatus', 'SubmittedForConversion')])
