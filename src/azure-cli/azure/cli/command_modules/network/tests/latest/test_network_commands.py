@@ -5507,6 +5507,28 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
         self.cmd('network vnet-gateway show-supported-devices -g {rg} -n {gw} -o tsv')
 
 
+class NetworkVnetGatewayMigration(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_gateway_migration', location='westus')
+    def test_network_vnet_gateway_migration(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'pub_ip': 'public_ip1',
+            'gw': 'gateway1',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --subnet-name GatewaySubnet --subnet-prefix 10.0.0.0/24')
+        self.cmd('network public-ip create -g {rg} -n {pub_ip} --sku Basic')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --sku VpnGw1 --vpn-gateway-generation Generation1 '
+                 '--vnet {vnet} --public-ip-address {pub_ip} --vpn-type RouteBased', checks=[
+                    #  self.check('foo', 'bar'),
+                 ])
+
+        self.cmd('network vnet-gateway migration prepare -g {rg} -n {gw} --migration-type UpgradeDeploymentToStandardIP')
+        self.cmd('network vnet-gateway migration execute -g {rg} -n {gw}')
+        self.cmd('network vnet-gateway migration commit -g {rg} -n {gw}')
+
+
 class NetworkVnetGatewayMultiAuth(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_multi_auth')
