@@ -9,6 +9,7 @@ import time
 from json import loads
 from enum import Enum
 from base64 import b64encode
+from azure.cli.command_modules.acr._params import validate_registry_name
 import requests
 from requests import RequestException
 from requests.utils import to_native_string
@@ -396,6 +397,9 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     cli_ctx = cmd.cli_ctx
     resource_not_found, registry = None, None
     try:
+        if cli_ctx is None or registry_name is None:
+            return None, None
+        registry_name, dnl_suffix = validate_registry_name(cli_ctx, registry_name)
         registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
         login_server = registry.login_server
         if tenant_suffix:
@@ -411,8 +415,11 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
         login_server_suffix = get_login_server_suffix(cli_ctx)
         if not login_server_suffix:
             raise
-        login_server = '{}{}{}'.format(
-            registry_name, '-{}'.format(tenant_suffix) if tenant_suffix else '', login_server_suffix).lower()
+        login_server = '{}{}{}{}'.format(
+            registry_name, 
+            '-{}'.format(tenant_suffix) if tenant_suffix else '', 
+            '{}'.format(dnl_suffix) if dnl_suffix else '',
+            login_server_suffix).lower()
 
     # Validate the login server is reachable
     url = 'https://' + login_server + '/v2/'
