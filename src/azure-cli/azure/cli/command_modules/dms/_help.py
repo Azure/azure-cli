@@ -324,6 +324,8 @@ parameters:
             "make_source_server_read_only": "true|false",
             // Optional setting to enable consistent backup. True by default for the sync migration, and false otherwise.
             "enable_consistent_backup": "true|false",
+            // Optional setting to enable lockless snapshot.
+            "enable_consistent_backup_without_locks": "true|false",
             // Optional. If true, all view definitions will be migrated in the selected databases.
             "migrate_all_views": "true|false",
             // Optional. If true, all trigger definitions will be migrated in the selected databases.
