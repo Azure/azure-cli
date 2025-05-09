@@ -1872,6 +1872,21 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return detach_acr
 
+    def get_assignee_principal_type(self) -> Union[str, None]:
+        """Obtain the value of assignee_principal_type.
+
+        This function will return the override value of the assignee principal type (e.g., User, ServicePrincipal, Group)
+        to determine the type of identity being assigned for the ACR role. This is used
+        during the attach ACR operation to ensure proper role assignment based on the identity type.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        assignee_principal_type = self.raw_param.get("assignee_principal_type")
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return assignee_principal_type
+
     def get_http_proxy_config(self) -> Union[Dict, ManagedClusterHTTPProxyConfig, None]:
         """Obtain the value of http_proxy_config.
 
@@ -7374,7 +7389,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         assignee, is_service_principal = self.context.get_assignee_from_identity_or_sp_profile()
         attach_acr = self.context.get_attach_acr()
         detach_acr = self.context.get_detach_acr()
-
+        assignee_principal_type = self.context.get_assignee_principal_type()
         if attach_acr:
             self.context.external_functions.ensure_aks_acr(
                 self.cmd,
@@ -7382,6 +7397,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 acr_name_or_id=attach_acr,
                 subscription_id=subscription_id,
                 is_service_principal=is_service_principal,
+                assignee_principal_type=assignee_principal_type,
             )
 
         if detach_acr:
@@ -7392,6 +7408,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 subscription_id=subscription_id,
                 detach=True,
                 is_service_principal=is_service_principal,
+                assignee_principal_type=assignee_principal_type,
             )
 
     def update_azure_service_mesh_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -8925,6 +8942,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     acr_name_or_id=attach_acr,
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
+                    assignee_principal_type=self.context.get_assignee_principal_type()
                 )
 
         enable_azure_container_storage = self.context.get_intermediate("enable_azure_container_storage")

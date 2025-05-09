@@ -7233,6 +7233,27 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # check role assignment
         self.cmd(role_assignment_check_cmd, checks=[self.is_empty()])
 
+        # Test with --assignee-principal-type
+        attach_with_principal_cmd = "aks update --resource-group={resource_group} --name={name} --attach-acr={acr_name} --assignee-principal-type=ServicePrincipal"
+        self.cmd(attach_with_principal_cmd)
+
+        # check role assignment with principal type
+        role_assignment_with_principal_check_cmd = (
+        "role assignment list --scope {acr_scope} --assignee " +
+        assignee_object_id if assignee_object_id else sp_name
+        )
+        self.cmd(role_assignment_with_principal_check_cmd, checks=[
+            self.check('length(@) == `1`', True),
+            self.check('[0].principalType', 'ServicePrincipal')
+        ])
+        
+        # detach acr
+        attach_cmd = 'aks update --resource-group={resource_group} --name={name} --detach-acr={acr_name}'
+        self.cmd(attach_cmd)
+
+        # check role assignment
+        self.cmd(role_assignment_check_cmd, checks=[self.is_empty()])
+
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])

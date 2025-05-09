@@ -580,8 +580,10 @@ def load_arguments(self, _):
         c.argument('gmsa_dns_server')
         c.argument('gmsa_root_domain_name')
         c.argument('disable_windows_gmsa', action='store_true')
-        c.argument('attach_acr', acr_arg_type, validator=validate_acr)
-        c.argument('detach_acr', acr_arg_type, validator=validate_acr)
+        c.argument('attach_acr', acr_arg_type, validator=validate_acr, help='Attach an ACR to the AKS cluster.')
+        c.argument('detach_acr', acr_arg_type, validator=validate_acr, help='Detach an ACR from the AKS cluster.')
+        c.argument('assignee_principal_type', validator=validate_acr, options_list=['--assignee-principal-type'],
+                   help='Use this parameter in conjunction with --attach-acr to explicitly set the principal type in the ACR role assignment. This helps avoid RBAC-related errors by ensuring the correct principal type is applied. Valid values are \'User\', \'Group\' or \'ServicePrincipal\'')
         c.argument('disable_defender', action='store_true', validator=validate_defender_disable_and_enable_parameters)
         c.argument('enable_defender', action='store_true')
         c.argument('defender_config', validator=validate_defender_config_parameter)
@@ -693,7 +695,6 @@ def load_arguments(self, _):
         c.argument('disable_cost_analysis', action='store_true')
         c.argument("if_match")
         c.argument("if_none_match")
-
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
 
