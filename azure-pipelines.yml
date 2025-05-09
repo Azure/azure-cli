@@ -911,12 +911,6 @@ jobs:
     matrix:
       ${{ each arch in parameters.architectures }}:
         # https://wiki.ubuntu.com/Releases
-        Focal ${{ arch.name }}:
-          # 20.04
-          deb_system: ubuntu
-          distro: focal
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
         Jammy ${{ arch.name }}:
           # 22.04
           deb_system: ubuntu
@@ -980,11 +974,6 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Focal ${{ arch.name }}:
-          deb_system: ubuntu
-          distro: focal
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
         Jammy ${{ arch.name }}:
           deb_system: ubuntu
           distro: jammy
