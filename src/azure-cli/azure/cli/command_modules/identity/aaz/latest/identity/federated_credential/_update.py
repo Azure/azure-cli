@@ -53,7 +53,6 @@ class Update(AAZCommand):
             options=["-n", "--name"],
             help="The name of the federated identity credential resource.",
             required=True,
-            id_part="child_name_1",
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9]{1}[a-zA-Z0-9-_]{2,119}$",
             ),
@@ -66,7 +65,6 @@ class Update(AAZCommand):
             options=["--identity-name"],
             help="The name of the identity resource.",
             required=True,
-            id_part="name",
         )
 
         # define Arg Group "ClaimsMatchingExpression"
