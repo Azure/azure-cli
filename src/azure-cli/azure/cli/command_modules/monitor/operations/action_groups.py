@@ -129,59 +129,47 @@ class ActionGroupCreate(_ActionGroupCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.arm_role_receivers._registered = False
-        args_schema.automation_runbook_receivers._registered = False
-        args_schema.azure_app_push_receivers._registered = False
-        args_schema.azure_function_receivers._registered = False
-        args_schema.email_receivers._registered = False
-        args_schema.enabled._registered = False
-        args_schema.event_hub_receivers._registered = False
-        args_schema.itsm_receivers._registered = False
-        args_schema.logic_app_receivers._registered = False
-        args_schema.sms_receivers._registered = False
-        args_schema.voice_receivers._registered = False
-        args_schema.webhook_receivers._registered = False
         args_schema.receiver_actions = AAZCustomListArg(
             options=["--actions"],
             singular_options=["--action", "-a"],
             help='''
-        Add receivers to the action group during the creation.
-        Usage:   --action TYPE NAME [ARG ...]
-        Email:
-            Format:     --action email NAME EMAIL_ADDRESS [usecommonalertschema]
-            Example:    --action email bob bob@contoso.com
-        SMS:
-            Format:     --action sms NAME COUNTRY_CODE PHONE_NUMBER
-            Example:    --action sms charli 1 5551234567
-        Webhook:
-            Format:     --action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
-            Example:    --action webhook alert_hook https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
-        Arm Role:
-            Format:     --action armrole NAME ROLE_ID [usecommonalertschema]
-            Example:    --action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
-        Azure App Push:
-            Format:     --action azureapppush NAME EMAIL_ADDRESS
-            Example:    --action azureapppush test_apppush bob@contoso.com
-        ITSM:
-            Format:     --action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION
-            Example:    --action itsm test_itsm test_workspace test_conn ticket_blob useast
-        Automation runbook:
-            Format:     --action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]
-            Example:    --action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema
-        Voice:
-            Format:     --action voice NAME COUNTRY_CODE PHONE_NUMBER
-            Example:    --action voice charli 1 4441234567
-        Logic App:
-            Format:     --action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
-            Example:    --action logicapp test_logicapp test_rsrc http://callback
-        Azure Function:
-            Format:     --action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
-            Example:    --action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
-        Event Hub:
-            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
-            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
-        Multiple actions can be specified by using more than one `--add-action` argument.
-        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        Add receivers to the action group during the creation.\n\n
+        Usage:   --action TYPE NAME [ARG ...]\n\n
+        Email:\n\n
+            Format:     --action email NAME EMAIL_ADDRESS [usecommonalertschema]\n\n
+            Example:    --action email bob bob@contoso.com\n\n
+        SMS:\n\n
+            Format:     --action sms NAME COUNTRY_CODE PHONE_NUMBER\n\n
+            Example:    --action sms charli 1 5551234567\n\n
+        Webhook:\n\n
+            Format:     --action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]\n\n
+            Example:    --action webhook alert_hook https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema\n\n
+        Arm Role:\n\n
+            Format:     --action armrole NAME ROLE_ID [usecommonalertschema]\n\n
+            Example:    --action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635\n\n
+        Azure App Push:\n\n
+            Format:     --action azureapppush NAME EMAIL_ADDRESS\n\n
+            Example:    --action azureapppush test_apppush bob@contoso.com\n\n
+        ITSM:\n\n
+            Format:     --action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION\n\n
+            Example:    --action itsm test_itsm test_workspace test_conn ticket_blob useast\n\n
+        Automation runbook:\n\n
+            Format:     --action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]\n\n
+            Example:    --action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema\n\n
+        Voice:\n\n
+            Format:     --action voice NAME COUNTRY_CODE PHONE_NUMBER\n\n
+            Example:    --action voice charli 1 4441234567\n\n
+        Logic App:\n\n
+            Format:     --action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]\n\n
+            Example:    --action logicapp test_logicapp test_rsrc http://callback\n\n
+        Azure Function:\n\n
+            Format:     --action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]\n\n
+            Example:    --action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema\n\n
+        Event Hub:\n\n
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]\n\n
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema\n\n
+        Multiple actions can be specified by using more than one `--add-action` argument.\n\n
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.\n\n
         If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
         ''',
             arg_group="Actions",
@@ -211,59 +199,47 @@ class ActionGroupUpdate(_ActionGroupUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.arm_role_receivers._registered = False
-        args_schema.automation_runbook_receivers._registered = False
-        args_schema.azure_app_push_receivers._registered = False
-        args_schema.azure_function_receivers._registered = False
-        args_schema.email_receivers._registered = False
-        args_schema.enabled._registered = False
-        args_schema.event_hub_receivers._registered = False
-        args_schema.itsm_receivers._registered = False
-        args_schema.logic_app_receivers._registered = False
-        args_schema.sms_receivers._registered = False
-        args_schema.voice_receivers._registered = False
-        args_schema.webhook_receivers._registered = False
         args_schema.receiver_actions = AAZCustomListArg(
             options=["--add-actions"],
             singular_options=["--add-action", "-a"],
             help='''
-        Add receivers to the action group.
-        Usage:   --add-action TYPE NAME [ARG ...]
-        Email:
-            Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]
-            Example:    --add-action email bob bob@contoso.com
-        SMS:
-            Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER
-            Example:    --add-action sms charli 1 5551234567
-        Webhook:
-            Format:     --add-action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
-            Example:    --add-action https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
-        Arm Role:
-            Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]
-            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
-        Azure App Push:
-            Format:     --add-action azureapppush NAME EMAIL_ADDRESS
-            Example:    --add-action azureapppush test_apppush bob@contoso.com
-        ITSM:
-            Format:     --add-action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION
-            Example:    --add-action itsm test_itsm test_workspace test_conn ticket_blob useast
-        Automation runbook:
-            Format:     --add-action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]
-            Example:    --add-action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema
-        Voice:
-            Format:     --add-action voice NAME COUNTRY_CODE PHONE_NUMBER
-            Example:    --add-action voice charli 1 4441234567
-        Logic App:
-            Format:     --add-action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
-            Example:    --add-action logicapp test_logicapp test_rsrc http://callback
-        Azure Function:
-            Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
-            Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
-        Event Hub:
-            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
-            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
-        Multiple actions can be specified by using more than one `--add-action` argument.
-        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        Add receivers to the action group.\n\n
+        Usage:   --add-action TYPE NAME [ARG ...]\n\n
+        Email:\n\n
+            Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]\n\n
+            Example:    --add-action email bob bob@contoso.com\n\n
+        SMS:\n\n
+            Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER\n\n
+            Example:    --add-action sms charli 1 5551234567\n\n
+        Webhook:\n\n
+            Format:     --add-action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]\n\n
+            Example:    --add-action https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema\n\n
+        Arm Role:\n\n
+            Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]\n\n
+            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635\n\n
+        Azure App Push:\n\n
+            Format:     --add-action azureapppush NAME EMAIL_ADDRESS\n\n
+            Example:    --add-action azureapppush test_apppush bob@contoso.com\n\n
+        ITSM:\n\n
+            Format:     --add-action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION\n\n
+            Example:    --add-action itsm test_itsm test_workspace test_conn ticket_blob useast\n\n
+        Automation runbook:\n\n
+            Format:     --add-action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]\n\n
+            Example:    --add-action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema\n\n
+        Voice:\n\n
+            Format:     --add-action voice NAME COUNTRY_CODE PHONE_NUMBER\n\n
+            Example:    --add-action voice charli 1 4441234567\n\n
+        Logic App:\n\n
+            Format:     --add-action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]\n\n
+            Example:    --add-action logicapp test_logicapp test_rsrc http://callback\n\n
+        Azure Function:\n\n
+            Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]\n\n
+            Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema\n\n
+        Event Hub:\n\n
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]\n\n
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema\n\n
+        Multiple actions can be specified by using more than one `--add-action` argument.\n\n
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.\n\n
         If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.''',
             arg_group="Actions",
         )
@@ -291,6 +267,10 @@ class ActionGroupUpdate(_ActionGroupUpdate):
 
         def filter_receivers(collection):
             return [item for item in collection if item.name.to_serialized_data() not in receiver_remove_list]
+
+        instance.properties.incident_receivers = filter_receivers(instance.properties.incident_receivers)
+        instance.properties.incident_receivers.extend(args.incident_receivers)
+        args.incident_receivers = instance.properties.incident_receivers
 
         instance.properties.email_receivers = filter_receivers(instance.properties.email_receivers)
         instance.properties.email_receivers.extend(args.email_receivers)
@@ -359,43 +339,43 @@ class ActionGroupTestNotificationCreate(_ActionGroupTestNotificationCreate):
             options=["--add-actions"],
             singular_options=["--add-action", "-a"],
             help='''
-        Add receivers to the action group.
-        Usage:   --add-action TYPE NAME [ARG ...]
-        Email:
-            Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]
-            Example:    --add-action email bob bob@contoso.com
-        SMS:
-            Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER
-            Example:    --add-action sms charli 1 5551234567
-        Webhook:
-            Format:     --add-action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
-            Example:    --add-action https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
-        Arm Role:
-            Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]
-            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
-        Azure App Push:
-            Format:     --add-action azureapppush NAME EMAIL_ADDRESS
-            Example:    --add-action azureapppush test_apppush bob@contoso.com
-        ITSM:
-            Format:     --add-action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION
-            Example:    --add-action itsm test_itsm test_workspace test_conn ticket_blob useast
-        Automation runbook:
-            Format:     --add-action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]
-            Example:    --add-action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema
-        Voice:
-            Format:     --add-action voice NAME COUNTRY_CODE PHONE_NUMBER
-            Example:    --add-action voice charli 1 4441234567
-        Logic App:
-            Format:     --add-action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
-            Example:    --add-action logicapp test_logicapp test_rsrc http://callback
-        Azure Function:
-            Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
-            Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
-        Event Hub:
-            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]
-            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema
-        Multiple actions can be specified by using more than one `--add-action` argument.
-        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        Add receivers to the action group.\n\n
+        Usage:   --add-action TYPE NAME [ARG ...]\n\n
+        Email:\n\n
+            Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]\n\n
+            Example:    --add-action email bob bob@contoso.com\n\n
+        SMS:\n\n
+            Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER\n\n
+            Example:    --add-action sms charli 1 5551234567\n\n
+        Webhook:\n\n
+            Format:     --add-action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]\n\n
+            Example:    --add-action https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema\n\n
+        Arm Role:\n\n
+            Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]\n\n
+            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635\n\n
+        Azure App Push:\n\n
+            Format:     --add-action azureapppush NAME EMAIL_ADDRESS\n\n
+            Example:    --add-action azureapppush test_apppush bob@contoso.com\n\n
+        ITSM:\n\n
+            Format:     --add-action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION\n\n
+            Example:    --add-action itsm test_itsm test_workspace test_conn ticket_blob useast\n\n
+        Automation runbook:\n\n
+            Format:     --add-action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]\n\n
+            Example:    --add-action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema\n\n
+        Voice:\n\n
+            Format:     --add-action voice NAME COUNTRY_CODE PHONE_NUMBER\n\n
+            Example:    --add-action voice charli 1 4441234567\n\n
+        Logic App:\n\n
+            Format:     --add-action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]\n\n
+            Example:    --add-action logicapp test_logicapp test_rsrc http://callback\n\n
+        Azure Function:\n\n
+            Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]\n\n
+            Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema\n\n
+        Event Hub:\n\n
+            Format:     --action eventhub NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema]\n\n
+            Example:    --action eventhub test_eventhub 5def922a-3ed4-49c1-b9fd-05ec533819a3 eventhubNameSpace testEventHubName usecommonalertschema\n\n
+        Multiple actions can be specified by using more than one `--add-action` argument.\n\n
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.\n\n
         If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.''',
         )
         args_schema.receiver_actions.Element = AAZListArg()
