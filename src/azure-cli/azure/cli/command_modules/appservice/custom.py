@@ -5024,17 +5024,18 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
+
 def update_flex_app_service_plan(instance):
-    instance.target_worker_count=None
-    instance.target_worker_size=None
-    instance.is_xenon=None
-    instance.hyper_v=None
-    instance.per_site_scaling=None
-    instance.maximum_elastic_worker_count=None
-    instance.elastic_scale_enabled=None
-    instance.is_spot=None
-    instance.target_worker_size_id=None
-    instance.sku.capacity=None
+    instance.target_worker_count = None
+    instance.target_worker_size = None
+    instance.is_xenon = None
+    instance.hyper_v = None
+    instance.per_site_scaling = None
+    instance.maximum_elastic_worker_count = None
+    instance.elastic_scale_enabled = None
+    instance.is_spot = None
+    instance.target_worker_size_id = None
+    instance.sku.capacity = None
     return instance
 
 
@@ -5066,6 +5067,7 @@ def is_plan_consumption(cmd, plan_info):
         if isinstance(plan_info.sku, SkuDescription):
             return plan_info.sku.tier.lower() == 'dynamic'
     return False
+
 
 def is_plan_flex(cmd, plan_info):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
