@@ -13,12 +13,16 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "identity federated-credential create",
+    is_preview=True,
 )
 class Create(AAZCommand):
     """Create a federated identity credential under an existing user assigned identity.
 
-    :example: Create a federated identity credential under a specific user assigned identity.
+    :example: Create a federated identity credential under a specific user assigned identity using subject.
         az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+
+    :example: Create a federated identity credential under a specific user assigned identity using claimsMatchingExpression.
+        az identity federated-credential create --name myFicName --identity-name myIdentityName --resource-group myResourceGroup --issuer myIssuer --claims-matching-expression-version 1 --claims-matching-expression-value "claims['sub'] eq 'foo'" --audiences myAudiences
     """
 
     _aaz_info = {
@@ -68,14 +72,12 @@ class Create(AAZCommand):
         _args_schema.claims_matching_expression_version = AAZIntArg(
             options=["--cme-version", "--claims-matching-expression-version"],
             arg_group="ClaimsMatchingExpression",
-            help="The version of the claims matching expression language.",
-            is_preview=True,
+            help="Specifies the version of the claims matching expression used in the expression.",
         )
         _args_schema.claims_matching_expression_value = AAZStrArg(
             options=["--cme-value", "--claims-matching-expression-value"],
             arg_group="ClaimsMatchingExpression",
             help="The wildcard-based expression for matching incoming claims. Cannot be used with --subject.",
-            is_preview=True,
         )
 
         # define Arg Group "Properties"

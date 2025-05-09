@@ -17,8 +17,11 @@ from azure.cli.core.aaz import *
 class Update(AAZCommand):
     """Update a federated identity credential under an existing user assigned identity.
 
-    :example: Update a federated identity credential under a specific user assigned identity.
+    :example: Update a federated identity credential under a specific user assigned identity using subject.
         az identity federated-credential update --identity-name myIdentityName --name myFicName --resource-group myResourceGroup --issuer myIssuer --subject mySubject --audiences myAudiences
+
+    :example: Update a federated identity credential under a specific user assigned identity using claimsMatchingExpression.
+        az identity federated-credential update --identity-name myIdentityName --name myFicName --resource-group myResourceGroup --issuer myIssuer --claims-matching-expression-version 1 --claims-matching-expression-value "claims['sub'] eq 'foo'" --audiences myAudiences
     """
 
     _aaz_info = {
@@ -72,7 +75,7 @@ class Update(AAZCommand):
         _args_schema.claims_matching_expression_version = AAZIntArg(
             options=["--cme-version", "--claims-matching-expression-version"],
             arg_group="ClaimsMatchingExpression",
-            help="The version of the claims matching expression language.",
+            help="Specifies the version of the claims matching expression used in the expression.",
         )
         _args_schema.claims_matching_expression_value = AAZStrArg(
             options=["--cme-value", "--claims-matching-expression-value"],

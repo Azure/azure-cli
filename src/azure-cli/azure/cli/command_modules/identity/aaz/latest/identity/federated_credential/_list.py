@@ -49,9 +49,9 @@ class List(AAZCommand):
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="The name of the federated identity credential resource.",
+        _args_schema.identity_name = AAZStrArg(
+            options=["--identity-name"],
+            help="The name of the identity resource.",
             required=True,
         )
         _args_schema.skiptoken = AAZStrArg(
@@ -119,7 +119,7 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceName", self.ctx.args.name,
+                    "resourceName", self.ctx.args.identity_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
