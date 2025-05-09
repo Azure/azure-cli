@@ -47,9 +47,9 @@ class Create(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.identity_name = AAZStrArg(
-            options=["--identity-name"],
-            help="The name of the identity resource.",
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="The name of the federated identity credential resource.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9]{1}[a-zA-Z0-9-_]{2,119}$",
@@ -59,9 +59,9 @@ class Create(AAZCommand):
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="The name of the federated identity credential resource.",
+        _args_schema.identity_name = AAZStrArg(
+            options=["--identity-name"],
+            help="The name of the identity resource.",
             required=True,
         )
 
@@ -151,7 +151,7 @@ class Create(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "federatedIdentityCredentialResourceName", self.ctx.args.identity_name,
+                    "federatedIdentityCredentialResourceName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -159,7 +159,7 @@ class Create(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceName", self.ctx.args.name,
+                    "resourceName", self.ctx.args.identity_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
