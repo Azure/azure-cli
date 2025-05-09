@@ -5353,7 +5353,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         self.kwargs.update({
             'admin': 'windowsUser',
             'loc': 'westus',
-            'image': 'Win2012R2Datacenter',
+            'image': 'Win2022Datacenter',
             'vm': 'vm-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}])
         })
