@@ -270,10 +270,23 @@ for source in SOURCE_RESOURCES:
         else:
             auth_params = get_auth_info_params(auth_types[0])
 
+        if target in {RESOURCE.MongoDbAtlas}:
+            auth_params = '--secret secret=xx'
+
         # auth info params in help message
         secret_param = ''
         if AUTH_TYPE.Secret in auth_types:
-            if source.value != RESOURCE.KubernetesCluster.value:
+            if target in {RESOURCE.MongoDbAtlas}:
+                secret_param = '''
+            - name: --secret
+              short-summary: The connection string for secret auth
+              long-summary: |
+                Usage: --secret secret=XX
+
+                secret  : Connection string for secret auth.
+                          Example: mongodb+srv://myUser:myPassword@cluster0.a12345.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+        '''
+            elif source.value != RESOURCE.KubernetesCluster.value:
                 secret_param = '''
             - name: --secret
               short-summary: The secret auth info
@@ -402,7 +415,7 @@ for source in SOURCE_RESOURCES:
             target_id=target_id,
             auth_params=auth_params,
             source_display_name=source_display_name
-        ) if target is not RESOURCE.NeonPostgres else ''
+        ) if target not in [RESOURCE.NeonPostgres, RESOURCE.MongoDbAtlas] else ''
 
         helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
           type: command
