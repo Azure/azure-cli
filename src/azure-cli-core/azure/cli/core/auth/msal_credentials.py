@@ -68,23 +68,30 @@ class UserCredential:  # pylint: disable=too-few-public-methods
             # browser is available.
             if 'data' in kwargs:
                 logger.warning(ex)
-                logger.warning("\nThe default web browser has been opened at %s for scope '%s'. "
-                               "Please continue the login in the web browser.",
-                               self._msal_app.authority.authorization_endpoint, ' '.join(scopes))
-
-                from .util import read_response_templates
-                success_template, error_template = read_response_templates()
-
-                result = self._msal_app.acquire_token_interactive(
-                    scopes, login_hint=self._account['username'],
-                    port=8400 if self._msal_app.authority.is_adfs else None,
-                    success_template=success_template, error_template=error_template, **kwargs)
-                check_result(result)
-
+                result = self._acquire_token_interactive(scopes, **kwargs)
             # For other scenarios like Storage Conditional Access MFA step-up, do not
             # launch browser, but show the error message and `az login` command instead.
             else:
                 raise
+        return result
+
+    def _acquire_token_interactive(self, scopes, **kwargs):
+        from .util import read_response_templates
+        success_template, error_template = read_response_templates()
+
+        def _prompt_launching_ui(ui=None, **_):
+            logger.warning(
+                "Interactively acquiring token for scope '%s'. Continue the login in the %s.",
+                ' '.join(scopes), 'web browser' if ui == 'browser' else 'pop-up window')
+
+        result = self._msal_app.acquire_token_interactive(
+            scopes, login_hint=self._account['username'],
+            port=8400 if self._msal_app.authority.is_adfs else None,
+            success_template=success_template, error_template=error_template,
+            parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE,
+            on_before_launching_ui=_prompt_launching_ui,
+            **kwargs)
+        check_result(result)
         return result
 
 
