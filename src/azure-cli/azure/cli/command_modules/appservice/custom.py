@@ -2268,7 +2268,15 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    try:
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    except Exception as ex:
+        if "Conflict" in str(ex):
+            logger.error("Operation returned an invalid status 'Conflict'. For more details, run the command with the --debug parameter.")
+        elif "Bad Request" in str(ex):
+            logger.error("Operation returned an invalid status 'Bad Request'. For more details, run the command with the --debug parameter.")
+        else:
+            raise
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
