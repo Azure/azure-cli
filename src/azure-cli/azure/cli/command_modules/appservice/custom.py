@@ -2180,8 +2180,6 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                 get_current_stack_from_runtime(runtime_version) != "tomcat" else "java"
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
-    if number_of_workers is not None:
-        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
             if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
