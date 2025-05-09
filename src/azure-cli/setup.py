@@ -77,7 +77,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==13.0.0',
     'azure-mgmt-containerservice~=35.0.0',
-    'azure-mgmt-cosmosdb==9.7.0',
+    'azure-mgmt-cosmosdb==9.8.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
