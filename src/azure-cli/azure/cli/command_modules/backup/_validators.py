@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
+
 from datetime import datetime
 from azure.cli.core.azclierror import RequiredArgumentMissingError, MutuallyExclusiveArgumentError, \
     ArgumentUsageError, InvalidArgumentValueError
@@ -71,7 +73,7 @@ def validate_wl_restore(item, item_type, restore_mode, recovery_mode):
             operation. Allowed values are: 'OriginalLocation', 'AlternateLocation'.
             """)
 
-    if recovery_mode is not None and recovery_mode != 'FileRecovery':
+    if recovery_mode is not None and recovery_mode not in ['FileRecovery', 'SnapshotAttachAndRecover', 'SnapshotAttach']:
         raise InvalidArgumentValueError("""
             The recovery_mode specified in recovery config file is incorrect. Please correct it and retry the
             operation.
