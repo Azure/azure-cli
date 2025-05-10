@@ -103,37 +103,33 @@ def validate_retention_days(namespace):
         raise CLIError("Invalid value for days: should be from 0 to 365")
 
 
-def validate_registry_name(cli_ctx, registry_name):
+def validate_registry_name(cmd, namespace):
     """Omit login server endpoint suffix."""
-    if registry_name is None:
+    registry = namespace.registry_name
+    if registry is None:
         return
-    suffixes = cli_ctx.cloud.suffixes
-    dnl_hash = registry_name.find("-")
+    suffixes = cmd.cli_ctx.cloud.suffixes
+    dnl_hash = registry.find("-")
 
-    if dnl_hash > 0:
+    if registry and dnl_hash > 0:
         logger.warning(
             "Registry name is %s. The following suffix '%s' is automatically omitted.",
-            registry_name[:dnl_hash],
-            registry_name[dnl_hash:])
-        registry_name = registry_name[:dnl_hash]
-        dnl_suffix = registry_name[dnl_hash:]
-        if hasattr(suffixes, 'acr_login_server_endpoint'):
-            acr_suffix = suffixes.acr_login_server_endpoint
-            pos = dnl_suffix.find(acr_suffix)
-            dnl_suffix = dnl_suffix[:pos]
-            
+            registry[:dnl_hash],
+            registry[dnl_hash:])
+        namespace.registry_name = registry[:dnl_hash]
     # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
-    elif hasattr(suffixes, 'acr_login_server_endpoint'):
+    elif registry and hasattr(suffixes, 'acr_login_server_endpoint'):
         acr_suffix = suffixes.acr_login_server_endpoint
-        pos = registry_name.find(acr_suffix)
+        pos = registry.find(acr_suffix)
         if pos > 0:
             logger.warning("Registry name is %s. The following suffix '%s' is automatically omitted.",
-                           registry_name[:pos],
+                           registry[:pos],
                            acr_suffix)
-            registry_name = registry_name[:pos]        
+            namespace.registry_name = registry[:pos]
+            registry = registry[:pos]
 
-    return registry_name, dnl_suffix
-    if not re.match(ACR_NAME_VALIDATION_REGEX, registry_name):
+    registry = namespace.registry_name
+    if not re.match(ACR_NAME_VALIDATION_REGEX, registry):
         raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
 
 
