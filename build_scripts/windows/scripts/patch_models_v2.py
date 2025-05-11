@@ -266,8 +266,12 @@ def find_autorest_generated_folder(module_prefix="azure.mgmt"):
         # No model, might dig deeper
         prefix_module = importlib.import_module(module_prefix)
         for _, sub_package, ispkg in pkgutil.iter_modules(prefix_module.__path__, module_prefix+"."):
-            if ispkg:
+            try:
+                # Check if the models module exists before importing
+                importlib.import_module(".models", sub_package)
                 result += find_autorest_generated_folder(sub_package)
+            except ModuleNotFoundError:
+                _LOGGER.warning(f"Skipping {sub_package} as it does not contain a models module.")
     return result
 
 
