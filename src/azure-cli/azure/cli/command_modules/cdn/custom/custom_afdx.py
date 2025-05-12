@@ -430,7 +430,6 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             args.health_probe_settings = None
 
 
-
 class AFDOriginCreate(_AFDOriginCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
