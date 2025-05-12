@@ -659,6 +659,8 @@ class ApimScenarioTest(ScenarioTest):
                     '--specification-path {policy_specification_path} '
                     '--policy-format {policy_specification_format}')
 
+        self.cmd('apim api wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --exists', checks=[self.is_empty()])
+
         # Verify policies were updated
         current_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
         current_policy_api = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
@@ -680,10 +682,22 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim api policy show -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}', 
                     checks=[self.check('format', '{policy_specification_format}')])
 
+        # Get etag
+        etag_global = self.cmd('apim api policy get-etag -g {rg} -n {service_name}').get_output_in_json()
+        etag_api = self.cmd('apim api policy get-etag -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
+        etag_operation = self.cmd('apim api policy get-etag -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
+
+        self.assertTrue(etag_global, "Global policy etag should not be empty")
+        self.assertTrue(etag_api, "API policy etag should not be empty")
+        self.assertTrue(etag_operation, "Operation policy etag should not be empty")
+
         # Delete policies
         self.cmd('apim api policy delete -g {rg} -n {service_name} --yes')
         self.cmd('apim api policy delete -g {rg} -n {service_name} --api-id {api_id} --yes')
         self.cmd('apim api policy delete -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name} --yes')
+
+        #wait
+        self.cmd('apim api wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --deleted', checks=[self.is_empty()])
 
         # Verify policies are deleted
         final_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
@@ -793,7 +807,7 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
 
-        # wait for creation
+        # eaait for creation
         self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
 
         # delete service
