@@ -749,14 +749,14 @@ def apim_api_policy_list(client, resource_group_name,
 
 
 def apim_api_policy_get_entity(client, resource_group_name,
-                               service_name, policy_id,
+                               service_name, policy_id="policy",
                                api_id=None, operation_id=None):
 
     """ Gets the entity state (etag) version of the API Policy. """
 
     module_context = _get_policy_context(client, api_id, operation_id)
 
-    arguments= {
+    arguments = {
         "resource_group_name": resource_group_name,
         "service_name": service_name,
         "policy_id": policy_id
