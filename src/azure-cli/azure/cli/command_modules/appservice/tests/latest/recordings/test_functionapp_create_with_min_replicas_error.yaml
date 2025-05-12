@@ -19,24 +19,54 @@ interactions:
       ParameterSetName:
       - -g -n --sku --is-linux --location
       User-Agent:
-      - AZURECLI/2.70.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004?api-version=2024-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004","name":"functionappplan000004","type":"Microsoft.Web/serverfarms","kind":"linux","location":"southcentralus","properties":{"serverFarmId":15239,"name":"functionappplan000004","sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-SouthCentralUSwebspace-Linux","subscription":"bef29afb-3c08-4894-ae64-43bdd8f3f447","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"South
-        Central US","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-sn1-217_15239","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2025-03-19T08:38:27.71"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+      string: '{"Code":"Unauthorized","Message":"Operation cannot be completed without
+        additional quota. See https://aka.ms/antquotahelp for instructions on requesting
+        limit increases. \r\nAdditional details- Location:  \r\nCurrent Limit (Standard
+        VMs): 0 \r\nCurrent Usage: 0\r\nAmount required for this deployment (Standard
+        VMs): 0 \r\n(Minimum) New Limit that you should request to enable this deployment:
+        0. \r\nNote that if you experience multiple scaling operations failing (in
+        addition to this one) and need to accommodate the aggregate quota requirements
+        of these operations, you will need to request a higher quota limit than the
+        one currently displayed.","Target":null,"Details":[{"Message":"Operation cannot
+        be completed without additional quota. See https://aka.ms/antquotahelp for
+        instructions on requesting limit increases. \r\nAdditional details- Location:  \r\nCurrent
+        Limit (Standard VMs): 0 \r\nCurrent Usage: 0\r\nAmount required for this deployment
+        (Standard VMs): 0 \r\n(Minimum) New Limit that you should request to enable
+        this deployment: 0. \r\nNote that if you experience multiple scaling operations
+        failing (in addition to this one) and need to accommodate the aggregate quota
+        requirements of these operations, you will need to request a higher quota
+        limit than the one currently displayed."},{"Code":"Unauthorized"},{"ErrorEntity":{"ExtendedCode":"70002","MessageTemplate":"Operation
+        cannot be completed without additional quota. See https://aka.ms/antquotahelp
+        for instructions on requesting limit increases. \r\nAdditional details- Location:
+        {0} \r\nCurrent Limit ({1}): {2} \r\nCurrent Usage: {3}\r\nAmount required
+        for this deployment ({1}): {4} \r\n(Minimum) New Limit that you should request
+        to enable this deployment: {5}. \r\nNote that if you experience multiple scaling
+        operations failing (in addition to this one) and need to accommodate the aggregate
+        quota requirements of these operations, you will need to request a higher
+        quota limit than the one currently displayed.","Parameters":["","Standard
+        VMs","0","0","0","0"],"Code":"Unauthorized","Message":"Operation cannot be
+        completed without additional quota. See https://aka.ms/antquotahelp for instructions
+        on requesting limit increases. \r\nAdditional details- Location:  \r\nCurrent
+        Limit (Standard VMs): 0 \r\nCurrent Usage: 0\r\nAmount required for this deployment
+        (Standard VMs): 0 \r\n(Minimum) New Limit that you should request to enable
+        this deployment: 0. \r\nNote that if you experience multiple scaling operations
+        failing (in addition to this one) and need to accommodate the aggregate quota
+        requirements of these operations, you will need to request a higher quota
+        limit than the one currently displayed."}}],"Innererror":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1643'
+      - '2714'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 19 Mar 2025 08:38:30 GMT
-      etag:
-      - '"1DB98AA49B1180B"'
+      - Sat, 10 May 2025 00:08:12 GMT
       expires:
       - '-1'
       pragma:
@@ -49,15 +79,17 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=bd30bf6a-f200-4cfd-bcd6-a339b0d9dbe8/westus2/bd498f4f-e161-4b8e-95a0-105523c5a259
       x-ms-ratelimit-remaining-subscription-global-writes:
-      - '12000'
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '800'
+      - '799'
       x-msedge-ref:
-      - 'Ref A: 95E9937F8DB4471B998C36AA4249509B Ref B: MAA201060513039 Ref C: 2025-03-19T08:38:20Z'
+      - 'Ref A: A5198879F1A84F8CA1A234A754EA9183 Ref B: CO6AA3150219019 Ref C: 2025-05-10T00:08:09Z'
       x-powered-by:
       - ASP.NET
     status:
-      code: 200
-      message: OK
+      code: 401
+      message: Unauthorized
 version: 1
