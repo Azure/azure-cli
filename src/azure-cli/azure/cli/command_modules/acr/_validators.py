@@ -111,14 +111,14 @@ def validate_registry_name(cmd, namespace):
     suffixes = cmd.cli_ctx.cloud.suffixes
     dnl_hash = registry.find("-")
 
-    if registry and dnl_hash > 0:
+    if dnl_hash > 0:
         logger.warning(
             "Registry name is %s. The following suffix '%s' is automatically omitted.",
             registry[:dnl_hash],
             registry[dnl_hash:])
         namespace.registry_name = registry[:dnl_hash]
     # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
-    elif registry and hasattr(suffixes, 'acr_login_server_endpoint'):
+    elif hasattr(suffixes, 'acr_login_server_endpoint'):
         acr_suffix = suffixes.acr_login_server_endpoint
         pos = registry.find(acr_suffix)
         if pos > 0:
