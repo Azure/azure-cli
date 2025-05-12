@@ -639,70 +639,70 @@ class ApimScenarioTest(ScenarioTest):
         self.kwargs['operation_name'] = operation_name
 
         # Verify initial policy lists (global, API, and operation levels)
-        initial_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
-        initial_policy_api = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
-        initial_policy_operation = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
+        initial_policy_global = self.cmd('apim policy list -g {rg} -n {service_name}').get_output_in_json()
+        initial_policy_api = self.cmd('apim policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
+        initial_policy_operation = self.cmd('apim policy list -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
 
         # Set policies at different scopes
-        self.cmd('apim api policy set -g {rg} -n {service_name} '
+        self.cmd('apim policy set -g {rg} -n {service_name} '
                     '--specification-path {policy_specification_path} '
                     '--policy-format {policy_specification_format}')
         
-        self.cmd('apim api policy set -g {rg} -n {service_name} '
+        self.cmd('apim policy set -g {rg} -n {service_name} '
                     '--api-id {api_id} '
                     '--specification-path {policy_specification_path} '
                     '--policy-format {policy_specification_format}')
         
-        self.cmd('apim api policy set -g {rg} -n {service_name} '
+        self.cmd('apim policy set -g {rg} -n {service_name} '
                     '--api-id {api_id} '
                     '--operation-id {operation_name} '
                     '--specification-path {policy_specification_path} '
                     '--policy-format {policy_specification_format}')
 
-        self.cmd('apim api policy wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --policy-id policy --exists', checks=[self.is_empty()])
+        self.cmd('apim policy wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --policy-id policy --exists', checks=[self.is_empty()])
 
         # Verify policies were updated
-        current_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
-        current_policy_api = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
-        current_policy_operation = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
+        current_policy_global = self.cmd('apim policy list -g {rg} -n {service_name}').get_output_in_json()
+        current_policy_api = self.cmd('apim policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
+        current_policy_operation = self.cmd('apim policy list -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
 
         # Ensure policies are different after update
         self.assertNotEqual(initial_policy_global['value'], current_policy_global['value'], 
                             "Global policy should have changed")
         self.assertNotEqual(initial_policy_api['value'], current_policy_api['value'], 
-                            "API policy should have changed")
+                            "policy should have changed")
         self.assertNotEqual(initial_policy_operation['value'], current_policy_operation['value'], 
                             "Operation policy should have changed")
 
         # Verify policy show commands
-        self.cmd('apim api policy show -g {rg} -n {service_name}', 
+        self.cmd('apim policy show -g {rg} -n {service_name}', 
                     checks=[self.check('format', '{policy_specification_format}')])
-        self.cmd('apim api policy show -g {rg} -n {service_name} --api-id {api_id}', 
+        self.cmd('apim policy show -g {rg} -n {service_name} --api-id {api_id}', 
                     checks=[self.check('format', '{policy_specification_format}')])
-        self.cmd('apim api policy show -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}', 
+        self.cmd('apim policy show -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}', 
                     checks=[self.check('format', '{policy_specification_format}')])
 
         # Get etag
-        etag_global = self.cmd('apim api policy get-etag -g {rg} -n {service_name}').get_output_in_json()
-        etag_api = self.cmd('apim api policy get-etag -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
-        etag_operation = self.cmd('apim api policy get-etag -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
+        etag_global = self.cmd('apim policy get-etag -g {rg} -n {service_name}').get_output_in_json()
+        etag_api = self.cmd('apim policy get-etag -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
+        etag_operation = self.cmd('apim policy get-etag -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
 
         self.assertTrue(etag_global, "Global policy etag should not be empty")
-        self.assertTrue(etag_api, "API policy etag should not be empty")
+        self.assertTrue(etag_api, "policy etag should not be empty")
         self.assertTrue(etag_operation, "Operation policy etag should not be empty")
 
         # Delete policies
-        self.cmd('apim api policy delete -g {rg} -n {service_name} --yes')
-        self.cmd('apim api policy delete -g {rg} -n {service_name} --api-id {api_id} --yes')
-        self.cmd('apim api policy delete -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name} --yes')
+        self.cmd('apim policy delete -g {rg} -n {service_name} --yes')
+        self.cmd('apim policy delete -g {rg} -n {service_name} --api-id {api_id} --yes')
+        self.cmd('apim policy delete -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name} --yes')
 
         #wait
-        self.cmd('apim api policy wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --policy-id policy --deleted', checks=[self.is_empty()])
+        self.cmd('apim policy wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --policy-id policy --deleted', checks=[self.is_empty()])
 
         # Verify policies are deleted
-        final_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
-        final_policy_api = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
-        final_policy_operation = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
+        final_policy_global = self.cmd('apim policy list -g {rg} -n {service_name}').get_output_in_json()
+        final_policy_api = self.cmd('apim policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
+        final_policy_operation = self.cmd('apim policy list -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
 
         self.assertEqual(final_policy_global.get('count', 0), 0, "Global policy should be deleted")
         self.assertEqual(final_policy_api.get('count', 0), 0, "API policy should be deleted")
