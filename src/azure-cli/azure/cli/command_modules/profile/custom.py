@@ -133,6 +133,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
+    if identity and username:
+        raise CLIError('Passing the managed identity ID with --username is no longer supported. '
+                       'Use --client-id, --object-id or --resource-id instead.')
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
     if use_cert_sn_issuer and not service_principal:
@@ -152,9 +155,6 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if identity:
         if in_cloud_console():
             return profile.login_in_cloud_shell()
-        if username:
-            from azure.cli.core.breaking_change import print_conditional_breaking_change
-            print_conditional_breaking_change(cmd.cli_ctx, tag='ManagedIdentityUsernameBreakingChange')
         return profile.login_with_managed_identity(
             client_id=client_id, object_id=object_id, resource_id=resource_id,
             allow_no_subscriptions=allow_no_subscriptions)
