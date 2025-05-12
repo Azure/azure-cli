@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2025-02-01"],
         ]
     }
 
@@ -63,7 +63,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.identity_type = AAZStrArg(
-            options=["--identity-type"],
+            options=["--type", "--identity-type"],
             arg_group="Identity",
             help="Type of managed service identity.",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
@@ -127,6 +127,20 @@ class Create(AAZCommand):
             options=["--quota"],
             arg_group="Properties",
             help="The workspace daily quota for ingestion in gigabytes. The minimum value is 0.023 and default is -1 which means unlimited.",
+        )
+
+        # define Arg Group "Replication"
+
+        _args_schema = cls._args_schema
+        _args_schema.replication_enabled = AAZBoolArg(
+            options=["--replication-enabled"],
+            arg_group="Replication",
+            help="Specifies whether the replication is enabled or not. When true, workspace configuration and data is replicated to the specified location. If replication is been enabled, location must be provided.",
+        )
+        _args_schema.replication_location = AAZStrArg(
+            options=["--replication-location"],
+            arg_group="Replication",
+            help="The location of the replication.",
         )
 
         # define Arg Group "Sku"
@@ -228,7 +242,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -253,7 +267,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType)
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -271,9 +285,15 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("publicNetworkAccessForIngestion", AAZStrType, ".ingestion_access")
                 properties.set_prop("publicNetworkAccessForQuery", AAZStrType, ".query_access")
+                properties.set_prop("replication", AAZObjectType)
                 properties.set_prop("retentionInDays", AAZIntType, ".retention_time", typ_kwargs={"nullable": True})
                 properties.set_prop("sku", AAZObjectType)
                 properties.set_prop("workspaceCapping", AAZObjectType)
+
+            replication = _builder.get(".properties.replication")
+            if replication is not None:
+                replication.set_prop("enabled", AAZBoolType, ".replication_enabled")
+                replication.set_prop("location", AAZStrType, ".replication_location")
 
             sku = _builder.get(".properties.sku")
             if sku is not None:
@@ -312,7 +332,7 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.identity = AAZObjectType()
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
@@ -372,7 +392,8 @@ class Create(AAZCommand):
             properties.default_data_collection_rule_resource_id = AAZStrType(
                 serialized_name="defaultDataCollectionRuleResourceId",
             )
-            properties.features = AAZObjectType()
+            properties.failover = AAZObjectType()
+            properties.features = AAZFreeFormDictType()
             properties.force_cmk_for_query = AAZBoolType(
                 serialized_name="forceCmkForQuery",
             )
@@ -394,6 +415,7 @@ class Create(AAZCommand):
             properties.public_network_access_for_query = AAZStrType(
                 serialized_name="publicNetworkAccessForQuery",
             )
+            properties.replication = AAZObjectType()
             properties.retention_in_days = AAZIntType(
                 serialized_name="retentionInDays",
                 nullable=True,
@@ -403,30 +425,12 @@ class Create(AAZCommand):
                 serialized_name="workspaceCapping",
             )
 
-            features = cls._schema_on_200_201.properties.features
-            features.cluster_resource_id = AAZStrType(
-                serialized_name="clusterResourceId",
-                nullable=True,
+            failover = cls._schema_on_200_201.properties.failover
+            failover.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
             )
-            features.disable_local_auth = AAZBoolType(
-                serialized_name="disableLocalAuth",
-                nullable=True,
-            )
-            features.enable_data_export = AAZBoolType(
-                serialized_name="enableDataExport",
-                nullable=True,
-            )
-            features.enable_log_access_using_only_resource_permissions = AAZBoolType(
-                serialized_name="enableLogAccessUsingOnlyResourcePermissions",
-                nullable=True,
-            )
-            features.immediate_purge_data_on30_days = AAZBoolType(
-                serialized_name="immediatePurgeDataOn30Days",
-                nullable=True,
-            )
-            features.unified_sentinel_billing_only = AAZBoolType(
-                serialized_name="unifiedSentinelBillingOnly",
-                nullable=True,
+            failover.state = AAZStrType(
                 flags={"read_only": True},
             )
 
@@ -439,6 +443,22 @@ class Create(AAZCommand):
             )
             _element.scope_id = AAZStrType(
                 serialized_name="scopeId",
+            )
+
+            replication = cls._schema_on_200_201.properties.replication
+            replication.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            replication.enabled = AAZBoolType()
+            replication.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            replication.location = AAZStrType()
+            replication.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
             )
 
             sku = cls._schema_on_200_201.properties.sku

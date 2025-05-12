@@ -1371,6 +1371,27 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         result = self.cmd('keyvault key random --count 1 --id {hsm_url}').get_output_in_json()
         self.assertIsNotNone(result['value'])
 
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_key_attestation')
+    @ManagedHSMPreparer(name_prefix='clitesthsmkeyats', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
+    def test_keyvault_hsm_key_attestation(self, resource_group, managed_hsm):
+        self.kwargs.update({
+            'hsm_name': managed_hsm,
+            'hsm_url': 'https://{}.managedhsm.azure.net'.format(managed_hsm),
+            'key': self.create_random_name('key1-', 24)
+        })
+
+        # create a key
+        hsm_key = self.cmd('keyvault key create --hsm-name {hsm_name} -n {key}').get_output_in_json()
+        self.kwargs['hsm_kid'] = hsm_key['key']['kid']
+        self.assertNotIn('attestation', hsm_key['attributes'])
+
+        # get key's attestation
+        key_attestation = self.cmd('keyvault key get-attestation --hsm-name {hsm_name} --name {key}').get_output_in_json()
+        self.assertIn('publicKeyAttestation', key_attestation)
+        self.assertIn('privateKeyAttestation', key_attestation)
+
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_key')
     @ManagedHSMPreparer(name_prefix='clitesthsmkey', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])

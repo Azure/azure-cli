@@ -288,7 +288,7 @@ def load_arguments(self, _):
     # keys track2
     for scope in ['create', 'import', 'set-attributes', 'show', 'show-deleted', 'delete', 'list', 'list-deleted',
                   'list-versions', 'encrypt', 'decrypt', 'sign', 'verify', 'recover', 'purge', 'download',
-                  'backup', 'restore', 'rotate', 'rotation-policy show', 'rotation-policy update']:
+                  'backup', 'restore', 'rotate', 'get-attestation', 'rotation-policy show', 'rotation-policy update']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
                        required=False, completer=get_keyvault_name_completion_list('key'),
@@ -314,6 +314,13 @@ def load_arguments(self, _):
             c.extra('identifier', options_list=['--id'], arg_group='Id',
                     help='The recovery id of the key. If specified all other \'Id\' arguments should be omitted.',
                     validator=validate_keyvault_resource_id('key'))
+
+    with self.argument_context('keyvault key get-attestation') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help="File to receive the key's attestation if you want to save it.")
+        c.extra('hsm_name', data_plane_hsm_name_type, required=False, arg_group='Id',
+                help='Name of the HSM. Required if --id is not specified.')
+        c.ignore('vault_base_url')
 
     with self.argument_context('keyvault key list') as c:
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,

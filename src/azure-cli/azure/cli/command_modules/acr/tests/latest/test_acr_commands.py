@@ -512,6 +512,8 @@ class AcrCommandsTests(ScenarioTest):
     @live_only()
     @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
+        user = self.cmd('ad signed-in-user show').get_output_in_json()
+        scope = '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
         self.kwargs.update({
             'key_vault': key_vault,
             'key_name': self.create_random_name('testkey', 20),
@@ -519,7 +521,17 @@ class AcrCommandsTests(ScenarioTest):
             'identity_name': self.create_random_name('testidentity', 20),
             'identity_permissions': "get unwrapkey wrapkey",
             'registry_name': self.create_random_name('testreg', 20),
+            'user_id': user['id'],
+            'scope': scope,
         })
+
+        # Assign "Key Vault Contributor" role to the user identity
+        self.cmd('role assignment create --role "Key Vault Administrator" --assignee {user_id} --scope {scope}',
+                 checks=[self.check('scope', '{scope}')])
+        
+        # Wait for the role assignment to propagate
+        time.sleep(15)
+
         # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
         self.kwargs['key_id'] = result.get_output_in_json()['key']['kid']
