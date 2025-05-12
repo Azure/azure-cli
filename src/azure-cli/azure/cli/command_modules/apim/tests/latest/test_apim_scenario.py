@@ -659,7 +659,7 @@ class ApimScenarioTest(ScenarioTest):
                     '--specification-path {policy_specification_path} '
                     '--policy-format {policy_specification_format}')
 
-        self.cmd('apim api wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --exists', checks=[self.is_empty()])
+        self.cmd('apim api policy wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --policy-id policy --exists', checks=[self.is_empty()])
 
         # Verify policies were updated
         current_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
@@ -697,7 +697,7 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim api policy delete -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name} --yes')
 
         #wait
-        self.cmd('apim api wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --deleted', checks=[self.is_empty()])
+        self.cmd('apim api policy wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --policy-id policy --deleted', checks=[self.is_empty()])
 
         # Verify policies are deleted
         final_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
