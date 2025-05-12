@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Commit(AAZCommand):
     """Trigger commit migration for the virtual network gateway.
+
+    :example: Commit a gateway migration.
+        az network vnet-gateway migration commit -g rg -n gateway
     """
 
     _aaz_info = {

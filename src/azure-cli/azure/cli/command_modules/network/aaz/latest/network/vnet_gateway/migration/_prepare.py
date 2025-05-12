@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Prepare(AAZCommand):
     """Trigger prepare migration for the virtual network gateway.
+
+    :example: Prepare a gateway migration.
+        az network vnet-gateway migration prepare -g rg -n gateway --migration-type UpgradeDeploymentToStandardIP --resource-url testUrl
     """
 
     _aaz_info = {

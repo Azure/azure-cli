@@ -5520,13 +5520,32 @@ class NetworkVnetGatewayMigration(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --subnet-name GatewaySubnet --subnet-prefix 10.0.0.0/24')
         self.cmd('network public-ip create -g {rg} -n {pub_ip} --sku Basic')
         self.cmd('network vnet-gateway create -g {rg} -n {gw} --sku VpnGw1 --vpn-gateway-generation Generation1 '
-                 '--vnet {vnet} --public-ip-address {pub_ip} --vpn-type RouteBased', checks=[
-                    #  self.check('foo', 'bar'),
-                 ])
+                 '--vnet {vnet} --public-ip-address {pub_ip} --vpn-type RouteBased', 
+                 checks=[
+                    self.check('virtualNetworkGatewayMigrationStatus.state', None),
+                    self.check('virtualNetworkGatewayMigrationStatus.phase', None)
+        ])
 
+        # prepare migration
         self.cmd('network vnet-gateway migration prepare -g {rg} -n {gw} --migration-type UpgradeDeploymentToStandardIP')
+        self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
+            self.check('virtualNetworkGatewayMigrationStatus.state', 'InProgress'),
+            self.check('virtualNetworkGatewayMigrationStatus.phase', 'PrepareSucceeded')
+        ])
+
+        # execute migration
         self.cmd('network vnet-gateway migration execute -g {rg} -n {gw}')
+        self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
+            self.check('virtualNetworkGatewayMigrationStatus.state', 'InProgress'),
+            self.check('virtualNetworkGatewayMigrationStatus.phase', 'ExecuteSucceeded')
+        ])
+
+        # commit migration
         self.cmd('network vnet-gateway migration commit -g {rg} -n {gw}')
+        self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
+            self.check('virtualNetworkGatewayMigrationStatus.state', 'Succeeded'),
+            self.check('virtualNetworkGatewayMigrationStatus.phase', 'CommitSucceeded')
+        ])
 
 
 class NetworkVnetGatewayMultiAuth(ScenarioTest):
