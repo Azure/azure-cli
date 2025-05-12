@@ -112,7 +112,7 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update', getter_name='get', supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('apim api policy', api_policy_sdk) as g:
+    with self.command_group('apim policy', api_policy_sdk) as g:
         g.custom_show_command('show', 'apim_api_policy_show')
         g.custom_command('set', 'apim_api_policy_set', supports_no_wait=True)
         g.custom_command('delete', 'apim_api_policy_delete', confirmation=True, supports_no_wait=True)
