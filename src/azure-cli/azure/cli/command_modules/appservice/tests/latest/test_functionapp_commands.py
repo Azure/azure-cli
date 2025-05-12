@@ -853,8 +853,42 @@ class FunctionAppFlex(LiveScenarioTest):
                                .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
 
         server_farm_id =functionapp['properties']['serverFarmId']
-        function_plan = self.cmd('az functionapp plan show --ids {}'
+        function_plan = self.cmd('functionapp plan show --ids {}'
                                .format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == False) 
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_plan_enable_zone_redundant(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id = functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == False) 
+        updated_plan = self.cmd('functionapp plan update --id {} --set zoneRedundant=true'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(updated_plan['zoneRedundant'] == True)
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == True) 
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_plan_disable_zone_redundant(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11 --zone-redundant'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id = functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == True) 
+        updated_plan = self.cmd('functionapp plan update --id {} --set zoneRedundant=false'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(updated_plan['zoneRedundant'] == False)
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
         self.assertTrue(function_plan['zoneRedundant'] == False) 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
@@ -1482,7 +1516,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 18'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 22'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1494,7 +1528,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~18')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~22')])
 
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
@@ -1810,7 +1844,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node --runtime-version 18'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node --runtime-version 22'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -1822,7 +1856,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')])
+            JMESPathCheck('linuxFxVersion', 'Node|22')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()

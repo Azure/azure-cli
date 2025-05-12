@@ -360,6 +360,10 @@ def validate_pod_subnet_id(namespace):
     _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
 
 
+def validate_apiserver_subnet_id(namespace):
+    _validate_subnet_id(namespace.apiserver_subnet_id, "--apiserver-subnet-id")
+
+
 def _validate_subnet_id(subnet_id, name):
     if subnet_id is None or subnet_id == '':
         return
