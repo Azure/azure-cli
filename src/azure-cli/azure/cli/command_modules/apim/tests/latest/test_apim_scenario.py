@@ -346,12 +346,6 @@ class ApimScenarioTest(ScenarioTest):
             self.cmd('apim api release list -g "{rg}" -n "{service_name}" --api-id "{api_id}"').get_output_in_json())
         self.assertEqual(final_release_count, initial_release_count)
 
-        # API policy operations
-
-        # get API policy
-        #self.cmd('apim api policy show -g {rg} --service-name {service_name} --api-id {api_id}',
-             #checks=[self.check('policyContentFormat', 'xml')])
-
         # product Apis operations
 
         # list APIs in a product
@@ -580,13 +574,133 @@ class ApimScenarioTest(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
-    @StorageAccountPreparer(parameter_name='storage_account_for_backup')
+    @AllowLargeResponse()
+    def test_apim_policy_operations(self, resource_group, resource_group_location):
+        service_name = self.create_random_name('cli-test-apim-policy-operations-', 50)
+
+        # try to use the injected location, but if the location is not known
+        # fall back to west us, otherwise we can't validate since the sdk returns displayName
+        if resource_group_location not in KNOWN_LOCS.keys():
+            resource_group_location = 'westus'
+
+        policyFile = 'api_policy.xml'
+        policypath = os.path.join(TEST_DIR, policyFile)
+
+        self.kwargs.update({
+            'service_name': service_name,
+            'rg': resource_group,
+            'rg_loc': resource_group_location,
+            'rg_loc_displayName': KNOWN_LOCS.get(resource_group_location),
+            'notification_sender_email': 'notifications@contoso.com',
+            'publisher_email': 'publisher@contoso.com',
+            'publisher_name': 'Contoso',
+            'sku_name': 'Consumption',
+            'policy_name': 'policy',
+            'skucapacity': 1,
+            'enable_managed_identity': True,
+            'tag': "foo=boo",
+            'path': 'test',
+            'api_id': '48242ec7f53745de9cbb800757a4204a',
+            'api_version': 'v1',
+            'specification_url': 'https://raw.githubusercontent.com/OAI/learn.openapis.org/refs/heads/main/examples/v3.0/petstore.json',
+            'specification_format': 'OpenApi',
+            'policy_specification_path': policypath,
+            'policy_specification_format': 'xml',
+            'vs_id': 'MyVSId',
+            'subscription_key_header_name': 'header',
+            'subscription_key_query_param_name': 'query'  
+        })
+
+        # Create service
+        self.cmd('apim check-name -n {service_name} -o json',
+                 checks=[self.check('nameAvailable', True)])
+
+        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-managed-identity {enable_managed_identity}',
+                 checks=[self.check('name', '{service_name}'),
+                         self.check('location', '{rg_loc_displayName}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'SystemAssigned'),
+                         self.check('publisherName', '{publisher_name}'),
+                         self.check('publisherEmail', '{publisher_email}')])
+
+
+        # import api
+        self.cmd('apim api import -g "{rg}" --service-name "{service_name}" --path "{path}" --api-id "{api_id}" --specification-url "{specification_url}" --specification-format "{specification_format}" --display-name "Swagger Petstore"',
+            checks=[self.check('displayName', 'Swagger Petstore'),
+                    self.check('path', '{path}')])
+
+        operations = self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"').get_output_in_json()
+
+        self.assertGreater(len(operations), 0)
+        operation_name = operations[0]['name']
+        self.assertNotEqual(operation_name, None)
+
+        self.kwargs['operation_name'] = operation_name
+
+        # Verify initial policy lists (global, API, and operation levels)
+        initial_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
+        initial_policy_api = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
+        initial_policy_operation = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
+
+        # Set policies at different scopes
+        self.cmd('apim api policy set -g {rg} -n {service_name} '
+                    '--specification-path {policy_specification_path} '
+                    '--policy-format {policy_specification_format}')
+        
+        self.cmd('apim api policy set -g {rg} -n {service_name} '
+                    '--api-id {api_id} '
+                    '--specification-path {policy_specification_path} '
+                    '--policy-format {policy_specification_format}')
+        
+        self.cmd('apim api policy set -g {rg} -n {service_name} '
+                    '--api-id {api_id} '
+                    '--operation-id {operation_name} '
+                    '--specification-path {policy_specification_path} '
+                    '--policy-format {policy_specification_format}')
+
+        # Verify policies were updated
+        current_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
+        current_policy_api = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
+        current_policy_operation = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
+
+        # Ensure policies are different after update
+        self.assertNotEqual(initial_policy_global['value'], current_policy_global['value'], 
+                            "Global policy should have changed")
+        self.assertNotEqual(initial_policy_api['value'], current_policy_api['value'], 
+                            "API policy should have changed")
+        self.assertNotEqual(initial_policy_operation['value'], current_policy_operation['value'], 
+                            "Operation policy should have changed")
+
+        # Verify policy show commands
+        self.cmd('apim api policy show -g {rg} -n {service_name}', 
+                    checks=[self.check('format', '{policy_specification_format}')])
+        self.cmd('apim api policy show -g {rg} -n {service_name} --api-id {api_id}', 
+                    checks=[self.check('format', '{policy_specification_format}')])
+        self.cmd('apim api policy show -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}', 
+                    checks=[self.check('format', '{policy_specification_format}')])
+
+        # Delete policies
+        self.cmd('apim api policy delete -g {rg} -n {service_name} --yes')
+        self.cmd('apim api policy delete -g {rg} -n {service_name} --api-id {api_id} --yes')
+        self.cmd('apim api policy delete -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name} --yes')
+
+        # Verify policies are deleted
+        final_policy_global = self.cmd('apim api policy list -g {rg} -n {service_name}').get_output_in_json()
+        final_policy_api = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id}').get_output_in_json()
+        final_policy_operation = self.cmd('apim api policy list -g {rg} -n {service_name} --api-id {api_id} --operation-id {operation_name}').get_output_in_json()
+
+        self.assertEqual(final_policy_global.get('count', 0), 0, "Global policy should be deleted")
+        self.assertEqual(final_policy_api.get('count', 0), 0, "API policy should be deleted")
+        self.assertEqual(final_policy_operation.get('count', 0), 0, "Operation policy should be deleted") 
+
+        # service delete command
+        self.cmd('apim delete -g {rg} -n {service_name} -y')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location') 
     @AllowLargeResponse()
     def test_apim_export_api(self, resource_group, resource_group_location):
         service_name = self.create_random_name('cli-test-apim-export-api-', 50)
-
-        service_name = self.create_random_name('cli-test-apim-service-', 35)
-        resource_group = self.create_random_name('cli-test-apim-service-rg', 35)
 
         # try to use the injected location, but if the location is not known
         # fall back to west us, otherwise we can't validate since the sdk returns displayName
@@ -608,14 +722,12 @@ class ApimScenarioTest(ScenarioTest):
             'path': 'test',
             'api_id': '48242ec7f53745de9cbb800757a4204a',
             'api_version': 'v1',
-            'specification_url': 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.json',
+            'specification_url': 'https://raw.githubusercontent.com/OAI/learn.openapis.org/refs/heads/main/examples/v3.0/petstore.json',
             'specification_format': 'OpenApi',
             'vs_id': 'MyVSId',
             'subscription_key_header_name': 'header',
             'subscription_key_query_param_name': 'query'
         })
-
-        self.cmd('group create -l {rg_loc} -n {rg}')
 
         self.cmd('apim check-name -n {service_name} -o json',
                  checks=[self.check('nameAvailable', True)])
@@ -628,6 +740,7 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('identity.type', 'SystemAssigned'),
                          self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
+
 
         # import api
         self.cmd(
@@ -644,12 +757,10 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim delete -g {rg} -n {service_name} -y')
 
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim_deletedservice-', parameter_name_for_location='resource_group_location')
-    @StorageAccountPreparer(parameter_name='storage_account_for_backup')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
     @AllowLargeResponse()
-    def test_apim_deletedservice(self, resource_group, resource_group_location, storage_account_for_backup):
-        service_name = self.create_random_name('cli-test-apim-deletedservice-', 35)
-        resource_group = self.create_random_name('cli-test-apim-deletedservice-rg', 35)
+    def test_apim_deletedservice(self, resource_group, resource_group_location):
+        service_name = self.create_random_name('cli-test-apim-deletedservice-', 50)
 
         # try to use the injected location, but if the location is not known
         # fall back to west us, otherwise we can't validate since the sdk returns displayName
@@ -670,8 +781,6 @@ class ApimScenarioTest(ScenarioTest):
             'tag': "foo=boo"
         })
 
-        self.cmd('group create -l {rg_loc} -n {rg}')
-
         self.cmd('apim check-name -n {service_name} -o json',
                  checks=[self.check('nameAvailable', True)])
 
@@ -687,8 +796,8 @@ class ApimScenarioTest(ScenarioTest):
         # wait for creation
         self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
 
-        # delete rg and get apim into soft-deleted state
-        self.cmd('group delete -g {rg} -y', checks=[self.is_empty()])
+        # delete service
+        self.cmd('apim delete -g {rg} -n {service_name} -y')
 
         # list deleted service
         # deletedservices = self.cmd('apim deletedservice list').get_output_in_json()

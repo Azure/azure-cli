@@ -715,13 +715,18 @@ def apim_api_policy_show(client, resource_group_name,
         "policy_id": policy_id
     }
 
-    policy = module_context.get(**arguments).value
+    if api_id:
+        arguments["api_id"] = api_id
+    if operation_id:
+        arguments["operation_id"] = operation_id
+
+    policy = module_context.get(**arguments)
 
     if file_path is not None:
         logger.warning("Writing policy to file: %s", file_path)
         try:
             with open(file_path, 'w') as f:
-                f.write(policy)
+                f.write(policy.value)
         except OSError as e:
             logger.warning("Error writing policy to file: %s", e)
 
@@ -751,7 +756,7 @@ def apim_api_policy_get_entity(client, resource_group_name,
 
     module_context = _get_policy_context(client, api_id, operation_id)
 
-    arguments = {
+    arguments= {
         "resource_group_name": resource_group_name,
         "service_name": service_name,
         "policy_id": policy_id

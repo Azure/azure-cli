@@ -113,11 +113,12 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('apim api policy', api_policy_sdk) as g:
-        g.custom_command('show', 'apim_api_policy_show')
+        g.custom_show_command('show', 'apim_api_policy_show')
         g.custom_command('set', 'apim_api_policy_set', supports_no_wait=True)
         g.custom_command('delete', 'apim_api_policy_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('list', 'apim_api_policy_list')
         g.custom_command('get-etag', 'apim_api_policy_get_entity')
+        g.wait_command('wait')
 
     with self.command_group('apim product api', api_sdk) as g:
         g.custom_command('list', 'apim_product_api_list')
