@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Execute(AAZCommand):
     """Trigger execute migration for the virtual network gateway.
+
+    :example: Execute a gateway migration.
+        az network vnet-gateway migration execute -g rg -n gateway
     """
 
     _aaz_info = {

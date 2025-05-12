@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Abort(AAZCommand):
     """Trigger abort migration for the virtual network gateway.
+
+    :example: Abort a gateway migration
+        az network vnet-gateway migration abort -g group -n gateway
     """
 
     _aaz_info = {
