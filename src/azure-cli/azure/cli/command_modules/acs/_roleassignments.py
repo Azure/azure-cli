@@ -307,10 +307,10 @@ def ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity
             "Could not grant Managed Identity Operator permission to cluster identity at scope {}".format(scope)
         )
 
-def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False,
-                                   is_service_principal=True, assignee_principal_type=None):
-    
-    
+
+def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False, is_service_principal=True,
+                                   assignee_principal_type=None):
+
     if detach:
         if not delete_role_assignments(
             cmd.cli_ctx, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal
@@ -323,9 +323,11 @@ def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False,
         raise AzCLIError("Could not create a role assignment for ACR. Are you an Owner on this subscription?")
     return
 
+
 # pylint: disable=unused-argument
 def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False,
                    is_service_principal=True, assignee_principal_type=None):
+
     from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
     # Check if the ACR exists by resource ID.

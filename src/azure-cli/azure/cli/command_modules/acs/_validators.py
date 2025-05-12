@@ -351,7 +351,8 @@ def validate_acr(namespace):
                 raise CLIError(
                     f"Invalid value for --assignee_principal_type. "
                     f"Allowed values are: {', '.join(valid_types)}"
-)
+                )
+
 
 def validate_nodepool_tags(ns):
     """ Extracts multiple space-separated tags in key[=value] format """
