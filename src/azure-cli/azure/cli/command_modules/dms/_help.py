@@ -339,7 +339,7 @@ parameters:
             // Optional. If true, all users/grants will be migrated.
             "migrate_user_system_tables": "true|false",
             // Binlog position to start the migration from. Only applicable for the ReplicateChanges migration.
-            "binLogInfo": {
+            "binlog_info": {
                 "filename": "binlog.0004523",
                 "position": 283287
             }
@@ -376,7 +376,9 @@ parameters:
             "userName": "user name",    // if this is missing or null, you will be prompted
             "password": null,           // if this is missing or null (highly recommended) you will be prompted
             "serverName": "server name",
-            "port": 3306                // if this is missing, it will default to 3306
+            "port": 3306,               // if this is missing, it will default to 3306
+            "encryptConnection": true,  // highly recommended to leave as true
+            "trustServerCertificate": false  // highly recommended to leave as false
         }
   - name: --target-connection-json
     type: string
