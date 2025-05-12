@@ -92,7 +92,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_linux_host_name, validate_load_balancer_idle_timeout,
     validate_load_balancer_outbound_ip_prefixes,
     validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
-    validate_load_balancer_sku, validate_max_surge,
+    validate_load_balancer_sku, validate_max_surge, validate_max_unavailable,
     validate_nat_gateway_idle_timeout,
     validate_nat_gateway_managed_outbound_ip_count, validate_network_policy,
     validate_nodepool_id, validate_nodepool_labels, validate_nodepool_name,
@@ -831,6 +831,7 @@ def load_arguments(self, _):
         c.argument('node_osdisk_type', arg_type=get_enum_type(node_os_disk_types))
         c.argument('node_osdisk_size', type=int)
         c.argument('max_surge', validator=validate_max_surge)
+        c.argument("max_unavailable", validator=validate_max_unavailable)
         c.argument('drain_timeout', type=int)
         c.argument('node_soak_duration', type=int)
         c.argument('mode', get_enum_type(node_mode_types))
@@ -871,6 +872,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('node_taints', validator=validate_nodepool_taints)
         c.argument('max_surge', validator=validate_max_surge)
+        c.argument("max_unavailable", validator=validate_max_unavailable)
         c.argument('drain_timeout', type=int)
         c.argument('node_soak_duration', type=int)
         c.argument('mode', get_enum_type(node_mode_types))
@@ -889,6 +891,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
+        c.argument("max_unavailable", validator=validate_max_unavailable)
         c.argument('drain_timeout', type=int)
         c.argument('node_soak_duration', type=int)
         c.argument('snapshot_id', validator=validate_snapshot_id)
