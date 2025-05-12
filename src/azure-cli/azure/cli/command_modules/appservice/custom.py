@@ -3231,6 +3231,9 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-instances',
                                                        number_of_workers, min_val=0, max_val=20)
+    if is_plan_flex(cmd, instance):
+        return update_flex_app_service_plan(instance)
+
     return update_app_service_plan(cmd, instance, sku, number_of_workers)
 
 
@@ -4280,6 +4283,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         linux_auto_updates = [
             s.display_name for s in self.stacks if
             s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
+
+        def is_valid_runtime_name(name):
+            # Accepts names like "node|18-lts", "python|3.11", but not "NODE:lts" or "node"
+            parts = name.split(self.DEFAULT_DELIMETER)
+            return len(parts) == 2 and parts[1] and not parts[1].lower() in ("lts", "default", "stable")
+
+        windows_stacks = [n for n in windows_stacks if is_valid_runtime_name(n)]
+        linux_stacks = [n for n in linux_stacks if is_valid_runtime_name(n)]
+        windows_auto_updates = [n for n in windows_auto_updates if is_valid_runtime_name(n)]
+        linux_auto_updates = [n for n in linux_auto_updates if is_valid_runtime_name(n)]
+
         if delimiter is not None:
             windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
             linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
@@ -4402,7 +4416,35 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting):
-        return runtime_setting is not None and not runtime_setting.is_hidden and not runtime_setting.is_deprecated
+        # Using datetime module imported at the top level
+        if runtime_setting is None or getattr(runtime_setting, 'is_hidden', False):
+            return False
+        if getattr(runtime_setting, 'is_deprecated', False):
+            return False
+        end_of_life = getattr(runtime_setting, 'end_of_life_date', None)
+        if end_of_life:
+            try:
+                if isinstance(end_of_life, str):
+                    try:
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%S.%fZ"
+                        ).replace(tzinfo=datetime.timezone.utc)
+                    except ValueError:
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%SZ"
+                        ).replace(tzinfo=datetime.timezone.utc)
+                else:
+                    # If already a datetime, ensure it's timezone-aware
+                    if end_of_life.tzinfo is None:
+                        end_of_life_dt = end_of_life.replace(tzinfo=datetime.timezone.utc)
+                    else:
+                        end_of_life_dt = end_of_life
+                now_utc = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+                if now_utc >= end_of_life_dt:
+                    return False
+            except (ValueError, AttributeError):
+                pass
+        return True
 
     @classmethod
     def _get_runtime_setting(cls, minor_version, linux, java):
@@ -4983,6 +5025,20 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
+def update_flex_app_service_plan(instance):
+    instance.target_worker_count = None
+    instance.target_worker_size = None
+    instance.is_xenon = None
+    instance.hyper_v = None
+    instance.per_site_scaling = None
+    instance.maximum_elastic_worker_count = None
+    instance.elastic_scale_enabled = None
+    instance.is_spot = None
+    instance.target_worker_size_id = None
+    instance.sku.capacity = None
+    return instance
+
+
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
@@ -5010,6 +5066,14 @@ def is_plan_consumption(cmd, plan_info):
     if isinstance(plan_info, AppServicePlan):
         if isinstance(plan_info.sku, SkuDescription):
             return plan_info.sku.tier.lower() == 'dynamic'
+    return False
+
+
+def is_plan_flex(cmd, plan_info):
+    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier.lower() == 'flexconsumption'
     return False
 
 

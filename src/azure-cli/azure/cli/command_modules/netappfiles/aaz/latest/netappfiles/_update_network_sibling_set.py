@@ -20,13 +20,13 @@ class UpdateNetworkSiblingSet(AAZCommand):
     Update the network features of the specified network sibling set
 
     :example: Update Network sibling set
-        az -l westus2 --network-sibling-set-id {SIBLIING_SET_ID} --subnet-id {SUBNET_ID} --network-sibling-set-state-id {SIBLING_SET_STATE_ID} --network-features Standard
+        az netappfiles update-network-sibling-set -l westus2 --network-sibling-set-id {SIBLIING_SET_ID} --subnet-id {SUBNET_ID} --network-sibling-set-state-id='{SIBLING_SET_STATE_ID}' --network-features Standard
     """
 
     _aaz_info = {
-        "version": "2024-09-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/updatenetworksiblingset", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/updatenetworksiblingset", "2025-01-01"],
         ]
     }
 
@@ -77,7 +77,7 @@ class UpdateNetworkSiblingSet(AAZCommand):
         _args_schema.network_sibling_set_state_id = AAZStrArg(
             options=["--state-id", "--network-sibling-set-state-id"],
             arg_group="Body",
-            help="Network sibling set state Id identifying the current state of the sibling set.",
+            help="Network sibling set state Id identifying the current state of the sibling set. Value can start with a dash, use ='-value'",
             required=True,
         )
         _args_schema.subnet_id = AAZResourceIdArg(
@@ -165,7 +165,7 @@ class UpdateNetworkSiblingSet(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }

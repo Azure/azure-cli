@@ -231,7 +231,7 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
-    api_version = '7.5-preview.1' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
+    api_version = '7.6-preview.2' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return KeyClient(
