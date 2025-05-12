@@ -245,7 +245,7 @@ def find_models_to_change(module_name):
         return [
             importlib.import_module('.'+label+'.models', main_module.__name__)
             for (_, label, ispkg) in pkgutil.iter_modules(main_module.__path__)
-            if ispkg and label != 'aio'
+            if ispkg and label != 'aio' and label != '_utils'
         ]
 
 
@@ -266,7 +266,7 @@ def find_autorest_generated_folder(module_prefix="azure.mgmt"):
         # No model, might dig deeper
         prefix_module = importlib.import_module(module_prefix)
         for _, sub_package, ispkg in pkgutil.iter_modules(prefix_module.__path__, module_prefix+"."):
-            if ispkg and not sub_package.endswith("._utils"):
+            if ispkg:
                 result += find_autorest_generated_folder(sub_package)
     return result
 
