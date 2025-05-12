@@ -317,6 +317,15 @@ examples:
         az apim api policy list -g MyResourceGroup -n MyApim
 """
 
+helps['apim api policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of an apim api is met.
+examples:
+  - name: Place the CLI in a waiting state until a condition of a apim api is met.
+    text: |
+        az apim api policy wait --created --api-id MyApi --policy-id MyPolicy --name MyApim --resource-group MyResourceGroup
+    crafted: true
+"""
 
 helps['apim product api list'] = """
 type: command
