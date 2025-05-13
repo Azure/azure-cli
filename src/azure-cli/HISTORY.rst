@@ -64,7 +64,6 @@ Release History
 
 **NetAppFiles**
 
-* Remove breaking changes properties (#31417)
 * `az volume-group create`: Parameter `--proximity-placement-group` is no longer required (#31254)
 * `az netappfiles account create`: Add new parameter `--federated-client-id` for Cross Tennant CMK (#31254)
 * `az netappfiles account create`: Add new parameter `--nfs-v4-id-domain`. Domain for NFSv4 user ID mapping (#31254)
