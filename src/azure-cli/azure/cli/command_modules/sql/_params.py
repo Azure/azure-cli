@@ -1850,8 +1850,8 @@ def load_arguments(self, _):
                    help='The federated client id used in cross tenant CMK scenario.')
 
         c.argument('retention_days',
-                   options_list=['--retention-days-soft-delete', '--rd'],
-                   help='The number of days (from 0 to 7 inclusive) that your server will be'
+                   options_list=['--retention-days-soft-delete'],
+                   help='The number of days (from 0 to 35 inclusive) that your server will be'
                    'recoverable after initial deletion.',
                    is_preview=True)
 
@@ -1897,9 +1897,9 @@ def load_arguments(self, _):
                    help='User, Group or Application')
 
         c.argument('retention_days',
-                   options_list=['--retention-days', '--rd'],
+                   options_list=['--retention-days'],
                    required=False,
-                   help='The number of days (from 0 to 7 inclusive) that your server will be'
+                   help='The number of days (from 0 to 35 inclusive) that your server will be'
                    'recoverable after initial deletion.')
         c.argument('create_mode',
                    options_list=['--create-mode', '--cm'],
@@ -1911,9 +1911,9 @@ def load_arguments(self, _):
                    help='The administrator login password.')
 
         c.argument('retention_days',
-                   options_list=['--retention-days', '--rd'],
+                   options_list=['--retention-days'],
                    required=False,
-                   help='The number of days (from 0 to 7 inclusive) that your server will be'
+                   help='The number of days (from 0 to 35 inclusive) that your server will be'
                    'recoverable after initial deletion.')
 
     with self.argument_context('sql server show') as c:
