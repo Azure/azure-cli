@@ -80,7 +80,7 @@ Release History
 **Packaging**
 
 * Bump Python to 3.12 on RHEL and CentOS Stream (#31264)
-* Drop Ubuntu 20.04 support (#31208)
+* [BREAKING CHANGE] Drop Ubuntu 20.04 support (#31208)
 
 **Profile**
 
