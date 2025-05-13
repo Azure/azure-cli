@@ -70,7 +70,7 @@ Release History
 * `az netappfiles account update`: Add new parameter `--federated-client-id` for Cross Tennant CMK (#31254)
 * `az netappfiles account update`: Add new parameter `--nfs-v4-id-domain`. Domain for NFSv4 user ID mapping (#31254)
 * `az netappfiles usage list`: Add new command to list current subscription usages (#31254)
-* `az netappfiles usage show`: Add new command to list current subscription usages (#31254)
+* `az netappfiles usage show`: Add new command to show current subscription usages (#31254)
 
 **Network**
 
