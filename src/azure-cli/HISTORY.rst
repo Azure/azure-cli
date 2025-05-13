@@ -35,10 +35,6 @@ Release History
 
 * [BREAKING CHANGE] `az backup protection enable-for-vm`: Support for protecting TVM with standard policy (#31410)
 
-**BREAKING CHANGE**
-
-* `az role assignment list`: Drop `--include-classic-administrators` argument (#29470)
-
 **Cloud**
 
 * [BREAKING CHANGE] `az cloud register/update`: No `gallery` endpoint returned if use endpoint discovery with `--endpoint-resource-manager` (#30682)
