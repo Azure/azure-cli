@@ -16,7 +16,6 @@ Release History
 * `az acr build`: Add a new optional parameter `--source-acr-auth-id` to specify the identity used for authentication with the source registry (#31069)
 * `az acr run`: Add a new optional parameter `--source-acr-auth-id` to specify the identity used for authentication with the source registry (#31069)
 * `az acr create`: Remove preview flag from `--allow-trusted-services` (#31372)
-* `az acr connected-registry`: Update api version of connected registry to 2025-04-01 (#31382)
 
 **AKS**
 
