@@ -9,7 +9,7 @@ Release History
 **ACR**
 
 * `az acr connected-registry create/update`: Add new parameter `--gc-enabled` which enables or disables garbage collection on a connected registry (#30956)
-* `az acr connected-registry create/update`: Added new parameter `--gc-schedule` which uses cron expression to set a collection interval. (#30956)
+* `az acr connected-registry create/update`: Add new parameter `--gc-schedule` which uses cron expression to set a collection interval (#30956)
 * `az acr create/update`: Add a new optional parameter `--role-assignment-mode` to specify the role assignment mode for new or existing registries. This parameter allows customers to enable or disable Attribute-Based Access Control (ABAC) (#31065)
 * `az acr check-health`: Add a new optional parameter `--repository` to check read, write, and delete permissions for a specific repository (#31065)
 * `az acr task create/update`: Add a new optional parameter `--source-acr-auth-id` to specify the managed identity used for authentication with the source registry (#31069)
