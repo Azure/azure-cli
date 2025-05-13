@@ -7181,7 +7181,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         assignee_object_id = _get_test_sp_object_id(sp_name)
         role_assignment_check_cmd = (
             "role assignment list --scope {acr_scope} --assignee " +
-            assignee_object_id if assignee_object_id else sp_name
+            assignee_object_id if assignee_object_id else "role assignment list --scope {acr_scope} --assignee " + sp_name
         )
 
         # attach acr
@@ -7205,7 +7205,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # check role assignment with principal type
         role_assignment_with_principal_check_cmd = (
         "role assignment list --scope {acr_scope} --assignee " +
-        assignee_object_id if assignee_object_id else sp_name
+        assignee_object_id if assignee_object_id else "role assignment list --scope {acr_scope} --assignee " + sp_name
         )
         self.cmd(role_assignment_with_principal_check_cmd, checks=[
             self.check('length(@) == `1`', True),
