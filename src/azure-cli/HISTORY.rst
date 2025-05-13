@@ -45,9 +45,9 @@ Release History
 * [BREAKING CHANGE] `az sig image-definition list-community/list-shared`: Replace pagination parameters with new parameters `--max-items` and `--next-token` (#31317)
 * [BREAKING CHANGE] `az sig image-version list-community/list-shared`: Replace pagination parameters with new parameters `--max-items` and `--next-token` (#31317)
 * `az vm/vmss create`: Fix missing auxiliary tokens (#31287)
-* `az vmss create/update`: Add new parameters `--enable-automatic-zone-balancing` to support setting automatic zone rebalancing policy (#31377)
-* `az vmss create/update`: Add new parameters `--automatic-zone-balancing-strategy` to support setting automatic zone rebalancing policy (#31377)
-* `az vmss create/update`: Add new parameters `--automatic-zone-balancing-behavior` to support setting automatic zone rebalancing policy (#31377)
+* `az vmss create/update`: Add new parameter `--enable-automatic-zone-balancing` to support setting automatic zone rebalancing policy (#31377)
+* `az vmss create/update`: Add new parameter `--automatic-zone-balancing-strategy` to support setting automatic zone rebalancing policy (#31377)
+* `az vmss create/update`: Add new parameter `--automatic-zone-balancing-behavior` to support setting automatic zone rebalancing policy (#31377)
 * `az vmss create/update`: Add new parameter `--skuprofile-rank` to specify a list of ranks to use with VMSS instance mix SKU profile VM sizes (#31255)
 
 **DMS**
