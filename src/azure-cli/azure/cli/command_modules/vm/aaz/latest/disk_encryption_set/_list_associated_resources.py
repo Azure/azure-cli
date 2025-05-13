@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class ListAssociatedResources(AAZCommand):
     """List all resources that are encrypted with this disk encryption set.
+
+    :example: List all resources that are encrypted with a disk encryption set.
+        az disk-encryption-set list-associated-resources --resource-group myResourceGroup --disk-encryption-set-name myDiskEncryptionSet
     """
 
     _aaz_info = {

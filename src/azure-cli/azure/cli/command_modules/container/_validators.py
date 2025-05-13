@@ -69,7 +69,7 @@ def validate_msi(namespace):
 
 
 def validate_subnet(ns):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
 
     # vnet_name is depricated, using for backwards compatability
     if ns.vnet_name and not ns.vnet:

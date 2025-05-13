@@ -1,0 +1,80 @@
+---
+# exclusions for the batch module
+
+batch job create:
+  parameters:
+    job_manager_task_application_package_references:
+      rule_exclusions:
+        - option_length_too_long
+    job_manager_task_environment_settings:
+      rule_exclusions:
+        - option_length_too_long
+
+batch job-schedule create:
+  parameters:
+    job_manager_task_application_package_references:
+      rule_exclusions:
+        - option_length_too_long
+    job_manager_task_environment_settings:
+      rule_exclusions:
+        - option_length_too_long
+
+batch job-schedule reset:
+  parameters:
+    job_max_task_retry_count:
+      rule_exclusions:
+        - option_length_too_long
+    job_max_wall_clock_time:
+      rule_exclusions:
+        - option_length_too_long
+
+batch job-schedule set:
+  parameters:
+    job_max_task_retry_count:
+      rule_exclusions:
+        - option_length_too_long
+    job_max_wall_clock_time:
+      rule_exclusions:
+        - option_length_too_long
+
+batch pool create:
+  parameters:
+    enable_cross_zone_upgrade:
+      rule_exclusions:
+        - option_length_too_long
+    max_batch_instance_percent:
+      rule_exclusions:
+        - option_length_too_long
+    max_unhealthy_instance_percent:
+      rule_exclusions:
+        - option_length_too_long
+    max_unhealthy_upgraded_instance_percent:
+      rule_exclusions:
+        - option_length_too_long
+    os_rolling_upgrade_deferral:
+      rule_exclusions:
+        - option_length_too_long
+    pause_time_between_batches:
+      rule_exclusions:
+        - option_length_too_long
+    prioritize_unhealthy_instances:
+      rule_exclusions:
+        - option_length_too_long
+    rollback_failed_instances_on_policy_breach:
+      rule_exclusions:
+        - option_length_too_long
+    start_task_environment_settings:
+      rule_exclusions:
+        - option_length_too_long
+    start_task_max_task_retry_count:
+      rule_exclusions:
+        - option_length_too_long
+    use_rolling_upgrade_policy:
+      rule_exclusions:
+        - option_length_too_long
+
+batch pool reset:
+  parameters:
+    start_task_resource_files:
+      rule_exclusions:
+        - option_length_too_long

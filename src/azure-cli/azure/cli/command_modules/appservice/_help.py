@@ -52,13 +52,13 @@ examples:
   - name: Create a Windows container app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --hyper-v --sku P1V3
-  - name: Create an app service plan for app service environment.
+  - name: Create an app service plan for App Service Environment.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment MyAppServiceEnvironment --sku I1
-  - name: Create an app service plan for app service environment in different subscription.
+        az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment MyAppServiceEnvironment --sku I1v2
+  - name: Create an app service plan for App Service Environment in different subscription.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Web/hostingEnvironments/test-ase' --sku I1V2
-  - name: Create an app service plan for app service environment in different subscription and the resource group in different region than app service environment.
+  - name: Create an app service plan for App Service Environment in different subscription and the resource group in different region than App Service Environment.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Web/hostingEnvironments/test-ase' --sku I1V2 --location ase-region
 """
@@ -173,6 +173,10 @@ short-summary: Sets if SCM site is using the same restrictions as the main site.
 examples:
   - name: Enable SCM site to use same access restrictions as main site.
     text: az functionapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+  - name: Set default action to Allow for main site.
+    text: az functionapp config access-restriction set -g ResourceGroup -n AppName --default-action Allow
+  - name: Set default action to Deny for scm site.
+    text: az functionapp config access-restriction set -g ResourceGroup -n AppName --scm-default-action Deny
 """
 
 helps['functionapp config access-restriction show'] = """
@@ -380,6 +384,106 @@ examples:
     text: az functionapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
 """
 
+helps['functionapp deployment config'] = """
+type: group
+short-summary: Manage a function app's deployment configuration.
+"""
+
+helps['functionapp deployment config set'] = """
+type: command
+short-summary: Update an existing function app's deployment configuration.
+examples:
+  - name: Set the function app's deployment storage.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-name MyStorageAccount --deployment-storage-container-name MyStorageContainer
+  - name: Set the function app's deployment storage authentication method.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value myAssignedId
+"""
+
+helps['functionapp deployment config show'] = """
+type: command
+short-summary: Get the details of a function app's deployment configuration.
+examples:
+  - name: Get the details of a function app's deployment configuration.
+    text: az functionapp deployment config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp runtime'] = """
+type: group
+short-summary: Manage a function app's runtime.
+"""
+
+helps['functionapp runtime config'] = """
+type: group
+short-summary: Manage a function app's runtime configuration.
+"""
+
+helps['functionapp runtime config set'] = """
+type: command
+short-summary: Update an existing function app's runtime configuration.
+examples:
+  - name: Set the function app's runtime version.
+    text: az functionapp runtime config set --name MyFunctionApp --resource-group MyResourceGroup --runtime-version 3.11
+"""
+
+helps['functionapp runtime config show'] = """
+type: command
+short-summary: Get the details of a function app's runtime configuration.
+examples:
+  - name: Get the details of a function app's runtime configuration.
+    text: az functionapp runtime config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp scale'] = """
+type: group
+short-summary: Manage a function app's scale.
+"""
+
+helps['functionapp scale config'] = """
+type: group
+short-summary: Manage a function app's scale configuration.
+"""
+
+helps['functionapp scale config set'] = """
+type: command
+short-summary: Update an existing function app's scale configuration.
+examples:
+  - name: Set the function app's instance memory configuration.
+    text: az functionapp scale config set --name MyFunctionApp --resource-group MyResourceGroup --instance-memory 2048
+  - name: Set the function app's maximum instance count configuration.
+    text: az functionapp scale config set --name MyFunctionApp --resource-group MyResourceGroup --maximum-instance-count 5
+  - name: Set the function app's trigger configuration.
+    text: az functionapp scale config set --name MyFunctionApp --resource-group MyResourceGroup --trigger-type http --trigger-settings perInstanceConcurrency=1
+"""
+
+helps['functionapp scale config show'] = """
+type: command
+short-summary: Get the details of a function app's scale configuration.
+examples:
+  - name: Get the details of a function app's scale configuration.
+    text: az functionapp scale config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp scale config always-ready'] = """
+type: group
+short-summary: Manage the always-ready settings in the scale configuration.
+"""
+
+helps['functionapp scale config always-ready delete'] = """
+type: command
+short-summary: Delete always-ready settings in the scale configuration.
+examples:
+  - name: Delete always-ready setings in the scale configuration.
+    text: az functionapp scale config always-ready delete --name MyFunctionApp --resource-group MyResourceGroup --setting-names key1 key2
+"""
+
+helps['functionapp scale config always-ready set'] = """
+type: command
+short-summary: Add or update existing always-ready settings in the scale configuration.
+examples:
+  - name: Add or update existing always-ready settings in the scale configuration.
+    text: az functionapp scale config always-ready set --name MyFunctionApp --resource-group MyResourceGroup --settings key1=value1 key2=value2
+"""
+
 helps['functionapp cors'] = """
 type: group
 short-summary: Manage Cross-Origin Resource Sharing (CORS)
@@ -436,11 +540,14 @@ examples:
     text: >
         az functionapp create -g MyResourceGroup  -p MyPlan -n MyUniqueAppName -s MyStorageAccount
   - name: Create a function app. (autogenerated)
-    text: az functionapp create --consumption-plan-location westus --name MyUniqueAppName --os-type Windows --resource-group MyResourceGroup --runtime dotnet --storage-account MyStorageAccount
+    text: az functionapp create --consumption-plan-location westus --name MyUniqueAppName --os-type Windows --resource-group MyResourceGroup --runtime dotnet-isolated --storage-account MyStorageAccount
     crafted: true
   - name: Create a function app using a private ACR image.
     text: >
         az functionapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime node --storage-account MyStorageAccount --deployment-container-image-name myacr.azurecr.io/myimage:tag --docker-registry-server-password passw0rd --docker-registry-server-user MyUser
+  - name: Create a flex consumption function app. See https://aka.ms/flex-http-concurrency for more information on default http concurrency values.
+    text: >
+        az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --runtime java --instance-memory 2048
 """
 
 helps['functionapp delete'] = """
@@ -865,6 +972,16 @@ type: command
 short-summary: List available locations for running function apps.
 """
 
+helps['functionapp list-flexconsumption-locations'] = """
+type: command
+short-summary: List available locations for running function apps on the Flex Consumption plan.
+"""
+
+helps['functionapp list-flexconsumption-runtimes'] = """
+type: command
+short-summary: List available built-in stacks which can be used for function apps on the Flex Consumption plan.
+"""
+
 helps['functionapp plan'] = """
 type: group
 short-summary: Manage App Service Plans for an Azure Function
@@ -1102,10 +1219,14 @@ examples:
 
 helps['webapp config access-restriction set'] = """
 type: command
-short-summary: Sets if SCM site is using the same restrictions as the main site.
+short-summary: Sets if SCM site is using the same restrictions as the main site and default actions.
 examples:
   - name: Enable SCM site to use same access restrictions as main site.
     text: az webapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+  - name: Set default action to Allow for main site.
+    text: az webapp config access-restriction set -g ResourceGroup -n AppName --default-action Allow
+  - name: Set default action to Deny for scm site.
+    text: az webapp config access-restriction set -g ResourceGroup -n AppName --scm-default-action Deny
 """
 
 helps['webapp config access-restriction show'] = """
@@ -1416,10 +1537,12 @@ helps['webapp config ssl import'] = """
 type: command
 short-summary: Import an SSL or App Service Certificate to a web app from Key Vault.
 examples:
-  - name: Import an SSL or App Service Certificate certificate to a web app from Key Vault.
+  - name: Import an SSL or App Service Certificate certificate to a web app from Key Vault. Note that all webapps in the webspace will also be able to use the certificate.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
-  - name: Import an SSL or App Service Certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
+  - name: Import an SSL or App Service Certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription). Note that all webapps in the webspace will also be able to use the certificate.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
+  - name: Import an SSL or App Service Certificate certificate to a webspace from Key Vault. Note that all webapps in the webspace will also be able to use the certificate.
+    text: az webapp config ssl import --resource-group MyResourceGroup --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
 """
 
 helps['webapp config ssl create'] = """
@@ -1432,12 +1555,12 @@ examples:
 
 helps['webapp config storage-account'] = """
 type: group
-short-summary: Manage a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
+short-summary: Manage a web app's Azure storage account configurations.
 """
 
 helps['webapp config storage-account add'] = """
 type: command
-short-summary: Add an Azure storage account configuration to a web app. (Linux Web Apps and Windows Containers Web Apps Only)
+short-summary: Add an Azure storage account configuration to a web app.
 long-summary: Note that storage account access keys are now redacted in the result. Please use the `az webapp config storage-account list` command to view the keys.
 examples:
   - name: Add a connection to the Azure Files file share called MyShare in the storage account named MyStorageAccount.
@@ -1453,26 +1576,26 @@ examples:
 
 helps['webapp config storage-account delete'] = """
 type: command
-short-summary: Delete a web app's Azure storage account configuration. (Linux Web Apps and Windows Containers Web Apps Only)
+short-summary: Delete a web app's Azure storage account configuration.
 long-summary: Note that storage account access keys are now redacted in the result. Please use the `az webapp config storage-account list` command to view the keys.
 examples:
-  - name: Delete a web app's Azure storage account configuration. (Linux Web Apps and Windows Containers Web Apps Only) (autogenerated)
+  - name: Delete a web app's Azure storage account configuration.
     text: az webapp config storage-account delete --custom-id CustomId --name MyWebApp --resource-group MyResourceGroup
     crafted: true
 """
 
 helps['webapp config storage-account list'] = """
 type: command
-short-summary: Get a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
+short-summary: Get a web app's Azure storage account configurations.
 examples:
-  - name: Get a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only) (autogenerated)
+  - name: Get a web app's Azure storage account configurations.
     text: az webapp config storage-account list --name MyWebApp --resource-group MyResourceGroup
     crafted: true
 """
 
 helps['webapp config storage-account update'] = """
 type: command
-short-summary: Update an existing Azure storage account configuration on a web app. (Linux Web Apps and Windows Containers Web Apps Only)
+short-summary: Update an existing Azure storage account configuration on a web app.
 long-summary: Note that storage account access keys are now redacted in the result. Please use the `az webapp config storage-account list` command to view the keys.
 examples:
   - name: Update the mount path for a connection to the Azure Files file share with the ID MyId.
@@ -1480,7 +1603,7 @@ examples:
         az webapp config storage-account update -g MyResourceGroup -n MyUniqueApp \\
           --custom-id CustomId \\
           --mount-path /path/to/new/mount
-  - name: Update an existing Azure storage account configuration on a web app. (Linux Web Apps and Windows Containers Web Apps Only) (autogenerated)
+  - name: Update an existing Azure storage account configuration on a web app.
     text: az webapp config storage-account update --access-key MyAccessKey --account-name MyAccount --custom-id CustomId --mount-path /path/to/new/mount --name MyUniqueApp --resource-group MyResourceGroup --share-name MyShare --storage-type AzureFiles
     crafted: true
 """
@@ -1531,12 +1654,18 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a Java 11 runtime.
+  - name: Create a web app with a Java 21 runtime.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:11"
-  - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "JAVA:21-java21"
+  - name: Create a web app with a NodeJS 20 runtime and deployed from a local git repository.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:12LTS" --deployment-local-git
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:20LTS" --deployment-local-git
+  - name: Create a web app with both SCM and FTP Basic Auth Publishing Credentials disabled.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --basic-auth Disabled
+  - name: Create a web app which supports sitecontainers.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --sitecontainers-app
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
@@ -1550,11 +1679,17 @@ examples:
     text: >
         AppServicePlanID=$(az appservice plan show -n SharedAppServicePlan -g MyASPRG --query "id" --out tsv)
         az webapp create -g MyResourceGroup -p "$AppServicePlanID" -n MyUniqueAppName
+  - name: Create a container webapp with an image pulled from a private Azure Container Registry using a User Assigned Managed Identity
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --container-image-name myregistry.azurecr.io/docker-image:tag --assign-identity MyAssignIdentities --acr-use-identity --acr-identity MyUserAssignedIdentityResourceId
 """
 
 helps['webapp create-remote-connection'] = """
 type: command
 short-summary: Creates a remote connection using a tcp tunnel to your web app
+examples:
+  - name: Create a remote connection using a tcp tunnel to your web app
+    text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup
 """
 
 helps['webapp delete'] = """
@@ -2083,6 +2218,132 @@ examples:
     crafted: true
 """
 
+helps['webapp sitecontainers'] = """
+type: group
+short-summary: Manage linux web apps sitecontainers.
+"""
+
+helps['webapp sitecontainers create'] = """
+type: command
+short-summary: Create sitecontainers for a linux webapp
+long-summary: |
+    Multiple sitecontainers can be added or updated at once by passing arg --sitecontainers-spec-file, which is the path to a json file containing an array of sitecontainer specs.
+    Example json file:
+    [
+    {
+        "name": "firstcontainer",
+        "properties": {
+            "image": "myregistry.io/firstimage:latest",
+            "targetPort": "80",
+            "isMain": true,
+            "environmentVariables": [
+                {
+                    "name": "VARIABLE_1",
+                    "value": "APPSETTING_NAME1"
+                }
+            ],
+            "volumeMounts": [
+                {
+                    "containerMountPath": "mountPath",
+                    "readOnly": true,
+                    "volumeSubPath": "subPath"
+                }
+            ]
+        }
+    },
+    {
+        "name": "secondcontainer",
+        "properties": {
+            "image": "myregistry.io/secondimage:latest",
+            "targetPort": "3000",
+            "isMain": false,
+            "authType": "SystemIdentity",
+            "startUpCommand": "MyStartupCmd"
+        }
+    },
+    {
+        "name": "thirdcontainer",
+        "properties": {
+            "image": "myregistry.io/thirdimage:latest",
+            "targetPort": "3001",
+            "isMain": false,
+            "authType": "UserAssigned",
+            "userManagedIdentityClientId": "ClientID"
+        }
+    },
+    {
+        "name": "fourthcontainer",
+        "properties": {
+            "image": "myregistry.io/fourthimage:latest",
+            "targetPort": "3002",
+            "isMain": false,
+            "authType": "UserCredentials",
+            "userName": "Username",
+            "passwordSecret": "Password"
+        }
+    }
+    ]
+examples:
+  - name: Create a main sitecontainer for a linux webapp
+    text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer --image MyImageRegistry.io/MyImage:latest --target-port 80 --is-main
+  - name : Create or update multiple sitecontainers for a linux webapp using a json sitecontainer-spec file
+    text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --sitecontainers-spec-file ./sitecontainersspec.json
+"""
+
+
+helps['webapp sitecontainers update'] = """
+type: command
+short-summary: Update an existing sitecontainer for a linux webapp
+examples:
+  - name: Update a sitecontainer for a linux webapp
+    text: az webapp sitecontainers update --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer --image MyImageRegistry.io/MyImage:latest --target-port 3000 --is-main false
+"""
+
+
+helps['webapp sitecontainers delete'] = """
+type: command
+short-summary: Delete a sitecontainer for a linux webapp
+examples:
+  - name: Delete a sitecontainer for a linux webapp
+    text: az webapp sitecontainers delete --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+"""
+
+
+helps['webapp sitecontainers show'] = """
+type: command
+short-summary: List the details of a sitecontainer for a linux webapp
+examples:
+  - name: List the details of a sitecontainer for a linux webapp
+    text: az webapp sitecontainers show --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+"""
+
+
+helps['webapp sitecontainers list'] = """
+type: command
+short-summary: List all the sitecontainers for a linux webapp
+examples:
+  - name: List all the sitecontainers for a linux webapp
+    text: az webapp sitecontainers list --name MyWebApp --resource-group MyResourceGroup
+"""
+
+
+helps['webapp sitecontainers status'] = """
+type: command
+short-summary: Get the status of a sitecontainer for a linux webapp
+examples:
+  - name: Get the status of a sitecontainer for a linux webapp
+    text: az webapp sitecontainers status --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+"""
+
+helps['webapp sitecontainers log'] = """
+type: command
+short-summary: Get the logs of a sitecontainer for a linux webapp
+examples:
+  - name: Get the logs of a sitecontainer for a linux webapp
+    text: az webapp sitecontainers log --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+"""
+
+
 helps['webapp up'] = """
 type: command
 short-summary: >
@@ -2092,6 +2353,7 @@ short-summary: >
     Append the html flag to deploy as a static HTML app.
     Each time the command is successfully run, default argument values for resource group, sku, location, plan, and name are saved for the current directory.
     These defaults are then used for any arguments not provided on subsequent runs of the command in the same directory.  Use 'az configure' to manage defaults.
+    Run this command with the --debug parameter to see the API calls and parameters values being used.
 
 examples:
   - name: View the details of the app that will be created, without actually running the operation
@@ -2259,43 +2521,43 @@ short-summary: Manage App Service Environments
 
 helps['appservice ase list'] = """
     type: command
-    short-summary: List app service environments.
+    short-summary: List App Service Environments.
     examples:
-    - name: List all app service environments in subscription.
+    - name: List all App Service Environments in subscription.
       text: az appservice ase list
-    - name: List all app service environment in resource group.
+    - name: List all App Service Environment in resource group.
       text: az appservice ase list --resource-group MyResourceGroup
 """
 
 helps['appservice ase show'] = """
     type: command
-    short-summary: Show details of an app service environment.
+    short-summary: Show details of an App Service Environment.
     examples:
-    - name: Show app service environment.
+    - name: Show App Service Environment.
       text: az appservice ase show --name MyAseName
 """
 
 helps['appservice ase list-addresses'] = """
     type: command
-    short-summary: List VIPs associated with an app service environment v2.
+    short-summary: List IP addresses associated with an App Service Environment.
     examples:
-    - name: List VIPs for an app service environments.
+    - name: List IPs for an App Service Environment.
       text: az appservice ase list-addresses --name MyAseName
 """
 
 helps['appservice ase list-plans'] = """
     type: command
-    short-summary: List app service plans associated with an app service environment.
+    short-summary: List app service plans associated with an App Service Environment.
     examples:
-    - name: List app service plans for an app service environments.
+    - name: List app service plans for an App Service Environments.
       text: az appservice ase list-plans --name MyAseName
 """
 
 helps['appservice ase create'] = """
     type: command
-    short-summary: Create app service environment.
+    short-summary: Create App Service Environment.
     examples:
-    - name: Create resource group, Virtual Network and App Service Environment v3 with default values.
+    - name: Create resource group, Virtual Network and App Service Environment with default values.
       text: |
           az group create -g MyResourceGroup --location westeurope
 
@@ -2303,22 +2565,22 @@ helps['appservice ase create'] = """
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --kind asev3
-    - name: Create external App Service Environments v3 in existing resource group and Virtual Network.
+            --subnet MyAseSubnet
+    - name: Create external App Service Environments in existing resource group and Virtual Network.
       text: |
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --virtual-ip-type External --kind asev3
-    - name: Create Virtual Network and App Service Environment v3 in a smaller than recommended subnet in existing resource group.
+            --subnet MyAseSubnet --virtual-ip-type External
+    - name: Create Virtual Network and App Service Environment in a smaller than recommended subnet in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/26
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
-            --subnet MyAseSubnet --ignore-subnet-size-validation --kind asev3
-    - name: Create external zone redundant App Service Environment v3 with default values.
+            --subnet MyAseSubnet --ignore-subnet-size-validation
+    - name: Create external zone redundant App Service Environment with default values.
       text: |
-          az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
-            --vnet-name MyASEv3VirtualNetwork --subnet MyASEv3Subnet --kind asev3 \\
+          az appservice ase create -n MyASEName -g ASEResourceGroup \\
+            --vnet-name MyASEVirtualNetwork --subnet MyASESubnet \\
             --zone-redundant --virtual-ip-type External
 """
 
@@ -2334,46 +2596,42 @@ helps['appservice ase create-inbound-services'] = """
 
 helps['appservice ase upgrade'] = """
     type: command
-    short-summary: Upgrade app service environment v3.
+    short-summary: Upgrade App Service Environment.
     examples:
-    - name: Upgrade app service environment v3.
+    - name: Upgrade App Service Environment.
       text: |
-          az appservice ase upgrade -n MyAseV3Name -g MyResourceGroup
+          az appservice ase upgrade -n MyAseName -g MyResourceGroup
 """
 
 helps['appservice ase send-test-notification'] = """
     type: command
-    short-summary: Send a test upgrade notification in app service environment v3.
+    short-summary: Send a test upgrade notification in App Service Environment.
     examples:
-    - name: Send a test upgrade notification in app service environment v3.
+    - name: Send a test upgrade notification in App Service Environment.
       text: |
-          az appservice ase send-test-notification -n MyAseV3Name -g MyResourceGroup
+          az appservice ase send-test-notification -n MyAseName -g MyResourceGroup
 """
 
 helps['appservice ase update'] = """
     type: command
-    short-summary: Update app service environment.
+    short-summary: Update App Service Environment.
     examples:
-    - name: Update app service environment v2 with medium front-ends and scale factor of 10.
+    - name: Update App Service Environment to allow new private endpoint connections.
       text: |
-          az appservice ase update -n MyAseV2Name -g MyResourceGroup --front-end-sku I2 \\
-            --front-end-scale-factor 10
-    - name: Update app service environment v3 to allow new private endpoint connections.
+          az appservice ase update -n MyAseName -g MyResourceGroup --allow-new-private-endpoint-connections
+    - name: Update App Service Environment to allow incoming ftp connections.
       text: |
-          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-new-private-endpoint-connections
-    - name: Update app service environment v3 to allow incoming ftp connections.
+          az appservice ase update -n MyAseName -g MyResourceGroup --allow-incoming-ftp-connections
+    - name: Update App Service Environment to allow remote debugging.
       text: |
-          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-incoming-ftp-connections
-    - name: Update app service environment v3 to allow remote debugging.
-      text: |
-          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-remote-debugging
+          az appservice ase update -n MyAseName -g MyResourceGroup --allow-remote-debugging
 """
 
 helps['appservice ase delete'] = """
     type: command
-    short-summary: Delete app service environment.
+    short-summary: Delete App Service Environment.
     examples:
-    - name: Delete app service environment.
+    - name: Delete App Service Environment.
       text: az appservice ase delete -n MyAseName
 """
 
@@ -2681,7 +2939,7 @@ short-summary: Link or unlink a prexisting functionapp with a static webapp. Als
 
 helps['staticwebapp functions link'] = """
     type: command
-    short-summary: Link an Azure Function to a static webapp. Also known as "Bring your own Functions." Only one Azure Functions app is available to a single static web app. Static webapp SKU must be "Standard"
+    short-summary: Link an Azure Function to a static webapp. Also known as "Bring your own Functions." Only one Azure Functions app is available to a single static web app. Static webapp SKU must be "Standard" or "Dedicated"
     examples:
     - name: Link a function to a static webapp
       text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
@@ -2714,7 +2972,7 @@ helps['staticwebapp backends validate'] = """
     long-summary: >
       Only one backend is available to a single static web app.
       If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
-      Static web app SKU must be "Standard".
+      Static web app SKU must be "Standard" or "Dedicated".
       Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
       Backend region must be provided for backends of type Azure Functions and Azure App Service.
       See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
@@ -2731,7 +2989,7 @@ helps['staticwebapp backends link'] = """
     long-summary: >
       Only one backend is available to a single static web app.
       If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
-      Static web app SKU must be "Standard".
+      Static web app SKU must be "Standard" or "Dedicated".
       Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
       Backend region must be provided for backends of type Azure Functions and Azure App Service.
       See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.

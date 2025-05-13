@@ -70,15 +70,15 @@ def load_arguments(self, _):
 
     with self.argument_context('batchai cluster create', arg_group='File Server Mount') as c:
         c.argument('nfs', options_list=['--nfs'], help='Name or ARM ID of a file server to be mounted on each cluster node. You need to provide full ARM ID if the file server belongs to a different workspace. Multiple NFS can be mounted using configuration file (see --config-file option).')
-        c.argument('nfs_mount_path', options_list=['--nfs-mount-path'], help='Relative mount path for NFS. The NFS will be available at $AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.')
+        c.argument('nfs_mount_path', options_list=['--nfs-mount-path'], help='Relative mount path for NFS. The NFS will be available at `$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path>` folder.')
 
     with self.argument_context('batchai cluster create', arg_group='Azure Storage Mount') as c:
         c.argument('account_name', options_list=['--storage-account-name'], help='Storage account name for Azure File Shares and/or Azure Storage Containers to be mounted on each cluster node. Can be specified using AZURE_BATCHAI_STORAGE_ACCOUNT environment variable.')
         c.argument('account_key', options_list=['--storage-account-key'], help='Storage account key. Required if the storage account belongs to a different subscription. Can be specified using AZURE_BATCHAI_STORAGE_KEY environment variable.')
         c.argument('azure_file_share', options_list=['--afs-name'], help='Name of Azure File Share to be mounted on each cluster node. Must be used in conjunction with --storage-account-name. Multiple shares can be mounted using configuration file (see --config-file option).')
-        c.argument('afs_mount_path', options_list=['--afs-mount-path'], help='Relative mount path for Azure File share. The file share will be available at $AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.')
+        c.argument('afs_mount_path', options_list=['--afs-mount-path'], help='Relative mount path for Azure File share. The file share will be available at `$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path>` folder.')
         c.argument('container_name', options_list=['--bfs-name'], help='Name of Azure Storage container to be mounted on each cluster node. Must be used in conjunction with --storage-account-name. Multiple containers can be mounted using configuration file (see --config-file option).')
-        c.argument('container_mount_path', options_list=['--bfs-mount-path'], help='Relative mount path for Azure Storage container. The container will be available at $AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.')
+        c.argument('container_mount_path', options_list=['--bfs-mount-path'], help='Relative mount path for Azure Storage container. The container will be available at `$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path>` folder.')
 
     with self.argument_context('batchai cluster resize') as c:
         c.argument('target', options_list=['--target', '-t'], help='Target number of compute nodes.')
@@ -120,13 +120,13 @@ def load_arguments(self, _):
         c.argument('account_name', options_list=['--storage-account-name'], help='Storage account name for Azure File Shares and/or Azure Storage Containers to be mounted on each cluster node. Can be specified using AZURE_BATCHAI_STORAGE_ACCOUNT environment variable.')
         c.argument('account_key', options_list=['--storage-account-key'], help='Storage account key. Required if the storage account belongs to a different subscription. Can be specified using AZURE_BATCHAI_STORAGE_KEY environment variable.')
         c.argument('azure_file_share', options_list=['--afs-name'], help='Name of Azure File Share to mount during the job execution. The File Share will be mounted only on the nodes which are executing the job. Must be used in conjunction with --storage-account-name.  Multiple shares can be mounted using configuration file (see --config-file option).')
-        c.argument('afs_mount_path', options_list=['--afs-mount-path'], help='Relative mount path for Azure File Share. The File Share will be available at $AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path> folder.')
+        c.argument('afs_mount_path', options_list=['--afs-mount-path'], help='Relative mount path for Azure File Share. The File Share will be available at `$AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path>` folder.')
         c.argument('container_name', options_list=['--bfs-name'], help='Name of Azure Storage Blob Container to mount during the job execution. The container will be mounted only on the nodes which are executing the job. Must be used in conjunction with --storage-account-name. Multiple containers can be mounted using configuration file (see --config-file option).')
-        c.argument('container_mount_path', options_list=['--bfs-mount-path'], help='Relative mount path for Azure Storage Blob Container. The container will be available at $AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path> folder.')
+        c.argument('container_mount_path', options_list=['--bfs-mount-path'], help='Relative mount path for Azure Storage Blob Container. The container will be available at `$AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path>` folder.')
 
     with self.argument_context('batchai job create', arg_group='File Server Mount') as c:
         c.argument('nfs', options_list=['--nfs'], help='Name or ARM ID of the file server to be mounted during the job execution. You need to provide ARM ID if the file server belongs to a different workspace. You can configure multiple file servers using job\'s  configuration file.')
-        c.argument('nfs_mount_path', options_list=['--nfs-mount-path'], help='Relative mount path for NFS. The NFS will be available at $AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path> folder.')
+        c.argument('nfs_mount_path', options_list=['--nfs-mount-path'], help='Relative mount path for NFS. The NFS will be available at `$AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path>` folder.')
 
     with self.argument_context('batchai job list') as c:
         c.argument('workspace_name', id_part=None, options_list=['--workspace', '-w'], help='Name of workspace.')

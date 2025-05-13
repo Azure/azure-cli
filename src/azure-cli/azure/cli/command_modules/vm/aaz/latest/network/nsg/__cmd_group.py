@@ -14,7 +14,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage Azure Network Security Groups (NSGs).
 
-    You can control network traffic to resources in a virtual network using a network security group. A network security group contains a list of security rules that allow or deny inbound or outbound network traffic based on source or destination IP addresses, Application Security Groups, ports, and protocols. For more information visit https://docs.microsoft.com/azure/virtual-network/virtual-networks-create-nsg-arm-cli.
+    You can control network traffic to resources in a virtual network using a network security group. A network security group contains a list of security rules that allow or deny inbound or outbound network traffic based on source or destination IP addresses, Application Security Groups, ports, and protocols. For more information visit https://learn.microsoft.com/azure/virtual-network/virtual-networks-create-nsg-arm-cli.
     """
     pass
 

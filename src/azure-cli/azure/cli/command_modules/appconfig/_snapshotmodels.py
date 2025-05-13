@@ -6,6 +6,8 @@
 from datetime import datetime
 from enum import Enum
 
+from ._constants import SnapshotFilterFields
+
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=line-too-long
@@ -84,7 +86,7 @@ class Snapshot:
         return "\nEtag: " + self.etag + \
             "\nName: " + self.name + \
             "\nStatus: " + self.status + \
-            "\nFilters: " + (str(self.filters) if self.filters else '') + \
+            "\nFilters: " + (str(self.filters) if self.filters else '[]') + \
             "\nComposition Type: " + self.composition_type + \
             "\nCreated: " + self.created + \
             "\nExpires: " + self.expires + \
@@ -94,122 +96,32 @@ class Snapshot:
             "\nRetention Period: " + str(self.retention_period)
 
     @classmethod
-    def from_json(cls, data_dict):
+    def from_configuration_snapshot(cls, config_snapshot):
         return cls(
-            name=data_dict.get("name", None),
-            status=data_dict.get("status", None),
-            filters=data_dict.get("filters", None),
-            etag=data_dict.get("etag", None),
-            composition_type=data_dict.get("composition_type", None),
-            created=data_dict.get("created", None),
-            expires=data_dict.get("expires", None),
-            size=data_dict.get("size", None),
-            items_count=data_dict.get("items_count", None),
-            tags=data_dict.get("tags", None),
-            retention_period=data_dict.get("retention_period", None)
+            name=config_snapshot.name,
+            status=config_snapshot.status,
+            filters=[convert_configuration_setting_filter(setting_filter) for setting_filter in config_snapshot.filters],
+            etag=config_snapshot.etag,
+            composition_type=config_snapshot.composition_type,
+            created=config_snapshot.created,
+            expires=config_snapshot.expires,
+            size=config_snapshot.size,
+            items_count=config_snapshot.items_count,
+            tags=config_snapshot.tags,
+            retention_period=config_snapshot.retention_period
         )
 
 
-class SnapshotListResult:
-    '''
-    Class representing a paginated list of snapshots.
-    :ivar str next_link:
-        Shows the link to the next page of snapshots
-    :ivar [Snapshot] items:
-        List of Snapshot entities in the current page.
-    '''
+def convert_configuration_setting_filter(configuration_setting_filter):
+    result = {}
 
-    def __init__(self, items=None, next_link=None):
-        self.items = items
-        self.next_link = next_link
+    if configuration_setting_filter.key is not None:
+        result[SnapshotFilterFields.KEY] = configuration_setting_filter.key
 
-    def __str__(self):
-        return str([str(i) for i in self.items])
+    if configuration_setting_filter.label is not None:
+        result[SnapshotFilterFields.LABEL] = configuration_setting_filter.label
 
-    @classmethod
-    def from_json(cls, data_dict):
+    if configuration_setting_filter.tags is not None:
+        result[SnapshotFilterFields.TAGS] = configuration_setting_filter.tags
 
-        return cls(
-            items=[Snapshot.from_json(snapshot) for snapshot in data_dict.get("items", [])],
-            next_link=data_dict.get("@nextLink", None)
-        )
-
-
-class OperationStatus:
-    '''
-    Class representing the current create status of a snapshot
-    :ivar str operation_id:
-        Name of the Snapshot being created.
-    :ivar str status:
-        The creation status of the snapshot
-    :ivar ErrorDetail error:
-        The details of the error if any.
-    '''
-
-    def __init__(self,
-                 operation_id,
-                 status,
-                 error=None):
-        self.operation_id = operation_id
-        self.status = status
-        self.error = error
-
-    @classmethod
-    def from_json(cls, data_dict):
-        return cls(
-            operation_id=data_dict.get("id", None),
-            status=data_dict.get("status", None),
-            error=ErrorDetail.from_json(data_dict.get("error", None)),
-        )
-
-
-class ErrorDetail:
-    '''
-    Class representing the create error details for a failed snapshot.
-    :ivar str code:
-        Error status code.
-    : ivar str message:
-        Error message.
-    '''
-
-    def __init__(self,
-                 code=None,
-                 message=None):
-        self.code = code
-        self.message = message
-
-    @classmethod
-    def from_json(cls, data_dict):
-        if not data_dict:
-            return None
-
-        return cls(
-            code=data_dict.get("code", None),
-            message=data_dict.get("message", None)
-        )
-
-
-class OperationStatusResponse:
-    '''
-    Class representing the required data needed in tracking snapshot creation
-    :ivar OperationStatus operation_status:
-        Status of the Snapshot being created.
-    :ivar int retry_after:
-        Number of seconds returned from the server in Retry-After header
-    '''
-
-    def __init__(self,
-                 operation_status,
-                 retry_after=None):
-        self.operation_status = operation_status
-        self.retry_after = retry_after
-
-    @classmethod
-    def from_response(cls, response):
-        response_headers = response.headers
-        retry_seconds = response_headers.pop('Retry-After', None)
-
-        return cls(
-            operation_status=OperationStatus.from_json(response.json()),
-            retry_after=int(retry_seconds) if retry_seconds else None
-        )
+    return result

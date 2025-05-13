@@ -16,7 +16,18 @@ def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
     url = f"{armendpoint}{azure_monitor_workspace_resource_id}/providers/microsoft.alertsManagement/alertRuleRecommendations?api-version={ALERTS_API}"
     r = send_raw_request(cmd.cli_ctx, "GET", url, headers=headers)
     data = json.loads(r.text)
-    return data['value']
+
+    filtered_templates = [
+        template for template in data.get('value', [])
+        if template.get("properties", {}).get("alertRuleType", "").lower() == "microsoft.alertsmanagement/prometheusrulegroups" and isinstance(template.get("properties", {}).get("rulesArmTemplate", {}).get("resources"), list) and all(
+            isinstance(rule, dict) and "record" in rule and "expression" in rule
+            for resource in template["properties"]["rulesArmTemplate"]["resources"]
+            if resource.get("type", "").lower() == "microsoft.alertsmanagement/prometheusrulegroups"
+            for rule in resource.get("properties", {}).get("rules", [])
+        )
+    ]
+
+    return filtered_templates
 
 
 # pylint: disable=line-too-long
@@ -45,9 +56,7 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, c
                              body=body, headers=headers)
             break
         except CLIError as e:
-            error = e
-    else:
-        raise error
+            raise e
 
 
 # pylint: disable=line-too-long
@@ -56,7 +65,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     # with urllib.request.urlopen("https://defaultrulessc.blob.core.windows.net/defaultrules/ManagedPrometheusDefaultRecordingRules.json") as url:
     #     default_rules_template = json.loads(url.read().decode())
     default_rules_template = get_recording_rules_template(cmd, azure_monitor_workspace_resource_id)
-    default_rule_group_name = truncate_rule_group_name("NodeRecordingRulesRuleGroup-{0}".format(cluster_name))
+    default_rule_group_name = truncate_rule_group_name("{0}-{1}".format(default_rules_template[0]["name"], cluster_name))
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,
@@ -75,7 +84,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     )
     put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, True, 0)
 
-    default_rule_group_name = truncate_rule_group_name("KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name))
+    default_rule_group_name = truncate_rule_group_name("{0}-{1}".format(default_rules_template[1]["name"], cluster_name))
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,
@@ -93,7 +102,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     if enable_windows_recording_rules is not True:
         enable_windows_recording_rules = False
 
-    default_rule_group_name = truncate_rule_group_name("NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name))
+    default_rule_group_name = truncate_rule_group_name("{0}-{1}".format(default_rules_template[2]["name"], cluster_name))
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,
@@ -106,7 +115,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     )
     put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 2)
 
-    default_rule_group_name = truncate_rule_group_name("NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name))
+    default_rule_group_name = truncate_rule_group_name("{0}-{1}".format(default_rules_template[3]["name"], cluster_name))
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,

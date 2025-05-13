@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class Generalize(AAZCommand):
     """Mark a VM as generalized, allowing it to be imaged for multiple deployments.
 
-    For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image
+    For an end-to-end tutorial, see https://learn.microsoft.com/azure/virtual-machines/linux/capture-image
 
     :example: Deallocate, generalize, and capture a stopped virtual machine.
         az vm deallocate -g MyResourceGroup -n MyVm

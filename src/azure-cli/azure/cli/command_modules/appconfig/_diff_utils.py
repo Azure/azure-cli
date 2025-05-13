@@ -6,12 +6,13 @@
 # pylint: disable=line-too-long, too-few-public-methods
 
 import json
+import os
 
 from knack.util import CLIError
 from knack.log import get_logger
 
 from ._constants import CompareFields, JsonDiff, AppServiceConstants
-from ._featuremodels import (map_keyvalue_to_featureflag, custom_serialize_conditions, is_feature_flag)
+from ._featuremodels import (custom_serialize_allocation, custom_serialize_variants, map_keyvalue_to_featureflag, custom_serialize_conditions, custom_serialize_telemetry, is_feature_flag)
 from ._utils import is_json_content_type
 
 logger = get_logger(__name__)
@@ -32,7 +33,7 @@ class KVComparer:
                 kv.label = label
 
     # Returns a diff in the form {"add": List[KeyValue], "delete": List[KeyValue], "update": List[{"new": KeyValue, "old": KeyValue}]}
-    def compare(self, dest_kvs, strict=False):
+    def compare(self, dest_kvs, strict=False, ignore_matching_kvs=True):
         if not strict and not self._src_kvs:
             return {}
 
@@ -52,7 +53,7 @@ class KVComparer:
                 kv_diff[JsonDiff.ADD].append(kv)
 
             else:
-                if not self._kv_equals(kv, dest_kv_lookup[lookup_key], self._compare_fields):
+                if not (ignore_matching_kvs and self._kv_equals(kv, dest_kv_lookup[lookup_key], self._compare_fields)):
                     kv_diff[JsonDiff.UPDATE].append({"new": kv, "old": dest_kv_lookup[lookup_key]})
 
                 del dest_kv_lookup[lookup_key]
@@ -153,15 +154,37 @@ def get_serializer(level):
 
         # Feature flag format: {"feature": <feature-name>, "state": <on/off>, "conditions": <conditions-dict>}
         if is_feature_flag(obj):
-            feature = map_keyvalue_to_featureflag(obj)
+
+            # State property doesn't make sense in feature flag version 2 schema beacuse of the added properties - variants, allocation, telemetry
+            # The State property only exists in the CLI, we should move to showing enabled property instead as the other clients
+            # As we move to showing the enabled property, we will show the state property in the CLI only if compatibility mode is true
+            env_compatibility_mode = os.environ.get("AZURE_APPCONFIG_FM_COMPATIBLE", True)
+            compatibility_mode = str(env_compatibility_mode).lower() == "true"
+
+            feature = map_keyvalue_to_featureflag(obj, hide_enabled=compatibility_mode)
             # name
             feature_json = {'feature': feature.name}
             # state
-            feature_json['state'] = feature.state
+            if hasattr(feature, 'state'):
+                feature_json['state'] = feature.state
+            # enabled
+            if hasattr(feature, 'enabled'):
+                feature_json['enabled'] = feature.enabled
             # description
-            feature_json['description'] = feature.description
+            if feature.description is not None:
+                feature_json['description'] = feature.description
             # conditions
-            feature_json['conditions'] = custom_serialize_conditions(feature.conditions)
+            if feature.conditions:
+                feature_json['conditions'] = custom_serialize_conditions(feature.conditions)
+            # allocation
+            if feature.allocation:
+                feature_json['allocation'] = custom_serialize_allocation(feature.allocation)
+            # variants
+            if feature.variants:
+                feature_json['variants'] = custom_serialize_variants(feature.variants)
+            # telemetry
+            if feature.telemetry:
+                feature_json['telemetry'] = custom_serialize_telemetry(feature.telemetry)
 
             return feature_json
 

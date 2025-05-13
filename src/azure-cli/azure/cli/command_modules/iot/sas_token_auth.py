@@ -7,10 +7,7 @@ from base64 import b64encode, b64decode
 from hashlib import sha256
 from hmac import HMAC
 from time import time
-try:
-    from urllib import (urlencode, quote)
-except ImportError:
-    from urllib.parse import (urlencode, quote)  # pylint: disable=import-error
+from urllib.parse import urlencode, quote
 from msrest.authentication import Authentication
 
 
@@ -39,7 +36,7 @@ class SasTokenAuthentication(Authentication):
 
         :rtype: requests.Session.
         """
-        session = session or super(SasTokenAuthentication, self).signed_session()
+        session = session or super().signed_session()
         session.headers['Authorization'] = self.generate_sas_token()
         return session
 

@@ -37,7 +37,7 @@ LINUXAPP_KIND = "linux"
 DOTNET_REFERENCES_DIR_IN_ZIP = ".az-references"
 
 
-class FUNCTIONS_STACKS_API_KEYS():
+class FUNCTIONS_STACKS_API_KEYS:
     # pylint:disable=too-few-public-methods,too-many-instance-attributes
     def __init__(self):
         self.NAME = 'name'
@@ -59,6 +59,7 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.USE_32_BIT_WORKER_PROC = 'use32BitWorkerProcess'
         self.FUNCTIONS_WORKER_RUNTIME = 'FUNCTIONS_WORKER_RUNTIME'
         self.GIT_HUB_ACTION_SETTINGS = 'git_hub_action_settings'
+        self.END_OF_LIFE_DATE = 'endOfLifeDate'
 
 
 GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file__),
@@ -99,10 +100,11 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
 }
 
-DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-demo:1.0'
+DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet8-quickstart-demo:1.0'
 ACR_IMAGE_SUFFIX = ".azurecr.io"
 
 RUNTIME_STATUS_TEXT_MAP = {
+    "BuildRequestReceived": "Received build request...",
     "BuildInProgress": "Building the app...",
     "BuildSuccessful": "Build successful.",
     "BuildFailed": "Build failed.",
@@ -136,3 +138,9 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
                "14-lts-is-ending-on-30-april-2023/",
     "node|16": "https://azure.microsoft.com/en-us/updates/node16support/"
 }
+
+FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
+
+DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
+
+STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'

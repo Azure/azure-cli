@@ -46,7 +46,7 @@ class AzureSignalRServiceReplicaTest(ScenarioTest):
             'added_allowed_origins': ' '.join(added_allowed_origins),
             'default_action': "Deny",
             'replica_name': replica_name,
-            'replica_location': replica_location
+            'replica_location': replica_location,
         })
 
         # Test primary create
@@ -95,4 +95,8 @@ class AzureSignalRServiceReplicaTest(ScenarioTest):
         ])
 
         # test remove replica
+        count = len(self.cmd('az signalr replica list --signalr-name {signalr_name} -g {rg}').get_output_in_json())
         self.cmd('az signalr replica delete --signalr-name {signalr_name} --replica-name {replica_name} -g {rg}')
+        final_count = len(
+            self.cmd('az signalr replica list --signalr-name {signalr_name} -g {rg}').get_output_in_json())
+        self.assertTrue(final_count == count - 1)

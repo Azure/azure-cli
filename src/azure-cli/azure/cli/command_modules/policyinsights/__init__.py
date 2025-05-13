@@ -20,7 +20,7 @@ class PolicyInsightsCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.policyinsights.custom#{}',
             exception_handler=policy_insights_exception_handler)
 
-        super(PolicyInsightsCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx,
             resource_type=ResourceType.MGMT_POLICYINSIGHTS,
             custom_command_type=policyinsights_custom)

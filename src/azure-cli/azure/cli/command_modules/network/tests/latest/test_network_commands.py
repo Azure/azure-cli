@@ -21,7 +21,7 @@ from azure.cli.testsdk import (
 
 from knack.util import CLIError
 
-from msrestazure.tools import resource_id
+from azure.mgmt.core.tools import resource_id
 
 from .credential_replacer import ExpressRoutePortLOAContentReplacer
 
@@ -108,7 +108,7 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
         self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
-        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24 --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
         pls1 = self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
@@ -284,7 +284,6 @@ class NetworkPrivateEndpoints(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_network_private_endpoint_private_dns_zone_group(self, resource_group, storage_account):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
             'loc': 'CentralUSEuap',
@@ -372,7 +371,31 @@ class NetworkPrivateEndpoints(ScenarioTest):
 
 class NetworkPrivateLinkService(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='cli_test_pls_udr')
+    @AllowLargeResponse()
+    def test_network_private_link_service_udr(self, resource_group):
+
+        self.kwargs.update({
+            'sku': 'Standard',
+            'vnet': 'vnet1',
+            'vnet_prefix': '10.0.0.0/16',
+            'subnet1': 'subnet1',
+            'subnet_prefix': '10.0.0.0/24',
+            'location': 'westcentralus',
+            'lks1': 'lks1',
+            'destination_ip': '10.0.0.10'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefixes {vnet_prefix} --subnet-name {subnet1} --subnet-prefixes {subnet_prefix} -l {location}')
+        self.cmd('az network vnet subnet update -n {subnet1} --vnet-name {vnet} -g {rg} --pls-network-policies disabled')
+        self.cmd('network private-link-service create -n {lks1} -g {rg} --vnet-name {vnet} --subnet {subnet1} --destination-ip-address {destination_ip} -l {location}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('enableProxyProtocol', False),
+            self.check('destinationIPAddress', '{destination_ip}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_link_service')
+    @AllowLargeResponse()
     def test_network_private_link_service(self, resource_group):
 
         self.kwargs.update({
@@ -381,18 +404,22 @@ class NetworkPrivateLinkService(ScenarioTest):
             'vnet': 'vnet1',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
-            'location': 'centralus',
+            'location': 'westcentralus',
             'ip': 'pubip1',
             'lks1': 'lks1',
             'lks2': 'lks2',
-            'sub1': '00000000-0000-0000-0000-000000000000'
+            'sub1': '00000000-0000-0000-0000-000000000000',
+            'destination_ip': '10.0.0.1'
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
         self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
-        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24 --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+
+        with self.assertRaises(HttpResponseError, msg=' either one LoadBalancerFrontendIpConfiguration if PLS with LB based scenario or DestinationIPAddress if PLS UDR and NSG scenario'):
+            self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location} --destination-ip-address {destination_ip}')
         self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}  --enable-proxy-protocol', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),
@@ -464,7 +491,7 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         # test for private-ip-address-version
         self.cmd('network lb create -g {rg} -n {lb2} -l westcentralus --sku Standard')
-        self.cmd('network public-ip create -n {ip2} -g {rg} -l westcentralus --sku Standard --allocation-method Static --version IPv6')
+        self.cmd('network public-ip create -n {ip2} -g {rg} -l westcentralus --sku Standard --allocation-method Static --version IPv6 --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network lb frontend-ip create --lb-name {lb2} -n ipv6 -g {rg} --private-ip-address-version IPv6 --public-ip-address {ip2}', checks=[
             self.check('name', 'ipv6'),
             self.check('provisioningState', 'Succeeded')
@@ -474,12 +501,20 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
     def test_network_lb_frontend_ip_zone(self, resource_group):
         self.kwargs.update({
             'location': 'eastus2',
+            'lb1': self.create_random_name('lb', 10),
+            'lb2': self.create_random_name('lb', 10),
+            'vnet1': self.create_random_name('vnet', 10),
+            'vnet2': self.create_random_name('vnet', 10),
+            'pool': self.create_random_name('poll', 10)
         })
 
         # LB with subnet : internal LB
-        self.cmd('network lb create -g {rg} -l {location} -n lb --vnet-name vnet --subnet subnet --sku Standard')
-        self.cmd('network lb frontend-ip create -g {rg} --lb-name lb -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name vnet --subnet subnet', checks=[
+        self.cmd('network lb create -g {rg} -l {location} -n {lb1} --vnet-name {vnet1} --subnet subnet --sku Standard')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name {vnet1} --subnet subnet', checks=[
             self.check("length(zones)", 3)
+        ])
+        self.cmd('network lb create -g {rg} -n {lb2} --sku standard --vnet-name {vnet2} --subnet default --frontend-ip-zone 1 2 3 --backend-pool-name {pool}', checks=[
+            self.check("loadBalancer.frontendIPConfigurations[0].zones", ['1', '2', '3'])
         ])
 
 
@@ -500,14 +535,14 @@ class NetworkPublicIpWithSku(ScenarioTest):
             'ip4': 'pubip4'
         })
 
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1}')
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
-            self.check('sku.name', self.kwargs.get('basic_sku')),
+            self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('regional_tier')),
-            self.check('publicIPAllocationMethod', 'Dynamic')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
             self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('regional_tier')),
@@ -515,30 +550,33 @@ class NetworkPublicIpWithSku(ScenarioTest):
             self.check('tags.foo', 'doo')
         ])
 
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku} --tier {global_tier}')
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku} --tier {global_tier} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
             self.check('sku.name', self.kwargs.get('standard_sku')),
             self.check('sku.tier', self.kwargs.get('global_tier')),
             self.check('publicIPAllocationMethod', 'Static')
         ])
 
-        from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegex(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
-            self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
-
 
 class NetworkCustomIPPrefix(ScenarioTest):
     @ResourceGroupPreparer(name_prefix="cli_test_network_custom_ip_prefix_", location="eastus2")
     def test_network_custom_ip_prefix_crud(self):
         self.kwargs.update({
-            "cip_name": self.create_random_name("cip-", 8),
+            "cip_name1": self.create_random_name("cip-", 8),
+            "cip_name2": self.create_random_name("cip-", 8),
         })
-
         self.cmd(
-            "network custom-ip prefix create -n {cip_name} -z 1 -g {rg} --cidr 0.0.0.0/24 "
+            "network custom-ip prefix create --name {cip_name1} --resource-group {rg} --cidr 2001:250:6000::/48 --is-parent",
+            checks=[
+                self.check("name", "{cip_name1}"),
+                self.check("prefixType", "Parent")
+            ]
+        )
+        self.cmd(
+            "network custom-ip prefix create -n {cip_name2} -z 1 -g {rg} --cidr 0.0.0.0/24 "
             "--asn 65515 --geo GLOBAL --is-advertised false",
             checks=[
-                self.check("name", "{cip_name}"),
+                self.check("name", "{cip_name2}"),
                 self.check("asn", "65515"),
                 self.check("geo", "GLOBAL"),
                 self.check("expressRouteAdvertise", False)
@@ -547,15 +585,15 @@ class NetworkCustomIPPrefix(ScenarioTest):
         self.cmd(
             "network custom-ip prefix list -g {rg}",
             checks=[
-                self.check("length(@)", 1),
-                self.check("@[0].name", "{cip_name}")
+                self.check("length(@)", 2),
+                self.check("@[0].name", "{cip_name1}")
             ]
         )
-        self.cmd("network custom-ip prefix update -n {cip_name} -g {rg} --tags foo=bar")
+        self.cmd("network custom-ip prefix update -n {cip_name2} -g {rg} --tags foo=bar")
         self.cmd(
-            "network custom-ip prefix show -n {cip_name} -g {rg}",
+            "network custom-ip prefix show -n {cip_name2} -g {rg}",
             checks=[
-                self.check("name", "{cip_name}"),
+                self.check("name", "{cip_name2}"),
                 self.check("tags.foo", "bar")
             ]
         )
@@ -579,6 +617,7 @@ class NetworkCustomIPPrefix(ScenarioTest):
 
 class NetworkPublicIpPrefix(ScenarioTest):
 
+    @record_only()  # cannot assign both tags and a public IP prefix to a public IP address in Azure
     @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix', location='eastus2')
     def test_network_public_ip_prefix(self, resource_group):
 
@@ -652,6 +691,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
             self.check('length(zones)', 3)
         ])
 
+    @record_only()  # cannot assign both tags and a public IP prefix to a public IP address in Azure
     @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_with_ip_address', location='eastus2')
     def test_network_public_ip_prefix_with_ip_address(self, resource_group):
         self.kwargs.update({
@@ -707,8 +747,8 @@ class NetworkMultiIdsShowScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_multi_id')
     def test_network_multi_id_show(self, resource_group):
 
-        self.cmd('network public-ip create -g {rg} -n pip1')
-        self.cmd('network public-ip create -g {rg} -n pip2')
+        self.cmd('network public-ip create -g {rg} -n pip1 --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network public-ip create -g {rg} -n pip2 --ip-tags FirstPartyUsage=/NonProd')
 
         pip1 = self.cmd('network public-ip show -g {rg} -n pip1').get_output_in_json()
         pip2 = self.cmd('network public-ip show -g {rg} -n pip2').get_output_in_json()
@@ -757,7 +797,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic_with_waf_v2_sku')
     def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
-        self.cmd('network public-ip create -g {rg} -n pubip1 --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n pubip1 --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
         self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --waf-policy waf1 --priority 1001')
 
@@ -808,7 +848,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             "ip": "publicIP",
         })
 
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         self.cmd("network application-gateway create -g {rg} -n {appgw} "
                  "--sku Standard_v2 "
@@ -871,7 +911,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
             'secret_id': cert_result['sid']
         })
 
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         # create application-gateway with one_off_identity
         self.cmd('network application-gateway create '
@@ -908,7 +948,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_cert_name_')
-    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
+    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium', additional_params='--enable-rbac-authorization false')
     def test_network_app_gateway_with_cert_name(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
@@ -942,7 +982,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
             'secret_id': cert_result['sid']
         })
 
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         # create application-gateway with one_off_identity
         self.cmd('network application-gateway create '
@@ -972,7 +1012,7 @@ class NetworkAppGatewayTrustedClientCertScenarioTest(ScenarioTest):
         })
 
         # create an ag with trusted client cert
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network application-gateway create -g {rg} -n {gw} --sku Standard_v2 --public-ip-address {ip} '
                  '--trusted-client-cert name={cname} data="{cert}" --priority 1001',
                  checks=[self.check('length(applicationGateway.trustedClientCertificates)', 1)])
@@ -1008,7 +1048,7 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
         })
 
         # create an ag with ssl profile
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
             "network application-gateway create -n {gw} -g {rg} --public-ip-address {ip} --sku Standard_v2 --priority 1001 "
             "--ssl-profile name={name} min-protocol-version=TLSv1_0 cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom client-auth-configuration=True",
@@ -1055,7 +1095,7 @@ class NetworkAppGatewayZoneScenario(ScenarioTest):
         })
 
         # for public-ip after '2020-08-01', when set '-z 1 3', actually return 'zones:[1,2,3]'
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard -z 1 3', checks=[
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard -z 1 3 --ip-tags FirstPartyUsage=/NonProd', checks=[
             self.check('length(publicIp.zones)', 3)
         ])
         self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --max-capacity 4 --zones 1 3 --public-ip-address {ip} --priority 1001 --no-wait')
@@ -1120,7 +1160,7 @@ class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
             'settings': 'https_settings',
             'ip1': 'myip1'
         })
-        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --public-ip-address {ip1} --priority 1001')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}"')
@@ -1206,7 +1246,7 @@ class NetworkAppGatewayNoWaitScenarioTest(ScenarioTest):
     def test_network_app_gateway_no_wait(self, resource_group):
 
         self.kwargs.update({
-            'tags': {u'a': u'b', u'c': u'd'}
+            'tags': {'a': 'b', 'c': 'd'}
         })
 
         self.cmd('network application-gateway create -g {rg} -n ag1 --no-wait --connection-draining-timeout 180 --priority 1001', checks=self.is_empty())
@@ -1313,7 +1353,7 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
             'port': 8080
         })
 
-        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku Standard')
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         self.cmd('network application-gateway create -g {rg} -n {appgw} '
                  '--public-ip-address {appgw_public_ip} --sku Standard_v2 '
@@ -1412,7 +1452,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
-        self.cmd('network public-ip create -g {rg} -n {ip1}')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Basic')
         self.cmd('network public-ip create -g {rg} -n {ip2}')
 
         self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --public-ip-address {ip1}')
@@ -1945,7 +1985,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  checks=(self.check('length(@)', 0)))
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_listener_with_host_names')
-    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium')
+    @KeyVaultPreparer(name_prefix='cli-test-keyvault-', sku='premium', additional_params='--enable-rbac-authorization false')
     def test_network_ag_listener_with_host_names(self, resource_group):
         self.kwargs.update({
             'appgw': 'appgw',
@@ -2140,6 +2180,7 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
             'rule': 'rule1',
             'rule2': 'rule2',
             'rule3': 'rule3',
+            'rule4': 'rule4',
             'var': 'http_req_Authorization'
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
@@ -2182,6 +2223,30 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
         # ISSUE#17373 create rewrite rule without
         self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule3} --sequence 123 --modified-path "/" --no-wait')
 
+        # manage rewrite rules with response-header-configurations
+        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule4} '
+                 '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat1,"header-value-matcher":{{"ignore-case":true,"negate":true,"pattern":"(https?)//.*azurewebsites.net(.*)$"}}}}] --request-headers foo=bar '
+                 '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
+                 checks=[
+                     self.check('actionSet.responseHeaderConfigurations[0].headerName', 'Set-Cookie'),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValue', 'hat1'),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.ignoreCase', True),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.negate', True),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern', "(https?)//.*azurewebsites.net(.*)$"),
+                 ])
+        self.cmd(
+            'network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule4} '
+            '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat2,"header-value-matcher":{{"ignore-case":true,"negate":false,"pattern":"(https?)//.*azurewebsites.net(.*)$"}}}}] --request-headers foo=bar '
+            '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
+            checks=[
+                self.check('actionSet.responseHeaderConfigurations[0].headerName', 'Set-Cookie'),
+                self.check('actionSet.responseHeaderConfigurations[0].headerValue', 'hat2'),
+                self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.ignoreCase', True),
+                self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.negate', False),
+                self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern',
+                           "(https?)//.*azurewebsites.net(.*)$"),
+            ])
+
         # manage rewrite rule conditions
         self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')
         self.cmd('network application-gateway rewrite-rule condition update -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearers" --no-wait')
@@ -2212,6 +2277,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
 
 class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
 
+    @unittest.skip('SKU for this scenario is deprecated.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_config')
     def test_network_app_gateway_waf_config(self, resource_group):
@@ -2247,7 +2313,7 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
 
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_', location='westcentralus')
     def test_network_app_gateway_waf_policy_with_application_gateway(self, resource_group):
         self.kwargs.update({
             'waf': 'agp1',
@@ -2276,16 +2342,18 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  checks=[
                      self.check('length(@)', 0)
                  ])
-        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf} --type OWASP --version 3.2')
 
         # add two custom rules of this waf-policy
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
                  '--policy-name {waf} -n {custom-rule1} '
-                 '--priority 50 --action log --rule-type MatchRule',
+                 '--priority 50 --action log --rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.1.0/24","10.0.0.0/24"]}}]',
                  checks=self.check('priority', 50))
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
                  '--policy-name {waf} -n {custom-rule2} '
-                 '--priority 100 --action log --rule-type MatchRule')
+                 '--priority 100 --action log --rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.1.0/24","10.0.0.0/24"]}}]')
 
         # test custom-rule list
         self.cmd('network application-gateway waf-policy custom-rule list -g {rg} '
@@ -2317,6 +2385,13 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
                      self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0')
                  ])
+        
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type Microsoft_BotManagerRuleSet --version 1.1',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.1')
+                 ])
 
         # add one exclusion rule to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
@@ -2334,7 +2409,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
             self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
-            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.1'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),
@@ -2375,6 +2450,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
     def test_network_app_gateway_waf_custom_rule(self, resource_group):
+        from azure.cli.core.azclierror import ArgumentUsageError
         self.kwargs.update({
             'waf': 'agp1',
             'rule': 'rule1',
@@ -2393,12 +2469,13 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # create a custom rule
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
                  '--policy-name {waf} -n {rule} '
-                 '--priority 50 --action LOG --rule-type MatchRule',
+                 '--priority 50 --action LOG --rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.1.0/24","10.0.0.0/24"]}}]',
                  checks=[
                      self.check('priority', 50),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 0),
+                     self.check('matchConditions | length(@)', 1),
                      self.check("state", "Enabled")
                  ])
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
@@ -2410,11 +2487,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 50),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 0)
+                     self.check('matchConditions | length(@)', 1)
                  ])
         # validate match condition
-        from azure.cli.core.azclierror import ArgumentUsageError
-        with self.assertRaisesRegex(ArgumentUsageError, "Non-any operator requires --match-values."):
+        with self.assertRaisesRegex(ArgumentUsageError, 'requires --values'):
             self.cmd("network application-gateway waf-policy custom-rule match-condition add -g {rg} "
                      "--policy-name {waf} -n {rule} "
                      "--match-variables RequestHeaders.value --operator Contains --transform lowercase")
@@ -2429,7 +2505,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 50),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 1)
+                     self.check('matchConditions | length(@)', 2)
                  ])
 
         # update one of properties
@@ -2452,12 +2528,12 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 75),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 2)
+                     self.check('matchConditions | length(@)', 3)
                  ])
         self.cmd('network application-gateway waf-policy custom-rule match-condition list -n {rule} -g {rg} '
                  '--policy-name {waf}',
                  checks=[
-                     self.check('length(@)', 2)
+                     self.check('length(@)', 3)
                  ])
 
         # remove one of match condition of custom rule
@@ -2470,7 +2546,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 75),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 1)
+                     self.check('matchConditions | length(@)', 2)
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_v2_')
@@ -2501,12 +2577,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--policy-name {waf} -n {rule} '
                  '--priority 1 '
                  '--action Block '
-                 '--rule-type MatchRule')
+                 '--rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.2.0/24","10.0.2.0/24"]}}]')
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
                  '--policy-name {waf} -n {rule2} '
                  '--priority 2 '
                  '--action Block '
-                 '--rule-type MatchRule')
+                 '--rule-type MatchRule '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.2.0/24","10.0.2.0/24"]}}]')
 
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
                  '--policy-name {waf} -n {rule} --match-variables RemoteAddr '
@@ -2525,7 +2603,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--rule-type RateLimitRule '
                  '--rate-limit-duration FiveMins '
                  '--rate-limit-threshold 15 '
-                 '--group-by-user-session [{{group-by-variables:[{{variable-name:"GeoLocation"}}]}}]',
+                 '--group-by-user-session [{{group-by-variables:[{{variable-name:"GeoLocation"}}]}}] '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RemoteAddr"}}],"operator":"IPMatch","values":["192.168.2.0/24","10.0.2.0/24"]}}]',
                  checks=[self.check('name', '{rule3}'),
                          self.check('groupByUserSession[0].groupByVariables[0].variableName', 'GeoLocation'),
                          self.check('rateLimitDuration', 'FiveMins'),
@@ -2564,13 +2643,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
         # randomly update some properties
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
-                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention',
+                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention --js-cookie-exp-time 100',
                  checks=[
                      self.check('policySettings.fileUploadLimitInMb', 64),
                      self.check('policySettings.maxRequestBodySizeInKb', 128),
                      self.check('policySettings.mode', 'Prevention'),
                      self.check('policySettings.requestBodyCheck', False),
-                     self.check('policySettings.state', 'Enabled')
+                     self.check('policySettings.state', 'Enabled'),
+                     self.check('policySettings.jsChallengeCookieExpirationInMins', 100)
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_v2_')
@@ -2613,31 +2693,43 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'csr_grp2': 'REQUEST-913-SCANNER-DETECTION',
             'csr_grp3': 'REQUEST-931-APPLICATION-ATTACK-RFI'
         })
-        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        # create a waf-policy with default type and version
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}', checks=[
+            self.check('name', '{waf}'),
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'Microsoft_DefaultRuleSet'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '2.1'),
+        ])
+        self.cmd('network application-gateway waf-policy delete -g {rg} -n {waf}')
+
+        # create a waf-policy
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf} --version 3.0 --type OWASP')
 
         # case 1: Initialize(add) managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110')
+                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110 sensitivity=low')
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
             self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
             self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
-            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100')
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].sensitivity', 'Low')
         ])
 
         # case 2: Append(add) another managed rule set to same rule group
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rule rule-id=921150')
+                 '--group-name {csr_grp1} --rule rule-id=921150 sensitivity=medium')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
                      self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 3),
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
-                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150')
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].sensitivity', 'Medium')
                  ])
 
         # case 3: Add another managed rule set of different rule group
@@ -2705,6 +2797,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 8: validate per rule action
         self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.2')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type Microsoft_DefaultRuleSet --version 2.1')
 
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.2 '
@@ -2723,7 +2817,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].state', 'Disabled'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].action', 'AnomalyScoring')
         ])
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
     def test_network_app_gateway_waf_policy_with_version_and_type(self, resource_group):
@@ -2842,7 +2935,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             "rule_group2": "REQUEST-920-PROTOCOL-ENFORCEMENT",
         })
         # create a waf-policy
-        self.cmd("network application-gateway waf-policy create -n {waf} -g {rg} --version 3.2")
+        self.cmd("network application-gateway waf-policy create -n {waf} -g {rg} --version 3.2 --type OWASP")
         # add one rule group to exclusion
         self.cmd(
             "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
@@ -2973,7 +3066,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
             self.check('publicIp.dnsSettings', None)
         ])
 
@@ -3043,8 +3136,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
         # test ddos protection status
         self.cmd('network application-gateway create -g {rg} -n testag --public-ip-address {ip1} --sku Standard_v2 --priority 1001')
-        self.cmd('network public-ip ddos-protection-statu show -g {rg} -n {ip1}', self.check('isWorkloadProtected', False))
-
+        self.cmd('network public-ip ddos-protection show -g {rg} -n {ip1}', self.check('isWorkloadProtected', True))
         self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
                      self.check('ddosSettings.protectionMode', 'Disabled'),
@@ -3058,6 +3150,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.cmd('network public-ip delete -g {rg} -n {ip1}')
         self.cmd('network public-ip list -g {rg}',
                  checks=self.check("length[?name == '{ip1}']", None))
+
 
 class NetworkZonedPublicIpScenarioTest(ScenarioTest):
 
@@ -3307,7 +3400,7 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_port', location='eastus')
-    @KeyVaultPreparer(name_prefix='test-er-port-kv', location='eastus')
+    @KeyVaultPreparer(name_prefix='test-er-port-kv', location='eastus', additional_params='--enable-rbac-authorization false')
     def test_network_express_route_port(self, resource_group, key_vault):
         self.kwargs.update({
             'rg': resource_group,
@@ -3432,7 +3525,6 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
     @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
     def test_network_express_route_peer_connection(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
         from azure.core.exceptions import ResourceNotFoundError
         self.kwargs.update({
             'er1': 'er1',
@@ -3607,10 +3699,28 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb create -g {rg} -n {lb}')
 
         self.cmd('network cross-region-lb address-pool create -g {rg} --lb-name {lb} -n {address_pool} '
-                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} ',
-                 checks=self.check('name', self.kwargs['address_pool']))
+                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} '
+                 '--admin-state Up',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[0].adminState', 'Up'),
+                         ])
 
-        self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2}', checks=self.check('name', self.kwargs['address_pool']))
+        self.cmd('network cross-region-lb address-pool update -g {rg} --lb-name {lb} -n {address_pool} '
+                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} admin-state=Down',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[0].adminState', 'Down'),
+                         ])
+
+        self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2} --admin-state Down',
+                 checks=[self.check('name', self.kwargs['address_pool']),
+                         self.check('loadBalancerBackendAddresses[1].adminState', 'Down'),
+                         ])
+
+        self.cmd(
+            'network cross-region-lb address-pool address update -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --admin-state Up',
+            checks=[self.check('name', self.kwargs['address_pool']),
+                    self.check('loadBalancerBackendAddresses[1].adminState', 'Up'),
+                    ])
 
         self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2}')
 
@@ -3747,6 +3857,8 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
             self.check('newVNet.name', '{vnet}'),
         ]).get_output_in_json()
 
+        self.cmd('network vnet subnet update -n {subnet} -g {rg2} --vnet-name {vnet} --default-outbound-access false --subscription {aux_sub}')
+
         self.kwargs['vnet_id'] = vnet['newVNet']['id']
         self.kwargs['subnet_id'] = vnet['newVNet']['subnets'][0]['id']
 
@@ -3754,7 +3866,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
             self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
         ])
 
-        public_ip_address_id = self.cmd('network public-ip create -g {rg2} -n {publicip} --subscription {aux_sub}', checks=[
+        public_ip_address_id = self.cmd('network public-ip create -g {rg2} -n {publicip} --subscription {aux_sub} --ip-tags FirstPartyUsage=/NonProd', checks=[
             self.check('publicIp.name', '{publicip}')
         ]).get_output_in_json()['publicIp']['id']
 
@@ -3779,7 +3891,7 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
 
         # create internal LB (lb2)
         self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name vnet1 -n subnet2 --address-prefix 10.0.1.0/24')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name vnet1 -n subnet2 --address-prefix 10.0.1.0/24 --default-outbound false')
         self.cmd('network lb create -g {rg} -n lb2 --subnet subnet1 --vnet-name vnet1')
 
         # Test frontend IP configuration for internet-facing LB
@@ -3997,7 +4109,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
             'subnet_name': 'subnetx'
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1')
-        self.cmd('network vnet subnet create -g {rg} -n {subnet_name} --vnet-name {vnet} --address-prefixes 10.0.1.0/24')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet_name} --vnet-name {vnet} --address-prefixes 10.0.1.0/24 --default-outbound false')
         self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet}')
         self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
 
@@ -4369,7 +4481,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24 --default-outbound false')
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.kwargs['ipaddres'] = json.dumps(
@@ -4561,7 +4673,7 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24 --default-outbound false')
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
@@ -4576,14 +4688,45 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(applicationGatewayBackendAddressPools)', 1))
         self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {ag_pool_id}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_ip_config_private_ip_address_prefix_length')
+    def test_network_nic_nic_ip_config_private_ip_address_prefix_length(self, resource_group):
+        self.kwargs.update({
+            'nic': self.create_random_name('nic', 10),
+            'vnet': self.create_random_name('vnet', 10),
+            'subnet': self.create_random_name('subnet', 10),
+            'config1': self.create_random_name('config', 10),
+            'config2': self.create_random_name('config', 10)
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet} --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+        self.cmd('network nic create -g {rg} -n {nic} --vnet-name {vnet} --subnet {subnet} --accelerated-networking true ')
+        self.cmd('network nic ip-config create -g {rg} -n {config1} --nic-name {nic} --private-ip-address-version IPv4 --private-ip-address-prefix-length 28 --make-primary false', checks=[
+            self.check('privateIPAddressPrefixLength', 28)
+        ])
+
+        self.cmd('network nic ip-config create -g {rg} -n {config2} --nic-name {nic}  --private-ip-address-version IPv4 ', checks=[
+            self.check('privateIPAddressPrefixLength', None)
+        ])
+        self.cmd('network nic ip-config update -g {rg} -n {config2} --nic-name {nic} --private-ip-address-prefix-length 28', checks=[
+            self.check('privateIPAddressPrefixLength', 28)
+        ])
+
 
 class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_nic_convenience_test')
     def test_network_nic_convenience_commands(self, resource_group):
+        self.kwargs.update({
+            'vm': 'conveniencevm1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
 
-        self.kwargs['vm'] = 'conveniencevm1'
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs['nic_id'] = self.cmd('vm show -g {rg} -n {vm} --query "networkProfile.networkInterfaces[0].id"').get_output_in_json()
         self.cmd('network nic list-effective-nsg --ids {nic_id}',
                  checks=self.greater_than('length(@)', 0))
@@ -4820,7 +4963,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet update --resource-group {rg} --name {vnet} --set addressSpace.addressPrefixes[0]="20.0.0.0/24"',
                  checks=self.check('addressSpace.addressPrefixes[0]', '20.0.0.0/24'))
 
-        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24')
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24 --default-outbound false')
         self.cmd('network vnet subnet list --resource-group {rg} --vnet-name {vnet}',
                  checks=self.check('type(@)', 'array'))
         self.cmd('network vnet subnet show --resource-group {rg} --vnet-name {vnet} --name {subnet}', checks=[
@@ -4836,6 +4979,29 @@ class NetworkVNetScenarioTest(ScenarioTest):
                  checks=self.check("length([?name == '{vnet}'])", 1))
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_ipam_pool_test', location='westus')
+    @AllowLargeResponse(size_kb=99999)
+    def test_network_vnet_with_ipam_pool(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'manager': 'manager1',
+            'pool': 'pool1',
+            'vnet': 'vnet1'
+        })
+        self.cmd('extension add -n virtual-network-manager')
+        self.kwargs['sub_id'] = self.get_subscription_id()
+        self.cmd('network manager create -g {rg} -n {manager} -l {location} --scope-accesses "SecurityAdmin" "Connectivity" --network-manager-scopes subscriptions="/subscriptions/{sub_id}"')
+        self.kwargs['pool_id'] = self.cmd('network manager ipam-pool create --manager-name {manager} -g {rg} --name {pool} --address-prefix 10.1.0.0/16').get_output_in_json()['id']
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --ipam-allocations [0].id={pool_id} [0].number-of-ip-addresses=10', checks=[
+            self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].id', '{pool_id}'),
+            self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].numberOfIpAddresses', 10),
+            self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].resourceGroup', '{rg}')
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_subnet_nsg_test')
     def test_network_vnet_with_subnet_nsg(self, resource_group):
@@ -4880,7 +5046,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('dhcpOptions.dnsServers[0]', '1.2.3.4')
         ])
 
-        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24')
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24 --default-outbound false')
 
         self.cmd('network vnet list-available-ips -g {rg} --name {vnet}', checks=[
             self.check('length(@)', 5)
@@ -4964,7 +5130,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         ])
 
         self.cmd(
-            'network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 10.0.1.0/24')
+            'network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 10.0.1.0/24 --default-outbound false')
 
         self.cmd('network vnet subnet list-available-ips -g {rg} --vnet-name {vnet} --name {subnet}', checks=[
             self.check('length(@)', 5)
@@ -5043,7 +5209,7 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             'vnet_id': vnet_id
         })
         # create the gateway on vnet2
-        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo')
+        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo --sku VpnGw1')
 
         vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
         vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
@@ -5097,7 +5263,7 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             'vnet_id': vnet_id
         })
         # create the gateway on vnet2
-        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo')
+        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo --sku VpnGw1')
 
         vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
         vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
@@ -5121,8 +5287,92 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
 
         self.cmd('network vnet peering sync -g {rg} -n peering1 --vnet-name vnet1')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering_with_params')
+    def test_network_vnet_peering_with_params(self, resource_group):
+
+        # create two vnets with non-overlapping prefixes
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name Subnet1 --address-prefixes 10.0.0.0/27 10.0.1.0/27 --subnet-prefixes 10.0.0.0/27')
+        self.cmd('network vnet create -g {rg} -n vnet2 --subnet-name Subnet2 --address-prefixes 20.0.0.0/27 --subnet-prefixes 20.0.0.0/27')
+
+        vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
+        vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
+
+        self.kwargs.update({
+            'vnet1_id': vnet1_id,
+            'vnet2_id': vnet2_id
+        })
+        self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet {vnet1_id} --peer-complete-vnets false --local-subnet-names Subnet2 --remote-subnet-names Subnet1 --allow-vnet-access --allow-forwarded-traffic --allow-gateway-transit false --use-remote-gateways false --enable-only-ipv6 false', checks=[
+            self.check('allowForwardedTraffic', True),
+            self.check('allowGatewayTransit', False),
+            self.check('allowVirtualNetworkAccess', True),
+            self.check('useRemoteGateways', False),
+            self.check('peerCompleteVnets', False),
+            self.check('enableOnlyIPv6Peering', False),
+            self.check('remoteVirtualNetwork.id', '{vnet1_id}'),
+            self.check('remoteSubnetNames[0]', 'Subnet1'),
+            self.check('localSubnetNames[0]', 'Subnet2'),
+        ])
+        self.cmd(
+            "network vnet peering update -n peering2 -g {rg} --vnet-name vnet2 --remote-vnet {vnet1_id} "
+            "--allow-vnet-access false --allow-forwarded-traffic false --allow-gateway-transit true",
+            checks=[
+                self.check("allowForwardedTraffic", False),
+                self.check("allowGatewayTransit", True),
+                self.check("allowVirtualNetworkAccess", False),
+            ]
+        )
+
 
 class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_vpn_connection_aux_', location='westus')
+    @ResourceGroupPreparer(name_prefix='test_vpn_connection_aux_', location='westus',
+                           parameter_name='aux_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_vpn_connection_aux(self, resource_group, aux_resource_group, resource_group_location,):
+        self.kwargs.update({
+            'rg': resource_group,
+            'rg2': aux_resource_group,
+            'location': resource_group_location,
+            'aux_sub': AUX_SUBSCRIPTION,
+            'vnet1': 'vnet1',
+            'vnet_prefix1': '10.11.0.0/16',
+            'vnet_prefix2': '10.12.0.0/16',
+            'fe_sub1': 'FrontEnd',
+            'fe_sub_prefix1': '10.11.0.0/24',
+            'be_sub1': 'BackEnd',
+            'be_sub_prefix1': '10.12.0.0/24',
+            'gw_sub1': 'GatewaySubnet',
+            'gw_sub_prefix1': '10.12.255.0/27',
+            'gw1ip': 'pip1',
+            'gw1': 'gw1',
+            'gw1_sku': 'VpnGw1',
+            'lgw1': 'lgw1',
+            'lgw1ip': '131.107.72.22',
+            'lgw1_prefix1': '10.61.0.0/16',
+            'lgw1_prefix2': '10.62.0.0/16',
+            'conn1': 'conn1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet_prefix1} {vnet_prefix2}')
+        self.cmd(
+            'network vnet subnet create -g {rg} --vnet-name {vnet1} -n {fe_sub1} --address-prefix {fe_sub_prefix1} --default-outbound false')
+        self.cmd(
+            'network vnet subnet create -g {rg} --vnet-name {vnet1} -n {be_sub1} --address-prefix {be_sub_prefix1} --default-outbound false')
+        self.cmd(
+            'network vnet subnet create -g {rg} --vnet-name {vnet1} -n {gw_sub1} --address-prefix {gw_sub_prefix1} --default-outbound false')
+        self.cmd('network public-ip create -g {rg} -n {gw1ip}')
+
+        self.cmd(
+            'network vnet-gateway create -g {rg} -l {location} -n {gw1} --public-ip-address {gw1ip} --vnet {vnet1} --sku {gw1_sku}')
+        self.kwargs["local_gateway_id"] = self.cmd(
+            'network local-gateway create -g {rg2} -l {location} -n {lgw1} --gateway-ip-address {lgw1ip} --local-address-prefixes {lgw1_prefix1} {lgw1_prefix2} --subscription {aux_sub}').get_output_in_json()["id"]
+
+        self.cmd(
+            'network vpn-connection create -g {rg} -l {location} -n {conn1} --vnet-gateway1 {gw1} --local-gateway2 {local_gateway_id} --shared-key AzureA1b2C3',
+            checks=[
+                self.check("resource.localNetworkGateway2.id", "{local_gateway_id}"),
+            ]
+        )
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_connection_ipsec')
     def test_network_vpn_connection_ipsec(self, resource_group):
@@ -5148,9 +5398,9 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet_prefix1} {vnet_prefix2}')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {fe_sub1} --address-prefix {fe_sub_prefix1}')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {be_sub1} --address-prefix {be_sub_prefix1}')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {gw_sub1} --address-prefix {gw_sub_prefix1}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {fe_sub1} --address-prefix {fe_sub_prefix1} --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {be_sub1} --address-prefix {be_sub_prefix1} --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {gw_sub1} --address-prefix {gw_sub_prefix1} --default-outbound false')
         self.cmd('network public-ip create -g {rg} -n {gw1ip}')
 
         self.cmd('network vnet-gateway create -g {rg} -n {gw1} --public-ip-address {gw1ip} --vnet {vnet1} --sku {gw1_sku}')
@@ -5307,6 +5557,26 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
                  '--radius-secret 111_aaa --radius-server 30.1.1.15',
                  checks=[self.check('length(vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
 
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_allow_traffic')
+    def test_network_vnet_gateway_allow_traffic(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'ip': 'pip',
+            'gw': 'gw',
+            'gw_sku': 'VpnGw2',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} '
+                 '--gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol OpenVPN '
+                 '--allow-remote-vnet-traffic true --allow-vwan-traffic true',
+                 checks=[self.check('vnetGateway.allowRemoteVnetTraffic', True),
+                         self.check('vnetGateway.allowVirtualWanTraffic', True)])
+        self.cmd('network vnet-gateway update -g {rg} -n {gw} --allow-remote-vnet-traffic false --allow-vwan-traffic false',
+                 checks=[self.check('allowRemoteVnetTraffic', False),
+                         self.check('allowVirtualWanTraffic', False)])
+
 
 class NetworkVirtualRouter(ScenarioTest):
 
@@ -5448,13 +5718,14 @@ class NetworkVirtualHubRouter(ScenarioTest):
             'subnet1_id': vnet['subnets'][0]['id']
         })
 
-        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
+        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} --auto-scale-config min-capacity=3 '
                  '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1} --hub-routing-preference aspath',
                  checks=[
                      self.check('type', 'Microsoft.Network/virtualHubs'),
                      self.check('ipConfigurations', None),
                      self.check('provisioningState', 'Succeeded'),
-                     self.check("hubRoutingPreference", "ASPath")
+                     self.check("hubRoutingPreference", "ASPath"),
+                     self.check('virtualRouterAutoScaleConfiguration.minCapacity', 3)
                  ])
 
         self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic --hub-routing-preference expressroute', checks=[
@@ -5547,26 +5818,46 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network nat gateway create --resource-group {rg} --location {location} --public-ip-prefixes {ip_prefix} --name {nat} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone}')
         self.cmd('network vnet create --resource-group {rg} --name {vnet} --address-prefix {vnet_prefix}')
 
-        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat}',
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat} --default-outbound false',
                  checks=self.check('ends_with(@.natGateway.id, `/{nat}`)', True))
         self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway null',
                  checks=self.check('natGateway', None))
 
-
-    @ResourceGroupPreparer(name_prefix='cli_subnet_endpoint_service_test')
+    @ResourceGroupPreparer(name_prefix='cli_subnet_endpoint_service_test', location="eastus2")
     def test_network_subnet_endpoint_service(self, resource_group):
         self.kwargs.update({
             'vnet': 'vnet1',
-            'subnet': 'subnet1'
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'subnet3': 'subnet3',
+            'publicip': 'testip1',
+            'publicip2': 'testip2'
         })
         result = self.cmd('network vnet list-endpoint-services -l westus').get_output_in_json()
         self.assertGreaterEqual(len(result), 2)
 
+        public_ip1 = self.cmd('network public-ip create -g {rg} -n {publicip}').get_output_in_json()
+        public_ip2 = self.cmd('network public-ip create -g {rg} -n {publicip2}').get_output_in_json()
+        self.kwargs.update({
+            'public_ip1': public_ip1['publicIp']['id'],
+            'public_ip2': public_ip2['publicIp']['id']
+        })
         self.cmd('network vnet create -g {rg} -n {vnet}')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage',
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet1} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage --default-outbound false',
                  checks=self.check('serviceEndpoints[0].service', 'Microsoft.Storage'))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints null',
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --service-endpoints null',
                  checks=self.check('serviceEndpoints', None))
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.2.0/24 --endpoints [{{"service":Microsoft.Storage,"network-identifier":{public_ip1}}}] --default-outbound false',
+                 checks=[self.check('serviceEndpoints[0].service', 'Microsoft.Storage'),
+                         self.check('serviceEndpoints[0].networkIdentifier.id', '{public_ip1}')])
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet2} --service-endpoints null',
+                 checks=self.check('serviceEndpoints', None))
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet3} --address-prefix 10.0.3.0/24 --default-outbound false')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet3} --endpoints [{{"service":Microsoft.Storage,"network-identifier":{public_ip2}}}]',
+                 checks=[self.check('serviceEndpoints[0].service', 'Microsoft.Storage'),
+                         self.check('serviceEndpoints[0].networkIdentifier.id', '{public_ip2}')])
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
     def test_network_subnet_delegation(self, resource_group):
@@ -5580,7 +5871,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.assertTrue(len(result) > 1, True)
 
         self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Web.serverFarms', checks=[
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Web.serverFarms --default-outbound false', checks=[
             self.check('delegations[0].serviceName', 'Microsoft.Web/serverFarms')
         ])
         # verify the update command, and that CLI validation will accept either serviceName or Name
@@ -5601,7 +5892,8 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
                  '--address-prefixes 10.0.1.0/24 '
                  '--name {subnet1} '
-                 '--disable-private-endpoint-network-policies true', checks=[
+                 '--disable-private-endpoint-network-policies true '
+                 '--default-outbound false', checks=[
                      self.check('addressPrefix', '10.0.1.0/24'),
                      self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Enabled')
@@ -5610,7 +5902,8 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
                  '--address-prefixes 10.0.2.0/24 '
                  '--name {subnet2} '
-                 '--disable-private-link-service-network-policies true', checks=[
+                 '--disable-private-link-service-network-policies true '
+                 '--default-outbound false', checks=[
                      self.check('addressPrefix', '10.0.2.0/24'),
                      self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Disabled')
@@ -5620,7 +5913,8 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  '--address-prefixes 10.0.3.0/24 '
                  '--name {subnet3} '
                  '--disable-private-endpoint-network-policies true '
-                 '--disable-private-link-service-network-policies true', checks=[
+                 '--disable-private-link-service-network-policies true '
+                 '--default-outbound false', checks=[
                      self.check('addressPrefix', '10.0.3.0/24'),
                      self.check('privateEndpointNetworkPolicies', 'Disabled'),
                      self.check('privateLinkServiceNetworkPolicies', 'Disabled')
@@ -5646,6 +5940,17 @@ class NetworkSubnetScenarioTests(ScenarioTest):
 
         self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} -n {subnet2}',
                  self.check('defaultOutboundAccess', False))
+
+    @ResourceGroupPreparer(name_prefix='cli_subnet_with_sharing_scope', location='westcentralus')
+    def test_network_subnet_with_sharing_scope(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1'
+        })
+        self.cmd('az network vnet create -g {rg} -n {vnet} -l westcentralus --address-prefixes 10.0.0.0/16')
+        self.cmd('az network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefixes 10.0.0.0/16 --default-outbound false --sharing-scope Tenant')
+        self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} -n {subnet}',
+                 checks=self.check('sharingScope', 'Tenant'))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -5703,12 +6008,11 @@ class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disa
         self.cmd('network local-gateway create -g {rg} -n {lgw3} -l {lgw_loc} --gateway-ip-address {lgw3_ip} --local-address-prefixes {lgw3_prefix} --asn {lgw_asn} --bgp-peering-address {bgp_peer2}')
         self.cmd('network vpn-connection create -g {rg} -n {conn_152} --vnet-gateway1 {gw1} --local-gateway2 {lgw3} --shared-key {shared_key} --enable-bgp')
 
-
 class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, method_name):
         self.sas_replacer = StorageAccountSASReplacer()
-        super(NetworkActiveActiveVnetScenarioTest, self).__init__(method_name, recording_processors=[
+        super().__init__(method_name, recording_processors=[
             self.sas_replacer
         ])
 
@@ -5782,7 +6086,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
         self.sas_replacer = StorageAccountSASReplacer()
-        super(NetworkVpnGatewayScenarioTest, self).__init__(method_name, recording_processors=[
+        super().__init__(method_name, recording_processors=[
             self.sas_replacer
         ])
 
@@ -5889,10 +6193,11 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
 
         self.cmd(
-            "network vnet-gateway create -n {gw1} -g {rg} --public-ip-address {ip1} --vnet {vnet1} --gateway-type ExpressRoute --sku ErGwScale --min-scale-unit 3 --max-scale-unit 5",
+            "network vnet-gateway create -n {gw1} -g {rg} --public-ip-address {ip1} --vnet {vnet1} --gateway-type ExpressRoute --resiliency-model SingleHomed --sku ErGwScale --min-scale-unit 3 --max-scale-unit 5",
             checks=[
                 self.check("vnetGateway.autoScaleConfiguration.bounds.max", 5),
                 self.check("vnetGateway.autoScaleConfiguration.bounds.min", 3),
+                self.check("vnetGateway.resiliencyModel", "SingleHomed"),
             ]
         )
         self.cmd(
@@ -6212,10 +6517,17 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'nsg': 'nsg1',
             'capture': 'capture1',
-            'private-ip': '10.0.0.9'
+            'private-ip': '10.0.0.9',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --nsg-rule None --private-ip-address {private-ip}').get_output_in_json()
+        vm = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy '
+                      '--admin-password PassPass10!) --nsg {nsg} --nsg-rule None --private-ip-address {private-ip} --subnet {subnet} --vnet-name {vnet}').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs['vm_id'] = vm['id']
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
@@ -6236,10 +6548,17 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'loc': resource_group_location,
             'vm': 'vm1',
             'capture1': 'capture1',
-            'capture2': 'capture2'
+            'capture2': 'capture2',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy '
+                 '--admin-password PassPass10!) --nsg {vm} --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
         self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture1} --file-path capture/capture.cap')
@@ -6353,7 +6672,7 @@ class ServiceEndpointScenarioTest(ScenarioTest):
         # create a subnet with the policy
         self.cmd('network service-endpoint policy-definition create -g {rg} --policy-name {policy} -n {pd_name} --service Microsoft.Storage --service-resources /subscriptions/{sub}')
         self.cmd('network vnet create -g {rg} -n {vnet}')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --service-endpoints Microsoft.Storage --service-endpoint-policy {policy}',
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --service-endpoints Microsoft.Storage --service-endpoint-policy {policy} --default-outbound false',
                  checks=self.check("contains(serviceEndpointPolicies[0].id, '{policy}')", True))
 
 
@@ -6459,7 +6778,7 @@ class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
 class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
-        super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.cmd('extension add -n virtual-wan')
 
     @unittest.skip('Decouple with virtual-wan bump API version')
@@ -6499,13 +6818,13 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
 
 class NetworkVirtualApplianceScenarioTest(ScenarioTest):
     def setUp(self):
-        super(NetworkVirtualApplianceScenarioTest, self).setUp()
+        super().setUp()
         self.cmd('extension add -n virtual-wan')
 
     def tearDown(self):
         # avoid influence other test when parallel run
         # self.cmd('extension remove -n virtual-wan')
-        super(NetworkVirtualApplianceScenarioTest, self).tearDown()
+        super().tearDown()
 
     @unittest.skip('GatewayError')
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')
@@ -6584,6 +6903,8 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         ])
         self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
+
+
 
 class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
     @live_only()
@@ -6713,6 +7034,146 @@ class NetworkVirtualApplianceIdentityScenarioTest(ScenarioTest):
                  ])
         self.cmd('network virtual-appliance delete -n {nva_name4} -g {rg} -y')
 
+class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance_connection')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_connection(self, resource_group):
+        from time import sleep
+        subscriptionId = self.get_subscription_id()
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clittestvhub',
+            'nva_name': 'clivirtualappliance',
+            'rg': resource_group,
+            'name': 'defaultConnection',
+            'subscription': subscriptionId
+        })
+        self.cmd('extension add -n virtual-wan')
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard')
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        self.cmd('network virtual-appliance create -n {nva_name} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc" ',
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}', 
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                     ])
+        self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
+            self.check('name', '{name}')
+        ])
+
+        self.cmd('network virtual-appliance connection list -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        self.cmd('network virtual-appliance connection update '
+                 '-n {name} '
+                 '-g {rg} '
+                 '--nva {nva_name} '
+                 '--labels [label1,label2] ')
+        
+        self.cmd('network virtual-appliance connection show -n {name} -g {rg} --nva {nva_name} --subscription {subscription}', checks=[
+            self.check('length(properties.routingConfiguration.propagatedRouteTables.labels)', 2),
+            self.check('properties.routingConfiguration.propagatedRouteTables.labels[0]', 'label1')
+        ])
+
+    @record_only()
+    def test_get_boot(self):
+        self.cmd('network virtual-appliance get-boot-diagnostic-log -n chkptbd1031 -g nashoktest --scs-sas-url "https://stonashoktest.blob.core.windows.net/testcontainer/example.txt?sp=rw&st=2025-03-07T03:47:49Z&se=2025-03-08T11:47:49Z&skoid=7f5b7efd-fa3f-4fbd-9430-8cf0f0ca6822&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-03-07T03:47:49Z&ske=2025-03-08T11:47:49Z&sks=b&skv=2022-11-02&spr=https&sv=2022-11-02&sr=b&sig=TOSsTfWx3e6ti7YLmeYms%2B3hAwMUSTlilE%2F08iht%2BUc%3D" --css-sas-url "https://stonashoktest.blob.core.windows.net/testcontainer/pstestscreenshot.png?sp=rw&st=2025-03-07T03:48:23Z&se=2025-03-08T11:48:23Z&skoid=7f5b7efd-fa3f-4fbd-9430-8cf0f0ca6822&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-03-07T03:48:23Z&ske=2025-03-08T11:48:23Z&sks=b&skv=2022-11-02&spr=https&sv=2022-11-02&sr=b&sig=4rU9xYe4T6t8GDUI0SVOhywiQWxIEtRSytpzq0xKwWY%3D"')
+
+
+class NetworkVirtualApplianceReimageScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='test_network_virtual_appliance_reimage')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_reimage(self, resource_group):
+        from time import sleep
+
+        # Variables to use in the test
+        subscriptionId = self.get_subscription_id()
+        self.kwargs.update({
+            'vwan': 'clitestvwan',  # Virtual WAN name
+            'vhub': 'clivhub',  # Virtual Hub name
+            'nva_name': 'clivirtualappliancereimage',  # NVA name
+            'rg': resource_group,
+            'name': 'defaultConnection',
+            'subscription': subscriptionId,
+            'instance_id' : 0
+        })
+
+        # Add the required extension
+        self.cmd('extension add -n virtual-wan')
+        
+        # Create Virtual WAN
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard', checks=[
+            self.check('name', '{vwan}'),
+            self.check('type', 'Microsoft.Network/virtualWans')
+        ])
+        
+        # Create Virtual Hub within the Virtual WAN
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard', checks=[
+            self.check('name', '{vhub}'),
+        ])
+
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+
+        # Create the NVA
+        self.cmd('network virtual-appliance create -n {nva_name} -g {rg} --vhub clivhub --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc"',
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+
+        # Verify the NVA exists
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}',
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+
+        # Trigger the reimage operation (you won't get useful data in response, just confirm the request is accepted)
+        response = self.cmd('network virtual-appliance reimage -g {rg} --network-virtual-appliance-name {nva_name} --subscription {subscription} --instance-ids {instance_id}')
+
+        # Wait for the reimage operation to complete and check provisioning state
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Reimage operation did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        # Ensure that the provisioning state is 'Succeeded' after reimaging
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')
+                 ])
 
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')
@@ -6738,7 +7199,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'vnet': 'clitestvnet',
             'nic': 'clitestnic',
             'rg': resource_group,
-            'edge_name': 'microsoftrrdclab1'
+            'edge_name': 'microsoftdclabs1'
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1 --edge-zone {edge_name}',
                  checks=self.check('newVNet.extendedLocation.name', '{edge_name}'))
@@ -6822,7 +7283,7 @@ class NetworkExtendedLocation(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} -l eastus --address-prefix 10.1.0.0/16 --subnet-name Frontend --subnet-prefix 10.1.0.0/24')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n GatewaySubnet --address-prefix 10.1.255.0/27')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n GatewaySubnet --address-prefix 10.1.255.0/27 --default-outbound false')
         self.cmd('network public-ip create -g {rg} -n {ip}')
         self.cmd('network vnet-gateway create -g {rg} -n {vnet_gateway} --vnet {vnet} --public-ip-address {ip} --gateway-type Vpn --sku VpnGw2 --vpn-gateway-generation Generation2 --enable-private-ip true -l eastus --no-wait')
         self.cmd('network vnet-gateway show -g {rg} -n {vnet_gateway}', checks=self.check("enablePrivateIpAddress", True))
@@ -6837,7 +7298,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'rg': resource_group,
             'lb': 'lb',
             'vnet': 'vnet',
-            'edge_name': 'microsoftrrdclab1',
+            'edge_name': 'microsoftdclabs1',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
         })
@@ -6846,7 +7307,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} '
                  '--disable-private-link-service-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} '
-                 '--address-prefixes 10.0.2.0/24')
+                 '--address-prefixes 10.0.2.0/24 --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} '
                  '--disable-private-endpoint-network-policies')
 

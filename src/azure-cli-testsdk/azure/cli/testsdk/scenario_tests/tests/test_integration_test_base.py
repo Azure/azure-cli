@@ -13,7 +13,7 @@ class TestIntegrationTestBase(unittest.TestCase):
     def test_integration_test_default_constructor(self):
         class MockTest(IntegrationTestBase):
             def __init__(self):
-                super(MockTest, self).__init__('sample_test')
+                super().__init__('sample_test')
 
             def sample_test(self):
                 pass
@@ -59,7 +59,7 @@ class TestIntegrationTestBase(unittest.TestCase):
     def test_live_test_default_constructor(self):
         class MockTest(LiveTest):
             def __init__(self):
-                super(MockTest, self).__init__('sample_test')
+                super().__init__('sample_test')
 
             def sample_test(self):
                 pass

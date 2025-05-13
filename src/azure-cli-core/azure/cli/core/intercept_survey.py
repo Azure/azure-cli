@@ -21,11 +21,11 @@ EXPERIENCE_PERIOD_IN_DAYS = 3
 PROMPT_INTERVAL_IN_DAYS = 180
 
 # VT code for text formatting:
-# https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
+# https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 SURVEY_STYLE = '\x1b[0;38;2;255;255;255;48;2;0;120;212m'  # Default & Foreground #FFFFFF & Background #0078D4
 
 # VT code for text modification:
-# https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#text-modification
+# https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#text-modification
 NEW_LINE = '\x1b[1L'
 ERASE_IN_LINE = '\x1b[0K'
 
@@ -81,8 +81,8 @@ def prompt_survey_message(cli):
     # prompt message
     print_styled_text((SURVEY_STYLE, NEW_LINE))
     print_styled_text([
-        (SURVEY_STYLE, f"[Survey] Help us improve Azure CLI by sharing your experience. "
-                       f"This survey should take about 5 minutes. Run 'az survey' to "
+        (SURVEY_STYLE, f"[Survey] Tell us what you think of Azure CLI. "
+                       f"This survey should take about 2 minutes. Run 'az survey' to "
                        f"open in browser. Learn more at {_SURVEY_LEARN_MORE_URL}"),
         (SURVEY_STYLE, ERASE_IN_LINE)
     ])

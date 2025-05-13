@@ -166,6 +166,10 @@ def load_command_table(self, _):
     with self.command_group('sf managed-cluster network-security-rule', managed_cluster_mgmt,
                             custom_command_type=managed_cluster_custom_type) as g:
         g.custom_command('add', 'add_network_security_rule')
+        g.custom_command('update', 'update_network_security_rule')
+        g.custom_command('get', 'get_network_security_rule')
+        g.custom_command('delete', 'delete_network_security_rule')
+        g.custom_command('list', 'list_network_security_rules')
 
     with self.command_group('sf managed-node-type', node_type_mgmt,
                             custom_command_type=managed_node_type_custom_type) as g:

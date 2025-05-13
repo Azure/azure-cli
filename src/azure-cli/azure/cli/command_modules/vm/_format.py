@@ -35,7 +35,7 @@ def transform_vm(vm):
 
 
 def transform_vm_create_output(result):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from collections import OrderedDict
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
@@ -91,7 +91,7 @@ def transform_sku_for_table_output(skus):
                     reason += ', type: ' + x['type']
                 if x['restrictionInfo']['locations']:
                     reason += ', locations: ' + ','.join(x['restrictionInfo']['locations'])
-                if x['restrictionInfo']['zones']:
+                if x['restrictionInfo'].get('zones', None):
                     reason += ', zones: ' + ','.join(x['restrictionInfo']['zones'])
                 reasons.append(reason)
             order_dict['restrictions'] = str(reasons) if len(reasons) > 1 else reasons[0]

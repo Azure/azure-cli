@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
+
 """
 Commands for storage file share operations
 """
@@ -13,23 +15,20 @@ from knack.log import get_logger
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files_track2,
                                                     guess_content_type)
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.aaz import has_value
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError, ResourceExistsError
 from .fileshare import _get_client
+from ..aaz.latest.storage.share_rm import Create as _ShareRmCreate
+from ..aaz.latest.storage.share_rm import Update as _ShareRmUpdate
+from ..aaz.latest.storage.share_rm import Delete as _ShareRmDelete
+from ..aaz.latest.storage.share_rm import Show as _ShareRmShow
+from ..aaz.latest.storage.share_rm import List as _ShareRmList
 
 logger = get_logger(__name__)
 
 
-def create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
-                    enabled_protocols=None, root_squash=None, access_tier=None):
-
-    return _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=metadata,
-                            share_quota=share_quota, enabled_protocols=enabled_protocols, root_squash=root_squash,
-                            access_tier=access_tier, snapshot=False)
-
-
 def snapshot_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
                       enabled_protocols=None, root_squash=None, access_tier=None):
-
     return _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=metadata,
                             share_quota=share_quota, enabled_protocols=enabled_protocols, root_squash=root_squash,
                             access_tier=access_tier, snapshot=True)
@@ -63,20 +62,7 @@ def get_stats(client, resource_group_name, account_name, share_name):
                       expand='stats')
 
 
-def list_share_rm(client, resource_group_name, account_name, include_deleted=None, include_snapshot=None):
-    expand = None
-    expand_item = []
-    if include_deleted:
-        expand_item.append('deleted')
-    if include_snapshot:
-        expand_item.append('snapshots')
-    if expand_item:
-        expand = ','.join(expand_item)
-    return client.list(resource_group_name=resource_group_name, account_name=account_name, expand=expand)
-
-
 def restore_share_rm(cmd, client, resource_group_name, account_name, share_name, deleted_version, restored_name=None):
-
     restored_name = restored_name if restored_name else share_name
 
     deleted_share = cmd.get_models('DeletedShare',
@@ -85,20 +71,6 @@ def restore_share_rm(cmd, client, resource_group_name, account_name, share_name,
 
     return client.restore(resource_group_name=resource_group_name, account_name=account_name,
                           share_name=restored_name, deleted_share=deleted_share)
-
-
-def update_share_rm(cmd, instance, metadata=None, share_quota=None, root_squash=None, access_tier=None):
-    FileShare = cmd.get_models('FileShare', resource_type=ResourceType.MGMT_STORAGE)
-
-    params = FileShare(
-        share_quota=share_quota if share_quota is not None else instance.share_quota,
-        root_squash=root_squash if root_squash is not None else instance.root_squash,
-        metadata=metadata if metadata is not None else instance.metadata,
-        enabled_protocols=instance.enabled_protocols,
-        access_tier=access_tier if access_tier is not None else instance.access_tier
-    )
-
-    return params
 
 
 def create_share_url(client, share_name, unc=None, protocol=None):
@@ -133,12 +105,13 @@ def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir
 
     if exclude_dir:
         t_file_properties = cmd.get_models('_models#FileProperties', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-        return list(f for f in results if isinstance(f, t_file_properties))
+        return [f for f in results if isinstance(f, t_file_properties)]
     return results
 
 
 def storage_file_upload(client, local_file_path, content_settings=None,
-                        metadata=None, validate_content=False, progress_callback=None, max_connections=2, timeout=None):
+                        metadata=None, validate_content=False, progress_callback=None, max_connections=2, timeout=None,
+                        file_mode=None, owner=None, group=None):
     upload_args = {
         'content_settings': content_settings,
         'metadata': metadata,
@@ -157,6 +130,14 @@ def storage_file_upload(client, local_file_path, content_settings=None,
     if 'content_md5' in response:
         if isinstance(response['content_md5'], bytearray):
             response['content_md5'] = ''.join(hex(x) for x in response['content_md5'])
+
+    if not (file_mode is None and owner is None and group is None):
+        nfs_args = {
+            'file_mode': file_mode,
+            'owner': owner,
+            'group': group
+        }
+        client.set_http_headers(content_settings, **nfs_args)
 
     return response
 
@@ -315,7 +296,7 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         # pylint: disable=inconsistent-return-statements
         def action_blob_copy(blob_name):
@@ -335,7 +316,7 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         # pylint: disable=inconsistent-return-statements
         def action_file_copy(file_info):
@@ -515,3 +496,153 @@ def file_exists(client, **kwargs):
 
 def file_updates(client, **kwargs):
     return client.set_http_headers(**kwargs)
+
+
+def _format_storage_account_id(args_schema):
+    from azure.cli.core.aaz import AAZResourceIdArgFormat
+    args_schema.storage_account._fmt = AAZResourceIdArgFormat(
+        template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/"
+                 "storageAccounts/{}"
+    )
+    args_schema.resource_group._required = False
+
+
+class ShareRmCreate(_ShareRmCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
+        parse_storage_account_aaz(self, args)
+
+    def post_operations(self):
+        result = self.ctx.vars.instance
+        new_result = _transform_share_rm_output(result)
+        self.ctx.vars.instance = new_result
+
+
+class ShareRmUpdate(_ShareRmUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
+        parse_storage_account_aaz(self, args)
+
+    def post_instance_update(self, instance):
+        args = self.ctx.args
+        if args.metadata:
+            instance.properties.metadata = args.metadata
+
+    def post_operations(self):
+        result = self.ctx.vars.instance
+        new_result = _transform_share_rm_output(result)
+        self.ctx.vars.instance = new_result
+
+
+class ShareRmDelete(_ShareRmDelete):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
+        parse_storage_account_aaz(self, args)
+
+
+def _transform_share_rm_output(result):
+    from datetime import datetime
+    try:
+        if hasattr(result, 'properties'):
+            if hasattr(result.properties, 'next_allowed_quota_downgrade_time') \
+                    and result.properties.next_allowed_quota_downgrade_time:
+                time_str = str(result.properties.next_allowed_quota_downgrade_time)
+                time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
+                result.properties.next_allowed_quota_downgrade_time = \
+                    time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+            if hasattr(result.properties, 'next_allowed_provisioned_iops_downgrade_time') \
+                    and result.properties.next_allowed_provisioned_iops_downgrade_time:
+                time_str = str(result.properties.next_allowed_provisioned_iops_downgrade_time)
+                time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
+                result.properties.next_allowed_provisioned_iops_downgrade_time = \
+                    time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+            if hasattr(result.properties, 'next_allowed_provisioned_bandwidth_downgrade_time') \
+                    and result.properties.next_allowed_provisioned_bandwidth_downgrade_time:
+                time_str = str(result.properties.next_allowed_provisioned_bandwidth_downgrade_time)
+                time_obj = datetime.strptime(time_str, '%a, %d %b %Y %H:%M:%S %Z')
+                result.properties.next_allowed_provisioned_bandwidth_downgrade_time = \
+                    time_obj.strftime("%Y-%m-%dT%H:%M:%S.%f0Z")
+            return result
+    except ValueError:  # make sure service side fix does not break
+        return result
+
+
+class ShareRmShow(_ShareRmShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
+        parse_storage_account_aaz(self, args)
+
+    def post_operations(self):
+        result = self.ctx.vars.instance
+        new_result = _transform_share_rm_output(result)
+        self.ctx.vars.instance = new_result
+
+
+class ShareRmList(_ShareRmList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.include_deleted = AAZBoolArg(
+            options=["--include-deleted"],
+            help="Include soft deleted file shares when specified."
+        )
+        args_schema.include_snapshot = AAZBoolArg(
+            options=["--include-snapshot"],
+            help="Include file share snapshots when specified."
+        )
+        _format_storage_account_id(args_schema)
+
+        args_schema.include_deleted._registered = True
+        args_schema.include_snapshot._registered = True
+        args_schema.expand._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_storage_account_aaz
+        args = self.ctx.args
+        expand_item = []
+        if has_value(args.include_deleted):
+            expand_item.append('deleted')
+        if has_value(args.include_snapshot):
+            expand_item.append('snapshots')
+        if expand_item:
+            args.expand = ','.join(expand_item)
+
+        parse_storage_account_aaz(self, args)
+
+    def post_operations(self):
+        result = self.ctx.vars.instance.value
+        new_result = []
+        for item in result:
+            new_result.append(_transform_share_rm_output(item))
+        self.ctx.vars.instance.value = new_result

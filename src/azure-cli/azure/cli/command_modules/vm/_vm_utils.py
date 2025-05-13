@@ -8,12 +8,9 @@ import os
 import re
 import importlib
 
-from azure.cli.core.commands.arm import ArmTemplateBuilder
+from urllib.parse import urlparse
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -80,7 +77,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.core.exceptions import HttpResponseError
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
     id_parts = parse_resource_id(value)
     resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
@@ -121,18 +118,18 @@ def get_key_vault_base_url(cli_ctx, vault_name):
 
 
 def list_sku_info(cli_ctx, location=None):
-    from ._client_factory import _compute_client_factory
+    from .aaz.latest.vm import ListSkus as _ListSkus
 
     def _match_location(loc, locations):
-        return next((x for x in locations if x.lower() == loc.lower()), None)
+        return next((x for x in locations if str(x).lower() == str(loc).lower()), None)
 
-    client = _compute_client_factory(cli_ctx)
-    result = client.resource_skus.list()
+    result = _ListSkus(cli_ctx=cli_ctx)(command_args={})
     if location:
-        result = [r for r in result if _match_location(location, r.locations)]
+        result = [r for r in result if _match_location(location, r['locations'])]
     return result
 
 
+# pylint: disable=line-too-long
 def is_sku_available(cmd, sku_info, zone):
     """
     The SKU is unavailable in the following cases:
@@ -143,19 +140,19 @@ def is_sku_available(cmd, sku_info, zone):
     is_available = True
     is_restrict_zone = False
     is_restrict_location = False
-    if not sku_info.restrictions:
+    if not sku_info.get('restrictions', []):
         return is_available
-    for restriction in sku_info.restrictions:
-        if restriction.reason_code == 'NotAvailableForSubscription':
+    for restriction in sku_info['restrictions']:
+        if restriction.get('reason_code', '') == 'NotAvailableForSubscription':
             # The attribute location_info is not supported in versions 2017-03-30 and earlier
             if cmd.supported_api_version(max_api='2017-03-30'):
                 is_available = False
                 break
-            if restriction.type == 'Zone' and not (
-                    set(sku_info.location_info[0].zones or []) - set(restriction.restriction_info.zones or [])):
+            if restriction['type'] == 'Zone' and not (
+                    set(sku_info['location_info'][0].get('zones', []) or []) - set(restriction['restriction_info'].get('zones', []) or [])):
                 is_restrict_zone = True
-            if restriction.type == 'Location' and (
-                    sku_info.location_info[0].location in (restriction.restriction_info.locations or [])):
+            if restriction['type'] == 'Location' and (
+                    sku_info['location_info'][0]['location'] in (restriction['restriction_info'].get('locations', []) or [])):
                 is_restrict_location = True
 
             if is_restrict_location or (is_restrict_zone and zone):
@@ -164,13 +161,15 @@ def is_sku_available(cmd, sku_info, zone):
     return is_available
 
 
-# pylint: disable=too-many-statements, too-many-branches
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None, size='',
                         ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
-                        data_disk_delete_option=None):
-    from msrestazure.tools import is_valid_resource_id
+                        data_disk_delete_option=None, source_snapshots_or_disks=None,
+                        source_snapshots_or_disks_size_gb=None, source_disk_restore_point=None,
+                        source_disk_restore_point_size_gb=None):
+    from azure.mgmt.core.tools import is_valid_resource_id
     from ._validators import validate_delete_options
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
     # we should return a dictionary with info like below
@@ -185,6 +184,10 @@ def normalize_disk_info(image_data_disks=None,
     attach_data_disks = attach_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
     image_data_disks = image_data_disks or []
+    source_snapshots_or_disks = source_snapshots_or_disks or []
+    source_snapshots_or_disks_size_gb = source_snapshots_or_disks_size_gb or []
+    source_disk_restore_point = source_disk_restore_point or []
+    source_disk_restore_point_size_gb = source_disk_restore_point_size_gb or []
 
     if data_disk_delete_option:
         if attach_data_disks:
@@ -231,6 +234,46 @@ def normalize_disk_info(image_data_disks=None,
         }
         if isinstance(data_disk_delete_option, str):
             info[i]['deleteOption'] = data_disk_delete_option
+
+    # add copy data disks
+    i = 0
+    source_resource_copy = list(source_snapshots_or_disks)
+    source_resource_copy_size = list(source_snapshots_or_disks_size_gb)
+    while source_resource_copy:
+        while i in used_luns:
+            i += 1
+
+        used_luns.add(i)
+
+        info[i] = {
+            'lun': i,
+            'createOption': 'copy',
+            'managedDisk': {'storageAccountType': None},
+            'diskSizeGB': source_resource_copy_size.pop(0),
+            'sourceResource': {
+                'id': source_resource_copy.pop(0)
+            }
+        }
+
+    # add restore data disks
+    i = 0
+    source_resource_restore = list(source_disk_restore_point)
+    source_resource_restore_size = list(source_disk_restore_point_size_gb)
+    while source_resource_restore:
+        while i in used_luns:
+            i += 1
+
+        used_luns.add(i)
+
+        info[i] = {
+            'lun': i,
+            'createOption': 'restore',
+            'managedDisk': {'storageAccountType': None},
+            'diskSizeGB': source_resource_restore_size.pop(0),
+            'sourceResource': {
+                'id': source_resource_restore.pop(0)
+            }
+        }
 
     # update storage skus for managed data disks
     if storage_sku is not None:
@@ -610,43 +653,21 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
         return
 
     security_type = disk_security_profile.security_type if hasattr(disk_security_profile, 'security_type') else None
-    if security_type.lower() == 'trustedlaunch':
+    if security_type and security_type.lower() == 'trustedlaunch':
         if namespace.enable_secure_boot is None:
             namespace.enable_secure_boot = True
         if namespace.enable_vtpm is None:
             namespace.enable_vtpm = True
         namespace.security_type = 'TrustedLaunch'
-    elif security_type.lower() == 'standard':
+    elif security_type and security_type.lower() == 'standard':
         logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def validate_image_trusted_launch(namespace):
     from ._constants import UPGRADE_SECURITY_HINT
 
-    # set securityType to Standard by default if no inputs by end user
-    if namespace.security_type is None:
-        namespace.security_type = 'Standard'
-    if namespace.security_type.lower() != 'trustedlaunch':
+    if namespace.security_type and namespace.security_type.lower() != 'trustedlaunch':
         logger.warning(UPGRADE_SECURITY_HINT)
-
-
-def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):
-    from azure.cli.command_modules.vm._client_factory import _compute_client_factory
-    from azure.cli.core.azclierror import InvalidArgumentValueError
-
-    client = _compute_client_factory(cmd.cli_ctx).disks
-    os_disk_info = client.get(os_disk_resource_group, os_disk_name)
-    generation_version = os_disk_info.hyper_v_generation if hasattr(os_disk_info, 'hyper_v_generation') else None
-
-    if generation_version != "V2":
-        raise InvalidArgumentValueError(
-            "Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit "
-            "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.")
-
-    if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
-        raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. "
-                                        "Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch."
-                                        .format(vm.name))
 
 
 def display_region_recommendation(cmd, namespace):
@@ -681,3 +702,51 @@ def import_aaz_by_profile(profile, module_name):
     from azure.cli.core.aaz.utils import get_aaz_profile_module_name
     profile_module_name = get_aaz_profile_module_name(profile_name=profile)
     return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")
+
+
+def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
+    def _open(filename, mode):
+        return os.open(filename, flags=os.O_WRONLY | os.O_TRUNC | os.O_CREAT, mode=mode)
+
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    ssh_dir = os.path.dirname(private_key_filepath)
+    if not os.path.exists(ssh_dir):
+        os.makedirs(ssh_dir, mode=0o700)
+
+    if os.path.isfile(private_key_filepath):
+        # Try to use existing private key if it exists.
+        with open(private_key_filepath, "rb") as f:
+            private_bytes = f.read()
+        private_key = serialization.load_ssh_private_key(private_bytes, password=None)
+        logger.warning("Private SSH key file '%s' was found in the directory: '%s'. "
+                       "A paired public key file '%s' will be generated.",
+                       private_key_filepath, ssh_dir, public_key_filepath)
+
+    else:
+        # Otherwise generate new private key.
+        private_key = Ed25519PrivateKey.generate()
+
+        # The private key will look like:
+        # -----BEGIN OPENSSH PRIVATE KEY-----
+        # ...
+        # -----END OPENSSH PRIVATE KEY-----
+        private_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.OpenSSH,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+
+        with os.fdopen(_open(private_key_filepath, 0o600), "wb") as f:
+            f.write(private_bytes)
+
+    public_key = private_key.public_key()
+    public_bytes = public_key.public_bytes(
+        encoding=serialization.Encoding.OpenSSH,
+        format=serialization.PublicFormat.OpenSSH)
+
+    with os.fdopen(_open(public_key_filepath, 0o644), 'wb') as f:
+        f.write(public_bytes)
+
+    return public_bytes.decode()

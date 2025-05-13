@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-06-01",
+        "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2021-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2025-02-01"],
         ]
     }
 
@@ -49,7 +49,6 @@ class Create(AAZCommand):
             options=["-n", "--name", "--cluster-name"],
             help="The name of the Log Analytics cluster.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -59,30 +58,16 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.location = AAZResourceLocationArg(
-            help="The geo-location where the resource lives",
-            required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Resource tags.",
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
 
         # define Arg Group "Identity"
 
         _args_schema = cls._args_schema
         _args_schema.identity_type = AAZStrArg(
-            options=["--identity-type"],
+            options=["--type", "--identity-type"],
             arg_group="Identity",
             help="Type of managed service identity.",
             default="SystemAssigned",
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned,UserAssigned": "SystemAssigned,UserAssigned", "UserAssigned": "UserAssigned"},
         )
         _args_schema.user_assigned = AAZDictArg(
             options=["--user-assigned"],
@@ -92,6 +77,7 @@ class Create(AAZCommand):
 
         user_assigned = cls._args_schema.user_assigned
         user_assigned.Element = AAZObjectArg(
+            nullable=True,
             blank={},
         )
 
@@ -119,6 +105,26 @@ class Create(AAZCommand):
             help="The version of the key associated with the Log Analytics cluster.",
         )
 
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
+        _args_schema.location = AAZResourceLocationArg(
+            arg_group="Parameters",
+            help="The geo-location where the resource lives",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Parameters",
+            help="Resource tags.",
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
@@ -129,6 +135,20 @@ class Create(AAZCommand):
             enum={"Cluster": "Cluster", "Workspaces": "Workspaces"},
         )
 
+        # define Arg Group "Replication"
+
+        _args_schema = cls._args_schema
+        _args_schema.replication_enabled = AAZBoolArg(
+            options=["--replication-enabled"],
+            arg_group="Replication",
+            help="Specifies whether the replication is enabled or not. When true the cluster is replicate to the specified location.",
+        )
+        _args_schema.replication_location = AAZStrArg(
+            options=["--replication-location"],
+            arg_group="Replication",
+            help="The secondary location of the replication. If replication is being enabled, enabled must be provided.",
+        )
+
         # define Arg Group "Sku"
 
         _args_schema = cls._args_schema
@@ -136,7 +156,7 @@ class Create(AAZCommand):
             options=["--sku-capacity"],
             arg_group="Sku",
             help="The capacity of the SKU. It can be decreased only after 31 days.",
-            enum={"1000": 1000, "2000": 2000, "500": 500, "5000": 5000},
+            enum={"100": 100, "1000": 1000, "10000": 10000, "200": 200, "2000": 2000, "25000": 25000, "300": 300, "400": 400, "500": 500, "5000": 5000, "50000": 50000},
         )
         _args_schema.sku_name = AAZStrArg(
             options=["--sku-name"],
@@ -152,11 +172,11 @@ class Create(AAZCommand):
         yield self.ClustersCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -174,16 +194,16 @@ class Create(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -228,7 +248,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-06-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -253,7 +273,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType)
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType)
@@ -266,12 +286,13 @@ class Create(AAZCommand):
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".")
+                user_assigned_identities.set_elements(AAZObjectType, ".", typ_kwargs={"nullable": True})
 
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("billingType", AAZStrType, ".billing_type")
                 properties.set_prop("keyVaultProperties", AAZObjectType)
+                properties.set_prop("replication", AAZObjectType)
 
             key_vault_properties = _builder.get(".properties.keyVaultProperties")
             if key_vault_properties is not None:
@@ -279,6 +300,11 @@ class Create(AAZCommand):
                 key_vault_properties.set_prop("keyRsaSize", AAZIntType, ".key_rsa_size")
                 key_vault_properties.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 key_vault_properties.set_prop("keyVersion", AAZStrType, ".key_version")
+
+            replication = _builder.get(".properties.replication")
+            if replication is not None:
+                replication.set_prop("enabled", AAZBoolType, ".replication_enabled")
+                replication.set_prop("location", AAZStrType, ".replication_location")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -291,44 +317,44 @@ class Create(AAZCommand):
 
             return self.serialize_content(_content_value)
 
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
+            cls._schema_on_200 = AAZObjectType()
 
-            _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.id = AAZStrType(
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.identity = AAZObjectType()
-            _schema_on_200_201.location = AAZStrType(
+            _schema_on_200.identity = AAZIdentityObjectType()
+            _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
-            _schema_on_200_201.name = AAZStrType(
+            _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.properties = AAZObjectType(
+            _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200_201.sku = AAZObjectType()
-            _schema_on_200_201.tags = AAZDictType()
-            _schema_on_200_201.type = AAZStrType(
+            _schema_on_200.sku = AAZObjectType()
+            _schema_on_200.tags = AAZDictType()
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            identity = cls._schema_on_200_201.identity
+            identity = cls._schema_on_200.identity
             identity.principal_id = AAZStrType(
                 serialized_name="principalId",
                 flags={"read_only": True},
@@ -344,10 +370,12 @@ class Create(AAZCommand):
                 serialized_name="userAssignedIdentities",
             )
 
-            user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
 
-            _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
             _element.client_id = AAZStrType(
                 serialized_name="clientId",
                 flags={"read_only": True},
@@ -357,7 +385,7 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200_201.properties
+            properties = cls._schema_on_200.properties
             properties.associated_workspaces = AAZListType(
                 serialized_name="associatedWorkspaces",
                 flags={"read_only": True},
@@ -379,6 +407,9 @@ class Create(AAZCommand):
             properties.is_availability_zones_enabled = AAZBoolType(
                 serialized_name="isAvailabilityZonesEnabled",
             )
+            properties.is_double_encryption_enabled = AAZBoolType(
+                serialized_name="isDoubleEncryptionEnabled",
+            )
             properties.key_vault_properties = AAZObjectType(
                 serialized_name="keyVaultProperties",
             )
@@ -390,13 +421,12 @@ class Create(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.replication = AAZObjectType()
 
-            associated_workspaces = cls._schema_on_200_201.properties.associated_workspaces
-            associated_workspaces.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            associated_workspaces = cls._schema_on_200.properties.associated_workspaces
+            associated_workspaces.Element = AAZObjectType()
 
-            _element = cls._schema_on_200_201.properties.associated_workspaces.Element
+            _element = cls._schema_on_200.properties.associated_workspaces.Element
             _element.associate_date = AAZStrType(
                 serialized_name="associateDate",
                 flags={"read_only": True},
@@ -414,7 +444,7 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
-            capacity_reservation_properties = cls._schema_on_200_201.properties.capacity_reservation_properties
+            capacity_reservation_properties = cls._schema_on_200.properties.capacity_reservation_properties
             capacity_reservation_properties.last_sku_update = AAZStrType(
                 serialized_name="lastSkuUpdate",
                 flags={"read_only": True},
@@ -424,7 +454,7 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
-            key_vault_properties = cls._schema_on_200_201.properties.key_vault_properties
+            key_vault_properties = cls._schema_on_200.properties.key_vault_properties
             key_vault_properties.key_name = AAZStrType(
                 serialized_name="keyName",
             )
@@ -438,14 +468,37 @@ class Create(AAZCommand):
                 serialized_name="keyVersion",
             )
 
-            sku = cls._schema_on_200_201.sku
+            replication = cls._schema_on_200.properties.replication
+            replication.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            replication.enabled = AAZBoolType()
+            replication.is_availability_zones_enabled = AAZBoolType(
+                serialized_name="isAvailabilityZonesEnabled",
+            )
+            replication.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            replication.location = AAZStrType()
+            replication.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
+            sku = cls._schema_on_200.sku
             sku.capacity = AAZIntType()
             sku.name = AAZStrType()
 
-            tags = cls._schema_on_200_201.tags
+            tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

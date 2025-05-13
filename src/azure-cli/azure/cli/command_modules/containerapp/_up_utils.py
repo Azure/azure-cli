@@ -24,9 +24,8 @@ from azure.cli.command_modules.appservice._create_util import (
 from azure.cli.command_modules.acr.custom import acr_show
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 from knack.log import get_logger
-
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._clients import ManagedEnvironmentClient, ContainerAppClient, GitHubActionClient, ContainerAppsJobClient
 
@@ -56,7 +55,7 @@ from ._utils import (
 
 )
 
-from ._constants import (MAXIMUM_SECRET_LENGTH,
+from ._constants import (MAXIMUM_ACR_LENGTH,
                          LOG_ANALYTICS_RP,
                          CONTAINER_APPS_RP,
                          ACR_IMAGE_SUFFIX,
@@ -451,9 +450,9 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
                         task_command_kwargs = {"resource_type": ResourceType.MGMT_CONTAINERREGISTRY,
                                                'operation_group': 'webhooks'}
                         old_command_kwargs = {}
-                        for key in task_command_kwargs:  # pylint: disable=consider-using-dict-items
-                            old_command_kwargs[key] = self.cmd.command_kwargs.get(key)
-                            self.cmd.command_kwargs[key] = task_command_kwargs[key]
+                        for k, v in task_command_kwargs.items():
+                            old_command_kwargs[k] = self.cmd.command_kwargs.get(k)
+                            self.cmd.command_kwargs[k] = v
                         if self.acr and self.acr.name is not None:
                             acr_login(self.cmd, self.acr.name)
                         for k, v in old_command_kwargs.items():
@@ -558,9 +557,9 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         run_client = cf_acr_runs(self.cmd.cli_ctx)
         task_command_kwargs = {"resource_type": ResourceType.MGMT_CONTAINERREGISTRY, 'operation_group': 'webhooks'}
         old_command_kwargs = {}
-        for key in task_command_kwargs:  # pylint: disable=consider-using-dict-items
-            old_command_kwargs[key] = self.cmd.command_kwargs.get(key)
-            self.cmd.command_kwargs[key] = task_command_kwargs[key]
+        for k, v in task_command_kwargs.items():
+            old_command_kwargs[k] = self.cmd.command_kwargs.get(k)
+            self.cmd.command_kwargs[k] = v
 
         with NamedTemporaryFile(mode="w", delete=False) as task_file:
             try:
@@ -596,8 +595,16 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         # Creating a tag for the image using the current time to avoid overwriting customer's existing images
         now = datetime.now()
         tag_now_suffix = str(now).replace(" ", "").replace("-", "").replace(".", "").replace(":", "")
-        image_name_with_tag = image_name + ":{}".format(tag_now_suffix)
-        self.image = self.registry_server + "/" + image_name_with_tag
+
+        if ":" in image_name.split("/")[-1]:
+            image_name_with_tag = image_name
+        else:
+            image_name_with_tag = image_name + ":{}".format(tag_now_suffix)
+
+        if not image_name_with_tag.startswith(self.registry_server):
+            self.image = self.registry_server + "/" + image_name_with_tag
+        else:
+            self.image = image_name_with_tag
 
         if build_from_source:
             logger.warning(
@@ -767,11 +774,14 @@ def _validate_up_args(cmd, source, image, repo, registry_server):
             "Cannot use --source and --repo togther. "
             "Can either deploy from a local directory or a Github repo"
         )
+
     if repo and registry_server and "azurecr.io" in registry_server:
         parsed = urlparse(registry_server)
         registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
-        if registry_name and len(registry_name) > MAXIMUM_SECRET_LENGTH:
-            raise ValidationError(f"--registry-server ACR name must be less than {MAXIMUM_SECRET_LENGTH} "
+        # The length limit of secret name is 253, we use {registry_name}azurecrio-{acr-username} as the registry's secret name.
+        # The value of {acr-username} is registry_name. So the length of registry_name need to <= 121
+        if registry_name and len(registry_name) > MAXIMUM_ACR_LENGTH:
+            raise ValidationError(f"--registry-server ACR name must be less than {MAXIMUM_ACR_LENGTH} "
                                   "characters when using --repo")
 
 
@@ -817,23 +827,31 @@ def _get_dockerfile_content(repo, branch, token, source, context_path, dockerfil
 def _get_app_env_and_group(
         cmd, name, resource_group: "ResourceGroup", env: "ContainerAppEnvironment", location
 ):
+    matched_apps = []
+    # If no resource group is provided, we need to search for the app in all resource groups
     if not resource_group.name and not resource_group.exists:
         matched_apps = [c for c in list_containerapp(cmd) if c["name"].lower() == name.lower()]
-        if env.name:
-            matched_apps = [c for c in matched_apps if
-                            parse_resource_id(c["properties"]["environmentId"])["name"].lower() == env.name.lower()]
-        if location:
-            matched_apps = [c for c in matched_apps if format_location(c["location"]) == format_location(location)]
-        if len(matched_apps) == 1:
-            resource_group.name = parse_resource_id(matched_apps[0]["id"])[
-                "resource_group"
-            ]
-            env.set_name(matched_apps[0]["properties"]["environmentId"])
-        elif len(matched_apps) > 1:
-            raise ValidationError(
-                f"There are multiple containerapps with name {name} on the subscription. "
-                "Please specify which resource group your Containerapp is in."
-            )
+
+    # If a resource group is provided, we need to search for the app in that resource group
+    if resource_group.name and resource_group.exists:
+        matched_apps = [c for c in list_containerapp(cmd, resource_group_name=resource_group.name) if
+                        c["name"].lower() == name.lower()]
+
+    if env.name:
+        matched_apps = [c for c in matched_apps if
+                        parse_resource_id(c["properties"]["environmentId"])["name"].lower() == env.name.lower()]
+    if location:
+        matched_apps = [c for c in matched_apps if format_location(c["location"]) == format_location(location)]
+    if len(matched_apps) == 1:
+        resource_group.name = parse_resource_id(matched_apps[0]["id"])[
+            "resource_group"
+        ]
+        env.set_name(matched_apps[0]["properties"]["environmentId"])
+    elif len(matched_apps) > 1:
+        raise ValidationError(
+            f"There are multiple containerapps with name {name} on the subscription. "
+            "Please specify which resource group your Containerapp is in."
+        )
 
 
 def _get_env_and_group_from_log_analytics(

@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage VPN connections.
 
-    For more information on site-to-site connections, visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli. For more information on Vnet-to-Vnet connections, visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-vnet-vnet-cli.
+    For more information on site-to-site connections, visit https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli. For more information on Vnet-to-Vnet connections, visit https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-vnet-vnet-cli.
     """
     pass
 

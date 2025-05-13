@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage Network Watcher troubleshooting sessions.
 
-    For more information on configuring troubleshooting visit https://docs.microsoft.com/azure/network-watcher/network-watcher-troubleshoot-manage-cli.
+    For more information on configuring troubleshooting visit https://learn.microsoft.com/azure/network-watcher/network-watcher-troubleshoot-manage-cli.
     """
     pass
 

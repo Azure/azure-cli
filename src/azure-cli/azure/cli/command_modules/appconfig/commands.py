@@ -81,7 +81,7 @@ def load_command_table(self, _):
     with self.command_group('appconfig replica', configstore_replica_util) as g:
         g.command('list', 'list_replica')
         g.command('create', 'create_replica')
-        g.command('delete', 'delete_replica', confirmation=True)
+        g.command('delete', 'delete_replica')
         g.show_command('show', 'show_replica')
 
     with self.command_group('appconfig credential', configstore_credential_util) as g:
@@ -128,7 +128,7 @@ def load_command_table(self, _):
                                                                cf_configstore_operations,
                                                                featurefilter_entry_format)) as g:
         g.custom_command('add', 'add_filter')
-        g.custom_command('update', 'update_filter', is_preview=True)
+        g.custom_command('update', 'update_filter')
         g.custom_command('delete', 'delete_filter')
         g.custom_show_command('show', 'show_filter')
         g.custom_command('list', 'list_filter')

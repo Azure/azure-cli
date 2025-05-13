@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/customipprefixes/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/customipprefixes/{}", "2023-11-01"],
         ]
     }
 
@@ -106,6 +106,14 @@ class Create(AAZCommand):
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.prefix_type = AAZStrArg(
+            options=["--prefix-type"],
+            arg_group="Properties",
+            help="Type of custom IP prefix. Should be Singular, Parent, or Child.",
+            enum={"Child": "Child", "Parent": "Parent", "Singular": "Singular"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -189,7 +197,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -227,6 +235,7 @@ class Create(AAZCommand):
                 properties.set_prop("customIpPrefixParent", AAZObjectType)
                 properties.set_prop("expressRouteAdvertise", AAZBoolType, ".express_route_advertise")
                 properties.set_prop("geo", AAZStrType, ".geo")
+                properties.set_prop("prefixType", AAZStrType, ".prefix_type")
                 properties.set_prop("signedMessage", AAZStrType, ".signed_message")
 
             custom_ip_prefix_parent = _builder.get(".properties.customIpPrefixParent")

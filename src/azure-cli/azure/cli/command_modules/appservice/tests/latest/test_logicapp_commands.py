@@ -16,7 +16,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathPatternCheck
-from msrestazure.tools import resource_id, parse_resource_id
+from azure.mgmt.core.tools import resource_id, parse_resource_id
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -134,10 +134,10 @@ class LogicappBasicE2ETest(ScenarioTest):
         # show
         result = self.cmd('logicapp config appsettings list -g {} -n {}'.format(
             resource_group, logicapp_name)).get_output_in_json()
-        appsetting_runtime_version = next((x for x in result if x['name'] == 'WEBSITE_NODE_DEFAULT_VERSION'))
+        appsetting_runtime_version = next(x for x in result if x['name'] == 'WEBSITE_NODE_DEFAULT_VERSION')
         self.assertEqual(appsetting_runtime_version['name'], 'WEBSITE_NODE_DEFAULT_VERSION')
         self.assertEqual(appsetting_runtime_version['value'], '~16')
-        appsetting_functions_version = next((x for x in result if x['name'] == 'FUNCTIONS_EXTENSION_VERSION'))
+        appsetting_functions_version = next(x for x in result if x['name'] == 'FUNCTIONS_EXTENSION_VERSION')
         self.assertEqual(appsetting_functions_version['name'], 'FUNCTIONS_EXTENSION_VERSION')
         self.assertEqual(appsetting_functions_version['value'], '~4')
 
@@ -179,7 +179,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         # show
         result = self.cmd('logicapp config appsettings list -g {} -n {}'.format(
             resource_group, logicapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
+        s2 = next(x for x in result if x['name'] == 's2')
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')

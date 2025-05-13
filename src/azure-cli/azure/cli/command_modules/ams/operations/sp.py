@@ -42,8 +42,7 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
     sp_oid = aad_sp['id']  # pylint: disable=unsubscriptable-object
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    _, _, tenant_id = profile.get_login_credentials(
-        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    _, _, tenant_id = profile.get_login_credentials()
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -84,8 +83,7 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
     app_object_id = aad_application['id']
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    _, _, tenant_id = profile.get_login_credentials(
-        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    _, _, tenant_id = profile.get_login_credentials()
     created_password = add_sp_password(graph_client, entity_name_string='password', app_id=app_object_id,
                                        password_display_name=password_display_name, years=years)
 
@@ -104,8 +102,7 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
 def _update_sp(cmd, graph_client, aad_sp, ams, account_name, resource_group_name, display_name,
                new_sp_name, role, years, sp_password, xml):
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    _, _, tenant_id = profile.get_login_credentials(
-        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    _, _, tenant_id = profile.get_login_credentials()
     sp_oid = aad_sp['id']
     app_id = aad_sp['appId']
     app_object_id = _get_application_object_id(graph_client, app_id)
@@ -277,7 +274,7 @@ def create_application(client, display_name):
         return client.application_create(app_create_param)
     except GraphError as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = ('https://docs.microsoft.com/en-us/azure/azure-resource-manager/' +
+            link = ('https://learn.microsoft.com/en-us/azure/azure-resource-manager/' +
                     'resource-group-create-service-principal-portal')
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))

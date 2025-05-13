@@ -11,7 +11,7 @@ def transform_sqlvm_group_output(result):
     Transforms the result of SQL virtual machine group to eliminate unnecessary parameters.
     '''
     from collections import OrderedDict
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
         wsfc_object = format_wsfc_domain_profile(result.wsfc_domain_profile)
@@ -44,7 +44,7 @@ def transform_sqlvm_output(result):
     Transforms the result of SQL virtual machine group to eliminate unnecessary parameters.
     '''
     from collections import OrderedDict
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
         # Create a dictionary with the relevant parameters
@@ -94,7 +94,7 @@ def transform_aglistener_output(result):
     Transforms the result of Availability Group Listener to eliminate unnecessary parameters.
     '''
     from collections import OrderedDict
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
         # Create a dictionary with the relevant parameters

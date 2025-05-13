@@ -16,19 +16,19 @@ ENDPOINT_DEPRECATION_INFO = 'IoT Extension (azure-iot) message-endpoint command 
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
-        result = super(PolicyUpdateResultTransform, self).__call__(poller)
+        result = super().__call__(poller)
         return result.properties.authorization_policies
 
 
 class EndpointUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
-        result = super(EndpointUpdateResultTransform, self).__call__(poller)
+        result = super().__call__(poller)
         return result.properties.routing.endpoints
 
 
 class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
-        result = super(RouteUpdateResultTransform, self).__call__(poller)
+        result = super().__call__(poller)
         return result.properties.routing.routes
 
 
@@ -42,7 +42,7 @@ class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few
         if not poller:
             return poller
         try:
-            super(HubDeleteResultTransform, self).__call__(poller)
+            super().__call__(poller)
         except CLIError as e:
             if 'not found' not in str(e):
                 raise e

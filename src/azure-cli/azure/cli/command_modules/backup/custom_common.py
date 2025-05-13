@@ -209,8 +209,8 @@ def fetch_tier_for_rp(rp):
         setattr(rp, "tier_type", None)
         return
 
-    for i in range(len(rp.properties.recovery_point_tier_details)):
-        currRpTierDetails = rp.properties.recovery_point_tier_details[i]
+    for v in rp.properties.recovery_point_tier_details:
+        currRpTierDetails = v
         if (currRpTierDetails.type == RecoveryPointTierType.ARCHIVED_RP and
                 currRpTierDetails.status == RecoveryPointTierStatus.REHYDRATED):
             isRehydrated = True

@@ -1,0 +1,64 @@
+name: CCOA
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+    branches:
+      - dev
+
+permissions:
+  pull-requests: write
+
+jobs:
+  add_label_and_comment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check current date securely
+        id: date_check
+        run: |
+          # Define the block date (Jan 7, 2025)
+          BLOCK_DATE=$(date -d "2025-01-07" +%s)
+
+          # Get the current date in seconds
+          CURRENT_DATE=$(date +%s)
+
+          # Validate the dates and safely output the result
+          if [ "$CURRENT_DATE" -lt "$BLOCK_DATE" ]; then
+            echo "continue=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "continue=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Comment on PR
+        if: steps.date_check.outputs.continue == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Fetch existing comments
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            // Check if the specific comment already exists
+            const existingComment = comments.data.find(comment =>
+              comment.body.includes("⚠️**Your changes in this PR will be released on Jan 14, 2025 due to CCOA (extend to Jan 6, 2025)**")
+            );
+
+            if (existingComment) {
+              console.log("Comment already exists. Skipping...");
+            } else {
+              console.log("No comment found. Adding a new one...");
+              // Add a new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: "⚠️**Your changes in this PR will be released on Jan 14, 2025 due to CCOA (extend to Jan 6, 2025)**",
+              });
+            }

@@ -6,20 +6,13 @@
 # pylint: disable=line-too-long, too-many-statements, too-many-locals, too-many-branches
 
 from azure.cli.core.azclierror import CLIError, AzureResponseError, ResourceNotFoundError
+from azure.appconfiguration import ConfigurationSettingsFilter
+from azure.cli.core.commands.progress import IndeterminateStandardOut
 from azure.core.exceptions import HttpResponseError
 
-from ._constants import StatusCodes, SearchFilterOptions
-from ._snapshot_custom_client import AppConfigSnapshotClient
-from ._snapshotmodels import SnapshotQueryFields
+from ._constants import ProvisioningStatus, StatusCodes, SearchFilterOptions, SnapshotFilterFields
+from ._snapshotmodels import SnapshotQueryFields, Snapshot
 from ._utils import get_appconfig_data_client
-
-
-def _get_snapshot_client(cmd,
-                         name,
-                         connection_string,
-                         auth_mode,
-                         endpoint):
-    return AppConfigSnapshotClient(get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint))
 
 
 # Snapshot commands #
@@ -33,13 +26,32 @@ def create_snapshot(cmd,
                     endpoint=None,
                     retention_period=None,
                     composition_type=None,
-                    tags=None
-                    ):
+                    tags=None):
 
-    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
+    configurationSettingsFilters = [ConfigurationSettingsFilter(
+        key=x.get(SnapshotFilterFields.KEY),
+        label=x.get(SnapshotFilterFields.LABEL),
+        tags=x.get(SnapshotFilterFields.TAGS)) for x in filters]
+
+    progress = IndeterminateStandardOut()
+    progress.write({"message": "Starting"})
 
     try:
-        return client.begin_create_snapshot(snapshot_name, filters, composition_type, retention_period, tags)
+        config_snapshot_poller = client.begin_create_snapshot(
+            snapshot_name,
+            configurationSettingsFilters,
+            composition_type=composition_type,
+            retention_period=retention_period,
+            tags=tags)
+
+        # Poll snapshot creation status
+        while config_snapshot_poller.status() != ProvisioningStatus.SUCCEEDED:
+            progress.spinner.step(label="Running")
+            config_snapshot_poller.wait(1)
+
+        return Snapshot.from_configuration_snapshot(config_snapshot_poller.result())
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.CONFLICT:
@@ -49,6 +61,9 @@ def create_snapshot(cmd,
 
     except Exception as exception:
         raise CLIError("Failed to create snapshot. {}".format(str(exception)))
+
+    finally:
+        progress.clear()
 
 
 def show_snapshot(cmd,
@@ -68,10 +83,10 @@ def show_snapshot(cmd,
                 break
             query_fields.append(field.name.lower())
 
-    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        snapshot = client.get_snapshot(snapshot_name, fields=query_fields)
+        result = client.get_snapshot(snapshot_name, fields=query_fields)
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
@@ -81,6 +96,8 @@ def show_snapshot(cmd,
 
     except Exception as exception:
         raise CLIError("Request failed. {}".format(str(exception)))
+
+    snapshot = Snapshot.from_configuration_snapshot(result)
 
     if not query_fields:
         return snapshot
@@ -113,7 +130,7 @@ def list_snapshots(cmd,
                 break
             query_fields.append(field.name.lower())
 
-    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
         snapshots_iterable = client.list_snapshots(name=snapshot_name, status=status, fields=query_fields)
@@ -132,7 +149,8 @@ def list_snapshots(cmd,
     snapshots = []
     current_snapshot_count = 0
 
-    for snapshot in snapshots_iterable:
+    for config_snapshot in snapshots_iterable:
+        snapshot = Snapshot.from_configuration_snapshot(config_snapshot)
         if query_fields:
             partial_snapshot = {}
             for field in query_fields:
@@ -156,10 +174,12 @@ def archive_snapshot(cmd,
                      auth_mode='key',
                      endpoint=None):
 
-    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        return client.archive_snapshot(snapshot_name)
+        result = client.archive_snapshot(snapshot_name)
+
+        return Snapshot.from_configuration_snapshot(result)
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
@@ -178,10 +198,12 @@ def recover_snapshot(cmd,
                      auth_mode='key',
                      endpoint=None):
 
-    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        return client.recover_snapshot(snapshot_name)
+        result = client.recover_snapshot(snapshot_name)
+
+        return Snapshot.from_configuration_snapshot(result)
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:

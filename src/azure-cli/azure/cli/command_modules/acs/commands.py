@@ -10,6 +10,7 @@ from azure.cli.command_modules.acs._client_factory import (
     cf_snapshots,
     cf_trustedaccess_role,
     cf_trustedaccess_role_binding,
+    cf_machines
 )
 from azure.cli.command_modules.acs._format import (
     aks_agentpool_list_table_format,
@@ -23,6 +24,8 @@ from azure.cli.command_modules.acs._format import (
     aks_versions_table_format,
     aks_mesh_revisions_table_format,
     aks_mesh_upgrades_table_format,
+    aks_machine_list_table_format,
+    aks_machine_show_table_format,
 )
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
@@ -45,6 +48,12 @@ def load_command_table(self, _):
                         '_agent_pools_operations#AgentPoolsOperations.{}',
         operation_group='agent_pools',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        client_factory=cf_managed_clusters
+    )
+
+    machines_sdk = CliCommandType(
+        operations_tmpl='azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks.'
+                        'operations._machine_operations#MachinesOperations.{}',
         client_factory=cf_managed_clusters
     )
 
@@ -110,6 +119,12 @@ def load_command_table(self, _):
         g.custom_command('get-versions', 'aks_get_versions',
                          table_transformer=aks_versions_table_format)
 
+    with self.command_group('aks machine', machines_sdk, client_factory=cf_machines) as g:
+        g.custom_command('list', 'aks_machine_list',
+                         table_transformer=aks_machine_list_table_format)
+        g.custom_show_command('show', 'aks_machine_show',
+                              table_transformer=aks_machine_show_table_format)
+
     # AKS maintenance configuration commands
     with self.command_group('aks maintenanceconfiguration', maintenance_configuration_sdk, client_factory=cf_maintenance_configurations) as g:
         g.custom_command('list', 'aks_maintenanceconfiguration_list')
@@ -134,6 +149,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'aks_agentpool_start', supports_no_wait=True)
         g.wait_command('wait')
         g.custom_command('operation-abort', 'aks_agentpool_operation_abort', supports_no_wait=True)
+        g.custom_command('delete-machines', 'aks_agentpool_delete_machines', supports_no_wait=True)
 
     with self.command_group('aks command', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command('invoke', 'aks_runcommand', supports_no_wait=True,
@@ -197,10 +213,11 @@ def load_command_table(self, _):
             'aks_mesh_enable',
             supports_no_wait=True)
         g.custom_command(
-            'disable',
-            'aks_mesh_disable',
+            "disable",
+            "aks_mesh_disable",
             supports_no_wait=True,
-            confirmation=True)
+            confirmation="Existing Azure Service Mesh Profile values will be reset.\n" +
+            "Are you sure you want to perform this operation?")
         g.custom_command(
             'enable-ingress-gateway',
             'aks_mesh_enable_ingress_gateway',
@@ -233,3 +250,16 @@ def load_command_table(self, _):
             'rollback',
             'aks_mesh_upgrade_rollback',
             supports_no_wait=True)
+
+    # AKS approuting commands
+    with self.command_group('aks approuting', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('enable', 'aks_approuting_enable')
+        g.custom_command('disable', 'aks_approuting_disable', confirmation=True)
+        g.custom_command('update', 'aks_approuting_update')
+
+    # AKS approuting dns-zone commands
+    with self.command_group('aks approuting zone', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('add', 'aks_approuting_zone_add')
+        g.custom_command('delete', 'aks_approuting_zone_delete', confirmation=True)
+        g.custom_command('update', 'aks_approuting_zone_update')
+        g.custom_command('list', 'aks_approuting_zone_list')

@@ -10,7 +10,7 @@ from azure.mgmt.cdn.models import SkuName
 
 
 class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_endpoint_crud(self, resource_group):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -25,7 +25,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                              JMESPathCheck('nameAvailable', True)]
         self.cmd(f"cdn name-exists --name {endpoint_name}", checks=name_exist_checks)
 
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         checks = [JMESPathCheck('name', endpoint_name),
                   JMESPathCheck('origins[0].hostName', origin),
                   JMESPathCheck('isHttpAllowed', True),
@@ -79,7 +79,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_endpoint_compression(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=24)
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -149,13 +149,13 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
     @record_only()  # This test relies on existing resources in a specific subscription
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_private_link(self, resource_group):
         profile_name = 'profile123'
         self.profile_create_cmd(resource_group, profile_name, sku='Standard_Microsoft')
 
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         pls_subscription_id = '27cafca8-b9a4-4264-b399-45d0c9cca1ab'
         # Workaround for overly heavy-handed subscription id replacement in playback mode.
         if self.is_playback_mode():
@@ -185,13 +185,13 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                        JMESPathCheck('@[0].origins[0].privateLinkApprovalMessage', private_link_message)]
         self.endpoint_list_cmd(resource_group, profile_name, checks=list_checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_endpoint_start_and_stop(self, resource_group):
         profile_name = 'profile123'
         self.profile_create_cmd(resource_group, profile_name)
 
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
 
         checks = [JMESPathCheck('resourceState', 'Stopped')]
@@ -202,10 +202,10 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.endpoint_start_cmd(resource_group, endpoint_name, profile_name)
         self.endpoint_show_cmd(resource_group, endpoint_name, profile_name, checks=checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_endpoint_load_and_purge(self, resource_group):
         profile_name = 'profile123'
-        self.profile_create_cmd(resource_group, profile_name, options='--sku Standard_Verizon')
+        self.profile_create_cmd(resource_group, profile_name, sku='Standard_Verizon')
 
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
         origin = 'www.contoso.com'
@@ -225,11 +225,6 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                   JMESPathCheck('isHttpsAllowed', True),
                   JMESPathCheck('isCompressionEnabled', False),
                   JMESPathCheck('queryStringCachingBehavior', 'IgnoreQueryString')]
-
-        # create an endpoint using the standard_akamai profile
-        profile_name = self._create_profile(resource_group, SkuName.standard_akamai.value)
-        endpoint_name = self.create_random_name(prefix='endpoint', length=24)
-        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin, checks=checks + [JMESPathCheck('name', endpoint_name)])
 
         # create an endpoint using the standard_verizon profile
         profile_name = self._create_profile(resource_group, SkuName.standard_verizon.value)
@@ -253,12 +248,12 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
-        self.profile_create_cmd(resource_group, profile_name, options='--sku Standard_Microsoft')
+        self.profile_create_cmd(resource_group, profile_name, sku='Standard_Microsoft')
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.endpoint_list_cmd(resource_group, profile_name, checks=list_checks)
 
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         checks = [JMESPathCheck('name', endpoint_name),
                   JMESPathCheck('origins[0].hostName', origin),
                   JMESPathCheck('isHttpAllowed', True),
@@ -376,16 +371,12 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
     @ResourceGroupPreparer()
-    def test_akamai_delivery_rule(self, resource_group):
-        self._test_delivery_rule_internal(resource_group, "akp", "Standard_Akamai")
-
-    @ResourceGroupPreparer()
     def test_verizon_delivery_rule(self, resource_group):
         self._test_delivery_rule_internal(resource_group, "akp", "Standard_Verizon")
 
     def _test_delivery_rule_internal(self, resource_group, profile_prefix, sku):
         profile_name = self.create_random_name(prefix=profile_prefix, length=24)
-        self.profile_create_cmd(resource_group, profile_name, options=f'--sku {sku}')
+        self.profile_create_cmd(resource_group, profile_name, sku=sku)
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
         origin = 'huaiyiztesthost1.blob.core.chinacloudapi.cn'
         checks = [JMESPathCheck('name', endpoint_name),

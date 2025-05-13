@@ -255,6 +255,7 @@ class Wait(AAZWaitCommand):
             )
             properties.property_updates_in_progress = AAZObjectType(
                 serialized_name="propertyUpdatesInProgress",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",

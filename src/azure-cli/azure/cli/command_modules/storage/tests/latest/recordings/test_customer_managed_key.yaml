@@ -13,39 +13,40 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-keyvault/10.3.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2023-11-07T03:49:05.613Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-11-07T03:49:05.613Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"3707fb2f-ac10-4591-a04f-8b0d786ea37d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","createdByType":"Application","createdAt":"2025-04-23T05:42:29.626Z","lastModifiedBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","lastModifiedByType":"Application","lastModifiedAt":"2025-04-23T05:42:29.626Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"55e73ff3-85c1-4e75-84df-a7a86a55f067","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '982'
+      - '1054'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:42 GMT
+      - Wed, 23 Apr 2025 05:43:02 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.969.1
+      - 2.2.81.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 8CFF706F4BC949B494FB51870600D004 Ref B: BN1AA2051012009 Ref C: 2025-04-23T05:43:02Z'
     status:
       code: 200
       message: OK
@@ -56,16 +57,21 @@ interactions:
       - application/json
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - keyvault key create
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       Content-Type:
       - application/json
+      ParameterSetName:
+      - -n -p --vault-name -o --query
       User-Agent:
-      - azsdk-python-keyvault-keys/4.9.0b3 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://clitest000003.vault.azure.net/keys/testkey/create?api-version=7.5-preview.1
+    uri: https://clitest000003.vault.azure.net/keys/testkey/create?api-version=7.6-preview.2
   response:
     body:
       string: '{"error":{"code":"Unauthorized","message":"AKV10000: Request is missing
@@ -78,7 +84,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:44 GMT
+      - Wed, 23 Apr 2025 05:43:02 GMT
       expires:
       - '-1'
       pragma:
@@ -91,11 +97,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=52.232.192.234;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - southcentralus
       x-ms-keyvault-service-version:
-      - 1.9.1054.1
+      - 1.9.2297.1
     status:
       code: 401
       message: Unauthorized
@@ -106,19 +112,24 @@ interactions:
       - application/json
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - keyvault key create
       Connection:
       - keep-alive
       Content-Length:
       - '47'
       Content-Type:
       - application/json
+      ParameterSetName:
+      - -n -p --vault-name -o --query
       User-Agent:
-      - azsdk-python-keyvault-keys/4.9.0b3 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://clitest000003.vault.azure.net/keys/testkey/create?api-version=7.5-preview.1
+    uri: https://clitest000003.vault.azure.net/keys/testkey/create?api-version=7.6-preview.2
   response:
     body:
-      string: '{"key":{"kid":"https://clitest000003.vault.azure.net/keys/testkey/8a67c8a034184248bdb6383bb4424872","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"zcQMA0WalRJjrf5vdfNKms1nDUZhTsp_ORmerPzBKdzuUNdaN0HWM4mIaOf39WOGoLHZk39U14TiClFkXGAKD-m_h6eqw5ry7-na7fEKQdUME2cTiHkMW2rNCvGhfr-tGgKD4A4B1icC5WMklmHTv_RLpXGYgzVF9dfgQTz4yuBzxY1mFVeEKPa6ZbC6993w_d48tC5n7rb3BbnZwf4bRYG0hLWyifm8nHvJWzuYAwCAX48Ei2VYalhXYjmT8HVX_BASyRK2KTPTRgTUiAVOCaNVR_XDW1cOc9SRBJqrCV_f7v1hddS1Mwb86yUGtLMgNRuT_ejeoI_hgjfoIgWAxQ","e":"AQAB"},"attributes":{"enabled":true,"created":1699328985,"updated":1699328985,"recoveryLevel":"CustomizedRecoverable+Purgeable","recoverableDays":7,"exportable":false,"hsmPlatform":"0"}}'
+      string: '{"key":{"kid":"https://clitest000003.vault.azure.net/keys/testkey/6b3d31f28904428180e483d5da31e34d","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"n23HrxiW3snvgz28UpMr483U_qlAyTgwZaHzb8OWZAW8K_CO5tgNUsOtCJaZoBBG3hBbg7iO_F2pMDWjeuv2G9iIwdiVJYWy2C7VHjD0lSw8g6UrYzjxD0MtJB1cfaQ0GTTCHP9aBtvRQuVkpVUSwXnsXWzBcLRWXzwGzU-7Bdcu8IRqfVjI350xr5fQQV_EGWZPEe2MY3nTq_ogksHa3y8bZhU7vbZni83lHhmOw8mut2Onpgv5evCv6x9gTSuvxl7_AjP7MlBM4Id4op4kQkyUI6Et3rwytg-Nl_cVp9AMPAu7pHsH9GnU_Q7QaE6WpRopJGCpwrDmTM3nH1_JwQ","e":"AQAB"},"attributes":{"enabled":true,"created":1745386983,"updated":1745386983,"recoveryLevel":"CustomizedRecoverable+Purgeable","recoverableDays":7,"exportable":false,"hsmPlatform":"0"}}'
     headers:
       cache-control:
       - no-cache
@@ -127,7 +138,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:45 GMT
+      - Wed, 23 Apr 2025 05:43:03 GMT
       expires:
       - '-1'
       pragma:
@@ -137,11 +148,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=52.232.192.234;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - southcentralus
       x-ms-keyvault-service-version:
-      - 1.9.1054.1
+      - 1.9.2297.1
     status:
       code: 200
       message: OK
@@ -159,35 +170,36 @@ interactions:
       ParameterSetName:
       - -n -g --assign-identity -o --query
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1301'
+      - '1337'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:49:46 GMT
+      - Wed, 23 Apr 2025 05:43:03 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 945E457DFA504303BBAD3C5E340F96B7 Ref B: BN1AA2051012051 Ref C: 2025-04-23T05:43:03Z'
     status:
       code: 200
       message: OK
@@ -213,37 +225,40 @@ interactions:
       ParameterSetName:
       - -n -g --assign-identity -o --query
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1441'
+      - '1477'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:49:50 GMT
+      - Wed, 23 Apr 2025 05:43:06 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/b4aaa475-283f-4c45-b40b-8ed44433a68f
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 0473C435CBCC46C8A2C1CACC75EA79BF Ref B: BN1AA2051013031 Ref C: 2025-04-23T05:43:04Z'
     status:
       code: 200
       message: OK
@@ -261,52 +276,54 @@ interactions:
       ParameterSetName:
       - -n --object-id -g --key-permissions
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-keyvault/10.3.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2023-11-07T03:49:05.613Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-11-07T03:49:05.613Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"3707fb2f-ac10-4591-a04f-8b0d786ea37d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","createdByType":"Application","createdAt":"2025-04-23T05:42:29.626Z","lastModifiedBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","lastModifiedByType":"Application","lastModifiedAt":"2025-04-23T05:42:29.626Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"55e73ff3-85c1-4e75-84df-a7a86a55f067","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '982'
+      - '1054'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:52 GMT
+      - Wed, 23 Apr 2025 05:43:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.969.1
+      - 2.2.81.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: E081DE3597294E469B8B139F3009E301 Ref B: BN1AA2051015053 Ref C: 2025-04-23T05:43:06Z'
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "southcentralus", "tags": {}, "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
       "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
-      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "3707fb2f-ac10-4591-a04f-8b0d786ea37d",
+      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "55e73ff3-85c1-4e75-84df-a7a86a55f067",
       "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["all"],
       "storage": ["all"]}}, {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId":
-      "21f634c6-7327-4842-9c3d-1154bf66d915", "permissions": {"keys": ["wrapKey",
-      "unwrapKey", "recover", "get"]}}], "vaultUri": "https://clitest000003.vault.azure.net/",
+      "28e7f50a-d0f7-4f74-9a8d-32791bbc84c9", "permissions": {"keys": ["unwrapKey",
+      "recover", "get", "wrapKey"]}}], "vaultUri": "https://clitest000003.vault.azure.net/",
       "enabledForDeployment": false, "enableSoftDelete": true, "softDeleteRetentionInDays":
-      7, "provisioningState": "Succeeded", "publicNetworkAccess": "Enabled"}}'
+      7, "enableRbacAuthorization": false, "provisioningState": "Succeeded", "publicNetworkAccess":
+      "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -317,47 +334,50 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '765'
+      - '799'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n --object-id -g --key-permissions
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-keyvault/10.3.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2023-11-07T03:49:05.613Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-11-07T03:49:53.255Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"3707fb2f-ac10-4591-a04f-8b0d786ea37d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"21f634c6-7327-4842-9c3d-1154bf66d915","permissions":{"keys":["wrapKey","unwrapKey","recover","get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","createdByType":"Application","createdAt":"2025-04-23T05:42:29.626Z","lastModifiedBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","lastModifiedByType":"Application","lastModifiedAt":"2025-04-23T05:43:09.395Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"55e73ff3-85c1-4e75-84df-a7a86a55f067","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","permissions":{"keys":["unwrapKey","recover","get","wrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1147'
+      - '1219'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:52 GMT
+      - Wed, 23 Apr 2025 05:43:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.969.1
+      - 2.2.81.0
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus2/5df45516-d6d0-4ad0-b13c-bcef4ce9a401
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: B8D4FB3FF6E84FA3840686C6CDC3C150 Ref B: BN1AA2051015053 Ref C: 2025-04-23T05:43:08Z'
     status:
       code: 200
       message: OK
@@ -375,52 +395,54 @@ interactions:
       ParameterSetName:
       - -n -g --set
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-keyvault/10.3.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2023-11-07T03:49:05.613Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-11-07T03:49:53.255Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"3707fb2f-ac10-4591-a04f-8b0d786ea37d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"21f634c6-7327-4842-9c3d-1154bf66d915","permissions":{"keys":["wrapKey","unwrapKey","recover","get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","createdByType":"Application","createdAt":"2025-04-23T05:42:29.626Z","lastModifiedBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","lastModifiedByType":"Application","lastModifiedAt":"2025-04-23T05:43:09.395Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"55e73ff3-85c1-4e75-84df-a7a86a55f067","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","permissions":{"keys":["unwrapKey","recover","get","wrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1147'
+      - '1219'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:55 GMT
+      - Wed, 23 Apr 2025 05:43:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.969.1
+      - 2.2.81.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: D6A042C8895E4A1FBC134ABFE681E39D Ref B: BN1AA2051014053 Ref C: 2025-04-23T05:43:09Z'
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "southcentralus", "tags": {}, "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
       "sku": {"family": "A", "name": "standard"}, "accessPolicies": [{"tenantId":
-      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "3707fb2f-ac10-4591-a04f-8b0d786ea37d",
+      "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "55e73ff3-85c1-4e75-84df-a7a86a55f067",
       "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["all"],
       "storage": ["all"]}}, {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId":
-      "21f634c6-7327-4842-9c3d-1154bf66d915", "permissions": {"keys": ["wrapKey",
-      "unwrapKey", "recover", "get"]}}], "vaultUri": "https://clitest000003.vault.azure.net/",
+      "28e7f50a-d0f7-4f74-9a8d-32791bbc84c9", "permissions": {"keys": ["unwrapKey",
+      "recover", "get", "wrapKey"]}}], "vaultUri": "https://clitest000003.vault.azure.net/",
       "enabledForDeployment": false, "enableSoftDelete": true, "softDeleteRetentionInDays":
-      7, "provisioningState": "Succeeded", "publicNetworkAccess": "Enabled"}}'
+      7, "enableRbacAuthorization": false, "provisioningState": "Succeeded", "publicNetworkAccess":
+      "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -431,47 +453,50 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '765'
+      - '799'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --set
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-keyvault/10.3.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2023-11-07T03:49:05.613Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-11-07T03:49:56.145Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"3707fb2f-ac10-4591-a04f-8b0d786ea37d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"21f634c6-7327-4842-9c3d-1154bf66d915","permissions":{"keys":["wrapKey","unwrapKey","recover","get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","createdByType":"Application","createdAt":"2025-04-23T05:42:29.626Z","lastModifiedBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","lastModifiedByType":"Application","lastModifiedAt":"2025-04-23T05:43:10.555Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"55e73ff3-85c1-4e75-84df-a7a86a55f067","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","permissions":{"keys":["unwrapKey","recover","get","wrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1147'
+      - '1219'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:55 GMT
+      - Wed, 23 Apr 2025 05:43:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.969.1
+      - 2.2.81.0
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/7bf7d2ca-664a-4547-ac52-9134b90251dc
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 2B3CF65F54114B68846933826B80585E Ref B: BN1AA2051013037 Ref C: 2025-04-23T05:43:09Z'
     status:
       code: 200
       message: OK
@@ -489,12 +514,13 @@ interactions:
       ParameterSetName:
       - --id --set
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault","namespace":"Microsoft.KeyVault","authorizations":[{"applicationId":"cfa8b339-82a2-471a-a3c9-0fc0be7a4093","roleDefinitionId":"1cf9858a-28a2-4228-abba-94e606305b95"},{"applicationId":"589d5083-6f11-4d30-a62a-a4b316a14abf","roleDefinitionId":"1f7e9952-ea79-42b8-a90e-b2dabbe1c1f2"},{"applicationId":"a1b76039-a76c-499f-a2dd-846b4cc32627"},{"applicationId":"1341df96-0b28-43da-ba24-7a6ce39be816"}],"resourceTypes":[{"resourceType":"operations","locations":[],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01","2014-12-19-preview"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"managedHSMs","locations":["Central
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault","namespace":"Microsoft.KeyVault","authorizations":[{"applicationId":"cfa8b339-82a2-471a-a3c9-0fc0be7a4093","roleDefinitionId":"1cf9858a-28a2-4228-abba-94e606305b95"},{"applicationId":"589d5083-6f11-4d30-a62a-a4b316a14abf","roleDefinitionId":"1f7e9952-ea79-42b8-a90e-b2dabbe1c1f2"},{"applicationId":"a1b76039-a76c-499f-a2dd-846b4cc32627"},{"applicationId":"1341df96-0b28-43da-ba24-7a6ce39be816"}],"resourceTypes":[{"resourceType":"operations","locations":[],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01","2014-12-19-preview"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"managedHSMs","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -503,7 +529,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","South
         India","Poland Central","Japan West","Norway East","Norway West","Germany
         West Central","Italy North","Israel Central","Australia Central 2","Brazil
-        Southeast","West India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview"],"defaultApiVersion":"2023-07-01","capabilities":"CrossResourceGroupResourceMove,
+        Southeast","West India","Mexico Central","Spain Central","Australia Southeast","France
+        South","Germany North","Korea South","South Africa West","UAE Central","New
+        Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview"],"defaultApiVersion":"2023-07-01","capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"deletedManagedHSMs","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
@@ -513,7 +541,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","South
         India","Poland Central","Japan West","Norway East","Norway West","Germany
         West Central","Italy North","Israel Central","Australia Central 2","Brazil
-        Southeast","West India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"defaultApiVersion":"2021-04-01-preview","capabilities":"None"},{"resourceType":"locations/deletedManagedHSMs","locations":["Central
+        Southeast","West India","Mexico Central","Spain Central","Australia Southeast","France
+        South","Germany North","Korea South","South Africa West","UAE Central","New
+        Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"defaultApiVersion":"2021-04-01-preview","capabilities":"None"},{"resourceType":"locations/deletedManagedHSMs","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -522,7 +552,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","South
         India","Poland Central","Japan West","Norway East","Norway West","Germany
         West Central","Italy North","Israel Central","Australia Central 2","Brazil
-        Southeast","West India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"capabilities":"None"},{"resourceType":"locations/managedHsmOperationResults","locations":["Central
+        Southeast","West India","Mexico Central","Spain Central","Australia Southeast","France
+        South","Germany North","Korea South","South Africa West","UAE Central","New
+        Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"capabilities":"None"},{"resourceType":"locations/managedHsmOperationResults","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -531,7 +563,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","South
         India","Poland Central","Japan West","Norway East","Norway West","Germany
         West Central","Italy North","Israel Central","Australia Central 2","Brazil
-        Southeast","West India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"capabilities":"None"},{"resourceType":"managedHSMs/keys","locations":["Central
+        Southeast","West India","Mexico Central","Spain Central","Australia Southeast","France
+        South","Germany North","Korea South","South Africa West","UAE Central","New
+        Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"capabilities":"None"},{"resourceType":"managedHSMs/keys","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -540,7 +574,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","Poland
         Central","South India","Japan West","Norway East","Norway West","Germany West
         Central","Italy North","Israel Central","Australia Central 2","Brazil Southeast","West
-        India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"managedHSMs/keys/versions","locations":["Central
+        India","Mexico Central","Spain Central","Australia Southeast","France South","Germany
+        North","Korea South","South Africa West","UAE Central","New Zealand North","Indonesia
+        Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"managedHSMs/keys/versions","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -549,7 +585,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","Poland
         Central","South India","Japan West","Norway East","Norway West","Germany West
         Central","Italy North","Israel Central","Australia Central 2","Brazil Southeast","West
-        India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"checkMhsmNameAvailability","locations":[],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"vaults","locations":["North
+        India","Mexico Central","Spain Central","Australia Southeast","France South","Germany
+        North","Korea South","South Africa West","UAE Central","New Zealand North","Indonesia
+        Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"checkMhsmNameAvailability","locations":[],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"vaults","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -559,7 +597,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"vaults/secrets","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
@@ -570,7 +609,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"vaults/accessPolicies","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"vaults/accessPolicies","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -580,7 +620,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"deletedVaults","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"deletedVaults","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -590,7 +631,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations/notifyNetworkSecurityPerimeterUpdatesAvailable","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations/notifyNetworkSecurityPerimeterUpdatesAvailable","locations":["North
         Central US","South Central US","Central US EUAP","East US 2 EUAP","West Central
         US","UK South","West Europe","Australia Central","Canada Central","Germany
         West Central","East Asia","Australia East","Japan East","East US 2","East
@@ -600,7 +642,8 @@ interactions:
         East","France Central","Jio India West","Korea South","Norway East","Poland
         Central","Qatar Central","South Africa North","Australia Southeast","Southeast
         Asia","Brazil Southeast","Switzerland North","UAE North","UK West","West India","Japan
-        West","West US 2","West US 3","West US"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview"],"defaultApiVersion":"2022-02-01-preview","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2022-02-01-preview"}],"capabilities":"None"},{"resourceType":"locations/deletedVaults","locations":["North
+        West","West US 2","West US 3","West US","Mexico Central","Israel Central","Spain
+        Central","North Europe","Italy North","Indonesia Central","New Zealand North"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview"],"defaultApiVersion":"2022-02-01-preview","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2022-02-01-preview"}],"capabilities":"None"},{"resourceType":"locations/deletedVaults","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -610,7 +653,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["East
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["East
         US","North Central US","West Europe","North Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West Central US","West
         US 2","West US","Japan East","Japan West","Australia East","Australia Southeast","Australia
@@ -620,7 +664,8 @@ interactions:
         Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"locations/operationResults","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"locations/operationResults","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -630,7 +675,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"vaults/eventGridFilters","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"vaults/eventGridFilters","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -640,7 +686,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"vaults/keys","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"vaults/keys","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -650,7 +697,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"vaults/keys/versions","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"vaults/keys/versions","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -660,26 +708,31 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '21815'
+      - '24863'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:57 GMT
+      - Wed, 23 Apr 2025 05:43:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 3128138F2DCA474EBC4ACD7B4AF993F0 Ref B: BN1AA2051014051 Ref C: 2025-04-23T05:43:10Z'
     status:
       code: 200
       message: OK
@@ -697,39 +750,40 @@ interactions:
       ParameterSetName:
       - --id --set
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2023-11-07T03:49:05.613Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-11-07T03:49:56.145Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"3707fb2f-ac10-4591-a04f-8b0d786ea37d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"21f634c6-7327-4842-9c3d-1154bf66d915","permissions":{"keys":["wrapKey","unwrapKey","recover","get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","createdByType":"Application","createdAt":"2025-04-23T05:42:29.626Z","lastModifiedBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","lastModifiedByType":"Application","lastModifiedAt":"2025-04-23T05:43:10.555Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"55e73ff3-85c1-4e75-84df-a7a86a55f067","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","permissions":{"keys":["unwrapKey","recover","get","wrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1147'
+      - '1219'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:58 GMT
+      - Wed, 23 Apr 2025 05:43:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.969.1
+      - 2.2.81.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: ABE6EFB5699D442B9117DC2E2744F4DA Ref B: BN1AA2051014051 Ref C: 2025-04-23T05:43:11Z'
     status:
       code: 200
       message: OK
@@ -747,12 +801,13 @@ interactions:
       ParameterSetName:
       - --id --set
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault","namespace":"Microsoft.KeyVault","authorizations":[{"applicationId":"cfa8b339-82a2-471a-a3c9-0fc0be7a4093","roleDefinitionId":"1cf9858a-28a2-4228-abba-94e606305b95"},{"applicationId":"589d5083-6f11-4d30-a62a-a4b316a14abf","roleDefinitionId":"1f7e9952-ea79-42b8-a90e-b2dabbe1c1f2"},{"applicationId":"a1b76039-a76c-499f-a2dd-846b4cc32627"},{"applicationId":"1341df96-0b28-43da-ba24-7a6ce39be816"}],"resourceTypes":[{"resourceType":"operations","locations":[],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01","2014-12-19-preview"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"managedHSMs","locations":["Central
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault","namespace":"Microsoft.KeyVault","authorizations":[{"applicationId":"cfa8b339-82a2-471a-a3c9-0fc0be7a4093","roleDefinitionId":"1cf9858a-28a2-4228-abba-94e606305b95"},{"applicationId":"589d5083-6f11-4d30-a62a-a4b316a14abf","roleDefinitionId":"1f7e9952-ea79-42b8-a90e-b2dabbe1c1f2"},{"applicationId":"a1b76039-a76c-499f-a2dd-846b4cc32627"},{"applicationId":"1341df96-0b28-43da-ba24-7a6ce39be816"}],"resourceTypes":[{"resourceType":"operations","locations":[],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01","2014-12-19-preview"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"managedHSMs","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -761,7 +816,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","South
         India","Poland Central","Japan West","Norway East","Norway West","Germany
         West Central","Italy North","Israel Central","Australia Central 2","Brazil
-        Southeast","West India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview"],"defaultApiVersion":"2023-07-01","capabilities":"CrossResourceGroupResourceMove,
+        Southeast","West India","Mexico Central","Spain Central","Australia Southeast","France
+        South","Germany North","Korea South","South Africa West","UAE Central","New
+        Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview"],"defaultApiVersion":"2023-07-01","capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"deletedManagedHSMs","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
@@ -771,7 +828,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","South
         India","Poland Central","Japan West","Norway East","Norway West","Germany
         West Central","Italy North","Israel Central","Australia Central 2","Brazil
-        Southeast","West India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"defaultApiVersion":"2021-04-01-preview","capabilities":"None"},{"resourceType":"locations/deletedManagedHSMs","locations":["Central
+        Southeast","West India","Mexico Central","Spain Central","Australia Southeast","France
+        South","Germany North","Korea South","South Africa West","UAE Central","New
+        Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"defaultApiVersion":"2021-04-01-preview","capabilities":"None"},{"resourceType":"locations/deletedManagedHSMs","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -780,7 +839,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","South
         India","Poland Central","Japan West","Norway East","Norway West","Germany
         West Central","Italy North","Israel Central","Australia Central 2","Brazil
-        Southeast","West India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"capabilities":"None"},{"resourceType":"locations/managedHsmOperationResults","locations":["Central
+        Southeast","West India","Mexico Central","Spain Central","Australia Southeast","France
+        South","Germany North","Korea South","South Africa West","UAE Central","New
+        Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"capabilities":"None"},{"resourceType":"locations/managedHsmOperationResults","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -789,7 +850,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","South
         India","Poland Central","Japan West","Norway East","Norway West","Germany
         West Central","Italy North","Israel Central","Australia Central 2","Brazil
-        Southeast","West India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"capabilities":"None"},{"resourceType":"managedHSMs/keys","locations":["Central
+        Southeast","West India","Mexico Central","Spain Central","Australia Southeast","France
+        South","Germany North","Korea South","South Africa West","UAE Central","New
+        Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-12-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview"],"capabilities":"None"},{"resourceType":"managedHSMs/keys","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -798,7 +861,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","Poland
         Central","South India","Japan West","Norway East","Norway West","Germany West
         Central","Italy North","Israel Central","Australia Central 2","Brazil Southeast","West
-        India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"managedHSMs/keys/versions","locations":["Central
+        India","Mexico Central","Spain Central","Australia Southeast","France South","Germany
+        North","Korea South","South Africa West","UAE Central","New Zealand North","Indonesia
+        Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"managedHSMs/keys/versions","locations":["Central
         US","Central US EUAP","East US 2","East US 2 EUAP","South Central US","North
         Europe","West Europe","Canada Central","Switzerland North","South Africa North","UK
         South","SouthEast Asia","East Asia","Korea Central","Australia Central","West
@@ -807,7 +872,9 @@ interactions:
         West","Central India","Brazil South","Sweden Central","Qatar Central","Poland
         Central","South India","Japan West","Norway East","Norway West","Germany West
         Central","Italy North","Israel Central","Australia Central 2","Brazil Southeast","West
-        India"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"checkMhsmNameAvailability","locations":[],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"vaults","locations":["North
+        India","Mexico Central","Spain Central","Australia Southeast","France South","Germany
+        North","Korea South","South Africa West","UAE Central","New Zealand North","Indonesia
+        Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"checkMhsmNameAvailability","locations":[],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01"],"defaultApiVersion":"2022-11-01","capabilities":"None"},{"resourceType":"vaults","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -817,7 +884,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"vaults/secrets","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
@@ -828,7 +896,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"vaults/accessPolicies","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"vaults/accessPolicies","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -838,7 +907,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"deletedVaults","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01","2015-06-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-10-01"},{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"deletedVaults","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -848,7 +918,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations/notifyNetworkSecurityPerimeterUpdatesAvailable","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations/notifyNetworkSecurityPerimeterUpdatesAvailable","locations":["North
         Central US","South Central US","Central US EUAP","East US 2 EUAP","West Central
         US","UK South","West Europe","Australia Central","Canada Central","Germany
         West Central","East Asia","Australia East","Japan East","East US 2","East
@@ -858,7 +929,8 @@ interactions:
         East","France Central","Jio India West","Korea South","Norway East","Poland
         Central","Qatar Central","South Africa North","Australia Southeast","Southeast
         Asia","Brazil Southeast","Switzerland North","UAE North","UK West","West India","Japan
-        West","West US 2","West US 3","West US"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview"],"defaultApiVersion":"2022-02-01-preview","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2022-02-01-preview"}],"capabilities":"None"},{"resourceType":"locations/deletedVaults","locations":["North
+        West","West US 2","West US 3","West US","Mexico Central","Israel Central","Spain
+        Central","North Europe","Italy North","Indonesia Central","New Zealand North"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview"],"defaultApiVersion":"2022-02-01-preview","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2022-02-01-preview"}],"capabilities":"None"},{"resourceType":"locations/deletedVaults","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -868,7 +940,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["East
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["East
         US","North Central US","West Europe","North Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West Central US","West
         US 2","West US","Japan East","Japan West","Australia East","Australia Southeast","Australia
@@ -878,7 +951,8 @@ interactions:
         Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"locations/operationResults","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"locations/operationResults","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -888,7 +962,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"vaults/eventGridFilters","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14","2016-10-01"],"defaultApiVersion":"2019-09-01","apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-10-01"}],"capabilities":"None"},{"resourceType":"vaults/eventGridFilters","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -898,7 +973,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"vaults/keys","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01","2018-02-14-preview","2018-02-14"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"vaults/keys","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -908,7 +984,8 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"vaults/keys/versions","locations":["North
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"},{"resourceType":"vaults/keys/versions","locations":["North
         Central US","East US","North Europe","West Europe","East Asia","Southeast
         Asia","East US 2","Central US","South Central US","West US","Japan East","Japan
         West","Australia East","Australia Southeast","Brazil South","Central India","South
@@ -918,26 +995,31 @@ interactions:
         2","UAE Central","UAE North","South Africa North","South Africa West","Switzerland
         North","Switzerland West","Germany North","Germany West Central","Norway East","Norway
         West","Brazil Southeast","West US 3","Jio India Central","Jio India West","Sweden
-        Central","Qatar Central","Poland Central","Italy North","Israel Central"],"apiVersions":["2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
+        Central","Qatar Central","Poland Central","Italy North","Israel Central","Mexico
+        Central","Spain Central","New Zealand North","Indonesia Central"],"apiVersions":["2024-12-01-preview","2024-11-01","2024-04-01-preview","2023-08-01-PREVIEW","2023-07-01","2023-02-01","2022-11-01","2022-07-01","2022-02-01-preview","2021-11-01-preview","2021-10-01","2021-06-01-preview","2021-04-01-preview","2020-04-01-preview","2019-09-01"],"defaultApiVersion":"2019-09-01","capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '21815'
+      - '24863'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:49:59 GMT
+      - Wed, 23 Apr 2025 05:43:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+      x-msedge-ref:
+      - 'Ref A: 3DDDC5B2E4B5422DA5070C112E5F4FAD Ref B: BN1AA2051012011 Ref C: 2025-04-23T05:43:11Z'
     status:
       code: 200
       message: OK
@@ -945,13 +1027,13 @@ interactions:
     body: '{"location": "southcentralus", "tags": {}, "properties": {"sku": {"family":
       "A", "name": "standard"}, "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
       "accessPolicies": [{"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId":
-      "3707fb2f-ac10-4591-a04f-8b0d786ea37d", "permissions": {"keys": ["all"], "secrets":
+      "55e73ff3-85c1-4e75-84df-a7a86a55f067", "permissions": {"keys": ["all"], "secrets":
       ["all"], "certificates": ["all"], "storage": ["all"]}}, {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
-      "objectId": "21f634c6-7327-4842-9c3d-1154bf66d915", "permissions": {"keys":
-      ["wrapKey", "unwrapKey", "recover", "get"]}}], "enabledForDeployment": false,
-      "enableSoftDelete": true, "softDeleteRetentionInDays": 7, "vaultUri": "https://clitest000003.vault.azure.net/",
-      "provisioningState": "Succeeded", "publicNetworkAccess": "Enabled", "enablePurgeProtection":
-      true}}'
+      "objectId": "28e7f50a-d0f7-4f74-9a8d-32791bbc84c9", "permissions": {"keys":
+      ["unwrapKey", "recover", "get", "wrapKey"]}}], "enabledForDeployment": false,
+      "enableSoftDelete": true, "softDeleteRetentionInDays": 7, "enableRbacAuthorization":
+      false, "vaultUri": "https://clitest000003.vault.azure.net/", "provisioningState":
+      "Succeeded", "publicNetworkAccess": "Enabled", "enablePurgeProtection": true}}'
     headers:
       Accept:
       - application/json
@@ -962,47 +1044,50 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '796'
+      - '830'
       Content-Type:
       - application/json
       ParameterSetName:
       - --id --set
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2023-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"yishiwang@microsoft.com","createdByType":"User","createdAt":"2023-11-07T03:49:05.613Z","lastModifiedBy":"yishiwang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-11-07T03:49:59.987Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"3707fb2f-ac10-4591-a04f-8b0d786ea37d","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"21f634c6-7327-4842-9c3d-1154bf66d915","permissions":{"keys":["wrapKey","unwrapKey","recover","get"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/clitest000003","name":"clitest000003","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{},"systemData":{"createdBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","createdByType":"Application","createdAt":"2025-04-23T05:42:29.626Z","lastModifiedBy":"05e98f05-c170-4236-968f-5bf6b5884bfc","lastModifiedByType":"Application","lastModifiedAt":"2025-04-23T05:43:11.976Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"55e73ff3-85c1-4e75-84df-a7a86a55f067","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","permissions":{"keys":["unwrapKey","recover","get","wrapKey"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://clitest000003.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1176'
+      - '1248'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:50:00 GMT
+      - Wed, 23 Apr 2025 05:43:12 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.969.1
+      - 2.2.81.0
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/48419089-3d20-4c87-a3ef-a27f40c6b59d
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 38973773F5B54A56A04852A692EB7E48 Ref B: BN1AA2051012011 Ref C: 2025-04-23T05:43:11Z'
     status:
       code: 200
       message: OK
@@ -1020,35 +1105,36 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-source --encryption-key-vault --encryption-key-name
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1441'
+      - '1477'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:50:01 GMT
+      - Wed, 23 Apr 2025 05:43:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 69941B4374064E718DBCF015E4268DCF Ref B: BN1AA2051012051 Ref C: 2025-04-23T05:43:12Z'
     status:
       code: 200
       message: OK
@@ -1075,37 +1161,40 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-source --encryption-key-vault --encryption-key-name
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/8a67c8a034184248bdb6383bb4424872","lastKeyRotationTimestamp":"2023-11-07T03:50:04.5387314Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey"},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/6b3d31f28904428180e483d5da31e34d","lastKeyRotationTimestamp":"2025-04-23T05:43:15.2120515Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey"},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1788'
+      - '1824'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:50:06 GMT
+      - Wed, 23 Apr 2025 05:43:15 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/88d2a697-0826-4668-ae67-f05e9e21e071
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 8128837A5F08405EBF49398EF86E8C5B Ref B: BN1AA2051012027 Ref C: 2025-04-23T05:43:12Z'
     status:
       code: 200
       message: OK
@@ -1123,35 +1212,36 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-version
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/8a67c8a034184248bdb6383bb4424872","lastKeyRotationTimestamp":"2023-11-07T03:50:04.5387314Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey"},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/6b3d31f28904428180e483d5da31e34d","lastKeyRotationTimestamp":"2025-04-23T05:43:15.2120515Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey"},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1788'
+      - '1824'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:50:09 GMT
+      - Wed, 23 Apr 2025 05:43:16 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: C4F8736047CF4184A5EFB7CE09CA262B Ref B: BN1AA2051012025 Ref C: 2025-04-23T05:43:16Z'
     status:
       code: 200
       message: OK
@@ -1159,7 +1249,7 @@ interactions:
     body: '{"sku": {"name": "Standard_LRS"}, "tags": {}, "properties": {"encryption":
       {"services": {"blob": {"enabled": true, "keyType": "Account"}, "file": {"enabled":
       true, "keyType": "Account"}}, "keySource": "Microsoft.Keyvault", "keyvaultproperties":
-      {"keyname": "testkey", "keyversion": "8a67c8a034184248bdb6383bb4424872", "keyvaulturi":
+      {"keyname": "testkey", "keyversion": "6b3d31f28904428180e483d5da31e34d", "keyvaulturi":
       "https://clitest000003.vault.azure.net/"}}, "supportsHttpsTrafficOnly": true,
       "networkAcls": {"bypass": "AzureServices", "virtualNetworkRules": [], "ipRules":
       [], "defaultAction": "Allow"}}}'
@@ -1179,37 +1269,40 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-version
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/8a67c8a034184248bdb6383bb4424872","lastKeyRotationTimestamp":"2023-11-07T03:50:11.4761881Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey","keyversion":"8a67c8a034184248bdb6383bb4424872"},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/6b3d31f28904428180e483d5da31e34d","lastKeyRotationTimestamp":"2025-04-23T05:43:18.5870582Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey","keyversion":"6b3d31f28904428180e483d5da31e34d"},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1836'
+      - '1872'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:50:43 GMT
+      - Wed, 23 Apr 2025 05:43:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus2/68c4ea1b-a474-4e1a-8549-a83ee474e8c4
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 972315EF2F044336B288068565D286B5 Ref B: BN1AA2051014029 Ref C: 2025-04-23T05:43:16Z'
     status:
       code: 200
       message: OK
@@ -1227,35 +1320,36 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-version
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/8a67c8a034184248bdb6383bb4424872","lastKeyRotationTimestamp":"2023-11-07T03:50:11.4761881Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey","keyversion":"8a67c8a034184248bdb6383bb4424872"},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/6b3d31f28904428180e483d5da31e34d","lastKeyRotationTimestamp":"2025-04-23T05:43:18.5870582Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey","keyversion":"6b3d31f28904428180e483d5da31e34d"},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1836'
+      - '1872'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:50:44 GMT
+      - Wed, 23 Apr 2025 05:43:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 710307D22CD04BF59702A9666C8FEC68 Ref B: BN1AA2051014037 Ref C: 2025-04-23T05:43:19Z'
     status:
       code: 200
       message: OK
@@ -1282,37 +1376,40 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-version
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/8a67c8a034184248bdb6383bb4424872","lastKeyRotationTimestamp":"2023-11-07T03:50:47.4920826Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey","keyversion":""},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/6b3d31f28904428180e483d5da31e34d","lastKeyRotationTimestamp":"2025-04-23T05:43:22.0558227Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey","keyversion":""},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1804'
+      - '1840'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:50:48 GMT
+      - Wed, 23 Apr 2025 05:43:51 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/51df8e93-c97b-48a7-bbdb-ed126b8706e7
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '3000'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '200'
+      x-msedge-ref:
+      - 'Ref A: 7BF9C88524E54E52A3E540F08C979039 Ref B: BN1AA2051013025 Ref C: 2025-04-23T05:43:19Z'
     status:
       code: 200
       message: OK
@@ -1323,19 +1420,24 @@ interactions:
       - application/json
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - keyvault key create
       Connection:
       - keep-alive
       Content-Length:
       - '47'
       Content-Type:
       - application/json
+      ParameterSetName:
+      - -n -p --vault-name
       User-Agent:
-      - azsdk-python-keyvault-keys/4.9.0b3 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://clitest000003.vault.azure.net/keys/newkey/create?api-version=7.5-preview.1
+    uri: https://clitest000003.vault.azure.net/keys/newkey/create?api-version=7.6-preview.2
   response:
     body:
-      string: '{"key":{"kid":"https://clitest000003.vault.azure.net/keys/newkey/1c990711bb164401af9f09910486b039","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"r6fZvnSEfyrtouLa8oDQ5ZGBw8Py5QzILkHm9wQdOBfbWGk0hzOxaQdUU64-VeYl895jUQ4f8OCyIiPWqSzVMkuiy2c2yBznxozk8V2aLx_wVA1vnHvPpp6Gc-OxBQWbhKzu8YPafwEZTVp0BGh9XE5v8J8KTz7TXEL68Lr_s3dO1Gx7lKvOb8OiX-Sv8ekBY4p-LTUe5yUhp3kt6JCngINljtXX5lHreQ3ILp9dp94qqngk3Dhs7fZ6kGPF87HyY3nbQoJARHrt_BsXxf00dboz_SImxpo7I84xeJx1R4C3mdcf3wyQmcQZzA8x3TWKB8MLSXuU4Sp942B06UG2GQ","e":"AQAB"},"attributes":{"enabled":true,"created":1699329050,"updated":1699329050,"recoveryLevel":"CustomizedRecoverable","recoverableDays":7,"exportable":false,"hsmPlatform":"0"}}'
+      string: '{"key":{"kid":"https://clitest000003.vault.azure.net/keys/newkey/3d5aa6b5b08942c4a38297b8a910ada5","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"-t2Z3aktL2GpRG4EMtUyTOPkKjAoJYQgigYRENYUz6e2LEwj28hr9P1uCxCJsPHrt3Do5zCLYDmbjlpfk5EU46ujnatUyzVww90TjnI5QpNHNCnTf-sUsYcDFS-nIdFK50Oi37HWTFFKBh2-8hso9A52bYFs6YiPpep-a4gqkPmJZGfQLnrRAFnGiBt0o_6BDLbyWUMucfgNOHza_mYJuAp50Gqw3Y5d2KW110pUJmHbxnhGNJ7HrRaByw3rpz7ItBu1pAe5NBa5xGBhsNXuS4UhB-YkARQbu_kPiW0fUc5PxHH85H7MQIJucqBc30kGrlUuUwDn9uCF31K2uP3foQ","e":"AQAB"},"attributes":{"enabled":true,"created":1745387033,"updated":1745387033,"recoveryLevel":"CustomizedRecoverable","recoverableDays":7,"exportable":false,"hsmPlatform":"0"}}'
     headers:
       cache-control:
       - no-cache
@@ -1344,7 +1446,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Nov 2023 03:50:50 GMT
+      - Wed, 23 Apr 2025 05:43:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1354,11 +1456,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=52.232.192.234;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - southcentralus
       x-ms-keyvault-service-version:
-      - 1.9.1054.1
+      - 1.9.2297.1
     status:
       code: 200
       message: OK
@@ -1376,35 +1478,36 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-vault --encryption-key-name
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/8a67c8a034184248bdb6383bb4424872","lastKeyRotationTimestamp":"2023-11-07T03:50:47.4920826Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey","keyversion":""},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/testkey/6b3d31f28904428180e483d5da31e34d","lastKeyRotationTimestamp":"2025-04-23T05:43:22.0558227Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"testkey","keyversion":""},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1804'
+      - '1840'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:50:52 GMT
+      - Wed, 23 Apr 2025 05:43:53 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 7879E6C07CA84EAF881D32DE16CE555D Ref B: BN1AA2051015051 Ref C: 2025-04-23T05:43:53Z'
     status:
       code: 200
       message: OK
@@ -1431,37 +1534,40 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-vault --encryption-key-name
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/newkey/1c990711bb164401af9f09910486b039","lastKeyRotationTimestamp":"2023-11-07T03:50:54.4452017Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"newkey","keyversion":""},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/newkey/3d5aa6b5b08942c4a38297b8a910ada5","lastKeyRotationTimestamp":"2025-04-23T05:43:54.9622119Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"newkey","keyversion":""},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1802'
+      - '1838'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:50:56 GMT
+      - Wed, 23 Apr 2025 05:43:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus2/da248463-9646-4efe-ae95-58d8ab9a13cd
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 57CFF62022B842B080AEDD24F45DE43A Ref B: BN1AA2051015011 Ref C: 2025-04-23T05:43:53Z'
     status:
       code: 200
       message: OK
@@ -1479,35 +1585,36 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-source
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/newkey/1c990711bb164401af9f09910486b039","lastKeyRotationTimestamp":"2023-11-07T03:50:54.4452017Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"newkey","keyversion":""},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"keyvaultproperties":{"currentVersionedKeyIdentifier":"https://clitest000003.vault.azure.net/keys/newkey/3d5aa6b5b08942c4a38297b8a910ada5","lastKeyRotationTimestamp":"2025-04-23T05:43:54.9622119Z","currentVersionedKeyExpirationTimestamp":"1970-01-01T00:00:00.0000000Z","keyvaulturi":"https://clitest000003.vault.azure.net/","keyname":"newkey","keyversion":""},"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Keyvault"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1802'
+      - '1838'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:50:57 GMT
+      - Wed, 23 Apr 2025 05:43:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: B412175343424C53A102890D024256AA Ref B: BN1AA2051013027 Ref C: 2025-04-23T05:43:56Z'
     status:
       code: 200
       message: OK
@@ -1533,37 +1640,40 @@ interactions:
       ParameterSetName:
       - -n -g --encryption-key-source
       User-Agent:
-      - AZURECLI/2.53.1 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.12.10 (Linux-6.8.0-1026-azure-x86_64-with-glibc2.35)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2024-01-01
   response:
     body:
-      string: '{"identity":{"principalId":"21f634c6-7327-4842-9c3d-1154bf66d915","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-11-07T03:48:40.0226282Z","key2":"2023-11-07T03:48:40.0226282Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-11-07T03:48:40.4601010Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2023-11-07T03:48:39.9289067Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"identity":{"principalId":"28e7f50a-d0f7-4f74-9a8d-32791bbc84c9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-04-23T05:42:07.8836736Z","key2":"2025-04-23T05:42:07.8836736Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-04-23T05:42:07.8993169Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2025-04-23T05:42:07.7430410Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1441'
+      - '1477'
       content-type:
       - application/json
       date:
-      - Tue, 07 Nov 2023 03:51:32 GMT
+      - Wed, 23 Apr 2025 05:43:57 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - appId=05e98f05-c170-4236-968f-5bf6b5884bfc,tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=55e73ff3-85c1-4e75-84df-a7a86a55f067/eastus/41ada374-e48a-4b46-a3f3-d970bd376c6b
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 3308F03570814C03B924A1322F60BAF8 Ref B: BN1AA2051013049 Ref C: 2025-04-23T05:43:56Z'
     status:
       code: 200
       message: OK

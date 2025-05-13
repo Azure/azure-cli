@@ -19,8 +19,8 @@ jobs:
   steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.10'
-        displayName: "Use Python 3.10"
+        versionSpec: '3.12'
+        displayName: "Use Python 3.12"
     - task: AzureCLI@1
       displayName: 'checkout branch'
       inputs:
@@ -76,8 +76,8 @@ jobs:
   steps:
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '3.10'
-      displayName: "Use Python 3.10"
+      versionSpec: '3.12'
+      displayName: "Use Python 3.12"
   - task: AzureCLI@1
     displayName: 'checkout cli and extension repo'
     inputs:
@@ -113,13 +113,14 @@ jobs:
       scriptLocation: inlineScript
       inlineScript: |
         set -ev
-  
+        
         source env/bin/activate
         cd azure-cli-extensions
-  
+        
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
-  
+        
         python ../scripts/ci/automation_full_test.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
+  
   - bash: |
       publishErrorModules='false'
       if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt' ]]; then

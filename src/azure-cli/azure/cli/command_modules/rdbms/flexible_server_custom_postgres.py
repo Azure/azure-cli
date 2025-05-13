@@ -8,35 +8,46 @@ from datetime import datetime, timedelta
 import os
 import json
 from importlib import import_module
+from functools import cmp_to_key
 import re
+from urllib.parse import quote
 from urllib.request import urlretrieve
 from dateutil.tz import tzutc   # pylint: disable=import-error
 import uuid
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
+from knack.prompting import (
+    prompt
+)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
+from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.cli.core.azclierror import BadRequestError, FileOperationError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
-from azure.mgmt.rdbms import postgresql_flexibleservers
+from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_check_resource_availability_with_location, \
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
-    cf_postgres_flexible_private_endpoint_connections
+    cf_postgres_flexible_private_endpoint_connections, \
+    cf_postgres_flexible_tuning_options, \
+    cf_postgres_flexible_config, cf_postgres_flexible_admin
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
-    _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
+    _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false, \
+    get_postgres_tiers, get_postgres_skus
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
+from ._util import get_index_tuning_settings_map
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
-    validate_postgres_replica, validate_georestore_network, pg_byok_validator
+    validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
+    validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
+    validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
+POSTGRES_DB_NAME = 'postgres'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
@@ -49,15 +60,19 @@ def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
                            sku_name=None, tier=None,
-                           storage_gb=None, administrator_login=None,
-                           administrator_login_password=None, version=None,
+                           storage_gb=None, version=None, microsoft_entra_auth=None,
+                           admin_name=None, admin_id=None, admin_type=None,
+                           password_auth=None, administrator_login=None, administrator_login_password=None,
                            tags=None, database_name=None,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, yes=False):
+                           auto_grow=None, performance_tier=None,
+                           storage_type=None, iops=None, throughput=None, create_default_db='Enabled', create_cluster=None, cluster_size=None, yes=False):
+
+    if not check_resource_group(resource_group_name):
+        resource_group_name = None
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -72,8 +87,21 @@ def flexible_server_create(cmd, client,
 
     server_name = server_name.lower()
 
+    if sku_name is None:
+        # set sku_name from capability API
+        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+        tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
+        try:
+            sku_info = list_location_capability_info['sku_info']
+            skus = list(get_postgres_skus(sku_info, tier.lower()))
+            skus = sorted(skus, key=cmp_to_key(compare_sku_names))
+            sku_name = skus[0]
+        except:
+            raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+
     pg_arguments_validator(db_context,
                            server_name=server_name,
+                           database_name=database_name,
                            location=location,
                            tier=tier, sku_name=sku_name,
                            storage_gb=storage_gb,
@@ -91,7 +119,15 @@ def flexible_server_create(cmd, client,
                            byok_key=byok_key,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
-                           performance_tier=performance_tier)
+                           performance_tier=performance_tier,
+                           create_cluster=create_cluster,
+                           password_auth=password_auth, microsoft_entra_auth=microsoft_entra_auth,
+                           admin_name=admin_name, admin_id=admin_id, admin_type=admin_type,)
+
+    cluster = None
+    if create_cluster == 'ElasticCluster':
+        cluster_size = cluster_size if cluster_size else 2
+        cluster = postgresql_flexibleservers.models.Cluster(cluster_size=cluster_size)
 
     server_result = firewall_id = None
 
@@ -118,7 +154,10 @@ def flexible_server_create(cmd, client,
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
-    administrator_login_password = generate_password(administrator_login_password)
+    is_password_auth_enabled = bool(password_auth is not None and password_auth.lower() == 'enabled')
+    is_microsoft_entra_auth_enabled = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    if is_password_auth_enabled:
+        administrator_login_password = generate_password(administrator_login_password)
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
@@ -126,7 +165,7 @@ def flexible_server_create(cmd, client,
                                                                    backup_byok_identity=backup_byok_identity,
                                                                    backup_byok_key=backup_byok_key)
 
-    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth=active_directory_auth,
+    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth='Enabled' if is_microsoft_entra_auth_enabled else 'Disabled',
                                                                password_auth=password_auth)
 
     # Create postgresql
@@ -145,18 +184,29 @@ def flexible_server_create(cmd, client,
                                    availability_zone=zone,
                                    identity=identity,
                                    data_encryption=data_encryption,
-                                   auth_config=auth_config)
+                                   auth_config=auth_config,
+                                   cluster=cluster)
+
+    # Add Microsoft Entra Admin
+    if is_microsoft_entra_auth_enabled and admin_name is not None or admin_id is not None:
+        server_admin_client = cf_postgres_flexible_admin(cmd.cli_ctx, '_')
+        logger.warning("Add Microsoft Entra Admin '%s'.", admin_name)
+        _create_admin(server_admin_client, resource_group_name, server_name, admin_name, admin_id, admin_type)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
-    # Create mysql database if it does not exist
-    if database_name is None:
-        database_name = DEFAULT_DB_NAME
-    _create_database(db_context, cmd, resource_group_name, server_name, database_name)
+    # Create database if it does not exist
+    if (database_name is not None or (create_default_db and create_default_db.lower() == 'enabled') and create_cluster != 'ElasticCluster'):
+        db_name = database_name if database_name else DEFAULT_DB_NAME
+        _create_database(db_context, cmd, resource_group_name, server_name, db_name)
+    else:
+        db_name = POSTGRES_DB_NAME
 
-    user = server_result.administrator_login
+    user = server_result.administrator_login if is_password_auth_enabled else '<user>'
+    password = administrator_login_password if is_password_auth_enabled else '<password>'
+    admin = quote(admin_name) if admin_name else '<admin>'
     server_id = server_result.id
     loc = server_result.location
     version = server_result.version
@@ -164,17 +214,18 @@ def flexible_server_create(cmd, client,
     host = server_result.fully_qualified_domain_name
     subnet_id = None if network is None else network.delegated_subnet_resource_id
 
-    logger.warning('Make a note of your password. If you forget, you would have to '
-                   'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
-                   server_name, resource_group_name)
+    if is_password_auth_enabled:
+        logger.warning('Make a note of your password. If you forget, you would have to '
+                       'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                       server_name, resource_group_name)
     logger.warning('Try using \'az postgres flexible-server connect\' command to test out connection.')
 
-    _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user)
+    _update_local_contexts(cmd, server_name, resource_group_name, db_name, location, user)
 
-    return _form_response(user, sku, loc, server_id, host, version,
-                          administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_postgresql_connection_string(host, user, administrator_login_password, database_name), database_name, firewall_id,
-                          subnet_id)
+    return _form_response(user, sku, loc, server_id, host, version, password,
+                          _create_postgresql_connection_string(host, user, password, db_name),
+                          db_name, firewall_id, subnet_id, is_password_auth_enabled, is_microsoft_entra_auth_enabled, admin_name,
+                          _create_microsoft_entra_connection_string(host, db_name, admin))
 # endregion create without args
 
 
@@ -183,9 +234,11 @@ def flexible_server_restore(cmd, client,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
                             subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, geo_redundant_backup=None,
-                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, yes=False):
+                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, storage_type=None, yes=False):
 
     server_name = server_name.lower()
+
+    validate_resource_group(resource_group_name)
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -218,14 +271,18 @@ def flexible_server_restore(cmd, client,
             logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
         validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
+        cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, source_server_object)
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
+
+        storage = postgresql_flexibleservers.models.Storage(type=storage_type if source_server_object.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
             point_in_time_utc=restore_point_in_time,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
-            availability_zone=zone
+            availability_zone=zone,
+            storage=storage
         )
 
         if source_server_object.network.public_network_access == 'Disabled' and any((vnet, subnet)):
@@ -258,6 +315,7 @@ def flexible_server_restore(cmd, client,
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
+# pylint: disable=too-many-branches
 def flexible_server_update_custom_func(cmd, client, instance,
                                        sku_name=None, tier=None,
                                        storage_gb=None,
@@ -268,13 +326,14 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
                                        backup_byok_identity=None, backup_byok_key=None,
-                                       active_directory_auth=None, password_auth=None,
+                                       microsoft_entra_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
+                                       public_access=None,
                                        tags=None,
                                        auto_grow=None,
                                        performance_tier=None,
                                        iops=None, throughput=None,
-                                       yes=False):
+                                       cluster_size=None, yes=False):
 
     # validator
     location = ''.join(instance.location.lower().split())
@@ -290,7 +349,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            sku_name=sku_name,
                            storage_gb=storage_gb,
                            auto_grow=auto_grow,
-                           replication_role=instance.replication_role if auto_grow is not None else None,
                            iops=iops,
                            throughput=throughput,
                            high_availability=high_availability,
@@ -301,7 +359,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
                            performance_tier=performance_tier,
-                           instance=instance)
+                           cluster_size=cluster_size, instance=instance)
 
     server_module_path = instance.__module__
     module = import_module(server_module_path)
@@ -310,6 +368,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
     server_id_parts = parse_resource_id(instance.id)
     resource_group_name = server_id_parts['resource_group']
     server_name = server_id_parts['name']
+
+    if public_access:
+        instance.network.public_network_access = public_access
 
     if private_dns_zone_arguments:
         private_dns_zone_id = prepare_private_dns_zone(db_context,
@@ -320,6 +381,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                                        location=location,
                                                        yes=yes)
         instance.network.private_dns_zone_arm_resource_id = private_dns_zone_id
+
+    _confirm_restart_server(instance, sku_name, storage_gb, yes)
 
     if sku_name:
         instance.sku.name = sku_name
@@ -338,6 +401,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if instance.storage.type == "PremiumV2_LRS":
         instance.storage.tier = None
 
+        if sku_name or storage_gb:
+            logger.warning("You are changing the compute and/or storage size of the server. "
+                           "The server will be restarted for this operation and you will see a short downtime.")
+
         if iops:
             instance.storage.iops = iops
 
@@ -351,13 +418,14 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
 
-    if maintenance_window and maintenance_window.lower() == "disabled":
-        # if disabled is pass in reset to default values
-        day_of_week = start_hour = start_minute = 0
-        custom_window = "Disabled"
-    elif maintenance_window:
-        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-        custom_window = "Enabled"
+    if maintenance_window:
+        if maintenance_window.lower() == "disabled":
+            # if disabled is pass in reset to default values
+            day_of_week = start_hour = start_minute = 0
+            custom_window = "Disabled"
+        else:
+            day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+            custom_window = "Enabled"
 
         # set values - if maintenance_window when is None when created then create a new object
         instance.maintenance_window.day_of_week = day_of_week
@@ -367,23 +435,34 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
-                                                                   byok_key=byok_key)
+                                                                   byok_key=byok_key,
+                                                                   backup_byok_identity=backup_byok_identity,
+                                                                   backup_byok_key=backup_byok_key,
+                                                                   instance=instance)
 
     auth_config = instance.auth_config
-    if active_directory_auth:
-        auth_config.active_directory_auth = active_directory_auth
+    administrator_login = instance.administrator_login if instance.administrator_login else None
+    if microsoft_entra_auth:
+        auth_config.active_directory_auth = microsoft_entra_auth
     if password_auth:
+        administrator_login, administrator_login_password = _update_login(server_name, resource_group_name, auth_config,
+                                                                          password_auth, administrator_login, administrator_login_password)
         auth_config.password_auth = password_auth
+
+    if cluster_size:
+        instance.cluster.cluster_size = cluster_size
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
+                             administrator_login=administrator_login,
                              administrator_login_password=administrator_login_password,
                              maintenance_window=instance.maintenance_window,
                              network=instance.network,
                              identity=identity,
                              data_encryption=data_encryption,
                              auth_config=auth_config,
+                             cluster=instance.cluster,
                              tags=tags)
 
     # High availability can't be updated with existing properties
@@ -394,18 +473,25 @@ def flexible_server_update_custom_func(cmd, client, instance,
         if high_availability.lower() != "disabled" and standby_availability_zone:
             high_availability_param.standby_availability_zone = standby_availability_zone
 
+        if high_availability.lower() != "disabled":
+            config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
+            fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
+            if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
+                raise CLIError("High availability cannot be enabled while Fabric mirroring is Active. Please disable Fabric mirroring to enable high availability.")
+
         params.high_availability = high_availability_param
 
-    print(params)
     return params
 
 
 def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_over=None):
+    validate_resource_group(resource_group_name)
     instance = client.get(resource_group_name, server_name)
     if fail_over is not None and instance.high_availability.mode not in ("ZoneRedundant", "SameZone"):
         raise ArgumentUsageError("Failing over can only be triggered for zone redundant or same zone servers.")
 
     if fail_over is not None:
+        validate_citus_cluster(cmd, resource_group_name, server_name)
         if fail_over.lower() not in ['planned', 'forced']:
             raise InvalidArgumentValueError("Allowed failover parameters are 'Planned' and 'Forced'.")
         if fail_over.lower() == 'planned':
@@ -422,6 +508,7 @@ def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_
 
 
 def flexible_server_delete(cmd, client, resource_group_name, server_name, yes=False):
+    validate_resource_group(resource_group_name)
     result = None
     if not yes:
         user_confirmation(
@@ -441,29 +528,36 @@ def flexible_server_delete(cmd, client, resource_group_name, server_name, yes=Fa
 
 
 def flexible_server_postgresql_get(cmd, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
     client = get_postgresql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
 
 
 def flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
-    if source is None and value is None:
-        # update the command with system default
-        try:
-            parameter = client.get(resource_group_name, server_name, configuration_name)
-            value = parameter.default_value  # reset value to default
+    validate_resource_group(resource_group_name)
+    parameter_value = value
+    parameter_source = source
+    try:
+        # validate configuration name
+        parameter = client.get(resource_group_name, server_name, configuration_name)
 
-            # this should be 'system-default' but there is currently a bug in PG, so keeping as what it is for now
+        # update the command with system default
+        if parameter_value is None and parameter_source is None:
+            parameter_value = parameter.default_value  # reset value to default
+
+            # this should be 'system-default' but there is currently a bug in PG
             # this will reset source to be 'system-default' anyway
-            source = parameter.source
-        except CloudError as e:
+            parameter_source = "user-override"
+        elif parameter_source is None:
+            parameter_source = "user-override"
+    except HttpResponseError as e:
+        if parameter_value is None and parameter_source is None:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
-    elif source is None:
-        source = "user-override"
+        raise CLIError(str(e))
 
     parameters = postgresql_flexibleservers.models.Configuration(
-        configuration_name=configuration_name,
-        value=value,
-        source=source
+        value=parameter_value,
+        source=parameter_source
     )
 
     return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
@@ -475,12 +569,19 @@ def flexible_list_skus(cmd, client, location):
     return result
 
 
+def flexible_replica_list_by_server(cmd, client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+    return client.list_by_server(resource_group_name, server_name)
+
+
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None,
                             location=None, vnet=None, vnet_address_prefix=None, subnet=None,
                             subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
                             byok_identity=None, byok_key=None,
                             sku_name=None, tier=None,
-                            storage_gb=None, performance_tier=None, yes=False):
+                            storage_gb=None, performance_tier=None, yes=False, tags=None):
+    validate_resource_group(resource_group_name)
     replica_name = replica_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -496,6 +597,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         source_server_id = source_server
 
     source_server_id_parts = parse_resource_id(source_server_id)
+    validate_citus_cluster(cmd, source_server_id_parts['resource_group'], source_server_id_parts['name'])
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
     except Exception as e:
@@ -535,6 +637,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     pg_byok_validator(byok_identity, byok_key)
 
     parameters = postgresql_flexibleservers.models.Server(
+        tags=tags,
         source_server_resource_id=source_server_id,
         location=location,
         availability_zone=zone,
@@ -562,7 +665,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     parameters.sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
-    parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow="Disabled", tier=performance_tier)
+    parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=source_server_object.storage.auto_grow, tier=performance_tier)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
@@ -570,7 +673,9 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
                                vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
                                private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
-                               byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
+                               byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, restore_point_in_time=None):
+    validate_resource_group(resource_group_name)
+
     server_name = server_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -585,8 +690,11 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
     else:
         source_server_id = source_server
 
+    restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
+
     try:
         id_parts = parse_resource_id(source_server_id)
+        validate_citus_cluster(cmd, id_parts['resource_group'], id_parts['name'])
         source_subscription_id = id_parts['subscription']
         postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, source_subscription_id)
         source_server_object = postgres_source_client.servers.get(id_parts['resource_group'], id_parts['name'])
@@ -608,12 +716,15 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
+    storage = postgresql_flexibleservers.models.Storage(type=None)
+
     parameters = postgresql_flexibleservers.models.Server(
-        point_in_time_utc=get_current_time(),
+        point_in_time_utc=restore_point_in_time,
         location=location,
         source_server_resource_id=source_server_id,
         create_mode="GeoRestore",
-        availability_zone=zone
+        availability_zone=zone,
+        storage=storage
     )
 
     if source_server_object.network.public_network_access == 'Disabled':
@@ -645,6 +756,8 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
                                   vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
                                   private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
                                   byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
+    validate_resource_group(resource_group_name)
+
     server_name = server_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -670,12 +783,15 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
 
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
+    storage = postgresql_flexibleservers.models.Storage(type=None)
+
     parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=get_current_time(),
         location=location,
         source_server_resource_id=source_server_id,
         create_mode="ReviveDropped",
-        availability_zone=zone
+        availability_zone=zone,
+        storage=storage
     )
 
     if vnet is not None or vnet_address_prefix is not None or subnet is not None or \
@@ -704,27 +820,10 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
-def flexible_replica_stop(client, resource_group_name, server_name):
-    try:
-        server_object = client.get(resource_group_name, server_name)
-    except Exception as e:
-        raise ResourceNotFoundError(e)
+def flexible_replica_promote(cmd, client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    if server_object.replica.role is not None and "replica" not in server_object.replica.role.lower():
-        raise CLIError('Server {} is not a replica server.'.format(server_name))
-
-    params = postgresql_flexibleservers.models.ServerForUpdate(
-        replica=postgresql_flexibleservers.models.Replica(
-            role='None',
-            promote_mode='standalone',
-            promote_option='planned'
-        )
-    )
-
-    return client.begin_update(resource_group_name, server_name, params)
-
-
-def flexible_replica_promote(client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
     try:
         server_object = client.get(resource_group_name, server_name)
     except Exception as e:
@@ -754,7 +853,9 @@ def flexible_replica_promote(client, resource_group_name, server_name, promote_m
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config):
+                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config, cluster):
+    validate_resource_group(resource_group_name)
+
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -778,6 +879,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         identity=identity,
         data_encryption=data_encryption,
         auth_config=auth_config,
+        cluster=cluster,
         create_mode="Create")
 
     return resolve_poller(
@@ -786,6 +888,9 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
 
 
 def _create_database(db_context, cmd, resource_group_name, server_name, database_name):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
     # check for existing database, create if not
     cf_db, logging_name = db_context.cf_db, db_context.logging_name
     database_client = cf_db(cmd.cli_ctx, None)
@@ -801,7 +906,10 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
         '{} Database Create/Update'.format(logging_name))
 
 
-def database_create_func(client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
+def database_create_func(cmd, client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
+    validate_database_name(database_name)
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     if charset is None and collation is None:
         charset = 'utf8'
@@ -841,7 +949,75 @@ def flexible_server_connection_string(
 
 
 # Custom functions for identity
+def flexible_server_identity_update(cmd, client, resource_group_name, server_name, system_assigned):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    server = client.get(resource_group_name, server_name)
+    identity_type = server.identity.type if (server and server.identity and server.identity.type) else 'None'
+
+    if system_assigned.lower() == 'enabled':
+        # user wants to enable system-assigned identity
+        if identity_type == 'None':
+            # if user-assigned identity is not enabled, then enable system-assigned identity
+            identity_type = 'SystemAssigned'
+        elif identity_type == 'UserAssigned':
+            # if user-assigned identity is enabled, then enable both system-assigned and user-assigned identity
+            identity_type = 'SystemAssigned,UserAssigned'
+    else:
+        # check if fabric is enabled
+        config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
+        fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
+        if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
+            raise CLIError("On servers for which Fabric mirroring is enabled, system assigned managed identity cannot be disabled.")
+        if server.data_encryption.type == 'AzureKeyVault':
+            # if data encryption is enabled, then system-assigned identity cannot be disabled
+            raise CLIError("On servers for which data encryption is based on customer managed key, system assigned managed identity cannot be disabled.")
+        if identity_type == 'SystemAssigned,UserAssigned':
+            # if both system-assigned and user-assigned identity is enabled, then disable system-assigned identity
+            identity_type = 'UserAssigned'
+        elif identity_type == 'SystemAssigned':
+            # if only system-assigned identity is enabled, then disable system-assigned identity
+            identity_type = 'None'
+
+    if identity_type == 'UserAssigned' or identity_type == 'SystemAssigned,UserAssigned':
+        identities_map = {}
+        for identity in server.identity.user_assigned_identities:
+            identities_map[identity] = {}
+        parameters = {
+            'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                user_assigned_identities=identities_map,
+                type=identity_type)}
+    else:
+        parameters = {
+            'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                type=identity_type)}
+
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Updating user assigned identity type for server {}'.format(server_name)
+    )
+
+    return result.identity
+
+
 def flexible_server_identity_assign(cmd, client, resource_group_name, server_name, identities):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    server = client.get(resource_group_name, server_name)
+    identity_type = server.identity.type if (server and server.identity and server.identity.type) else 'None'
+
+    if identity_type == 'SystemAssigned':
+        # if system-assigned identity is enabled, then enable both system
+        identity_type = 'SystemAssigned,UserAssigned'
+    elif identity_type == 'None':
+        # if system-assigned identity is not enabled, then enable user-assigned identity
+        identity_type = 'UserAssigned'
+
     identities_map = {}
     for identity in identities:
         identities_map[identity] = {}
@@ -849,7 +1025,7 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
     parameters = {
         'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
             user_assigned_identities=identities_map,
-            type="UserAssigned")}
+            type=identity_type)}
 
     result = resolve_poller(
         client.begin_update(
@@ -863,6 +1039,9 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
 
 
 def flexible_server_identity_remove(cmd, client, resource_group_name, server_name, identities):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
     instance = client.get(resource_group_name, server_name)
 
     if instance.data_encryption:
@@ -870,6 +1049,11 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
 
         if primary_id and primary_id.lower() in [identity.lower() for identity in identities]:
             raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(primary_id))
+
+        geo_backup_id = instance.data_encryption.geo_backup_user_assigned_identity_id
+
+        if geo_backup_id and geo_backup_id.lower() in [identity.lower() for identity in identities]:
+            raise CLIError("Cannot remove identity {} because it's used for geo backup data encryption.".format(geo_backup_id))
 
     identities_map = {}
     for identity in identities:
@@ -897,12 +1081,18 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     return result.identity or postgresql_flexibleservers.models.UserAssignedIdentity(type="SystemAssigned")
 
 
-def flexible_server_identity_list(client, resource_group_name, server_name):
+def flexible_server_identity_list(cmd, client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
     server = client.get(resource_group_name, server_name)
     return server.identity or postgresql_flexibleservers.models.UserAssignedIdentity(type="SystemAssigned")
 
 
-def flexible_server_identity_show(client, resource_group_name, server_name, identity):
+def flexible_server_identity_show(cmd, client, resource_group_name, server_name, identity):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
     server = client.get(resource_group_name, server_name)
 
     for key, value in server.identity.user_assigned_identities.items():
@@ -913,16 +1103,23 @@ def flexible_server_identity_show(client, resource_group_name, server_name, iden
 
 
 # Custom functions for ad-admin
-def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
+def flexible_server_microsoft_entra_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
+    validate_resource_group(resource_group_name)
+
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
 
     instance = server_operations_client.get(resource_group_name, server_name)
 
     if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
+        raise CLIError("Cannot create a Microsoft Entra admin on a server with replication role. Use the primary server instead.")
 
+    return _create_admin(client, resource_group_name, server_name, login, sid, principal_type, no_wait)
+
+
+# Create Microsoft Entra admin
+def _create_admin(client, resource_group_name, server_name, principal_name, sid, principal_type=None, no_wait=False):
     parameters = {
-        'principal_name': login,
+        'principal_name': principal_name,
         'tenant_id': get_tenant_id(),
         'principal_type': principal_type
     }
@@ -930,24 +1127,30 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, sid, parameters)
 
 
-def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
+def flexible_server_microsoft_entra_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
+    validate_resource_group(resource_group_name)
+
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
 
     instance = server_operations_client.get(resource_group_name, server_name)
 
     if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
+        raise CLIError("Cannot delete an Microsoft Entra admin on a server with replication role. Use the primary server instead.")
 
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, server_name, sid)
 
 
-def flexible_server_ad_admin_list(client, resource_group_name, server_name):
+def flexible_server_microsoft_entra_admin_list(client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+
     return client.list_by_server(
         resource_group_name=resource_group_name,
         server_name=server_name)
 
 
-def flexible_server_ad_admin_show(client, resource_group_name, server_name, sid):
+def flexible_server_microsoft_entra_admin_show(client, resource_group_name, server_name, sid):
+    validate_resource_group(resource_group_name)
+
     return client.get(
         resource_group_name=resource_group_name,
         server_name=server_name,
@@ -957,12 +1160,13 @@ def flexible_server_ad_admin_show(client, resource_group_name, server_name, sid)
 def flexible_server_provision_network_resource(cmd, resource_group_name, server_name,
                                                location, db_context, private_dns_zone_arguments=None, public_access=None,
                                                vnet=None, subnet=None, vnet_address_prefix=None, subnet_address_prefix=None, yes=False):
+    validate_resource_group(resource_group_name)
+
     start_ip = -1
     end_ip = -1
-    network = None
+    network = postgresql_flexibleservers.models.Network()
 
     if subnet is not None or vnet is not None:
-        network = postgresql_flexibleservers.models.Network()
         subnet_id = prepare_private_network(cmd,
                                             resource_group_name,
                                             server_name,
@@ -986,6 +1190,10 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
         raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
     else:
         start_ip, end_ip = prepare_public_network(public_access, yes=yes)
+        if public_access is not None and str(public_access).lower() in ['disabled', 'none']:
+            network.public_network_access = 'Disabled'
+        else:
+            network.public_network_access = 'Enabled'
 
     return network, start_ip, end_ip
 
@@ -997,6 +1205,8 @@ def flexible_server_threat_protection_get(
     '''
     Gets an advanced threat protection setting.
     '''
+
+    validate_resource_group(resource_group_name)
 
     return client.get(
         resource_group_name=resource_group_name,
@@ -1012,6 +1222,8 @@ def flexible_server_threat_protection_update(
     '''
     Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
     '''
+
+    validate_resource_group(resource_group_name)
 
     try:
         parameters = {
@@ -1041,6 +1253,7 @@ def flexible_server_threat_protection_set(
         resource_group_name,
         server_name,
         parameters):
+    validate_resource_group(resource_group_name)
 
     return resolve_poller(
         client.begin_create_or_update(
@@ -1054,6 +1267,7 @@ def flexible_server_threat_protection_set(
 
 # Custom functions for server logs
 def flexible_server_download_log_files(client, resource_group_name, server_name, file_name):
+    validate_resource_group(resource_group_name)
 
     # list all files
     files = client.list_by_server(resource_group_name, server_name)
@@ -1065,6 +1279,7 @@ def flexible_server_download_log_files(client, resource_group_name, server_name,
 
 def flexible_server_list_log_files_with_filter(client, resource_group_name, server_name, filename_contains=None,
                                                file_last_written=None, max_file_size=None):
+    validate_resource_group(resource_group_name)
 
     # list all files
     all_files = client.list_by_server(resource_group_name, server_name)
@@ -1090,6 +1305,8 @@ def flexible_server_list_log_files_with_filter(client, resource_group_name, serv
 
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline",
                           migration_name=None, migration_option=None, tags=None, location=None):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     logging_name = 'PostgreSQL'
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1117,29 +1334,36 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         # Use default migration_option as 'ValidateAndMigrate'
         migration_option = "ValidateAndMigrate"
 
-    return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
+    return _create_migration(cmd, logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
                              migration_mode, migration_option, migration_parameters, tags, location)
 
 
 def migration_show_func(cmd, client, resource_group_name, server_name, migration_name):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     return client.get(subscription_id, resource_group_name, server_name, migration_name)
 
 
 def migration_list_func(cmd, client, resource_group_name, server_name, migration_filter="Active"):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     return client.list_by_target_server(subscription_id, resource_group_name, server_name, migration_filter)
 
 
 def migration_delete_func(cmd, client, resource_group_name, server_name, migration_name):
+    validate_resource_group(resource_group_name)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     return client.delete(subscription_id, resource_group_name, server_name, migration_name)
 
 
 def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, cutover=None, cancel=None):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -1171,13 +1395,19 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
 
 
 def migration_check_name_availability(cmd, client, resource_group_name, server_name, migration_name):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     migration_name_availability_parammeters = {"name": "%s" % migration_name, "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}
     return get_postgresql_flexible_management_client(cmd.cli_ctx).check_migration_name_availability(subscription_id, resource_group_name, server_name, migration_name_availability_parammeters)
 
 
-def virtual_endpoint_create_func(client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+    validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name)
+
     parameters = {
         'name': virtual_endpoint_name,
         'endpoint_type': endpoint_type,
@@ -1191,7 +1421,9 @@ def virtual_endpoint_create_func(client, resource_group_name, server_name, virtu
         parameters)
 
 
-def virtual_endpoint_show_func(client, resource_group_name, server_name, virtual_endpoint_name):
+def virtual_endpoint_show_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     return client.get(
         resource_group_name,
@@ -1199,14 +1431,19 @@ def virtual_endpoint_show_func(client, resource_group_name, server_name, virtual
         virtual_endpoint_name)
 
 
-def virtual_endpoint_list_func(client, resource_group_name, server_name):
+def virtual_endpoint_list_func(cmd, client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     return client.list_by_server(
         resource_group_name,
         server_name)
 
 
-def virtual_endpoint_delete_func(client, resource_group_name, server_name, virtual_endpoint_name, yes=False):
+def virtual_endpoint_delete_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, yes=False):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
     if not yes:
         user_confirmation(
             "Are you sure you want to delete the virtual endpoint '{0}' in resource group '{1}'".format(virtual_endpoint_name,
@@ -1218,7 +1455,10 @@ def virtual_endpoint_delete_func(client, resource_group_name, server_name, virtu
         virtual_endpoint_name)
 
 
-def virtual_endpoint_update_func(client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+def virtual_endpoint_update_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
     parameters = {
         'name': virtual_endpoint_name,
         'endpoint_type': endpoint_type,
@@ -1232,9 +1472,62 @@ def virtual_endpoint_update_func(client, resource_group_name, server_name, virtu
         parameters)
 
 
+def backup_create_func(client, resource_group_name, server_name, backup_name):
+    validate_resource_group(resource_group_name)
+    validate_backup_name(backup_name)
+
+    return client.begin_create(
+        resource_group_name,
+        server_name,
+        backup_name)
+
+
+def ltr_precheck_func(client, resource_group_name, server_name, backup_name):
+    validate_resource_group(resource_group_name)
+
+    return client.trigger_ltr_pre_backup(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        parameters={"backup_settings": {"backup_name": backup_name}}
+    )
+
+
+def ltr_start_func(client, resource_group_name, server_name, backup_name, sas_url):
+    validate_resource_group(resource_group_name)
+
+    parameters = {
+        "backup_settings": {
+            "backup_name": backup_name
+        },
+        "target_details": {
+            "sas_uri_list": [sas_url]
+        }
+    }
+
+    return client.begin_start_ltr_backup(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        parameters=parameters
+    )
+
+
+def backup_delete_func(client, resource_group_name, server_name, backup_name, yes=False):
+    validate_resource_group(resource_group_name)
+
+    if not yes:
+        user_confirmation(
+            "Are you sure you want to delete the backup '{0}' in server '{1}'".format(backup_name, server_name), yes=yes)
+
+    return client.begin_delete(
+        resource_group_name,
+        server_name,
+        backup_name)
+
+
 def flexible_server_approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
                                                         description=None):
     """Approve a private endpoint connection request for a server."""
+    validate_resource_group(resource_group_name)
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
@@ -1244,6 +1537,7 @@ def flexible_server_approve_private_endpoint_connection(cmd, client, resource_gr
 def flexible_server_reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
                                                        description=None):
     """Reject a private endpoint connection request for a server."""
+    validate_resource_group(resource_group_name)
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
@@ -1257,6 +1551,7 @@ def flexible_server_private_link_resource_get(
     '''
     Gets a private link resource for a PostgreSQL flexible server.
     '''
+    validate_resource_group(resource_group_name)
 
     return client.get(
         resource_group_name=resource_group_name,
@@ -1264,8 +1559,180 @@ def flexible_server_private_link_resource_get(
         group_name="postgresqlServer")
 
 
+def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, server_name, database_names, yes=False):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
+
+    if server.high_availability.mode != "Disabled":
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
+
+    databases = ','.join(database_names)
+    user_confirmation("Are you sure you want to prepare and enable your server" +
+                      " '{0}' in resource group '{1}' for mirroring of databases '{2}'.".format(server_name, resource_group_name, databases) +
+                      " This requires restart.", yes=yes)
+
+    if (server.identity is None or 'SystemAssigned' not in server.identity.type):
+        logger.warning('Enabling system assigned managed identity on the server.')
+        flexible_server_identity_update(cmd, flexible_servers_client, resource_group_name, server_name, 'Enabled')
+
+    logger.warning('Updating necessary server parameters.')
+    source = "user-override"
+    configuration_name = "azure.fabric_mirror_enabled"
+    value = "on"
+    _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+    configuration_name = "azure.mirror_databases"
+    value = databases
+    return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+
+
+def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, server_name, yes=False):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
+
+    if server.high_availability.mode != "Disabled":
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
+
+    user_confirmation("Are you sure you want to disable mirroring for server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=yes)
+
+    configuration_name = "azure.fabric_mirror_enabled"
+    parameters = postgresql_flexibleservers.models.Configuration(
+        value="off",
+        source="user-override"
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
+
+
+def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_group_name, server_name, database_names, yes=False):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
+
+    if server.high_availability.mode != "Disabled":
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
+
+    databases = ','.join(database_names)
+    user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
+                      .format(server_name, resource_group_name, databases), yes=yes)
+
+    configuration_name = "azure.mirror_databases"
+    parameters = postgresql_flexibleservers.models.Configuration(
+        value=databases,
+        source="user-override"
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
+
+
+def _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value):
+    parameters = postgresql_flexibleservers.models.Configuration(
+        value=value,
+        source=source
+    )
+
+    return resolve_poller(
+        client.begin_update(resource_group_name, server_name, configuration_name, parameters), cmd.cli_ctx, 'PostgreSQL Parameter update')
+
+
+def index_tuning_update(cmd, client, resource_group_name, server_name, index_tuning_enabled):
+    validate_resource_group(resource_group_name)
+    source = "user-override"
+
+    if index_tuning_enabled == "True":
+        subscription = get_subscription_id(cmd.cli_ctx)
+        postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, subscription)
+        source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
+        location = ''.join(source_server_object.location.lower().split())
+        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+        index_tuning_supported = list_location_capability_info['index_tuning_supported']
+        if not index_tuning_supported:
+            raise CLIError("Index tuning is not supported for the server.")
+
+        logger.warning("Enabling index tuning for the server.")
+        configuration_name = "index_tuning.mode"
+        value = "report"
+        _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        configuration_name = "pg_qs.query_capture_mode"
+        query_capture_mode_configuration = client.get(resource_group_name, server_name, configuration_name)
+
+        if query_capture_mode_configuration.value.lower() == "none":
+            value = "all"
+            _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        logger.warning("Index tuning is enabled for the server.")
+    else:
+        logger.warning("Disabling index tuning for the server.")
+        configuration_name = "index_tuning.mode"
+        value = "off"
+        _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        logger.warning("Index tuning is disabled for the server.")
+
+
+def index_tuning_show(client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    index_tuning_configuration = client.get(resource_group_name, server_name, "index_tuning.mode")
+    query_capture_mode_configuration = client.get(resource_group_name, server_name, "pg_qs.query_capture_mode")
+
+    if index_tuning_configuration.value.lower() == "report" and query_capture_mode_configuration.value.lower() != "none":
+        logger.warning("Index tuning is enabled for the server.")
+    else:
+        logger.warning("Index tuning is disabled for the server.")
+
+
+def index_tuning_settings_list(cmd, client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    index_tuning_configurations_map_values = get_index_tuning_settings_map().values()
+    configurations_list = client.list_by_server(resource_group_name, server_name)
+
+    # Filter the list based on the values in the dictionary
+    index_tuning_settings = [setting for setting in configurations_list if setting.name in index_tuning_configurations_map_values]
+
+    return index_tuning_settings
+
+
+def index_tuning_settings_get(cmd, client, resource_group_name, server_name, setting_name):
+    validate_resource_group(resource_group_name)
+    index_tuning_configurations_map = get_index_tuning_settings_map()
+    index_tuning_configuration_name = index_tuning_configurations_map[setting_name]
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        configuration_name=index_tuning_configuration_name)
+
+
+def index_tuning_settings_set(client, resource_group_name, server_name, setting_name, value=None):
+    source = "user-override" if value else None
+    tuning_settings = get_index_tuning_settings_map()
+    configuration_name = tuning_settings[setting_name]
+    return flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source, value)
+
+
+def recommendations_list(cmd, resource_group_name, server_name, recommendation_type=None):
+    validate_resource_group(resource_group_name)
+    tuning_options_client = cf_postgres_flexible_tuning_options(cmd.cli_ctx, None)
+
+    return tuning_options_client.list_recommendations(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        tuning_option="index",
+        recommendation_type=recommendation_type
+    )
+
+
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
+    validate_resource_group(resource_group_name)
+
     private_endpoint_connections_client = cf_postgres_flexible_private_endpoint_connections(cmd.cli_ctx, None)
     private_endpoint_connection = private_endpoint_connections_client.get(resource_group_name=resource_group_name,
                                                                           server_name=server_name,
@@ -1320,7 +1787,7 @@ def _create_postgresql_connection_strings(host, user, password, database, port):
 
 def _create_postgresql_connection_string(host, user, password, database):
     connection_kwargs = {
-        'user': user,
+        'user': user if user is not None else '{user}',
         'host': host,
         'password': password if password is not None else '{password}',
         'database': database,
@@ -1328,13 +1795,22 @@ def _create_postgresql_connection_string(host, user, password, database):
     return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
+def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
+    connection_kwargs = {
+        'user': admin,
+        'host': host,
+        'database': database,
+    }
+    return 'postgresql://{user}:<access-token>@{host}/{database}?sslmode=require'.format(**connection_kwargs)
+
+
 def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,
-                   subnet_id=None):
+                   subnet_id=None, is_password_auth=True, is_microsoft_entra_auth_enabled=False, microsoft_admin=None, connection_string_microsoft_entra=None):
 
     output = {
         'host': host,
-        'username': username,
-        'password': password,
+        'username': username if is_password_auth else None,
+        'password': password if is_password_auth else None,
         'skuname': sku,
         'location': location,
         'id': server_id,
@@ -1342,6 +1818,9 @@ def _form_response(username, sku, location, server_id, host, version, password, 
         'databaseName': database_name,
         'connectionString': connection_string
     }
+    if is_microsoft_entra_auth_enabled:
+        output['admin'] = microsoft_admin
+        output['connectionStringMicrosoftEntra'] = connection_string_microsoft_entra
     if firewall_id is not None:
         output['firewallName'] = firewall_id
     if subnet_id is not None:
@@ -1350,6 +1829,8 @@ def _form_response(username, sku, location, server_id, host, version, password, 
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user):
+    validate_resource_group(resource_group_name)
+
     if cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name',
                                       server_name)  # Setting the server name in the local context
@@ -1394,11 +1875,16 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
     return pg_replica_zone
 
 
-def _create_migration(logging_name, client, subscription_id, resource_group_name, target_db_server_name,
+def _create_migration(cmd, logging_name, client, subscription_id, resource_group_name, target_db_server_name,
                       migration_name, migration_mode, migration_option, parameters, tags, location):
-    logger.warning('Creating %s Migration for server \'%s\' in group \'%s\' and subscription \'%s\'...', logging_name, target_db_server_name, resource_group_name, subscription_id)
+    validate_resource_group(resource_group_name)
 
     parameter_keys = list(parameters.keys())
+    migrationInstanceResourceId = get_case_insensitive_key_value("MigrationRuntimeResourceId", parameter_keys, parameters)
+    if migrationInstanceResourceId is not None:
+        validate_migration_runtime_server(cmd, migrationInstanceResourceId, resource_group_name, target_db_server_name)
+
+    logger.warning('Creating %s Migration for server \'%s\' in group \'%s\' and subscription \'%s\'...', logging_name, target_db_server_name, resource_group_name, subscription_id)
     secret_parameter_dictionary = get_case_insensitive_key_value("SecretParameters", parameter_keys, parameters)
     secret_parameter_keys = list(secret_parameter_dictionary.keys())
     admin_credentials_dictionary = get_case_insensitive_key_value("AdminCredentials", secret_parameter_keys, secret_parameter_dictionary)
@@ -1419,18 +1905,56 @@ def _create_migration(logging_name, client, subscription_id, resource_group_name
         migration_mode=migration_mode,
         source_db_server_resource_id=get_case_insensitive_key_value("SourceDbServerResourceId", parameter_keys, parameters),
         secret_parameters=secret_parameters,
+        source_db_server_fully_qualified_domain_name=get_case_insensitive_key_value("SourceDbServerFullyQualifiedDomainName", parameter_keys, parameters),
+        target_db_server_fully_qualified_domain_name=get_case_insensitive_key_value("TargetDbServerFullyQualifiedDomainName", parameter_keys, parameters),
         dbs_to_migrate=get_case_insensitive_key_value("DbsToMigrate", parameter_keys, parameters),
         setup_logical_replication_on_source_db_if_needed=get_enum_value_true_false(get_case_insensitive_key_value("SetupLogicalReplicationOnSourceDbIfNeeded", parameter_keys, parameters), "SetupLogicalReplicationOnSourceDbIfNeeded"),
         overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"),
         source_type=source_type,
         migration_option=migration_option,
-        ssl_mode=ssl_mode)
+        ssl_mode=ssl_mode,
+        migration_instance_resource_id=migrationInstanceResourceId)
 
     return client.create(subscription_id, resource_group_name, target_db_server_name, migration_name, migration_parameters)
 
 
-# pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
-class DbContext(object):
+def _update_login(server_name, resource_group_name, auth_config, password_auth, administrator_login, administrator_login_password):
+    if auth_config.password_auth.lower() == 'disabled' and password_auth.lower() == 'enabled':
+        administrator_login = administrator_login if administrator_login else prompt('Please enter administrator username for the server. Once set, it cannot be changed: ')
+        if not administrator_login:
+            raise CLIError('Administrator username is required for enabling password authentication.')
+        if not administrator_login_password:
+            administrator_login_password = generate_password(administrator_login_password)
+            logger.warning('Make a note of password "%s". You can '
+                           'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                           administrator_login_password, server_name, resource_group_name)
+
+    return administrator_login, administrator_login_password
+
+
+# pylint: disable=chained-comparison
+def _confirm_restart_server(instance, sku_name, storage_gb, yes):
+    show_confirmation = False
+
+    # check if sku_name is changed
+    if sku_name and sku_name != instance.sku.name:
+        show_confirmation = True
+
+    # check if requested storage growth is crossing the 4096 threshold
+    if storage_gb and storage_gb > 4096 and instance.storage.storage_size_gb <= 4096 and instance.storage.type == "":
+        show_confirmation = True
+
+    # check if storage_gb changed for PremiumV2_LRS
+    if storage_gb and instance.storage.type == "PremiumV2_LRS" and instance.storage.storage_size_gb != storage_gb:
+        show_confirmation = True
+
+    if not yes and show_confirmation:
+        user_confirmation("You are trying to change the compute or the size of storage assigned to your server in a way that \
+            requires a server restart. During the restart, you'll experience some downtime of the server. Do you want to proceed?", yes=yes)
+
+
+# pylint: disable=too-many-instance-attributes, too-few-public-methods
+class DbContext:
     def __init__(self, cmd=None, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
                  cf_availability=None, cf_availability_without_location=None, cf_private_dns_zone_suffix=None,
                  command_group=None, server_client=None, location=None):

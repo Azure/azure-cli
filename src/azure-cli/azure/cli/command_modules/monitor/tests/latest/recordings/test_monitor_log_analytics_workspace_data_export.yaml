@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --quota --level --sku
       User-Agent:
-      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_log_analytics_workspace_data_export","date":"2023-07-21T05:51:58Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_log_analytics_workspace_data_export","date":"2025-05-08T03:00:43Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,17 +27,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:52:31 GMT
+      - Thu, 08 May 2025 03:01:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: D756DED91B9E4BAAAACECA21A66F1AA0 Ref B: TYO201151002036 Ref C: 2025-05-08T03:01:10Z'
     status:
       code: 200
       message: OK
@@ -62,41 +66,50 @@ interactions:
       ParameterSetName:
       - -g -n --quota --level --sku
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2022-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2025-02-01
   response:
     body:
-      string: '{"properties":{"customerId":"aefeb9bf-3ce3-49b4-a64c-f407771b52df","provisioningState":"Creating","sku":{"name":"CapacityReservation","capacityReservationLevel":100,"lastSkuUpdate":"2023-07-21T05:52:48.9337629Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":1.0,"quotaNextResetTime":"2023-07-21T14:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2023-07-21T05:52:48.9337629Z","modifiedDate":"2023-07-21T05:52:48.9337629Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003","name":"clitest000003","type":"Microsoft.OperationalInsights/workspaces"}'
+      string: '{"properties":{"customerId":"8315c8b9-db49-46ae-9f56-a9b011050172","provisioningState":"Creating","sku":{"name":"CapacityReservation","capacityReservationLevel":100,"lastSkuUpdate":"2025-05-08T03:01:12.7097745Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":1.0,"quotaNextResetTime":"2025-05-08T05:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T03:01:12.7097745Z","modifiedDate":"2025-05-08T03:01:12.7097745Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003","name":"clitest000003","type":"Microsoft.OperationalInsights/workspaces","etag":"\"fe048973-0000-0100-0000-681c1e780000\""}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/eastus/operationstatuses/43a6aff2-2c80-4260-b7ba-e19a7a1c9d13?api-version=2015-11-01-preview&t=638822700730840829&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=WBtRTXJOaKMKyK68g-gVo6R8y0X2Y3_EB_3pcbKAR6nVTBus9bR9Gple_RDjbaLjs6Yq1-DnGz00TgEOQcLG4JRaLNkPsWmoU-8ImxgK8CfW8d3CxCLPx0Y2ZOww-NIMtgtduMfs79zocRUs2l73md6YgPvrEKnnm1HuFuzu1m0CYoUs-nCscGMHvhDHNv9j2G0Zo6vUvaE1HQa4em2jf9soItHbqFGKU5TuEBraJsccHszZLf-ilBLRjttEGq5rgT-9Bnhm5Fxf0CJgjV-RWOGZ00AuqjKP0Sj7m3M7WuUXg5xrbuAp1iKa695qlXf3dJu3u7TTuX3G6H0r38J3rw&h=ilfrLyYPrWWY2X4CaJq49mf-eR7l0QKY68lr7LLfxCE
       cache-control:
       - no-cache
       content-length:
-      - '901'
+      - '951'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:52:49 GMT
+      - Thu, 08 May 2025 03:01:12 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2022-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2025-02-01
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/10339b0b-23bb-4f7e-a773-504982cb7171
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: F7847A1E401B414D8AA86266CD26AD41 Ref B: TYO201151003060 Ref C: 2025-05-08T03:01:11Z'
     status:
       code: 201
       message: Created
@@ -114,25 +127,23 @@ interactions:
       ParameterSetName:
       - -g -n --quota --level --sku
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2022-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/eastus/operationstatuses/43a6aff2-2c80-4260-b7ba-e19a7a1c9d13?api-version=2015-11-01-preview&t=638822700730840829&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=WBtRTXJOaKMKyK68g-gVo6R8y0X2Y3_EB_3pcbKAR6nVTBus9bR9Gple_RDjbaLjs6Yq1-DnGz00TgEOQcLG4JRaLNkPsWmoU-8ImxgK8CfW8d3CxCLPx0Y2ZOww-NIMtgtduMfs79zocRUs2l73md6YgPvrEKnnm1HuFuzu1m0CYoUs-nCscGMHvhDHNv9j2G0Zo6vUvaE1HQa4em2jf9soItHbqFGKU5TuEBraJsccHszZLf-ilBLRjttEGq5rgT-9Bnhm5Fxf0CJgjV-RWOGZ00AuqjKP0Sj7m3M7WuUXg5xrbuAp1iKa695qlXf3dJu3u7TTuX3G6H0r38J3rw&h=ilfrLyYPrWWY2X4CaJq49mf-eR7l0QKY68lr7LLfxCE
   response:
     body:
-      string: '{"properties":{"customerId":"aefeb9bf-3ce3-49b4-a64c-f407771b52df","provisioningState":"Succeeded","sku":{"name":"CapacityReservation","capacityReservationLevel":100,"lastSkuUpdate":"2023-07-21T05:52:48.9337629Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":1.0,"quotaNextResetTime":"2023-07-21T14:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2023-07-21T05:52:48.9337629Z","modifiedDate":"2023-07-21T05:52:48.9337629Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003","name":"clitest000003","type":"Microsoft.OperationalInsights/workspaces"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/eastus/operationstatuses/43a6aff2-2c80-4260-b7ba-e19a7a1c9d13","name":"43a6aff2-2c80-4260-b7ba-e19a7a1c9d13","status":"InProgress","startTime":"2025-05-08T03:01:12.7202302Z"}'
     headers:
       access-control-allow-origin:
       - '*'
-      api-supported-versions:
-      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01
       cache-control:
       - no-cache
       content-length:
-      - '902'
+      - '283'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:52:50 GMT
+      - Thu, 08 May 2025 03:01:12 GMT
       expires:
       - '-1'
       pragma:
@@ -141,14 +152,121 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-powered-by:
-      - ASP.NET
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/20d89db2-46ae-40eb-a4b9-07d942d28814
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 0C3C5F1038AA497BB2800CA76AAC8D5E Ref B: TYO201151003060 Ref C: 2025-05-08T03:01:13Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --quota --level --sku
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/eastus/operationstatuses/43a6aff2-2c80-4260-b7ba-e19a7a1c9d13?api-version=2015-11-01-preview&t=638822700730840829&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=WBtRTXJOaKMKyK68g-gVo6R8y0X2Y3_EB_3pcbKAR6nVTBus9bR9Gple_RDjbaLjs6Yq1-DnGz00TgEOQcLG4JRaLNkPsWmoU-8ImxgK8CfW8d3CxCLPx0Y2ZOww-NIMtgtduMfs79zocRUs2l73md6YgPvrEKnnm1HuFuzu1m0CYoUs-nCscGMHvhDHNv9j2G0Zo6vUvaE1HQa4em2jf9soItHbqFGKU5TuEBraJsccHszZLf-ilBLRjttEGq5rgT-9Bnhm5Fxf0CJgjV-RWOGZ00AuqjKP0Sj7m3M7WuUXg5xrbuAp1iKa695qlXf3dJu3u7TTuX3G6H0r38J3rw&h=ilfrLyYPrWWY2X4CaJq49mf-eR7l0QKY68lr7LLfxCE
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/eastus/operationstatuses/43a6aff2-2c80-4260-b7ba-e19a7a1c9d13","name":"43a6aff2-2c80-4260-b7ba-e19a7a1c9d13","status":"Succeeded","startTime":"2025-05-08T03:01:12.7202302Z","endTime":"2025-05-08T03:01:25.0692187Z","properties":{}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '339'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 03:01:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/85c939ae-ab52-44cc-a95a-e6f89898e36f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: D1F5D3BB197B4BCB94907EE8FC4DAC75 Ref B: TYO201151003060 Ref C: 2025-05-08T03:01:43Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --quota --level --sku
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2025-02-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"8315c8b9-db49-46ae-9f56-a9b011050172","provisioningState":"Succeeded","sku":{"name":"CapacityReservation","capacityReservationLevel":100,"lastSkuUpdate":"2025-05-08T03:01:12.7097745Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":1.0,"quotaNextResetTime":"2025-05-08T05:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T03:01:12.7097745Z","modifiedDate":"2025-05-08T03:01:25.0326034Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003","name":"clitest000003","type":"Microsoft.OperationalInsights/workspaces","etag":"\"fe04dc73-0000-0100-0000-681c1e850000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '952'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 03:01:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 8E7319B47C7945FDBE3B9246344E55E7 Ref B: TYO201151003060 Ref C: 2025-05-08T03:01:44Z'
     status:
       code: 200
       message: OK
@@ -171,17 +289,17 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: '{"properties":{"dataExportId":"2f4dce49-d53c-405f-abce-98eac8dc8425","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2023-07-21T05:52:53.6917983Z","lastModifiedDate":"2023-07-21T05:52:53.6917983Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
+      string: '{"properties":{"dataExportId":"aa9aa9a8-984e-40d2-bb52-711469aae11a","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2025-05-08T03:01:50.0766832Z","lastModifiedDate":"2025-05-08T03:01:50.0766832Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-cache
       content-length:
@@ -189,7 +307,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:52:53 GMT
+      - Thu, 08 May 2025 03:01:49 GMT
       expires:
       - '-1'
       pragma:
@@ -198,16 +316,18 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/e05fd2dc-ea5f-435e-a528-4da37d679070
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 18466CC0B2194AE7A0966D0474D08E27 Ref B: TYO201151002054 Ref C: 2025-05-08T03:01:45Z'
     status:
       code: 200
       message: OK
@@ -230,7 +350,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest2?api-version=2020-08-01
   response:
@@ -238,12 +358,12 @@ interactions:
       string: '{"error":{"code":"InvalidParameter","message":"You are adding a destination
         that is already defined in rule: clitest. Destination must be unique across
         export rules in your workspace. See http://aka.ms/LADataExport#limitations.
-        Operation Id: ''c0d863e0ee466c0f96b0157af5cee4c9''"}}'
+        Operation Id: ''b5dd1bfa834fc91b33c966da15e6351f''"}}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-store, no-cache
       content-length:
@@ -251,23 +371,27 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 21 Jul 2023 05:53:02 GMT
+      - Thu, 08 May 2025 03:01:53 GMT
       diagnostic-context:
-      - c0d863e0ee466c0f96b0157af5cee4c9
+      - b5dd1bfa834fc91b33c966da15e6351f
       expires:
       - '-1'
       pragma:
       - no-cache
-      request-context:
-      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/b6e1f772-23c0-47cb-a997-1710fd18e596
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: A6972BE1F2DC401986421F850ADA7FE7 Ref B: TYO201100115037 Ref C: 2025-05-08T03:01:50Z'
     status:
       code: 400
       message: Bad Request
@@ -290,7 +414,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest2?api-version=2020-08-01
   response:
@@ -298,12 +422,12 @@ interactions:
       string: '{"error":{"code":"InvalidParameter","message":"You are adding a destination
         that is already defined in rule: clitest. Destination must be unique across
         export rules in your workspace. See http://aka.ms/LADataExport#limitations.
-        Operation Id: ''ad77f69a3d80799ca06d280463174eee''"}}'
+        Operation Id: ''f61bc927c9d790d509cf8a16806c9413''"}}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-store, no-cache
       content-length:
@@ -311,23 +435,27 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 21 Jul 2023 05:53:12 GMT
+      - Thu, 08 May 2025 03:01:59 GMT
       diagnostic-context:
-      - ad77f69a3d80799ca06d280463174eee
+      - f61bc927c9d790d509cf8a16806c9413
       expires:
       - '-1'
       pragma:
       - no-cache
-      request-context:
-      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/e0ca1d07-2d99-4187-a9f1-49582779b8cb
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: B3BD638E89B140A89E71BC5FDC122231 Ref B: TYO201100117049 Ref C: 2025-05-08T03:01:54Z'
     status:
       code: 400
       message: Bad Request
@@ -350,7 +478,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest2?api-version=2020-08-01
   response:
@@ -358,12 +486,12 @@ interactions:
       string: '{"error":{"code":"InvalidParameter","message":"You are adding a destination
         that is already defined in rule: clitest. Destination must be unique across
         export rules in your workspace. See http://aka.ms/LADataExport#limitations.
-        Operation Id: ''03a5c4784867816280d2110f3441e445''"}}'
+        Operation Id: ''910699ec08799128c270b215027fad60''"}}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-store, no-cache
       content-length:
@@ -371,23 +499,27 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 21 Jul 2023 05:53:20 GMT
+      - Thu, 08 May 2025 03:02:01 GMT
       diagnostic-context:
-      - 03a5c4784867816280d2110f3441e445
+      - 910699ec08799128c270b215027fad60
       expires:
       - '-1'
       pragma:
       - no-cache
-      request-context:
-      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/9c5d1add-784b-4b2e-ab13-6658bf692ed9
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 925FEB5B5FF94841930299EFD254CAE5 Ref B: TYO201100117053 Ref C: 2025-05-08T03:02:00Z'
     status:
       code: 400
       message: Bad Request
@@ -410,7 +542,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest2?api-version=2020-08-01
   response:
@@ -418,12 +550,12 @@ interactions:
       string: '{"error":{"code":"InvalidParameter","message":"You are adding a destination
         that is already defined in rule: clitest. Destination must be unique across
         export rules in your workspace. See http://aka.ms/LADataExport#limitations.
-        Operation Id: ''196d7f0eb3943c0275eee8444a784da4''"}}'
+        Operation Id: ''a7c54f552fdf9621ff7d440fc9ee94e0''"}}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-store, no-cache
       content-length:
@@ -431,23 +563,27 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 21 Jul 2023 05:53:29 GMT
+      - Thu, 08 May 2025 03:02:04 GMT
       diagnostic-context:
-      - 196d7f0eb3943c0275eee8444a784da4
+      - a7c54f552fdf9621ff7d440fc9ee94e0
       expires:
       - '-1'
       pragma:
       - no-cache
-      request-context:
-      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/bc1719dd-9d60-42f9-ba3b-d68ec174c6b5
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2998'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
+      - '198'
+      x-msedge-ref:
+      - 'Ref A: 9F2BBF2FC687450D9FBB7844354BBEA0 Ref B: TYO201100117049 Ref C: 2025-05-08T03:02:02Z'
     status:
       code: 400
       message: Bad Request
@@ -465,17 +601,17 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: '{"properties":{"dataExportId":"2f4dce49-d53c-405f-abce-98eac8dc8425","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2023-07-21T05:52:53.6917983Z","lastModifiedDate":"2023-07-21T05:52:53.6917983Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
+      string: '{"properties":{"dataExportId":"aa9aa9a8-984e-40d2-bb52-711469aae11a","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2025-05-08T03:01:50.0766832Z","lastModifiedDate":"2025-05-08T03:01:50.0766832Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-cache
       content-length:
@@ -483,7 +619,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:53:31 GMT
+      - Thu, 08 May 2025 03:02:04 GMT
       expires:
       - '-1'
       pragma:
@@ -492,14 +628,16 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-powered-by:
-      - ASP.NET
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/0c9cd333-3af1-4d03-94dd-a8f9ad51f8d3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: B9484FCD644C4CB3B28B328EF8407DB5 Ref B: TYO201151006029 Ref C: 2025-05-08T03:02:04Z'
     status:
       code: 200
       message: OK
@@ -517,17 +655,17 @@ interactions:
       ParameterSetName:
       - -g --workspace-name
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports?api-version=2020-08-01
   response:
     body:
-      string: '{"value":[{"properties":{"dataExportId":"2f4dce49-d53c-405f-abce-98eac8dc8425","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2023-07-21T05:52:53.6917983Z","lastModifiedDate":"2023-07-21T05:52:53.6917983Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}]}'
+      string: '{"value":[{"properties":{"dataExportId":"aa9aa9a8-984e-40d2-bb52-711469aae11a","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2025-05-08T03:01:50.0766832Z","lastModifiedDate":"2025-05-08T03:01:50.0766832Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}]}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-cache
       content-length:
@@ -535,7 +673,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:53:33 GMT
+      - Thu, 08 May 2025 03:02:06 GMT
       expires:
       - '-1'
       pragma:
@@ -544,14 +682,16 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-powered-by:
-      - ASP.NET
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/21254073-ced8-49fe-bbc3-755a50e2505c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: D75E1FF22E1F413091D0C3009E3503D5 Ref B: TYO201100115019 Ref C: 2025-05-08T03:02:05Z'
     status:
       code: 200
       message: OK
@@ -569,12 +709,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.50.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_log_analytics_workspace_data_export","date":"2023-07-21T05:51:58Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_log_analytics_workspace_data_export","date":"2025-05-08T03:00:43Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -583,23 +723,26 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:53:34 GMT
+      - Thu, 08 May 2025 03:02:06 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: E3E3665509F546939D946D02F8B04319 Ref B: TYO201151003040 Ref C: 2025-05-08T03:02:06Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"identity": {"type": "None"}, "location": "eastus", "sku": {"name": "Standard",
-      "tier": "Standard"}}'
+    body: '{"location": "eastus", "sku": {"name": "Standard", "tier": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -610,47 +753,103 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '101'
+      - '71'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2023-07-21T05:53:39.463Z","updatedAt":"2023-07-21T05:53:39.463Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"eastus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"eastus","roleType":"Primary","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"metricId":"cd7fae01-f952-4ffa-97d1-7d528081f572:eventhubs-nscli000004","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2025-05-08T03:02:10.2563002Z","updatedAt":"2025-05-08T03:02:10Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/eastus/namespaceOperationResults/26510f0f-b22d-46b3-a2a7-b5f4324e60cd?isAsyncHeader=true&resourceName=eventhubs-nscli000004&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638822701306490365&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=nfbL6NN7xx_dkalh8q6Qi7gnrANLKhM7IY_Il37s88tlKA4VRTArGDN9RDgujviTcYQ5lPZgryRAQsqHaFJVpRXzgCj3ty6t1netzKdDYcIL4gFs9a2zZg3Lutu7M2iRg_UOZh1aazq69xvJ7-3hIKZmGJQSSjIooP1bMv6wNXV7cYi4_KsfNYrwTUCz_Bh9qDGeUahp8Qf3yl9NKUz2eO-tLtxGDucuYVMm0BAknf-01athgOQUdDi2EcYyoo9azQxMpd3StFl6tcZBld2PSxNEqixhLTHuyrmO9lQcqNgLACnperrCLhLnk3R9jh1zid13Xx-bJplvpqm9Pl_BXg&h=ehosoGoGa-LDLhyu2rzG-Kw6FtgIU8Xrgka_4kji3b4
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '964'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:53:40 GMT
+      - Thu, 08 May 2025 03:02:09 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/eastus/namespaceOperationResults/26510f0f-b22d-46b3-a2a7-b5f4324e60cd?isAsyncHeader=false&resourceName=eventhubs-nscli000004&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638822701306646601&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=OyJR40UjZuCfgGJRPKp67o9vCE94iYpp_I-4DcTjDy7MLmE9N0iByg1LLaZNKM848AjzKvyoOCItu5h8q5Ify6Tp5wHnJ-u_C4Cc9MK_aPLlsvPggMyHYEIIkSjlBlr2txCjGCh7CPpMrwagCTklr-K8uvdDoLU1meNo28_i8qSqkpXU3q_Jzarh3qkMXkAfeIe1oF3T2T3OuMJ1JgSjKfPT_LKVqtNM_LKIWzJ18uyOGcUJ9BC-K5nsd8hAhoOFhOndn80UfYajJ3_G3-yhEoXj-R9TPkgvx4pBcmEEW8yRAyyBtqPfiZl5aGHULjciuoHMmg5FRL2GBEKEeKg2vg&h=DIqQzuzw70F2AwkaU56edahLPWBWMc5UmdVeJ0m12tU
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 471e3a29-9230-45f8-bedc-d9f6b55b16f0
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G13|2025-05-08T03:02:10
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/1205d9c4-b139-44ac-b4ad-8aa25355e74f
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '49'
+      x-msedge-ref:
+      - 'Ref A: EFA182878DC54871B42AFBC0D1FFB1CE Ref B: TYO201100117033 Ref C: 2025-05-08T03:02:07Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/eastus/namespaceOperationResults/26510f0f-b22d-46b3-a2a7-b5f4324e60cd?isAsyncHeader=true&resourceName=eventhubs-nscli000004&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638822701306490365&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=nfbL6NN7xx_dkalh8q6Qi7gnrANLKhM7IY_Il37s88tlKA4VRTArGDN9RDgujviTcYQ5lPZgryRAQsqHaFJVpRXzgCj3ty6t1netzKdDYcIL4gFs9a2zZg3Lutu7M2iRg_UOZh1aazq69xvJ7-3hIKZmGJQSSjIooP1bMv6wNXV7cYi4_KsfNYrwTUCz_Bh9qDGeUahp8Qf3yl9NKUz2eO-tLtxGDucuYVMm0BAknf-01athgOQUdDi2EcYyoo9azQxMpd3StFl6tcZBld2PSxNEqixhLTHuyrmO9lQcqNgLACnperrCLhLnk3R9jh1zid13Xx-bJplvpqm9Pl_BXg&h=ehosoGoGa-LDLhyu2rzG-Kw6FtgIU8Xrgka_4kji3b4
+  response:
+    body:
+      string: '{"name":"26510f0f-b22d-46b3-a2a7-b5f4324e60cd","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 03:02:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 89160dc4-70ca-4fde-b4df-85b26d2757e4
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G2|2025-05-08T03:02:11
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/65c2b16f-2f11-4498-bcce-7b8935818dc1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 136A5D9273734F60B9071DF3C2FDF28F Ref B: TYO201100117033 Ref C: 2025-05-08T03:02:10Z'
     status:
       code: 200
       message: OK
@@ -668,39 +867,41 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/eastus/namespaceOperationResults/26510f0f-b22d-46b3-a2a7-b5f4324e60cd?isAsyncHeader=true&resourceName=eventhubs-nscli000004&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638822701306490365&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=nfbL6NN7xx_dkalh8q6Qi7gnrANLKhM7IY_Il37s88tlKA4VRTArGDN9RDgujviTcYQ5lPZgryRAQsqHaFJVpRXzgCj3ty6t1netzKdDYcIL4gFs9a2zZg3Lutu7M2iRg_UOZh1aazq69xvJ7-3hIKZmGJQSSjIooP1bMv6wNXV7cYi4_KsfNYrwTUCz_Bh9qDGeUahp8Qf3yl9NKUz2eO-tLtxGDucuYVMm0BAknf-01athgOQUdDi2EcYyoo9azQxMpd3StFl6tcZBld2PSxNEqixhLTHuyrmO9lQcqNgLACnperrCLhLnk3R9jh1zid13Xx-bJplvpqm9Pl_BXg&h=ehosoGoGa-LDLhyu2rzG-Kw6FtgIU8Xrgka_4kji3b4
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2023-07-21T05:53:39.463Z","updatedAt":"2023-07-21T05:53:39.463Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"name":"26510f0f-b22d-46b3-a2a7-b5f4324e60cd","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '68'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:53:41 GMT
+      - Thu, 08 May 2025 03:02:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - f1354931-485d-4e11-9f3e-7beaaa8f701e
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G1|2025-05-08T03:02:42
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/22101d2f-76a1-43a1-ae8a-a398c66d7471
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 2B501571232F45A2979474549AC44849 Ref B: TYO201100117033 Ref C: 2025-05-08T03:02:41Z'
     status:
       code: 200
       message: OK
@@ -718,89 +919,39 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2023-07-21T05:53:39.463Z","updatedAt":"2023-07-21T05:53:39.463Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"eastus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"eastus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"metricId":"cd7fae01-f952-4ffa-97d1-7d528081f572:eventhubs-nscli000004","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2025-05-08T03:02:10.2563002Z","updatedAt":"2025-05-08T03:02:38Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '961'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:54:11 GMT
+      - Thu, 08 May 2025 03:02:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name
-      User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2023-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2023-07-21T05:53:39.463Z","updatedAt":"2023-07-21T05:54:26.677Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '817'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 21 Jul 2023 05:54:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
+      x-ms-messaging-activity-id:
+      - a57de94d-7d7d-4188-a949-5f4c1b5ef82a
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G3|2025-05-08T03:02:43
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 19D31B5C6E264282AA1C8A8FF95EFF34 Ref B: TYO201100117033 Ref C: 2025-05-08T03:02:42Z'
     status:
       code: 200
       message: OK
@@ -822,37 +973,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"retentionDescription":{"cleanupPolicy":"Delete","retentionTimeInHours":168},"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2023-07-21T05:54:47.473Z","updatedAt":"2023-07-21T05:54:47.713Z","partitionIds":["0","1","2","3"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"messageTimestampDescription":{"timestampType":"LogAppend"},"retentionDescription":{"cleanupPolicy":"Delete","retentionTimeInHours":168},"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2025-05-08T03:02:46.093Z","updatedAt":"2025-05-08T03:02:46.657Z","partitionIds":["0","1","2","3"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '555'
+      - '615'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:54:48 GMT
+      - Thu, 08 May 2025 03:02:47 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 51ca7d07-1670-4ef0-9774-c75470b66d62
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G12|2025-05-08T03:02:47
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/101f2ed4-7de9-410e-afbf-18583e9575ef
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 187CD5DE61CE42CAB09A67047274B6A5 Ref B: TYO201151004054 Ref C: 2025-05-08T03:02:43Z'
     status:
       code: 200
       message: OK
@@ -870,17 +1027,17 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: '{"properties":{"dataExportId":"2f4dce49-d53c-405f-abce-98eac8dc8425","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2023-07-21T05:52:53.6917983Z","lastModifiedDate":"2023-07-21T05:52:53.6917983Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
+      string: '{"properties":{"dataExportId":"aa9aa9a8-984e-40d2-bb52-711469aae11a","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2025-05-08T03:01:50.0766832Z","lastModifiedDate":"2025-05-08T03:01:50.0766832Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-cache
       content-length:
@@ -888,7 +1045,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:54:50 GMT
+      - Thu, 08 May 2025 03:02:47 GMT
       expires:
       - '-1'
       pragma:
@@ -897,22 +1054,24 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-powered-by:
-      - ASP.NET
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/2c9aec27-ace9-4680-8f32-b470d0795ee3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: BF54D2239AB7444AB4DA3B7DF47D12F3 Ref B: TYO201151003052 Ref C: 2025-05-08T03:02:47Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"createdDate": "2023-07-21T05:52:53.6917983Z", "dataExportId":
-      "2f4dce49-d53c-405f-abce-98eac8dc8425", "destination": {"metaData": {}, "resourceId":
+    body: '{"properties": {"createdDate": "2025-05-08T03:01:50.0766832Z", "dataExportId":
+      "aa9aa9a8-984e-40d2-bb52-711469aae11a", "destination": {"metaData": {}, "resourceId":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004"},
-      "enable": true, "lastModifiedDate": "2023-07-21T05:52:53.6917983Z", "tableNames":
+      "enable": true, "lastModifiedDate": "2025-05-08T03:01:50.0766832Z", "tableNames":
       ["Usage", "Alert"]}}'
     headers:
       Accept:
@@ -930,17 +1089,17 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: '{"properties":{"dataExportId":"2f4dce49-d53c-405f-abce-98eac8dc8425","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","type":"EventHub","metaData":{}},"tableNames":["Usage","Alert"],"enable":true,"createdDate":"2023-07-21T05:52:53.6917983Z","lastModifiedDate":"2023-07-21T05:54:52.5953019Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
+      string: '{"properties":{"dataExportId":"aa9aa9a8-984e-40d2-bb52-711469aae11a","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","type":"EventHub","metaData":{}},"tableNames":["Usage","Alert"],"enable":true,"createdDate":"2025-05-08T03:01:50.0766832Z","lastModifiedDate":"2025-05-08T03:02:49.9804217Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-cache
       content-length:
@@ -948,7 +1107,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:54:52 GMT
+      - Thu, 08 May 2025 03:02:49 GMT
       expires:
       - '-1'
       pragma:
@@ -957,16 +1116,18 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/e9fd453c-70ee-4bd7-8541-e5cdac50d67a
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: E14D2AE0B15F4A54A3CB6732884993E2 Ref B: TYO201151003052 Ref C: 2025-05-08T03:02:47Z'
     status:
       code: 200
       message: OK
@@ -984,37 +1145,43 @@ interactions:
       ParameterSetName:
       - -g --namespace-name
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"retentionDescription":{"cleanupPolicy":"Delete","retentionTimeInHours":168},"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2023-07-21T05:54:47.473","updatedAt":"2023-07-21T05:54:47.713","partitionIds":["0","1","2","3"]}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"messageTimestampDescription":{"timestampType":"LogAppend"},"retentionDescription":{"cleanupPolicy":"Delete","retentionTimeInHours":168},"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2025-05-08T03:02:46.093","updatedAt":"2025-05-08T03:02:46.657","partitionIds":["0","1","2","3"]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '565'
+      - '625'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:54:53 GMT
+      - Thu, 08 May 2025 03:02:51 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-inline-count:
       - ''
+      x-ms-messaging-activity-id:
+      - 901369f6-399e-4421-abed-3efb8b0ca8af
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G14|2025-05-08T03:02:51
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/fd3edb64-37e0-4955-bf34-567fe0befecd
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 748E1858F362472EBF6E498625BC3225 Ref B: TYO201151003040 Ref C: 2025-05-08T03:02:50Z'
     status:
       code: 200
       message: OK
@@ -1034,7 +1201,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n -y
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
@@ -1044,13 +1211,13 @@ interactions:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 21 Jul 2023 05:54:55 GMT
+      - Thu, 08 May 2025 03:02:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1059,12 +1226,18 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/c43d9846-061b-4d55-87fa-75cb5b863624
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-      x-powered-by:
-      - ASP.NET
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
+      x-msedge-ref:
+      - 'Ref A: B12F32FF29B54F669866E54D4E305C1D Ref B: TYO201100115029 Ref C: 2025-05-08T03:02:51Z'
     status:
       code: 200
       message: OK
@@ -1088,17 +1261,17 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: '{"properties":{"dataExportId":"1b366895-59d1-49ad-b570-f39af2c6a85a","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","type":"EventHub","metaData":{"eventHubName":"hub_name"}},"tableNames":["Syslog"],"enable":false,"createdDate":"2023-07-21T05:54:58.5339121Z","lastModifiedDate":"2023-07-21T05:54:58.5339121Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
+      string: '{"properties":{"dataExportId":"03db18e9-4ffb-4b27-8a17-4dcf14c15296","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","type":"EventHub","metaData":{"eventHubName":"hub_name"}},"tableNames":["Syslog"],"enable":false,"createdDate":"2025-05-08T03:02:53.8329777Z","lastModifiedDate":"2025-05-08T03:02:53.8329777Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-cache
       content-length:
@@ -1106,7 +1279,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:54:58 GMT
+      - Thu, 08 May 2025 03:02:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1115,16 +1288,18 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/26067ea6-53fe-4323-89a0-4d83abf73670
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 0C2F5D29FC0E41888F324CD902214369 Ref B: TYO201151002036 Ref C: 2025-05-08T03:02:53Z'
     status:
       code: 200
       message: OK
@@ -1144,7 +1319,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n -y
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
@@ -1154,13 +1329,13 @@ interactions:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 21 Jul 2023 05:55:00 GMT
+      - Thu, 08 May 2025 03:02:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1169,12 +1344,18 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/abaa0429-fb74-4998-8e10-0c51b2e85cd3
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-      x-powered-by:
-      - ASP.NET
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
+      x-msedge-ref:
+      - 'Ref A: 54CEC0EFBDFB4D508B3358CC74332128 Ref B: TYO201100115045 Ref C: 2025-05-08T03:02:54Z'
     status:
       code: 200
       message: OK
@@ -1192,7 +1373,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-13.4.1-x86_64-i386-64bit)
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports?api-version=2020-08-01
   response:
@@ -1202,7 +1383,7 @@ interactions:
       access-control-allow-origin:
       - '*'
       api-supported-versions:
-      - '2020-08-01'
+      - 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
       cache-control:
       - no-cache
       content-length:
@@ -1210,7 +1391,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 21 Jul 2023 05:55:02 GMT
+      - Thu, 08 May 2025 03:02:55 GMT
       expires:
       - '-1'
       pragma:
@@ -1219,14 +1400,16 @@ interactions:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-powered-by:
-      - ASP.NET
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/088e6e46-26e7-4dff-9bce-4a51c274f685
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: C82CBA346EE34906A94A56C1FA7EE9B2 Ref B: TYO201151003042 Ref C: 2025-05-08T03:02:55Z'
     status:
       code: 200
       message: OK

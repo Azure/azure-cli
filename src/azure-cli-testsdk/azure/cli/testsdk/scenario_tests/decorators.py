@@ -22,7 +22,7 @@ def record_only():
         'This test is excluded from being run live. To force a recording, please remove the recording file.')
 
 
-class AllowLargeResponse(object):  # pylint: disable=too-few-public-methods
+class AllowLargeResponse:  # pylint: disable=too-few-public-methods
 
     def __init__(self, size_kb=1024):
         self.size_kb = size_kb
