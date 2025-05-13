@@ -50,7 +50,7 @@ class DmsServiceTests(ScenarioTest):
                          JMESPathCheck('tags.area', 'cli'),
                          JMESPathCheck('tags.env', 'test'),
                          JMESPathCheck('type', 'Microsoft.DataMigration/services')]
-        self.cmd('az dms create -l {lname} -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test', checks=create_checks)
+        self.cmd('az dms create -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test', checks=create_checks)
 
         self.cmd('az dms show -g {rg} -n {sname}', checks=create_checks)
 
@@ -105,7 +105,7 @@ class DmsServiceTests(ScenarioTest):
         })
 
         # Set up container service
-        self.cmd('az dms create -l {lname} -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test')
+        self.cmd('az dms create -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test')
 
         self.cmd('az dms project show -g {rg} --service-name {sname} -n {pname1}', expect_failure=True)
 
@@ -307,7 +307,7 @@ class DmsServiceTests(ScenarioTest):
         })
 
         # Set up container service and project
-        self.cmd('az dms create -l {lname} -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test')
+        self.cmd('az dms create -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test')
         self.cmd('az dms project create -g {rg} --service-name {sname} -n {pname} --source-platform SQL --target-platform SQLDB')
         self.cmd('az dms project create -g {rg} --service-name {sname} -n {pnamepg} --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL')
         self.cmd('az dms project create -g {rg} --service-name {sname} -n {pnamemysql} --source-platform MySql --target-platform AzureDbForMySQL')
