@@ -100,6 +100,10 @@ Release History
 * `az postgres flexible-server create/db create`: Add validation for database name (#31392)
 * `az postgres flexible-server create`: Set default sku to be coming from location capability API (#31141)
 
+**Role**
+
+* `az role assignment list`: Drop `--include-classic-administrators` argument (#29470)
+
 **Service Connector**
 
 * `az webapp connection create mongodb-atlas`: Add `mongodb-atlas` target service support (#31308)
