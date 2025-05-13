@@ -1,0 +1,334 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --vm-sku --skuprofile-vmsizes --skuprofile-rank --skuprofile-allocation-strategy
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_create_sku_profile_prioritized_validation000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_sku_profile_prioritized_validation000001","name":"cli_test_vmss_create_sku_profile_prioritized_validation000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","test":"test_vmss_create_sku_profile_prioritized_validation","date":"2025-04-30T18:27:50Z","module":"vm"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '476'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Apr 2025 18:27:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 47871F7864DB464286AC5123B3A59E7C Ref B: MWH011020807060 Ref C: 2025-04-30T18:27:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.3
+    method: GET
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
+  response:
+    body:
+      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\"\
+        ,\n  \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\"\
+        : {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"\
+        type\": \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"\
+        CentOS85Gen2\": {\n            \"publisher\": \"OpenLogic\",\n           \
+        \ \"offer\": \"CentOS\",\n            \"sku\": \"8_5-gen2\",\n           \
+        \ \"version\": \"latest\",\n            \"architecture\": \"x64\"\n      \
+        \    },\n          \"Debian11\": {\n            \"publisher\": \"Debian\"\
+        ,\n            \"offer\": \"debian-11\",\n            \"sku\": \"11-backports-gen2\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"OpenSuseLeap154Gen2\": {\n            \"\
+        publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-leap-15-4\",\n \
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\",\n   \
+        \         \"architecture\": \"x64\"\n          },\n          \"RHELRaw8LVMGen2\"\
+        : {\n            \"publisher\": \"RedHat\",\n            \"offer\": \"RHEL\"\
+        ,\n            \"sku\": \"8-lvm-gen2\",\n            \"version\": \"latest\"\
+        ,\n            \"architecture\": \"x64\"\n          },\n          \"SuseSles15SP5\"\
+        : {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"sles-15-sp5\"\
+        ,\n            \"sku\": \"gen2\",\n            \"version\": \"latest\",\n\
+        \            \"architecture\": \"x64\"\n          },\n          \"Ubuntu2204\"\
+        : {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"\
+        0001-com-ubuntu-server-jammy\",\n            \"sku\": \"22_04-lts-gen2\",\n\
+        \            \"version\": \"latest\",\n            \"architecture\": \"x64\"\
+        \n          },\n          \"Ubuntu2404\": {\n            \"publisher\": \"\
+        Canonical\",\n            \"offer\": \"ubuntu-24_04-lts\",\n            \"\
+        sku\": \"server\",\n            \"version\": \"latest\",\n            \"architecture\"\
+        : \"x64\"\n          },\n          \"Ubuntu2404Pro\": {\n            \"publisher\"\
+        : \"Canonical\",\n            \"offer\": \"ubuntu-24_04-lts\",\n         \
+        \   \"sku\": \"ubuntu-pro\",\n            \"version\": \"latest\",\n     \
+        \       \"architecture\": \"x64\"\n          },\n          \"FlatcarLinuxFreeGen2\"\
+        : {\n            \"publisher\": \"kinvolk\",\n            \"offer\": \"flatcar-container-linux-free\"\
+        ,\n            \"sku\": \"stable-gen2\",\n            \"version\": \"latest\"\
+        ,\n            \"architecture\": \"x64\"\n          }\n        },\n      \
+        \  \"Windows\": {\n          \"Win2022Datacenter\": {\n            \"publisher\"\
+        : \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n\
+        \            \"sku\": \"2022-datacenter-g2\",\n            \"version\": \"\
+        latest\",\n            \"architecture\": \"x64\"\n          },\n         \
+        \ \"Win2022AzureEditionCore\": {\n            \"publisher\": \"MicrosoftWindowsServer\"\
+        ,\n            \"offer\": \"WindowsServer\",\n            \"sku\": \"2022-datacenter-azure-edition-core\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\"\
+        : \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n\
+        \            \"sku\": \"2019-datacenter-gensecond\",\n            \"version\"\
+        : \"latest\",\n            \"architecture\": \"x64\"\n          },\n     \
+        \     \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\"\
+        ,\n            \"offer\": \"WindowsServer\",\n            \"sku\": \"2016-datacenter-gensecond\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"\
+        publisher\": \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\"\
+        ,\n            \"sku\": \"2012-R2-Datacenter\",\n            \"version\":\
+        \ \"latest\",\n            \"architecture\": \"x64\"\n          },\n     \
+        \     \"Win2012Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\"\
+        ,\n            \"offer\": \"WindowsServer\",\n            \"sku\": \"2012-Datacenter\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          }\n        }\n      }\n    }\n  }\n}\n"
+    headers:
+      accept-ranges:
+      - bytes
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=300
+      connection:
+      - keep-alive
+      content-length:
+      - '3790'
+      content-security-policy:
+      - default-src 'none'; style-src 'unsafe-inline'; sandbox
+      content-type:
+      - text/plain; charset=utf-8
+      cross-origin-resource-policy:
+      - cross-origin
+      date:
+      - Wed, 30 Apr 2025 18:27:49 GMT
+      etag:
+      - W/"0f53b56eda413b90fc6365dd4848831171968adfbf5b440c8da07b5866a97d67"
+      expires:
+      - Wed, 30 Apr 2025 18:32:49 GMT
+      source-age:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000
+      vary:
+      - Authorization,Accept-Encoding,Origin
+      via:
+      - 1.1 varnish
+      x-cache:
+      - HIT
+      x-cache-hits:
+      - '0'
+      x-content-type-options:
+      - nosniff
+      x-fastly-request-id:
+      - 0509e485b9e919a65c2be77b0289ecc3051334dd
+      x-frame-options:
+      - deny
+      x-github-request-id:
+      - D5AE:742CD:22DC85:2AC578:68125DA0
+      x-served-by:
+      - cache-bfi-krnt7300098-BFI
+      x-timer:
+      - S1746037670.760829,VS0,VE61
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --vm-sku --skuprofile-vmsizes --skuprofile-rank --skuprofile-allocation-strategy
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Canonical/artifacttypes/vmimage/offers/0001-com-ubuntu-server-jammy/skus/22_04-lts-gen2/versions?$top=1&$orderby=name%20desc&api-version=2024-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"22.04.202504250\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202504250\"\
+        \r\n  }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Apr 2025 18:27:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12346924-f56c-4d61-b610-f67437f7ab4d/westus2/c2b0ec9a-d042-4602-a935-f3baa96ef2f7
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15996,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43982
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 2241B708E07C457189B07C239BB321D1 Ref B: CO6AA3150218039 Ref C: 2025-04-30T18:27:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --vm-sku --skuprofile-vmsizes --skuprofile-rank --skuprofile-allocation-strategy
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Canonical/artifacttypes/vmimage/offers/0001-com-ubuntu-server-jammy/skus/22_04-lts-gen2/versions/22.04.202504250?api-version=2024-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V2\",\r\n \
+        \   \"architecture\": \"x64\",\r\n    \"replicaType\": \"Managed\",\r\n  \
+        \  \"replicaCount\": 10,\r\n    \"disallowed\": {\r\n      \"vmDiskType\"\
+        : \"Unmanaged\"\r\n    },\r\n    \"automaticOSUpgradeProperties\": {\r\n \
+        \     \"automaticOSUpgradeSupported\": false\r\n    },\r\n    \"imageDeprecationStatus\"\
+        : {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\
+        \n      {\r\n        \"name\": \"SecurityType\",\r\n        \"value\": \"\
+        TrustedLaunchSupported\"\r\n      },\r\n      {\r\n        \"name\": \"IsAcceleratedNetworkSupported\"\
+        ,\r\n        \"value\": \"True\"\r\n      },\r\n      {\r\n        \"name\"\
+        : \"DiskControllerTypes\",\r\n        \"value\": \"SCSI, NVMe\"\r\n      },\r\
+        \n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n        \"value\"\
+        : \"True\"\r\n      }\r\n    ],\r\n    \"osDiskImage\": {\r\n      \"operatingSystem\"\
+        : \"Linux\",\r\n      \"sizeInGb\": 30\r\n    },\r\n    \"dataDiskImages\"\
+        : [],\r\n    \"goLiveDate\": \"2025-04-26T00:00:00+00:00\"\r\n  },\r\n  \"\
+        location\": \"eastus2\",\r\n  \"name\": \"22.04.202504250\",\r\n  \"id\":\
+        \ \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202504250\"\
+        \r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1208'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Apr 2025 18:27:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12346924-f56c-4d61-b610-f67437f7ab4d/westus2/7aba7963-c931-46f8-b913-613df42c3c80
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12996,Microsoft.Compute/GetVMImageFromLocation30Min;73991
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 276FE2FD9EF84BF7B84F4C1BECAACAA2 Ref B: CO6AA3150218017 Ref C: 2025-04-30T18:27:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --vm-sku --skuprofile-vmsizes --skuprofile-rank --skuprofile-allocation-strategy
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_create_sku_profile_prioritized_validation000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Apr 2025 18:27:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8411099221564593BCDC3B6EFB838C1F Ref B: MWH011020808054 Ref C: 2025-04-30T18:27:50Z'
+    status:
+      code: 200
+      message: OK
+version: 1

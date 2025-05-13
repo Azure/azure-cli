@@ -113,7 +113,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             c.argument('default_action', arg_type=get_enum_type(DefaultAction),
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
             c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry.{suffix}".format(suffix=default_allow_suffix))
-            c.argument('allow_trusted_services', get_three_state_flag(), is_preview=True, help="Allow trusted Azure Services to access network restricted registries. For more information, please visit https://aka.ms/acr/trusted-services.{suffix}".format(suffix=default_allow_suffix))
+            c.argument('allow_trusted_services', get_three_state_flag(), help="Allow trusted Azure Services to access network restricted registries. For more information, please visit https://aka.ms/acr/trusted-services.{suffix}".format(suffix=default_allow_suffix))
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group="Permissions and Role Assignment") as c:
@@ -315,6 +315,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('set_secret', help="Secret value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set_secret)
         c.argument('agent_pool_name', options_list=['--agent-pool'], help='The name of the agent pool.', is_preview=True)
         c.argument('log_template', options_list=['--log-template'], help="The repository and tag template for run log artifact using the format: 'log/repo:tag' (e.g., 'acr/logs:{{.Run.ID}}'). Only applicable to CMK enabled registry.", is_preview=True)
+        c.argument('source_acr_auth_id', is_preview=True, arg_type=get_enum_type(["[caller]", "none"]), help="Assign the identity used for source registry login. Use '[caller]' for caller identity.")
 
     with self.argument_context('acr pack build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -334,6 +335,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('secret_arg', options_list=['--secret-build-arg'], help="Secret build argument in '--secret-build-arg name[=value]' format. Multiples are supported by passing '--secret-build-arg name[=value]' multiple times. This parameter value is not surfaced to the ACR team and is more suitable for sensitive information.", action='append', validator=validate_secret_arg)
         c.argument('agent_pool_name', options_list=['--agent-pool'], help='The name of the agent pool.', is_preview=True)
         c.argument('log_template', options_list=['--log-template'], help="The repository and tag template for run log artifact using the format: 'log/repo:tag' (e.g., 'acr/logs:{{.Run.ID}}'). Only applicable to CMK enabled registry.", is_preview=True)
+        c.argument('source_acr_auth_id', is_preview=True, arg_type=get_enum_type(["[caller]", "none"]), help="Assign the identity used for source registry login. Use '[caller]' for caller identity.")
 
     with self.argument_context('acr task') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -376,16 +378,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')
 
         # MSI parameter
-        c.argument('assign_identity', nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. Please see https://aka.ms/acr/tasks/task-create-managed-identity for more information.")
+        c.argument('assign_identity', nargs='*', help="Assign managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. Please see https://aka.ms/acr/tasks/task-create-managed-identity for more information.")
 
         # Agent Pool Parameter
         c.argument('agent_pool_name', options_list=['--agent-pool'], help='The name of the agent pool.', is_preview=True)
 
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
+        c.argument('source_acr_auth_id', is_preview=True, help="Assign the managed identity used for source registry login. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned managed identity.")
+
+    with self.argument_context('acr task update') as c:
+        c.argument('source_acr_auth_id', is_preview=True, help="Assign the managed identity used for source registry login. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned managed identity.")
 
     with self.argument_context('acr task identity') as c:
-        c.argument('identities', options_list=['--identities'], nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity.")
+        c.argument('identities', options_list=['--identities'], nargs='*', help="Assign managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity.")
 
     with self.argument_context('acr task credential') as c:
         # Custom registry credentials

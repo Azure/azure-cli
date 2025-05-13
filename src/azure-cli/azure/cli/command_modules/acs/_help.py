@@ -65,7 +65,7 @@ parameters:
     short-summary: Secret associated with the service principal. This argument is required if `--service-principal` is specified.
   - name: --node-vm-size -s
     type: string
-    short-summary: Size of Virtual Machines to create as Kubernetes nodes.
+    short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
   - name: --dns-name-prefix -p
     type: string
     short-summary: Prefix for hostnames that are created. If not specified, generate a hostname using the managed cluster and resource group names.
@@ -323,6 +323,12 @@ parameters:
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --enable-apiserver-vnet-integration
+    type: bool
+    short-summary: Enable integration of user vnet with control plane apiserver pods.
+  - name: --apiserver-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
@@ -536,6 +542,9 @@ parameters:
   - name: --enable-app-routing
     type: bool
     short-summary: Enable Application Routing addon.
+  - name: --app-routing-default-nginx-controller --ardnc
+    type: string
+    short-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
   - name: --revision
     type: string
     short-summary: Azure Service Mesh revision to install.
@@ -931,6 +940,18 @@ parameters:
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.
+  - name: --enable-apiserver-vnet-integration
+    type: bool
+    short-summary: Enable integration of user vnet with control plane apiserver pods.
+  - name: --apiserver-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
+  - name: --enable-private-cluster
+    type: bool
+    short-summary: Enable private cluster for apiserver vnet integration cluster.
+  - name: --disable-private-cluster
+    type: bool
+    short-summary: Disable private cluster for apiserver vnet integration cluster.
   - name: --enable-keda
     type: bool
     short-summary: Enable KEDA workload auto-scaler.
@@ -1532,7 +1553,7 @@ short-summary: Add a node pool to the managed Kubernetes cluster.
 parameters:
   - name: --node-vm-size -s
     type: string
-    short-summary: Size of Virtual Machines to create as Kubernetes nodes.
+    short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
   - name: --node-count -c
     type: int
     short-summary: Number of nodes in the Kubernetes agent pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
@@ -2451,6 +2472,10 @@ helps['aks approuting enable'] = """
         type: string
         short-summary: Attach a keyvault id to access secrets and certificates.
         long-summary: This optional flag attaches a keyvault id to access secrets and certificates.
+      - name: --nginx
+        type: string
+        short-summary: Configure default NginxIngressController resource
+        long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
 helps['aks approuting disable'] = """
@@ -2472,6 +2497,10 @@ helps['aks approuting update'] = """
         type: bool
         short-summary: Enable the keyvault secrets provider addon.
         long-summary: This optional flag enables the keyvault-secrets-provider addon in given cluster. This is required for most App Routing use-cases.
+      - name: --nginx
+        type: string
+        short-summary: Configure default NginxIngressController resource
+        long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
 helps['aks approuting zone'] = """

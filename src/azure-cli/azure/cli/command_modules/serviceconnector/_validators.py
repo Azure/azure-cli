@@ -232,23 +232,35 @@ def get_client_type(cmd, namespace):
     return client_type.value
 
 
-def interactive_input(arg, hint):
+def interactive_input(arg, hint, cmd):
     '''Get interactive inputs from users
     '''
     value = None
     cmd_value = None
     if arg == 'secret_auth_info':
-        name = prompt('User name of database (--secret name=): ')
-        secret = prompt_pass('Password of database (--secret secret=): ')
-        value = {
-            'name': name,
-            'secret_info': {
-                'secret_type': 'rawValue',
-                'value': secret
-            },
-            'auth_type': 'secret'
-        }
-        cmd_value = 'name={} secret={}'.format(name, '*' * len(secret))
+        if 'mongodb-atlas' in cmd.name:
+            secret = prompt_pass('Connection string of cluster (--secret secret=): ')
+            value = {
+                'name': 'NA',
+                'secret_info': {
+                    'secret_type': 'rawValue',
+                    'value': secret
+                },
+                'auth_type': 'secret'
+            }
+            cmd_value = 'secret={}'.format('*' * len(secret))
+        else:
+            name = prompt('User name of database (--secret name=): ')
+            secret = prompt_pass('Password of database (--secret secret=): ')
+            value = {
+                'name': name,
+                'secret_info': {
+                    'secret_type': 'rawValue',
+                    'value': secret
+                },
+                'auth_type': 'secret'
+            }
+            cmd_value = 'name={} secret={}'.format(name, '*' * len(secret))
     elif arg == 'service_principal_auth_info_secret':
         client_id = prompt('ServicePrincipal client-id (--service-principal client_id=): ')
         object_id = prompt('Enterprise Application object-id (--service-principal object-id=): ')
@@ -373,7 +385,7 @@ def intelligent_experience(cmd, namespace, missing_args):
     for arg in missing_args:
         if arg not in cmd_arg_values:
             hint = '{} ({})'.format(missing_args[arg].get('help'), '/'.join(missing_args[arg].get('options')))
-            value, cmd_value = interactive_input(arg, hint)
+            value, cmd_value = interactive_input(arg, hint, cmd)
             cmd_arg_values[arg] = value
 
             # show applied params

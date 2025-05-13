@@ -10,10 +10,8 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from azure.cli.command_modules.monitor.actions import (
-    AlertAddAction, AlertRemoveAction, ConditionAction,
     AutoscaleScaleAction, AutoscaleConditionAction, get_period_type, AutoscaleCreateAction,
     timezone_offset_type, timezone_name_type, MetricAlertConditionAction, MetricAlertAddAction)
-from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     validate_loganalytics_workspace_search_table_name, validate_loganalytics_workspace_restore_table_name,
     validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
@@ -25,7 +23,7 @@ from knack.arguments import CLIArgumentType
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
-    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData, PredictiveAutoscalePolicyScaleMode
+    from azure.mgmt.monitor.models import EventData, PredictiveAutoscalePolicyScaleMode
     from .grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion, agg_conversion, op_conversion, sens_conversion
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
 
@@ -36,54 +34,6 @@ def load_arguments(self, _):
     with self.argument_context('monitor') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
-
-    # region Alerts
-    with self.argument_context('monitor alert') as c:
-        c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-
-    with self.argument_context('monitor alert create') as c:
-        c.resource_parameter('target', arg_group='Target Resource', alias='target', preserve_resource_group_parameter=True)
-        c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-        c.argument('disabled', arg_type=get_three_state_flag())
-        c.argument('condition', action=ConditionAction, nargs='+')
-
-    with self.argument_context('monitor alert create', arg_group='Action') as c:
-        c.argument('custom_emails', nargs='+')
-        c.argument('email_service_owners', arg_type=get_three_state_flag())
-        c.argument('actions', options_list=['--action', '-a'], action=AlertAddAction, nargs='+')
-
-    with self.argument_context('monitor alert create', arg_group='Condition') as c:
-        c.argument('metric_name')
-        c.argument('operator', arg_type=get_enum_type(ConditionOperator))
-        c.argument('threshold')
-        c.argument('time_aggregation', arg_type=get_enum_type(TimeAggregationOperator))
-        c.argument('window_size')
-
-    with self.argument_context('monitor alert update') as c:
-        c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-        c.resource_parameter('target', arg_group='Target Resource', required=False, preserve_resource_group_parameter=True)
-
-    with self.argument_context('monitor alert update', arg_group='Action') as c:
-        c.argument('email_service_owners', arg_type=get_three_state_flag())
-        c.argument('add_actions', options_list=['--add-action', '-a'], nargs='+', action=AlertAddAction)
-        c.argument('remove_actions', options_list=['--remove-action', '-r'], nargs='+', action=AlertRemoveAction)
-
-    with self.argument_context('monitor alert update', arg_group='Condition') as c:
-        c.argument('condition', action=ConditionAction, nargs='+')
-        c.argument('metric')
-        c.argument('operator', arg_type=get_enum_type(get_operator_map().keys()))
-        c.argument('threshold')
-        c.argument('aggregation', arg_type=get_enum_type(get_aggregation_map().keys()))
-        c.argument('period', type=get_period_type())
-
-    for scope in ['monitor alert show-incident', 'monitor alert list-incidents']:
-        with self.argument_context(scope) as c:
-            c.argument('rule_name', options_list=['--rule-name'], id_part='name')
-            c.argument('incident_name', name_arg_type, id_part='child_name_1')
-
-    with self.argument_context('monitor alert list-incidents') as c:
-        c.argument('rule_name', options_list=['--rule-name'], id_part=None)
-    # endregion
 
     # region Metrics
     with self.argument_context('monitor metrics') as c:

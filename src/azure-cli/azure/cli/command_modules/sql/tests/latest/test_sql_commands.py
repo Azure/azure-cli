@@ -1994,7 +1994,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
                                                   JMESPathCheck('provisioningState',
-                                                                'Creating')]).get_output_in_json()['id']
+                                                                'Succeeded')]).get_output_in_json()['id']
 
         # update audit policy - enable log analytics target
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
@@ -2200,7 +2200,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
                                                   JMESPathCheck('provisioningState',
-                                                                'Creating')]).get_output_in_json()['id']
+                                                                'Succeeded')]).get_output_in_json()['id']
 
         # update audit policy - enable log analytics target
         self.cmd('sql server audit-policy update -g {} -n {}'
@@ -2609,7 +2609,7 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
                                                   JMESPathCheck('provisioningState',
-                                                                'Creating')]).get_output_in_json()['id']
+                                                                'Succeeded')]).get_output_in_json()['id']
 
         # update MS support audit policy - enable log analytics target
         self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {}'

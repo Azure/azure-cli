@@ -153,6 +153,7 @@ def load_command_table(self, _):
         g.keyvault_custom('create', 'create_key', transform=transform_key_output, validator=validate_key_create)
         g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_output)
         g.keyvault_command('show', 'get_key', transform=transform_key_output)
+        g.keyvault_custom('get-attestation', 'get_key_attestation')
         g.keyvault_custom('import', 'import_key', transform=transform_key_output)
         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
         g.keyvault_custom('encrypt', 'encrypt_key', is_preview=True, transform=transform_key_encryption_output)
