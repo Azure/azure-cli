@@ -118,6 +118,7 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
 
+    @unittest.skip("Unit test is currently blocked as soft delete is enabled by default")
     def test_registration_ase_container(self):
         self.kwargs.update({
             'vault': vault_ase_reg,

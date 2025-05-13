@@ -967,11 +967,6 @@ def _get_restore_request_instance(item_type, log_point_in_time, rehydration_prio
             raise InvalidArgumentValueError('Integrated restore is not defined for log recovery point.')
         return AzureWorkloadSQLRestoreWithRehydrateRequest()
 
-    # if item_type.lower() == "sapase":
-    #     if log_point_in_time is not None:
-    #         raise InvalidArgumentValueError('Integrated restore is not defined for log recovery point.')
-    #     return AzureWorkloadSAPAseRestoreWithRehydrateRequest()
-
 
 def _get_protected_item_instance(item_type):
     if item_type.lower() == "saphanadatabase":
