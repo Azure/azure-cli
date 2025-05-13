@@ -122,13 +122,13 @@ parameters:
 examples:
   - name: Create a SQL to SQLDB project for a DMS instance.
     text: >
-        az dms project create -l westus -n sqlproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
+        az dms project create -n sqlproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
   - name: Create a PostgreSql to AzureDbForPostgreSql project for a DMS instance.
     text: >
-        az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags tagName1=tagValue1 tagWithNoValue
+        az dms project create -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags tagName1=tagValue1 tagWithNoValue
   - name: Create a MySQL to AzureDbForMySQL project for a DMS instance.
     text: >
-        az dms project create -l westus -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySQL --tags tagName1=tagValue1 tagWithNoValue
+        az dms project create -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySQL --tags tagName1=tagValue1 tagWithNoValue
 """
 
 helps['dms project delete'] = """
