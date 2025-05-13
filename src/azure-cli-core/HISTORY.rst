@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.73.0
+++++++
+* [BREAKING CHANGE] Remove azure stack profiles `2020-09-01-hybrid`, `2019-03-01-hybrid`, `2018-03-01-hybrid` and `2017-03-09-profile` (#31307)
+* Use MSAL for managed identity authentication. To revert to the old `msrestazure` implementation, run `az config set core.use_msal_managed_identity=false` or set environment variable `AZURE_CORE_USE_MSAL_MANAGED_IDENTITY=false` (#25959)
+
 2.72.0
 ++++++
 * Minor fixes
