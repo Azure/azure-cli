@@ -1896,21 +1896,48 @@ def load_arguments(self, _):
                    options_list=['--external-admin-principal-type'],
                    help='User, Group or Application')
 
-        c.argument('retention_days_soft_delete',
-                   options_list=['--retention-days-soft-delete', '--rd'],
+        c.argument('retention_days',
+                   options_list=['--retention-days', '--rd'],
                    required=False,
                    help='The number of days (from 0 to 7 inclusive) that your server will be'
                    'recoverable after initial deletion.')
+        c.argument('create_mode',
+                   options_list=['--create-mode', '--cm'],
+                   required=False,
+                   help='Normal or Restore')
 
     with self.argument_context('sql server update') as c:
         c.argument('administrator_login_password',
                    help='The administrator login password.')
 
-        c.argument('retention_days_soft_delete',
-                   options_list=['--retention-days-soft-delete', '--rd'],
+        c.argument('retention_days',
+                   options_list=['--retention-days', '--rd'],
                    required=False,
                    help='The number of days (from 0 to 7 inclusive) that your server will be'
                    'recoverable after initial deletion.')
+
+    with self.argument_context('sql server show') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
+
+    with self.argument_context('sql server list') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
+
+    with self.argument_context('sql server restore') as c:
+        c.argument('location',
+                   arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
+
+        # Create args that will be used to build up the Server object
+        create_args_for_complex_type(
+            c, 'parameters', Server, [
+                'administrator_login',
+                'administrator_login_password',
+                'location',
+                'minimal_tls_version'
+            ])
 
     with self.argument_context('sql server show') as c:
         c.argument('expand_ad_admin',

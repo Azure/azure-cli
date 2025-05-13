@@ -4088,7 +4088,8 @@ def server_create(
             else ServerNetworkAccessFlag.DISABLED)
         
     if retention_days is not None:
-        kwargs['soft_delete_retention_days'] = retention_days
+        kwargs['retention_days'] = retention_days
+        print(retention_days)
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id
@@ -4161,7 +4162,7 @@ def server_restore(
             else ServerNetworkAccessFlag.DISABLED)
         
     if retention_days is not None:
-        kwargs['soft_delete_retention_days'] = retention_days
+        kwargs['retention_days'] = retention_days
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id
@@ -4274,7 +4275,10 @@ def server_update(
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
         
-    instance.soft_delete_retention_days = (retention_days or instance.soft_delete_retention_days)
+    instance.retention_days = (retention_days or instance.retention_days)
+
+    print("instance.retention_days")
+    print(instance.retention_days)
 
     instance.primary_user_assigned_identity_id = (
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
