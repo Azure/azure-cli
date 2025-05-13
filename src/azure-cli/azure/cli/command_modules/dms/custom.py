@@ -36,21 +36,22 @@ from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sq
 
 # region Service
 
-def check_service_name_availability(client, service_name, location):
+def check_service_name_availability(cmd, client, service_name, location):
     parameters = NameAvailabilityRequest(name=service_name,
                                          type='services')
     return client.check_name_availability(location=location,
                                           parameters=parameters)
 
 
-def create_service(client,
+def create_service(cmd,
+                   client,
                    service_name,
                    resource_group_name,
-                   location,
                    subnet,
                    sku_name,
                    tags=None,
                    no_wait=False):
+    location = get_rg_location(cmd.cli_ctx, resource_group_name)
     parameters = DataMigrationService(location=location,
                                       virtual_subnet_id=subnet,
                                       sku=ServiceSku(name=sku_name),
