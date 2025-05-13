@@ -2353,7 +2353,7 @@ examples:
         az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
     text: >
-        az vmss create -n MyVmss -g MyResourceGroup --image Win2012R2Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
+        az vmss create -n MyVmss -g MyResourceGroup --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
   - name: Create a VMSS with specifying the security posture to be used for all virtual machines in the scale set.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version} --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{version} \\
