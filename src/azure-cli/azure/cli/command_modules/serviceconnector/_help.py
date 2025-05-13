@@ -217,12 +217,77 @@ for source in SOURCE_RESOURCES:
         # target resource params
         target_params = get_target_resource_params(target)
 
+        # special target resource to pass linter check with no auth params
+        if target == RESOURCE.ContainerApp:
+            helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
+            type: command
+            short-summary: Create a containerapp-to-containerapp connection.
+            examples:
+                - name: Create a connection between containerapp and containerapp interactively
+                  text: |-
+                        az {source} connection create {target}
+                - name: Create a connection between {source_display_name} and {target} with resource name
+                  text: |-
+                        az {source} connection create {target} {source_params} {target_params}
+                - name: Create a connection between {source_display_name} and {target} with resource id
+                  text: |-
+                        az {source} connection create {target} --source-id {source_id} --target-id {target_id}
+            """.format(
+                source=source.value,
+                target=target.value,
+                source_id=source_id,
+                target_id=target_id,
+                source_params=source_params,
+                target_params=target_params,
+                source_display_name=source_display_name)
+
+            helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """
+            type: command
+            short-summary: Update a containerapp-to-containerapp connection.
+            examples:
+                - name: Update the client type of a connection with resource name
+                  text: |-
+                        az {source} connection update {target} {source_params} --connection MyConnection --client-type dotnet
+                - name: Update the client type of a connection with resource id
+                  text: |-
+                        az {source} connection update {target} --id {connection_id} --client-type dotnet
+            """.format(
+                source=source.value,
+                target=target.value,
+                source_params=source_params,
+                connection_id=connection_id)
+            continue
+
         # auth info params
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
-        auth_params = get_auth_info_params(auth_types[0])
+        if auth_types[0] == AUTH_TYPE.WorkloadIdentity:
+            if target is RESOURCE.KeyVault:
+                auth_params = '--enable-csi'
+            else:
+                auth_params = get_auth_info_params(AUTH_TYPE.SecretAuto)
+        elif auth_types[0] == AUTH_TYPE.Null:
+            auth_params = ''
+        else:
+            auth_params = get_auth_info_params(auth_types[0])
+
+        if target in {RESOURCE.MongoDbAtlas}:
+            auth_params = '--secret secret=xx'
 
         # auth info params in help message
-        secret_param = '''
+        secret_param = ''
+        if AUTH_TYPE.Secret in auth_types:
+            if target in {RESOURCE.MongoDbAtlas}:
+                secret_param = '''
+            - name: --secret
+              short-summary: The connection string for secret auth
+              long-summary: |
+                Usage: --secret secret=XX
+
+                secret  : Connection string for secret auth.
+                          Example: mongodb+srv://myUser:myPassword@cluster0.a12345.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+        '''
+            elif source.value != RESOURCE.KubernetesCluster.value:
+                secret_param = '''
             - name: --secret
               short-summary: The secret auth info
               long-summary: |
@@ -231,10 +296,22 @@ for source in SOURCE_RESOURCES:
                        --secret name=XX secret-name=XX
 
                 name    : Required. Username or account name for secret auth.
-                secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
-                secret-uri  : One of <secret, secret-uri, secret-name> is required. Keyvault secret uri which stores password.
-                secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
-        ''' if AUTH_TYPE.Secret in auth_types else ''
+                secret  : One of `<secret, secret-uri, secret-name>` is required. Password or account key for secret auth.
+                secret-uri  : One of `<secret, secret-uri, secret-name>` is required. Keyvault secret uri which stores password.
+                secret-name : One of `<secret, secret-uri, secret-name>` is required. Keyvault secret name which stores password. It's for AKS only.
+        '''
+            else:
+                secret_param = '''
+            - name: --secret
+              short-summary: The secret auth info
+              long-summary: |
+                Usage: --secret name=XX secret=XX
+                       --secret name=XX secret-name=XX
+
+                name    : Required. Username or account name for secret auth.
+                secret  : One of `<secret, secret-uri, secret-name>` is required. Password or account key for secret auth.
+                secret-name : One of `<secret, secret-uri, secret-name>` is required. Keyvault secret name which stores password. It's for AKS only.
+        '''
         secret_auto_param = '''
             - name: --secret
               short-summary: The secret auth info
@@ -256,7 +333,7 @@ for source in SOURCE_RESOURCES:
             else:
                 system_identity_param = '''
             - name: --system-identity
-              short-summary: The system assigned identity auth info
+              short-summary: The flag to use system assigned identity auth info. No additional parameters are needed.
               long-summary: |
                 Usage: --system-identity
 
@@ -270,6 +347,15 @@ for source in SOURCE_RESOURCES:
                 client-id      : Required. Client id of the user assigned identity.
                 subs-id        : Required. Subscription id of the user assigned identity.
         ''' if AUTH_TYPE.UserIdentity in auth_types else ''
+        workload_identity_param = '''
+            - name: --workload-identity
+              short-summary: The user-assigned managed identity used to create workload identity federation.
+              long-summary: |
+                Usage: --workload-identity `<user-identity-resource-id>`
+
+                user-identity-resource-id: Required. The resource id of the user assigned identity.
+                Please DO NOT use AKS control plane identity and kubelet identity which is not supported by federated identity credential.
+        ''' if AUTH_TYPE.WorkloadIdentity in auth_types else ''
         service_principal_param = '''
             - name: --service-principal
               short-summary: The service principal auth info
@@ -280,7 +366,6 @@ for source in SOURCE_RESOURCES:
                 object-id      : Optional. Object id of the service principal (Enterprise Application).
                 secret         : Required. Secret of the service principal.
         ''' if AUTH_TYPE.ServicePrincipalSecret in auth_types else ''
-
         # create with `--new` examples
         provision_example = '''
             - name: Create a new {target} and connect {source_display_name} to it interactively
@@ -307,6 +392,31 @@ for source in SOURCE_RESOURCES:
             auth_params=auth_params,
             source_display_name=source_display_name) if source is RESOURCE.WebApp else ''
 
+        aks_keyvault_example = '''
+            - name: Create a connection between {source_display_name} and {target} using secret store csi driver
+              text: |-
+                     az {source} connection create {target} {source_params} {target_params} --enable-csi
+        '''.format(
+            source=source.value,
+            target=target.value,
+            source_params=source_params,
+            target_params=target_params,
+            source_display_name=source_display_name
+        ) if source is RESOURCE.KubernetesCluster and target is RESOURCE.KeyVault else ''
+
+        id_example = '''
+            - name: Create a connection between {source_display_name} and {target} with resource id
+              text: |-
+                     az {source} connection create {target} --source-id {source_id} --target-id {target_id} {auth_params}
+        '''.format(
+            source=source.value,
+            target=target.value,
+            source_id=source_id,
+            target_id=target_id,
+            auth_params=auth_params,
+            source_display_name=source_display_name
+        ) if target not in [RESOURCE.NeonPostgres, RESOURCE.MongoDbAtlas] else ''
+
         helps['{source} connection create {target}'.format(source=source.value, target=target.value)] = """
           type: command
           short-summary: Create a {source_display_name} connection to {target}.
@@ -315,6 +425,7 @@ for source in SOURCE_RESOURCES:
             {secret_auto_param}
             {system_identity_param}
             {user_identity_param}
+            {workload_identity_param}
             {service_principal_param}
           examples:
             - name: Create a connection between {source_display_name} and {target} interactively
@@ -324,25 +435,23 @@ for source in SOURCE_RESOURCES:
               text: |-
                      az {source} connection create {target} {source_params} {target_params} {auth_params}
             {webappslot_example}
-            - name: Create a connection between {source_display_name} and {target} with resource id
-              text: |-
-                     az {source} connection create {target} --source-id {source_id} --target-id {target_id} {auth_params}
+            {id_example}
             {provision_example}
         """.format(
             source=source.value,
             target=target.value,
-            source_id=source_id,
-            target_id=target_id,
             secret_param=secret_param,
             secret_auto_param=secret_auto_param,
             system_identity_param=system_identity_param,
             user_identity_param=user_identity_param,
+            workload_identity_param=workload_identity_param,
             service_principal_param=service_principal_param,
             source_params=source_params,
             target_params=target_params,
             auth_params=auth_params,
             provision_example=provision_example,
             webappslot_example=webappslot_example,
+            id_example=id_example,
             source_display_name=source_display_name)
 
         helps['{source} connection update {target}'.format(source=source.value, target=target.value)] = """
@@ -353,6 +462,7 @@ for source in SOURCE_RESOURCES:
             {secret_auto_param}
             {system_identity_param}
             {user_identity_param}
+            {workload_identity_param}
             {service_principal_param}
           examples:
             - name: Update the client type of a connection with resource name
@@ -368,6 +478,7 @@ for source in SOURCE_RESOURCES:
             secret_auto_param=secret_auto_param,
             system_identity_param=system_identity_param,
             user_identity_param=user_identity_param,
+            workload_identity_param=workload_identity_param,
             service_principal_param=service_principal_param,
             source_params=source_params,
             connection_id=connection_id,
@@ -416,7 +527,6 @@ for source in SOURCE_RESOURCES:
                server_params=server_params,
                registry_params=registry_params,
                source_display_name=source_display_name)
-
 
 source = RESOURCE.Local
 connection_id = (

@@ -69,6 +69,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_role_definition')
         g.custom_command('create', 'create_role_definition')
         g.custom_command('update', 'update_role_definition')
+        g.custom_show_command('show', 'show_role_definition')
 
     with self.command_group('role assignment') as g:
         g.custom_command('delete', 'delete_role_assignments', validator=process_assignment_namespace)

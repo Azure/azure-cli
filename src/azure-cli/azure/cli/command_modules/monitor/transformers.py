@@ -94,7 +94,7 @@ def metrics_table(results):
     for value_group in results['value']:
         name = value_group['name']['localizedValue']
         for series in value_group['timeseries']:
-            metadata = dict((m['name']['localizedValue'], m['value']) for m in series['metadatavalues'])
+            metadata = {m['name']['localizedValue']: m['value'] for m in series['metadatavalues']}
 
             for data in series['data']:
                 row = OrderedDict()

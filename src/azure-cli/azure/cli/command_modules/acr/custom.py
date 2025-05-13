@@ -5,12 +5,13 @@
 
 # pylint: disable=too-many-locals
 
+import os
 import re
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.util import user_confirmation
-from ._constants import get_managed_sku, get_premium_sku
+from ._constants import AbacRoleAssignmentMode, get_managed_sku, get_premium_sku
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -25,14 +26,26 @@ logger = get_logger(__name__)
 DEF_DIAG_SETTINGS_NAME_TEMPLATE = '{}-diagnostic-settings'
 SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
 DENY_ACTION = 'Deny'
+DOMAIN_NAME_LABEL_SCOPE_UNSECURE = 'Unsecure'
+DOMAIN_NAME_LABEL_SCOPE_RESOURCE_GROUP_REUSE = 'ResourceGroupReuse'
 
 
-def acr_check_name(client, registry_name):
-    registry = {
-        'name': registry_name,
-        'type': 'Microsoft.ContainerRegistry/registries'
-    }
-    return client.check_name_availability(registry)
+def acr_check_name(cmd, client, registry_name, resource_group_name=None, dnl_scope=DOMAIN_NAME_LABEL_SCOPE_UNSECURE):
+    if dnl_scope.lower() == DOMAIN_NAME_LABEL_SCOPE_RESOURCE_GROUP_REUSE.lower() and resource_group_name is None:
+        raise RequiredArgumentMissingError("Resource group name is required for domain name label scope " +
+                                           DOMAIN_NAME_LABEL_SCOPE_RESOURCE_GROUP_REUSE)
+    domain_name_label_scope = _get_domain_name_label_scope(cmd, dnl_scope)
+    if domain_name_label_scope:
+        RegistryNameCheckRequest = cmd.get_models('RegistryNameCheckRequest')
+        registry_check_name_request = RegistryNameCheckRequest(
+            name=registry_name,
+            type='Microsoft.ContainerRegistry/registries',
+            resource_group_name=resource_group_name,
+            auto_generated_domain_name_label_scope=domain_name_label_scope)
+    else:
+        raise RequiredArgumentMissingError("Invalid domain name label scope. The allowed values are 'Unsecure'," +
+                                           " 'TenantReuse', 'SubscriptionReuse', 'ResourceGroupReuse' or 'NoReuse'.")
+    return client.check_name_availability(registry_check_name_request)
 
 
 def acr_list(client, resource_group_name=None):
@@ -56,8 +69,10 @@ def acr_create(cmd,
                zone_redundancy=None,
                allow_trusted_services=None,
                allow_exports=None,
-               tags=None):
-
+               tags=None,
+               allow_metadata_search=None,
+               dnl_scope=None,
+               role_assignment_mode=None):
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
@@ -66,6 +81,9 @@ def acr_create(cmd,
 
     if re.match(r'\w*[A-Z]\w*', registry_name):
         raise InvalidArgumentValueError("argument error: Registry name must use only lowercase.")
+
+    if re.match(r'\w*[-]\w*', registry_name):
+        raise InvalidArgumentValueError("argument error: Registry name cannot contain dashes.")
 
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
@@ -79,13 +97,22 @@ def acr_create(cmd,
     if identity or key_encryption_key:
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
 
+    if allow_metadata_search is not None:
+        _configure_metadata_search(cmd, registry, allow_metadata_search)
+
+    if dnl_scope is not None:
+        _configure_domain_name_label_scope(cmd, registry, dnl_scope)
+
+    if role_assignment_mode is not None:
+        _configure_role_assignment_mode(cmd, registry, role_assignment_mode)
+
     _handle_network_bypass(cmd, registry, allow_trusted_services)
     _handle_export_policy(cmd, registry, allow_exports)
 
     lro_poller = client.begin_create(resource_group_name, registry_name, registry)
 
     if workspace:
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands import LongRunningOperation
         from azure.cli.core.commands.client_factory import get_subscription_id
         acr = LongRunningOperation(cmd.cli_ctx)(lro_poller)
@@ -122,7 +149,9 @@ def acr_update_custom(cmd,
                       allow_trusted_services=None,
                       anonymous_pull_enabled=None,
                       allow_exports=None,
-                      tags=None):
+                      tags=None,
+                      allow_metadata_search=None,
+                      role_assignment_mode=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
         instance.sku = Sku(name=sku)
@@ -144,6 +173,12 @@ def acr_update_custom(cmd,
 
     if default_action is not None:
         _configure_default_action(cmd, instance, default_action)
+
+    if allow_metadata_search is not None:
+        _configure_metadata_search(cmd, instance, allow_metadata_search)
+
+    if role_assignment_mode is not None:
+        _configure_role_assignment_mode(cmd, instance, role_assignment_mode)
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
     _handle_export_policy(cmd, instance, allow_exports)
@@ -247,7 +282,7 @@ def acr_show_endpoints(cmd,
 
 def acr_login(cmd,
               registry_name,
-              resource_group_name=None,  # pylint: disable=unused-argument
+              resource_group_name=None,
               tenant_suffix=None,
               username=None,
               password=None,
@@ -261,7 +296,8 @@ def acr_login(cmd,
             registry_name=registry_name,
             tenant_suffix=tenant_suffix,
             username=username,
-            password=password)
+            password=password,
+            resource_group_name=resource_group_name)
 
         logger.warning("You can perform manual login using the provided access token below, "
                        "for example: 'docker login loginServer -u %s -p accessToken'", EMPTY_GUID)
@@ -292,7 +328,8 @@ def acr_login(cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
-        password=password)
+        password=password,
+        resource_group_name=resource_group_name)
 
     # warn casing difference caused by ACR normalizing to lower on login_server
     parts = login_server.split('.')
@@ -347,7 +384,10 @@ def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
 
 def get_docker_command(is_diagnostics_context=False):
     from ._errors import DOCKER_COMMAND_ERROR, DOCKER_DAEMON_ERROR
-    docker_command = 'docker'
+    if os.getenv('DOCKER_COMMAND'):
+        docker_command = os.getenv('DOCKER_COMMAND')
+    else:
+        docker_command = 'docker'
 
     from subprocess import PIPE, Popen, CalledProcessError
     try:
@@ -415,7 +455,6 @@ def _check_wincred(login_server):
             # Don't update config file or retry as this doesn't seem to be a wincred issue
             return False
 
-        import os
         content = {
             "auths": {
                 login_server: {}
@@ -596,7 +635,7 @@ def _analyze_identities(identities):
 
 
 def _ensure_identity_resource_id(subscription_id, resource_group, resource):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     if is_valid_resource_id(resource):
         return resource
     return resource_id(subscription=subscription_id,
@@ -609,3 +648,34 @@ def _ensure_identity_resource_id(subscription_id, resource_group, resource):
 def list_private_link_resources(cmd, client, registry_name, resource_group_name=None):
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return client.list_private_link_resources(resource_group_name, registry_name)
+
+
+def _configure_metadata_search(cmd, registry, enabled):
+    MetadataSearch = cmd.get_models('MetadataSearch')
+    registry.metadata_search = (MetadataSearch.enabled if enabled else MetadataSearch.disabled)
+
+
+def _configure_domain_name_label_scope(cmd, registry, scope):
+    registry.auto_generated_domain_name_label_scope = _get_domain_name_label_scope(cmd, scope)
+
+
+def _get_domain_name_label_scope(cmd, scope):
+    if DomainNameLabelScope := cmd.get_models('AutoGeneratedDomainNameLabelScope'):
+        return DomainNameLabelScope(scope).value
+    return DOMAIN_NAME_LABEL_SCOPE_UNSECURE
+
+
+def _configure_role_assignment_mode(cmd, registry, role_assignment_mode):
+    RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
+    mode = RoleAssignmentMode.LEGACY_REGISTRY_PERMISSIONS
+    if role_assignment_mode == AbacRoleAssignmentMode.ABAC.value:
+        mode = RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+        logger.warning(
+            "Warning: You have successfully updated the registry authentication mode to enable RBAC "
+            "Registry + ABAC Repository Permissions. ACR Tasks within the registry that do not have "
+            "an assigned identity for source registry access will not have data plane access to the "
+            "registry. To configure source registry data plane access for your existing Tasks, you "
+            "must explicitly assign an Entra identity for accessing the source registry using the "
+            "'--source-registry-auth-id' flag in 'az acr task update'. Please refer to "
+            "https://aka.ms/acr/auth/abac for more details.")
+    registry.role_assignment_mode = mode

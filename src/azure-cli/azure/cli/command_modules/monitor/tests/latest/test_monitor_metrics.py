@@ -11,7 +11,7 @@ class TestMonitorMetrics(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_monitor_metrics_scenario(self, resource_group, storage_account):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'sa_id': resource_id(
                 resource_group=resource_group,

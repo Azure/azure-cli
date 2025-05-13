@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network lb address-pool address update",
-    is_preview=True,
 )
 class Update(AAZCommand):
     """Update the backend address into the load balance backend address pool.

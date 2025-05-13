@@ -26,12 +26,13 @@ from azure.cli.testsdk import api_version_constraint
 
 class MockCLI(CLI):
     def __init__(self):
-        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
-                                      config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
+        super().__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
+                         config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
         self.cloud = get_active_cloud(self)
+        self.data = {"headers": [], "completer_active": False, "command": ""}
 
 
-class MockLoader(object):
+class MockLoader:
     def __init__(self, ctx):
         self.ctx = ctx
 
@@ -40,11 +41,12 @@ class MockLoader(object):
         return get_sdk(self.ctx, ResourceType.DATA_STORAGE, *attr_args, mod='models')
 
 
-class MockCmd(object):
+class MockCmd:
     def __init__(self, ctx, arguments={}):
         self.cli_ctx = ctx
         self.loader = MockLoader(self.cli_ctx)
         self.arguments = arguments
+        self.command_kwargs = {}
 
     def get_models(self, *attr_args, **kwargs):
         return get_sdk(self.cli_ctx, ResourceType.DATA_STORAGE, *attr_args, **kwargs)
@@ -340,7 +342,7 @@ class TestAzcopyValidator(unittest.TestCase):
                        source_account_name=None, source_account_key=None,
                        source_connection_string=None, source_sas=None,
                        account_name=None, account_key=None,
-                       connection_string=None, sas_token=None,
+                       connection_string=None, sas_token=None, auth_mode=None,
                        _cmd=MockCmd(self.cli))
         validate_azcopy_credential(MockCmd(self.cli), ns)
         self.assertIsNotNone(ns.source)
@@ -355,7 +357,7 @@ class TestAzcopyValidator(unittest.TestCase):
                        source_account_name=None, source_account_key=None,
                        source_connection_string=None, source_sas=None,
                        account_name='destacc', account_key=None,
-                       connection_string=None, sas_token=None,
+                       connection_string=None, sas_token=None, auth_mode=None,
                        _cmd=MockCmd(self.cli))
         validate_azcopy_credential(MockCmd(self.cli), ns)
         self.assertIsNotNone(ns.source)
@@ -370,7 +372,7 @@ class TestAzcopyValidator(unittest.TestCase):
                        source_account_name='srcacc', source_account_key='mockacckey',
                        source_connection_string=None, source_sas=None,
                        account_name='destacc', account_key='mockacckey',
-                       connection_string=None, sas_token=None,
+                       connection_string=None, sas_token=None, auth_mode=None,
                        _cmd=MockCmd(self.cli))
         validate_azcopy_credential(MockCmd(self.cli), ns)
         self.assertIsNotNone(ns.source)

@@ -24,7 +24,7 @@ logger = logging.getLogger('azdev.verify.package')
 # It also ensures all the items were ran and errors are collected.
 class PackageVerifyTests(unittest.TestCase):
     def __init__(self, method_name, **kwargs):
-        super(PackageVerifyTests, self).__init__(method_name)
+        super().__init__(method_name)
         self.test_data = kwargs
 
     def test_azure_cli_module_manifest_and_azure_bdist(self):

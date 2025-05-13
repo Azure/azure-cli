@@ -42,7 +42,7 @@ class AzCliLogging(CLILogging):
     COMMAND_METADATA_LOGGER = 'az_command_data_logger'
 
     def __init__(self, name, cli_ctx=None):
-        super(AzCliLogging, self).__init__(name, cli_ctx)
+        super().__init__(name, cli_ctx)
         self.command_log_dir = os.path.join(cli_ctx.config.config_dir, 'commands')
         self.command_logger_handler = None
         self.command_metadata_logger = None
@@ -50,7 +50,7 @@ class AzCliLogging(CLILogging):
         self.cli_ctx.register_event(EVENT_CLI_POST_EXECUTE, AzCliLogging.deinit_cmd_metadata_logging)
 
     def configure(self, args):
-        super(AzCliLogging, self).configure(args)
+        super().configure(args)
         from knack.log import CliLogLevel
         if self.log_level == CliLogLevel.DEBUG:
             # As azure.core.pipeline.policies.http_logging_policy is a redacted version of

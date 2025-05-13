@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "eastus2", "identity": {"type": "SystemAssigned"}, "properties":
+    body: '{"location": "westus2", "identity": {"type": "SystemAssigned"}, "properties":
       {"encryptionConfig": {"type": "ServiceManaged"}}}'
     headers:
       Accept:
@@ -14,22 +14,19 @@ interactions:
       Content-Length:
       - '127'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003?api-version=2016-11-01
   response:
     body:
-      string: '{"properties":{"encryptionConfig":{"type":"ServiceManaged"},"provisioningState":"Creating","state":null,"endpoint":null,"accountId":"20a9d59e-2de3-4dae-bee0-7217d0a09383"},"location":"eastus2","identity":{"type":"SystemAssigned","principalId":"00000000-0000-0000-0000-000000000000","tenantId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
+      string: '{"properties":{"encryptionConfig":{"type":"ServiceManaged"},"provisioningState":"Creating","state":null,"endpoint":null,"accountId":"ba0fa98c-edf2-40a7-bc81-dc537a3b24e3"},"location":"westus2","identity":{"type":"SystemAssigned","principalId":"00000000-0000-0000-0000-000000000000","tenantId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/20a9d59e-2de3-4dae-bee0-7217d0a09383_0?api-version=2016-11-01&t=638386684219025980&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=UrgXlEkLUQlfEfaC6OD1uWyB6mU3axghCNK27Cy6kwfeumTd0Sjhsa55TwYda4OgFGrHq5GNOq2yE0MwQHe9Vid4t81GwSCmjvZzybzo27MPSsY45CRhMi8T4ZqfEeDv0zz8djE3Jh9ujrXdC5GeOJuS4cdnZpujkAbX7I8rK-kO14zBYTYS_1xvzkD1sBkJCx6krKk3okuuuTOnMbM1ftwn5nPG9MCql2ITG24Ya3xixkF_-w6nD5FO3p5tBT2lj5e5zQUVV6zEJwG_xb9E2qtk5YCCxdhQrucOSfCL7TqvhezoAAe3YI_LYKpoURqwfEeRhcFQpMLKrLx-8X8vkQ&h=rydRjbKCWClWCQDOJtlPG4LT31a658ZJrj_pYeuQ-1U
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/westus2/operationResults/ba0fa98c-edf2-40a7-bc81-dc537a3b24e3_0?api-version=2016-11-01&t=638654794707118520&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=VmxB1_MP_ACmcANizIz3p1j9ePnsgYd9rOcO3ajmI8nPErt47iutJ-19ScookuArmXzTzurBpng_TMAQPMtgddc61up0jqXlDg3ZwXczLICTCvIm8eQnzmmvDwOr_mK_5lg7v9jTmGt-E_L039gdyNVwzKFgbU9MSE4wAiirRs52E9lgsUM3YW9xZpem1GJnYpHyJ9tzZCUzFVjq57zs9I_GKvOIa1KbGgRjCE4gHDnvqD4iATJm8m9CRSFBCMZVSHZKjrhmOWmP4UlTBAQ29ec2_xReO2efoGFLvoNFBzvdOha5IK0LHv3ICVqO-AKVufG3DQBIBqlVZxDRjYS-Cg&h=hueFyFxMe5ksF_biu0lGeHp992CvkPDl7yB0bcudGDE
       cache-control:
       - no-cache
       content-length:
@@ -37,23 +34,27 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:27:01 GMT
+      - Fri, 25 Oct 2024 18:57:50 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/operationresults/0?api-version=2016-11-01&t=638386684219025980&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=Z_JVXbTKKG8cOPDY95hZiQSHomhkfAOVmiBtfegkIEKCPxweNCb8Ae_KCZ7XYHd5cqVtkaYiZsj2oJ_HbDySIZBakFDkEXPzH-xsD3811aeuGQc9yTnlkLT3fM3WUBN56khn3Ejinb4Wi98QtqEfOU51iOQ_HRaCoNWeiIP4ey93lVOU2v7ke7U_Qu3Fh8W4ppKBqE58k3dMbYBmiiY9WsICY5Drd9oMm1wiM2POMiTYzzv0uDcGJDmMstI-66LLsPtmVMFpt41lKEqMvFtDaFuzEOOiR8MUq51QnSAETqqyc1S6WA-dhPkPGdDclQAyfkPDiFiLQa9ExK4LW2SosA&h=iHqmWFfZaOuqVJJJVOB9NAhRKs2AEzFuL7UqGGJpXKg
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/operationresults/0?api-version=2016-11-01&t=638654794707118520&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=AecxtxMEIHT6W1k0puzwb3KLIjmC_Dorm9B5BgEV0bSDg-_KEYI3tO8fsAUMXhBL36xV57BEByx7TcIyjVGpuvUYye8uWSOt9FNLcfKgkjC25HidJBWKQAuNZ7hkVGju2nzb4TBLJlMBI9JM5kkao7njtq-l_uu_Ntztfil11hG8p2iZYZKzKiLrZafTAcMNOKbLqqngE3nCn4ZVOnjdrqRWvCnOXAG0YUGeOlOCHE_WCdPT2rXeM2Dazo3Z1gk7VW9ZIF9vPqOdaS2NRuZZSDD54zupSw6_Caqm0cEDDUL6joq0mtfRpEYLnXnb2EPWZ5iPcYF0gfVhn5TKTeYPEA&h=btyd2SJf4Xfl2wvMbx_irp0TEvlapKZeVzPrObW2rJQ
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 98D10A61E15D4BBD82B66CD2D88C17E1 Ref B: CO6AA3150220027 Ref C: 2024-10-25T18:57:49Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -63,7 +64,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -73,13 +74,12 @@ interactions:
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/20a9d59e-2de3-4dae-bee0-7217d0a09383_0?api-version=2016-11-01&t=638386684219025980&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=UrgXlEkLUQlfEfaC6OD1uWyB6mU3axghCNK27Cy6kwfeumTd0Sjhsa55TwYda4OgFGrHq5GNOq2yE0MwQHe9Vid4t81GwSCmjvZzybzo27MPSsY45CRhMi8T4ZqfEeDv0zz8djE3Jh9ujrXdC5GeOJuS4cdnZpujkAbX7I8rK-kO14zBYTYS_1xvzkD1sBkJCx6krKk3okuuuTOnMbM1ftwn5nPG9MCql2ITG24Ya3xixkF_-w6nD5FO3p5tBT2lj5e5zQUVV6zEJwG_xb9E2qtk5YCCxdhQrucOSfCL7TqvhezoAAe3YI_LYKpoURqwfEeRhcFQpMLKrLx-8X8vkQ&h=rydRjbKCWClWCQDOJtlPG4LT31a658ZJrj_pYeuQ-1U
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/westus2/operationResults/ba0fa98c-edf2-40a7-bc81-dc537a3b24e3_0?api-version=2016-11-01&t=638654794707118520&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=VmxB1_MP_ACmcANizIz3p1j9ePnsgYd9rOcO3ajmI8nPErt47iutJ-19ScookuArmXzTzurBpng_TMAQPMtgddc61up0jqXlDg3ZwXczLICTCvIm8eQnzmmvDwOr_mK_5lg7v9jTmGt-E_L039gdyNVwzKFgbU9MSE4wAiirRs52E9lgsUM3YW9xZpem1GJnYpHyJ9tzZCUzFVjq57zs9I_GKvOIa1KbGgRjCE4gHDnvqD4iATJm8m9CRSFBCMZVSHZKjrhmOWmP4UlTBAQ29ec2_xReO2efoGFLvoNFBzvdOha5IK0LHv3ICVqO-AKVufG3DQBIBqlVZxDRjYS-Cg&h=hueFyFxMe5ksF_biu0lGeHp992CvkPDl7yB0bcudGDE
   response:
     body:
-      string: '{"status":"InProgress","startTime":"2023-12-20T11:27:01.5526951Z"}'
+      string: '{"status":"InProgress","startTime":"2024-10-25T18:57:50.5920441Z"}'
     headers:
       cache-control:
       - no-cache
@@ -88,23 +88,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:27:12 GMT
+      - Fri, 25 Oct 2024 18:57:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 6153F1515C694C2F932F733C24DC2AC7 Ref B: CO6AA3150220027 Ref C: 2024-10-25T18:57:50Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -114,7 +114,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -124,13 +124,62 @@ interactions:
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/20a9d59e-2de3-4dae-bee0-7217d0a09383_0?api-version=2016-11-01&t=638386684219025980&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=UrgXlEkLUQlfEfaC6OD1uWyB6mU3axghCNK27Cy6kwfeumTd0Sjhsa55TwYda4OgFGrHq5GNOq2yE0MwQHe9Vid4t81GwSCmjvZzybzo27MPSsY45CRhMi8T4ZqfEeDv0zz8djE3Jh9ujrXdC5GeOJuS4cdnZpujkAbX7I8rK-kO14zBYTYS_1xvzkD1sBkJCx6krKk3okuuuTOnMbM1ftwn5nPG9MCql2ITG24Ya3xixkF_-w6nD5FO3p5tBT2lj5e5zQUVV6zEJwG_xb9E2qtk5YCCxdhQrucOSfCL7TqvhezoAAe3YI_LYKpoURqwfEeRhcFQpMLKrLx-8X8vkQ&h=rydRjbKCWClWCQDOJtlPG4LT31a658ZJrj_pYeuQ-1U
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/westus2/operationResults/ba0fa98c-edf2-40a7-bc81-dc537a3b24e3_0?api-version=2016-11-01&t=638654794707118520&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=VmxB1_MP_ACmcANizIz3p1j9ePnsgYd9rOcO3ajmI8nPErt47iutJ-19ScookuArmXzTzurBpng_TMAQPMtgddc61up0jqXlDg3ZwXczLICTCvIm8eQnzmmvDwOr_mK_5lg7v9jTmGt-E_L039gdyNVwzKFgbU9MSE4wAiirRs52E9lgsUM3YW9xZpem1GJnYpHyJ9tzZCUzFVjq57zs9I_GKvOIa1KbGgRjCE4gHDnvqD4iATJm8m9CRSFBCMZVSHZKjrhmOWmP4UlTBAQ29ec2_xReO2efoGFLvoNFBzvdOha5IK0LHv3ICVqO-AKVufG3DQBIBqlVZxDRjYS-Cg&h=hueFyFxMe5ksF_biu0lGeHp992CvkPDl7yB0bcudGDE
   response:
     body:
-      string: '{"status":"Succeeded","startTime":"2023-12-20T11:27:01.5526951Z","endTime":"2023-12-20T11:27:32.2403807Z"}'
+      string: '{"status":"InProgress","startTime":"2024-10-25T18:57:50.5920441Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Fri, 25 Oct 2024 18:58:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E222819759F4465DB4B625D892210D0E Ref B: CO6AA3150220027 Ref C: 2024-10-25T18:58:21Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l
+      User-Agent:
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/westus2/operationResults/ba0fa98c-edf2-40a7-bc81-dc537a3b24e3_0?api-version=2016-11-01&t=638654794707118520&c=MIIHpTCCBo2gAwIBAgITOgM6dTLGpzYZpvPtgQAEAzp1MjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNjI2MDEzMjIxWhcNMjUwNjIxMDEzMjIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAPPPKY5bDN03KptFFhiyLIyn86BlrXYFIZWYXA-hY7_WbLyWN0IxcLIUBW_I-9u-YsXOHk9WPMlUYHIFPgHW7A3FsSGfl9dd6YGapKoSSw0NkTpNXM58R54BBgLp7AhiWzK15D9T-XELNSU4Wq9sEeA5T24kazcgS2MUkzELH0I9dwu7g0dwJIuIJkoJjEzg1b1Q3Ie5HKHHNbjottJn7Q5LBS-9QtQyruuwaNTgSJpCoi4PBKVIOTBYL_Nv1wecmKmfWcT0mnhQE9zjhJTbcoN9hKSvAMqsDHtxWUFZosiw3JKIY0zb59CrVGSuOhfN3qaarwN9EAlXLqc4ZyKpsTkCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRk_38CqdKjPVylWUR4uuqhbFGeHTAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFsx7FtYAzSo98T5ydNFa0ukjPZ6XCQc9zo7ldqy235P_zJAUkaNgCU4EGOzbZJDoMa8mAfhyukL_0GfPeApUaY2e44ZOzoYAkeEuDiwcs-9zoQ1fCyXhn0pCumGFXRilX9KjAPaYTzDvQMEllTy_ZViwTahuKaGtFVamZguBPdaeYC_0oybtTVNQCs8hGnffhNZOMASB-5pFs35MNxsDWTVIQksDee419jqpsbWLkh6rnanILO1O_ihwb-WpvRQByQ5NGpG1-z0MQ6nRpr9wWxUi-DsrVsD38NTMIPc2uei4Ivf6qnGRvOOj0fmsciWuTTEXMaD-5a81mGlzhZc09Q&s=VmxB1_MP_ACmcANizIz3p1j9ePnsgYd9rOcO3ajmI8nPErt47iutJ-19ScookuArmXzTzurBpng_TMAQPMtgddc61up0jqXlDg3ZwXczLICTCvIm8eQnzmmvDwOr_mK_5lg7v9jTmGt-E_L039gdyNVwzKFgbU9MSE4wAiirRs52E9lgsUM3YW9xZpem1GJnYpHyJ9tzZCUzFVjq57zs9I_GKvOIa1KbGgRjCE4gHDnvqD4iATJm8m9CRSFBCMZVSHZKjrhmOWmP4UlTBAQ29ec2_xReO2efoGFLvoNFBzvdOha5IK0LHv3ICVqO-AKVufG3DQBIBqlVZxDRjYS-Cg&h=hueFyFxMe5ksF_biu0lGeHp992CvkPDl7yB0bcudGDE
+  response:
+    body:
+      string: '{"status":"Succeeded","startTime":"2024-10-25T18:57:50.5920441Z","endTime":"2024-10-25T18:58:22.4984284Z"}'
     headers:
       cache-control:
       - no-cache
@@ -139,23 +188,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:27:45 GMT
+      - Fri, 25 Oct 2024 18:58:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: B0C51D39878041D1994441BFB41ED402 Ref B: CO6AA3150220027 Ref C: 2024-10-25T18:58:51Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -165,7 +214,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -175,38 +224,37 @@ interactions:
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003?api-version=2016-11-01
   response:
     body:
-      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Enabled","encryptionConfig":{"type":"ServiceManaged"},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"20a9d59e-2de3-4dae-bee0-7217d0a09383","creationTime":"2023-12-20T11:27:05.0652681Z","lastModifiedTime":"2023-12-20T11:27:05.0652681Z"},"location":"eastus2","identity":{"type":"SystemAssigned","principalId":"a66810aa-8328-4165-a16e-116874c907b9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
+      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Enabled","encryptionConfig":{"type":"ServiceManaged"},"dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"ba0fa98c-edf2-40a7-bc81-dc537a3b24e3","creationTime":"2024-10-25T18:57:57.1456672Z","lastModifiedTime":"2024-10-25T18:57:57.1456672Z"},"location":"westus2","identity":{"type":"SystemAssigned","principalId":"07739881-2c55-45b3-8425-868f82e3a3fe","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1097'
+      - '1045'
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:27:47 GMT
+      - Fri, 25 Oct 2024 18:58:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 3EEBC61CE69B4132A2BD0F35453960AC Ref B: CO6AA3150220027 Ref C: 2024-10-25T18:58:51Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -223,45 +271,40 @@ interactions:
       - dls account show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003?api-version=2016-11-01
   response:
     body:
-      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Enabled","encryptionConfig":{"type":"ServiceManaged"},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"20a9d59e-2de3-4dae-bee0-7217d0a09383","creationTime":"2023-12-20T11:27:05.0652681Z","lastModifiedTime":"2023-12-20T11:27:05.0652681Z"},"location":"eastus2","identity":{"type":"SystemAssigned","principalId":"a66810aa-8328-4165-a16e-116874c907b9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
+      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Enabled","encryptionConfig":{"type":"ServiceManaged"},"dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"ba0fa98c-edf2-40a7-bc81-dc537a3b24e3","creationTime":"2024-10-25T18:57:57.1456672Z","lastModifiedTime":"2024-10-25T18:57:57.1456672Z"},"location":"westus2","identity":{"type":"SystemAssigned","principalId":"07739881-2c55-45b3-8425-868f82e3a3fe","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1097'
+      - '1045'
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:27:49 GMT
+      - Fri, 25 Oct 2024 18:58:51 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 524B7B6CA9CE4297ABC9AD167F0C8748 Ref B: CO1EDGE1913 Ref C: 2024-10-25T18:58:51Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -271,7 +314,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -280,15 +323,10 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/enableKeyVault?api-version=2016-11-01
   response:
@@ -303,21 +341,25 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:27:51 GMT
+      - Fri, 25 Oct 2024 18:58:51 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 3124CF7C99444661AD31CF73593F204E Ref B: CO1EDGE2613 Ref C: 2024-10-25T18:58:51Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -334,20 +376,15 @@ interactions:
       - dls account list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts?api-version=2016-11-01
   response:
     body:
-      string: '{"value":[{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"20a9d59e-2de3-4dae-bee0-7217d0a09383","creationTime":"2023-12-20T11:27:05.0652681Z","lastModifiedTime":"2023-12-20T11:27:05.0652681Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}]}'
+      string: '{"value":[{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"ba0fa98c-edf2-40a7-bc81-dc537a3b24e3","creationTime":"2024-10-25T18:57:57.1456672Z","lastModifiedTime":"2024-10-25T18:57:57.1456672Z"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}]}'
     headers:
       cache-control:
       - no-cache
@@ -356,23 +393,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:27:53 GMT
+      - Fri, 25 Oct 2024 18:58:51 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 7DA3914A3BE748E89EC2948EB95FE1F2 Ref B: CO1EDGE1809 Ref C: 2024-10-25T18:58:52Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -389,45 +426,40 @@ interactions:
       - dls account list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/accounts?api-version=2016-11-01
   response:
     body:
-      string: '{"value":[{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"20a9d59e-2de3-4dae-bee0-7217d0a09383","creationTime":"2023-12-20T11:27:05.0652681Z","lastModifiedTime":"2023-12-20T11:27:05.0652681Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}]}'
+      string: '{"value":[{"properties":{"provisioningState":"Failed","state":null,"endpoint":null,"accountId":"fec1d18d-0d34-487e-9f81-607b0278c47b"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ADLS-PERF/providers/Microsoft.DataLakeStore/accounts/scopeabfs","name":"scopeabfs","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Failed","state":null,"endpoint":null,"accountId":"d4081d1f-8638-4de9-bc17-596ec670d2dd"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ADLS-PERF/providers/Microsoft.DataLakeStore/accounts/scopeabfsdb5","name":"scopeabfsdb5","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"scopeonabfs2.azuredatalakestore.net","accountId":"10dd444c-a81a-4447-b4bd-dde7f85f0d27","creationTime":"2019-09-06T02:17:14.0415933Z","lastModifiedTime":"2019-09-06T02:17:14.0415933Z"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ADLS-PERF/providers/Microsoft.DataLakeStore/accounts/scopeonabfs2","name":"scopeonabfs2","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Failed","state":null,"endpoint":null,"accountId":"26242090-348b-4190-8848-7a25334f3fa0"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ADLS-PERF/providers/Microsoft.DataLakeStore/accounts/scopeonazure","name":"scopeonazure","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"ssslwddb5.azuredatalakestore.net","accountId":"08fd4101-71ce-42fb-bd3f-c2c7c9f781c8","creationTime":"2019-09-06T17:46:18.8023127Z","lastModifiedTime":"2019-09-06T17:46:18.8023127Z"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ADLS-PERF/providers/Microsoft.DataLakeStore/accounts/ssslwddb5","name":"ssslwddb5","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Failed","state":null,"endpoint":null,"accountId":"7b15f994-c0fb-4cfa-a315-5f051df166f4"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anshubin-adls-test/providers/Microsoft.DataLakeStore/accounts/anshubinadlstest","name":"anshubinadlstest","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Failed","state":null,"endpoint":null,"accountId":"d7f525c5-de2e-4ee9-a9c6-bf8bc09fcdbb"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rdutta-resourcegroup1/providers/Microsoft.DataLakeStore/accounts/rduttagen1ukwest","name":"rduttagen1ukwest","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"rduttagen1ukwest1.azuredatalakestore.net","accountId":"0b91bfdc-4bf7-49d5-88a5-fd5f9d994f79","creationTime":"2020-01-27T20:29:24.8322718Z","lastModifiedTime":"2020-01-27T20:29:24.8322718Z"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rdutta-resourcegroup1/providers/Microsoft.DataLakeStore/accounts/rduttagen1ukwest1","name":"rduttagen1ukwest1","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Failed","state":null,"endpoint":null,"accountId":"ced81c1c-31e5-43fa-88fd-99059a9920cd"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sharetest/providers/Microsoft.DataLakeStore/accounts/ssstestproviderie01","name":"ssstestproviderie01","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"yuslgen1uswest1.azuredatalakestore.net","accountId":"c44861e3-32f8-453c-abe6-6e1dc028f73b","creationTime":"2021-06-16T19:25:24.1747116Z","lastModifiedTime":"2021-06-16T19:25:24.1747116Z"},"location":"ukwest","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yusl-rg/providers/Microsoft.DataLakeStore/accounts/yuslgen1uswest1","name":"yuslgen1uswest1","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"akharit-test-account.azuredatalakestore.net","accountId":"aee72223-9cee-4c57-b0f5-cadb7e0f29a0","creationTime":"2024-07-16T23:14:12.1927795Z","lastModifiedTime":"2024-07-16T23:14:12.1927795Z"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akharit-rg/providers/Microsoft.DataLakeStore/accounts/akharit-test-account","name":"akharit-test-account","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadlswzrqzgopdufvk2f6c.azuredatalakestore.net","accountId":"e23d5b6a-b334-477d-8226-96b5f89da131","creationTime":"2024-10-25T18:57:40.0929848Z","lastModifiedTime":"2024-10-25T18:57:40.0929848Z"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_access3ct3ebqcvtvtxaglxmqy2idmf3ob6tggnkxtnabibfsirww5z3mtyu3/providers/Microsoft.DataLakeStore/accounts/cliadlswzrqzgopdufvk2f6c","name":"cliadlswzrqzgopdufvk2f6c","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"ba0fa98c-edf2-40a7-bc81-dc537a3b24e3","creationTime":"2024-10-25T18:57:57.1456672Z","lastModifiedTime":"2024-10-25T18:57:57.1456672Z"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadlsa7sj4sazimcscse7m.azuredatalakestore.net","accountId":"9978860a-f243-4471-8850-a3df452559f6","creationTime":"2024-10-25T18:57:40.2049264Z","lastModifiedTime":"2024-10-25T18:57:40.2049264Z"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cls_test_adls_fileycryikvkysc5axuknfnzf2uxhvqn4suutnxf4cbo4p4arvy2364vklae7/providers/Microsoft.DataLakeStore/accounts/cliadlsa7sj4sazimcscse7m","name":"cliadlsa7sj4sazimcscse7m","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"webhdfse2etest-c09.azuredatalakestore.net","accountId":"c00dd2e3-b7c4-4523-bdc1-3f9b9d6956cf","creationTime":"2023-02-13T22:00:46.7189413Z","lastModifiedTime":"2023-02-13T22:00:46.7189413Z"},"location":"westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/conv/providers/Microsoft.DataLakeStore/accounts/webhdfse2etest-c09","name":"webhdfse2etest-c09","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"adlus08acltestts.azuredatalakestore.net","accountId":"cb6caa4c-ca02-41ab-ad77-d76fe065392c","creationTime":"2023-02-07T14:29:57.0262776Z","lastModifiedTime":"2023-02-07T14:29:57.0262776Z"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/acl_test/providers/Microsoft.DataLakeStore/accounts/adlus08acltestts","name":"adlus08acltestts","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"adlse2eadlus08ts2.azuredatalakestore.net","accountId":"e597adeb-3069-4059-a150-47853b63040d","creationTime":"2022-12-05T07:16:49.3657035Z","lastModifiedTime":"2022-12-05T07:16:49.3657035Z"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/adls-gen1-e2e-test/providers/Microsoft.DataLakeStore/accounts/adlse2eadlus08ts2","name":"adlse2eadlus08ts2","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"adlus08e2etest.azuredatalakestore.net","accountId":"3b9091ae-f63c-48f7-b090-b69ccaa81bc2","creationTime":"2022-12-23T08:00:08.2239091Z","lastModifiedTime":"2022-12-23T08:00:08.2239091Z"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/adls-gen1-e2e-test/providers/Microsoft.DataLakeStore/accounts/adlus08e2etest","name":"adlus08e2etest","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"adlus71ae2eacltest.azuredatalakestore.net","accountId":"3eb4245f-6af2-4271-8ca4-67c947bc65a1","creationTime":"2023-11-30T17:32:40.4180287Z","lastModifiedTime":"2023-11-30T17:32:40.4180287Z"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/adls-gen1-e2e-test/providers/Microsoft.DataLakeStore/accounts/adlus71ae2eacltest","name":"adlus71ae2eacltest","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"adlus71ae2eacltstest.azuredatalakestore.net","accountId":"c7719008-4f2d-41f9-9c2e-50c6cffe3efe","creationTime":"2023-12-11T06:42:47.1285349Z","lastModifiedTime":"2023-12-11T06:42:47.1285349Z"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/adls-gen1-e2e-test/providers/Microsoft.DataLakeStore/accounts/adlus71ae2eacltstest","name":"adlus71ae2eacltstest","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"adlus71ae2etest.azuredatalakestore.net","accountId":"34470d04-9152-477a-9baf-93bb96ba2ea0","creationTime":"2023-11-30T17:30:09.4878937Z","lastModifiedTime":"2023-11-30T17:30:09.4878937Z"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/adls-gen1-e2e-test/providers/Microsoft.DataLakeStore/accounts/adlus71ae2etest","name":"adlus71ae2etest","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"adlus71ae2etstest.azuredatalakestore.net","accountId":"121443fc-b7c9-44f0-aad8-0d6af8f732ed","creationTime":"2023-12-11T06:08:06.4798756Z","lastModifiedTime":"2023-12-11T06:08:06.4798756Z"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/adls-gen1-e2e-test/providers/Microsoft.DataLakeStore/accounts/adlus71ae2etstest","name":"adlus71ae2etstest","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"scaletestingus71a.azuredatalakestore.net","accountId":"df1510d9-5325-42f3-a2f3-978c492aa530","creationTime":"2024-02-14T15:15:01.7094279Z","lastModifiedTime":"2024-02-14T15:15:01.7094279Z"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/anj-rg/providers/Microsoft.DataLakeStore/accounts/scaletestingus71a","name":"scaletestingus71a","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Failed","state":null,"endpoint":null,"accountId":"f99e13ce-f673-487e-bbc9-5634a77dcf33"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/witong-centraluseuap/providers/Microsoft.DataLakeStore/accounts/adlsgen1us08test","name":"adlsgen1us08test","type":"Microsoft.DataLakeStore/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"witongadlsgen1centraluseuap.azuredatalakestore.net","accountId":"3b965cba-ec2c-4ca0-874d-8cf439a5c331","creationTime":"2020-09-23T22:41:25.9175785Z","lastModifiedTime":"2022-04-30T08:50:46.6810312Z"},"location":"centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/witong-centraluseuap/providers/Microsoft.DataLakeStore/accounts/witongadlsgen1centraluseuap","name":"witongadlsgen1centraluseuap","type":"Microsoft.DataLakeStore/accounts"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '516'
+      - '11853'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 20 Dec 2023 11:27:54 GMT
+      - Fri, 25 Oct 2024 18:58:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-powered-by:
-      - ASP.NET
+      x-ms-original-request-ids:
+      - 8ad09bee-5cd4-4001-b7da-48e02a002c30
+      - 5bcd103e-dabb-4b12-8559-26d7ec2f51e7
+      - 1f738c47-0abc-4ce5-bc81-046deccf1b3d
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16500'
+      x-msedge-ref:
+      - 'Ref A: 6767E4852C7445BC8F56FC63C93C4400 Ref B: CO1EDGE1606 Ref C: 2024-10-25T18:58:52Z'
     status:
       code: 200
       message: OK
@@ -445,46 +477,43 @@ interactions:
       Content-Length:
       - '81'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --firewall-state --trusted-id-provider-state
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003?api-version=2016-11-01
   response:
     body:
-      string: '{"properties":{"firewallState":"Enabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Enabled","trustedIdProviders":[],"encryptionState":"Enabled","encryptionConfig":{"type":"ServiceManaged"},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"20a9d59e-2de3-4dae-bee0-7217d0a09383","creationTime":"2023-12-20T11:27:05.0652681Z","lastModifiedTime":"2023-12-20T11:27:57.8234596Z"},"location":"eastus2","identity":{"type":"SystemAssigned","principalId":"a66810aa-8328-4165-a16e-116874c907b9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
+      string: '{"properties":{"firewallState":"Enabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Enabled","trustedIdProviders":[],"encryptionState":"Enabled","encryptionConfig":{"type":"ServiceManaged"},"dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"ba0fa98c-edf2-40a7-bc81-dc537a3b24e3","creationTime":"2024-10-25T18:57:57.1456672Z","lastModifiedTime":"2024-10-25T18:59:01.2004044Z"},"location":"westus2","identity":{"type":"SystemAssigned","principalId":"07739881-2c55-45b3-8425-868f82e3a3fe","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1095'
+      - '1043'
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:28:01 GMT
+      - Fri, 25 Oct 2024 18:59:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: C4421C1FF05C40F18578377577893B0B Ref B: CO6AA3150220019 Ref C: 2024-10-25T18:58:59Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -501,45 +530,40 @@ interactions:
       - dls account show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003?api-version=2016-11-01
   response:
     body:
-      string: '{"properties":{"firewallState":"Enabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Enabled","trustedIdProviders":[],"encryptionState":"Enabled","encryptionConfig":{"type":"ServiceManaged"},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"20a9d59e-2de3-4dae-bee0-7217d0a09383","creationTime":"2023-12-20T11:27:05.0652681Z","lastModifiedTime":"2023-12-20T11:27:57.8234596Z"},"location":"eastus2","identity":{"type":"SystemAssigned","principalId":"a66810aa-8328-4165-a16e-116874c907b9","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
+      string: '{"properties":{"firewallState":"Enabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Enabled","trustedIdProviders":[],"encryptionState":"Enabled","encryptionConfig":{"type":"ServiceManaged"},"dataLakePerformanceTierState":"Disabled","migrationInfo":{"state":"RequestConsent","mode":"Offline","strategy":"Id"},"provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"ba0fa98c-edf2-40a7-bc81-dc537a3b24e3","creationTime":"2024-10-25T18:57:57.1456672Z","lastModifiedTime":"2024-10-25T18:59:01.2004044Z"},"location":"westus2","identity":{"type":"SystemAssigned","principalId":"07739881-2c55-45b3-8425-868f82e3a3fe","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1095'
+      - '1043'
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:28:03 GMT
+      - Fri, 25 Oct 2024 18:59:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 667AAAB5FDAE433CBE2E3F6043159264 Ref B: CO6AA3150217011 Ref C: 2024-10-25T18:59:04Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -559,14 +583,11 @@ interactions:
       Content-Length:
       - '76'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --firewall-rule-name --start-ip-address --end-ip-address
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/firewallRules/testfirewallrule01?api-version=2016-11-01
   response:
@@ -580,25 +601,25 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:28:06 GMT
+      - Fri, 25 Oct 2024 18:59:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: B4CC7D8A0F3B4412B36C551D4797E374 Ref B: CO6AA3150220017 Ref C: 2024-10-25T18:59:04Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -615,15 +636,10 @@ interactions:
       - dls account firewall show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --firewall-rule-name
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/firewallRules/testfirewallrule01?api-version=2016-11-01
   response:
@@ -637,23 +653,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:28:07 GMT
+      - Fri, 25 Oct 2024 18:59:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 01E811FE3D6C4D668BF9ADF2B8D037D5 Ref B: CO6AA3150220031 Ref C: 2024-10-25T18:59:05Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -673,14 +689,11 @@ interactions:
       Content-Length:
       - '45'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --firewall-rule-name --end-ip-address
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/firewallRules/testfirewallrule01?api-version=2016-11-01
   response:
@@ -694,25 +707,25 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:28:09 GMT
+      - Fri, 25 Oct 2024 18:59:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 5D2DCF742F924915A80E0EA3EBAD0345 Ref B: CO6AA3150217019 Ref C: 2024-10-25T18:59:05Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -729,15 +742,10 @@ interactions:
       - dls account firewall show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --firewall-rule-name
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/firewallRules/testfirewallrule01?api-version=2016-11-01
   response:
@@ -751,23 +759,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:28:12 GMT
+      - Fri, 25 Oct 2024 18:59:06 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: C9E90C5CAAD742CA87FCC53B6D557088 Ref B: CO6AA3150217049 Ref C: 2024-10-25T18:59:06Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -784,15 +792,10 @@ interactions:
       - dls account firewall list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/firewallRules?api-version=2016-11-01
   response:
@@ -806,23 +809,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:28:14 GMT
+      - Fri, 25 Oct 2024 18:59:06 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 81463D7058E2462F9EED0F6358A0B411 Ref B: CO6AA3150220035 Ref C: 2024-10-25T18:59:06Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -832,7 +835,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -841,15 +844,10 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --firewall-rule-name
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/firewallRules/testfirewallrule01?api-version=2016-11-01
   response:
@@ -861,21 +859,25 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 20 Dec 2023 11:28:16 GMT
+      - Fri, 25 Oct 2024 18:59:06 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 72AC36CCC7A6438C8D4948E0335690DB Ref B: CO6AA3150220051 Ref C: 2024-10-25T18:59:07Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -892,15 +894,10 @@ interactions:
       - dls account firewall list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/firewallRules?api-version=2016-11-01
   response:
@@ -914,1203 +911,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:28:18 GMT
+      - Fri, 25 Oct 2024 18:59:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2023-09-01
-  response:
-    body:
-      string: '{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default","etag":"W/\"cb6c7f62-38bd-4881-97e9-149e3e46b2e2\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '481'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:19 GMT
-      etag:
-      - W/"cb6c7f62-38bd-4881-97e9-149e3e46b2e2"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - aa96cba6-8b4a-4505-b24c-a3c52fc08ef0
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"name": "updatedSubnet", "properties": {"addressPrefix": "10.0.1.0/24",
-      "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '167'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --vnet-name --name --address-prefixes
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet?api-version=2023-09-01
-  response:
-    body:
-      string: '{"name":"updatedSubnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet","etag":"W/\"43336fe5-6879-4055-b471-6ef3bc941962\"","properties":{"provisioningState":"Updating","addressPrefix":"10.0.1.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b92052c4-3be4-444f-b97b-80eeb308d86f?api-version=2023-09-01&t=638386685015339305&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=RIbw_MtnbJkPMfK2oO-_Qm6zIpBxlem2n4wGrrEcJwDrk-5OTAnxbVEK42VqtWLy97wUPpMt9mKqdr5DOSah5QJD5z0VPsOQ4dnwfcjv3ghy5dkr0bd0n5I9JyS5gwGLLMQijcxa33QfY6qdsqh2uTqa5iv_sWFwQiLnAqpjwg_BweDX2k2CzG57du_N9t9xPoOBRMqtzHkEt0tc0MgWjHKhg2dor-oIaclh1a7l72JKTH7znCZRzqagYiFDX24_xrufrWJvvAbVwMdBF6x5iu4IQJSv7RoXrxrDpjMPgwwsh5smGSItKcnWJeB8h5IGgvdeaIE21260-5vE6dJTrQ&h=rpiLSXFpCDc4Pc3XtoDCidY3W0YZ1XaMzuDehzC07NI
-      cache-control:
-      - no-cache
-      content-length:
-      - '492'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - abd359c0-43f8-4c08-b6e1-45bd62533322
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --vnet-name --name --address-prefixes
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b92052c4-3be4-444f-b97b-80eeb308d86f?api-version=2023-09-01&t=638386685015339305&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=RIbw_MtnbJkPMfK2oO-_Qm6zIpBxlem2n4wGrrEcJwDrk-5OTAnxbVEK42VqtWLy97wUPpMt9mKqdr5DOSah5QJD5z0VPsOQ4dnwfcjv3ghy5dkr0bd0n5I9JyS5gwGLLMQijcxa33QfY6qdsqh2uTqa5iv_sWFwQiLnAqpjwg_BweDX2k2CzG57du_N9t9xPoOBRMqtzHkEt0tc0MgWjHKhg2dor-oIaclh1a7l72JKTH7znCZRzqagYiFDX24_xrufrWJvvAbVwMdBF6x5iu4IQJSv7RoXrxrDpjMPgwwsh5smGSItKcnWJeB8h5IGgvdeaIE21260-5vE6dJTrQ&h=rpiLSXFpCDc4Pc3XtoDCidY3W0YZ1XaMzuDehzC07NI
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - e28083f2-08a4-49b8-b01a-5587c4679bd1
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --vnet-name --name --address-prefixes
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet?api-version=2023-09-01
-  response:
-    body:
-      string: '{"name":"updatedSubnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet","etag":"W/\"e9f8bdc5-4447-48c4-a3ea-32410e98c8d8\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.1.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '493'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:22 GMT
-      etag:
-      - W/"e9f8bdc5-4447-48c4-a3ea-32410e98c8d8"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 7692ae73-6f6c-4da4-918d-8d68559a99ba
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2023-09-01
-  response:
-    body:
-      string: '{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default","etag":"W/\"e9f8bdc5-4447-48c4-a3ea-32410e98c8d8\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '481'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:23 GMT
-      etag:
-      - W/"e9f8bdc5-4447-48c4-a3ea-32410e98c8d8"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - c9da34a2-bf89-4a17-8e89-82024448b362
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default",
-      "name": "default", "properties": {"addressPrefix": "10.0.0.0/24", "delegations":
-      [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
-      "Enabled", "serviceEndpoints": [{"service": "Microsoft.AzureActiveDirectory"}]},
-      "type": "Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '480'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2023-09-01
-  response:
-    body:
-      string: '{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default","etag":"W/\"75a935ef-ebbc-44df-b247-03aa31c28b93\"","properties":{"provisioningState":"Updating","addressPrefix":"10.0.0.0/24","serviceEndpoints":[{"provisioningState":"Updating","service":"Microsoft.AzureActiveDirectory","locations":["*"]}],"delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b2a7447c-8c64-4a1d-ac4b-aea25019bedf?api-version=2023-09-01&t=638386685045817536&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=VYG-MFk7shAfvsff3hW7KIlysxPcrdWeyiBn4W8iPjmWQ4W2HgpSdvnNOe_Hhb3KaqKacDvJm6917usq-uCBXev5W_0CkNHfkVDCrqb38cNFvLHrtK3YG67cHcW03BBOfaTQ57qTnZ122A0G-jQ8uFs8FbD3MpgapeAO7rAoyJASTeBjEn_YC4_0zovJrzAQofybAV7vNFDGWtk7CxKe6IekrInfqT-lJTGzkMY0LVFhknA-kRZJXmvWIHmN3ICHk7qqYnJxw-KG8xLooSmW80OuucaUhOpYYa6fRQQw-HN-PKcz6H1yWqZEXmSMS__hhQvD0OGF-q5xHiQuchuS0g&h=n4aUuPoDfBgeneTKXOU9fO8gZdWZ2BnLYEHPnmKdMk8
-      cache-control:
-      - no-cache
-      content-length:
-      - '595'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - ae9ef884-d839-4147-9aed-afb5a0a56c1e
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b2a7447c-8c64-4a1d-ac4b-aea25019bedf?api-version=2023-09-01&t=638386685045817536&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=VYG-MFk7shAfvsff3hW7KIlysxPcrdWeyiBn4W8iPjmWQ4W2HgpSdvnNOe_Hhb3KaqKacDvJm6917usq-uCBXev5W_0CkNHfkVDCrqb38cNFvLHrtK3YG67cHcW03BBOfaTQ57qTnZ122A0G-jQ8uFs8FbD3MpgapeAO7rAoyJASTeBjEn_YC4_0zovJrzAQofybAV7vNFDGWtk7CxKe6IekrInfqT-lJTGzkMY0LVFhknA-kRZJXmvWIHmN3ICHk7qqYnJxw-KG8xLooSmW80OuucaUhOpYYa6fRQQw-HN-PKcz6H1yWqZEXmSMS__hhQvD0OGF-q5xHiQuchuS0g&h=n4aUuPoDfBgeneTKXOU9fO8gZdWZ2BnLYEHPnmKdMk8
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 8e14f2ab-17f6-4c3e-9cf1-1fdba4cd277d
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b2a7447c-8c64-4a1d-ac4b-aea25019bedf?api-version=2023-09-01&t=638386685045817536&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=VYG-MFk7shAfvsff3hW7KIlysxPcrdWeyiBn4W8iPjmWQ4W2HgpSdvnNOe_Hhb3KaqKacDvJm6917usq-uCBXev5W_0CkNHfkVDCrqb38cNFvLHrtK3YG67cHcW03BBOfaTQ57qTnZ122A0G-jQ8uFs8FbD3MpgapeAO7rAoyJASTeBjEn_YC4_0zovJrzAQofybAV7vNFDGWtk7CxKe6IekrInfqT-lJTGzkMY0LVFhknA-kRZJXmvWIHmN3ICHk7qqYnJxw-KG8xLooSmW80OuucaUhOpYYa6fRQQw-HN-PKcz6H1yWqZEXmSMS__hhQvD0OGF-q5xHiQuchuS0g&h=n4aUuPoDfBgeneTKXOU9fO8gZdWZ2BnLYEHPnmKdMk8
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 5679141c-73f5-4b74-a83d-0e0c19ce4bf3
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2023-09-01
-  response:
-    body:
-      string: '{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default","etag":"W/\"007241af-398f-434c-905b-050ac4be2038\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","serviceEndpoints":[{"provisioningState":"Succeeded","service":"Microsoft.AzureActiveDirectory","locations":["*"]}],"delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '597'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:35 GMT
-      etag:
-      - W/"007241af-398f-434c-905b-050ac4be2038"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 04055ecc-331a-4a7b-a08e-ce6b254d9f28
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet?api-version=2023-09-01
-  response:
-    body:
-      string: '{"name":"updatedSubnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet","etag":"W/\"007241af-398f-434c-905b-050ac4be2038\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.1.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '493'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:38 GMT
-      etag:
-      - W/"007241af-398f-434c-905b-050ac4be2038"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 125d7c5b-450e-496e-bcd8-d2387efacf1c
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet",
-      "name": "updatedSubnet", "properties": {"addressPrefix": "10.0.1.0/24", "delegations":
-      [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
-      "Enabled", "serviceEndpoints": [{"service": "Microsoft.AzureActiveDirectory"}]},
-      "type": "Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '492'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet?api-version=2023-09-01
-  response:
-    body:
-      string: '{"name":"updatedSubnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet","etag":"W/\"60b3e5d5-eafb-400a-8cc5-2d038b8bdc25\"","properties":{"provisioningState":"Updating","addressPrefix":"10.0.1.0/24","serviceEndpoints":[{"provisioningState":"Updating","service":"Microsoft.AzureActiveDirectory","locations":["*"]}],"delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f2bf0601-6274-49d7-b053-f8559f76f660?api-version=2023-09-01&t=638386685197512804&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=H9_UXkrG7pDRVO5mxfyoVCSBHsrtJvDnTRQlyNWlcBMuk7RnepBURIgahaPzji9cbDoVPOZ1EDMBgquQ-a2eVOc9Ck5r1LtWrrtotfQ7Hn4NAGhod8DKnFPj9HAq_w1bkY08RzKX-vS0S0z-Bjn7PsQ6J2XxkoFoP8p60UmqmqFEj8kDUlAaXBB97gF7sahsRS6hpb_dOTLyxnPzVsdtuiMlV7McvLpLjZBRrRfldyfMD0TVXiX5EKi2fwjaxTqaNzdoLmV-btKz7QRR507-Czvh0RJqz01VFGpjCSkLomUTkF518KPGAAN9DLBjFfuhNO4KASzUTqvo4LLmyazhDA&h=yKj8SC6LQnuxy-S_eqxHIW11LTpXfGuDE9NZwiIed-I
-      cache-control:
-      - no-cache
-      content-length:
-      - '607'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 93c60191-207f-4ac9-83fd-f7b29460dda0
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f2bf0601-6274-49d7-b053-f8559f76f660?api-version=2023-09-01&t=638386685197512804&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=H9_UXkrG7pDRVO5mxfyoVCSBHsrtJvDnTRQlyNWlcBMuk7RnepBURIgahaPzji9cbDoVPOZ1EDMBgquQ-a2eVOc9Ck5r1LtWrrtotfQ7Hn4NAGhod8DKnFPj9HAq_w1bkY08RzKX-vS0S0z-Bjn7PsQ6J2XxkoFoP8p60UmqmqFEj8kDUlAaXBB97gF7sahsRS6hpb_dOTLyxnPzVsdtuiMlV7McvLpLjZBRrRfldyfMD0TVXiX5EKi2fwjaxTqaNzdoLmV-btKz7QRR507-Czvh0RJqz01VFGpjCSkLomUTkF518KPGAAN9DLBjFfuhNO4KASzUTqvo4LLmyazhDA&h=yKj8SC6LQnuxy-S_eqxHIW11LTpXfGuDE9NZwiIed-I
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 65d6bc0d-41cd-480f-8450-ae520bbcb2fd
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f2bf0601-6274-49d7-b053-f8559f76f660?api-version=2023-09-01&t=638386685197512804&c=MIIHHjCCBgagAwIBAgITOgI9LlF5jGEEQe1CmgAEAj0uUTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjMxMTAxMjE0OTQ5WhcNMjQxMDI2MjE0OTQ5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMKt_zl2yRFDxIUmqoEA-B7WoRkSqscgwk6CGqDbwEVJS3oTI4Gk-ukQ6El3GQJVthiuwZGw4jwvTDyVWC8mQH2Zni6X1ocTXrNNa6VFJnvzeEn-HpmPATuII8AWtdtUnBvGZGAwgspvH8iZZCiHDowHCWhjVsU6_ipCsmzQeH3oRJI4AwUS_nCVA7U9WPdgIyQp6v5QPzcYCO_zIbNW4y_Cc3phfPEQvPvtSKhuijt68F5WlUY6Ps23ksosYG5VTx7z6skGG9arA5UKUzbbEO8lxzda3OFPZdG7OHe8-VMXxJjtSanZSSbdLgYBRB9m9PGr6voKtML9W5rEukE-lEUCAwEAAaOCBAswggQHMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBRYUmiD-EjeFFNZByiKICN9p1JofzAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKRwStAdrsy7tgEfmtXPZXIwgdXOYwSx2Kqzlhq8b6Ptid4V3vhJvDV0WLS7d72KIMUwZiBnfPHhMmsdkLOSpNSZYC23g3QJSBWvoS86Rpkeru5bEyQmv1gucF_MyaFaUXUd4b7xnvCkv-BBNO8m1lvFAowB2odz9esggf82yeOVBx0yEK_NNOK4l36XvRjvIqemSLZOSi1wow_wn_ovhAEPpSSN7UTahPtz7J12vhP1LuZ4Rvn_hNx48ncw445nMBnMVmcuuakaKDC6_sAcs5lg9jq2yHSaIHRw4xcoS5XwvIykGPMUyAD-dXWFih_XFOKh7ea50hObFhghf3Dtvlo&s=H9_UXkrG7pDRVO5mxfyoVCSBHsrtJvDnTRQlyNWlcBMuk7RnepBURIgahaPzji9cbDoVPOZ1EDMBgquQ-a2eVOc9Ck5r1LtWrrtotfQ7Hn4NAGhod8DKnFPj9HAq_w1bkY08RzKX-vS0S0z-Bjn7PsQ6J2XxkoFoP8p60UmqmqFEj8kDUlAaXBB97gF7sahsRS6hpb_dOTLyxnPzVsdtuiMlV7McvLpLjZBRrRfldyfMD0TVXiX5EKi2fwjaxTqaNzdoLmV-btKz7QRR507-Czvh0RJqz01VFGpjCSkLomUTkF518KPGAAN9DLBjFfuhNO4KASzUTqvo4LLmyazhDA&h=yKj8SC6LQnuxy-S_eqxHIW11LTpXfGuDE9NZwiIed-I
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - ea5c9a80-fcfa-4092-8cdd-35ce131fdb04
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --service-endpoints --ids
-      User-Agent:
-      - AZURECLI/2.55.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet?api-version=2023-09-01
-  response:
-    body:
-      string: '{"name":"updatedSubnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet","etag":"W/\"db84f083-3e27-49b8-a86d-83b311c15d7b\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.1.0/24","serviceEndpoints":[{"provisioningState":"Succeeded","service":"Microsoft.AzureActiveDirectory","locations":["*"]}],"delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '609'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 20 Dec 2023 11:28:50 GMT
-      etag:
-      - W/"db84f083-3e27-49b8-a86d-83b311c15d7b"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 0d688ffc-a654-4d6b-9c38-79d566ae58e9
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - dls account network-rule create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '200'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --account-name --name --subnet
-      User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule?api-version=2016-11-01
-  response:
-    body:
-      string: '{"properties":{"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule","name":"dlsVnetRule","type":"Microsoft.DataLakeStore/accounts/virtualNetworkRules"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '469'
-      content-type:
-      - application/json
-      date:
-      - Wed, 20 Dec 2023 11:28:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - dls account network-rule show
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --account-name --name
-      User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule?api-version=2016-11-01
-  response:
-    body:
-      string: '{"properties":{"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default","state":"Active"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule","name":"dlsVnetRule","type":"Microsoft.DataLakeStore/accounts/virtualNetworkRules"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '486'
-      content-type:
-      - application/json
-      date:
-      - Wed, 20 Dec 2023 11:28:55 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - dls account network-rule update
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --account-name --name --subnet
-      User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule?api-version=2016-11-01
-  response:
-    body:
-      string: '{"properties":{"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default","state":"Active"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule","name":"dlsVnetRule","type":"Microsoft.DataLakeStore/accounts/virtualNetworkRules"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '486'
-      content-type:
-      - application/json
-      date:
-      - Wed, 20 Dec 2023 11:28:58 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - dls account network-rule update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '206'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --account-name --name --subnet
-      User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule?api-version=2016-11-01
-  response:
-    body:
-      string: '{"properties":{"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule","name":"dlsVnetRule","type":"Microsoft.DataLakeStore/accounts/virtualNetworkRules"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '475'
-      content-type:
-      - application/json
-      date:
-      - Wed, 20 Dec 2023 11:29:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - dls account network-rule show
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --account-name --name
-      User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule?api-version=2016-11-01
-  response:
-    body:
-      string: '{"properties":{"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet","state":"Active"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule","name":"dlsVnetRule","type":"Microsoft.DataLakeStore/accounts/virtualNetworkRules"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '492'
-      content-type:
-      - application/json
-      date:
-      - Wed, 20 Dec 2023 11:29:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - dls account network-rule list
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --account-name
-      User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules?api-version=2016-11-01
-  response:
-    body:
-      string: '{"value":[{"properties":{"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/updatedSubnet","state":"Active"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule","name":"dlsVnetRule","type":"Microsoft.DataLakeStore/accounts/virtualNetworkRules"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '504'
-      content-type:
-      - application/json
-      date:
-      - Wed, 20 Dec 2023 11:29:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - dls account network-rule delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --account-name --name
-      User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules/dlsVnetRule?api-version=2016-11-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Wed, 20 Dec 2023 11:29:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - dls account network-rule list
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --account-name
-      User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/virtualNetworkRules?api-version=2016-11-01
-  response:
-    body:
-      string: '{"value":[]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '12'
-      content-type:
-      - application/json
-      date:
-      - Wed, 20 Dec 2023 11:29:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 0E66FA8CA20247A8AA7E0A491F691516 Ref B: CO6AA3150217049 Ref C: 2024-10-25T18:59:07Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -2130,14 +947,11 @@ interactions:
       Content-Length:
       - '94'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --trusted-id-provider-name --id-provider
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/trustedIdProviders/testprovider01?api-version=2016-11-01
   response:
@@ -2151,25 +965,25 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:29:12 GMT
+      - Fri, 25 Oct 2024 18:59:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 66D0AF9FE4704B0799A1AE51A786D312 Ref B: CO6AA3150217029 Ref C: 2024-10-25T18:59:08Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -2186,15 +1000,10 @@ interactions:
       - dls account trusted-provider show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --trusted-id-provider-name
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/trustedIdProviders/testprovider01?api-version=2016-11-01
   response:
@@ -2208,23 +1017,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:29:14 GMT
+      - Fri, 25 Oct 2024 18:59:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 287C897801C647CCA5B9265BAF5F84ED Ref B: CO6AA3150220027 Ref C: 2024-10-25T18:59:09Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -2244,14 +1053,11 @@ interactions:
       Content-Length:
       - '94'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --trusted-id-provider-name --id-provider
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/trustedIdProviders/testprovider01?api-version=2016-11-01
   response:
@@ -2265,25 +1071,25 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:29:17 GMT
+      - Fri, 25 Oct 2024 18:59:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: A2F1DCBE9A9647B28393CE721310D7B9 Ref B: CO6AA3150217025 Ref C: 2024-10-25T18:59:09Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -2300,15 +1106,10 @@ interactions:
       - dls account trusted-provider show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --trusted-id-provider-name
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/trustedIdProviders/testprovider01?api-version=2016-11-01
   response:
@@ -2322,23 +1123,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:29:18 GMT
+      - Fri, 25 Oct 2024 18:59:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A06560D8F08C40129D8A5FD816B90166 Ref B: CO6AA3150220053 Ref C: 2024-10-25T18:59:10Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -2355,15 +1156,10 @@ interactions:
       - dls account trusted-provider list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/trustedIdProviders?api-version=2016-11-01
   response:
@@ -2377,23 +1173,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:29:20 GMT
+      - Fri, 25 Oct 2024 18:59:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 14D3C2BB33D14E6E95981040FCCCC83E Ref B: CO6AA3150219047 Ref C: 2024-10-25T18:59:10Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -2403,7 +1199,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2412,15 +1208,10 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --trusted-id-provider-name
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/trustedIdProviders/testprovider01?api-version=2016-11-01
   response:
@@ -2432,21 +1223,25 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 20 Dec 2023 11:29:23 GMT
+      - Fri, 25 Oct 2024 18:59:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: CE338BFBCE894CB6A4E22CC41B8145FD Ref B: CO6AA3150217031 Ref C: 2024-10-25T18:59:10Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -2463,15 +1258,10 @@ interactions:
       - dls account trusted-provider list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/trustedIdProviders?api-version=2016-11-01
   response:
@@ -2485,23 +1275,23 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 20 Dec 2023 11:29:25 GMT
+      - Fri, 25 Oct 2024 18:59:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: EE484988F5D44684B9CE2A56BFE05053 Ref B: CO6AA3150220023 Ref C: 2024-10-25T18:59:11Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -2511,7 +1301,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2520,15 +1310,10 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003?api-version=2016-11-01
   response:
@@ -2540,21 +1325,25 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 20 Dec 2023 11:29:33 GMT
+      - Fri, 25 Oct 2024 18:59:17 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 2BD91EEC4BDB4565AC93CCF335143351 Ref B: CO6AA3150217031 Ref C: 2024-10-25T18:59:11Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -2571,15 +1360,10 @@ interactions:
       - dls account list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19045-SP0) msrest/0.7.1 msrest_azure/0.6.4
-        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.55.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_mgmt000001/providers/Microsoft.DataLakeStore/accounts?api-version=2016-11-01
   response:
@@ -2593,17 +1377,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 20 Dec 2023 11:29:34 GMT
+      - Fri, 25 Oct 2024 18:59:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A50D5389ECF945569DAC91AEDF43EE46 Ref B: CO6AA3150220035 Ref C: 2024-10-25T18:59:18Z'
     status:
       code: 200
       message: OK

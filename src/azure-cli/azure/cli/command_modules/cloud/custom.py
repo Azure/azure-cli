@@ -34,13 +34,42 @@ def show_cloud(cmd, cloud_name=None):
         raise CLIError(e)
 
 
+def _populate_from_metadata_endpoint(arm_endpoint, session=None):
+    METADATA_ENDPOINT_SUFFIX = '/metadata/endpoints?api-version=2022-09-01'
+    if not arm_endpoint:  # pylint: disable=use-a-generator
+        return Cloud('')
+    import requests
+    from azure.cli.core.cloud import _arm_to_cli_mapper
+    error_msg_fmt = "Unable to get endpoints from the cloud.\n{}"
+    try:
+        session = requests.Session() if session is None else session
+        metadata_endpoint = arm_endpoint + METADATA_ENDPOINT_SUFFIX
+        response = session.get(metadata_endpoint)
+        if response.status_code == 200:
+            metadata = response.json()
+            return _arm_to_cli_mapper(metadata)
+        msg = 'Server returned status code {} for {}'.format(response.status_code, metadata_endpoint)
+        raise CLIError(error_msg_fmt.format(msg))
+    except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
+        msg = 'Please ensure you have network connection. Error detail: {}'.format(str(err))
+        raise CLIError(error_msg_fmt.format(msg))
+    except ValueError as err:
+        msg = 'Response body does not contain valid json. Error detail: {}'.format(str(err))
+        raise CLIError(error_msg_fmt.format(msg))
+
+
 def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
-    from msrestazure.azure_cloud import _populate_from_metadata_endpoint, MetadataEndpointError
-    from azure.cli.core.cloud import CloudEndpointNotSetException
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         cloud_args = {to_snake_case(k): v for k, v in cloud_config.items()}
-    c = Cloud(cloud_name)
+    arm_endpoint = None
+    if 'endpoints' in cloud_args:
+        arm_endpoint = (cloud_args['endpoints'].get('resource_manager', None) or
+                        cloud_args['endpoints'].get('resourceManager', None))
+    if 'endpoint_resource_manager' in cloud_args:
+        arm_endpoint = cloud_args['endpoint_resource_manager']
+    c = _populate_from_metadata_endpoint(arm_endpoint)
+    c.name = cloud_name
     c.profile = cloud_args.get('profile', None)
     try:
         endpoints = cloud_args['endpoints']
@@ -61,14 +90,6 @@ def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
         elif arg.startswith('suffix_') and cloud_args[arg] is not None:
             setattr(c.suffixes, arg.replace('suffix_', ''), cloud_args[arg])
 
-    try:
-        arm_endpoint = c.endpoints.resource_manager
-    except CloudEndpointNotSetException:
-        arm_endpoint = None
-    try:
-        _populate_from_metadata_endpoint(c, arm_endpoint)
-    except MetadataEndpointError as err:
-        raise CLIError(err)
     required_endpoints = {'resource_manager': '--endpoint-resource-manager',
                           'active_directory': '--endpoint-active-directory',
                           'active_directory_resource_id': '--endpoint-active-directory-resource-id',

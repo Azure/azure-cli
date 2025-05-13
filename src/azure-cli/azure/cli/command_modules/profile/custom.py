@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import sys
 
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
@@ -28,6 +29,28 @@ _CLOUD_CONSOLE_LOGOUT_WARNING = ("Logout successful. Re-login to your initial Cl
                                  " 'az login --identity'. Login with a new identity with 'az login'.")
 _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated under the initial account signed-in with."
                                 " Run 'az login' only if you need to use a different account")
+
+
+LOGIN_ANNOUNCEMENT = (
+    "[Announcements]\n"
+    "With the new Azure CLI login experience, you can select the subscription you want to use more easily. "
+    "Learn more about it and its configuration at https://go.microsoft.com/fwlink/?linkid=2271236\n\n"
+    "If you encounter any problem, please open an issue at https://aka.ms/azclibug\n")
+
+LOGIN_OUTPUT_WARNING = (
+    "[Warning] The login output has been updated. Please be aware that it no longer displays the full list of "
+    "available subscriptions by default.\n")
+
+USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD = (
+    "Starting July 01, 2025, MFA will be gradually enforced for Azure public cloud. "
+    "The authentication with username and password in the command line is not supported with MFA. "
+    "Consider using one of the compatible authentication methods. "
+    "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
+
+USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD = (
+    "Using authentication with username and password in the command line is strongly discouraged. "
+    "Consider using one of the recommended authentication methods. "
+    "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
 
 
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
@@ -97,20 +120,33 @@ def account_clear(cmd):
     profile.logout_all()
 
 
-# pylint: disable=inconsistent-return-statements, too-many-branches
-def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
+# pylint: disable=too-many-branches, too-many-locals
+def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
+          # Device code flow
+          use_device_code=False,
+          # Service principal
+          service_principal=None, certificate=None, use_cert_sn_issuer=None, client_assertion=None,
+          # Managed identity
+          identity=False, client_id=None, object_id=None, resource_id=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
+    if identity and username:
+        raise CLIError('Passing the managed identity ID with --username is no longer supported. '
+                       'Use --client-id, --object-id or --resource-id instead.')
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+    if username and not service_principal and not identity:
+        if cmd.cli_ctx.cloud.endpoints.active_directory.startswith('https://login.microsoftonline.com'):
+            logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD)
+        else:
+            logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD)
 
     interactive = False
 
@@ -119,12 +155,14 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     if identity:
         if in_cloud_console():
             return profile.login_in_cloud_shell()
-        return profile.login_with_managed_identity(username, allow_no_subscriptions)
+        return profile.login_with_managed_identity(
+            client_id=client_id, object_id=object_id, resource_id=resource_id,
+            allow_no_subscriptions=allow_no_subscriptions)
     if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not (password or client_assertion):
+        if not (password or client_assertion or certificate):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -134,7 +172,17 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     if service_principal:
         from azure.cli.core.auth.identity import ServicePrincipalAuth
-        password = ServicePrincipalAuth.build_credential(password, client_assertion, use_cert_sn_issuer)
+        password = ServicePrincipalAuth.build_credential(
+            client_secret=password,
+            certificate=certificate, use_cert_sn_issuer=use_cert_sn_issuer,
+            client_assertion=client_assertion)
+
+    login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
+    # Send login_experience_v2 config to telemetry
+    from azure.cli.core.telemetry import set_login_experience_v2
+    set_login_experience_v2(login_experience_v2)
+
+    select_subscription = interactive and sys.stdin.isatty() and sys.stdout.isatty() and login_experience_v2
 
     subscriptions = profile.login(
         interactive,
@@ -145,7 +193,21 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         scopes=scopes,
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
-        use_cert_sn_issuer=use_cert_sn_issuer)
+        use_cert_sn_issuer=use_cert_sn_issuer,
+        show_progress=select_subscription)
+
+    # Launch interactive account selection. No JSON output.
+    if select_subscription:
+        from ._subscription_selector import SubscriptionSelector
+        from azure.cli.core._profile import _SUBSCRIPTION_ID
+
+        selected = SubscriptionSelector(subscriptions)()
+        profile.set_active_subscription(selected[_SUBSCRIPTION_ID])
+
+        print(LOGIN_ANNOUNCEMENT)
+        logger.warning(LOGIN_OUTPUT_WARNING)
+        return
+
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)

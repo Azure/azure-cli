@@ -45,5 +45,5 @@ def _ensure_telemetry_log_folder(config_dir):
         if not os.path.isdir(ret):
             os.makedirs(ret)
         return ret
-    except (OSError, IOError, TypeError):
+    except (OSError, TypeError):
         return None

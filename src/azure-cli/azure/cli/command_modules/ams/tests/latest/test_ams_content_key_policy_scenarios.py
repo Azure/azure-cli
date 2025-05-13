@@ -395,7 +395,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         output = self.cmd('az ams content-key-policy show -a {amsname} -n {contentKeyPolicyName} -g {rg} --with-secrets').get_output_in_json()
 
-        self.assertNotEquals(output.get('options')[0].get('restriction').get('primaryVerificationKey').get('rawBody'), None)
+        self.assertNotEqual(output.get('options')[0].get('restriction').get('primaryVerificationKey').get('rawBody'), None)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_delete')

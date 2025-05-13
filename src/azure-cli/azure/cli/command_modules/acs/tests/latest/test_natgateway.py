@@ -86,6 +86,9 @@ class TestIsNatGatewayProfileProvided(unittest.TestCase):
         result = natgateway.is_nat_gateway_profile_provided(1, 4)
         self.assertTrue(result)
 
+    def test_nonempty_arguments(self):
+        result = natgateway.is_nat_gateway_profile_provided(0, None)
+        self.assertTrue(result)
 
 if __name__ == "__main__":
     unittest.main()

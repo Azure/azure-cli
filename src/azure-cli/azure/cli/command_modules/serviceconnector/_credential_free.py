@@ -20,6 +20,7 @@ AUTHTYPES = {
     AUTH_TYPE.UserIdentity: 'userAssignedIdentity',
     AUTH_TYPE.ServicePrincipalSecret: 'servicePrincipalSecret',
     AUTH_TYPE.UserAccount: 'userAccount',
+    AUTH_TYPE.WorkloadIdentity: 'userAssignedIdentity'
 }
 
 
@@ -36,6 +37,6 @@ def is_passwordless_command(cmd, auth_info):
     target_type = get_target_resource_name(cmd)
     if source_type not in {RESOURCE.WebApp, RESOURCE.ContainerApp, RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated, RESOURCE.FunctionApp, RESOURCE.Local}:
         return False
-    if target_type not in {RESOURCE.Sql, RESOURCE.Postgres, RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible}:
+    if target_type not in {RESOURCE.Sql, RESOURCE.Postgres, RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.FabricSql}:
         return False
     return True

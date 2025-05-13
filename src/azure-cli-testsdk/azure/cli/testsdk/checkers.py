@@ -9,7 +9,7 @@ import jmespath
 from .exceptions import JMESPathCheckAssertionError
 
 
-class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
+class JMESPathCheck:  # pylint: disable=too-few-public-methods
     def __init__(self, query, expected_result, case_sensitive=True):
         self._query = query
         self._expected_result = expected_result
@@ -37,7 +37,7 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
                                               execution_result.output)
 
 
-class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods
+class JMESPathCheckExists:  # pylint: disable=too-few-public-methods
     def __init__(self, query):
         self._query = query
 
@@ -50,7 +50,7 @@ class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods
                                               execution_result.output)
 
 
-class JMESPathCheckNotExists(object):  # pylint: disable=too-few-public-methods
+class JMESPathCheckNotExists:  # pylint: disable=too-few-public-methods
     def __init__(self, query):
         self._query = query
 
@@ -63,7 +63,7 @@ class JMESPathCheckNotExists(object):  # pylint: disable=too-few-public-methods
                                               execution_result.output)
 
 
-class JMESPathCheckGreaterThan(object):  # pylint: disable=too-few-public-methods
+class JMESPathCheckGreaterThan:  # pylint: disable=too-few-public-methods
     def __init__(self, query, expected_result):
         self._query = query
         self._expected_result = expected_result
@@ -82,7 +82,7 @@ class JMESPathCheckGreaterThan(object):  # pylint: disable=too-few-public-method
                                               execution_result.output)
 
 
-class JMESPathPatternCheck(object):  # pylint: disable=too-few-public-methods
+class JMESPathPatternCheck:  # pylint: disable=too-few-public-methods
     def __init__(self, query, expected_result):
         self._query = query
         self._expected_result = expected_result
@@ -96,7 +96,7 @@ class JMESPathPatternCheck(object):  # pylint: disable=too-few-public-methods
                                               execution_result.output)
 
 
-class NoneCheck(object):  # pylint: disable=too-few-public-methods
+class NoneCheck:  # pylint: disable=too-few-public-methods
     def __call__(self, execution_result):  # pylint: disable=no-self-use
         none_strings = ['[]', '{}', 'false']
         try:
@@ -107,7 +107,7 @@ class NoneCheck(object):  # pylint: disable=too-few-public-methods
                                  "string in {}".format(data, none_strings))
 
 
-class StringCheck(object):  # pylint: disable=too-few-public-methods
+class StringCheck:  # pylint: disable=too-few-public-methods
     def __init__(self, expected_result):
         self.expected_result = expected_result
 
@@ -120,7 +120,7 @@ class StringCheck(object):  # pylint: disable=too-few-public-methods
                 "Actual value '{}' != Expected value {}".format(result, self.expected_result))
 
 
-class StringContainCheck(object):  # pylint: disable=too-few-public-methods
+class StringContainCheck:  # pylint: disable=too-few-public-methods
     def __init__(self, expected_result):
         self.expected_result = expected_result
 
@@ -134,7 +134,7 @@ class StringContainCheck(object):  # pylint: disable=too-few-public-methods
                                                                              self.expected_result))
 
 
-class StringContainCheckIgnoreCase(object):  # pylint: disable=too-few-public-methods
+class StringContainCheckIgnoreCase:  # pylint: disable=too-few-public-methods
     def __init__(self, expected_result):
         self.expected_result = expected_result.lower()
 

@@ -126,7 +126,7 @@ def load_arguments(self, _):
                         'Role Based Access Control (RBAC) for authorization of data actions, and the access policies '
                         'specified in vault properties will be ignored. When false, the key vault will use the access '
                         'policies specified in vault properties, and any policy stored on Azure Resource Manager will '
-                        'be ignored. If null or not specified, the vault is created with the default value of false. '
+                        'be ignored. If null or not specified, the vault is created with the default value of true. '
                         'Note that management actions are always authorized with RBAC.')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(),
                    help='Property specifying whether protection against purge is enabled for this vault/managed HSM '
@@ -160,7 +160,7 @@ def load_arguments(self, _):
                    help='[HSM Only] Administrator role for data plane operations for Managed HSM. '
                         'It accepts a space separated list of OIDs that will be assigned.')
         c.argument('sku', help='Required. SKU details. Allowed values for Vault: premium, standard. Default: standard.'
-                               ' Allowed values for HSM: Standard_B1, Custom_B32. Default: Standard_B1')
+                               ' Allowed values for HSM: Standard_B1, Custom_B32, Custom_B6, Custom_C42, Custom_C10. Default: Standard_B1')
         c.argument('no_self_perms', arg_type=get_three_state_flag(),
                    help='[Vault Only] Don\'t add permissions for the current user/service principal in the new vault.')
         c.argument('location', validator=get_default_location_from_resource_group)
@@ -288,7 +288,7 @@ def load_arguments(self, _):
     # keys track2
     for scope in ['create', 'import', 'set-attributes', 'show', 'show-deleted', 'delete', 'list', 'list-deleted',
                   'list-versions', 'encrypt', 'decrypt', 'sign', 'verify', 'recover', 'purge', 'download',
-                  'backup', 'restore', 'rotate', 'rotation-policy show', 'rotation-policy update']:
+                  'backup', 'restore', 'rotate', 'get-attestation', 'rotation-policy show', 'rotation-policy update']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
                        required=False, completer=get_keyvault_name_completion_list('key'),
@@ -314,6 +314,13 @@ def load_arguments(self, _):
             c.extra('identifier', options_list=['--id'], arg_group='Id',
                     help='The recovery id of the key. If specified all other \'Id\' arguments should be omitted.',
                     validator=validate_keyvault_resource_id('key'))
+
+    with self.argument_context('keyvault key get-attestation') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help="File to receive the key's attestation if you want to save it.")
+        c.extra('hsm_name', data_plane_hsm_name_type, required=False, arg_group='Id',
+                help='Name of the HSM. Required if --id is not specified.')
+        c.ignore('vault_base_url')
 
     with self.argument_context('keyvault key list') as c:
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
@@ -351,9 +358,9 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
-                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
+                   help='The type of key to create. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
-                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
+                   help='Elliptic curve name. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import') as c:
         c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,
@@ -564,10 +571,10 @@ def load_arguments(self, _):
     # endregion
 
     # region keyvault security-domain
-    for scope in ['init-recovery', 'download', 'upload']:
+    for scope in ['init-recovery', 'download', 'upload', 'wait']:
         with self.argument_context('keyvault security-domain {}'.format(scope), arg_group='HSM Id') as c:
-            c.argument('hsm_name', hsm_url_type, required=False,
-                       help='Name of the HSM. Can be omitted if --id is specified.')
+            c.extra('hsm_name', hsm_url_type, required=False,
+                    help='Name of the HSM. Can be omitted if --id is specified.')
             c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
             c.ignore('vault_base_url')
 
@@ -605,14 +612,8 @@ def load_arguments(self, _):
                                                'for recovery.')
 
     with self.argument_context('keyvault security-domain wait') as c:
-        c.argument('hsm_name', hsm_url_type, help='Name of the HSM. Can be omitted if --id is specified.',
-                   required=False)
-        c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
-        c.argument('resource_group_name', options_list=['--resource-group', '-g'],
-                   help='Proceed only if HSM belongs to the specified resource group.')
         c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
                    help='Target operation that needs waiting.')
-        c.ignore('vault_base_url')
     # endregion
 
     # region keyvault backup/restore

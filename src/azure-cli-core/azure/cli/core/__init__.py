@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.57.0"
+__version__ = "2.72.0"
 
 import os
 import sys
@@ -56,8 +56,9 @@ _configure_knack()
 class AzCli(CLI):
 
     def __init__(self, **kwargs):
-        super(AzCli, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
+        from azure.cli.core.breaking_change import register_upcoming_breaking_change_info
         from azure.cli.core.commands import register_cache_arguments
         from azure.cli.core.commands.arm import (
             register_ids_argument, register_global_subscription_argument)
@@ -90,6 +91,7 @@ class AzCli(CLI):
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
         register_cache_arguments(self)
+        register_upcoming_breaking_change_info(self)
 
         self.progress_controller = None
 
@@ -198,7 +200,7 @@ class MainCommandsLoader(CLICommandsLoader):
     item_ext_format_string = item_format_string + "  %s"
 
     def __init__(self, cli_ctx=None):
-        super(MainCommandsLoader, self).__init__(cli_ctx)
+        super().__init__(cli_ctx)
         self.cmd_to_loader_map = {}
         self.loaders = []
 
@@ -218,6 +220,8 @@ class MainCommandsLoader(CLICommandsLoader):
             _load_module_command_loader, _load_extension_command_loader, BLOCKED_MODS, ExtensionCommandSource)
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
+        from azure.cli.core.breaking_change import (
+            import_core_breaking_changes, import_module_breaking_changes, import_extension_breaking_changes)
 
         def _update_command_table_from_modules(args, command_modules=None):
             """Loads command tables from modules and merge into the main command table.
@@ -254,6 +258,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 try:
                     start_time = timeit.default_timer()
                     module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
+                    import_module_breaking_changes(mod)
                     for cmd in module_command_table.values():
                         cmd.command_source = mod
                     self.command_table.update(module_command_table)
@@ -349,6 +354,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         start_time = timeit.default_timer()
                         extension_command_table, extension_group_table = \
                             _load_extension_command_loader(self, args, ext_mod)
+                        import_extension_breaking_changes(ext_mod)
 
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
@@ -410,6 +416,9 @@ class MainCommandsLoader(CLICommandsLoader):
         # Clear the tables to make this method idempotent
         self.command_group_table.clear()
         self.command_table.clear()
+
+        # Import announced breaking changes in azure.cli.core._breaking_change.py
+        import_core_breaking_changes()
 
         command_index = None
         # Set fallback=False to turn off command index in case of regression
@@ -484,6 +493,26 @@ class MainCommandsLoader(CLICommandsLoader):
 
         return self.command_table
 
+    @staticmethod
+    def _sort_command_loaders(command_loaders):
+        module_command_loaders = []
+        extension_command_loaders = []
+
+        # Separate module and extension command loaders
+        for loader in command_loaders:
+            if loader.__module__.startswith('azext'):
+                extension_command_loaders.append(loader)
+            else:
+                module_command_loaders.append(loader)
+
+        # Sort name in each command loader list
+        module_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
+        extension_command_loaders.sort(key=lambda loader: loader.__class__.__name__)
+
+        # Module first, then extension
+        sorted_command_loaders = module_command_loaders + extension_command_loaders
+        return sorted_command_loaders
+
     def load_arguments(self, command=None):
         from azure.cli.core.commands.parameters import (
             resource_group_name_type, get_location_type, deployment_name_type, vnet_name_type, subnet_name_type)
@@ -494,6 +523,8 @@ class MainCommandsLoader(CLICommandsLoader):
             command_loaders = set()
             for loaders in self.cmd_to_loader_map.values():
                 command_loaders = command_loaders.union(set(loaders))
+            # sort command loaders for consistent order when loading all commands for docs generation to avoid random diff
+            command_loaders = self._sort_command_loaders(command_loaders)
             logger.info('Applying %s command loaders...', len(command_loaders))
         else:
             command_loaders = self.cmd_to_loader_map.get(command, None)
@@ -672,9 +703,9 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                  suppress_extension=None, **kwargs):
         from azure.cli.core.commands import AzCliCommand, AzCommandGroup, AzArgumentContext
 
-        super(AzCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                               command_cls=AzCliCommand,
-                                               excluded_command_handler_args=EXCLUDED_PARAMS)
+        super().__init__(cli_ctx=cli_ctx,
+                         command_cls=AzCliCommand,
+                         excluded_command_handler_args=EXCLUDED_PARAMS)
         self.suppress_extension = suppress_extension
         self.module_kwargs = kwargs
         self.command_name = None

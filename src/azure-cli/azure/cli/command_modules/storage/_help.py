@@ -31,7 +31,7 @@ helps['storage account blob-inventory-policy create'] = """
 type: command
 short-summary: Create Blob Inventory Policy for storage account.
 examples:
-  - name: Create Blob Inventory Policy trough json file for storage account.
+  - name: Create Blob Inventory Policy through json file for storage account.
     text: az storage account blob-inventory-policy create -g myresourcegroup --account-name mystorageaccount --policy @policy.json
 """
 
@@ -85,7 +85,7 @@ long-summary: >
     Sharing) rules.
 parameters:
   - name: --enable-change-feed
-    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://docs.microsoft.com/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
+    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://learn.microsoft.com/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
   - name: --enable-delete-retention
     short-summary: 'Indicate whether delete retention policy is enabled for the blob service.'
   - name: --delete-retention-days
@@ -145,10 +145,6 @@ long-summary: >
 examples:
   - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
     text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --sku Standard_LRS
-    unsupported-profiles: 2017-03-09-profile
-  - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
-    text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --account-type Standard_LRS
-    supported-profiles: 2017-03-09-profile
   - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the eastus2euap region with account-scoped encryption key enabled for Table Service.
     text: az storage account create -n mystorageaccount -g MyResourceGroup --kind StorageV2 -l eastus2euap -t Account
 """
@@ -229,7 +225,7 @@ short-summary: Failover request can be triggered for a storage account in case o
 long-summary: |
     The failover occurs from the storage account's primary cluster to secondary cluster for (RA-)GRS/GZRS accounts. The secondary
     cluster will become primary after failover. For more information, please refer to
-    https://docs.microsoft.com/azure/storage/common/storage-disaster-recovery-guidance.
+    https://learn.microsoft.com/azure/storage/common/storage-disaster-recovery-guidance.
 examples:
   - name: Failover a storage account.
     text: |
@@ -434,7 +430,7 @@ short-summary: Create Object Replication Service Policy for storage account.
 examples:
   - name: Create Object Replication Service Policy for storage account.
     text: az storage account or-policy create -g ResourceGroupName -n storageAccountName -d destAccountName -s srcAccountName --destination-container dcont --source-container scont
-  - name: Create Object Replication Service Policy trough json file for storage account.
+  - name: Create Object Replication Service Policy through json file for storage account.
     text: az storage account or-policy create -g ResourceGroupName -n storageAccountName --policy @policy.json
   - name: Create Object Replication Service Policy to source storage account through policy associated with destination storage account.
     text: az storage account or-policy show -g ResourceGroupName -n destAccountName --policy-id "3496e652-4cea-4581-b2f7-c86b3971ba92" | az storage account or-policy create -g ResourceGroupName -n srcAccountName -p "@-"
@@ -856,7 +852,7 @@ parameters:
     short-summary: The blob container where the selected source files or blobs will be copied to.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -923,7 +919,7 @@ parameters:
     long-summary: The source can be the container URL or the container name. When the source is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'. You can also try "az storage remove" command with --include and --exclude with azure cli >= 2.0.70 to match multiple patterns.
   - name: --dryrun
     type: bool
@@ -965,7 +961,7 @@ parameters:
     short-summary: The existing destination folder for this download operation.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -1293,7 +1289,7 @@ parameters:
     long-summary: The destination can be the container URL or the container name. When the destination is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -1462,6 +1458,8 @@ examples:
     text: az storage container create -n mystoragecontainer --fail-on-exist
   - name: Create a storage container in a storage account and allow public read access for blobs.
     text: az storage container create -n mystoragecontainer --public-access blob
+  - name: Create a storage container in a PartitionedDNS enabled storage account.
+    text: az storage container create --account-name mystorageaccount --name mystoragecontainer --account-key "enter-your-storage_account-key" --blob-endpoint "https://mystorageaccount.z3.blob.storage.azure.net/"
 """
 
 helps['storage container delete'] = """
@@ -1798,6 +1796,11 @@ short-summary: Manage file storage directories.
 helps['storage directory create'] = """
 type: command
 short-summary: Create a new directory under the specified share or parent directory.
+examples:
+  - name: Create a new directory under the specified NFS share with file-mode, owner, group
+    text: |
+        az storage directory create --account-name mystorageaccount --name dir --share-name myshare
+        --file-mode rwxr--r-- --owner 1 --group 2
 """
 
 helps['storage directory delete'] = """
@@ -1860,7 +1863,13 @@ parameters:
   - name: --entity -e
     type: list
     short-summary: Space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
-    long-summary: The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size. If using an integer value as a key, convert it to a fixed-width string which can be canonically sorted. For example, convert the integer value 1 to the string value "0000001" to ensure proper sorting.
+    long-summary: >
+        The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size.
+        If using an integer value as a key, convert it to a fixed-width string which can be canonically sorted.
+        For example, convert the integer value 1 to the string value "0000001" to ensure proper sorting. \n
+        To manually specify the value type, an additional key,value pair can be added in the format of
+        `key@odata.type=<EdmType>` where `<EdmType>` can be from the following list: Edm.Binary, Edm.Int64, Edm.Guid,
+        Edm.DateTime, Edm.String, Edm.Int32, Edm.Double, Edm.Boolean
   - name: --if-exists
     type: string
     short-summary: Behavior when an entity already exists for the specified PartitionKey and RowKey.
@@ -1869,6 +1878,9 @@ examples:
     text: |
         az storage entity insert --connection-string $connectionString --entity PartitionKey=AAA RowKey=BBB Content=ASDF2 --if-exists fail --table-name MyTable
     crafted: true
+  - name: Insert an entity when specifying the odatatype.
+    text: |
+        az storage entity insert --connection-string $connectionString --entity PartitionKey=AAA RowKey=BBB Content=0152 Content@odata.type=Edm.String --if-exists merge --table-name MyTable
 """
 
 helps['storage entity merge'] = """
@@ -1903,7 +1915,7 @@ short-summary: Delete an existing entity in a table.
 
 helps['storage file'] = """
 type: group
-short-summary: Manage file shares that use the SMB 3.0 protocol.
+short-summary: Manage file shares.
 """
 
 helps['storage file copy'] = """
@@ -1936,6 +1948,12 @@ examples:
     - name: Copy a file asynchronously from file snapshot to destination storage account with sas token.
       text: |
         az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --file-snapshot "2020-03-02T13:51:54.0000000Z" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destination-sas>
+    - name: Copy a file with the source file-mode, group, owner.
+      text: |
+        az storage file copy start --source-account-name srcaccount --source-path srcpath --source-share srcshare --destination-path dstpath --destination-share dstshare --owner-copy-mode Source --file-mode-copy-mode Source
+    - name: Copy a file with the overridden file-mode, group, owner.
+      text: |
+        az storage file copy start --source-account-name srcaccount --source-path srcpath --source-share srcshare --destination-path dstpath --destination-share dstshare --owner-copy-mode Override --file-mode-copy-mode Override --file-mode rw-rw-rw- --owner 4 --group 5
 """
 
 helps['storage file copy start-batch'] = """
@@ -1950,7 +1968,7 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -1992,7 +2010,7 @@ parameters:
     short-summary: The source of the file delete operation. The source can be the file share URL or the share name.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -2026,7 +2044,7 @@ parameters:
     short-summary: The local directory where the files are downloaded to. This directory must already exist.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -2154,12 +2172,12 @@ examples:
 
 helps['storage file upload'] = """
 type: command
-short-summary: Upload a file to a share that uses the SMB 3.0 protocol.
+short-summary: Upload a file to a share.
 long-summary: Creates or updates an Azure file from a source path with automatic chunking and progress notifications.
 examples:
   - name: Upload to a local file to a share.
     text: az storage file upload -s MyShare --source /path/to/file
-  - name: Upload a file to a share that uses the SMB 3.0 protocol. (autogenerated)
+  - name: Upload a file to a share.
     text: |
         az storage file upload --account-key 00000000 --account-name MyStorageAccount --path path/file.txt --share-name MyShare --source /path/to/file
     crafted: true
@@ -2181,7 +2199,7 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -2256,7 +2274,7 @@ parameters:
         For example, the following ACL grants read, write, and execute rights to the file owner an
         john.doe@contoso, the read right to the owning group, and nothing to everyone else:
         "user::rwx,user:john.doe@contoso:rwx,group::r--,other::---,mask::rwx".
-        For more information, please refer to https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.
+        For more information, please refer to https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.
     - name: --permissions
       short-summary: >
         Invalid in conjunction with acl. POSIX access permissions for the file owner, the file owning group, and others.
@@ -2266,12 +2284,12 @@ parameters:
       short-summary: >
         The owning user of the file or directory. The user Azure Active Directory object ID or user principal name to
         set as the owner. For more information, please refer to
-        https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
+        https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
     - name: --group
       short-summary: >
         The owning group of the file or directory. The group Azure Active Directory object ID or user principal name to
         set as the owning group. For more information, please refer to
-        https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
+        https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
 examples:
     - name: Set the access control list of a path.
       text: az storage fs access set --acl "user::rwx,group::r--,other::---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
@@ -2534,7 +2552,7 @@ examples:
   - name: Generate a sas token for directory and use it to upload files.
     text: |
         end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
-        az storage fs directory generate-sas --name dir/ --file-system myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
+        az storage fs directory generate-sas --name dir --file-system myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
 """
 
 helps['storage fs file'] = """
@@ -2932,39 +2950,6 @@ type: group
 short-summary: Manage Azure file shares using the Microsoft.Storage resource provider.
 """
 
-helps['storage share-rm create'] = """
-type: command
-short-summary: Create a new Azure file share under the specified storage account.
-examples:
-  - name: Create a new Azure file share 'myfileshare' with metadata and quota as 10 GB under the storage account 'mystorageaccount'(account name) in resource group 'MyResourceGroup'.
-    text: az storage share-rm create -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 10 --metadata key1=value1 key2=value2
-  - name: Create a new Azure file share 'myfileshare' with metadata and quota as 6000 GB under the storage account 'mystorageaccount'(account name) which enables large file share in resource group 'MyResourceGroup'.
-    text: |
-        az storage account update -g MyResourceGroup --name mystorageaccount --enable-large-file-share
-        az storage share-rm create -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 6000 --metadata key1=value1 key2=value2
-  - name: Create a new Azure file share 'myfileshare' with metadata and quota as 10 GB under the storage account 'mystorageaccount' (account id).
-    text: az storage share-rm create --storage-account mystorageaccount --name myfileshare --quota 10 --metadata key1=value1 key2=value2
-"""
-
-helps['storage share-rm delete'] = """
-type: command
-short-summary: Delete the specified Azure file share or share snapshot.
-long-summary: 'BREAKING CHANGE: Snapshot can not be deleted by default and we have added a new parameter to use if you want to include sanpshots for delete operation.'
-examples:
-  - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
-    text: az storage share-rm delete -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
-  - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
-    text: az storage share-rm delete --storage-account mystorageaccount --name myfileshare
-  - name: Delete an Azure file share by resource id.
-    text: az storage share-rm delete --ids file-share-id
-  - name: Delete an Azure file share snapshot.
-    text: az storage share-rm delete --ids file-share-id --snapshot "2021-03-25T05:29:56.0000000Z"
-  - name: Delete an Azure file share and all its snapshots.
-    text: az storage share-rm delete --include snapshots -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
-  - name: Delete an Azure file share and all its snapshots (leased/unleased).
-    text: az storage share-rm delete --include leased-snapshots -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
-"""
-
 helps['storage share-rm exists'] = """
 type: command
 short-summary: Check for the existence of an Azure file share.
@@ -2977,22 +2962,6 @@ examples:
     text: az storage share-rm exists --ids file-share-id
 """
 
-helps['storage share-rm list'] = """
-type: command
-short-summary: List the Azure file shares under the specified storage account.
-examples:
-  - name: List the Azure file shares under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
-    text: az storage share-rm list -g MyResourceGroup --storage-account mystorageaccount
-  - name: List the Azure file shares under the storage account 'mystorageaccount' (account id).
-    text: az storage share-rm list --storage-account mystorageaccount
-  - name: List all file shares include deleted under the storage account 'mystorageaccount' .
-    text: az storage share-rm list --storage-account mystorageaccount --include-deleted
-  - name: List all file shares include its all snapshots under the storage account 'mystorageaccount' .
-    text: az storage share-rm list --storage-account mystorageaccount --include-snapshot
-  - name: List all file shares include its all snapshots and deleted file shares under the storage account 'mystorageaccount' .
-    text: az storage share-rm list --storage-account mystorageaccount --include-deleted --include-snapshot
-"""
-
 helps['storage share-rm restore'] = """
 type: command
 short-summary: Restore a file share within a valid retention days if share soft delete is enabled.
@@ -3003,38 +2972,12 @@ examples:
     text: az storage share-rm restore -n deletedshare --deleted-version 01D64EB9886F00C4 --restored-name newname -g MyResourceGroup --storage-account mystorageaccount
 """
 
-helps['storage share-rm show'] = """
-type: command
-short-summary: Show the properties for a specified Azure file share or share snapshot.
-examples:
-  - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
-    text: az storage share-rm show -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
-  - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
-    text: az storage share-rm show --storage-account mystorageaccount --name myfileshare
-  - name: Show the properties of an Azure file share by resource id.
-    text: az storage share-rm show --ids file-share-id
-  - name: Show the properties of an Azure file share snapshot
-    text: az storage share-rm show --ids file-share-id --snapshot "2021-03-25T05:29:56.0000000Z"
-"""
-
 helps['storage share-rm stats'] = """
 type: command
 short-summary: Get the usage bytes of the data stored on the share.
 examples:
   - name: Get the usage bytes of the data stored on the share.
     text: az storage share-rm stats -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
-"""
-
-helps['storage share-rm update'] = """
-type: command
-short-summary: Update the properties for an Azure file share.
-examples:
-  - name: Update the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
-    text: az storage share-rm update -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
-  - name: Update the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
-    text: az storage share-rm update --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
-  - name: Update the properties for an Azure file shares by resource id.
-    text: az storage share-rm update --ids file-share-id --quota 3 --metadata key1=value1 key2=value2
 """
 
 helps['storage share-rm snapshot'] = """
@@ -3058,6 +3001,9 @@ examples:
     text: |
         az storage share create --account-name MyAccount --name MyFileShare
     crafted: true
+  - name: Creates a new share under the specified account for NFS.
+    text: |
+        az storage share create --account-name MyAccount --name MyFileShare --protocol nfs
 """
 
 helps['storage share exists'] = """
@@ -3224,4 +3170,18 @@ short-summary: List tables in a storage account.
 helps['storage table policy'] = """
 type: group
 short-summary: Manage shared access policies of a storage table.
+"""
+
+helps['storage file hard-link'] = """
+    type: group
+    short-summary: Manage storage file hard-link.
+"""
+
+helps['storage file hard-link create'] = """
+    type: command
+    short-summary: NFS only. Create a hard link to the file specified by path.
+    examples:
+      - name: Create a hard link to an NFS file specified by path.
+        text: |
+            az storage file hard-link create --account-name MyAccount --share-name share --path link_path --target original_path
 """

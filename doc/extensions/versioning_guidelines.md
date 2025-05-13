@@ -1,10 +1,10 @@
 # Versioning of Azure CLI Extension
 
-To keep a unified versioning strategy across azure cli extension modules, azure cli set up a simple list of rules and requirements on how cli extension version numbers are assigned and incremented, based on [Semantic Versioning](https://semver.org/#semantic-versioning-200) 
+To keep a unified versioning strategy across Azure CLI extension modules, Azure CLI set up a simple list of rules and requirements on how CLI extension version numbers are assigned and incremented, based on [Semantic Versioning](https://semver.org/#semantic-versioning-200) 
 
 ## Versioning Scheme
 
-The published cli extension modules MUST comply with the following version scheme:
+The published CLI extension modules MUST comply with the following version scheme:
 
 ```
 MAJOR.MINOR.PATCH[pre]
@@ -17,7 +17,7 @@ Extension version identifiers are separated into up to four segments:
 - pre: preview (or pre-release) indicator, `b[1-9][0-9]*`, started with `b` and ended with numeric identifier, positive integers, no leading zeroes
 
 #### Notes
-- Azure cli extension only holds two kinds of public releases: stable and preview
+- Azure CLI extension only holds two kinds of public releases: stable and preview
 - Each segment MUST increase numerically. If MAJOR number is incremented, MINOR and PATCH number should be reset to 0. And PATCH number should be reset to 0 if MINOR number is incremented
 - Precedence is determined by the first difference when comparing each of these segments from left to right as follows: Major, minor, and patch versions numerically. And, preview-release version is smaller than corresponding stable-release version. For instance: 1.9.0 < 2.0.0b1 < 2.0.0b2 < 2.0.0 < 2.1.0
 
@@ -135,15 +135,15 @@ Considering version increment rules above, version transition table can be summa
 - &#10006; means no
 - \- means skip check
 - The major version number of preview can increase by at most one compared to the last stable version. For example, the last stable version is 2.0.0, if there are breaking changes for next preview release, the version will be 3.0.0b1. Then another breaking changes for the next preview release, the version will be 3.0.0b2
-- If last version is less than 1.0.0, then, the next preview version should be 1.0.0b1 and the next stable one should be 1.0.0
+- Minimum preview version is 1.0.0b1 and minimum stable version is 1.0.0
 
 ## Backward Compatibility of Extension Version Tags
 
 Current extension module has a combination of semantic scheme and extra metadata tags (`azext.isExperimental` and `azext.isPreview`) to mark module release version. To keep backward compatibility:
 - `azext.isPreview` is reserved for all preview extension releases.
-- `azext.isExperimental` is deprecated and will be replaced by `azext.isPreview` for version tag simplicity, since cli extension only supports two types of public releases now: stable and preview
+- `azext.isExperimental` is deprecated and will be replaced by `azext.isPreview` for version tag simplicity, since CLI extension only supports two types of public releases now: stable and preview
 - For all stable extension releases, neither `azext.isPreview` nor `azext.isExperimental` can be added into module metadata.
 
 ## Extension Installation Upgrade
 
-To distinguish `stable-only` extension installation with `preview-included` extension installation, `--allow-preview` is added into `az extension add/update` and `az upgrade` and the `stable/preview` justification is made based on this extension versioning specification from cli version `2.56.0`. Default value for `--allow-preview` is `True` for user compatibility and will be reset to `False` in next breaking change window (by May 2024).
+To distinguish `stable-only` extension installation with `preview-included` extension installation, `--allow-preview` is added into `az extension add/update` and `az upgrade` and the `stable/preview` justification is made based on this extension versioning specification from CLI version `2.56.0`. Default value for `--allow-preview` is `True` for user compatibility and will be reset to `False` in future breaking change window.

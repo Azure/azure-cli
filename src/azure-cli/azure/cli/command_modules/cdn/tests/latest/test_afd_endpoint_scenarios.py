@@ -8,7 +8,7 @@ from .afdx_scenario_mixin import CdnAfdScenarioMixin
 
 
 class CdnAfdEndpointScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_endpoint_crud(self, resource_group):
         profile_name = 'profile123'
         self.afd_endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -53,8 +53,7 @@ class CdnAfdEndpointScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                      options=options,
                                      checks=update_checks)
 
-
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_endpoint_purge(self, resource_group):
         profile_name = 'profile123'
         self.afd_profile_create_cmd(resource_group, profile_name)

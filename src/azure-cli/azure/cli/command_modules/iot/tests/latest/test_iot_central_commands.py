@@ -117,7 +117,6 @@ class IoTCentralTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer()  # name_prefix not required, but can be useful
     def test_iot_central_private_link_and_private_endpoint(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
         name = self.create_random_name(prefix='iotc-cli-test', length=24)
         self.kwargs.update({
             'app_name': name,
@@ -219,8 +218,7 @@ class IoTCentralTest(ScenarioTest):
         # self.cmd('iot central app private-endpoint-connection reject --id {iotc_pec_id}',
         #          checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
-        # with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+        # with self.assertRaisesRegex(CloudError, 'You cannot approve the connection request after rejection.'):
         #     self.cmd('iot central app private-endpoint-connection approve --account-name {app_name} -g {rg} --name {iotc_pec_name}')
 
         self.cmd('iot central app private-endpoint-connection delete --id {iotc_pec_id} -y')
-     

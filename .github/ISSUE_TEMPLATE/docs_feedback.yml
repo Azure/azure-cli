@@ -1,0 +1,77 @@
+name: ✒️ Reference documentation issue or question
+description: Report reference documentation related issue
+title: '[Reference feedback]: '
+labels: [needs-triage]
+
+body:
+- type: markdown
+  attributes:
+    value: >
+      Azure CLI documentation includes 3 categories:
+
+      - Conceptual doc about Azure CLI: https://learn.microsoft.com/en-us/CLI/azure 
+           
+      - Engineering doc on Github repo (Core): https://github.com/Azure/azure-CLI
+
+      - Engineering doc on Github repo (Extensions): https://github.com/Azure/azure-CLI-extensions
+- type: markdown
+  attributes:
+    value: Select the issue type, and describe the issue in the text box below. Add as much detail as needed to help us resolve the issue.
+- type: dropdown
+  id: issue-type
+  attributes:
+    label: Type of issue
+    options:
+      - Other (describe below)
+      - Code doesn't work
+      - Missing information
+      - Outdated article
+      - Typo
+  validations:
+    required: true
+- type: textarea
+  id: referencecommand
+  validations:
+    required: true
+  attributes:
+    label: Reference command name
+    description: >-
+      Enter the reference command name. Example: `az vm create`. Do not include parameters in this section.
+- type: textarea
+  id: userfeedback
+  validations:
+    required: true
+  attributes:
+    label: Feedback
+    description: >-
+      Please provide extended details that will add context and help the team update
+      Azure CLI reference documentation. For technical or factual errors, include code
+      snippets and output from the `--debug` parameter. For examples on using `--debug`,
+      see https://learn.microsoft.com/cli/azure/use-azure-cli-successfully-troubleshooting#the---debug-parameter.
+- type: markdown
+  attributes:
+    value: Article information
+- type: markdown
+  attributes:
+    value: "*If the following fields are automatically filled in for you, please don't modify them*"
+- type: input
+  id: pageUrl
+  attributes:
+    label: Page URL
+- type: input
+  id: contentSourceUrl
+  attributes:
+    label: Content source URL
+- type: input
+  id: author
+  attributes:
+    label: Author
+    description: GitHub Id of the author
+- type: input
+  id: documentVersionIndependentId
+  attributes:
+    label: Document Id
+- type: markdown
+  attributes:
+    value: >
+      The Azure CLI team is listening, please let us know how we are doing: https://learn.microsoft.com/cli/azure/command-line-tools-survey-guidance.

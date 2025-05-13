@@ -107,81 +107,86 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
         parser = AAZShortHandSyntaxParser()
         self.assertEqual(parser("{}"), {})
         self.assertEqual(parser("{a:1,b:2,c:null,d:''}"), {
+            "a": 1,
+            "b": 2,
+            "c": None,
+            "d": ''
+        })
+        self.assertEqual(parser("{a:'1',b:'2',c:null,d:''}"), {
             "a": "1",
             "b": "2",
             "c": None,
             "d": ''
         })
         self.assertEqual(parser("{a:1,b:2,c:None,d:'',}"), {
-            "a": "1",
-            "b": "2",
+            "a": 1,
+            "b": 2,
             "c": "None",
             "d": ''
         })
         self.assertEqual(parser("{a:1,b:''/'}"), {
-            "a": "1",
+            "a": 1,
             "b": "'"
         })
 
-        self.assertEqual(parser("{a:1,b:'/'}"), {
+        self.assertEqual(parser("{a:'1',b:'/'}"), {
             "a": "1",
             "b": "/"
         })
 
         self.assertEqual(parser("{a:1,b:'//'}"), {
-            "a": "1",
+            "a": 1,
             "b": "//"
         })
 
         self.assertEqual(parser("{a:1,b:/}"), {
-            "a": "1",
+            "a": 1,
             "b": "/"
         })
 
-        self.assertEqual(parser("{a:1,b:2,c:Null,d:''}"), {
+        self.assertEqual(parser("{a:'1',b:'2',c:Null,d:''}"), {
             "a": "1",
             "b": "2",
             "c": "Null",
             "d": ''
         })
         self.assertEqual(parser("{a:1,b:2,c:none,d:'',}"), {
-            "a": "1",
-            "b": "2",
+            "a": 1,
+            "b": 2,
             "c": "none",
             "d": ''
         })
 
-        self.assertEqual(parser("{a:{a1:' \n '/',a2:2}}"), {
+        self.assertEqual(parser("{a:{a1:' \n '/',a2:2.2}}"), {
             "a": {
                 "a1": " \n '",
-                "a2": "2",
+                "a2": 2.2,
             }
         })
 
-        self.assertEqual(parser("{a:{a1:1,a2:2}}"), {
+        self.assertEqual(parser("{a:{a1:1,a2:'false'}}"), {
             "a": {
-                "a1": "1",
-                "a2": "2",
+                "a1": 1,
+                "a2": 'false',
             }
         })
-        self.assertEqual(parser("{a:{a1:1,a2:2},}"), {
+        self.assertEqual(parser("{a:{a1:'1.1',a2:true},}"), {
             "a": {
-                "a1": "1",
-                "a2": "2",
+                "a1": "1.1",
+                "a2": True,
             }
         })
-
-        self.assertEqual(parser("{a:{a1:{},a2:2}}"), {
+        self.assertEqual(parser("{a:{a1:{},a2:false}}"), {
             "a": {
                 "a1": {},
-                "a2": "2",
+                "a2": False,
             }
         })
 
         self.assertEqual(parser("{a:{a1,a2:2,c},a3,a4:''}"), {
             "a": {
                 "a1": AAZBlankArgValue,
-                "a2": "2",
+                "a2": 2,
                 "c": AAZBlankArgValue,
             },
             "a3": AAZBlankArgValue,
@@ -189,20 +194,20 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
         })
 
         self.assertEqual(parser("{a:1,'',c:1,e}"), {
-            "a": "1",
+            "a": 1,
             "": AAZBlankArgValue,
-            "c": "1",
+            "c": 1,
             "e": AAZBlankArgValue,
         })
 
-        self.assertEqual(parser("{a:[{prop1:1,prop2:2},{a1:[b,null,c,'d:e \"]'],a2:'2 3\t\"}',a4:'',a3:null,}],e:f,g:null}"), {
+        self.assertEqual(parser("{a:[{prop1:1,prop2:true},{a1:[b,3,3.4,true,false,'true','false',null,c,'d:e \"]'],a2:'2 3\t\"}',a4:'',a3:null,}],e:f,g:null}"), {
             "a": [
                 {
-                    "prop1": "1",
-                    "prop2": "2",
+                    "prop1": 1,
+                    "prop2": True,
                 },
                 {
-                    "a1": ["b", None, "c", 'd:e "]'],
+                    "a1": ["b", 3, 3.4, True, False, "true", "false", None, "c", 'd:e "]'],
                     "a2": '2 3\t"}',
                     "a4": '',
                     "a3": None,
@@ -346,7 +351,7 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
 
         ls = [1, 2, 3, 4]
         s = json.dumps(ls, separators=(',', ':'))
-        self.assertEqual(parser(s), ['1', '2', '3', '4'])
+        self.assertEqual(parser(s), ls)
 
         ls = ["1", "2"]
         s = json.dumps(ls, separators=(',', ':'))
@@ -467,7 +472,7 @@ class TestAAZArg(unittest.TestCase):
             parse_partial_value_key("b.a.'/bc sef'/.sss[2]")
 
     def test_aaz_str_arg(self):
-        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema, AAZListArg
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
         from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
@@ -493,6 +498,14 @@ class TestAAZArg(unittest.TestCase):
             },
             nullable=True,
             blank="Sunday"
+        )
+        schema.tasks = AAZListArg(
+            options=["--tasks"],
+            singular_options=["--task", "-t"],
+        )
+        schema.tasks.Element = AAZStrArg(
+            enum={"task1", "task2"},
+            enum_support_extension=True,
         )
         self.assertFalse(has_value(v.work_day))
 
@@ -548,6 +561,18 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "work_day")
         self.assertEqual(v.work_day, None)
 
+        # Task argument
+        arg = schema.tasks.to_cmd_arg("tasks")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+
+        action.setup_operations(dest_ops, ["[0,'null',false,'true',1.2,'1.2','10']"])
+        self.assertEqual(len(dest_ops._ops), 1)
+        dest_ops.apply(v, "tasks")
+        self.assertEqual(v.tasks.to_serialized_data(), ["0", "null", "false", "true", "1.2", "1.2", "10"])
+
         # New argument
         schema.name = AAZStrArg(options=["--name", "-n"])
         arg = schema.name.to_cmd_arg("work_day")
@@ -596,6 +621,7 @@ class TestAAZArg(unittest.TestCase):
                 "C": 80,
                 "D": 0,
             },
+            enum_support_extension=True,
             nullable=True,
             blank=0
         )
@@ -603,7 +629,7 @@ class TestAAZArg(unittest.TestCase):
         self.assertFalse(has_value(v.score))
 
         arg = schema.score.to_cmd_arg("score")
-        self.assertEqual(len(arg.choices), 4)
+        self.assertEqual(arg.choices, None)
         action = arg.type.settings["action"]
 
         dest_ops = AAZArgActionOperations()
@@ -631,6 +657,16 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 4)
         dest_ops.apply(v, "score")
         self.assertEqual(v.score, None)
+
+         # extension value
+        action.setup_operations(dest_ops, "1234")
+        self.assertEqual(len(dest_ops._ops), 5)
+        dest_ops.apply(v, "score")
+        self.assertEqual(v.score, 1234)
+
+        # extension invalid value
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            action.setup_operations(dest_ops, "12A34")
 
         # credit argument
         schema.credit = AAZIntArg(options=["--credit", "-c"])
@@ -689,13 +725,14 @@ class TestAAZArg(unittest.TestCase):
                 "C": 80.0,
                 "D": 0.0,
             },
+            enum_support_extension=True,
             nullable=True,
             blank=0.0
         )
         self.assertFalse(has_value(v.score))
 
         arg = schema.score.to_cmd_arg("score")
-        self.assertEqual(len(arg.choices), 4)
+        self.assertEqual(arg.choices, None)
         action = arg.type.settings["action"]
 
         dest_ops = AAZArgActionOperations()
@@ -723,6 +760,21 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 4)
         dest_ops.apply(v, "score")
         self.assertEqual(v.score, None)
+        
+        # extension value
+        from unittest import mock
+        with mock.patch('azure.cli.core.aaz._arg.logger') as mock_logger:
+            action.setup_operations(dest_ops, "1234")
+            self.assertEqual(len(dest_ops._ops), 5)
+            dest_ops.apply(v, "score")
+            self.assertEqual(v.score, 1234.0)
+            call_args = mock_logger.warning.call_args
+            self.assertEqual("Use extended value '%s' outside choices %s.", call_args[0][0])
+            self.assertEqual("1234.0", call_args[0][1])
+
+        # extension invalid value
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            action.setup_operations(dest_ops, "12A34")
 
         # credit argument
         schema.credit = AAZFloatArg(options=["--credit", "-c"])
@@ -1101,40 +1153,202 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 0)
 
         # null value
-        action.setup_operations(dest_ops, "null")
+        action.setup_operations(dest_ops, ["null"])
         self.assertEqual(len(dest_ops._ops), 1)
         dest_ops.apply(v, "tags")
         self.assertEqual(v.tags, None)
 
         # empty dict
-        action.setup_operations(dest_ops, "{}")
+        action.setup_operations(dest_ops, ["{}"])
         self.assertEqual(len(dest_ops._ops), 2)
         dest_ops.apply(v, "tags")
         self.assertEqual(v.tags, {})
 
-        # freeform dict
-        action.setup_operations(dest_ops, '{"a": 1, "b": null, "c": false, "d": "string", "e": [1, "str", null]}')
-        self.assertEqual(len(dest_ops._ops), 3)
+        # partial value
+        action.setup_operations(dest_ops, ["a=1", "b=false", "c=abc", "d='1'", "e='null'"])
+        self.assertEqual(len(dest_ops._ops), 7)
         dest_ops.apply(v, "tags")
-        self.assertEqual(v.tags, {"a": 1, "b": None, "c": False, "d": "string", "e": [1, "str", None]})
+        self.assertEqual(v.tags, {"a": 1, "b": False, "c": "abc", "d": "1", "e": 'null'})
+
+        # json string
+        action.setup_operations(dest_ops, ['{"a": 1, "c": false, "d": "string", "e": [1, "str", null]}'])
+        self.assertEqual(len(dest_ops._ops), 8)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"a": 1, "c": False, "d": "string", "e": [1, "str", None]})
 
         # blank value
         action.setup_operations(dest_ops, None)
-        self.assertEqual(len(dest_ops._ops), 4)
+        self.assertEqual(len(dest_ops._ops), 9)
         dest_ops.apply(v, "tags")
         self.assertEqual(v.tags, {"blank": True})
 
-        with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, "'null'")
+        # with shorthand syntax
+        action.setup_operations(dest_ops, ["{a:1,b:false,c:abc,d:'1',e:'null'}"])
+        self.assertEqual(len(dest_ops._ops), 10)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"a": 1, "b": False, "c": "abc", "d": "1", "e": 'null'})
 
         with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, "'123'")
+            action.setup_operations(dest_ops, ["'null'"])
 
         with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, "123")
+            action.setup_operations(dest_ops, ["'123'"])
 
         with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, "[1, 2, 3]")
+            action.setup_operations(dest_ops, ["123"])
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, ["[1, 2, 3]"])
+    
+    def test_aaz_any_arg(self):
+        # verify the shell_safe_json_parse function
+        from azure.cli.core.aaz._arg import AAZAnyTypeArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
+        from azure.cli.core.util import shell_safe_json_parse
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.any = AAZAnyTypeArg(
+            options=["--any", "-a"],
+            nullable=True,
+            blank={"blank": True}
+        )
+
+        self.assertFalse(has_value(v.any))
+
+        arg = schema.any.to_cmd_arg("any")
+        action = arg.type.settings["action"]
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+
+        # null value
+        action.setup_operations(dest_ops, "null")
+        self.assertEqual(len(dest_ops._ops), 1)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, None)
+
+        # empty dict
+        action.setup_operations(dest_ops, "{}")
+        self.assertEqual(len(dest_ops._ops), 2)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, {})
+
+        # partial value should raise error
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "a=1")
+        # assign a partial value like string
+        action.setup_operations(dest_ops, "'a=1'")
+        self.assertEqual(len(dest_ops._ops), 3)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, "a=1")
+
+        # empty list
+        action.setup_operations(dest_ops, "[]")
+        self.assertEqual(len(dest_ops._ops), 4)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, [])
+
+        # blank value
+        action.setup_operations(dest_ops, None)
+        self.assertEqual(len(dest_ops._ops), 5)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, {"blank": True})
+
+        # json string
+        action.setup_operations(dest_ops, '{"a": 1, "c": false, "d": "string", "e": [1, "str", null]}')
+        self.assertEqual(len(dest_ops._ops), 6)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, {"a": 1, "c": False, "d": "string", "e": [1, "str", None]})
+
+        # with shorthand syntax
+        action.setup_operations(dest_ops, "{a:1,b:false,c:abc,d:'1',e:'null'}")
+        self.assertEqual(len(dest_ops._ops), 7)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, {"a": 1, "b": False, "c": "abc", "d": "1", "e": 'null'})
+
+        # test strings
+        action.setup_operations(dest_ops, "'null'")
+        self.assertEqual(len(dest_ops._ops), 8)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 'null')
+
+        action.setup_operations(dest_ops, "'1'")
+        self.assertEqual(len(dest_ops._ops), 9)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, '1')
+
+        action.setup_operations(dest_ops, "'false'")
+        self.assertEqual(len(dest_ops._ops), 10)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 'false')
+
+        action.setup_operations(dest_ops, "'true'")
+        self.assertEqual(len(dest_ops._ops), 11)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 'true')
+
+        # test int
+        action.setup_operations(dest_ops, "123")
+        self.assertEqual(len(dest_ops._ops), 12)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 123)
+
+        # test float
+        action.setup_operations(dest_ops, "123.456")
+        self.assertEqual(len(dest_ops._ops), 13)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 123.456)
+
+        # test bool
+        action.setup_operations(dest_ops, "true")
+        self.assertEqual(len(dest_ops._ops), 14)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, True)
+
+        action.setup_operations(dest_ops, "false")
+        self.assertEqual(len(dest_ops._ops), 15)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, False)
+
+        # test without nullable and blank value
+        schema.any2 = AAZAnyTypeArg(
+            options=["--any2"],
+        )
+        self.assertFalse(has_value(v.any2))
+
+        arg = schema.any2.to_cmd_arg("any")
+        action = arg.type.settings["action"]
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+        
+        action.setup_operations(dest_ops, "[]")
+        self.assertEqual(len(dest_ops._ops), 1)
+        dest_ops.apply(v, "any2")
+        self.assertEqual(v.any2, [])
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, None)
+        
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "null")
+
+        self.assertEqual(shell_safe_json_parse("true"), True)
+        self.assertEqual(shell_safe_json_parse("false"), False)
+        self.assertEqual(shell_safe_json_parse("'true'"), "true")
+        self.assertEqual(shell_safe_json_parse('"false"'), "false")
+        self.assertEqual(shell_safe_json_parse("null"), None)
+        self.assertEqual(shell_safe_json_parse("'null'"), "null")
+        self.assertEqual(shell_safe_json_parse('"null"'), "null")
+        self.assertEqual(shell_safe_json_parse("123"), 123)
+        self.assertEqual(shell_safe_json_parse("'123'"), "123")
+        self.assertEqual(shell_safe_json_parse('"123"'), "123")
+        self.assertEqual(shell_safe_json_parse("[]"), [])
+        self.assertEqual(shell_safe_json_parse("['a', 'b', 'c']"), ["a", "b", "c"])
+        self.assertEqual(shell_safe_json_parse("[1, 2, 3]"), [1, 2, 3])
+        self.assertEqual(shell_safe_json_parse("{}"), {})
+        self.assertEqual(shell_safe_json_parse('{"a": 1, "b": 2, "c": 3}'), {"a": 1, "b": 2, "c": 3})
+        self.assertEqual(shell_safe_json_parse(r"'{\"a\":1,\"b\":2,\"c\":3}'"), '{"a":1,"b":2,"c":3}')
 
     def test_aaz_object_arg(self):
         from azure.cli.core.aaz._arg import AAZDictArg, AAZListArg, AAZObjectArg, AAZIntArg, AAZBoolArg, AAZFloatArg, \
@@ -1306,6 +1520,19 @@ class TestAAZArg(unittest.TestCase):
             "new_i_pv6": '00:00:00'
         })
 
+        # test assign the int value to the float field, it should be converted to float
+        action.setup_operations(dest_ops, ["{enable:True,tags:null,vnets:null,pt:12,newIPv6:'00:00:00'}"])
+        self.assertEqual(len(dest_ops._ops), 13)
+        dest_ops.apply(v, "properties")
+        self.assertEqual(v.properties, {
+            "enable": True,
+            "tags": None,
+            "vnets": None,
+            "pt": 12.0,
+            "new_i_pv6": '00:00:00'
+        })
+
+
     def test_aaz_has_value_for_buildin(self):
         from azure.cli.core.aaz import has_value, AAZUndefined
         self.assertTrue(has_value(0))
@@ -1387,6 +1614,20 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(arg.type.settings['configured_default'], 'specialname')
         arg = schema.count.to_cmd_arg("count")
         self.assertEqual(arg.type.settings['configured_default'], 'specialcount')
+
+    def test_aaz_generic_update_arg(self):
+        from azure.cli.core.aaz._arg import (AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg,
+                                             AAZArgumentsSchema)
+        schema = AAZArgumentsSchema()
+        schema.generic_update_add = AAZGenericUpdateAddArg()
+        schema.generic_update_set = AAZGenericUpdateSetArg()
+        schema.generic_update_remove = AAZGenericUpdateRemoveArg()
+        arg = schema.generic_update_add.to_cmd_arg("add")
+        self.assertEqual(arg.type.settings['help'], 'Add an object to a list of objects by specifying a path and key value pairs.  Example: `--add property.listProperty <key=value, string or JSON string>`')
+        arg = schema.generic_update_set.to_cmd_arg("set")
+        self.assertEqual(arg.type.settings['help'], 'Update an object by specifying a property path and value to set.  Example: `--set property1.property2=<value>`')
+        arg = schema.generic_update_remove.to_cmd_arg("remove")
+        self.assertEqual(arg.type.settings['help'], 'Remove a property or an element from a list.  Example: `--remove property.list <indexToRemove>` OR `--remove propertyToRemove`')
 
 
 class TestAAZArgUtils(unittest.TestCase):
@@ -1566,3 +1807,72 @@ class TestAAZArgUtils(unittest.TestCase):
         v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
         self.assertTrue(v.items._is_patch)
         self.assertEqual(v.items, {'a': {"name": '1'}, 'b': {"name": '2'}, 'c': {"name": "3"}})
+
+
+class TestAazArgCompleter(unittest.TestCase):
+    from azure.cli.core.decorators import Completer
+
+    @staticmethod
+    @Completer
+    def custom_completer(cmd, prefix, namespace):
+        return ['a', 'b']
+
+    def test_custom_completer(self):
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema, AAZUnregisteredArg
+
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.foo = AAZStrArg(
+            options=['foo'],
+            nullable=True,
+            completer=self.custom_completer
+        )
+        args = {}
+        for name, field in schema._fields.items():
+            # generate command arguments from argument schema.
+            try:
+                args[name] = field.to_cmd_arg(name)
+            except AAZUnregisteredArg:
+                continue
+        self.assertEqual(args['foo'].completer, schema.foo._completer)
+        self.assertEqual(args['foo'].completer, self.custom_completer)
+
+    def test_completer_override(self):
+        from azure.cli.core.aaz._arg import (AAZResourceLocationArg, AAZArgumentsSchema, AAZUnregisteredArg,
+                                             AAZSubscriptionIdArg)
+        from azure.cli.core.commands.parameters import get_location_completion_list
+        from azure.cli.core._completers import get_subscription_id_list
+
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.foo = AAZResourceLocationArg(
+            options=['foo'],
+            completer=self.custom_completer
+        )
+        schema.bar = AAZResourceLocationArg(
+            options=['bar']
+        )
+        schema.sub = AAZSubscriptionIdArg(
+            options=["--subscription-id"],
+            help="subscription id",
+            required=True,
+            id_part="subscription")
+        self.assertEqual(schema.foo._completer, self.custom_completer)
+        self.assertEqual(schema.bar._completer, get_location_completion_list)
+        self.assertEqual(schema.sub._completer, get_subscription_id_list)
+
+        args = {}
+        for name, field in schema._fields.items():
+            # generate command arguments from argument schema.
+            try:
+                args[name] = field.to_cmd_arg(name)
+            except AAZUnregisteredArg:
+                continue
+        self.assertEqual(args['foo'].completer, self.custom_completer)
+        self.assertEqual(args['bar'].completer, get_location_completion_list)
+        self.assertEqual(args['sub'].completer, get_subscription_id_list)
+        schema.bar._completer = self.custom_completer
+        new_arg = schema.bar.to_cmd_arg('bar')
+        self.assertEqual(new_arg.completer, self.custom_completer)

@@ -1,0 +1,921 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lab artifact-source show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lab-name --name
+      User-Agent:
+      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/artifactsources/Public%20Repo?api-version=2018-09-15
+  response:
+    body:
+      string: '{"properties":{"displayName":"Public Artifact Repo","uri":"https://github.com/Azure/azure-devtestlab.git","sourceType":"GitHub","folderPath":"/Artifacts","branchRef":"master","status":"Enabled","provisioningState":"Succeeded","uniqueIdentifier":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/labtest/providers/microsoft.devtestlab/labs/cliautomationlab/artifactsources/public
+        repo","name":"Public Repo","type":"Microsoft.DevTestLab/labs/artifactSources"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '520'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 Sep 2024 10:59:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:9e8cebda-9c88-460b-b55d-9410c4648f9a
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '7499'
+      x-msedge-ref:
+      - 'Ref A: 9D6F1D6D4A5A44F591A9F26C20F47B07 Ref B: TYO201151002052 Ref C: 2024-09-09T10:59:53Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lab artifact-source list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lab-name
+      User-Agent:
+      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/artifactsources?api-version=2018-09-15
+  response:
+    body:
+      string: '{"value":[{"properties":{"displayName":"Public Artifact Repo","uri":"https://github.com/Azure/azure-devtestlab.git","sourceType":"GitHub","folderPath":"/Artifacts","branchRef":"master","status":"Enabled","provisioningState":"Succeeded","uniqueIdentifier":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/labtest/providers/microsoft.devtestlab/labs/cliautomationlab/artifactsources/public
+        repo","name":"Public Repo","type":"Microsoft.DevTestLab/labs/artifactSources"},{"properties":{"displayName":"Public
+        Environment Repo","uri":"https://github.com/Azure/azure-devtestlab.git","sourceType":"GitHub","armTemplateFolderPath":"/Environments","branchRef":"master","status":"Disabled","provisioningState":"Succeeded","uniqueIdentifier":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/labtest/providers/microsoft.devtestlab/labs/cliautomationlab/artifactsources/public
+        environment repo","name":"Public Environment Repo","type":"Microsoft.DevTestLab/labs/artifactSources"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 Sep 2024 10:59:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:9e8cebda-9c88-460b-b55d-9410c4648f9a
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '7499'
+      x-msedge-ref:
+      - 'Ref A: 238A795FFF4E4AD3951066EC787FDDF0 Ref B: TYO201100115021 Ref C: 2024-09-09T10:59:54Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lab vnet list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lab-name
+      User-Agent:
+      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?api-version=2018-09-15
+  response:
+    body:
+      string: '{"value":[{"properties":{"allowedSubnets":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","allowPublicIp":"Allow"}],"externalProviderResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/labtest/providers/microsoft.network/virtualnetworks/dtlcliautomationlab","subnetOverrides":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","useInVmCreationPermission":"Allow","usePublicIpAddressPermission":"Allow","sharedPublicIpAddressConfiguration":{"allowedPorts":[{"transportProtocol":"Tcp","backendPort":3389},{"transportProtocol":"Tcp","backendPort":22}]}}],"createdDate":"2024-08-28T09:39:47.2292015+00:00","provisioningState":"Succeeded","uniqueIdentifier":"f785c9bb-caee-4e7c-b6d6-e68a4177ff74"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/labtest/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab","name":"Dtlcliautomationlab","type":"Microsoft.DevTestLab/labs/virtualNetworks"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1343'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 Sep 2024 10:59:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:9e8cebda-9c88-460b-b55d-9410c4648f9a
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '7499'
+      x-msedge-ref:
+      - 'Ref A: AD6E880C0BA84FB9A5022912A7305692 Ref B: TYO201151005036 Ref C: 2024-09-09T10:59:55Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lab vnet list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lab-name
+      User-Agent:
+      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?api-version=2018-09-15
+  response:
+    body:
+      string: '{"value":[{"properties":{"allowedSubnets":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","allowPublicIp":"Allow"}],"externalProviderResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/labtest/providers/microsoft.network/virtualnetworks/dtlcliautomationlab","subnetOverrides":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","useInVmCreationPermission":"Allow","usePublicIpAddressPermission":"Allow","sharedPublicIpAddressConfiguration":{"allowedPorts":[{"transportProtocol":"Tcp","backendPort":3389},{"transportProtocol":"Tcp","backendPort":22}]}}],"createdDate":"2024-08-28T09:39:47.2292015+00:00","provisioningState":"Succeeded","uniqueIdentifier":"f785c9bb-caee-4e7c-b6d6-e68a4177ff74"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/labtest/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab","name":"Dtlcliautomationlab","type":"Microsoft.DevTestLab/labs/virtualNetworks"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1343'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 Sep 2024 10:59:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:9e8cebda-9c88-460b-b55d-9410c4648f9a
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '7499'
+      x-msedge-ref:
+      - 'Ref A: CF4D4A5031484CA98B02303324F85926 Ref B: TYO201100116031 Ref C: 2024-09-09T10:59:56Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lab vnet get
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lab-name --name
+      User-Agent:
+      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks/Dtlcliautomationlab?api-version=2018-09-15
+  response:
+    body:
+      string: '{"properties":{"allowedSubnets":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","allowPublicIp":"Allow"}],"externalProviderResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/labtest/providers/microsoft.network/virtualnetworks/dtlcliautomationlab","subnetOverrides":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","useInVmCreationPermission":"Allow","usePublicIpAddressPermission":"Allow","sharedPublicIpAddressConfiguration":{"allowedPorts":[{"transportProtocol":"Tcp","backendPort":3389},{"transportProtocol":"Tcp","backendPort":22}]}}],"createdDate":"2024-08-28T09:39:47.2292015+00:00","provisioningState":"Succeeded","uniqueIdentifier":"f785c9bb-caee-4e7c-b6d6-e68a4177ff74"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/labtest/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab","name":"Dtlcliautomationlab","type":"Microsoft.DevTestLab/labs/virtualNetworks"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1331'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 Sep 2024 10:59:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:9e8cebda-9c88-460b-b55d-9410c4648f9a
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-dtl-virtual-network-creator:
+      - DevTestLabs
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '7499'
+      x-msedge-ref:
+      - 'Ref A: 52903979725B4ED39FAA8C1C13637918 Ref B: TYO201151003023 Ref C: 2024-09-09T10:59:57Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lab formula list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --lab-name -g
+      User-Agent:
+      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/formulas?api-version=2018-09-15
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 Sep 2024 10:59:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:9e8cebda-9c88-460b-b55d-9410c4648f9a
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '7499'
+      x-msedge-ref:
+      - 'Ref A: 62FB2E1DC6DD4644A6C8CC3DAADE6819 Ref B: TYO201100114033 Ref C: 2024-09-09T10:59:58Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lab arm-template list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --lab-name -g --artifact-source-name --top
+      User-Agent:
+      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/artifactsources/Public%20Environment%20Repo/armtemplates?$top=3&api-version=2018-09-15
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/artifactSources/Public
+        Environment Repo/armTemplates/ServiceFabric-LabCluster","properties":{"displayName":"Service
+        Fabric Lab Cluster","description":"A secure 5 node, single nodetype Service
+        fabric Cluster.","publisher":"Microsoft","contents":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"clusterOS":{"type":"string","allowedValues":["Windows","Linux"],"defaultValue":"Windows","metadata":{"description":"Select
+        the cluster OS."}},"adminUsername":{"type":"string","minLength":1,"metadata":{"description":"Remote
+        desktop user Id"}},"adminPassword":{"type":"securestring","metadata":{"description":"Remote
+        desktop user password. Must be a strong password"}},"certificate":{"type":"string","minLength":1,"metadata":{"description":"Certificate
+        as Base64 encoded string."}},"certificatePassword":{"type":"securestring","metadata":{"description":"Certificate
+        password for installation."}},"certificateThumbprint":{"type":"string","minLength":1,"metadata":{"description":"Certificate
+        thumbprint for identification in the local certificate store."}},"appPort1":{"type":"int","defaultValue":80,"minValue":1,"metadata":{"description":"Public
+        accessible application port #1."}},"appPort2":{"type":"int","defaultValue":443,"minValue":1,"metadata":{"description":"Public
+        accessible application port #2."}},"tenantId":{"type":"string","defaultValue":"","metadata":{"description":"Tenant
+        the cluster- and clientapplication belongs to. Required for Windows clusters."}},"clusterApplication":{"type":"string","defaultValue":"","metadata":{"description":"Client
+        id of cluster application. Required for Windows clusters."}},"clientApplication":{"type":"string","defaultValue":"","metadata":{"description":"Client
+        id of client application. Required for Windows clusters."}}},"variables":{"quickstartRepoRoot":"https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/quickstarts/microsoft.servicefabric/","clusterName":"[concat(''sf-'',
+        toLower(uniqueString(resourceGroup().name)))]","vaultName":"[concat(''kv-'',
+        toLower(uniqueString(resourceGroup().name)))]","vaultSecret":"ClusterCertificate","loadBalancedAppPort1":"[parameters(''appPort1'')]","loadBalancedAppPort2":"[parameters(''appPort2'')]","nt0InstanceCount":5},"resources":[{"name":"[variables(''vaultName'')]","type":"Microsoft.KeyVault/vaults","apiVersion":"2015-06-01","location":"[resourceGroup().location]","tags":{},"properties":{"enabledForDeployment":true,"enabledForTemplateDeployment":false,"enabledForVolumeEncryption":false,"tenantId":"[subscription().tenantId]","sku":{"name":"standard","family":"A"},"accessPolicies":[]}},{"name":"[concat(variables(''vaultName''),
+        ''/'', variables(''vaultSecret''))]","type":"Microsoft.KeyVault/vaults/secrets","apiVersion":"2015-06-01","dependsOn":["[resourceId(''Microsoft.KeyVault/vaults'',
+        variables(''vaultName''))]"],"properties":{"value":"[base64(concat(''{ \"data\":\"'',
+        parameters(''certificate''), ''\", \"dataType\":\"pfx\", \"password\":\"'',
+        parameters(''certificatePassword''), ''\" }''))]"}},{"condition":"[equals(parameters(''clusterOS''),
+        ''Windows'')]","name":"[concat(deployment().name, ''-QuickstartTemplate-Windows'')]","type":"Microsoft.Resources/deployments","apiVersion":"2015-01-01","dependsOn":["[resourceId(''Microsoft.KeyVault/vaults/secrets'',
+        variables(''vaultName''), variables(''vaultSecret''))]"],"properties":{"mode":"Incremental","templateLink":{"uri":"[concat(variables(''quickstartRepoRoot''),
+        ''service-fabric-secure-cluster-5-node-1-nodetype/azuredeploy.json'')]","contentVersion":"1.0.0.0"},"parameters":{"clusterName":{"value":"[variables(''clusterName'')]"},"adminUsername":{"value":"[parameters(''adminUsername'')]"},"adminPassword":{"value":"[parameters(''adminPassword'')]"},"vmImagePublisher":{"value":"MicrosoftWindowsServer"},"vmImageOffer":{"value":"WindowsServer"},"vmImageSku":{"value":"2022-datacenter"},"vmImageVersion":{"value":"latest"},"loadBalancedAppPort1":{"value":"[variables(''loadBalancedAppPort1'')]"},"loadBalancedAppPort2":{"value":"[variables(''loadBalancedAppPort2'')]"},"certificateThumbprint":{"value":"[parameters(''certificateThumbprint'')]"},"sourceVaultResourceId":{"value":"[resourceId(''Microsoft.KeyVault/vaults'',
+        variables(''vaultName''))]"},"certificateUrlValue":{"value":"[reference(resourceId(''Microsoft.KeyVault/vaults/secrets'',
+        variables(''vaultName''), variables(''vaultSecret''))).secretUriWithVersion]"},"nt0InstanceCount":{"value":"[variables(''nt0InstanceCount'')]"},"nodeDataDrive":{"value":"OS"},"tenantId":{"value":"[parameters(''tenantId'')]"},"clusterApplication":{"value":"[parameters(''clusterApplication'')]"},"clientapplication":{"value":"[parameters(''clientApplication'')]"}}}},{"condition":"[equals(parameters(''clusterOS''),
+        ''Linux'')]","name":"[concat(deployment().name, ''-QuickstartTemplate-Linux'')]","type":"Microsoft.Resources/deployments","apiVersion":"2015-01-01","dependsOn":["[resourceId(''Microsoft.KeyVault/vaults/secrets'',
+        variables(''vaultName''), variables(''vaultSecret''))]"],"properties":{"mode":"Incremental","templateLink":{"uri":"[concat(variables(''quickstartRepoRoot''),
+        ''5-vm-ubuntu-1-nodetypes-secure/azuredeploy.json'')]","contentVersion":"1.0.0.0"},"parameters":{"clusterName":{"value":"[variables(''clusterName'')]"},"adminUsername":{"value":"[parameters(''adminUsername'')]"},"adminPassword":{"value":"[parameters(''adminPassword'')]"},"vmImagePublisher":{"value":"Canonical"},"vmImageOffer":{"value":"UbuntuServer"},"vmImageSku":{"value":"16.04-LTS"},"vmImageVersion":{"value":"latest"},"loadBalancedAppPort1":{"value":"[variables(''loadBalancedAppPort1'')]"},"loadBalancedAppPort2":{"value":"[variables(''loadBalancedAppPort2'')]"},"certificateThumbprint":{"value":"[parameters(''certificateThumbprint'')]"},"sourceVaultValue":{"value":"[resourceId(''Microsoft.KeyVault/vaults'',
+        variables(''vaultName''))]"},"certificateUrlValue":{"value":"[reference(resourceId(''Microsoft.KeyVault/vaults/secrets'',
+        variables(''vaultName''), variables(''vaultSecret''))).secretUriWithVersion]"},"nt0InstanceCount":{"value":"[variables(''nt0InstanceCount'')]"},"storageAccountEndPoint":{"value":"[resourceGroup().location]"}}}}],"outputs":{}},"parametersValueFilesInfo":[],"enabled":true},"name":"ServiceFabric-LabCluster","type":"Microsoft.DevTestLab/labs/artifactSources/armTemplates"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/artifactSources/Public
+        Environment Repo/armTemplates/SharePoint-AllVersions","properties":{"displayName":"SharePoint
+        Subscription / 2019 / 2016 with a lightweight configuration","description":"Deploy
+        SharePoint Subscription / 2019 / 2016 with a lightweight configuration. Each
+        version is independent and may or may not be deployed.","publisher":"Yvand","contents":{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","contentVersion":"5.0.0.0","metadata":{"description":"Deploy
+        SharePoint Subscription / 2019 / 2016 with a lightweight configuration. Each
+        version is independent and may or may not be deployed.","author":"Yvand"},"parameters":{"location":{"type":"string","defaultValue":"[resourceGroup().location]","metadata":{"description":"Location
+        for all resources."}},"provisionSharePointSubscription":{"type":"string","defaultValue":"Subscription-Latest","allowedValues":["No","Subscription-RTM","Subscription-22H2","Subscription-23H1","Subscription-23H2","Subscription-Latest"],"metadata":{"description":"Specify
+        if a SharePoint Subscription farm should be provisioned, and which version
+        if so."}},"provisionSharePoint2019":{"type":"bool","defaultValue":false,"metadata":{"description":"Specify
+        if a SharePoint 2019 farm should be provisioned."}},"provisionSharePoint2016":{"type":"bool","defaultValue":false,"metadata":{"description":"Specify
+        if a SharePoint 2016 farm should be provisioned."}},"domainFQDN":{"type":"string","defaultValue":"contoso.local","minLength":5,"metadata":{"description":"FQDN
+        of the AD forest to create."}},"configureADFS":{"type":"bool","defaultValue":false,"metadata":{"description":"Specify
+        if ADFS shoulde be provisioned, and used in SharePoint in an extended zone."}},"addAzureBastion":{"type":"bool","defaultValue":false,"metadata":{"description":"Specify
+        if Azure Bastion should be provisioned. See https://azure.microsoft.com/en-us/services/azure-bastion
+        for more information."}},"addPublicIPAddress":{"type":"string","defaultValue":"SharePointVMsOnly","allowedValues":["Yes","No","SharePointVMsOnly"],"metadata":{"description":"Specify
+        if each VM should have a public IP and be reachable from Internet."}},"RDPTrafficAllowed":{"type":"string","defaultValue":"No","minLength":1,"metadata":{"description":"Specify
+        if RDP traffic is allowed:<br>- If ''No'' (default): Firewall denies all incoming
+        RDP traffic.<br>- If ''*'' or ''Internet'': Firewall accepts all incoming
+        RDP traffic from Internet.<br>- If CIDR notation (e.g. 192.168.99.0/24 or
+        2001:1234::/64) or IP address (e.g. 192.168.99.0 or 2001:1234::): Firewall
+        accepts incoming RDP traffic from the IP addresses specified."}},"adminUserName":{"type":"string","minLength":1,"metadata":{"description":"Name
+        of the AD and SharePoint administrator. ''admin'' and ''administrator'' are
+        not allowed."}},"adminPassword":{"type":"securestring","minLength":8,"metadata":{"description":"Input
+        must meet password complexity requirements as documented in https://learn.microsoft.com/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm-"}},"serviceAccountsPassword":{"type":"securestring","minLength":8,"metadata":{"description":"Password
+        for all service accounts and SharePoint passphrase. Input must meet password
+        complexity requirements as documented in https://learn.microsoft.com/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm-"}},"vmsTimeZone":{"type":"string","defaultValue":"Romance
+        Standard Time","allowedValues":["Dateline Standard Time","UTC-11","Aleutian
+        Standard Time","Hawaiian Standard Time","Marquesas Standard Time","Alaskan
+        Standard Time","UTC-09","Pacific Standard Time (Mexico)","UTC-08","Pacific
+        Standard Time","US Mountain Standard Time","Mountain Standard Time (Mexico)","Mountain
+        Standard Time","Central America Standard Time","Central Standard Time","Easter
+        Island Standard Time","Central Standard Time (Mexico)","Canada Central Standard
+        Time","SA Pacific Standard Time","Eastern Standard Time (Mexico)","Eastern
+        Standard Time","Haiti Standard Time","Cuba Standard Time","US Eastern Standard
+        Time","Turks And Caicos Standard Time","Paraguay Standard Time","Atlantic
+        Standard Time","Venezuela Standard Time","Central Brazilian Standard Time","SA
+        Western Standard Time","Pacific SA Standard Time","Newfoundland Standard Time","Tocantins
+        Standard Time","E. South America Standard Time","SA Eastern Standard Time","Argentina
+        Standard Time","Greenland Standard Time","Montevideo Standard Time","Magallanes
+        Standard Time","Saint Pierre Standard Time","Bahia Standard Time","UTC-02","Mid-Atlantic
+        Standard Time","Azores Standard Time","Cape Verde Standard Time","UTC","GMT
+        Standard Time","Greenwich Standard Time","Sao Tome Standard Time","Morocco
+        Standard Time","W. Europe Standard Time","Central Europe Standard Time","Romance
+        Standard Time","Central European Standard Time","W. Central Africa Standard
+        Time","Jordan Standard Time","GTB Standard Time","Middle East Standard Time","Egypt
+        Standard Time","E. Europe Standard Time","Syria Standard Time","West Bank
+        Standard Time","South Africa Standard Time","FLE Standard Time","Israel Standard
+        Time","Kaliningrad Standard Time","Sudan Standard Time","Libya Standard Time","Namibia
+        Standard Time","Arabic Standard Time","Turkey Standard Time","Arab Standard
+        Time","Belarus Standard Time","Russian Standard Time","E. Africa Standard
+        Time","Iran Standard Time","Arabian Standard Time","Astrakhan Standard Time","Azerbaijan
+        Standard Time","Russia Time Zone 3","Mauritius Standard Time","Saratov Standard
+        Time","Georgian Standard Time","Volgograd Standard Time","Caucasus Standard
+        Time","Afghanistan Standard Time","West Asia Standard Time","Ekaterinburg
+        Standard Time","Pakistan Standard Time","Qyzylorda Standard Time","India Standard
+        Time","Sri Lanka Standard Time","Nepal Standard Time","Central Asia Standard
+        Time","Bangladesh Standard Time","Omsk Standard Time","Myanmar Standard Time","SE
+        Asia Standard Time","Altai Standard Time","W. Mongolia Standard Time","North
+        Asia Standard Time","N. Central Asia Standard Time","Tomsk Standard Time","China
+        Standard Time","North Asia East Standard Time","Singapore Standard Time","W.
+        Australia Standard Time","Taipei Standard Time","Ulaanbaatar Standard Time","Aus
+        Central W. Standard Time","Transbaikal Standard Time","Tokyo Standard Time","North
+        Korea Standard Time","Korea Standard Time","Yakutsk Standard Time","Cen. Australia
+        Standard Time","AUS Central Standard Time","E. Australia Standard Time","AUS
+        Eastern Standard Time","West Pacific Standard Time","Tasmania Standard Time","Vladivostok
+        Standard Time","Lord Howe Standard Time","Bougainville Standard Time","Russia
+        Time Zone 10","Magadan Standard Time","Norfolk Standard Time","Sakhalin Standard
+        Time","Central Pacific Standard Time","Russia Time Zone 11","New Zealand Standard
+        Time","UTC+12","Fiji Standard Time","Kamchatka Standard Time","Chatham Islands
+        Standard Time","UTC+13","Tonga Standard Time","Samoa Standard Time","Line
+        Islands Standard Time"],"minLength":2,"metadata":{"description":"Time zone
+        of the virtual machines. Type \"[TimeZoneInfo]::GetSystemTimeZones().Id\"
+        in PowerShell to get the list."}},"enableAutomaticUpdates":{"type":"bool","defaultValue":true,"metadata":{"description":"Enable
+        automatic Windows Updates."}},"enableHybridBenefitServerLicenses":{"type":"bool","defaultValue":false,"metadata":{"description":"Enable
+        Azure Hybrid Benefit to use your on-premises Windows Server licenses and reduce
+        cost. See https://docs.microsoft.com/en-us/azure/virtual-machines/windows/hybrid-use-benefit-licensing
+        for more information."}},"vmDCSize":{"type":"string","defaultValue":"Standard_B2s","metadata":{"description":"Size
+        of the DC VM"}},"vmDCStorageAccountType":{"type":"string","defaultValue":"StandardSSD_LRS","allowedValues":["Standard_LRS","StandardSSD_LRS","Premium_LRS","Premium_ZRS","StandardSSD_ZRS","UltraSSD_LRS"],"metadata":{"description":"Type
+        of storage for the managed disks. Visit ''https://docs.microsoft.com/en-us/rest/api/compute/disks/list#diskstorageaccounttypes''
+        for more information"}},"vmSQLSize":{"type":"string","defaultValue":"Standard_B2ms","metadata":{"description":"Size
+        of the SQL VM"}},"vmSQLStorageAccountType":{"type":"string","defaultValue":"StandardSSD_LRS","allowedValues":["Standard_LRS","StandardSSD_LRS","Premium_LRS","Premium_ZRS","StandardSSD_ZRS","UltraSSD_LRS"],"metadata":{"description":"Type
+        of storage for the managed disks. Visit ''https://docs.microsoft.com/en-us/rest/api/compute/disks/list#diskstorageaccounttypes''
+        for more information"}},"vmSPSize":{"type":"string","defaultValue":"Standard_B4ms","metadata":{"description":"Size
+        of the SharePoint VM"}},"vmSPStorageAccountType":{"type":"string","defaultValue":"StandardSSD_LRS","allowedValues":["Standard_LRS","StandardSSD_LRS","Premium_LRS","Premium_ZRS","StandardSSD_ZRS","UltraSSD_LRS"],"metadata":{"description":"Type
+        of storage for the managed disks. Visit ''https://docs.microsoft.com/en-us/rest/api/compute/disks/list#diskstorageaccounttypes''
+        for more information"}},"_artifactsLocation":{"type":"string","defaultValue":"https://github.com/Azure/azure-devtestlab/raw/master/Environments/SharePoint-AllVersions","metadata":{"description":"The
+        base URI where artifacts required by this template are located. When the template
+        is deployed using the accompanying scripts, a private location in the subscription
+        will be used and this value will be automatically generated."}},"_artifactsLocationSasToken":{"type":"securestring","defaultValue":"","metadata":{"description":"The
+        sasToken required to access _artifactsLocation. When the template is deployed
+        using the accompanying scripts, a sasToken will be automatically generated."}}},"variables":{"resourceGroupNameFormatted":"[replace(replace(replace(replace(resourceGroup().name,
+        ''.'', ''-''), ''('', ''-''), '')'', ''-''), ''_'', ''-'')]","_artifactsLocationWithTrailingSlash":"[concat(parameters(''_artifactsLocation''),
+        ''/'')]","sharePointSettings":{"sharePointImagesList":{"Subscription":"MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition-smalldisk:latest","sp2019":"MicrosoftSharePoint:MicrosoftSharePointServer:sp2019gen2smalldisk:latest","sp2016":"MicrosoftSharePoint:MicrosoftSharePointServer:sp2016:latest"},"sharePointSubscriptionBits":[{"Label":"RTM","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/3/f/5/3f5f8a7e-462b-41ff-a5b2-04bdf5821ceb/OfficeServer.iso","ChecksumType":"SHA256","Checksum":"C576B847C573234B68FC602A0318F5794D7A61D8149EB6AE537AF04470B7FC05"}]},{"Label":"22H2","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/8/d/f/8dfcb515-6e49-42e5-b20f-5ebdfd19d8e7/wssloc-subscription-kb5002270-fullfile-x64-glb.exe","ChecksumType":"SHA256","Checksum":"7E496530EB873146650A9E0653DE835CB2CAD9AF8D154CBD7387BB0F2297C9FC"},{"DownloadUrl":"https://download.microsoft.com/download/3/f/5/3f5b1ee0-3336-45d7-b2f4-1e6af977d574/sts-subscription-kb5002271-fullfile-x64-glb.exe","ChecksumType":"SHA256","Checksum":"247011443AC573D4F03B1622065A7350B8B3DAE04D6A5A6DC64C8270A3BE7636"}]},{"Label":"23H1","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/c/6/a/c6a17105-3d86-42ad-888d-49b22383bfa1/uber-subscription-kb5002355-fullfile-x64-glb.exe"}]},{"Label":"23H2","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/f/5/5/f5559e3f-8b24-419f-b238-b09cf986e927/uber-subscription-kb5002474-fullfile-x64-glb.exe"}]},{"Label":"Latest","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/8/7/9/8798c828-1d2c-442d-9a98-e6ce59166690/uber-subscription-kb5002560-fullfile-x64-glb.exe"}]}]},"networkSettings":{"vNetPrivatePrefix":"10.1.0.0/16","subnetDCPrefix":"10.1.1.0/24","dcPrivateIPAddress":"10.1.1.4","subnetSQLPrefix":"10.1.2.0/24","subnetSPPrefix":"10.1.3.0/24","vNetPrivateName":"[concat(variables(''resourceGroupNameFormatted''),
+        ''-vnet'')]","subnetDCName":"Subnet-DC","subnetSQLName":"Subnet-SQL","subnetSPName":"Subnet-SP","nsgSubnetDCName":"NSG-Subnet-DC","nsgSubnetSQLName":"NSG-Subnet-SQL","nsgSubnetSPName":"NSG-Subnet-SP","vmDCPublicIPNicAssociation":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmDCPublicIPName)]"},"vmSQLPublicIPNicAssociation":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSQLPublicIPName)]"},"vmSP2016PublicIPNicAssociation":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSP2016PublicIPName)]"},"vmSP2019PublicIPNicAssociation":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSP2019PublicIPName)]"},"vmSPSubscriptionPublicIPNicAssociation":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSPSubscriptionPublicIPName)]"},"nsgRuleAllowIncomingRdp":[{"name":"allow-rdp-rule","properties":{"description":"Allow
+        RDP","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"3389","sourceAddressPrefix":"[parameters(''RDPTrafficAllowed'')]","destinationAddressPrefix":"*","access":"Allow","priority":110,"direction":"Inbound"}}]},"vmsSettings":{"vmDCName":"DC","vmSQLName":"SQL","vmSPSubscriptionName":"SPSE","vmSP2019Name":"SP2019","vmSP2016Name":"SP2016","vmDCImage":"MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition-smalldisk:latest","vmSQLImage":"MicrosoftSQLServer:sql2022-ws2022:sqldev-gen2:latest","vmSPSubscriptionImage":"[variables(''sharePointSettings'').sharePointImagesList.Subscription]","vmSP2019Image":"[variables(''sharePointSettings'').sharePointImagesList.sp2019]","vmSP2016Image":"[variables(''sharePointSettings'').sharePointImagesList.sp2016]"},"vmsResourcesNames":{"vmDCNicName":"[concat(''NIC-'',
+        variables(''vmsSettings'').vmDCName, ''-0'')]","vmDCPublicIPName":"[concat(''PublicIP-'',
+        variables(''vmsSettings'').vmDCName)]","vmSQLNicName":"[concat(''NIC-'', variables(''vmsSettings'').vmSQLName,
+        ''-0'')]","vmSQLPublicIPName":"[concat(''PublicIP-'', variables(''vmsSettings'').vmSQLName)]","vmSPSubscriptionNicName":"[concat(''NIC-'',
+        variables(''vmsSettings'').vmSPSubscriptionName, ''-0'')]","vmSPSubscriptionPublicIPName":"[concat(''PublicIP-'',
+        variables(''vmsSettings'').vmSPSubscriptionName)]","vmSP2019NicName":"[concat(''NIC-'',
+        variables(''vmsSettings'').vmSP2019Name, ''-0'')]","vmSP2019PublicIPName":"[concat(''PublicIP-'',
+        variables(''vmsSettings'').vmSP2019Name)]","vmSP2016NicName":"[concat(''NIC-'',
+        variables(''vmsSettings'').vmSP2016Name, ''-0'')]","vmSP2016PublicIPName":"[concat(''PublicIP-'',
+        variables(''vmsSettings'').vmSP2016Name)]"},"dscSettings":{"forceUpdateTag":"1.0","vmDCScriptFileUri":"[uri(variables(''_artifactsLocationWithTrailingSlash''),
+        concat(''dsc/ConfigureDCVM.zip'', parameters(''_artifactsLocationSasToken'')))]","vmDCScript":"ConfigureDCVM.ps1","vmDCFunction":"ConfigureDCVM","vmSQLScriptFileUri":"[uri(variables(''_artifactsLocationWithTrailingSlash''),
+        concat(''dsc/ConfigureSQLVM.zip'', parameters(''_artifactsLocationSasToken'')))]","vmSQLScript":"ConfigureSQLVM.ps1","vmSQLFunction":"ConfigureSQLVM","vmSPSubscriptionScriptFileUri":"[uri(variables(''_artifactsLocationWithTrailingSlash''),
+        concat(''dsc/ConfigureSPSE.zip'', parameters(''_artifactsLocationSasToken'')))]","vmSPLegacyScriptFileUri":"[uri(variables(''_artifactsLocationWithTrailingSlash''),
+        concat(''dsc/ConfigureSPLegacy.zip'', parameters(''_artifactsLocationSasToken'')))]","vmSPSubscriptionScript":"ConfigureSPSE.ps1","vmSPLegacyScript":"ConfigureSPLegacy.ps1","vmSPFunction":"ConfigureSPVM"},"deploymentSettings":{"sharePointSitesAuthority":"spsites","sharePointCentralAdminPort":5000,"localAdminUserName":"[concat(''l-'',
+        uniqueString(subscription().subscriptionId))]","enableAnalysis":false,"applyBrowserPolicies":true,"sqlAlias":"SQLAlias","spSuperUserName":"spSuperUser","spSuperReaderName":"spSuperReader","adfsSvcUserName":"adfssvc","sqlSvcUserName":"sqlsvc","spSetupUserName":"spsetup","spFarmUserName":"spfarm","spSvcUserName":"spsvc","spAppPoolUserName":"spapppool","spADDirSyncUserName":"spdirsync"}},"resources":[{"name":"[variables(''networkSettings'').nsgSubnetDCName]","type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2022-07-01","location":"[parameters(''location'')]","properties":{"securityRules":"[if(equals(toLower(parameters(''RDPTrafficAllowed'')),
+        ''no''), json(''null''), variables(''networkSettings'').nsgRuleAllowIncomingRdp)]"}},{"name":"[variables(''networkSettings'').nsgSubnetSQLName]","type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2022-07-01","location":"[parameters(''location'')]","properties":{"securityRules":"[if(equals(toLower(parameters(''RDPTrafficAllowed'')),
+        ''no''), json(''null''), variables(''networkSettings'').nsgRuleAllowIncomingRdp)]"}},{"name":"[variables(''networkSettings'').nsgSubnetSPName]","type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2022-07-01","location":"[parameters(''location'')]","properties":{"securityRules":"[if(equals(toLower(parameters(''RDPTrafficAllowed'')),
+        ''no''), json(''null''), variables(''networkSettings'').nsgRuleAllowIncomingRdp)]"}},{"name":"[variables(''networkSettings'').vNetPrivateName]","type":"Microsoft.Network/virtualNetworks","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetDCName)]","[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetSQLName)]","[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetSPName)]"],"properties":{"addressSpace":{"addressPrefixes":["[variables(''networkSettings'').vNetPrivatePrefix]"]},"subnets":[{"name":"[variables(''networkSettings'').subnetDCName]","properties":{"addressPrefix":"[variables(''networkSettings'').subnetDCPrefix]","networkSecurityGroup":{"id":"[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetDCName)]"}}},{"name":"[variables(''networkSettings'').subnetSQLName]","properties":{"addressPrefix":"[variables(''networkSettings'').subnetSQLPrefix]","networkSecurityGroup":{"id":"[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetSQLName)]"}}},{"name":"[variables(''networkSettings'').subnetSPName]","properties":{"addressPrefix":"[variables(''networkSettings'').subnetSPPrefix]","networkSecurityGroup":{"id":"[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetSPName)]"}}}]}},{"condition":"[equals(parameters(''addPublicIPAddress''),
+        ''Yes'')]","name":"[variables(''vmsResourcesNames'').vmDCPublicIPName]","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Basic","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Dynamic","dnsSettings":{"domainNameLabel":"[toLower(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', variables(''vmsSettings'').vmDCName))]"}}},{"name":"[variables(''vmsResourcesNames'').vmDCNicName]","type":"Microsoft.Network/networkInterfaces","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmDCPublicIPName)]"],"properties":{"ipConfigurations":[{"name":"ipconfig1","properties":{"privateIPAllocationMethod":"Static","privateIPAddress":"[variables(''networkSettings'').dcPrivateIPAddress]","subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, variables(''networkSettings'').subnetDCName)]"},"publicIPAddress":"[if(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), variables(''networkSettings'').vmDCPublicIPNicAssociation, json(''null''))]"}}]}},{"name":"[variables(''vmsSettings'').vmDCName]","type":"Microsoft.Compute/virtualMachines","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmDCNicName)]"],"properties":{"hardwareProfile":{"vmSize":"[parameters(''vmDCSize'')]"},"osProfile":{"computerName":"[variables(''vmsSettings'').vmDCName]","adminUsername":"[parameters(''adminUserName'')]","adminPassword":"[parameters(''adminPassword'')]","windowsConfiguration":{"timeZone":"[parameters(''vmsTimeZone'')]","enableAutomaticUpdates":"[parameters(''enableAutomaticUpdates'')]","provisionVMAgent":true,"patchSettings":{"patchMode":"[if(parameters(''enableAutomaticUpdates''),
+        ''AutomaticByOS'', ''Manual'')]","assessmentMode":"ImageDefault"}}},"storageProfile":{"imageReference":{"publisher":"[split(variables(''vmsSettings'').vmDCImage,
+        '':'')[0]]","offer":"[split(variables(''vmsSettings'').vmDCImage, '':'')[1]]","sku":"[split(variables(''vmsSettings'').vmDCImage,
+        '':'')[2]]","version":"[split(variables(''vmsSettings'').vmDCImage, '':'')[3]]"},"osDisk":{"name":"[concat(''Disk-'',
+        variables(''vmsSettings'').vmDCName, ''-OS'')]","caching":"ReadWrite","osType":"Windows","createOption":"FromImage","diskSizeGB":32,"managedDisk":{"storageAccountType":"[parameters(''vmDCStorageAccountType'')]"}}},"networkProfile":{"networkInterfaces":[{"id":"[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmDCNicName)]"}]},"licenseType":"[if(parameters(''enableHybridBenefitServerLicenses''),
+        ''Windows_Server'', json(''null''))]"},"resources":[{"name":"ConfigureDCVM","type":"extensions","location":"[parameters(''location'')]","apiVersion":"2022-08-01","dependsOn":["[resourceId(''Microsoft.Compute/virtualMachines'',
+        variables(''vmsSettings'').vmDCName)]"],"properties":{"publisher":"Microsoft.Powershell","type":"DSC","typeHandlerVersion":"2.9","autoUpgradeMinorVersion":true,"forceUpdateTag":"[variables(''dscSettings'').forceUpdateTag]","settings":{"wmfVersion":"latest","configuration":{"url":"[variables(''dscSettings'').vmDCScriptFileUri]","script":"[variables(''dscSettings'').vmDCScript]","function":"[variables(''dscSettings'').vmDCFunction]"},"configurationArguments":{"domainFQDN":"[parameters(''domainFQDN'')]","PrivateIP":"[variables(''networkSettings'').dcPrivateIPAddress]","SPServerName":"[if(not(equals(parameters(''provisionSharePointSubscription''),
+        ''No'')), variables(''vmsSettings'').vmSPSubscriptionName, if(parameters(''provisionSharePoint2019''),
+        variables(''vmsSettings'').vmSP2019Image, variables(''vmsSettings'').vmSP2016Image))]","SharePointSitesAuthority":"[concat(variables(''deploymentSettings'').sharePointSitesAuthority,
+        ''SE'')]","SharePointCentralAdminPort":"[variables(''deploymentSettings'').sharePointCentralAdminPort]","ApplyBrowserPolicies":"[variables(''deploymentSettings'').applyBrowserPolicies]","ConfigureADFS":"[parameters(''configureADFS'')]"},"privacy":{"dataCollection":"enable"}},"protectedSettings":{"configurationArguments":{"AdminCreds":{"UserName":"[parameters(''adminUserName'')]","Password":"[parameters(''adminPassword'')]"},"AdfsSvcCreds":{"UserName":"[variables(''deploymentSettings'').adfsSvcUserName]","Password":"[parameters(''serviceAccountsPassword'')]"}}}}}]},{"condition":"[equals(parameters(''addPublicIPAddress''),
+        ''Yes'')]","name":"[variables(''vmsResourcesNames'').vmSQLPublicIPName]","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Basic","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Dynamic","dnsSettings":{"domainNameLabel":"[toLower(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', variables(''vmsSettings'').vmSQLName))]"}}},{"name":"[variables(''vmsResourcesNames'').vmSQLNicName]","type":"Microsoft.Network/networkInterfaces","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSQLPublicIPName)]"],"properties":{"ipConfigurations":[{"name":"ipconfig1","properties":{"privateIPAllocationMethod":"Dynamic","subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, variables(''networkSettings'').subnetSQLName)]"},"publicIPAddress":"[if(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), variables(''networkSettings'').vmSQLPublicIPNicAssociation, json(''null''))]"}}]}},{"name":"[variables(''vmsSettings'').vmSQLName]","type":"Microsoft.Compute/virtualMachines","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSQLNicName)]"],"properties":{"hardwareProfile":{"vmSize":"[parameters(''vmSQLSize'')]"},"osProfile":{"computerName":"[variables(''vmsSettings'').vmSQLName]","adminUsername":"[variables(''deploymentSettings'').localAdminUserName]","adminPassword":"[parameters(''adminPassword'')]","windowsConfiguration":{"timeZone":"[parameters(''vmsTimeZone'')]","enableAutomaticUpdates":"[parameters(''enableAutomaticUpdates'')]","provisionVMAgent":true,"patchSettings":{"patchMode":"[if(parameters(''enableAutomaticUpdates''),
+        ''AutomaticByOS'', ''Manual'')]","assessmentMode":"ImageDefault"}}},"storageProfile":{"imageReference":{"publisher":"[split(variables(''vmsSettings'').vmSQLImage,
+        '':'')[0]]","offer":"[split(variables(''vmsSettings'').vmSQLImage, '':'')[1]]","sku":"[split(variables(''vmsSettings'').vmSQLImage,
+        '':'')[2]]","version":"[split(variables(''vmsSettings'').vmSQLImage, '':'')[3]]"},"osDisk":{"name":"[concat(''Disk-'',
+        variables(''vmsSettings'').vmSQLName, ''-OS'')]","caching":"ReadWrite","osType":"Windows","createOption":"FromImage","diskSizeGB":128,"managedDisk":{"storageAccountType":"[parameters(''vmSQLStorageAccountType'')]"}}},"networkProfile":{"networkInterfaces":[{"id":"[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSQLNicName)]"}]},"licenseType":"[if(parameters(''enableHybridBenefitServerLicenses''),
+        ''Windows_Server'', json(''null''))]"},"resources":[]},{"name":"[concat(variables(''vmsSettings'').vmSQLName,
+        ''/ConfigureSQLVM'')]","type":"Microsoft.Compute/virtualMachines/extensions","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Compute/virtualMachines'',
+        variables(''vmsSettings'').vmSQLName)]"],"properties":{"publisher":"Microsoft.Powershell","type":"DSC","typeHandlerVersion":"2.9","autoUpgradeMinorVersion":true,"forceUpdateTag":"[variables(''dscSettings'').forceUpdateTag]","settings":{"wmfVersion":"latest","configuration":{"url":"[variables(''dscSettings'').vmSQLScriptFileUri]","script":"[variables(''dscSettings'').vmSQLScript]","function":"[variables(''dscSettings'').vmSQLFunction]"},"configurationArguments":{"DNSServerIP":"[variables(''networkSettings'').dcPrivateIPAddress]","DomainFQDN":"[parameters(''domainFQDN'')]"},"privacy":{"dataCollection":"enable"}},"protectedSettings":{"configurationArguments":{"DomainAdminCreds":{"UserName":"[parameters(''adminUserName'')]","Password":"[parameters(''adminPassword'')]"},"SqlSvcCreds":{"UserName":"[variables(''deploymentSettings'').sqlSvcUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPSetupCreds":{"UserName":"[variables(''deploymentSettings'').spSetupUserName]","Password":"[parameters(''serviceAccountsPassword'')]"}}}}},{"condition":"[and(equals(parameters(''provisionSharePoint2016''),
+        true()), or(equals(parameters(''addPublicIPAddress''), ''Yes''), equals(parameters(''addPublicIPAddress''),
+        ''SharePointVMsOnly'')))]","name":"[variables(''vmsResourcesNames'').vmSP2016PublicIPName]","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Basic","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Dynamic","dnsSettings":{"domainNameLabel":"[toLower(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', variables(''vmsSettings'').vmSP2016Name))]"}}},{"condition":"[equals(parameters(''provisionSharePoint2016''),
+        true())]","name":"[variables(''vmsResourcesNames'').vmSP2016NicName]","type":"Microsoft.Network/networkInterfaces","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSP2016PublicIPName)]"],"properties":{"ipConfigurations":[{"name":"ipconfig1","properties":{"privateIPAllocationMethod":"Dynamic","subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, variables(''networkSettings'').subnetSPName)]"},"publicIPAddress":"[if(or(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), equals(parameters(''addPublicIPAddress''), ''SharePointVMsOnly'')),
+        variables(''networkSettings'').vmSP2016PublicIPNicAssociation, json(''null''))]"}}]}},{"condition":"[equals(parameters(''provisionSharePoint2016''),
+        true())]","name":"[variables(''vmsSettings'').vmSP2016Name]","type":"Microsoft.Compute/virtualMachines","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSP2016NicName)]"],"properties":{"hardwareProfile":{"vmSize":"[parameters(''vmSPSize'')]"},"osProfile":{"computerName":"[variables(''vmsSettings'').vmSP2016Name]","adminUsername":"[variables(''deploymentSettings'').localAdminUserName]","adminPassword":"[parameters(''adminPassword'')]","windowsConfiguration":{"timeZone":"[parameters(''vmsTimeZone'')]","enableAutomaticUpdates":"[parameters(''enableAutomaticUpdates'')]","provisionVMAgent":true,"patchSettings":{"patchMode":"[if(parameters(''enableAutomaticUpdates''),
+        ''AutomaticByOS'', ''Manual'')]","assessmentMode":"ImageDefault"}}},"storageProfile":{"imageReference":{"publisher":"[split(variables(''vmsSettings'').vmSP2016Image,
+        '':'')[0]]","offer":"[split(variables(''vmsSettings'').vmSP2016Image, '':'')[1]]","sku":"[split(variables(''vmsSettings'').vmSP2016Image,
+        '':'')[2]]","version":"[split(variables(''vmsSettings'').vmSP2016Image, '':'')[3]]"},"osDisk":{"name":"[concat(''Disk-'',
+        variables(''vmsSettings'').vmSP2016Name, ''-OS'')]","caching":"ReadWrite","osType":"Windows","createOption":"FromImage","managedDisk":{"storageAccountType":"[parameters(''vmSPStorageAccountType'')]"}}},"networkProfile":{"networkInterfaces":[{"id":"[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSP2016NicName)]"}]},"licenseType":"[if(parameters(''enableHybridBenefitServerLicenses''),
+        ''Windows_Server'', json(''null''))]"},"resources":[]},{"condition":"[equals(parameters(''provisionSharePoint2016''),
+        true())]","name":"[concat(variables(''vmsSettings'').vmSP2016Name, ''/ConfigureSPVM'')]","type":"Microsoft.Compute/virtualMachines/extensions","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Compute/virtualMachines'',
+        variables(''vmsSettings'').vmSP2016Name)]"],"properties":{"publisher":"Microsoft.Powershell","type":"DSC","typeHandlerVersion":"2.9","autoUpgradeMinorVersion":true,"forceUpdateTag":"[variables(''dscSettings'').forceUpdateTag]","settings":{"wmfVersion":"latest","configuration":{"url":"[variables(''dscSettings'').vmSPLegacyScriptFileUri]","script":"[variables(''dscSettings'').vmSPLegacyScript]","function":"[variables(''dscSettings'').vmSPFunction]"},"configurationArguments":{"DNSServerIP":"[variables(''networkSettings'').dcPrivateIPAddress]","DomainFQDN":"[parameters(''domainFQDN'')]","DCServerName":"[variables(''vmsSettings'').vmDCName]","SQLServerName":"[variables(''vmsSettings'').vmSQLName]","SQLAlias":"[variables(''deploymentSettings'').sqlAlias]","SharePointVersion":"2016","SharePointSitesAuthority":"[concat(variables(''deploymentSettings'').sharePointSitesAuthority,
+        ''2016'')]","SharePointCentralAdminPort":"[variables(''deploymentSettings'').sharePointCentralAdminPort]","EnableAnalysis":"[variables(''deploymentSettings'').enableAnalysis]","SharePointBits":"[json(''null'')]","ConfigureADFS":"[parameters(''configureADFS'')]"},"privacy":{"dataCollection":"enable"}},"protectedSettings":{"configurationArguments":{"DomainAdminCreds":{"UserName":"[parameters(''adminUserName'')]","Password":"[parameters(''adminPassword'')]"},"SPSetupCreds":{"UserName":"[variables(''deploymentSettings'').spSetupUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPFarmCreds":{"UserName":"[variables(''deploymentSettings'').spFarmUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPAppPoolCreds":{"UserName":"[variables(''deploymentSettings'').spAppPoolUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPPassphraseCreds":{"UserName":"Passphrase","Password":"[parameters(''serviceAccountsPassword'')]"}}}}},{"condition":"[and(equals(parameters(''provisionSharePoint2019''),
+        true()), or(equals(parameters(''addPublicIPAddress''), ''Yes''), equals(parameters(''addPublicIPAddress''),
+        ''SharePointVMsOnly'')))]","name":"[variables(''vmsResourcesNames'').vmSP2019PublicIPName]","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Basic","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Dynamic","dnsSettings":{"domainNameLabel":"[toLower(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', variables(''vmsSettings'').vmSP2019Name))]"}}},{"condition":"[equals(parameters(''provisionSharePoint2019''),
+        true())]","name":"[variables(''vmsResourcesNames'').vmSP2019NicName]","type":"Microsoft.Network/networkInterfaces","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSP2019PublicIPName)]"],"properties":{"ipConfigurations":[{"name":"ipconfig1","properties":{"privateIPAllocationMethod":"Dynamic","subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, variables(''networkSettings'').subnetSPName)]"},"publicIPAddress":"[if(or(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), equals(parameters(''addPublicIPAddress''), ''SharePointVMsOnly'')),
+        variables(''networkSettings'').vmSP2019PublicIPNicAssociation, json(''null''))]"}}]}},{"condition":"[equals(parameters(''provisionSharePoint2019''),
+        true())]","name":"[variables(''vmsSettings'').vmSP2019Name]","type":"Microsoft.Compute/virtualMachines","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSP2019NicName)]"],"properties":{"hardwareProfile":{"vmSize":"[parameters(''vmSPSize'')]"},"osProfile":{"computerName":"[variables(''vmsSettings'').vmSP2019Name]","adminUsername":"[variables(''deploymentSettings'').localAdminUserName]","adminPassword":"[parameters(''adminPassword'')]","windowsConfiguration":{"timeZone":"[parameters(''vmsTimeZone'')]","enableAutomaticUpdates":"[parameters(''enableAutomaticUpdates'')]","provisionVMAgent":true,"patchSettings":{"patchMode":"[if(parameters(''enableAutomaticUpdates''),
+        ''AutomaticByOS'', ''Manual'')]","assessmentMode":"ImageDefault"}}},"storageProfile":{"imageReference":{"publisher":"[split(variables(''vmsSettings'').vmSP2019Image,
+        '':'')[0]]","offer":"[split(variables(''vmsSettings'').vmSP2019Image, '':'')[1]]","sku":"[split(variables(''vmsSettings'').vmSP2019Image,
+        '':'')[2]]","version":"[split(variables(''vmsSettings'').vmSP2019Image, '':'')[3]]"},"osDisk":{"name":"[concat(''Disk-'',
+        variables(''vmsSettings'').vmSP2019Name, ''-OS'')]","caching":"ReadWrite","osType":"Windows","createOption":"FromImage","managedDisk":{"storageAccountType":"[parameters(''vmSPStorageAccountType'')]"}}},"networkProfile":{"networkInterfaces":[{"id":"[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSP2019NicName)]"}]},"licenseType":"[if(parameters(''enableHybridBenefitServerLicenses''),
+        ''Windows_Server'', json(''null''))]"},"resources":[]},{"condition":"[equals(parameters(''provisionSharePoint2019''),
+        true())]","name":"[concat(variables(''vmsSettings'').vmSP2019Name, ''/ConfigureSPVM'')]","type":"Microsoft.Compute/virtualMachines/extensions","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Compute/virtualMachines'',
+        variables(''vmsSettings'').vmSP2019Name)]"],"properties":{"publisher":"Microsoft.Powershell","type":"DSC","typeHandlerVersion":"2.9","autoUpgradeMinorVersion":true,"forceUpdateTag":"[variables(''dscSettings'').forceUpdateTag]","settings":{"wmfVersion":"latest","configuration":{"url":"[variables(''dscSettings'').vmSPLegacyScriptFileUri]","script":"[variables(''dscSettings'').vmSPLegacyScript]","function":"[variables(''dscSettings'').vmSPFunction]"},"configurationArguments":{"DNSServerIP":"[variables(''networkSettings'').dcPrivateIPAddress]","DomainFQDN":"[parameters(''domainFQDN'')]","DCServerName":"[variables(''vmsSettings'').vmDCName]","SQLServerName":"[variables(''vmsSettings'').vmSQLName]","SQLAlias":"[variables(''deploymentSettings'').sqlAlias]","SharePointVersion":"2019","SharePointSitesAuthority":"[concat(variables(''deploymentSettings'').sharePointSitesAuthority,
+        ''2019'')]","SharePointCentralAdminPort":"[variables(''deploymentSettings'').sharePointCentralAdminPort]","EnableAnalysis":"[variables(''deploymentSettings'').enableAnalysis]","SharePointBits":"[json(''null'')]","ConfigureADFS":"[parameters(''configureADFS'')]"},"privacy":{"dataCollection":"enable"}},"protectedSettings":{"configurationArguments":{"DomainAdminCreds":{"UserName":"[parameters(''adminUserName'')]","Password":"[parameters(''adminPassword'')]"},"SPSetupCreds":{"UserName":"[variables(''deploymentSettings'').spSetupUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPFarmCreds":{"UserName":"[variables(''deploymentSettings'').spFarmUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPAppPoolCreds":{"UserName":"[variables(''deploymentSettings'').spAppPoolUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPPassphraseCreds":{"UserName":"Passphrase","Password":"[parameters(''serviceAccountsPassword'')]"}}}}},{"condition":"[and(not(equals(parameters(''provisionSharePointSubscription''),
+        ''No'')), or(equals(parameters(''addPublicIPAddress''), ''Yes''), equals(parameters(''addPublicIPAddress''),
+        ''SharePointVMsOnly'')))]","name":"[variables(''vmsResourcesNames'').vmSPSubscriptionPublicIPName]","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Basic","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Dynamic","dnsSettings":{"domainNameLabel":"[toLower(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', variables(''vmsSettings'').vmSPSubscriptionName))]"}}},{"condition":"[not(equals(parameters(''provisionSharePointSubscription''),
+        ''No''))]","name":"[variables(''vmsResourcesNames'').vmSPSubscriptionNicName]","type":"Microsoft.Network/networkInterfaces","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSPSubscriptionPublicIPName)]"],"properties":{"ipConfigurations":[{"name":"ipconfig1","properties":{"privateIPAllocationMethod":"Dynamic","subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, variables(''networkSettings'').subnetSPName)]"},"publicIPAddress":"[if(or(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), equals(parameters(''addPublicIPAddress''), ''SharePointVMsOnly'')),
+        variables(''networkSettings'').vmSPSubscriptionPublicIPNicAssociation, json(''null''))]"}}]}},{"condition":"[not(equals(parameters(''provisionSharePointSubscription''),
+        ''No''))]","name":"[variables(''vmsSettings'').vmSPSubscriptionName]","type":"Microsoft.Compute/virtualMachines","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSPSubscriptionNicName)]"],"properties":{"hardwareProfile":{"vmSize":"[parameters(''vmSPSize'')]"},"osProfile":{"computerName":"[variables(''vmsSettings'').vmSPSubscriptionName]","adminUsername":"[variables(''deploymentSettings'').localAdminUserName]","adminPassword":"[parameters(''adminPassword'')]","windowsConfiguration":{"timeZone":"[parameters(''vmsTimeZone'')]","enableAutomaticUpdates":"[parameters(''enableAutomaticUpdates'')]","provisionVMAgent":true,"patchSettings":{"patchMode":"[if(parameters(''enableAutomaticUpdates''),
+        ''AutomaticByOS'', ''Manual'')]","assessmentMode":"ImageDefault"}}},"storageProfile":{"imageReference":{"publisher":"[split(variables(''vmsSettings'').vmSPSubscriptionImage,
+        '':'')[0]]","offer":"[split(variables(''vmsSettings'').vmSPSubscriptionImage,
+        '':'')[1]]","sku":"[split(variables(''vmsSettings'').vmSPSubscriptionImage,
+        '':'')[2]]","version":"[split(variables(''vmsSettings'').vmSPSubscriptionImage,
+        '':'')[3]]"},"osDisk":{"name":"[concat(''Disk-'', variables(''vmsSettings'').vmSPSubscriptionName,
+        ''-OS'')]","caching":"ReadWrite","osType":"Windows","createOption":"FromImage","managedDisk":{"storageAccountType":"[parameters(''vmSPStorageAccountType'')]"}}},"networkProfile":{"networkInterfaces":[{"id":"[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSPSubscriptionNicName)]"}]},"licenseType":"[if(parameters(''enableHybridBenefitServerLicenses''),
+        ''Windows_Server'', json(''null''))]"},"resources":[]},{"condition":"[not(equals(parameters(''provisionSharePointSubscription''),
+        ''No''))]","name":"[concat(variables(''vmsSettings'').vmSPSubscriptionName,
+        ''/ConfigureSPVM'')]","type":"Microsoft.Compute/virtualMachines/extensions","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Compute/virtualMachines'',
+        variables(''vmsSettings'').vmSPSubscriptionName)]"],"properties":{"publisher":"Microsoft.Powershell","type":"DSC","typeHandlerVersion":"2.9","autoUpgradeMinorVersion":true,"forceUpdateTag":"[variables(''dscSettings'').forceUpdateTag]","settings":{"wmfVersion":"latest","configuration":{"url":"[variables(''dscSettings'').vmSPSubscriptionScriptFileUri]","script":"[variables(''dscSettings'').vmSPSubscriptionScript]","function":"[variables(''dscSettings'').vmSPFunction]"},"configurationArguments":{"DNSServerIP":"[variables(''networkSettings'').dcPrivateIPAddress]","DomainFQDN":"[parameters(''domainFQDN'')]","DCServerName":"[variables(''vmsSettings'').vmDCName]","SQLServerName":"[variables(''vmsSettings'').vmSQLName]","SQLAlias":"[variables(''deploymentSettings'').sqlAlias]","SharePointVersion":"[parameters(''provisionSharePointSubscription'')]","SharePointSitesAuthority":"[concat(variables(''deploymentSettings'').sharePointSitesAuthority,
+        ''SE'')]","SharePointCentralAdminPort":"[variables(''deploymentSettings'').sharePointCentralAdminPort]","EnableAnalysis":"[variables(''deploymentSettings'').enableAnalysis]","SharePointBits":"[variables(''sharePointSettings'').sharePointSubscriptionBits]","ConfigureADFS":"[parameters(''configureADFS'')]"},"privacy":{"dataCollection":"enable"}},"protectedSettings":{"configurationArguments":{"DomainAdminCreds":{"UserName":"[parameters(''adminUserName'')]","Password":"[parameters(''adminPassword'')]"},"SPSetupCreds":{"UserName":"[variables(''deploymentSettings'').spSetupUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPFarmCreds":{"UserName":"[variables(''deploymentSettings'').spFarmUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPAppPoolCreds":{"UserName":"[variables(''deploymentSettings'').spAppPoolUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPPassphraseCreds":{"UserName":"Passphrase","Password":"[parameters(''serviceAccountsPassword'')]"}}}}},{"condition":"[equals(parameters(''addAzureBastion''),
+        true())]","name":"NSG-Subnet-AzureBastion","type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2022-07-01","location":"[parameters(''location'')]","properties":{"securityRules":[{"name":"AllowHttpsInBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"Internet","destinationPortRange":"443","destinationAddressPrefix":"*","access":"Allow","priority":100,"direction":"Inbound"}},{"name":"AllowGatewayManagerInBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"GatewayManager","destinationPortRange":"443","destinationAddressPrefix":"*","access":"Allow","priority":110,"direction":"Inbound"}},{"name":"AllowLoadBalancerInBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationPortRange":"443","destinationAddressPrefix":"*","access":"Allow","priority":120,"direction":"Inbound"}},{"name":"AllowBastionHostCommunicationInBound","properties":{"protocol":"*","sourcePortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationPortRanges":["8080","5701"],"destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":130,"direction":"Inbound"}},{"name":"DenyAllInBound","properties":{"protocol":"*","sourcePortRange":"*","sourceAddressPrefix":"*","destinationPortRange":"*","destinationAddressPrefix":"*","access":"Deny","priority":1000,"direction":"Inbound"}},{"name":"AllowSshRdpOutBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"*","destinationPortRanges":["22","3389"],"destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":100,"direction":"Outbound"}},{"name":"AllowAzureCloudCommunicationOutBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"*","destinationPortRange":"443","destinationAddressPrefix":"AzureCloud","access":"Allow","priority":110,"direction":"Outbound"}},{"name":"AllowBastionHostCommunicationOutBound","properties":{"protocol":"*","sourcePortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationPortRanges":["8080","5701"],"destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":120,"direction":"Outbound"}},{"name":"AllowGetSessionInformationOutBound","properties":{"protocol":"*","sourcePortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","destinationPortRanges":["80","443"],"access":"Allow","priority":130,"direction":"Outbound"}},{"name":"DenyAllOutBound","properties":{"protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1000,"direction":"Outbound"}}]}},{"condition":"[equals(parameters(''addAzureBastion''),
+        true())]","name":"[concat(variables(''networkSettings'').vNetPrivateName,
+        ''/'', ''AzureBastionSubnet'')]","type":"Microsoft.Network/virtualNetworks/subnets","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        ''NSG-Subnet-AzureBastion'')]"],"properties":{"addressPrefix":"10.1.4.0/24","networkSecurityGroup":{"id":"[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        ''NSG-Subnet-AzureBastion'')]"}}},{"condition":"[equals(parameters(''addAzureBastion''),
+        true())]","name":"PublicIP-Bastion","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Standard","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Static","dnsSettings":{"domainNameLabel":"[toLower(replace(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', ''Bastion''), ''_'', ''-''))]"}}},{"condition":"[equals(parameters(''addAzureBastion''),
+        true())]","name":"Bastion","type":"Microsoft.Network/bastionHosts","location":"[parameters(''location'')]","apiVersion":"2022-07-01","dependsOn":["[resourceId(''Microsoft.Network/publicIPAddresses'',
+        ''PublicIP-Bastion'')]","[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, ''AzureBastionSubnet'')]"],"properties":{"ipConfigurations":[{"name":"IpConf","properties":{"privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        ''PublicIP-Bastion'')]"},"subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, ''AzureBastionSubnet'')]"}}}]}}],"outputs":{"domainAdminAccount":{"type":"string","value":"[concat(substring(parameters(''domainFQDN''),
+        0, indexOf(parameters(''domainFQDN''), ''.'')), ''\\'', parameters(''adminUserName''))]"},"domainAdminAccountFormatForBastion":{"type":"string","value":"[concat(parameters(''adminUserName''),
+        ''@'', parameters(''domainFQDN''))]"},"localAdminAccount":{"type":"string","value":"[variables(''deploymentSettings'').localAdminUserName]"},"publicIPAddressSPSE":{"condition":"[and(not(equals(parameters(''provisionSharePointSubscription''),
+        ''No'')), or(equals(parameters(''addPublicIPAddress''), ''Yes''), equals(parameters(''addPublicIPAddress''),
+        ''SharePointVMsOnly'')))]","type":"string","value":"[reference(resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSPSubscriptionPublicIPName)).dnsSettings.fqdn]"},"publicIPAddressSP2019":{"condition":"[and(equals(parameters(''provisionSharePoint2019''),
+        true()), or(equals(parameters(''addPublicIPAddress''), ''Yes''), equals(parameters(''addPublicIPAddress''),
+        ''SharePointVMsOnly'')))]","type":"string","value":"[reference(resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSP2019PublicIPName)).dnsSettings.fqdn]"},"publicIPAddressSP2016":{"condition":"[and(equals(parameters(''provisionSharePoint2016''),
+        true()), or(equals(parameters(''addPublicIPAddress''), ''Yes''), equals(parameters(''addPublicIPAddress''),
+        ''SharePointVMsOnly'')))]","type":"string","value":"[reference(resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSP2016PublicIPName)).dnsSettings.fqdn]"},"publicIPAddressSQL":{"condition":"[equals(parameters(''addPublicIPAddress''),
+        ''Yes'')]","type":"string","value":"[reference(resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSQLPublicIPName)).dnsSettings.fqdn]"},"publicIPAddressDC":{"condition":"[equals(parameters(''addPublicIPAddress''),
+        ''Yes'')]","type":"string","value":"[reference(resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmDCPublicIPName)).dnsSettings.fqdn]"}}},"parametersValueFilesInfo":[{"fileName":"azuredeploy.parameters.json","parametersValueInfo":{}}],"enabled":true},"name":"SharePoint-AllVersions","type":"Microsoft.DevTestLab/labs/artifactSources/armTemplates"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/artifactSources/Public
+        Environment Repo/armTemplates/SharePoint-SingleFarm-FullConfig","properties":{"displayName":"SharePoint
+        Subscription / 2019 / 2016 with an extensive configuration","description":"This
+        template creates a SharePoint Subscription / 2019 / 2016 farm with an extensive
+        configuration that would take ages to perform manually, including a federated
+        authentication with ADFS, an OAuth trust, the User Profiles service and a
+        web application with 2 zones that contains multiple path based and host-named
+        site collections. On the SharePoint virtual machines, Chocolatey is used to
+        install the latest version of Notepad++, Visual Studio Code, Azure Data Studio,
+        Fiddler, ULS Viewer and 7-Zip.","publisher":"Yvand","contents":{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","contentVersion":"5.0.0.0","metadata":{"description":"Create
+        a SharePoint Subscription / 2019 / 2016 farm with an extensive configuration
+        that would take ages to perform manually, and install useful softwares like
+        Fiddler, vscode, np++, 7zip, ULS Viewer to get ready to use","author":"Yvand"},"parameters":{"location":{"type":"string","defaultValue":"[resourceGroup().location]","metadata":{"description":"Location
+        for all resources."}},"sharePointVersion":{"type":"string","defaultValue":"Subscription-Latest","allowedValues":["2016","2019","Subscription-RTM","Subscription-22H2","Subscription-23H1","Subscription-23H2","Subscription-Latest"],"metadata":{"description":"Version
+        of SharePoint farm to create."}},"domainFQDN":{"type":"string","defaultValue":"contoso.local","minLength":5,"metadata":{"description":"FQDN
+        of the AD forest to create."}},"numberOfAdditionalFrontEnd":{"type":"int","allowedValues":[0,1,2,3,4],"defaultValue":0,"metadata":{"description":"Number
+        of MinRole Front-end to add to the farm. The MinRole type can be changed later
+        as needed."}},"addAzureBastion":{"type":"bool","defaultValue":false,"metadata":{"description":"Specify
+        if Azure Bastion should be provisioned. See https://azure.microsoft.com/en-us/services/azure-bastion
+        for more information."}},"addPublicIPAddress":{"type":"string","defaultValue":"SharePointVMsOnly","allowedValues":["Yes","No","SharePointVMsOnly"],"metadata":{"description":"Specify
+        if each VM should have a public IP and be reachable from Internet."}},"RDPTrafficAllowed":{"type":"string","defaultValue":"No","minLength":1,"metadata":{"description":"Specify
+        if RDP traffic is allowed:<br>- If ''No'' (default): Firewall denies all incoming
+        RDP traffic.<br>- If ''*'' or ''Internet'': Firewall accepts all incoming
+        RDP traffic from Internet.<br>- If CIDR notation (e.g. 192.168.99.0/24 or
+        2001:1234::/64) or IP address (e.g. 192.168.99.0 or 2001:1234::): Firewall
+        accepts incoming RDP traffic from the IP addresses specified."}},"adminUserName":{"type":"string","minLength":1,"metadata":{"description":"Name
+        of the AD and SharePoint administrator. ''admin'' and ''administrator'' are
+        not allowed."}},"adminPassword":{"type":"securestring","minLength":8,"metadata":{"description":"Input
+        must meet password complexity requirements as documented in https://learn.microsoft.com/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm-"}},"serviceAccountsPassword":{"type":"securestring","minLength":8,"metadata":{"description":"Password
+        for all service accounts and SharePoint passphrase. Input must meet password
+        complexity requirements as documented in https://learn.microsoft.com/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm-"}},"vmsTimeZone":{"type":"string","defaultValue":"Romance
+        Standard Time","allowedValues":["Dateline Standard Time","UTC-11","Aleutian
+        Standard Time","Hawaiian Standard Time","Marquesas Standard Time","Alaskan
+        Standard Time","UTC-09","Pacific Standard Time (Mexico)","UTC-08","Pacific
+        Standard Time","US Mountain Standard Time","Mountain Standard Time (Mexico)","Mountain
+        Standard Time","Central America Standard Time","Central Standard Time","Easter
+        Island Standard Time","Central Standard Time (Mexico)","Canada Central Standard
+        Time","SA Pacific Standard Time","Eastern Standard Time (Mexico)","Eastern
+        Standard Time","Haiti Standard Time","Cuba Standard Time","US Eastern Standard
+        Time","Turks And Caicos Standard Time","Paraguay Standard Time","Atlantic
+        Standard Time","Venezuela Standard Time","Central Brazilian Standard Time","SA
+        Western Standard Time","Pacific SA Standard Time","Newfoundland Standard Time","Tocantins
+        Standard Time","E. South America Standard Time","SA Eastern Standard Time","Argentina
+        Standard Time","Greenland Standard Time","Montevideo Standard Time","Magallanes
+        Standard Time","Saint Pierre Standard Time","Bahia Standard Time","UTC-02","Mid-Atlantic
+        Standard Time","Azores Standard Time","Cape Verde Standard Time","UTC","GMT
+        Standard Time","Greenwich Standard Time","Sao Tome Standard Time","Morocco
+        Standard Time","W. Europe Standard Time","Central Europe Standard Time","Romance
+        Standard Time","Central European Standard Time","W. Central Africa Standard
+        Time","Jordan Standard Time","GTB Standard Time","Middle East Standard Time","Egypt
+        Standard Time","E. Europe Standard Time","Syria Standard Time","West Bank
+        Standard Time","South Africa Standard Time","FLE Standard Time","Israel Standard
+        Time","Kaliningrad Standard Time","Sudan Standard Time","Libya Standard Time","Namibia
+        Standard Time","Arabic Standard Time","Turkey Standard Time","Arab Standard
+        Time","Belarus Standard Time","Russian Standard Time","E. Africa Standard
+        Time","Iran Standard Time","Arabian Standard Time","Astrakhan Standard Time","Azerbaijan
+        Standard Time","Russia Time Zone 3","Mauritius Standard Time","Saratov Standard
+        Time","Georgian Standard Time","Volgograd Standard Time","Caucasus Standard
+        Time","Afghanistan Standard Time","West Asia Standard Time","Ekaterinburg
+        Standard Time","Pakistan Standard Time","Qyzylorda Standard Time","India Standard
+        Time","Sri Lanka Standard Time","Nepal Standard Time","Central Asia Standard
+        Time","Bangladesh Standard Time","Omsk Standard Time","Myanmar Standard Time","SE
+        Asia Standard Time","Altai Standard Time","W. Mongolia Standard Time","North
+        Asia Standard Time","N. Central Asia Standard Time","Tomsk Standard Time","China
+        Standard Time","North Asia East Standard Time","Singapore Standard Time","W.
+        Australia Standard Time","Taipei Standard Time","Ulaanbaatar Standard Time","Aus
+        Central W. Standard Time","Transbaikal Standard Time","Tokyo Standard Time","North
+        Korea Standard Time","Korea Standard Time","Yakutsk Standard Time","Cen. Australia
+        Standard Time","AUS Central Standard Time","E. Australia Standard Time","AUS
+        Eastern Standard Time","West Pacific Standard Time","Tasmania Standard Time","Vladivostok
+        Standard Time","Lord Howe Standard Time","Bougainville Standard Time","Russia
+        Time Zone 10","Magadan Standard Time","Norfolk Standard Time","Sakhalin Standard
+        Time","Central Pacific Standard Time","Russia Time Zone 11","New Zealand Standard
+        Time","UTC+12","Fiji Standard Time","Kamchatka Standard Time","Chatham Islands
+        Standard Time","UTC+13","Tonga Standard Time","Samoa Standard Time","Line
+        Islands Standard Time"],"minLength":2,"metadata":{"description":"Time zone
+        of the virtual machines. Type \"[TimeZoneInfo]::GetSystemTimeZones().Id\"
+        in PowerShell to get the list."}},"enableAutomaticUpdates":{"type":"bool","defaultValue":true,"metadata":{"description":"Enable
+        automatic Windows Updates."}},"enableHybridBenefitServerLicenses":{"type":"bool","defaultValue":false,"metadata":{"description":"Enable
+        Azure Hybrid Benefit to use your on-premises Windows Server licenses and reduce
+        cost. See https://docs.microsoft.com/en-us/azure/virtual-machines/windows/hybrid-use-benefit-licensing
+        for more information."}},"vmDCSize":{"type":"string","defaultValue":"Standard_B2s","metadata":{"description":"Size
+        of the DC VM"}},"vmDCStorageAccountType":{"type":"string","defaultValue":"StandardSSD_LRS","allowedValues":["Standard_LRS","StandardSSD_LRS","Premium_LRS","Premium_ZRS","StandardSSD_ZRS","UltraSSD_LRS"],"metadata":{"description":"Type
+        of storage for the managed disks. Visit ''https://docs.microsoft.com/en-us/rest/api/compute/disks/list#diskstorageaccounttypes''
+        for more information"}},"vmSQLSize":{"type":"string","defaultValue":"Standard_B2ms","metadata":{"description":"Size
+        of the SQL VM"}},"vmSQLStorageAccountType":{"type":"string","defaultValue":"StandardSSD_LRS","allowedValues":["Standard_LRS","StandardSSD_LRS","Premium_LRS","Premium_ZRS","StandardSSD_ZRS","UltraSSD_LRS"],"metadata":{"description":"Type
+        of storage for the managed disks. Visit ''https://docs.microsoft.com/en-us/rest/api/compute/disks/list#diskstorageaccounttypes''
+        for more information"}},"vmSPSize":{"type":"string","defaultValue":"Standard_B4ms","metadata":{"description":"Size
+        of the SharePoint VM"}},"vmSPStorageAccountType":{"type":"string","defaultValue":"StandardSSD_LRS","allowedValues":["Standard_LRS","StandardSSD_LRS","Premium_LRS","Premium_ZRS","StandardSSD_ZRS","UltraSSD_LRS"],"metadata":{"description":"Type
+        of storage for the managed disks. Visit ''https://docs.microsoft.com/en-us/rest/api/compute/disks/list#diskstorageaccounttypes''
+        for more information"}},"_artifactsLocation":{"type":"string","defaultValue":"https://github.com/Azure/azure-devtestlab/raw/master/Environments/SharePoint-SingleFarm-FullConfig","metadata":{"description":"The
+        base URI where artifacts required by this template are located. When the template
+        is deployed using the accompanying scripts, a private location in the subscription
+        will be used and this value will be automatically generated."}},"_artifactsLocationSasToken":{"type":"securestring","defaultValue":"","metadata":{"description":"The
+        sasToken required to access _artifactsLocation. When the template is deployed
+        using the accompanying scripts, a sasToken will be automatically generated."}}},"variables":{"resourceGroupNameFormatted":"[replace(replace(replace(replace(resourceGroup().name,
+        ''.'', ''-''), ''('', ''-''), '')'', ''-''), ''_'', ''-'')]","_artifactsLocationWithTrailingSlash":"[concat(parameters(''_artifactsLocation''),
+        ''/'')]","sharePointSettings":{"isSharePointSubscription":"[if(startsWith(parameters(''sharePointVersion''),
+        ''subscription''), true(), false())]","sharePointImagesList":{"Subscription":"MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition-smalldisk:latest","sp2019":"MicrosoftSharePoint:MicrosoftSharePointServer:sp2019gen2smalldisk:latest","sp2016":"MicrosoftSharePoint:MicrosoftSharePointServer:sp2016:latest"},"sharePointSubscriptionBits":[{"Label":"RTM","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/3/f/5/3f5f8a7e-462b-41ff-a5b2-04bdf5821ceb/OfficeServer.iso","ChecksumType":"SHA256","Checksum":"C576B847C573234B68FC602A0318F5794D7A61D8149EB6AE537AF04470B7FC05"}]},{"Label":"22H2","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/8/d/f/8dfcb515-6e49-42e5-b20f-5ebdfd19d8e7/wssloc-subscription-kb5002270-fullfile-x64-glb.exe","ChecksumType":"SHA256","Checksum":"7E496530EB873146650A9E0653DE835CB2CAD9AF8D154CBD7387BB0F2297C9FC"},{"DownloadUrl":"https://download.microsoft.com/download/3/f/5/3f5b1ee0-3336-45d7-b2f4-1e6af977d574/sts-subscription-kb5002271-fullfile-x64-glb.exe","ChecksumType":"SHA256","Checksum":"247011443AC573D4F03B1622065A7350B8B3DAE04D6A5A6DC64C8270A3BE7636"}]},{"Label":"23H1","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/c/6/a/c6a17105-3d86-42ad-888d-49b22383bfa1/uber-subscription-kb5002355-fullfile-x64-glb.exe"}]},{"Label":"23H2","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/f/5/5/f5559e3f-8b24-419f-b238-b09cf986e927/uber-subscription-kb5002474-fullfile-x64-glb.exe"}]},{"Label":"Latest","Packages":[{"DownloadUrl":"https://download.microsoft.com/download/8/7/9/8798c828-1d2c-442d-9a98-e6ce59166690/uber-subscription-kb5002560-fullfile-x64-glb.exe"}]}]},"networkSettings":{"vNetPrivatePrefix":"10.1.0.0/16","subnetDCPrefix":"10.1.1.0/24","dcPrivateIPAddress":"10.1.1.4","subnetSQLPrefix":"10.1.2.0/24","subnetSPPrefix":"10.1.3.0/24","vNetPrivateName":"[concat(variables(''resourceGroupNameFormatted''),
+        ''-vnet'')]","subnetDCName":"Subnet-DC","subnetSQLName":"Subnet-SQL","subnetSPName":"Subnet-SP","nsgSubnetDCName":"NSG-Subnet-DC","nsgSubnetSQLName":"NSG-Subnet-SQL","nsgSubnetSPName":"NSG-Subnet-SP","vmDCPublicIPNicAssociation":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmDCPublicIPName)]"},"vmSQLPublicIPNicAssociation":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSQLPublicIPName)]"},"vmSPPublicIPNicAssociation":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSPPublicIPName)]"},"nsgRuleAllowIncomingRdp":[{"name":"allow-rdp-rule","properties":{"description":"Allow
+        RDP","protocol":"Tcp","sourcePortRange":"*","destinationPortRange":"3389","sourceAddressPrefix":"[parameters(''RDPTrafficAllowed'')]","destinationAddressPrefix":"*","access":"Allow","priority":110,"direction":"Inbound"}}]},"vmsSettings":{"vmDCName":"DC","vmSQLName":"SQL","vmSPName":"SP","vmFEName":"FE","vmDCImage":"MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition-smalldisk:latest","vmSQLImage":"MicrosoftSQLServer:sql2022-ws2022:sqldev-gen2:latest","vmSharePointImage":"[if(variables(''sharePointSettings'').isSharePointSubscription,
+        variables(''sharePointSettings'').sharePointImagesList.Subscription, if(equals(parameters(''sharePointVersion''),
+        ''2019''), variables(''sharePointSettings'').sharePointImagesList.sp2019,
+        variables(''sharePointSettings'').sharePointImagesList.sp2016))]"},"vmsResourcesNames":{"vmDCNicName":"[concat(''NIC-'',
+        variables(''vmsSettings'').vmDCName, ''-0'')]","vmDCPublicIPName":"[concat(''PublicIP-'',
+        variables(''vmsSettings'').vmDCName)]","vmSQLNicName":"[concat(''NIC-'', variables(''vmsSettings'').vmSQLName,
+        ''-0'')]","vmSQLPublicIPName":"[concat(''PublicIP-'', variables(''vmsSettings'').vmSQLName)]","vmSPNicName":"[concat(''NIC-'',
+        variables(''vmsSettings'').vmSPName, ''-0'')]","vmSPPublicIPName":"[concat(''PublicIP-'',
+        variables(''vmsSettings'').vmSPName)]","vmFENicName":"[concat(''NIC-'', variables(''vmsSettings'').vmFEName,
+        ''-0'')]","vmFEPublicIPName":"[concat(''PublicIP-'', variables(''vmsSettings'').vmFEName)]"},"dscSettings":{"forceUpdateTag":"1.0","vmDCScriptFileUri":"[uri(variables(''_artifactsLocationWithTrailingSlash''),
+        concat(''dsc/ConfigureDCVM.zip'', parameters(''_artifactsLocationSasToken'')))]","vmDCScript":"ConfigureDCVM.ps1","vmDCFunction":"ConfigureDCVM","vmSQLScriptFileUri":"[uri(variables(''_artifactsLocationWithTrailingSlash''),
+        concat(''dsc/ConfigureSQLVM.zip'', parameters(''_artifactsLocationSasToken'')))]","vmSQLScript":"ConfigureSQLVM.ps1","vmSQLFunction":"ConfigureSQLVM","vmSPScriptFileUri":"[uri(variables(''_artifactsLocationWithTrailingSlash''),
+        concat(if(variables(''sharePointSettings'').isSharePointSubscription, ''dsc/ConfigureSPSE.zip'',
+        ''dsc/ConfigureSPLegacy.zip''), parameters(''_artifactsLocationSasToken'')))]","vmSPScript":"[if(variables(''sharePointSettings'').isSharePointSubscription,
+        ''ConfigureSPSE.ps1'', ''ConfigureSPLegacy.ps1'')]","vmSPFunction":"ConfigureSPVM","vmFEScriptFileUri":"[uri(variables(''_artifactsLocationWithTrailingSlash''),
+        concat(if(variables(''sharePointSettings'').isSharePointSubscription, ''dsc/ConfigureFESE.zip'',
+        ''dsc/ConfigureFELegacy.zip''), parameters(''_artifactsLocationSasToken'')))]","vmFEScript":"[if(variables(''sharePointSettings'').isSharePointSubscription,
+        ''ConfigureFESE.ps1'', ''ConfigureFELegacy.ps1'')]","vmFEFunction":"ConfigureFEVM"},"deploymentSettings":{"sharePointSitesAuthority":"spsites","sharePointCentralAdminPort":5000,"sharePointBitsSelected":"[if(variables(''sharePointSettings'').isSharePointSubscription,
+        variables(''sharePointSettings'').sharePointSubscriptionBits, ''fake'')]","localAdminUserName":"[concat(''l-'',
+        uniqueString(subscription().subscriptionId))]","enableAnalysis":false,"applyBrowserPolicies":true,"sqlAlias":"SQLAlias","spSuperUserName":"spSuperUser","spSuperReaderName":"spSuperReader","adfsSvcUserName":"adfssvc","sqlSvcUserName":"sqlsvc","spSetupUserName":"spsetup","spFarmUserName":"spfarm","spSvcUserName":"spsvc","spAppPoolUserName":"spapppool","spADDirSyncUserName":"spdirsync"}},"resources":[{"name":"[variables(''networkSettings'').nsgSubnetDCName]","type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2022-07-01","location":"[parameters(''location'')]","properties":{"securityRules":"[if(equals(toLower(parameters(''RDPTrafficAllowed'')),
+        ''no''), json(''null''), variables(''networkSettings'').nsgRuleAllowIncomingRdp)]"}},{"name":"[variables(''networkSettings'').nsgSubnetSQLName]","type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2022-07-01","location":"[parameters(''location'')]","properties":{"securityRules":"[if(equals(toLower(parameters(''RDPTrafficAllowed'')),
+        ''no''), json(''null''), variables(''networkSettings'').nsgRuleAllowIncomingRdp)]"}},{"name":"[variables(''networkSettings'').nsgSubnetSPName]","type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2022-07-01","location":"[parameters(''location'')]","properties":{"securityRules":"[if(equals(toLower(parameters(''RDPTrafficAllowed'')),
+        ''no''), json(''null''), variables(''networkSettings'').nsgRuleAllowIncomingRdp)]"}},{"name":"[variables(''networkSettings'').vNetPrivateName]","type":"Microsoft.Network/virtualNetworks","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetDCName)]","[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetSQLName)]","[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetSPName)]"],"properties":{"addressSpace":{"addressPrefixes":["[variables(''networkSettings'').vNetPrivatePrefix]"]},"subnets":[{"name":"[variables(''networkSettings'').subnetDCName]","properties":{"addressPrefix":"[variables(''networkSettings'').subnetDCPrefix]","networkSecurityGroup":{"id":"[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetDCName)]"}}},{"name":"[variables(''networkSettings'').subnetSQLName]","properties":{"addressPrefix":"[variables(''networkSettings'').subnetSQLPrefix]","networkSecurityGroup":{"id":"[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetSQLName)]"}}},{"name":"[variables(''networkSettings'').subnetSPName]","properties":{"addressPrefix":"[variables(''networkSettings'').subnetSPPrefix]","networkSecurityGroup":{"id":"[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        variables(''networkSettings'').nsgSubnetSPName)]"}}}]}},{"condition":"[equals(parameters(''addPublicIPAddress''),
+        ''Yes'')]","name":"[variables(''vmsResourcesNames'').vmDCPublicIPName]","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Basic","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Dynamic","dnsSettings":{"domainNameLabel":"[toLower(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', variables(''vmsSettings'').vmDCName))]"}}},{"name":"[variables(''vmsResourcesNames'').vmDCNicName]","type":"Microsoft.Network/networkInterfaces","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmDCPublicIPName)]"],"properties":{"ipConfigurations":[{"name":"ipconfig1","properties":{"privateIPAllocationMethod":"Static","privateIPAddress":"[variables(''networkSettings'').dcPrivateIPAddress]","subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, variables(''networkSettings'').subnetDCName)]"},"publicIPAddress":"[if(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), variables(''networkSettings'').vmDCPublicIPNicAssociation, json(''null''))]"}}]}},{"name":"[variables(''vmsSettings'').vmDCName]","type":"Microsoft.Compute/virtualMachines","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmDCNicName)]"],"properties":{"hardwareProfile":{"vmSize":"[parameters(''vmDCSize'')]"},"osProfile":{"computerName":"[variables(''vmsSettings'').vmDCName]","adminUsername":"[parameters(''adminUserName'')]","adminPassword":"[parameters(''adminPassword'')]","windowsConfiguration":{"timeZone":"[parameters(''vmsTimeZone'')]","enableAutomaticUpdates":"[parameters(''enableAutomaticUpdates'')]","provisionVMAgent":true,"patchSettings":{"patchMode":"[if(parameters(''enableAutomaticUpdates''),
+        ''AutomaticByOS'', ''Manual'')]","assessmentMode":"ImageDefault"}}},"storageProfile":{"imageReference":{"publisher":"[split(variables(''vmsSettings'').vmDCImage,
+        '':'')[0]]","offer":"[split(variables(''vmsSettings'').vmDCImage, '':'')[1]]","sku":"[split(variables(''vmsSettings'').vmDCImage,
+        '':'')[2]]","version":"[split(variables(''vmsSettings'').vmDCImage, '':'')[3]]"},"osDisk":{"name":"[concat(''Disk-'',
+        variables(''vmsSettings'').vmDCName, ''-OS'')]","caching":"ReadWrite","osType":"Windows","createOption":"FromImage","diskSizeGB":32,"managedDisk":{"storageAccountType":"[parameters(''vmDCStorageAccountType'')]"}}},"networkProfile":{"networkInterfaces":[{"id":"[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmDCNicName)]"}]},"licenseType":"[if(parameters(''enableHybridBenefitServerLicenses''),
+        ''Windows_Server'', json(''null''))]"},"resources":[{"name":"ConfigureDCVM","type":"extensions","location":"[parameters(''location'')]","apiVersion":"2022-08-01","dependsOn":["[resourceId(''Microsoft.Compute/virtualMachines'',
+        variables(''vmsSettings'').vmDCName)]"],"properties":{"publisher":"Microsoft.Powershell","type":"DSC","typeHandlerVersion":"2.9","autoUpgradeMinorVersion":true,"forceUpdateTag":"[variables(''dscSettings'').forceUpdateTag]","settings":{"wmfVersion":"latest","configuration":{"url":"[variables(''dscSettings'').vmDCScriptFileUri]","script":"[variables(''dscSettings'').vmDCScript]","function":"[variables(''dscSettings'').vmDCFunction]"},"configurationArguments":{"domainFQDN":"[parameters(''domainFQDN'')]","PrivateIP":"[variables(''networkSettings'').dcPrivateIPAddress]","SPServerName":"[variables(''vmsSettings'').vmSPName]","SharePointSitesAuthority":"[variables(''deploymentSettings'').sharePointSitesAuthority]","SharePointCentralAdminPort":"[variables(''deploymentSettings'').sharePointCentralAdminPort]","ApplyBrowserPolicies":"[variables(''deploymentSettings'').applyBrowserPolicies]"},"privacy":{"dataCollection":"enable"}},"protectedSettings":{"configurationArguments":{"AdminCreds":{"UserName":"[parameters(''adminUserName'')]","Password":"[parameters(''adminPassword'')]"},"AdfsSvcCreds":{"UserName":"[variables(''deploymentSettings'').adfsSvcUserName]","Password":"[parameters(''serviceAccountsPassword'')]"}}}}}]},{"condition":"[equals(parameters(''addPublicIPAddress''),
+        ''Yes'')]","name":"[variables(''vmsResourcesNames'').vmSQLPublicIPName]","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Basic","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Dynamic","dnsSettings":{"domainNameLabel":"[toLower(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', variables(''vmsSettings'').vmSQLName))]"}}},{"name":"[variables(''vmsResourcesNames'').vmSQLNicName]","type":"Microsoft.Network/networkInterfaces","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSQLPublicIPName)]"],"properties":{"ipConfigurations":[{"name":"ipconfig1","properties":{"privateIPAllocationMethod":"Dynamic","subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, variables(''networkSettings'').subnetSQLName)]"},"publicIPAddress":"[if(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), variables(''networkSettings'').vmSQLPublicIPNicAssociation, json(''null''))]"}}]}},{"name":"[variables(''vmsSettings'').vmSQLName]","type":"Microsoft.Compute/virtualMachines","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSQLNicName)]"],"properties":{"hardwareProfile":{"vmSize":"[parameters(''vmSQLSize'')]"},"osProfile":{"computerName":"[variables(''vmsSettings'').vmSQLName]","adminUsername":"[variables(''deploymentSettings'').localAdminUserName]","adminPassword":"[parameters(''adminPassword'')]","windowsConfiguration":{"timeZone":"[parameters(''vmsTimeZone'')]","enableAutomaticUpdates":"[parameters(''enableAutomaticUpdates'')]","provisionVMAgent":true,"patchSettings":{"patchMode":"[if(parameters(''enableAutomaticUpdates''),
+        ''AutomaticByOS'', ''Manual'')]","assessmentMode":"ImageDefault"}}},"storageProfile":{"imageReference":{"publisher":"[split(variables(''vmsSettings'').vmSQLImage,
+        '':'')[0]]","offer":"[split(variables(''vmsSettings'').vmSQLImage, '':'')[1]]","sku":"[split(variables(''vmsSettings'').vmSQLImage,
+        '':'')[2]]","version":"[split(variables(''vmsSettings'').vmSQLImage, '':'')[3]]"},"osDisk":{"name":"[concat(''Disk-'',
+        variables(''vmsSettings'').vmSQLName, ''-OS'')]","caching":"ReadWrite","osType":"Windows","createOption":"FromImage","diskSizeGB":128,"managedDisk":{"storageAccountType":"[parameters(''vmSQLStorageAccountType'')]"}}},"networkProfile":{"networkInterfaces":[{"id":"[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSQLNicName)]"}]},"licenseType":"[if(parameters(''enableHybridBenefitServerLicenses''),
+        ''Windows_Server'', json(''null''))]"},"resources":[]},{"condition":"[or(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), equals(parameters(''addPublicIPAddress''), ''SharePointVMsOnly''))]","name":"[variables(''vmsResourcesNames'').vmSPPublicIPName]","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Basic","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Dynamic","dnsSettings":{"domainNameLabel":"[toLower(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', variables(''vmsSettings'').vmSPName))]"}}},{"name":"[variables(''vmsResourcesNames'').vmSPNicName]","type":"Microsoft.Network/networkInterfaces","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSPPublicIPName)]"],"properties":{"ipConfigurations":[{"name":"ipconfig1","properties":{"privateIPAllocationMethod":"Dynamic","subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, variables(''networkSettings'').subnetSPName)]"},"publicIPAddress":"[if(or(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), equals(parameters(''addPublicIPAddress''), ''SharePointVMsOnly'')),
+        variables(''networkSettings'').vmSPPublicIPNicAssociation, json(''null''))]"}}]}},{"name":"[variables(''vmsSettings'').vmSPName]","type":"Microsoft.Compute/virtualMachines","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSPNicName)]"],"properties":{"hardwareProfile":{"vmSize":"[parameters(''vmSPSize'')]"},"osProfile":{"computerName":"[variables(''vmsSettings'').vmSPName]","adminUsername":"[variables(''deploymentSettings'').localAdminUserName]","adminPassword":"[parameters(''adminPassword'')]","windowsConfiguration":{"timeZone":"[parameters(''vmsTimeZone'')]","enableAutomaticUpdates":"[parameters(''enableAutomaticUpdates'')]","provisionVMAgent":true,"patchSettings":{"patchMode":"[if(parameters(''enableAutomaticUpdates''),
+        ''AutomaticByOS'', ''Manual'')]","assessmentMode":"ImageDefault"}}},"storageProfile":{"imageReference":{"publisher":"[split(variables(''vmsSettings'').vmSharePointImage,
+        '':'')[0]]","offer":"[split(variables(''vmsSettings'').vmSharePointImage,
+        '':'')[1]]","sku":"[split(variables(''vmsSettings'').vmSharePointImage, '':'')[2]]","version":"[split(variables(''vmsSettings'').vmSharePointImage,
+        '':'')[3]]"},"osDisk":{"name":"[concat(''Disk-'', variables(''vmsSettings'').vmSPName,
+        ''-OS'')]","caching":"ReadWrite","osType":"Windows","createOption":"FromImage","managedDisk":{"storageAccountType":"[parameters(''vmSPStorageAccountType'')]"}}},"networkProfile":{"networkInterfaces":[{"id":"[resourceId(''Microsoft.Network/networkInterfaces'',
+        variables(''vmsResourcesNames'').vmSPNicName)]"}]},"licenseType":"[if(parameters(''enableHybridBenefitServerLicenses''),
+        ''Windows_Server'', json(''null''))]"},"resources":[]},{"name":"[concat(variables(''vmsSettings'').vmSPName,''/IncreaseMaxEnvelopeSizeQuota'')]","type":"Microsoft.Compute/virtualMachines/runCommands","location":"[parameters(''location'')]","apiVersion":"2023-03-01","dependsOn":["[resourceId(''Microsoft.Compute/virtualMachines'',
+        variables(''vmsSettings'').vmSPName)]"],"properties":{"source":{"script":"Set-Item
+        -Path WSMan:\\localhost\\MaxEnvelopeSizeKb -Value 2048"},"timeoutInSeconds":90,"treatFailureAsDeploymentFailure":false}},{"name":"[concat(variables(''vmsSettings'').vmSQLName,''/ConfigureSQLVM'')]","type":"Microsoft.Compute/virtualMachines/extensions","location":"[parameters(''location'')]","apiVersion":"2022-08-01","dependsOn":["[resourceId(''Microsoft.Compute/virtualMachines'',
+        variables(''vmsSettings'').vmSQLName)]"],"properties":{"publisher":"Microsoft.Powershell","type":"DSC","typeHandlerVersion":"2.9","autoUpgradeMinorVersion":true,"forceUpdateTag":"[variables(''dscSettings'').forceUpdateTag]","settings":{"wmfVersion":"latest","configuration":{"url":"[variables(''dscSettings'').vmSQLScriptFileUri]","script":"[variables(''dscSettings'').vmSQLScript]","function":"[variables(''dscSettings'').vmSQLFunction]"},"configurationArguments":{"DNSServerIP":"[variables(''networkSettings'').dcPrivateIPAddress]","DomainFQDN":"[parameters(''domainFQDN'')]"},"privacy":{"dataCollection":"enable"}},"protectedSettings":{"configurationArguments":{"DomainAdminCreds":{"UserName":"[parameters(''adminUserName'')]","Password":"[parameters(''adminPassword'')]"},"SqlSvcCreds":{"UserName":"[variables(''deploymentSettings'').sqlSvcUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPSetupCreds":{"UserName":"[variables(''deploymentSettings'').spSetupUserName]","Password":"[parameters(''serviceAccountsPassword'')]"}}}}},{"name":"[concat(variables(''vmsSettings'').vmSPName,''/ConfigureSPVM'')]","type":"Microsoft.Compute/virtualMachines/extensions","location":"[parameters(''location'')]","apiVersion":"2022-08-01","dependsOn":["[resourceId(''Microsoft.Compute/virtualMachines'',
+        variables(''vmsSettings'').vmSPName)]","[resourceId(''Microsoft.Compute/virtualMachines/runCommands'',
+        variables(''vmsSettings'').vmSPName, ''IncreaseMaxEnvelopeSizeQuota'')]"],"properties":{"publisher":"Microsoft.Powershell","type":"DSC","typeHandlerVersion":"2.9","autoUpgradeMinorVersion":true,"forceUpdateTag":"[variables(''dscSettings'').forceUpdateTag]","settings":{"wmfVersion":"latest","configuration":{"url":"[variables(''dscSettings'').vmSPScriptFileUri]","script":"[variables(''dscSettings'').vmSPScript]","function":"[variables(''dscSettings'').vmSPFunction]"},"configurationArguments":{"DNSServerIP":"[variables(''networkSettings'').dcPrivateIPAddress]","DomainFQDN":"[parameters(''domainFQDN'')]","DCServerName":"[variables(''vmsSettings'').vmDCName]","SQLServerName":"[variables(''vmsSettings'').vmSQLName]","SQLAlias":"[variables(''deploymentSettings'').sqlAlias]","SharePointVersion":"[parameters(''sharePointVersion'')]","SharePointSitesAuthority":"[variables(''deploymentSettings'').sharePointSitesAuthority]","SharePointCentralAdminPort":"[variables(''deploymentSettings'').sharePointCentralAdminPort]","EnableAnalysis":"[variables(''deploymentSettings'').enableAnalysis]","SharePointBits":"[variables(''deploymentSettings'').sharePointBitsSelected]"},"privacy":{"dataCollection":"enable"}},"protectedSettings":{"configurationArguments":{"DomainAdminCreds":{"UserName":"[parameters(''adminUserName'')]","Password":"[parameters(''adminPassword'')]"},"SPSetupCreds":{"UserName":"[variables(''deploymentSettings'').spSetupUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPFarmCreds":{"UserName":"[variables(''deploymentSettings'').spFarmUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPSvcCreds":{"UserName":"[variables(''deploymentSettings'').spSvcUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPAppPoolCreds":{"UserName":"[variables(''deploymentSettings'').spAppPoolUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPADDirSyncCreds":{"UserName":"[variables(''deploymentSettings'').spADDirSyncUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPPassphraseCreds":{"UserName":"Passphrase","Password":"[parameters(''serviceAccountsPassword'')]"},"SPSuperUserCreds":{"UserName":"[variables(''deploymentSettings'').spSuperUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPSuperReaderCreds":{"UserName":"[variables(''deploymentSettings'').spSuperReaderName]","Password":"[parameters(''serviceAccountsPassword'')]"}}}}},{"condition":"[and(greaterOrEquals(parameters(''numberOfAdditionalFrontEnd''),
+        1), or(equals(parameters(''addPublicIPAddress''), ''Yes''), equals(parameters(''addPublicIPAddress''),
+        ''SharePointVMsOnly'')))]","name":"[concat(variables(''vmsResourcesNames'').vmFEPublicIPName,
+        ''-'', copyIndex())]","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","copy":{"name":"frontendPublicIPAddresses","count":"[parameters(''numberOfAdditionalFrontEnd'')]"},"sku":{"name":"Basic","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Dynamic","dnsSettings":{"domainNameLabel":"[concat(toLower(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', variables(''vmsSettings'').vmFEName)), ''-'', copyIndex())]"}}},{"condition":"[greaterOrEquals(parameters(''numberOfAdditionalFrontEnd''),
+        1)]","name":"[concat(variables(''vmsResourcesNames'').vmFENicName, ''-'',
+        copyIndex())]","type":"Microsoft.Network/networkInterfaces","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","frontendPublicIPAddresses"],"copy":{"name":"frontendNetworkInterfaces","count":"[parameters(''numberOfAdditionalFrontEnd'')]"},"properties":{"ipConfigurations":[{"name":"ipconfig1","properties":{"privateIPAllocationMethod":"Dynamic","subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, variables(''networkSettings'').subnetSPName)]"},"publicIPAddress":"[if(or(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), equals(parameters(''addPublicIPAddress''), ''SharePointVMsOnly'')),
+        json(concat(''{\"id\": \"'', resourceId(''Microsoft.Network/publicIPAddresses'',
+        concat(variables(''vmsResourcesNames'').vmFEPublicIPName, ''-'', copyIndex())),
+        ''\" }'')), json(''null''))]"}}]}},{"condition":"[greaterOrEquals(parameters(''numberOfAdditionalFrontEnd''),
+        1)]","name":"[concat(variables(''vmsSettings'').vmFEName, ''-'', copyIndex())]","type":"Microsoft.Compute/virtualMachines","apiVersion":"2022-08-01","location":"[parameters(''location'')]","dependsOn":["frontendNetworkInterfaces"],"copy":{"name":"frontendVirtualMachines","count":"[parameters(''numberOfAdditionalFrontEnd'')]"},"properties":{"hardwareProfile":{"vmSize":"[parameters(''vmSPSize'')]"},"osProfile":{"computerName":"[concat(variables(''vmsSettings'').vmFEName,
+        ''-'', copyIndex())]","adminUsername":"[variables(''deploymentSettings'').localAdminUserName]","adminPassword":"[parameters(''adminPassword'')]","windowsConfiguration":{"timeZone":"[parameters(''vmsTimeZone'')]","enableAutomaticUpdates":"[parameters(''enableAutomaticUpdates'')]","provisionVMAgent":true,"patchSettings":{"patchMode":"[if(parameters(''enableAutomaticUpdates''),
+        ''AutomaticByOS'', ''Manual'')]","assessmentMode":"ImageDefault"}}},"storageProfile":{"imageReference":{"publisher":"[split(variables(''vmsSettings'').vmSharePointImage,
+        '':'')[0]]","offer":"[split(variables(''vmsSettings'').vmSharePointImage,
+        '':'')[1]]","sku":"[split(variables(''vmsSettings'').vmSharePointImage, '':'')[2]]","version":"[split(variables(''vmsSettings'').vmSharePointImage,
+        '':'')[3]]"},"osDisk":{"name":"[concat(''Disk-'', variables(''vmsSettings'').vmFEName,
+        ''-'', copyIndex(), ''-OS'')]","caching":"ReadWrite","osType":"Windows","createOption":"FromImage","managedDisk":{"storageAccountType":"[parameters(''vmSPStorageAccountType'')]"}}},"networkProfile":{"networkInterfaces":[{"id":"[resourceId(''Microsoft.Network/networkInterfaces'',
+        concat(variables(''vmsResourcesNames'').vmFENicName, ''-'', copyIndex()))]"}]},"licenseType":"[if(parameters(''enableHybridBenefitServerLicenses''),
+        ''Windows_Server'', json(''null''))]"},"resources":[]},{"condition":"[greaterOrEquals(parameters(''numberOfAdditionalFrontEnd''),
+        1)]","name":"[concat(variables(''vmsSettings'').vmFEName, ''-'', copyIndex(),''/ConfigureFEVM'')]","type":"Microsoft.Compute/virtualMachines/extensions","location":"[parameters(''location'')]","apiVersion":"2022-08-01","dependsOn":["frontendVirtualMachines"],"copy":{"name":"frontendVirtualMachineExtensions","count":"[parameters(''numberOfAdditionalFrontEnd'')]"},"properties":{"publisher":"Microsoft.Powershell","type":"DSC","typeHandlerVersion":"2.9","autoUpgradeMinorVersion":true,"forceUpdateTag":"[variables(''dscSettings'').forceUpdateTag]","settings":{"wmfVersion":"latest","configuration":{"url":"[variables(''dscSettings'').vmFEScriptFileUri]","script":"[variables(''dscSettings'').vmFEScript]","function":"[variables(''dscSettings'').vmFEFunction]"},"configurationArguments":{"DNSServerIP":"[variables(''networkSettings'').dcPrivateIPAddress]","DomainFQDN":"[parameters(''domainFQDN'')]","DCServerName":"[variables(''vmsSettings'').vmDCName]","SQLServerName":"[variables(''vmsSettings'').vmSQLName]","SQLAlias":"[variables(''deploymentSettings'').sqlAlias]","SharePointVersion":"[parameters(''sharePointVersion'')]","SharePointSitesAuthority":"[variables(''deploymentSettings'').sharePointSitesAuthority]","EnableAnalysis":"[variables(''deploymentSettings'').enableAnalysis]","SharePointBits":"[variables(''deploymentSettings'').sharePointBitsSelected]"},"privacy":{"dataCollection":"enable"}},"protectedSettings":{"configurationArguments":{"DomainAdminCreds":{"UserName":"[parameters(''adminUserName'')]","Password":"[parameters(''adminPassword'')]"},"SPSetupCreds":{"UserName":"[variables(''deploymentSettings'').spSetupUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPFarmCreds":{"UserName":"[variables(''deploymentSettings'').spFarmUserName]","Password":"[parameters(''serviceAccountsPassword'')]"},"SPPassphraseCreds":{"UserName":"Passphrase","Password":"[parameters(''serviceAccountsPassword'')]"}}}}},{"condition":"[equals(parameters(''addAzureBastion''),
+        true())]","name":"NSG-Subnet-AzureBastion","type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2022-07-01","location":"[parameters(''location'')]","properties":{"securityRules":[{"name":"AllowHttpsInBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"Internet","destinationPortRange":"443","destinationAddressPrefix":"*","access":"Allow","priority":100,"direction":"Inbound"}},{"name":"AllowGatewayManagerInBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"GatewayManager","destinationPortRange":"443","destinationAddressPrefix":"*","access":"Allow","priority":110,"direction":"Inbound"}},{"name":"AllowLoadBalancerInBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationPortRange":"443","destinationAddressPrefix":"*","access":"Allow","priority":120,"direction":"Inbound"}},{"name":"AllowBastionHostCommunicationInBound","properties":{"protocol":"*","sourcePortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationPortRanges":["8080","5701"],"destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":130,"direction":"Inbound"}},{"name":"DenyAllInBound","properties":{"protocol":"*","sourcePortRange":"*","sourceAddressPrefix":"*","destinationPortRange":"*","destinationAddressPrefix":"*","access":"Deny","priority":1000,"direction":"Inbound"}},{"name":"AllowSshRdpOutBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"*","destinationPortRanges":["22","3389"],"destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":100,"direction":"Outbound"}},{"name":"AllowAzureCloudCommunicationOutBound","properties":{"protocol":"Tcp","sourcePortRange":"*","sourceAddressPrefix":"*","destinationPortRange":"443","destinationAddressPrefix":"AzureCloud","access":"Allow","priority":110,"direction":"Outbound"}},{"name":"AllowBastionHostCommunicationOutBound","properties":{"protocol":"*","sourcePortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationPortRanges":["8080","5701"],"destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":120,"direction":"Outbound"}},{"name":"AllowGetSessionInformationOutBound","properties":{"protocol":"*","sourcePortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","destinationPortRanges":["80","443"],"access":"Allow","priority":130,"direction":"Outbound"}},{"name":"DenyAllOutBound","properties":{"protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":1000,"direction":"Outbound"}}]}},{"condition":"[equals(parameters(''addAzureBastion''),
+        true())]","name":"[concat(variables(''networkSettings'').vNetPrivateName,
+        ''/'', ''AzureBastionSubnet'')]","type":"Microsoft.Network/virtualNetworks/subnets","apiVersion":"2022-07-01","location":"[parameters(''location'')]","dependsOn":["[resourceId(''Microsoft.Network/virtualNetworks'',
+        variables(''networkSettings'').vNetPrivateName)]","[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        ''NSG-Subnet-AzureBastion'')]"],"properties":{"addressPrefix":"10.1.4.0/24","networkSecurityGroup":{"id":"[resourceId(''Microsoft.Network/networkSecurityGroups'',
+        ''NSG-Subnet-AzureBastion'')]"}}},{"condition":"[equals(parameters(''addAzureBastion''),
+        true())]","name":"PublicIP-Bastion","type":"Microsoft.Network/publicIPAddresses","apiVersion":"2022-07-01","location":"[parameters(''location'')]","sku":{"name":"Standard","tier":"Regional"},"properties":{"publicIPAllocationMethod":"Static","dnsSettings":{"domainNameLabel":"[toLower(replace(concat(variables(''resourceGroupNameFormatted''),
+        ''-'', ''Bastion''), ''_'', ''-''))]"}}},{"condition":"[equals(parameters(''addAzureBastion''),
+        true())]","name":"Bastion","type":"Microsoft.Network/bastionHosts","location":"[parameters(''location'')]","apiVersion":"2022-07-01","dependsOn":["[resourceId(''Microsoft.Network/publicIPAddresses'',
+        ''PublicIP-Bastion'')]","[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, ''AzureBastionSubnet'')]"],"properties":{"ipConfigurations":[{"name":"IpConf","properties":{"privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"[resourceId(''Microsoft.Network/publicIPAddresses'',
+        ''PublicIP-Bastion'')]"},"subnet":{"id":"[resourceId(''Microsoft.Network/virtualNetworks/subnets'',
+        variables(''networkSettings'').vNetPrivateName, ''AzureBastionSubnet'')]"}}}]}}],"outputs":{"publicIPAddressSP":{"condition":"[or(equals(parameters(''addPublicIPAddress''),
+        ''Yes''), equals(parameters(''addPublicIPAddress''), ''SharePointVMsOnly''))]","type":"string","value":"[reference(resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSPPublicIPName)).dnsSettings.fqdn]"},"publicIPAddressFEs":{"condition":"[and(greaterOrEquals(parameters(''numberOfAdditionalFrontEnd''),
+        1), or(equals(parameters(''addPublicIPAddress''), ''Yes''), equals(parameters(''addPublicIPAddress''),
+        ''SharePointVMsOnly'')))]","type":"array","copy":{"count":"[parameters(''numberOfAdditionalFrontEnd'')]","input":"[reference(resourceId(''Microsoft.Network/publicIPAddresses'',
+        concat(variables(''vmsResourcesNames'').vmFEPublicIPName, ''-'', copyIndex()))).dnsSettings.fqdn]"}},"publicIPAddressSQL":{"condition":"[equals(parameters(''addPublicIPAddress''),
+        ''Yes'')]","type":"string","value":"[reference(resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmSQLPublicIPName)).dnsSettings.fqdn]"},"publicIPAddressDC":{"condition":"[equals(parameters(''addPublicIPAddress''),
+        ''Yes'')]","type":"string","value":"[reference(resourceId(''Microsoft.Network/publicIPAddresses'',
+        variables(''vmsResourcesNames'').vmDCPublicIPName)).dnsSettings.fqdn]"},"domainAdminAccount":{"type":"string","value":"[concat(substring(parameters(''domainFQDN''),
+        0, indexOf(parameters(''domainFQDN''), ''.'')), ''\\'', parameters(''adminUserName''))]"},"domainAdminAccountFormatForBastion":{"type":"string","value":"[concat(parameters(''adminUserName''),
+        ''@'', parameters(''domainFQDN''))]"},"localAdminAccount":{"type":"string","value":"[variables(''deploymentSettings'').localAdminUserName]"}}},"parametersValueFilesInfo":[{"fileName":"azuredeploy.parameters.json","parametersValueInfo":{}}],"enabled":true},"name":"SharePoint-SingleFarm-FullConfig","type":"Microsoft.DevTestLab/labs/artifactSources/armTemplates"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '102354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 Sep 2024 11:00:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:9e8cebda-9c88-460b-b55d-9410c4648f9a
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '7499'
+      x-msedge-ref:
+      - 'Ref A: 54A2ABDDFCD84CA38A5AC9B9857F1D0C Ref B: TYO201151001062 Ref C: 2024-09-09T10:59:59Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lab arm-template show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --lab-name -g --artifact-source-name
+      User-Agent:
+      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/artifactsources/Public%20Environment%20Repo/armtemplates/ServiceFabric-LabCluster?api-version=2018-09-15
+  response:
+    body:
+      string: '{"properties":{"displayName":"Service Fabric Lab Cluster","description":"A
+        secure 5 node, single nodetype Service fabric Cluster.","publisher":"Microsoft","contents":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"clusterOS":{"type":"string","allowedValues":["Windows","Linux"],"defaultValue":"Windows","metadata":{"description":"Select
+        the cluster OS."}},"adminUsername":{"type":"string","minLength":1,"metadata":{"description":"Remote
+        desktop user Id"}},"adminPassword":{"type":"securestring","metadata":{"description":"Remote
+        desktop user password. Must be a strong password"}},"certificate":{"type":"string","minLength":1,"metadata":{"description":"Certificate
+        as Base64 encoded string."}},"certificatePassword":{"type":"securestring","metadata":{"description":"Certificate
+        password for installation."}},"certificateThumbprint":{"type":"string","minLength":1,"metadata":{"description":"Certificate
+        thumbprint for identification in the local certificate store."}},"appPort1":{"type":"int","defaultValue":80,"minValue":1,"metadata":{"description":"Public
+        accessible application port #1."}},"appPort2":{"type":"int","defaultValue":443,"minValue":1,"metadata":{"description":"Public
+        accessible application port #2."}},"tenantId":{"type":"string","defaultValue":"","metadata":{"description":"Tenant
+        the cluster- and clientapplication belongs to. Required for Windows clusters."}},"clusterApplication":{"type":"string","defaultValue":"","metadata":{"description":"Client
+        id of cluster application. Required for Windows clusters."}},"clientApplication":{"type":"string","defaultValue":"","metadata":{"description":"Client
+        id of client application. Required for Windows clusters."}}},"variables":{"quickstartRepoRoot":"https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/quickstarts/microsoft.servicefabric/","clusterName":"[concat(''sf-'',
+        toLower(uniqueString(resourceGroup().name)))]","vaultName":"[concat(''kv-'',
+        toLower(uniqueString(resourceGroup().name)))]","vaultSecret":"ClusterCertificate","loadBalancedAppPort1":"[parameters(''appPort1'')]","loadBalancedAppPort2":"[parameters(''appPort2'')]","nt0InstanceCount":5},"resources":[{"name":"[variables(''vaultName'')]","type":"Microsoft.KeyVault/vaults","apiVersion":"2015-06-01","location":"[resourceGroup().location]","tags":{},"properties":{"enabledForDeployment":true,"enabledForTemplateDeployment":false,"enabledForVolumeEncryption":false,"tenantId":"[subscription().tenantId]","sku":{"name":"standard","family":"A"},"accessPolicies":[]}},{"name":"[concat(variables(''vaultName''),
+        ''/'', variables(''vaultSecret''))]","type":"Microsoft.KeyVault/vaults/secrets","apiVersion":"2015-06-01","dependsOn":["[resourceId(''Microsoft.KeyVault/vaults'',
+        variables(''vaultName''))]"],"properties":{"value":"[base64(concat(''{ \"data\":\"'',
+        parameters(''certificate''), ''\", \"dataType\":\"pfx\", \"password\":\"'',
+        parameters(''certificatePassword''), ''\" }''))]"}},{"condition":"[equals(parameters(''clusterOS''),
+        ''Windows'')]","name":"[concat(deployment().name, ''-QuickstartTemplate-Windows'')]","type":"Microsoft.Resources/deployments","apiVersion":"2015-01-01","dependsOn":["[resourceId(''Microsoft.KeyVault/vaults/secrets'',
+        variables(''vaultName''), variables(''vaultSecret''))]"],"properties":{"mode":"Incremental","templateLink":{"uri":"[concat(variables(''quickstartRepoRoot''),
+        ''service-fabric-secure-cluster-5-node-1-nodetype/azuredeploy.json'')]","contentVersion":"1.0.0.0"},"parameters":{"clusterName":{"value":"[variables(''clusterName'')]"},"adminUsername":{"value":"[parameters(''adminUsername'')]"},"adminPassword":{"value":"[parameters(''adminPassword'')]"},"vmImagePublisher":{"value":"MicrosoftWindowsServer"},"vmImageOffer":{"value":"WindowsServer"},"vmImageSku":{"value":"2022-datacenter"},"vmImageVersion":{"value":"latest"},"loadBalancedAppPort1":{"value":"[variables(''loadBalancedAppPort1'')]"},"loadBalancedAppPort2":{"value":"[variables(''loadBalancedAppPort2'')]"},"certificateThumbprint":{"value":"[parameters(''certificateThumbprint'')]"},"sourceVaultResourceId":{"value":"[resourceId(''Microsoft.KeyVault/vaults'',
+        variables(''vaultName''))]"},"certificateUrlValue":{"value":"[reference(resourceId(''Microsoft.KeyVault/vaults/secrets'',
+        variables(''vaultName''), variables(''vaultSecret''))).secretUriWithVersion]"},"nt0InstanceCount":{"value":"[variables(''nt0InstanceCount'')]"},"nodeDataDrive":{"value":"OS"},"tenantId":{"value":"[parameters(''tenantId'')]"},"clusterApplication":{"value":"[parameters(''clusterApplication'')]"},"clientapplication":{"value":"[parameters(''clientApplication'')]"}}}},{"condition":"[equals(parameters(''clusterOS''),
+        ''Linux'')]","name":"[concat(deployment().name, ''-QuickstartTemplate-Linux'')]","type":"Microsoft.Resources/deployments","apiVersion":"2015-01-01","dependsOn":["[resourceId(''Microsoft.KeyVault/vaults/secrets'',
+        variables(''vaultName''), variables(''vaultSecret''))]"],"properties":{"mode":"Incremental","templateLink":{"uri":"[concat(variables(''quickstartRepoRoot''),
+        ''5-vm-ubuntu-1-nodetypes-secure/azuredeploy.json'')]","contentVersion":"1.0.0.0"},"parameters":{"clusterName":{"value":"[variables(''clusterName'')]"},"adminUsername":{"value":"[parameters(''adminUsername'')]"},"adminPassword":{"value":"[parameters(''adminPassword'')]"},"vmImagePublisher":{"value":"Canonical"},"vmImageOffer":{"value":"UbuntuServer"},"vmImageSku":{"value":"16.04-LTS"},"vmImageVersion":{"value":"latest"},"loadBalancedAppPort1":{"value":"[variables(''loadBalancedAppPort1'')]"},"loadBalancedAppPort2":{"value":"[variables(''loadBalancedAppPort2'')]"},"certificateThumbprint":{"value":"[parameters(''certificateThumbprint'')]"},"sourceVaultValue":{"value":"[resourceId(''Microsoft.KeyVault/vaults'',
+        variables(''vaultName''))]"},"certificateUrlValue":{"value":"[reference(resourceId(''Microsoft.KeyVault/vaults/secrets'',
+        variables(''vaultName''), variables(''vaultSecret''))).secretUriWithVersion]"},"nt0InstanceCount":{"value":"[variables(''nt0InstanceCount'')]"},"storageAccountEndPoint":{"value":"[resourceGroup().location]"}}}}],"outputs":{}},"parametersValueFilesInfo":[],"enabled":true},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/labtest/providers/Microsoft.DevTestLab/labs/cliautomationlab/artifactSources/Public
+        Environment Repo/armTemplates/ServiceFabric-LabCluster","name":"ServiceFabric-LabCluster","type":"Microsoft.DevTestLab/labs/artifactSources/armTemplates"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6425'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 09 Sep 2024 11:00:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:9e8cebda-9c88-460b-b55d-9410c4648f9a
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '7498'
+      x-msedge-ref:
+      - 'Ref A: 8EF2163E896148FB9B217F9E20C94884 Ref B: TYO201100115049 Ref C: 2024-09-09T11:00:04Z'
+    status:
+      code: 200
+      message: OK
+version: 1

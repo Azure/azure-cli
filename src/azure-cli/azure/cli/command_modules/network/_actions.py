@@ -15,7 +15,7 @@ from ._validators import read_base_64_file
 class AddBackendAddressCreate(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AddBackendAddressCreate, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
@@ -43,7 +43,7 @@ class AddBackendAddressCreate(argparse._AppendAction):
 class AddBackendAddressCreateForCrossRegionLB(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AddBackendAddressCreateForCrossRegionLB, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
@@ -69,7 +69,7 @@ class AddBackendAddressCreateForCrossRegionLB(argparse._AppendAction):
 class TrustedClientCertificateCreate(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(TrustedClientCertificateCreate, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
@@ -99,7 +99,7 @@ def _split(param):
 class SslProfilesCreate(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(SslProfilesCreate, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
@@ -163,7 +163,7 @@ class AddMappingRequest(argparse.Action):
 class WAFRulesCreate(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(WAFRulesCreate, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
@@ -183,6 +183,8 @@ class WAFRulesCreate(argparse._AppendAction):
                 d['action'] = v[0]
             elif kl == 'state':
                 d['state'] = v[0]
+            elif kl == 'sensitivity':
+                d['sensitivity'] = v[0]
             else:
                 raise UnrecognizedArgumentError('key error: key must be one of rule-id, action and state.')
         return d

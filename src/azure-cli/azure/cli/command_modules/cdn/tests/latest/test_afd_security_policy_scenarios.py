@@ -10,7 +10,7 @@ from azure.core.exceptions import (HttpResponseError)
 
 
 class CdnAfdSecurityPolicyScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_security_policy_crud(self, resource_group):
         profile_name = 'profilesecuritytest'
         self.afd_security_policy_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -44,7 +44,7 @@ class CdnAfdSecurityPolicyScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         
         # Create a security policy with non-exisit waf should fail
         waf_policy_id = f'/subscriptions/{self.get_subscription_id()}/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/nonexist'
-        with self.assertRaisesRegexp(HttpResponseError, "Web Application Firewall Policy being attached to AFDX profile does not exist"):
+        with self.assertRaisesRegex(HttpResponseError, "Web Application Firewall Policy being attached to AFDX profile does not exist"):
             self.afd_security_policy_create_cmd(resource_group,
                                                 profile_name,
                                                 security_policy_name,
