@@ -195,10 +195,10 @@ AZURE_API_PROFILES = {
             'provider_operations_metadata': '2018-01-01-preview'
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2025-03-01-preview', {
-            'agent_pools': '2019-06-01-preview',
-            'tasks': '2019-06-01-preview',
-            'task_runs': '2019-06-01-preview',
-            'runs': '2019-06-01-preview',
+            'agent_pools': '2025-03-01-preview',
+            'tasks': '2025-03-01-preview',
+            'task_runs': '2025-03-01-preview',
+            'runs': '2025-03-01-preview',
             'network_rule': '2021-08-01-preview',
             'cache_rules': '2023-01-01-preview',
             'credential_sets': '2023-01-01-preview'

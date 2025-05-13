@@ -268,16 +268,6 @@ def validate_add_vnet(cmd, namespace):
                               "Web app location: {}. Vnet location: {}".format(webapp_loc, vnet_loc))
 
 
-def validate_front_end_scale_factor(namespace):
-    if namespace.front_end_scale_factor:
-        min_scale_factor = 5
-        max_scale_factor = 15
-        scale_error_text = "Frontend Scale Factor '{}' is invalid. Must be between {} and {}"
-        scale_factor = namespace.front_end_scale_factor
-        if scale_factor < min_scale_factor or scale_factor > max_scale_factor:
-            raise ValidationError(scale_error_text.format(scale_factor, min_scale_factor, max_scale_factor))
-
-
 def validate_ip_address(cmd, namespace):
     if namespace.ip_address is not None:
         _validate_ip_address_format(namespace)

@@ -1,0 +1,1297 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001","name":"cli_test_monitor_workspace000001","type":"Microsoft.Resources/resourceGroups","location":"centralus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_log_analytics_workspace_default","date":"2025-05-08T04:08:03Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '418'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:08:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 8FE97C4133B1484DA08DEB3DE7455735 Ref B: TYO201151005054 Ref C: 2025-05-08T04:08:07Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centralus", "properties": {"publicNetworkAccessForIngestion":
+      "Enabled", "publicNetworkAccessForQuery": "Enabled", "retentionInDays": 30,
+      "sku": {"name": "PerGB2018"}}, "tags": {"clitest": "myron"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '212'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2025-02-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"7b73488a-97ba-4299-a6b2-a9b9392d66ed","provisioningState":"Creating","sku":{"name":"PerGB2018","lastSkuUpdate":"2025-05-08T04:08:09.8731833Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2025-05-08T19:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T04:08:09.8731833Z","modifiedDate":"2025-05-08T04:08:09.8731833Z"},"location":"centralus","tags":{"clitest":"myron"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002","name":"clitest000002","type":"Microsoft.OperationalInsights/workspaces","etag":"\"f400a53a-0000-0300-0000-681c2e290000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/867a16fa-c842-4121-96a5-1dc981f9c0e1?api-version=2015-11-01-preview&t=638822740913992842&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=RerXN2qj-0aA6xfs7ox-zRZSNHMfQEibuZKjj-jLtuuxkaibRc_JlTE0QjzYPjyb9JHfmn2kpjgDYnzqnLDKySRC337ciu3ePmQY8x6FjIyoJUNwGvomS7JDAa8SQNlQSQQkhB-FA4ita7EhkClQsZtDlcsW7Sy3R312eCGSuq-p9D6UTHZ3ZKfaDyJatXkFxMSFynvXaEOrPn_ql3rbsrQQO4FHxRyBlhW--qK3D5m4OtoL6zYsVBi18EdJ94H24-LzuZz-ChEIrqQvc78azPSeDZMkx9tuHDwl90qU4uzVdlTv83w3J44xnbuOVF4V6qtjLCUykL5u9AemYBE2vw&h=I_bxK0oqqKJ_Srvkcy8QrUmNENrzyLMt_HIdg7xuyRE
+      cache-control:
+      - no-cache
+      content-length:
+      - '929'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:08:10 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2025-02-01
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/6d0ccd06-3b31-4586-ac30-9e95cecf932a
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: D57DB4B82E1E4DEFB1E05F2761D46AEB Ref B: TYO201100117053 Ref C: 2025-05-08T04:08:08Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/867a16fa-c842-4121-96a5-1dc981f9c0e1?api-version=2015-11-01-preview&t=638822740913992842&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=RerXN2qj-0aA6xfs7ox-zRZSNHMfQEibuZKjj-jLtuuxkaibRc_JlTE0QjzYPjyb9JHfmn2kpjgDYnzqnLDKySRC337ciu3ePmQY8x6FjIyoJUNwGvomS7JDAa8SQNlQSQQkhB-FA4ita7EhkClQsZtDlcsW7Sy3R312eCGSuq-p9D6UTHZ3ZKfaDyJatXkFxMSFynvXaEOrPn_ql3rbsrQQO4FHxRyBlhW--qK3D5m4OtoL6zYsVBi18EdJ94H24-LzuZz-ChEIrqQvc78azPSeDZMkx9tuHDwl90qU4uzVdlTv83w3J44xnbuOVF4V6qtjLCUykL5u9AemYBE2vw&h=I_bxK0oqqKJ_Srvkcy8QrUmNENrzyLMt_HIdg7xuyRE
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/867a16fa-c842-4121-96a5-1dc981f9c0e1","name":"867a16fa-c842-4121-96a5-1dc981f9c0e1","status":"InProgress","startTime":"2025-05-08T04:08:09.8796909Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:08:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/b3795f5e-6ae8-420d-bc1a-c79e463d178c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 87B0ED1AB295445E8D12E2C73763B66C Ref B: TYO201100117053 Ref C: 2025-05-08T04:08:11Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/867a16fa-c842-4121-96a5-1dc981f9c0e1?api-version=2015-11-01-preview&t=638822740913992842&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=RerXN2qj-0aA6xfs7ox-zRZSNHMfQEibuZKjj-jLtuuxkaibRc_JlTE0QjzYPjyb9JHfmn2kpjgDYnzqnLDKySRC337ciu3ePmQY8x6FjIyoJUNwGvomS7JDAa8SQNlQSQQkhB-FA4ita7EhkClQsZtDlcsW7Sy3R312eCGSuq-p9D6UTHZ3ZKfaDyJatXkFxMSFynvXaEOrPn_ql3rbsrQQO4FHxRyBlhW--qK3D5m4OtoL6zYsVBi18EdJ94H24-LzuZz-ChEIrqQvc78azPSeDZMkx9tuHDwl90qU4uzVdlTv83w3J44xnbuOVF4V6qtjLCUykL5u9AemYBE2vw&h=I_bxK0oqqKJ_Srvkcy8QrUmNENrzyLMt_HIdg7xuyRE
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/867a16fa-c842-4121-96a5-1dc981f9c0e1","name":"867a16fa-c842-4121-96a5-1dc981f9c0e1","status":"Succeeded","startTime":"2025-05-08T04:08:09.8796909Z","endTime":"2025-05-08T04:08:26.4190791Z","properties":{}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '342'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:08:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/919dfe3a-f2e4-43d3-9f23-c646b250fee5
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 647F2082B9AC4F93B7A5B860A846CB0E Ref B: TYO201100117053 Ref C: 2025-05-08T04:08:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2025-02-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"7b73488a-97ba-4299-a6b2-a9b9392d66ed","provisioningState":"Succeeded","sku":{"name":"PerGB2018","lastSkuUpdate":"2025-05-08T04:08:09.8731833Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2025-05-08T19:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T04:08:09.8731833Z","modifiedDate":"2025-05-08T04:08:26.394133Z"},"location":"centralus","tags":{"clitest":"myron"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002","name":"clitest000002","type":"Microsoft.OperationalInsights/workspaces","etag":"\"f400b33a-0000-0300-0000-681c2e3a0000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '929'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:08:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 8D53B0E61B40454FAD7EDD03A418A002 Ref B: TYO201100117053 Ref C: 2025-05-08T04:08:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --retention-time
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2025-02-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"7b73488a-97ba-4299-a6b2-a9b9392d66ed","provisioningState":"Succeeded","sku":{"name":"PerGB2018","lastSkuUpdate":"2025-05-08T04:08:09.8731833Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2025-05-08T19:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T04:08:09.8731833Z","modifiedDate":"2025-05-08T04:08:26.394133Z"},"location":"centralus","tags":{"clitest":"myron"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002","name":"clitest000002","type":"Microsoft.OperationalInsights/workspaces","etag":"\"f400b33a-0000-0300-0000-681c2e3a0000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '929'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:08:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 47D70522CA674C16BBADD96D268DC9D9 Ref B: TYO201100115051 Ref C: 2025-05-08T04:08:43Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "\"f400b33a-0000-0300-0000-681c2e3a0000\"", "location": "centralus",
+      "properties": {"features": {"legacy": 0, "searchVersion": 1, "enableLogAccessUsingOnlyResourcePermissions":
+      true}, "publicNetworkAccessForIngestion": "Enabled", "publicNetworkAccessForQuery":
+      "Enabled", "retentionInDays": 100, "sku": {"name": "PerGB2018"}, "workspaceCapping":
+      {"dailyQuotaGb": -1.0}}, "tags": {"clitest": "myron"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '409'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --retention-time
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2025-02-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"7b73488a-97ba-4299-a6b2-a9b9392d66ed","provisioningState":"Updating","sku":{"name":"PerGB2018","lastSkuUpdate":"2025-05-08T04:08:09.8731833Z"},"retentionInDays":100,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2025-05-08T19:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T04:08:09.8731833Z","modifiedDate":"2025-05-08T04:08:44.7423402Z"},"location":"centralus","tags":{"clitest":"myron"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002","name":"clitest000002","type":"Microsoft.OperationalInsights/workspaces","etag":"\"f400b83a-0000-0300-0000-681c2e4c0000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/ec144f6c-6e16-4d34-9204-b39f639ebe6e?api-version=2015-11-01-preview&t=638822741248624914&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=CUGb7uGBQd_qTpmCtoRZQu6I05XyLpkszagMGFkOmi-Fq6M9TTnD9e6x483RLHI1Kx8R3tI8OoBgW37YSliSeF5QTOmvckDUli7IiI_OmkUrEgIq_gsLNk5WHVg-CFVVU5CSRAKlQxk4Yo_1oUYOAGJRosTwONg2NGNbtjxPHYbKHw6hIDe4i4-n7YxX4aBLekmZlIdyAw0g_miryMUWl4w5JOJOylXhCkaSZXbmTahxpEXz4zDAUtg3RJQXZmAqYHVsEtWQcMxohw0S6_V6bjXfW1fpuCVbYEoGbUFw_H6q0cazCO9XgvDgCnRa9bAV9CVRWY8EAVUjl2-efm4vZQ&h=idJdQ8rR-5ESSO4MFrOM6nHclX0uypqYQFkmNiWie6w
+      cache-control:
+      - no-cache
+      content-length:
+      - '930'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:08:43 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/operationresults/ec144f6c-6e16-4d34-9204-b39f639ebe6e?api-version=2025-02-01&t=638822741248781159&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=BuqWtK0LgAZvrt9dJBk53Bp5HnR9GCS-AbKqR5g7J-N_azvi6QzOvQK80nfC-N0bwlijqGbJVI6BZpRODpz1i57qmeuXX4_aeMwoW0MnVOl2HMMdpv5cSvjU7Pvhi4M6Skir3S61TzMgqMURioOIxLR1AF87ABw0Z13uIUMWq7PaKcjNF3GzjUQaMTTr6ghWzEb-MpNUc2yuBbwPKawt5XcHuhsyXgE8zpur_juB5opHYoXr3EDW_OLrT2ouMUrHX2cTHrjB5WziVRi0FqkRIRrFlwrvUIT4oz094zgvKVXU-O86-3MdZ9O3YoY81VP6Q4nyEeeWFpNhGClfQIPWaw&h=3O3gUQu4uIQOgKKoHB6bR_QKNdJ1Pp_96LkxLl62Lho
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/f44a0267-ea56-4cdf-9ff3-ed2974c1a686
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 9EB9C702618244F995EC592110D58131 Ref B: TYO201100115051 Ref C: 2025-05-08T04:08:44Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --retention-time
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/ec144f6c-6e16-4d34-9204-b39f639ebe6e?api-version=2015-11-01-preview&t=638822741248624914&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=CUGb7uGBQd_qTpmCtoRZQu6I05XyLpkszagMGFkOmi-Fq6M9TTnD9e6x483RLHI1Kx8R3tI8OoBgW37YSliSeF5QTOmvckDUli7IiI_OmkUrEgIq_gsLNk5WHVg-CFVVU5CSRAKlQxk4Yo_1oUYOAGJRosTwONg2NGNbtjxPHYbKHw6hIDe4i4-n7YxX4aBLekmZlIdyAw0g_miryMUWl4w5JOJOylXhCkaSZXbmTahxpEXz4zDAUtg3RJQXZmAqYHVsEtWQcMxohw0S6_V6bjXfW1fpuCVbYEoGbUFw_H6q0cazCO9XgvDgCnRa9bAV9CVRWY8EAVUjl2-efm4vZQ&h=idJdQ8rR-5ESSO4MFrOM6nHclX0uypqYQFkmNiWie6w
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/ec144f6c-6e16-4d34-9204-b39f639ebe6e","name":"ec144f6c-6e16-4d34-9204-b39f639ebe6e","status":"InProgress","startTime":"2025-05-08T04:08:44.7429901Z"}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:08:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/f8d7eb35-f5ee-4777-b71a-417d8b0f41a4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+      x-msedge-ref:
+      - 'Ref A: 46B7A85B05924D949E3FD5C660E13B98 Ref B: TYO201100115051 Ref C: 2025-05-08T04:08:45Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --retention-time
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/ec144f6c-6e16-4d34-9204-b39f639ebe6e?api-version=2015-11-01-preview&t=638822741248624914&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=CUGb7uGBQd_qTpmCtoRZQu6I05XyLpkszagMGFkOmi-Fq6M9TTnD9e6x483RLHI1Kx8R3tI8OoBgW37YSliSeF5QTOmvckDUli7IiI_OmkUrEgIq_gsLNk5WHVg-CFVVU5CSRAKlQxk4Yo_1oUYOAGJRosTwONg2NGNbtjxPHYbKHw6hIDe4i4-n7YxX4aBLekmZlIdyAw0g_miryMUWl4w5JOJOylXhCkaSZXbmTahxpEXz4zDAUtg3RJQXZmAqYHVsEtWQcMxohw0S6_V6bjXfW1fpuCVbYEoGbUFw_H6q0cazCO9XgvDgCnRa9bAV9CVRWY8EAVUjl2-efm4vZQ&h=idJdQ8rR-5ESSO4MFrOM6nHclX0uypqYQFkmNiWie6w
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.OperationalInsights/locations/centralus/operationstatuses/ec144f6c-6e16-4d34-9204-b39f639ebe6e","name":"ec144f6c-6e16-4d34-9204-b39f639ebe6e","status":"Succeeded","startTime":"2025-05-08T04:08:44.7429901Z","endTime":"2025-05-08T04:08:47.4129027Z","properties":{}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '342'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/cb1f266b-ab4a-4d6f-a22f-b53841129813
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 2757C0B68FF94A94AE84C4E58098D565 Ref B: TYO201100115051 Ref C: 2025-05-08T04:09:15Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --retention-time
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2025-02-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"7b73488a-97ba-4299-a6b2-a9b9392d66ed","provisioningState":"Succeeded","sku":{"name":"PerGB2018","lastSkuUpdate":"2025-05-08T04:08:09.8731833Z"},"retentionInDays":100,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2025-05-08T19:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T04:08:09.8731833Z","modifiedDate":"2025-05-08T04:08:47.3909994Z"},"location":"centralus","tags":{"clitest":"myron"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002","name":"clitest000002","type":"Microsoft.OperationalInsights/workspaces","etag":"\"f400bb3a-0000-0300-0000-681c2e4f0000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '931'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: E51B9D59BFE94E86928688551C48E9ED Ref B: TYO201100115051 Ref C: 2025-05-08T04:09:15Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2025-02-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"7b73488a-97ba-4299-a6b2-a9b9392d66ed","provisioningState":"Succeeded","sku":{"name":"PerGB2018","lastSkuUpdate":"2025-05-08T04:08:09.8731833Z"},"retentionInDays":100,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2025-05-08T19:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T04:08:09.8731833Z","modifiedDate":"2025-05-08T04:08:47.3909994Z"},"location":"centralus","tags":{"clitest":"myron"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002","name":"clitest000002","type":"Microsoft.OperationalInsights/workspaces","etag":"\"f400bb3a-0000-0300-0000-681c2e4f0000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '931'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: B0E7C99FCD024301B46D03A25086FD3C Ref B: TYO201100114021 Ref C: 2025-05-08T04:09:16Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace list-usages
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/usages?api-version=2020-08-01
+  response:
+    body:
+      string: '{"value":[{"name":{"value":"DataAnalyzed","localizedValue":"Data Analyzed"},"unit":"Bytes","currentValue":0.0,"limit":-1.0,"nextResetTime":"2025-05-08T19:00:00Z","quotaPeriod":"P1D"}]}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/6666c2ab-e18e-4dbc-a54e-709d7a702ee4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 0C8C2A4BA36846879B39C650FF350F9B Ref B: TYO201151003040 Ref C: 2025-05-08T04:09:17Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces?api-version=2025-02-01
+  response:
+    body:
+      string: '{"value":[{"properties":{"customerId":"7b73488a-97ba-4299-a6b2-a9b9392d66ed","provisioningState":"Succeeded","sku":{"name":"PerGB2018","lastSkuUpdate":"2025-05-08T04:08:09.8731833Z"},"retentionInDays":100,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2025-05-08T19:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T04:08:09.8731833Z","modifiedDate":"2025-05-08T04:08:47.3909994Z"},"location":"centralus","tags":{"clitest":"myron"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002","name":"clitest000002","type":"Microsoft.OperationalInsights/workspaces","etag":"\"f400bb3a-0000-0300-0000-681c2e4f0000\""}]}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '943'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - ''
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 434659A385634CEBB87E0CB77021958B Ref B: TYO201100114029 Ref C: 2025-05-08T04:09:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace get-shared-keys
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/sharedKeys?api-version=2020-08-01
+  response:
+    body:
+      string: '{"primarySharedKey":"UoZHGGNk85YdU+BMq9WwpYSj70MfFSMlFWWy+CzBSJJaV34tXMOi3N72okU2JZHpRwf8kDA/EDLKbsymOsqb/w==","secondarySharedKey":"LekrsTCtVLRX7MdSPSs4n9MmnLnPnvRMhsQjzP5xh0PFnV4Mz5jW0HKWwXGAcfUMYJaxW8ODcK9kYVRKco6J4A=="}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '223'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/875c945e-8b67-48cc-ad3c-b3dcf3aee4e0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: FA82AE734587424F9055F2523A90EA62 Ref B: TYO201100115031 Ref C: 2025-05-08T04:09:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace get-schema
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/schema?api-version=2020-08-01
+  response:
+    body:
+      string: '{"__metadata":{"schema":{"name":"CloudOps","version":2},"resultType":"Schema"},"value":[]}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2015-11-01-preview, 2017-01-01-preview, 2017-03-03-preview, 2017-03-15-preview,
+        2017-04-26-preview, 2020-03-01-preview, 2020-08-01, 2020-10-01, 2023-01-01-preview,
+        2023-09-01, 2025-02-01, 2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '90'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/d1538e80-9f83-4387-a131-e4db58faf17a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: BBE76D118151456A8004BB9740A8E5FE Ref B: TYO201100116027 Ref C: 2025-05-08T04:09:19Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace pack enable
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --workspace-name -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/intelligencePacks/AzureSecurityOfThings/Enable?api-version=2020-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 08 May 2025 04:09:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/68da3a5c-e043-431d-84f6-2f8c7abab273
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: B9E411CE82974D67B704B11A712EE087 Ref B: TYO201100113053 Ref C: 2025-05-08T04:09:21Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace pack list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --workspace-name
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/intelligencePacks?api-version=2020-08-01
+  response:
+    body:
+      string: "[{\"displayname\":\"Azure Security of Things solution\",\"enabled\":true,\"modifiedDate\":\"Thu,
+        08 May 2025 04:09:22 GMT\",\"createdDate\":\"Thu, 08 May 2025 04:09:22 GMT\",\"name\":\"AzureSecurityOfThings\"},{\"displayname\":\"Capacity
+        and Performance\",\"enabled\":false,\"name\":\"CapacityPerformance\"},{\"displayname\":\"Azure
+        Web Apps Analytics (Preview)\",\"enabled\":false,\"name\":\"AzureWebAppsAnalytics\"},{\"displayname\":\"BehaviorAnalyticsInsights_DisplayName_TBD\",\"enabled\":false,\"name\":\"BehaviorAnalyticsInsights\"},{\"displayname\":\"Security
+        and Audit\",\"enabled\":false,\"name\":\"Security\"},{\"displayname\":\"Update
+        Management\",\"enabled\":false,\"name\":\"Updates\"},{\"displayname\":\"Antimalware
+        Assessment\",\"enabled\":false,\"name\":\"AntiMalware\"},{\"displayname\":\"Log
+        Management\",\"enabled\":true,\"name\":\"LogManagement\"},{\"displayname\":\"Azure
+        Resources\",\"enabled\":true,\"name\":\"AzureResources\"},{\"displayname\":\"Change
+        Tracking\",\"enabled\":false,\"name\":\"ChangeTracking\"},{\"displayname\":\"SQL
+        Health Check\",\"enabled\":false,\"name\":\"SQLAssessment\"},{\"displayname\":\"System
+        Center Operations Manager Health Check\",\"enabled\":false,\"name\":\"SCOMAssessment\"},{\"displayname\":\"IT
+        Service Management Connector(Preview)\",\"enabled\":false,\"name\":\"ServiceDesk\"},{\"displayname\":\"SQL
+        Server Assessment\",\"enabled\":false,\"name\":\"SQLAssessmentPlus\"},{\"displayname\":\"Active
+        Directory Health Check\",\"enabled\":false,\"name\":\"ADAssessment\"},{\"displayname\":\"Alert
+        Management\",\"enabled\":false,\"name\":\"AlertManagement\"},{\"displayname\":\"Azure
+        Automation\",\"enabled\":false,\"name\":\"AzureAutomation\"},{\"displayname\":\"Wire
+        Data\",\"enabled\":false,\"name\":\"WireData\"},{\"displayname\":\"Azure Site
+        Recovery\",\"enabled\":false,\"name\":\"SiteRecovery\"},{\"displayname\":\"Backup\",\"enabled\":false,\"name\":\"Backup\"},{\"displayname\":\"Surface
+        Hub\",\"enabled\":false,\"name\":\"SurfaceHub\"},{\"displayname\":\"Network
+        Performance Monitor\",\"enabled\":false,\"name\":\"NetworkMonitoring\"},{\"displayname\":\"Container
+        Monitoring Solution\",\"enabled\":false,\"name\":\"Containers\"},{\"displayname\":\"Container
+        Insights\",\"enabled\":false,\"name\":\"ContainerInsights\"},{\"displayname\":\"Service
+        Map\",\"enabled\":false,\"name\":\"ServiceMap\"},{\"displayname\":\"Azure
+        Networking Analytics (Deprecated)\",\"enabled\":false,\"name\":\"AzureNetworking\"},{\"displayname\":\"AD
+        Replication Status\",\"enabled\":false,\"name\":\"ADReplication\"},{\"displayname\":\"Office
+        365 (Preview)\",\"enabled\":false,\"name\":\"Office365\"},{\"displayname\":\"Upgrade
+        Readiness\",\"enabled\":false,\"name\":\"CompatibilityAssessment\"},{\"displayname\":\"Key
+        Vault (Deprecated)\",\"enabled\":false,\"name\":\"KeyVault\"},{\"displayname\":\"Service
+        Fabric\",\"enabled\":false,\"name\":\"ServiceFabric\"},{\"displayname\":\"DNS
+        Analytics (Preview)\",\"enabled\":false,\"name\":\"DnsAnalytics\"},{\"displayname\":\"Application
+        Insights (Preview)\",\"enabled\":false,\"name\":\"ApplicationInsights\"},{\"displayname\":\"Wire
+        Data 2.0\",\"enabled\":false,\"name\":\"WireData2\"},{\"displayname\":\"Update
+        Compliance\",\"enabled\":false,\"name\":\"WaaSUpdateInsights\"},{\"displayname\":\"Agent
+        Health \",\"enabled\":false,\"name\":\"AgentHealthAssessment\"},{\"displayname\":\"Activity
+        Log Analytics\",\"enabled\":false,\"name\":\"AzureActivity\"},{\"displayname\":\"HDInsight
+        HBase Monitoring (Preview)\",\"enabled\":false,\"name\":\"HDInsight\"},{\"displayname\":\"HDInsight
+        Kafka Monitoring\",\"enabled\":false,\"name\":\"HDInsightKafka\"},{\"displayname\":\"HDInsight
+        Spark Monitoring\",\"enabled\":false,\"name\":\"HDInsightSpark\"},{\"displayname\":\"HDInsight
+        Hadoop Monitoring\",\"enabled\":false,\"name\":\"HDInsightHadoop\"},{\"displayname\":\"Azure
+        CDN Core Analytics\",\"enabled\":false,\"name\":\"AzureCdnCoreAnalytics\"},{\"displayname\":\"HDInsight
+        Storm Monitoring\",\"enabled\":false,\"name\":\"HDInsightStorm\"},{\"displayname\":\"HDInsight
+        InteractiveQuery Monitoring\",\"enabled\":false,\"name\":\"HDInsightInteractiveQuery\"},{\"displayname\":\"VMware
+        (Preview)\",\"enabled\":false,\"name\":\"VMware\"},{\"displayname\":\"Security
+        Center Free \u2013 for Azure Resources only\",\"enabled\":false,\"name\":\"SecurityCenterFree\"},{\"displayname\":\"Logic
+        Apps Management\",\"enabled\":false,\"name\":\"LogicAppsManagement\"},{\"displayname\":\"Logic
+        Apps B2B\",\"enabled\":false,\"name\":\"LogicAppB2B\"},{\"displayname\":\"Azure
+        SQL Analytics (Preview)\",\"enabled\":false,\"name\":\"AzureSQLAnalytics\"},{\"displayname\":\"Key
+        Vault Analytics\",\"enabled\":false,\"name\":\"KeyVaultAnalytics\"},{\"displayname\":\"Azure
+        Network Security Group Analytics\",\"enabled\":false,\"name\":\"AzureNSGAnalytics\"},{\"displayname\":\"Azure
+        Application Gateway Analytics\",\"enabled\":false,\"name\":\"AzureAppGatewayAnalytics\"},{\"displayname\":\"Device
+        Health (Preview)\",\"enabled\":false,\"name\":\"DeviceHealthProd\"},{\"displayname\":\"Windows
+        Defender ATP\",\"enabled\":false,\"name\":\"WindowsDefenderATP\"},{\"displayname\":\"Stable
+        Windows Defender ATP\",\"enabled\":false,\"name\":\"WindowsDefenderATPStable\"},{\"displayname\":\"Infrastructure
+        Insights\",\"enabled\":false,\"name\":\"InfrastructureInsights\"},{\"displayname\":\"ProcessInvestigator\",\"enabled\":false,\"name\":\"ProcessInvestigator\"},{\"displayname\":\"Microsoft
+        365 Analytics\",\"enabled\":false,\"name\":\"Microsoft365Analytics\"},{\"displayname\":\"Azure
+        Site Recovery Analytics\",\"enabled\":false,\"name\":\"ASRAnalytics\"},{\"displayname\":\"Security
+        Insights (Private Preview)\",\"enabled\":false,\"name\":\"AzureSentinelPrivatePreview\"},{\"displayname\":\"AzureSentinel
+        DSRE\",\"enabled\":false,\"name\":\"AzureSentinelDSRE\"},{\"displayname\":\"Security
+        Insights\",\"enabled\":false,\"name\":\"SecurityInsights\"},{\"displayname\":\"Security
+        Center Network Traffic\",\"enabled\":false,\"name\":\"SecurityCenterNetworkTraffic\"},{\"displayname\":\"Windows
+        Firewall\",\"enabled\":false,\"name\":\"WindowsFirewall\"},{\"displayname\":\"Windows
+        Event Forwarding\",\"enabled\":false,\"name\":\"WindowsEventForwarding\"},{\"displayname\":\"Internal
+        Windows Event\",\"enabled\":false,\"name\":\"InternalWindowsEvent\"},{\"displayname\":\"Customized
+        Windows Events Filtering\",\"enabled\":false,\"name\":\"CustomizedWindowsEventsFiltering\"},{\"displayname\":\"WEF
+        Internal Uat\",\"enabled\":false,\"name\":\"WEFInternalUat\"},{\"displayname\":\"WEF
+        Internal\",\"enabled\":false,\"name\":\"WEFInternal\"},{\"displayname\":\"WEF_10x\",\"enabled\":false,\"name\":\"WEF_10x\"},{\"displayname\":\"WEF_10xDSRE\",\"enabled\":false,\"name\":\"WEF_10xDSRE\"},{\"displayname\":\"DHCPActivity\",\"enabled\":false,\"name\":\"DHCPActivity\"},{\"displayname\":\"Azure
+        Data Factory Analytics (Preview)\",\"enabled\":false,\"name\":\"AzureDataFactoryAnalytics\"},{\"displayname\":\"SQL
+        Vulnerability Assessment\",\"enabled\":false,\"name\":\"SQLVulnerabilityAssessment\"},{\"displayname\":\"SQL
+        Advanced Threat Protection\",\"enabled\":false,\"name\":\"SQLAdvancedThreatProtection\"},{\"displayname\":\"Azure
+        Monitor - VM Insights\",\"enabled\":false,\"name\":\"VMInsights\"},{\"displayname\":\"WinLog\",\"enabled\":false,\"name\":\"WinLog\"},{\"displayname\":\"NetFlow\",\"enabled\":false,\"name\":\"NetFlow\"}]"
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '6594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/e107c6b6-226a-43ab-9596-e8b062635fc0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 33AA52452C9D4FDBA834946A06ED07D0 Ref B: TYO201151006040 Ref C: 2025-05-08T04:09:23Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace pack disable
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --workspace-name -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/intelligencePacks/AzureSecurityOfThings/Disable?api-version=2020-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 08 May 2025 04:09:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/b711d495-cc9b-4dac-9d19-446207f9ba37
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 4E1C272912084E38AFFB7DA6EC41A758 Ref B: TYO201100115045 Ref C: 2025-05-08T04:09:23Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace pack list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --workspace-name
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/intelligencePacks?api-version=2020-08-01
+  response:
+    body:
+      string: "[{\"displayname\":\"Azure Security of Things solution\",\"enabled\":false,\"modifiedDate\":\"Thu,
+        08 May 2025 04:09:24 GMT\",\"createdDate\":\"Thu, 08 May 2025 04:09:22 GMT\",\"name\":\"AzureSecurityOfThings\"},{\"displayname\":\"Capacity
+        and Performance\",\"enabled\":false,\"name\":\"CapacityPerformance\"},{\"displayname\":\"Azure
+        Web Apps Analytics (Preview)\",\"enabled\":false,\"name\":\"AzureWebAppsAnalytics\"},{\"displayname\":\"BehaviorAnalyticsInsights_DisplayName_TBD\",\"enabled\":false,\"name\":\"BehaviorAnalyticsInsights\"},{\"displayname\":\"Security
+        and Audit\",\"enabled\":false,\"name\":\"Security\"},{\"displayname\":\"Update
+        Management\",\"enabled\":false,\"name\":\"Updates\"},{\"displayname\":\"Antimalware
+        Assessment\",\"enabled\":false,\"name\":\"AntiMalware\"},{\"displayname\":\"Log
+        Management\",\"enabled\":true,\"name\":\"LogManagement\"},{\"displayname\":\"Azure
+        Resources\",\"enabled\":true,\"name\":\"AzureResources\"},{\"displayname\":\"Change
+        Tracking\",\"enabled\":false,\"name\":\"ChangeTracking\"},{\"displayname\":\"SQL
+        Health Check\",\"enabled\":false,\"name\":\"SQLAssessment\"},{\"displayname\":\"System
+        Center Operations Manager Health Check\",\"enabled\":false,\"name\":\"SCOMAssessment\"},{\"displayname\":\"IT
+        Service Management Connector(Preview)\",\"enabled\":false,\"name\":\"ServiceDesk\"},{\"displayname\":\"SQL
+        Server Assessment\",\"enabled\":false,\"name\":\"SQLAssessmentPlus\"},{\"displayname\":\"Active
+        Directory Health Check\",\"enabled\":false,\"name\":\"ADAssessment\"},{\"displayname\":\"Alert
+        Management\",\"enabled\":false,\"name\":\"AlertManagement\"},{\"displayname\":\"Azure
+        Automation\",\"enabled\":false,\"name\":\"AzureAutomation\"},{\"displayname\":\"Wire
+        Data\",\"enabled\":false,\"name\":\"WireData\"},{\"displayname\":\"Azure Site
+        Recovery\",\"enabled\":false,\"name\":\"SiteRecovery\"},{\"displayname\":\"Backup\",\"enabled\":false,\"name\":\"Backup\"},{\"displayname\":\"Surface
+        Hub\",\"enabled\":false,\"name\":\"SurfaceHub\"},{\"displayname\":\"Network
+        Performance Monitor\",\"enabled\":false,\"name\":\"NetworkMonitoring\"},{\"displayname\":\"Container
+        Monitoring Solution\",\"enabled\":false,\"name\":\"Containers\"},{\"displayname\":\"Container
+        Insights\",\"enabled\":false,\"name\":\"ContainerInsights\"},{\"displayname\":\"Service
+        Map\",\"enabled\":false,\"name\":\"ServiceMap\"},{\"displayname\":\"Azure
+        Networking Analytics (Deprecated)\",\"enabled\":false,\"name\":\"AzureNetworking\"},{\"displayname\":\"AD
+        Replication Status\",\"enabled\":false,\"name\":\"ADReplication\"},{\"displayname\":\"Office
+        365 (Preview)\",\"enabled\":false,\"name\":\"Office365\"},{\"displayname\":\"Upgrade
+        Readiness\",\"enabled\":false,\"name\":\"CompatibilityAssessment\"},{\"displayname\":\"Key
+        Vault (Deprecated)\",\"enabled\":false,\"name\":\"KeyVault\"},{\"displayname\":\"Service
+        Fabric\",\"enabled\":false,\"name\":\"ServiceFabric\"},{\"displayname\":\"DNS
+        Analytics (Preview)\",\"enabled\":false,\"name\":\"DnsAnalytics\"},{\"displayname\":\"Application
+        Insights (Preview)\",\"enabled\":false,\"name\":\"ApplicationInsights\"},{\"displayname\":\"Wire
+        Data 2.0\",\"enabled\":false,\"name\":\"WireData2\"},{\"displayname\":\"Update
+        Compliance\",\"enabled\":false,\"name\":\"WaaSUpdateInsights\"},{\"displayname\":\"Agent
+        Health \",\"enabled\":false,\"name\":\"AgentHealthAssessment\"},{\"displayname\":\"Activity
+        Log Analytics\",\"enabled\":false,\"name\":\"AzureActivity\"},{\"displayname\":\"HDInsight
+        HBase Monitoring (Preview)\",\"enabled\":false,\"name\":\"HDInsight\"},{\"displayname\":\"HDInsight
+        Kafka Monitoring\",\"enabled\":false,\"name\":\"HDInsightKafka\"},{\"displayname\":\"HDInsight
+        Spark Monitoring\",\"enabled\":false,\"name\":\"HDInsightSpark\"},{\"displayname\":\"HDInsight
+        Hadoop Monitoring\",\"enabled\":false,\"name\":\"HDInsightHadoop\"},{\"displayname\":\"Azure
+        CDN Core Analytics\",\"enabled\":false,\"name\":\"AzureCdnCoreAnalytics\"},{\"displayname\":\"HDInsight
+        Storm Monitoring\",\"enabled\":false,\"name\":\"HDInsightStorm\"},{\"displayname\":\"HDInsight
+        InteractiveQuery Monitoring\",\"enabled\":false,\"name\":\"HDInsightInteractiveQuery\"},{\"displayname\":\"VMware
+        (Preview)\",\"enabled\":false,\"name\":\"VMware\"},{\"displayname\":\"Security
+        Center Free \u2013 for Azure Resources only\",\"enabled\":false,\"name\":\"SecurityCenterFree\"},{\"displayname\":\"Logic
+        Apps Management\",\"enabled\":false,\"name\":\"LogicAppsManagement\"},{\"displayname\":\"Logic
+        Apps B2B\",\"enabled\":false,\"name\":\"LogicAppB2B\"},{\"displayname\":\"Azure
+        SQL Analytics (Preview)\",\"enabled\":false,\"name\":\"AzureSQLAnalytics\"},{\"displayname\":\"Key
+        Vault Analytics\",\"enabled\":false,\"name\":\"KeyVaultAnalytics\"},{\"displayname\":\"Azure
+        Network Security Group Analytics\",\"enabled\":false,\"name\":\"AzureNSGAnalytics\"},{\"displayname\":\"Azure
+        Application Gateway Analytics\",\"enabled\":false,\"name\":\"AzureAppGatewayAnalytics\"},{\"displayname\":\"Device
+        Health (Preview)\",\"enabled\":false,\"name\":\"DeviceHealthProd\"},{\"displayname\":\"Windows
+        Defender ATP\",\"enabled\":false,\"name\":\"WindowsDefenderATP\"},{\"displayname\":\"Stable
+        Windows Defender ATP\",\"enabled\":false,\"name\":\"WindowsDefenderATPStable\"},{\"displayname\":\"Infrastructure
+        Insights\",\"enabled\":false,\"name\":\"InfrastructureInsights\"},{\"displayname\":\"ProcessInvestigator\",\"enabled\":false,\"name\":\"ProcessInvestigator\"},{\"displayname\":\"Microsoft
+        365 Analytics\",\"enabled\":false,\"name\":\"Microsoft365Analytics\"},{\"displayname\":\"Azure
+        Site Recovery Analytics\",\"enabled\":false,\"name\":\"ASRAnalytics\"},{\"displayname\":\"Security
+        Insights (Private Preview)\",\"enabled\":false,\"name\":\"AzureSentinelPrivatePreview\"},{\"displayname\":\"AzureSentinel
+        DSRE\",\"enabled\":false,\"name\":\"AzureSentinelDSRE\"},{\"displayname\":\"Security
+        Insights\",\"enabled\":false,\"name\":\"SecurityInsights\"},{\"displayname\":\"Security
+        Center Network Traffic\",\"enabled\":false,\"name\":\"SecurityCenterNetworkTraffic\"},{\"displayname\":\"Windows
+        Firewall\",\"enabled\":false,\"name\":\"WindowsFirewall\"},{\"displayname\":\"Windows
+        Event Forwarding\",\"enabled\":false,\"name\":\"WindowsEventForwarding\"},{\"displayname\":\"Internal
+        Windows Event\",\"enabled\":false,\"name\":\"InternalWindowsEvent\"},{\"displayname\":\"Customized
+        Windows Events Filtering\",\"enabled\":false,\"name\":\"CustomizedWindowsEventsFiltering\"},{\"displayname\":\"WEF
+        Internal Uat\",\"enabled\":false,\"name\":\"WEFInternalUat\"},{\"displayname\":\"WEF
+        Internal\",\"enabled\":false,\"name\":\"WEFInternal\"},{\"displayname\":\"WEF_10x\",\"enabled\":false,\"name\":\"WEF_10x\"},{\"displayname\":\"WEF_10xDSRE\",\"enabled\":false,\"name\":\"WEF_10xDSRE\"},{\"displayname\":\"DHCPActivity\",\"enabled\":false,\"name\":\"DHCPActivity\"},{\"displayname\":\"Azure
+        Data Factory Analytics (Preview)\",\"enabled\":false,\"name\":\"AzureDataFactoryAnalytics\"},{\"displayname\":\"SQL
+        Vulnerability Assessment\",\"enabled\":false,\"name\":\"SQLVulnerabilityAssessment\"},{\"displayname\":\"SQL
+        Advanced Threat Protection\",\"enabled\":false,\"name\":\"SQLAdvancedThreatProtection\"},{\"displayname\":\"Azure
+        Monitor - VM Insights\",\"enabled\":false,\"name\":\"VMInsights\"},{\"displayname\":\"WinLog\",\"enabled\":false,\"name\":\"WinLog\"},{\"displayname\":\"NetFlow\",\"enabled\":false,\"name\":\"NetFlow\"}]"
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2023-09-01, 2025-02-01, 2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '6595'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/bddcdacf-4cdd-4a43-8518-efa9c8994954
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: B5620CF89E4F440CBB838F4162D1C09E Ref B: TYO201100116039 Ref C: 2025-05-08T04:09:25Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace list-management-groups
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/managementGroups?api-version=2020-08-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 04:09:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/7b044045-af0f-4092-8214-ed9d29fc5077
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 89B63A8ED69D4C66A217448511615ECD Ref B: TYO201151004029 Ref C: 2025-05-08T04:09:25Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2025-02-01
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 08 May 2025 04:09:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/8c62f745-ae65-4f90-84e2-95043113158d
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
+      x-msedge-ref:
+      - 'Ref A: 7ACE7C1FD1BD4B7F992FB976B00E357C Ref B: TYO201151004062 Ref C: 2025-05-08T04:09:26Z'
+    status:
+      code: 200
+      message: OK
+version: 1
