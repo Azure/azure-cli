@@ -36,7 +36,7 @@ from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sq
 
 # region Service
 
-def check_service_name_availability(cmd, client, service_name, location):
+def check_service_name_availability(client, service_name, location):
     parameters = NameAvailabilityRequest(name=service_name,
                                          type='services')
     return client.check_name_availability(location=location,
