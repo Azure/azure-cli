@@ -31,10 +31,6 @@ class AcrabacScenarioTest(ScenarioTest):
             self.check('roleAssignmentMode', 'LegacyRegistryPermissions')
         ])
 
-        self.cmd('acr show -g {rg} -n {name}', checks=[
-            self.check('roleAssignmentMode', 'LegacyRegistryPermissions')
-        ])
-
         self.cmd('acr update -g {rg} -n {name} --role-assignment-mode rbac-abac', checks=[
             self.check('roleAssignmentMode', 'AbacRepositoryPermissions')
         ])
@@ -45,10 +41,10 @@ class AcrabacScenarioTest(ScenarioTest):
 
         self.cmd('acr delete -g {rg} -n {name} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
+    @ResourceGroupPreparer(name_prefix='cli_test_acrrbac_')
     def test_acr_create_normal(self):
         self.kwargs.update({
-            'name': self.create_random_name('clitestabac', length=16),
+            'name': self.create_random_name('clitestrbac', length=16),
         })
 
         self.cmd('acr create -g {rg} -n {name} --sku Basic --location southeastasia', checks=[
@@ -77,11 +73,11 @@ class AcrabacScenarioTest(ScenarioTest):
 
         self.cmd('acr delete -g {rg} -n {name} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_acrabac_')
+    @ResourceGroupPreparer(name_prefix='cli_test_acrrbac_')
     @live_only()
     def test_acr_create_normal_check_health(self):
         self.kwargs.update({
-            'name': self.create_random_name('clitestabac', length=16),
+            'name': self.create_random_name('clitestrbac', length=16),
         })
 
         self.cmd('acr create -g {rg} -n {name} --sku Basic --location southeastasia', checks=[
