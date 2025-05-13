@@ -102,7 +102,7 @@ Release History
 
 **Service Connector**
 
-* `az webapp connection create mongodb-atlas` (#31308)
+* `az webapp connection create mongodb-atlas`: Add `mongodb-atlas` target service support (#31308)
 
 **Storage**
 
