@@ -218,11 +218,11 @@ def import_config(cmd,
 
     if not need_kv_change and not need_feature_change:
         return
-    
+
     # If yes is provided, it should take precedence over dry-run
     if dry_run and not yes:
         return
-    
+
     if not yes:
         user_confirmation("Do you want to continue? \n")
 
@@ -418,7 +418,7 @@ def export_config(cmd,
 
     if not need_feature_change and not need_kv_change:
         return
-    
+
     # If yes is provided, it takes precedence over dry-run
     if dry_run and not yes:
         return
