@@ -77,12 +77,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
         client_factory=cf_sa)
 
-    block_blob_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
-        client_factory=blob_data_service_factory,
-        resource_type=ResourceType.DATA_STORAGE)
-
-    def get_custom_sdk(custom_module, client_factory, resource_type=ResourceType.DATA_STORAGE):
+    def get_custom_sdk(custom_module, client_factory, resource_type=ResourceType.MGMT_STORAGE):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
         This is useful when the command is not defined in the default 'custom' module but instead in a module under
         'operations' package."""
@@ -93,8 +88,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             resource_type=resource_type
         )
 
-    with self.command_group('storage', command_type=block_blob_sdk,
-                            custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
+    with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
         g.storage_custom_command_oauth('remove', 'storage_remove')
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
@@ -448,8 +442,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             min_api='2016-05-31') as g:
         g.storage_command_oauth('cancel', 'abort_copy_blob')
 
-    with self.command_group('storage blob', command_type=block_blob_sdk,
-                            custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
+    with self.command_group('storage blob', custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
         g.storage_custom_command_oauth('sync', 'storage_blob_sync', is_preview=True)
 
     container_client_sdk = CliCommandType(

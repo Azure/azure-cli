@@ -16,7 +16,7 @@ class StorageCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
         super().__init__(cli_ctx=cli_ctx,
-                         resource_type=ResourceType.DATA_STORAGE,
+                         resource_type=ResourceType.MGMT_STORAGE,
                          custom_command_type=storage_custom,
                          command_group_cls=StorageCommandGroup,
                          argument_context_cls=StorageArgumentContext)
