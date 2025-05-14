@@ -5,7 +5,8 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
 
-from ..aaz.latest.sig.image_definition import Update as _SigImageDefinitionUpdate
+from ..aaz.latest.sig.image_definition import (Update as _SigImageDefinitionUpdate,
+                                               ListShared as _SigImageDefinitionListShared)
 
 logger = get_logger(__name__)
 
@@ -33,3 +34,11 @@ class SigImageDefinitionUpdate(_SigImageDefinitionUpdate):
         args_schema.release_note_uri._registered = False
 
         return args_schema
+
+
+class SigImageDefinitionListShared(_SigImageDefinitionListShared):
+    def pre_operations(self):
+        from azure.cli.core.aaz import has_value
+        args = self.ctx.args
+        if has_value(args.shared_to) and args.shared_to == 'subscription':
+            args.shared_to = None

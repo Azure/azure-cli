@@ -45,7 +45,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('login') as c:
             c.argument('username', options_list=['--username', '-u'],
-                       help='User name, service principal client ID, or managed identity ID.')
+                       help='User name or service principal client ID.')
             c.argument('password', options_list=['--password', '-p'],
                        help='User password or service principal secret. Will prompt if not given.')
             c.argument('tenant', options_list=['--tenant', '-t'], validator=validate_tenant,

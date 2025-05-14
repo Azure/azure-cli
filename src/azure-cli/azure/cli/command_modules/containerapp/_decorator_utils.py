@@ -64,7 +64,8 @@ def process_loaded_yaml(yaml_containerapp):
                          "outboundIPAddresses",
                          "workloadProfileName",
                          "latestReadyRevisionName",
-                         "eventStreamEndpoint"]
+                         "eventStreamEndpoint",
+                         "runningStatus"]
     for nested_property in nested_properties:
         tmp = yaml_containerapp.get(nested_property)
         if nested_property in yaml_containerapp:

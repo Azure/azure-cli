@@ -71,10 +71,6 @@ class CloudTests(ScenarioTest):
         result = self.cmd('cloud list-profiles').get_output_in_json()
         assert result == [
             "latest",
-            "2017-03-09-profile",
-            "2018-03-01-hybrid",
-            "2019-03-01-hybrid",
-            "2020-09-01-hybrid"
         ]
 
     @serial_test()
@@ -96,8 +92,8 @@ class CloudTests(ScenarioTest):
         self.cmd('cloud register --name {name} --endpoint-resource-manager https://management.azure.com/')
         result = self.cmd('az cloud show --name {name}').get_output_in_json()
         assert result['name'] == 'mycloud'
-        assert result['endpoints']['activeDirectory'] == 'https://login.microsoftonline.com/'
-        assert result['endpoints']['management'] == 'https://management.azure.com/'
+        assert result['endpoints']['activeDirectory'] == 'https://login.microsoftonline.com'
+        assert result['endpoints']['management'] == 'https://management.core.windows.net/'
 
         # Update the cloud
         self.cmd('cloud update --name {name} --endpoint-active-directory https://login.myendpoint.com/ '
@@ -108,7 +104,7 @@ class CloudTests(ScenarioTest):
 
         # TODO: Test all arguments of `az cloud update`
 
-        self.cmd('cloud set --name {name} --profile 2020-09-01-hybrid')
+        self.cmd('cloud set --name {name} --profile latest')
         self.cli_ctx.cloud.name = self.kwargs['name']
 
         self.cmd('cloud show', checks=[self.check('name', '{name}'),

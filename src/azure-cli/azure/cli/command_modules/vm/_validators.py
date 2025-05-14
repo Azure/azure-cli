@@ -518,7 +518,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 image_version_infos = _SigImageVersionList(cli_ctx=cmd.cli_ctx)(command_args={
                     "resource_group": res['resource_group'],
                     "gallery_name": res['name'],
-                    "gallery_image_definition": res['child_name_1']
+                    "gallery_image_definition": res['child_name_1'],
+                    "subscription": res['subscription']
                 })
                 image_version_infos = [x for x in image_version_infos
                                        if not x.get("publishingProfile", {}).get("excludeFromLatest", None)]
@@ -535,6 +536,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                     "gallery_name": res['name'],
                     "gallery_image_definition": res['child_name_1'],
                     "gallery_image_version_name": res['child_name_2'],
+                    "subscription": res['subscription']
                 })
                 image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", []) or []
                 image_data_disks = [{'lun': disk["lun"]} for disk in image_data_disks]
@@ -1413,8 +1415,6 @@ def trusted_launch_set_default(namespace, generation_version, features):
                 if namespace.enable_secure_boot is None:
                     namespace.enable_secure_boot = True
         else:
-            if namespace.security_type is None:
-                namespace.security_type = COMPATIBLE_SECURITY_TYPE_VALUE
             logger.warning(UPGRADE_SECURITY_HINT)
 
 
@@ -1424,11 +1424,6 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         return
     from ._vm_utils import validate_image_trusted_launch, validate_vm_disk_trusted_launch
     if namespace.image is not None:
-        from ._vm_utils import is_valid_image_version_id
-        if is_valid_image_version_id(namespace.image):
-            if namespace.security_type is None:
-                namespace.security_type = 'Standard'
-
         image_type = _parse_image_argument(cmd, namespace)
 
         if image_type == 'image_id':

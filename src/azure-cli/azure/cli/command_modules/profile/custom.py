@@ -41,9 +41,15 @@ LOGIN_OUTPUT_WARNING = (
     "[Warning] The login output has been updated. Please be aware that it no longer displays the full list of "
     "available subscriptions by default.\n")
 
-USERNAME_PASSWORD_DEPRECATION_WARNING = (
-    "Authentication with username and password in the command line is strongly discouraged. "
-    "Use one of the recommended authentication methods based on your requirements. "
+USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD = (
+    "Starting July 01, 2025, MFA will be gradually enforced for Azure public cloud. "
+    "The authentication with username and password in the command line is not supported with MFA. "
+    "Consider using one of the compatible authentication methods. "
+    "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
+
+USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD = (
+    "Using authentication with username and password in the command line is strongly discouraged. "
+    "Consider using one of the recommended authentication methods. "
     "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
 
 
@@ -127,6 +133,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
+    if identity and username:
+        raise CLIError('Passing the managed identity ID with --username is no longer supported. '
+                       'Use --client-id, --object-id or --resource-id instead.')
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
     if use_cert_sn_issuer and not service_principal:
@@ -134,7 +143,10 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
     if username and not service_principal and not identity:
-        logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING)
+        if cmd.cli_ctx.cloud.endpoints.active_directory.startswith('https://login.microsoftonline.com'):
+            logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD)
+        else:
+            logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD)
 
     interactive = False
 
@@ -143,11 +155,8 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if identity:
         if in_cloud_console():
             return profile.login_in_cloud_shell()
-        if username:
-            from azure.cli.core.breaking_change import print_conditional_breaking_change
-            print_conditional_breaking_change(cmd.cli_ctx, tag='ManagedIdentityUsernameBreakingChange')
         return profile.login_with_managed_identity(
-            identity_id=username, client_id=client_id, object_id=object_id, resource_id=resource_id,
+            client_id=client_id, object_id=object_id, resource_id=resource_id,
             allow_no_subscriptions=allow_no_subscriptions)
     if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)

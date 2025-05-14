@@ -220,27 +220,20 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity(self, identity_id=None, client_id=None, object_id=None, resource_id=None,
-                                    allow_no_subscriptions=None):
-        if _use_msal_managed_identity(self.cli_ctx):
-            if identity_id:
-                raise CLIError('--username is not supported by MSAL managed identity. '
-                               'Use --client-id, --object-id or --resource-id instead.')
-            return self.login_with_managed_identity_msal(
-                client_id=client_id, object_id=object_id, resource_id=resource_id,
-                allow_no_subscriptions=allow_no_subscriptions)
-
+    def login_with_managed_identity_msrestazure(self, client_id=None, object_id=None, resource_id=None,
+                                                allow_no_subscriptions=None):
+        # Old way of using msrestazure for managed identity
         import jwt
-        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        id_arg_count = len([arg for arg in (client_id, object_id, resource_id, identity_id) if arg])
+        id_arg_count = len([arg for arg in (client_id, object_id, resource_id) if arg])
         if id_arg_count > 1:
-            raise CLIError('Usage error: Provide only one of --client-id, --object-id, --resource-id, or --username.')
+            raise CLIError('Usage error: Provide only one of --client-id, --object-id, --resource-id.')
 
         if id_arg_count == 0:
             identity_type = MsiAccountTypes.system_assigned
+            identity_id = None
             msi_creds = MSIAuthenticationWrapper(resource=resource)
         elif client_id:
             identity_type = MsiAccountTypes.user_assigned_client_id
@@ -254,37 +247,6 @@ class Profile:
             identity_type = MsiAccountTypes.user_assigned_resource_id
             identity_id = resource_id
             msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=resource_id)
-        # The old way of re-using the same --username for 3 types of ID
-        elif identity_id:
-            if is_valid_resource_id(identity_id):
-                msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
-                identity_type = MsiAccountTypes.user_assigned_resource_id
-            else:
-                authenticated = False
-                from azure.cli.core.azclierror import AzureResponseError
-                try:
-                    msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
-                    identity_type = MsiAccountTypes.user_assigned_client_id
-                    authenticated = True
-                except AzureResponseError as ex:
-                    if 'http error: 400, reason: Bad Request' in ex.error_msg:
-                        logger.info('Sniff: not an MSI client id')
-                    else:
-                        raise
-
-                if not authenticated:
-                    try:
-                        identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
-                        authenticated = True
-                    except AzureResponseError as ex:
-                        if 'http error: 400, reason: Bad Request' in ex.error_msg:
-                            logger.info('Sniff: not an MSI object id')
-                        else:
-                            raise
-
-                if not authenticated:
-                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
 
         token_entry = msi_creds.token
         token = token_entry['access_token']
@@ -308,8 +270,13 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity_msal(self, client_id=None, object_id=None, resource_id=None,
-                                         allow_no_subscriptions=None):
+    def login_with_managed_identity(self, client_id=None, object_id=None, resource_id=None,
+                                    allow_no_subscriptions=None):
+        if not _use_msal_managed_identity(self.cli_ctx):
+            return self.login_with_managed_identity_msrestazure(
+                client_id=client_id, object_id=object_id, resource_id=resource_id,
+                allow_no_subscriptions=allow_no_subscriptions)
+
         import jwt
         from .auth.constants import ACCESS_TOKEN
 
@@ -1020,10 +987,8 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
 
 
 def _use_msal_managed_identity(cli_ctx):
-    # This indicates an Azure Arc-enabled server
-    from msal.managed_identity import get_managed_identity_source, AZURE_ARC
     from azure.cli.core.telemetry import set_use_msal_managed_identity
-    # PREVIEW: Use core.use_msal_managed_identity=true to enable managed identity authentication with MSAL
-    use_msal_managed_identity = cli_ctx.config.getboolean('core', 'use_msal_managed_identity', fallback=False)
+    # Use core.use_msal_managed_identity=false to use the old msrestazure implementation
+    use_msal_managed_identity = cli_ctx.config.getboolean('core', 'use_msal_managed_identity', fallback=True)
     set_use_msal_managed_identity(use_msal_managed_identity)
-    return use_msal_managed_identity or get_managed_identity_source() == AZURE_ARC
+    return use_msal_managed_identity
