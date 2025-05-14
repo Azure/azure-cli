@@ -441,6 +441,7 @@ short-summary: Remove all image builder output distributors from an image builde
 long-summary: Must be used with --defer
 """
 
+
 helps['image builder output remove'] = """
 type: command
 short-summary: Remove an image builder output distributor from an image builder template.
