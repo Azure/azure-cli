@@ -49,8 +49,8 @@ class FeatureFlagConstants:
     GROUPS = "groups"
 
     # Requirement type options
-    REQUIREMENT_TYPE_ALL = "all"
-    REQUIREMENT_TYPE_ANY = "any"
+    REQUIREMENT_TYPE_ALL = "All"
+    REQUIREMENT_TYPE_ANY = "Any"
 
     # Telemetry properties
     METADATA = "metadata"
