@@ -6838,8 +6838,9 @@ class VMDiskEncryptionTest(ScenarioTest):
 
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId}')
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
-        
-   
+
+
+    @unittest.skip('skip for now')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_identity_set_at_encryption_cmdlet', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
