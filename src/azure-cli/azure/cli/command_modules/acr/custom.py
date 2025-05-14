@@ -317,7 +317,7 @@ def acr_login(cmd,
 
         return token_info
 
-    tips = "You may want to use 'az acr login -n {} --expose-token' to get an access token, " \
+    tips = "You may want to use 'az acr login -n {} --expose-token' to get a refresh token, " \
            "which does not require Docker to be installed.".format(registry_name)
 
     from azure.cli.core.util import in_cloud_console
