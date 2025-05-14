@@ -102,6 +102,7 @@ class AcrCommandsTests(ScenarioTest):
             self.check('nameAvailable', True)
         ])
 
+    @live_only()
     @ResourceGroupPreparer()
     def test_acr_login_expose_token(self, resource_group):
         registry_name = self.create_random_name('clireg', 20)
