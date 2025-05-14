@@ -5,14 +5,10 @@
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
-<<<<<<< HEAD
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE, EMPTY_GUID
-=======
-from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
 from azure.cli.core.commands.client_factory import get_subscription_id
 import time
 
->>>>>>> dev
 
 class AcrCommandsTests(ScenarioTest):
 
@@ -121,7 +117,7 @@ class AcrCommandsTests(ScenarioTest):
             self.check('username', EMPTY_GUID)]).get_output_in_json()
         
         self.assertEqual(tokens['accessToken'], tokens['refreshToken'])
-        
+
     @ResourceGroupPreparer()
     @live_only()
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
