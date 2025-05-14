@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class QueryStatu(AAZCommand):
     """Query the status of a running packet capture session.
+
+    :example: Query a status of packet capture 
+        az network network-watcher packet-capture query-status --network-watcher-name "NetworkWatcher_eastus2euap" --packet-capture-name "clitestpacp3" --resource-group "NetworkWatcherRG"
     """
 
     _aaz_info = {

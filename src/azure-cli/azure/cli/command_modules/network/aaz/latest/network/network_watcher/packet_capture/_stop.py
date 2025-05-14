@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Stop(AAZCommand):
     """Stops a specified packet capture session.
+
+    :example: Stop a packet capture 
+        az network network-watcher packet-capture stop --network-watcher-name "NetworkWatcher_eastus2euap" --packet-capture-name "clitestpacp3" --resource-group "NetworkWatcherRG"
     """
 
     _aaz_info = {

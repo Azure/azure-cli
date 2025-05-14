@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create and start a packet capture on the specified VM.
+
+    :example: Create and start a packet capture 
+        az network network-watcher packet-capture create --network-watcher-name "NetworkWatcher_eastus2euap" --packet-capture-name "clitestpcap" --resource-group "NetworkWatcherRG" --storage-location '{"storageId": "/subscriptions//resourceGroups//providers/Microsoft.Storage/storageAccounts/", "filePath": "C:\Captures\testByCli.cap"}' --target "/subscriptions/*****/resourceGroups//providers/Microsoft.Compute/virtualMachines/testVmName"
     """
 
     _aaz_info = {
@@ -60,7 +63,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.bytes_to_capture_per_packet = AAZIntArg(
-            options=["--bytes-to-capture-per-packet"],
+            options=["--bytes-to-capture", "--bytes-to-capture-per-packet"],
             arg_group="Properties",
             help="Number of bytes captured per packet, the remaining bytes are truncated.",
             default=0,
@@ -118,7 +121,7 @@ class Create(AAZCommand):
             ),
         )
         _args_schema.total_bytes_per_session = AAZIntArg(
-            options=["--total-bytes-per-session"],
+            options=["--total-bytes", "--total-bytes-per-session"],
             arg_group="Properties",
             help="Maximum size of the capture output.",
             default=1073741824,
