@@ -12,21 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network vnet-gateway delete",
+    "network vnet-gateway migration prepare",
 )
-class Delete(AAZCommand):
-    """Delete a virtual network gateway.
+class Prepare(AAZCommand):
+    """Trigger prepare migration for the virtual network gateway.
 
-    In order to delete a Virtual Network Gateway, you must first delete ALL Connection objects in Azure that are connected to the Gateway. After deleting the Gateway, proceed to delete other resources now not in use. For more information, follow the order of instructions on this page: https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-delete-vnet-gateway-portal
-
-    :example: Delete a virtual network gateway.
-        az network vnet-gateway delete -g MyResourceGroup -n MyVnetGateway
+    :example: Prepare a gateway migration.
+        az network vnet-gateway migration prepare -g rg -n gateway --migration-type UpgradeDeploymentToStandardIP --resource-url testUrl
     """
 
     _aaz_info = {
         "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}/preparemigration", "2024-07-01"],
         ]
     }
 
@@ -50,17 +48,33 @@ class Delete(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Name of the VNet gateway.",
+        _args_schema.vnet_gateway_name = AAZStrArg(
+            options=["-n", "--gateway-name", "--vnet-gateway-name"],
+            help="The name of the gateway.",
             required=True,
             id_part="name",
+        )
+
+        # define Arg Group "MigrationParams"
+
+        _args_schema = cls._args_schema
+        _args_schema.migration_type = AAZStrArg(
+            options=["--migration-type"],
+            arg_group="MigrationParams",
+            help="MigrationType for the virtual network gateway.",
+            required=True,
+            enum={"UpgradeDeploymentToStandardIP": "UpgradeDeploymentToStandardIP"},
+        )
+        _args_schema.resource_url = AAZStrArg(
+            options=["--resource-url"],
+            arg_group="MigrationParams",
+            help="Resource url that needs to be passed in to migration.",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.VirtualNetworkGatewaysDelete(ctx=self.ctx)()
+        yield self.VirtualNetworkGatewaysInvokePrepareMigration(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -71,7 +85,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class VirtualNetworkGatewaysDelete(AAZHttpOperation):
+    class VirtualNetworkGatewaysInvokePrepareMigration(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -81,25 +95,7 @@ class Delete(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
+                    None,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -110,13 +106,13 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/prepareMigration",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -134,7 +130,7 @@ class Delete(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "virtualNetworkGatewayName", self.ctx.args.name,
+                    "virtualNetworkGatewayName", self.ctx.args.vnet_gateway_name,
                     required=True,
                 ),
             }
@@ -150,15 +146,30 @@ class Delete(AAZCommand):
             }
             return parameters
 
-        def on_200(self, session):
-            pass
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+            }
+            return parameters
 
-        def on_204(self, session):
-            pass
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("migrationType", AAZStrType, ".migration_type", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("resourceUrl", AAZStrType, ".resource_url")
+
+            return self.serialize_content(_content_value)
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _PrepareHelper:
+    """Helper class for Prepare"""
 
 
-__all__ = ["Delete"]
+__all__ = ["Prepare"]
