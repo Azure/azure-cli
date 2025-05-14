@@ -154,6 +154,11 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
 
     def remove_resource(self, name, **kwargs):
         # Resource group deletion will take care of this.
+        cmd = 'az vm delete -g {} -n {} --yes'.format(self.resource_group, name)
+        try:
+            execute(self.cli_ctx, cmd)
+        except:
+            logger.warning("Unable to delete the Virtual Machine. Please delete it manually.")
         pass
 
     def _get_resource_group(self, **kwargs):
