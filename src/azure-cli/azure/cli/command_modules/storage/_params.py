@@ -1366,18 +1366,53 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Defines the type of blob at the destination. '
                      'Value of "Detect" determines the type based on source blob type.', arg_group=None)
 
+    # with self.argument_context('storage blob incremental-copy start') as c:
+    #     from azure.cli.command_modules.storage._validators import process_blob_source_uri
+    #
+    #     c.register_source_uri_arguments(validator=process_blob_source_uri, blob_only=True)
+    #     c.argument('destination_if_modified_since', arg_group='Pre-condition', arg_type=if_modified_since_type)
+    #     c.argument('destination_if_unmodified_since', arg_group='Pre-condition', arg_type=if_unmodified_since_type)
+    #     c.argument('destination_if_match', arg_group='Pre-condition')
+    #     c.argument('destination_if_none_match', arg_group='Pre-condition')
+    #     c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
+    #     c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
+    #                help='Name of the destination blob. If the exists, it will be overwritten.')
+    #     c.argument('source_lease_id', arg_group='Copy Source')
+
+
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
 
+        c.register_blob_arguments()
         c.register_source_uri_arguments(validator=process_blob_source_uri, blob_only=True)
         c.argument('destination_if_modified_since', arg_group='Pre-condition', arg_type=if_modified_since_type)
         c.argument('destination_if_unmodified_since', arg_group='Pre-condition', arg_type=if_unmodified_since_type)
-        c.argument('destination_if_match', arg_group='Pre-condition')
-        c.argument('destination_if_none_match', arg_group='Pre-condition')
-        c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
-        c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
+        c.argument('destination_if_match', arg_group='Pre-condition',
+                   help='An ETag value, or the wildcard character (*). Specify an ETag value for this conditional '
+                        'header to copy the blob only if the specified ETag value matches the ETag value for an '
+                        'existing destination blob. If the ETag for the destination blob does not match the ETag '
+                        'specified for If-Match, the Blob service returns status code 412 (Precondition Failed).')
+        c.argument('destination_if_none_match', arg_group='Pre-condition',
+                   help="An ETag value, or the wildcard character (*). Specify an ETag value for this conditional "
+                        "header to copy the blob only if the specified ETag value does not match the ETag value for "
+                        "the destination blob. Specify the wildcard character (*) to perform the operation only if the "
+                        "destination blob does not exist. If the specified condition isn't met, the Blob service "
+                        "returns status code 412 (Precondition Failed).")
+        c.argument('container_name', options_list=('--destination-container', '-c'), required=True,
+                   help='The container name.')
+        c.argument('blob_name', options_list=('--destination-blob', '-b'), required=True,
                    help='Name of the destination blob. If the exists, it will be overwritten.')
-        c.argument('source_lease_id', arg_group='Copy Source')
+        c.extra('destination_lease', options_list='--destination-lease-id',
+                help='The lease ID specified for this header must match the lease ID of the estination blob. '
+                     'If the request does not include the lease ID or it is not valid, the operation fails with status '
+                     'code 412 (Precondition Failed).')
+        c.extra('source_lease', options_list='--source-lease-id', arg_group='Copy Source',
+                help='Specify this to perform the Copy Blob operation only if the lease ID given matches the '
+                     'active lease ID of the source blob.')
+        c.extra('metadata', nargs='+',
+                   help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
+                   validator=validate_metadata)
+
 
     with self.argument_context('storage blob query') as c:
         from ._validators import validate_text_configuration

@@ -378,6 +378,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 table_transformer=transform_boolean_for_table)
         g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch', client_factory=cf_blob_service,
                                        validator=process_blob_delete_batch_parameters)
+        g.storage_custom_command_oauth('incremental-copy start', 'incremental_copy_start')
 
     blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
                                              resource_type=ResourceType.DATA_STORAGE_BLOB)
@@ -428,12 +429,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=storage_blob_custom_type) as g:
         g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', supports_no_wait=True)
 
-    with self.command_group('storage blob incremental-copy',
-                            operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',
-                            client_factory=page_blob_service_factory,
-                            resource_type=ResourceType.DATA_STORAGE,
-                            min_api='2016-05-31') as g:
-        g.storage_command_oauth('start', 'incremental_copy_blob')
+    # with self.command_group('storage blob incremental-copy',
+    #                         operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',
+    #                         client_factory=page_blob_service_factory,
+    #                         resource_type=ResourceType.DATA_STORAGE,
+    #                         min_api='2016-05-31') as g:
+    #     g.storage_command_oauth('start', 'incremental_copy_blob')
 
     with self.command_group('storage blob incremental-copy',
                             operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',

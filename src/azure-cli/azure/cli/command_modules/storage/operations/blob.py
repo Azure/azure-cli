@@ -1092,3 +1092,13 @@ def exists(client, container_name, blob_name, snapshot, timeout):
     else:
         client = client.get_container_client(container=container_name)
     return client.exists(timeout=timeout)
+
+
+def incremental_copy_start(client, copy_source=None, metadata=None,
+                                destination_if_modified_since=None, destination_if_unmodified_since=None,
+                                destination_if_match=None, destination_if_none_match=None,  **kwargs):
+    client.start_copy_from_url(source_url=copy_source, metadata=metadata, incremental_copy=True,
+                               if_modified_since=destination_if_modified_since,
+                               if_unmodified_since=destination_if_unmodified_since,
+                               if_match=destination_if_match, if_none_match=destination_if_none_match,
+                               **kwargs)
