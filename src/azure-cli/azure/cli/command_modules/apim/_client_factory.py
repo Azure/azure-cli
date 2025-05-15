@@ -18,6 +18,10 @@ def cf_api(cli_ctx, *_):
     return cf_apim(cli_ctx).api
 
 
+def cf_api_policy(cli_ctx, *_):
+    return cf_apim(cli_ctx).api_policy
+
+
 def cf_product(cli_ctx, *_):
     return cf_apim(cli_ctx).product
 
