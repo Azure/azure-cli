@@ -601,6 +601,7 @@ def aks_create(
     enable_secret_rotation=False,
     rotation_poll_interval=None,
     enable_app_routing=False,
+    enable_ai_toolchain_operator=False,
     app_routing_default_nginx_controller=None,
     # nodepool paramerters
     nodepool_name="nodepool1",
@@ -799,6 +800,8 @@ def aks_update(
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
+    enable_ai_toolchain_operator=False,
+    disable_ai_toolchain_operator=False,
     rotation_poll_interval=None,
     # nodepool paramerters
     enable_cluster_autoscaler=False,
