@@ -41,18 +41,18 @@ class Patch(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.if_match = AAZStrArg(
             options=["--if-match"],
-            help="The ETag of the transformation. Omit this value to always overwrite the current resource. Specify the last-seen ETag value to prevent accidentally overwriting concurrent changes.",
+            help="",
         )
         _args_schema.if_none_match = AAZStrArg(
             options=["--if-none-match"],
-            help="Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will result in error from server as they are not supported.",
+            help="",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
         _args_schema.vm_name = AAZStrArg(
             options=["-n", "--name", "--vm-name"],
-            help="The name of the virtual machine.",
+            help="",
             required=True,
             id_part="name",
         )
@@ -63,13 +63,13 @@ class Patch(AAZCommand):
         _args_schema.mi_system_assigned = AAZStrArg(
             options=["--system-assigned", "--mi-system-assigned"],
             arg_group="Identity",
-            help="Set the system managed identity.",
+            help="",
             blank="True",
         )
         _args_schema.mi_user_assigned = AAZListArg(
             options=["--user-assigned", "--mi-user-assigned"],
             arg_group="Identity",
-            help="Set the user managed identities.",
+            help="",
             blank=[],
         )
 
@@ -82,35 +82,35 @@ class Patch(AAZCommand):
         _args_schema.plan = AAZObjectArg(
             options=["--plan"],
             arg_group="Parameters",
-            help="Specifies information about the marketplace image used to create the virtual machine. This element is only used for marketplace images. Before you can use a marketplace image from an API, you must enable the image for programmatic use.  In the Azure portal, find the marketplace image that you want to use and then click **Want to deploy programmatically, Get Started ->**. Enter any required information and then click **Save**.",
+            help="",
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Parameters",
-            help="Resource tags",
+            help="",
         )
         _args_schema.zones = AAZListArg(
             options=["--zones"],
             arg_group="Parameters",
-            help="The virtual machine zones.",
+            help="",
         )
 
         plan = cls._args_schema.plan
         plan.name = AAZStrArg(
             options=["name"],
-            help="The plan ID.",
+            help="",
         )
         plan.product = AAZStrArg(
             options=["product"],
-            help="Specifies the product of the image from the marketplace. This is the same value as Offer under the imageReference element.",
+            help="",
         )
         plan.promotion_code = AAZStrArg(
             options=["promotion-code"],
-            help="The promotion code.",
+            help="",
         )
         plan.publisher = AAZStrArg(
             options=["publisher"],
-            help="The publisher ID.",
+            help="",
         )
 
         tags = cls._args_schema.tags
@@ -125,140 +125,140 @@ class Patch(AAZCommand):
         _args_schema.additional_capabilities = AAZObjectArg(
             options=["--additional-capabilities"],
             arg_group="Properties",
-            help="Specifies additional capabilities enabled or disabled on the virtual machine.",
+            help="",
         )
         _args_schema.application_profile = AAZObjectArg(
             options=["--application-profile"],
             arg_group="Properties",
-            help="Specifies the gallery applications that should be made available to the VM/VMSS.",
+            help="",
         )
         _args_schema.availability_set = AAZObjectArg(
             options=["--availability-set"],
             arg_group="Properties",
-            help="Specifies information about the availability set that the virtual machine should be assigned to. Virtual machines specified in the same availability set are allocated to different nodes to maximize availability. For more information about availability sets, see [Availability sets overview](https://docs.microsoft.com/azure/virtual-machines/availability-set-overview). For more information on Azure planned maintenance, see [Maintenance and updates for Virtual Machines in Azure](https://docs.microsoft.com/azure/virtual-machines/maintenance-and-updates). Currently, a VM can only be added to availability set at creation time. The availability set to which the VM is being added should be under the same resource group as the availability set resource. An existing VM cannot be added to an availability set. This property cannot exist along with a non-null properties.virtualMachineScaleSet reference.",
+            help="",
         )
         cls._build_args_sub_resource_update(_args_schema.availability_set)
         _args_schema.billing_profile = AAZObjectArg(
             options=["--billing-profile"],
             arg_group="Properties",
-            help="Specifies the billing related details of a Azure Spot virtual machine. Minimum api-version: 2019-03-01.",
+            help="",
         )
         _args_schema.capacity_reservation = AAZObjectArg(
             options=["--capacity-reservation"],
             arg_group="Properties",
-            help="Specifies information about the capacity reservation that is used to allocate virtual machine. Minimum api-version: 2021-04-01.",
+            help="",
         )
         _args_schema.diagnostics_profile = AAZObjectArg(
             options=["--diagnostics-profile"],
             arg_group="Properties",
-            help="Specifies the boot diagnostic settings state. Minimum api-version: 2015-06-15.",
+            help="",
         )
         _args_schema.eviction_policy = AAZStrArg(
             options=["--eviction-policy"],
             arg_group="Properties",
-            help="Specifies the eviction policy for the Azure Spot virtual machine and Azure Spot scale set. For Azure Spot virtual machines, both 'Deallocate' and 'Delete' are supported and the minimum api-version is 2019-03-01. For Azure Spot scale sets, both 'Deallocate' and 'Delete' are supported and the minimum api-version is 2017-10-30-preview.",
+            help="",
             enum={"Deallocate": "Deallocate", "Delete": "Delete"},
         )
         _args_schema.extensions_time_budget = AAZStrArg(
             options=["--extensions-time-budget"],
             arg_group="Properties",
-            help="Specifies the time alloted for all extensions to start. The time duration should be between 15 minutes and 120 minutes (inclusive) and should be specified in ISO 8601 format. The default value is 90 minutes (PT1H30M). Minimum api-version: 2020-06-01.",
+            help="",
         )
         _args_schema.hardware_profile = AAZObjectArg(
             options=["--hardware-profile"],
             arg_group="Properties",
-            help="Specifies the hardware settings for the virtual machine.",
+            help="",
         )
         _args_schema.host = AAZObjectArg(
             options=["--host"],
             arg_group="Properties",
-            help="Specifies information about the dedicated host that the virtual machine resides in. Minimum api-version: 2018-10-01.",
+            help="",
         )
         cls._build_args_sub_resource_update(_args_schema.host)
         _args_schema.host_group = AAZObjectArg(
             options=["--host-group"],
             arg_group="Properties",
-            help="Specifies information about the dedicated host group that the virtual machine resides in. **Note:** User cannot specify both host and hostGroup properties. Minimum api-version: 2020-06-01.",
+            help="",
         )
         cls._build_args_sub_resource_update(_args_schema.host_group)
         _args_schema.license_type = AAZStrArg(
             options=["--license-type"],
             arg_group="Properties",
-            help="Specifies that the image or disk that is being used was licensed on-premises. <br><br> Possible values for Windows Server operating system are: <br><br> Windows_Client <br><br> Windows_Server <br><br> Possible values for Linux Server operating system are: <br><br> RHEL_BYOS (for RHEL) <br><br> SLES_BYOS (for SUSE) <br><br> For more information, see [Azure Hybrid Use Benefit for Windows Server](https://docs.microsoft.com/azure/virtual-machines/windows/hybrid-use-benefit-licensing) <br><br> [Azure Hybrid Use Benefit for Linux Server](https://docs.microsoft.com/azure/virtual-machines/linux/azure-hybrid-benefit-linux) <br><br> Minimum api-version: 2015-06-15",
+            help="",
         )
         _args_schema.network_profile = AAZObjectArg(
             options=["--network-profile"],
             arg_group="Properties",
-            help="Specifies the network interfaces of the virtual machine.",
+            help="",
         )
         _args_schema.os_profile = AAZObjectArg(
             options=["--os-profile"],
             arg_group="Properties",
-            help="Specifies the operating system settings used while creating the virtual machine. Some of the settings cannot be changed once VM is provisioned.",
+            help="",
         )
         _args_schema.platform_fault_domain = AAZIntArg(
             options=["--platform-fault-domain"],
             arg_group="Properties",
-            help="Specifies the scale set logical fault domain into which the Virtual Machine will be created. By default, the Virtual Machine will by automatically assigned to a fault domain that best maintains balance across available fault domains. This is applicable only if the 'virtualMachineScaleSet' property of this Virtual Machine is set. The Virtual Machine Scale Set that is referenced, must have 'platformFaultDomainCount' greater than 1. This property cannot be updated once the Virtual Machine is created. Fault domain assignment can be viewed in the Virtual Machine Instance View. Minimum api‐version: 2020‐12‐01.",
+            help="",
         )
         _args_schema.priority = AAZStrArg(
             options=["--priority"],
             arg_group="Properties",
-            help="Specifies the priority for the virtual machine. Minimum api-version: 2019-03-01",
+            help="",
             enum={"Low": "Low", "Regular": "Regular", "Spot": "Spot"},
         )
         _args_schema.proximity_placement_group = AAZObjectArg(
             options=["--proximity-placement-group"],
             arg_group="Properties",
-            help="Specifies information about the proximity placement group that the virtual machine should be assigned to. Minimum api-version: 2018-04-01.",
+            help="",
         )
         cls._build_args_sub_resource_update(_args_schema.proximity_placement_group)
         _args_schema.scheduled_events_policy = AAZObjectArg(
             options=["--scheduled-events-policy"],
             arg_group="Properties",
-            help="Specifies Redeploy, Reboot and ScheduledEventsAdditionalPublishingTargets Scheduled Event related configurations for the virtual machine.",
+            help="",
         )
         _args_schema.scheduled_events_profile = AAZObjectArg(
             options=["--scheduled-events-profile"],
             arg_group="Properties",
-            help="Specifies Scheduled Event related configurations.",
+            help="",
         )
         _args_schema.security_profile = AAZObjectArg(
             options=["--security-profile"],
             arg_group="Properties",
-            help="Specifies the Security related profile settings for the virtual machine.",
+            help="",
         )
         _args_schema.storage_profile = AAZObjectArg(
             options=["--storage-profile"],
             arg_group="Properties",
-            help="Specifies the storage settings for the virtual machine disks.",
+            help="",
         )
         _args_schema.user_data = AAZStrArg(
             options=["--user-data"],
             arg_group="Properties",
-            help="UserData for the VM, which must be base-64 encoded. Customer should not pass any secrets in here. Minimum api-version: 2021-03-01.",
+            help="",
         )
         _args_schema.virtual_machine_scale_set = AAZObjectArg(
             options=["--virtual-machine-scale-set"],
             arg_group="Properties",
-            help="Specifies information about the virtual machine scale set that the virtual machine should be assigned to. Virtual machines specified in the same virtual machine scale set are allocated to different nodes to maximize availability. Currently, a VM can only be added to virtual machine scale set at creation time. An existing VM cannot be added to a virtual machine scale set. This property cannot exist along with a non-null properties.availabilitySet reference. Minimum api‐version: 2019‐03‐01.",
+            help="",
         )
         cls._build_args_sub_resource_update(_args_schema.virtual_machine_scale_set)
 
         additional_capabilities = cls._args_schema.additional_capabilities
         additional_capabilities.hibernation_enabled = AAZBoolArg(
             options=["hibernation-enabled"],
-            help="The flag that enables or disables hibernation capability on the VM.",
+            help="",
         )
         additional_capabilities.ultra_ssd_enabled = AAZBoolArg(
             options=["ultra-ssd-enabled"],
-            help="The flag that enables or disables a capability to have one or more managed data disks with UltraSSD_LRS storage account type on the VM or VMSS. Managed disks with storage account type UltraSSD_LRS can be added to a virtual machine or virtual machine scale set only if this property is enabled.",
+            help="",
         )
 
         application_profile = cls._args_schema.application_profile
         application_profile.gallery_applications = AAZListArg(
             options=["gallery-applications"],
-            help="Specifies the gallery applications that should be made available to the VM/VMSS",
+            help="",
         )
 
         gallery_applications = cls._args_schema.application_profile.gallery_applications
@@ -267,93 +267,93 @@ class Patch(AAZCommand):
         _element = cls._args_schema.application_profile.gallery_applications.Element
         _element.configuration_reference = AAZStrArg(
             options=["configuration-reference"],
-            help="Optional, Specifies the uri to an azure blob that will replace the default configuration for the package if provided",
+            help="",
         )
         _element.enable_automatic_upgrade = AAZBoolArg(
             options=["enable-automatic-upgrade"],
-            help="If set to true, when a new Gallery Application version is available in PIR/SIG, it will be automatically updated for the VM/VMSS",
+            help="",
         )
         _element.order = AAZIntArg(
             options=["order"],
-            help="Optional, Specifies the order in which the packages have to be installed",
+            help="",
         )
         _element.package_reference_id = AAZStrArg(
             options=["package-reference-id"],
-            help="Specifies the GalleryApplicationVersion resource id on the form of /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/applications/{application}/versions/{version}",
+            help="",
             required=True,
         )
         _element.tags = AAZStrArg(
             options=["tags"],
-            help="Optional, Specifies a passthrough value for more generic context.",
+            help="",
         )
         _element.treat_failure_as_deployment_failure = AAZBoolArg(
             options=["treat-failure-as-deployment-failure"],
-            help="Optional, If true, any failure for any operation in the VmApplication will fail the deployment",
+            help="",
         )
 
         billing_profile = cls._args_schema.billing_profile
         billing_profile.max_price = AAZFloatArg(
             options=["max-price"],
-            help="Specifies the maximum price you are willing to pay for a Azure Spot VM/VMSS. This price is in US Dollars. <br><br> This price will be compared with the current Azure Spot price for the VM size. Also, the prices are compared at the time of create/update of Azure Spot VM/VMSS and the operation will only succeed if  the maxPrice is greater than the current Azure Spot price. <br><br> The maxPrice will also be used for evicting a Azure Spot VM/VMSS if the current Azure Spot price goes beyond the maxPrice after creation of VM/VMSS. <br><br> Possible values are: <br><br> - Any decimal value greater than zero. Example: 0.01538 <br><br> -1 – indicates default price to be up-to on-demand. <br><br> You can set the maxPrice to -1 to indicate that the Azure Spot VM/VMSS should not be evicted for price reasons. Also, the default max price is -1 if it is not provided by you. <br><br>Minimum api-version: 2019-03-01.",
+            help="",
         )
 
         capacity_reservation = cls._args_schema.capacity_reservation
         capacity_reservation.capacity_reservation_group = AAZObjectArg(
             options=["capacity-reservation-group"],
-            help="Specifies the capacity reservation group resource id that should be used for allocating the virtual machine or scaleset vm instances provided enough capacity has been reserved. Please refer to https://aka.ms/CapacityReservation for more details.",
+            help="",
         )
         cls._build_args_sub_resource_update(capacity_reservation.capacity_reservation_group)
 
         diagnostics_profile = cls._args_schema.diagnostics_profile
         diagnostics_profile.boot_diagnostics = AAZObjectArg(
             options=["boot-diagnostics"],
-            help="Boot Diagnostics is a debugging feature which allows you to view Console Output and Screenshot to diagnose VM status. **NOTE**: If storageUri is being specified then ensure that the storage account is in the same region and subscription as the VM. You can easily view the output of your console log. Azure also enables you to see a screenshot of the VM from the hypervisor.",
+            help="",
         )
 
         boot_diagnostics = cls._args_schema.diagnostics_profile.boot_diagnostics
         boot_diagnostics.enabled = AAZBoolArg(
             options=["enabled"],
-            help="Whether boot diagnostics should be enabled on the Virtual Machine.",
+            help="",
         )
         boot_diagnostics.storage_uri = AAZStrArg(
             options=["storage-uri"],
-            help="Uri of the storage account to use for placing the console output and screenshot. If storageUri is not specified while enabling boot diagnostics, managed storage will be used.",
+            help="",
         )
 
         hardware_profile = cls._args_schema.hardware_profile
         hardware_profile.vm_size = AAZStrArg(
             options=["vm-size"],
-            help="Specifies the size of the virtual machine. The enum data type is currently deprecated and will be removed by December 23rd 2023. The recommended way to get the list of available sizes is using these APIs: [List all available virtual machine sizes in an availability set](https://docs.microsoft.com/rest/api/compute/availabilitysets/listavailablesizes), [List all available virtual machine sizes in a region]( https://docs.microsoft.com/rest/api/compute/resourceskus/list), [List all available virtual machine sizes for resizing](https://docs.microsoft.com/rest/api/compute/virtualmachines/listavailablesizes). For more information about virtual machine sizes, see [Sizes for virtual machines](https://docs.microsoft.com/azure/virtual-machines/sizes). The available VM sizes depend on region and availability set.",
+            help="",
             enum={"Basic_A0": "Basic_A0", "Basic_A1": "Basic_A1", "Basic_A2": "Basic_A2", "Basic_A3": "Basic_A3", "Basic_A4": "Basic_A4", "Standard_A0": "Standard_A0", "Standard_A1": "Standard_A1", "Standard_A10": "Standard_A10", "Standard_A11": "Standard_A11", "Standard_A1_v2": "Standard_A1_v2", "Standard_A2": "Standard_A2", "Standard_A2_v2": "Standard_A2_v2", "Standard_A2m_v2": "Standard_A2m_v2", "Standard_A3": "Standard_A3", "Standard_A4": "Standard_A4", "Standard_A4_v2": "Standard_A4_v2", "Standard_A4m_v2": "Standard_A4m_v2", "Standard_A5": "Standard_A5", "Standard_A6": "Standard_A6", "Standard_A7": "Standard_A7", "Standard_A8": "Standard_A8", "Standard_A8_v2": "Standard_A8_v2", "Standard_A8m_v2": "Standard_A8m_v2", "Standard_A9": "Standard_A9", "Standard_B1ms": "Standard_B1ms", "Standard_B1s": "Standard_B1s", "Standard_B2ms": "Standard_B2ms", "Standard_B2s": "Standard_B2s", "Standard_B4ms": "Standard_B4ms", "Standard_B8ms": "Standard_B8ms", "Standard_D1": "Standard_D1", "Standard_D11": "Standard_D11", "Standard_D11_v2": "Standard_D11_v2", "Standard_D12": "Standard_D12", "Standard_D12_v2": "Standard_D12_v2", "Standard_D13": "Standard_D13", "Standard_D13_v2": "Standard_D13_v2", "Standard_D14": "Standard_D14", "Standard_D14_v2": "Standard_D14_v2", "Standard_D15_v2": "Standard_D15_v2", "Standard_D16_v3": "Standard_D16_v3", "Standard_D16s_v3": "Standard_D16s_v3", "Standard_D1_v2": "Standard_D1_v2", "Standard_D2": "Standard_D2", "Standard_D2_v2": "Standard_D2_v2", "Standard_D2_v3": "Standard_D2_v3", "Standard_D2s_v3": "Standard_D2s_v3", "Standard_D3": "Standard_D3", "Standard_D32_v3": "Standard_D32_v3", "Standard_D32s_v3": "Standard_D32s_v3", "Standard_D3_v2": "Standard_D3_v2", "Standard_D4": "Standard_D4", "Standard_D4_v2": "Standard_D4_v2", "Standard_D4_v3": "Standard_D4_v3", "Standard_D4s_v3": "Standard_D4s_v3", "Standard_D5_v2": "Standard_D5_v2", "Standard_D64_v3": "Standard_D64_v3", "Standard_D64s_v3": "Standard_D64s_v3", "Standard_D8_v3": "Standard_D8_v3", "Standard_D8s_v3": "Standard_D8s_v3", "Standard_DS1": "Standard_DS1", "Standard_DS11": "Standard_DS11", "Standard_DS11_v2": "Standard_DS11_v2", "Standard_DS12": "Standard_DS12", "Standard_DS12_v2": "Standard_DS12_v2", "Standard_DS13": "Standard_DS13", "Standard_DS13-2_v2": "Standard_DS13-2_v2", "Standard_DS13-4_v2": "Standard_DS13-4_v2", "Standard_DS13_v2": "Standard_DS13_v2", "Standard_DS14": "Standard_DS14", "Standard_DS14-4_v2": "Standard_DS14-4_v2", "Standard_DS14-8_v2": "Standard_DS14-8_v2", "Standard_DS14_v2": "Standard_DS14_v2", "Standard_DS15_v2": "Standard_DS15_v2", "Standard_DS1_v2": "Standard_DS1_v2", "Standard_DS2": "Standard_DS2", "Standard_DS2_v2": "Standard_DS2_v2", "Standard_DS3": "Standard_DS3", "Standard_DS3_v2": "Standard_DS3_v2", "Standard_DS4": "Standard_DS4", "Standard_DS4_v2": "Standard_DS4_v2", "Standard_DS5_v2": "Standard_DS5_v2", "Standard_E16_v3": "Standard_E16_v3", "Standard_E16s_v3": "Standard_E16s_v3", "Standard_E2_v3": "Standard_E2_v3", "Standard_E2s_v3": "Standard_E2s_v3", "Standard_E32-16_v3": "Standard_E32-16_v3", "Standard_E32-8s_v3": "Standard_E32-8s_v3", "Standard_E32_v3": "Standard_E32_v3", "Standard_E32s_v3": "Standard_E32s_v3", "Standard_E4_v3": "Standard_E4_v3", "Standard_E4s_v3": "Standard_E4s_v3", "Standard_E64-16s_v3": "Standard_E64-16s_v3", "Standard_E64-32s_v3": "Standard_E64-32s_v3", "Standard_E64_v3": "Standard_E64_v3", "Standard_E64s_v3": "Standard_E64s_v3", "Standard_E8_v3": "Standard_E8_v3", "Standard_E8s_v3": "Standard_E8s_v3", "Standard_F1": "Standard_F1", "Standard_F16": "Standard_F16", "Standard_F16s": "Standard_F16s", "Standard_F16s_v2": "Standard_F16s_v2", "Standard_F1s": "Standard_F1s", "Standard_F2": "Standard_F2", "Standard_F2s": "Standard_F2s", "Standard_F2s_v2": "Standard_F2s_v2", "Standard_F32s_v2": "Standard_F32s_v2", "Standard_F4": "Standard_F4", "Standard_F4s": "Standard_F4s", "Standard_F4s_v2": "Standard_F4s_v2", "Standard_F64s_v2": "Standard_F64s_v2", "Standard_F72s_v2": "Standard_F72s_v2", "Standard_F8": "Standard_F8", "Standard_F8s": "Standard_F8s", "Standard_F8s_v2": "Standard_F8s_v2", "Standard_G1": "Standard_G1", "Standard_G2": "Standard_G2", "Standard_G3": "Standard_G3", "Standard_G4": "Standard_G4", "Standard_G5": "Standard_G5", "Standard_GS1": "Standard_GS1", "Standard_GS2": "Standard_GS2", "Standard_GS3": "Standard_GS3", "Standard_GS4": "Standard_GS4", "Standard_GS4-4": "Standard_GS4-4", "Standard_GS4-8": "Standard_GS4-8", "Standard_GS5": "Standard_GS5", "Standard_GS5-16": "Standard_GS5-16", "Standard_GS5-8": "Standard_GS5-8", "Standard_H16": "Standard_H16", "Standard_H16m": "Standard_H16m", "Standard_H16mr": "Standard_H16mr", "Standard_H16r": "Standard_H16r", "Standard_H8": "Standard_H8", "Standard_H8m": "Standard_H8m", "Standard_L16s": "Standard_L16s", "Standard_L32s": "Standard_L32s", "Standard_L4s": "Standard_L4s", "Standard_L8s": "Standard_L8s", "Standard_M128-32ms": "Standard_M128-32ms", "Standard_M128-64ms": "Standard_M128-64ms", "Standard_M128ms": "Standard_M128ms", "Standard_M128s": "Standard_M128s", "Standard_M64-16ms": "Standard_M64-16ms", "Standard_M64-32ms": "Standard_M64-32ms", "Standard_M64ms": "Standard_M64ms", "Standard_M64s": "Standard_M64s", "Standard_NC12": "Standard_NC12", "Standard_NC12s_v2": "Standard_NC12s_v2", "Standard_NC12s_v3": "Standard_NC12s_v3", "Standard_NC24": "Standard_NC24", "Standard_NC24r": "Standard_NC24r", "Standard_NC24rs_v2": "Standard_NC24rs_v2", "Standard_NC24rs_v3": "Standard_NC24rs_v3", "Standard_NC24s_v2": "Standard_NC24s_v2", "Standard_NC24s_v3": "Standard_NC24s_v3", "Standard_NC6": "Standard_NC6", "Standard_NC6s_v2": "Standard_NC6s_v2", "Standard_NC6s_v3": "Standard_NC6s_v3", "Standard_ND12s": "Standard_ND12s", "Standard_ND24rs": "Standard_ND24rs", "Standard_ND24s": "Standard_ND24s", "Standard_ND6s": "Standard_ND6s", "Standard_NV12": "Standard_NV12", "Standard_NV24": "Standard_NV24", "Standard_NV6": "Standard_NV6"},
         )
         hardware_profile.vm_size_properties = AAZObjectArg(
             options=["vm-size-properties"],
-            help="Specifies the properties for customizing the size of the virtual machine. Minimum api-version: 2021-07-01. This feature is still in preview mode and is not supported for VirtualMachineScaleSet. Please follow the instructions in [VM Customization](https://aka.ms/vmcustomization) for more details.",
+            help="",
         )
 
         vm_size_properties = cls._args_schema.hardware_profile.vm_size_properties
         vm_size_properties.v_cp_us_available = AAZIntArg(
             options=["v-cp-us-available"],
-            help="Specifies the number of vCPUs available for the VM. When this property is not specified in the request body the default behavior is to set it to the value of vCPUs available for that VM size exposed in api response of [List all available virtual machine sizes in a region](https://docs.microsoft.com/en-us/rest/api/compute/resource-skus/list).",
+            help="",
         )
         vm_size_properties.v_cp_us_per_core = AAZIntArg(
             options=["v-cp-us-per-core"],
-            help="Specifies the vCPU to physical core ratio. When this property is not specified in the request body the default behavior is set to the value of vCPUsPerCore for the VM Size exposed in api response of [List all available virtual machine sizes in a region](https://docs.microsoft.com/en-us/rest/api/compute/resource-skus/list). **Setting this property to 1 also means that hyper-threading is disabled.**",
+            help="",
         )
 
         network_profile = cls._args_schema.network_profile
         network_profile.network_api_version = AAZStrArg(
             options=["network-api-version"],
-            help="specifies the Microsoft.Network API version used when creating networking resources in the Network Interface Configurations",
+            help="",
             enum={"2020-11-01": "2020-11-01", "2022-11-01": "2022-11-01"},
         )
         network_profile.network_interface_configurations = AAZListArg(
             options=["network-interface-configurations"],
-            help="Specifies the networking configurations that will be used to create the virtual machine networking resources.",
+            help="",
         )
         network_profile.network_interfaces = AAZListArg(
             options=["network-interfaces"],
-            help="Specifies the list of resource Ids for the network interfaces associated with the virtual machine.",
+            help="",
         )
 
         network_interface_configurations = cls._args_schema.network_profile.network_interface_configurations
@@ -362,31 +362,31 @@ class Patch(AAZCommand):
         _element = cls._args_schema.network_profile.network_interface_configurations.Element
         _element.name = AAZStrArg(
             options=["name"],
-            help="The network interface configuration name.",
+            help="",
             required=True,
         )
         _element.auxiliary_mode = AAZStrArg(
             options=["auxiliary-mode"],
-            help="Specifies whether the Auxiliary mode is enabled for the Network Interface resource.",
+            help="",
             enum={"AcceleratedConnections": "AcceleratedConnections", "Floating": "Floating", "None": "None"},
         )
         _element.auxiliary_sku = AAZStrArg(
             options=["auxiliary-sku"],
-            help="Specifies whether the Auxiliary sku is enabled for the Network Interface resource.",
+            help="",
             enum={"A1": "A1", "A2": "A2", "A4": "A4", "A8": "A8", "None": "None"},
         )
         _element.delete_option = AAZStrArg(
             options=["delete-option"],
-            help="Specify what happens to the network interface when the VM is deleted",
+            help="",
             enum={"Delete": "Delete", "Detach": "Detach"},
         )
         _element.disable_tcp_state_tracking = AAZBoolArg(
             options=["disable-tcp-state-tracking"],
-            help="Specifies whether the network interface is disabled for tcp state tracking.",
+            help="",
         )
         _element.dns_settings = AAZObjectArg(
             options=["dns-settings"],
-            help="The dns settings to be applied on the network interfaces.",
+            help="",
         )
         _element.dscp_configuration = AAZObjectArg(
             options=["dscp-configuration"],
@@ -394,34 +394,34 @@ class Patch(AAZCommand):
         cls._build_args_sub_resource_update(_element.dscp_configuration)
         _element.enable_accelerated_networking = AAZBoolArg(
             options=["enable-accelerated-networking"],
-            help="Specifies whether the network interface is accelerated networking-enabled.",
+            help="",
         )
         _element.enable_fpga = AAZBoolArg(
             options=["enable-fpga"],
-            help="Specifies whether the network interface is FPGA networking-enabled.",
+            help="",
         )
         _element.enable_ip_forwarding = AAZBoolArg(
             options=["enable-ip-forwarding"],
-            help="Whether IP forwarding enabled on this NIC.",
+            help="",
         )
         _element.ip_configurations = AAZListArg(
             options=["ip-configurations"],
-            help="Specifies the IP configurations of the network interface.",
+            help="",
         )
         _element.network_security_group = AAZObjectArg(
             options=["network-security-group"],
-            help="The network security group.",
+            help="",
         )
         cls._build_args_sub_resource_update(_element.network_security_group)
         _element.primary = AAZBoolArg(
             options=["primary"],
-            help="Specifies the primary network interface in case the virtual machine has more than 1 network interface.",
+            help="",
         )
 
         dns_settings = cls._args_schema.network_profile.network_interface_configurations.Element.dns_settings
         dns_settings.dns_servers = AAZListArg(
             options=["dns-servers"],
-            help="List of DNS servers IP addresses",
+            help="",
         )
 
         dns_servers = cls._args_schema.network_profile.network_interface_configurations.Element.dns_settings.dns_servers
@@ -433,37 +433,37 @@ class Patch(AAZCommand):
         _element = cls._args_schema.network_profile.network_interface_configurations.Element.ip_configurations.Element
         _element.name = AAZStrArg(
             options=["name"],
-            help="The IP configuration name.",
+            help="",
             required=True,
         )
         _element.application_gateway_backend_address_pools = AAZListArg(
             options=["application-gateway-backend-address-pools"],
-            help="Specifies an array of references to backend address pools of application gateways. A virtual machine can reference backend address pools of multiple application gateways. Multiple virtual machines cannot use the same application gateway.",
+            help="",
         )
         _element.application_security_groups = AAZListArg(
             options=["application-security-groups"],
-            help="Specifies an array of references to application security group.",
+            help="",
         )
         _element.load_balancer_backend_address_pools = AAZListArg(
             options=["load-balancer-backend-address-pools"],
-            help="Specifies an array of references to backend address pools of load balancers. A virtual machine can reference backend address pools of one public and one internal load balancer. [Multiple virtual machines cannot use the same basic sku load balancer].",
+            help="",
         )
         _element.primary = AAZBoolArg(
             options=["primary"],
-            help="Specifies the primary network interface in case the virtual machine has more than 1 network interface.",
+            help="",
         )
         _element.private_ip_address_version = AAZStrArg(
             options=["private-ip-address-version"],
-            help="Available from Api-Version 2017-03-30 onwards, it represents whether the specific ipconfiguration is IPv4 or IPv6. Default is taken as IPv4.  Possible values are: 'IPv4' and 'IPv6'.",
+            help="",
             enum={"IPv4": "IPv4", "IPv6": "IPv6"},
         )
         _element.public_ip_address_configuration = AAZObjectArg(
             options=["public-ip-address-configuration"],
-            help="The publicIPAddressConfiguration.",
+            help="",
         )
         _element.subnet = AAZObjectArg(
             options=["subnet"],
-            help="Specifies the identifier of the subnet.",
+            help="",
         )
         cls._build_args_sub_resource_update(_element.subnet)
 
@@ -482,55 +482,55 @@ class Patch(AAZCommand):
         public_ip_address_configuration = cls._args_schema.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration
         public_ip_address_configuration.name = AAZStrArg(
             options=["name"],
-            help="The publicIP address configuration name.",
+            help="",
             required=True,
         )
         public_ip_address_configuration.delete_option = AAZStrArg(
             options=["delete-option"],
-            help="Specify what happens to the public IP address when the VM is deleted",
+            help="",
             enum={"Delete": "Delete", "Detach": "Detach"},
         )
         public_ip_address_configuration.dns_settings = AAZObjectArg(
             options=["dns-settings"],
-            help="The dns settings to be applied on the publicIP addresses .",
+            help="",
         )
         public_ip_address_configuration.idle_timeout_in_minutes = AAZIntArg(
             options=["idle-timeout-in-minutes"],
-            help="The idle timeout of the public IP address.",
+            help="",
         )
         public_ip_address_configuration.ip_tags = AAZListArg(
             options=["ip-tags"],
-            help="The list of IP tags associated with the public IP address.",
+            help="",
         )
         public_ip_address_configuration.public_ip_address_version = AAZStrArg(
             options=["public-ip-address-version"],
-            help="Available from Api-Version 2019-07-01 onwards, it represents whether the specific ipconfiguration is IPv4 or IPv6. Default is taken as IPv4. Possible values are: 'IPv4' and 'IPv6'.",
+            help="",
             enum={"IPv4": "IPv4", "IPv6": "IPv6"},
         )
         public_ip_address_configuration.public_ip_allocation_method = AAZStrArg(
             options=["public-ip-allocation-method"],
-            help="Specify the public IP allocation type",
+            help="",
             enum={"Dynamic": "Dynamic", "Static": "Static"},
         )
         public_ip_address_configuration.public_ip_prefix = AAZObjectArg(
             options=["public-ip-prefix"],
-            help="The PublicIPPrefix from which to allocate publicIP addresses.",
+            help="",
         )
         cls._build_args_sub_resource_update(public_ip_address_configuration.public_ip_prefix)
         public_ip_address_configuration.sku = AAZObjectArg(
             options=["sku"],
-            help="Describes the public IP Sku. It can only be set with OrchestrationMode as Flexible.",
+            help="",
         )
 
         dns_settings = cls._args_schema.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.dns_settings
         dns_settings.domain_name_label = AAZStrArg(
             options=["domain-name-label"],
-            help="The Domain name label prefix of the PublicIPAddress resources that will be created. The generated name label is the concatenation of the domain name label and vm network profile unique ID.",
+            help="",
             required=True,
         )
         dns_settings.domain_name_label_scope = AAZStrArg(
             options=["domain-name-label-scope"],
-            help="The Domain name label scope of the PublicIPAddress resources that will be created. The generated name label is the concatenation of the hashed domain name label with policy according to the domain name label scope and vm network profile unique ID.",
+            help="",
             enum={"NoReuse": "NoReuse", "ResourceGroupReuse": "ResourceGroupReuse", "SubscriptionReuse": "SubscriptionReuse", "TenantReuse": "TenantReuse"},
         )
 
@@ -540,22 +540,22 @@ class Patch(AAZCommand):
         _element = cls._args_schema.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.ip_tags.Element
         _element.ip_tag_type = AAZStrArg(
             options=["ip-tag-type"],
-            help="IP tag type. Example: FirstPartyUsage.",
+            help="",
         )
         _element.tag = AAZStrArg(
             options=["tag"],
-            help="IP tag associated with the public IP. Example: SQL, Storage etc.",
+            help="",
         )
 
         sku = cls._args_schema.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.sku
         sku.name = AAZStrArg(
             options=["name"],
-            help="Specify public IP sku name",
+            help="",
             enum={"Basic": "Basic", "Standard": "Standard"},
         )
         sku.tier = AAZStrArg(
             options=["tier"],
-            help="Specify public IP sku tier",
+            help="",
             enum={"Global": "Global", "Regional": "Regional"},
         )
 
@@ -565,109 +565,109 @@ class Patch(AAZCommand):
         _element = cls._args_schema.network_profile.network_interfaces.Element
         _element.id = AAZStrArg(
             options=["id"],
-            help="Resource Id",
+            help="",
         )
         _element.delete_option = AAZStrArg(
             options=["delete-option"],
-            help="Specify what happens to the network interface when the VM is deleted",
+            help="",
             enum={"Delete": "Delete", "Detach": "Detach"},
         )
         _element.primary = AAZBoolArg(
             options=["primary"],
-            help="Specifies the primary network interface in case the virtual machine has more than 1 network interface.",
+            help="",
         )
 
         os_profile = cls._args_schema.os_profile
         os_profile.admin_password = AAZStrArg(
             options=["admin-password"],
-            help="Specifies the password of the administrator account. <br><br> **Minimum-length (Windows):** 8 characters <br><br> **Minimum-length (Linux):** 6 characters <br><br> **Max-length (Windows):** 123 characters <br><br> **Max-length (Linux):** 72 characters <br><br> **Complexity requirements:** 3 out of 4 conditions below need to be fulfilled <br> Has lower characters <br>Has upper characters <br> Has a digit <br> Has a special character (Regex match [\\W_]) <br><br> **Disallowed values:** \"abc@123\", \"P@$$w0rd\", \"P@ssw0rd\", \"P@ssword123\", \"Pa$$word\", \"pass@word1\", \"Password!\", \"Password1\", \"Password22\", \"iloveyou!\" <br><br> For resetting the password, see [How to reset the Remote Desktop service or its login password in a Windows VM](https://docs.microsoft.com/troubleshoot/azure/virtual-machines/reset-rdp) <br><br> For resetting root password, see [Manage users, SSH, and check or repair disks on Azure Linux VMs using the VMAccess Extension](https://docs.microsoft.com/troubleshoot/azure/virtual-machines/troubleshoot-ssh-connection)",
+            help="",
         )
         os_profile.admin_username = AAZStrArg(
             options=["admin-username"],
-            help="Specifies the name of the administrator account. <br><br> This property cannot be updated after the VM is created. <br><br> **Windows-only restriction:** Cannot end in \".\" <br><br> **Disallowed values:** \"administrator\", \"admin\", \"user\", \"user1\", \"test\", \"user2\", \"test1\", \"user3\", \"admin1\", \"1\", \"123\", \"a\", \"actuser\", \"adm\", \"admin2\", \"aspnet\", \"backup\", \"console\", \"david\", \"guest\", \"john\", \"owner\", \"root\", \"server\", \"sql\", \"support\", \"support_388945a0\", \"sys\", \"test2\", \"test3\", \"user4\", \"user5\". <br><br> **Minimum-length (Linux):** 1  character <br><br> **Max-length (Linux):** 64 characters <br><br> **Max-length (Windows):** 20 characters.",
+            help="",
         )
         os_profile.allow_extension_operations = AAZBoolArg(
             options=["allow-extension-operations"],
-            help="Specifies whether extension operations should be allowed on the virtual machine. This may only be set to False when no extensions are present on the virtual machine.",
+            help="",
         )
         os_profile.computer_name = AAZStrArg(
             options=["computer-name"],
-            help="Specifies the host OS name of the virtual machine. This name cannot be updated after the VM is created. **Max-length (Windows):** 15 characters. **Max-length (Linux):** 64 characters. For naming conventions and restrictions see [Azure infrastructure services implementation guidelines](https://docs.microsoft.com/azure/azure-resource-manager/management/resource-name-rules).",
+            help="",
         )
         os_profile.custom_data = AAZStrArg(
             options=["custom-data"],
-            help="Specifies a base-64 encoded string of custom data. The base-64 encoded string is decoded to a binary array that is saved as a file on the Virtual Machine. The maximum length of the binary array is 65535 bytes. **Note: Do not pass any secrets or passwords in customData property.** This property cannot be updated after the VM is created. The property 'customData' is passed to the VM to be saved as a file, for more information see [Custom Data on Azure VMs](https://azure.microsoft.com/blog/custom-data-and-cloud-init-on-windows-azure/). For using cloud-init for your Linux VM, see [Using cloud-init to customize a Linux VM during creation](https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init).",
+            help="",
         )
         os_profile.linux_configuration = AAZObjectArg(
             options=["linux-configuration"],
-            help="Specifies the Linux operating system settings on the virtual machine. For a list of supported Linux distributions, see [Linux on Azure-Endorsed Distributions](https://docs.microsoft.com/azure/virtual-machines/linux/endorsed-distros).",
+            help="",
         )
         os_profile.require_guest_provision_signal = AAZBoolArg(
             options=["require-guest-provision-signal"],
-            help="Optional property which must either be set to True or omitted.",
+            help="",
         )
         os_profile.secrets = AAZListArg(
             options=["secrets"],
-            help="Specifies set of certificates that should be installed onto the virtual machine. To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-windows).",
+            help="",
         )
         os_profile.windows_configuration = AAZObjectArg(
             options=["windows-configuration"],
-            help="Specifies Windows operating system settings on the virtual machine.",
+            help="",
         )
 
         linux_configuration = cls._args_schema.os_profile.linux_configuration
         linux_configuration.disable_password_authentication = AAZBoolArg(
             options=["disable-password-authentication"],
-            help="Specifies whether password authentication should be disabled.",
+            help="",
         )
         linux_configuration.enable_vm_agent_platform_updates = AAZBoolArg(
             options=["enable-vm-agent-platform-updates"],
-            help="Indicates whether VMAgent Platform Updates is enabled for the Linux virtual machine. Default value is false.",
+            help="",
         )
         linux_configuration.patch_settings = AAZObjectArg(
             options=["patch-settings"],
-            help="[Preview Feature] Specifies settings related to VM Guest Patching on Linux.",
+            help="",
         )
         linux_configuration.provision_vm_agent = AAZBoolArg(
             options=["provision-vm-agent"],
-            help="Indicates whether virtual machine agent should be provisioned on the virtual machine. When this property is not specified in the request body, default behavior is to set it to true. This will ensure that VM Agent is installed on the VM so that extensions can be added to the VM later.",
+            help="",
         )
         linux_configuration.ssh = AAZObjectArg(
             options=["ssh"],
-            help="Specifies the ssh key configuration for a Linux OS.",
+            help="",
         )
 
         patch_settings = cls._args_schema.os_profile.linux_configuration.patch_settings
         patch_settings.assessment_mode = AAZStrArg(
             options=["assessment-mode"],
-            help="Specifies the mode of VM Guest Patch Assessment for the IaaS virtual machine.<br /><br /> Possible values are:<br /><br /> **ImageDefault** - You control the timing of patch assessments on a virtual machine. <br /><br /> **AutomaticByPlatform** - The platform will trigger periodic patch assessments. The property provisionVMAgent must be true.",
+            help="",
             enum={"AutomaticByPlatform": "AutomaticByPlatform", "ImageDefault": "ImageDefault"},
         )
         patch_settings.automatic_by_platform_settings = AAZObjectArg(
             options=["automatic-by-platform-settings"],
-            help="Specifies additional settings for patch mode AutomaticByPlatform in VM Guest Patching on Linux.",
+            help="",
         )
         patch_settings.patch_mode = AAZStrArg(
             options=["patch-mode"],
-            help="Specifies the mode of VM Guest Patching to IaaS virtual machine or virtual machines associated to virtual machine scale set with OrchestrationMode as Flexible.<br /><br /> Possible values are:<br /><br /> **ImageDefault** - The virtual machine's default patching configuration is used. <br /><br /> **AutomaticByPlatform** - The virtual machine will be automatically updated by the platform. The property provisionVMAgent must be true",
+            help="",
             enum={"AutomaticByPlatform": "AutomaticByPlatform", "ImageDefault": "ImageDefault"},
         )
 
         automatic_by_platform_settings = cls._args_schema.os_profile.linux_configuration.patch_settings.automatic_by_platform_settings
         automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolArg(
             options=["bypass-platform-safety-checks-on-user-schedule"],
-            help="Enables customer to schedule patching without accidental upgrades",
+            help="",
         )
         automatic_by_platform_settings.reboot_setting = AAZStrArg(
             options=["reboot-setting"],
-            help="Specifies the reboot setting for all AutomaticByPlatform patch installation operations.",
+            help="",
             enum={"Always": "Always", "IfRequired": "IfRequired", "Never": "Never", "Unknown": "Unknown"},
         )
 
         ssh = cls._args_schema.os_profile.linux_configuration.ssh
         ssh.public_keys = AAZListArg(
             options=["public-keys"],
-            help="The list of SSH public keys used to authenticate with linux based VMs.",
+            help="",
         )
 
         public_keys = cls._args_schema.os_profile.linux_configuration.ssh.public_keys
@@ -676,11 +676,11 @@ class Patch(AAZCommand):
         _element = cls._args_schema.os_profile.linux_configuration.ssh.public_keys.Element
         _element.key_data = AAZStrArg(
             options=["key-data"],
-            help="SSH public key certificate used to authenticate with the VM through ssh. The key needs to be at least 2048-bit and in ssh-rsa format. For creating ssh keys, see [Create SSH keys on Linux and Mac for Linux VMs in Azure]https://docs.microsoft.com/azure/virtual-machines/linux/create-ssh-keys-detailed).",
+            help="",
         )
         _element.path = AAZStrArg(
             options=["path"],
-            help="Specifies the full path on the created VM where ssh public key is stored. If the file already exists, the specified key is appended to the file. Example: /home/user/.ssh/authorized_keys",
+            help="",
         )
 
         secrets = cls._args_schema.os_profile.secrets
@@ -689,12 +689,12 @@ class Patch(AAZCommand):
         _element = cls._args_schema.os_profile.secrets.Element
         _element.source_vault = AAZObjectArg(
             options=["source-vault"],
-            help="The relative URL of the Key Vault containing all of the certificates in VaultCertificates.",
+            help="",
         )
         cls._build_args_sub_resource_update(_element.source_vault)
         _element.vault_certificates = AAZListArg(
             options=["vault-certificates"],
-            help="The list of key vault references in SourceVault which contain certificates.",
+            help="",
         )
 
         vault_certificates = cls._args_schema.os_profile.secrets.Element.vault_certificates
@@ -703,37 +703,37 @@ class Patch(AAZCommand):
         _element = cls._args_schema.os_profile.secrets.Element.vault_certificates.Element
         _element.certificate_store = AAZStrArg(
             options=["certificate-store"],
-            help="For Windows VMs, specifies the certificate store on the Virtual Machine to which the certificate should be added. The specified certificate store is implicitly in the LocalMachine account. For Linux VMs, the certificate file is placed under the /var/lib/waagent directory, with the file name &lt;UppercaseThumbprint&gt;.crt for the X509 certificate file and &lt;UppercaseThumbprint&gt;.prv for private key. Both of these files are .pem formatted.",
+            help="",
         )
         _element.certificate_url = AAZStrArg(
             options=["certificate-url"],
-            help="This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://docs.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  \"data\":\"<Base64-encoded-certificate>\",<br>  \"dataType\":\"pfx\",<br>  \"password\":\"<pfx-file-password>\"<br>} <br> To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-windows).",
+            help="",
         )
 
         windows_configuration = cls._args_schema.os_profile.windows_configuration
         windows_configuration.additional_unattend_content = AAZListArg(
             options=["additional-unattend-content"],
-            help="Specifies additional base-64 encoded XML formatted information that can be included in the Unattend.xml file, which is used by Windows Setup.",
+            help="",
         )
         windows_configuration.enable_automatic_updates = AAZBoolArg(
             options=["enable-automatic-updates"],
-            help="Indicates whether Automatic Updates is enabled for the Windows virtual machine. Default value is true. For virtual machine scale sets, this property can be updated and updates will take effect on OS reprovisioning.",
+            help="",
         )
         windows_configuration.patch_settings = AAZObjectArg(
             options=["patch-settings"],
-            help="[Preview Feature] Specifies settings related to VM Guest Patching on Windows.",
+            help="",
         )
         windows_configuration.provision_vm_agent = AAZBoolArg(
             options=["provision-vm-agent"],
-            help="Indicates whether virtual machine agent should be provisioned on the virtual machine. When this property is not specified in the request body, it is set to true by default. This will ensure that VM Agent is installed on the VM so that extensions can be added to the VM later.",
+            help="",
         )
         windows_configuration.time_zone = AAZStrArg(
             options=["time-zone"],
-            help="Specifies the time zone of the virtual machine. e.g. \"Pacific Standard Time\". Possible values can be [TimeZoneInfo.Id](https://docs.microsoft.com/dotnet/api/system.timezoneinfo.id?#System_TimeZoneInfo_Id) value from time zones returned by [TimeZoneInfo.GetSystemTimeZones](https://docs.microsoft.com/dotnet/api/system.timezoneinfo.getsystemtimezones).",
+            help="",
         )
         windows_configuration.win_rm = AAZObjectArg(
             options=["win-rm"],
-            help="Specifies the Windows Remote Management listeners. This enables remote Windows PowerShell.",
+            help="",
         )
 
         additional_unattend_content = cls._args_schema.os_profile.windows_configuration.additional_unattend_content
@@ -742,59 +742,59 @@ class Patch(AAZCommand):
         _element = cls._args_schema.os_profile.windows_configuration.additional_unattend_content.Element
         _element.component_name = AAZStrArg(
             options=["component-name"],
-            help="The component name. Currently, the only allowable value is Microsoft-Windows-Shell-Setup.",
+            help="",
             enum={"Microsoft-Windows-Shell-Setup": "Microsoft-Windows-Shell-Setup"},
         )
         _element.content = AAZStrArg(
             options=["content"],
-            help="Specifies the XML formatted content that is added to the unattend.xml file for the specified path and component. The XML must be less than 4KB and must include the root element for the setting or feature that is being inserted.",
+            help="",
         )
         _element.pass_name = AAZStrArg(
             options=["pass-name"],
-            help="The pass name. Currently, the only allowable value is OobeSystem.",
+            help="",
             enum={"OobeSystem": "OobeSystem"},
         )
         _element.setting_name = AAZStrArg(
             options=["setting-name"],
-            help="Specifies the name of the setting to which the content applies. Possible values are: FirstLogonCommands and AutoLogon.",
+            help="",
             enum={"AutoLogon": "AutoLogon", "FirstLogonCommands": "FirstLogonCommands"},
         )
 
         patch_settings = cls._args_schema.os_profile.windows_configuration.patch_settings
         patch_settings.assessment_mode = AAZStrArg(
             options=["assessment-mode"],
-            help="Specifies the mode of VM Guest patch assessment for the IaaS virtual machine.<br /><br /> Possible values are:<br /><br /> **ImageDefault** - You control the timing of patch assessments on a virtual machine.<br /><br /> **AutomaticByPlatform** - The platform will trigger periodic patch assessments. The property provisionVMAgent must be true. ",
+            help="",
             enum={"AutomaticByPlatform": "AutomaticByPlatform", "ImageDefault": "ImageDefault"},
         )
         patch_settings.automatic_by_platform_settings = AAZObjectArg(
             options=["automatic-by-platform-settings"],
-            help="Specifies additional settings for patch mode AutomaticByPlatform in VM Guest Patching on Windows.",
+            help="",
         )
         patch_settings.enable_hotpatching = AAZBoolArg(
             options=["enable-hotpatching"],
-            help="Enables customers to patch their Azure VMs without requiring a reboot. For enableHotpatching, the 'provisionVMAgent' must be set to true and 'patchMode' must be set to 'AutomaticByPlatform'.",
+            help="",
         )
         patch_settings.patch_mode = AAZStrArg(
             options=["patch-mode"],
-            help="Specifies the mode of VM Guest Patching to IaaS virtual machine or virtual machines associated to virtual machine scale set with OrchestrationMode as Flexible.<br /><br /> Possible values are:<br /><br /> **Manual** - You  control the application of patches to a virtual machine. You do this by applying patches manually inside the VM. In this mode, automatic updates are disabled; the property WindowsConfiguration.enableAutomaticUpdates must be false<br /><br /> **AutomaticByOS** - The virtual machine will automatically be updated by the OS. The property WindowsConfiguration.enableAutomaticUpdates must be true. <br /><br /> **AutomaticByPlatform** - the virtual machine will automatically updated by the platform. The properties provisionVMAgent and WindowsConfiguration.enableAutomaticUpdates must be true ",
+            help="",
             enum={"AutomaticByOS": "AutomaticByOS", "AutomaticByPlatform": "AutomaticByPlatform", "Manual": "Manual"},
         )
 
         automatic_by_platform_settings = cls._args_schema.os_profile.windows_configuration.patch_settings.automatic_by_platform_settings
         automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolArg(
             options=["bypass-platform-safety-checks-on-user-schedule"],
-            help="Enables customer to schedule patching without accidental upgrades",
+            help="",
         )
         automatic_by_platform_settings.reboot_setting = AAZStrArg(
             options=["reboot-setting"],
-            help="Specifies the reboot setting for all AutomaticByPlatform patch installation operations.",
+            help="",
             enum={"Always": "Always", "IfRequired": "IfRequired", "Never": "Never", "Unknown": "Unknown"},
         )
 
         win_rm = cls._args_schema.os_profile.windows_configuration.win_rm
         win_rm.listeners = AAZListArg(
             options=["listeners"],
-            help="The list of Windows Remote Management listeners",
+            help="",
         )
 
         listeners = cls._args_schema.os_profile.windows_configuration.win_rm.listeners
@@ -803,167 +803,167 @@ class Patch(AAZCommand):
         _element = cls._args_schema.os_profile.windows_configuration.win_rm.listeners.Element
         _element.certificate_url = AAZStrArg(
             options=["certificate-url"],
-            help="This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://docs.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  \"data\":\"<Base64-encoded-certificate>\",<br>  \"dataType\":\"pfx\",<br>  \"password\":\"<pfx-file-password>\"<br>} <br> To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://docs.microsoft.com/azure/virtual-machines/extensions/key-vault-windows).",
+            help="",
         )
         _element.protocol = AAZStrArg(
             options=["protocol"],
-            help="Specifies the protocol of WinRM listener. Possible values are: **http,** **https.**",
+            help="",
             enum={"Http": "Http", "Https": "Https"},
         )
 
         scheduled_events_policy = cls._args_schema.scheduled_events_policy
         scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectArg(
             options=["scheduled-events-additional-publishing-targets"],
-            help="The configuration parameters used while publishing scheduledEventsAdditionalPublishingTargets.",
+            help="",
         )
         scheduled_events_policy.user_initiated_reboot = AAZObjectArg(
             options=["user-initiated-reboot"],
-            help="The configuration parameters used while creating userInitiatedReboot scheduled event setting creation.",
+            help="",
         )
         scheduled_events_policy.user_initiated_redeploy = AAZObjectArg(
             options=["user-initiated-redeploy"],
-            help="The configuration parameters used while creating userInitiatedRedeploy scheduled event setting creation.",
+            help="",
         )
 
         scheduled_events_additional_publishing_targets = cls._args_schema.scheduled_events_policy.scheduled_events_additional_publishing_targets
         scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectArg(
             options=["event-grid-and-resource-graph"],
-            help="The configuration parameters used while creating eventGridAndResourceGraph Scheduled Event setting.",
+            help="",
         )
 
         event_grid_and_resource_graph = cls._args_schema.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
         event_grid_and_resource_graph.enable = AAZBoolArg(
             options=["enable"],
-            help="Specifies if event grid and resource graph is enabled for Scheduled event related configurations.",
+            help="",
         )
 
         user_initiated_reboot = cls._args_schema.scheduled_events_policy.user_initiated_reboot
         user_initiated_reboot.automatically_approve = AAZBoolArg(
             options=["automatically-approve"],
-            help="Specifies Reboot Scheduled Event related configurations.",
+            help="",
         )
 
         user_initiated_redeploy = cls._args_schema.scheduled_events_policy.user_initiated_redeploy
         user_initiated_redeploy.automatically_approve = AAZBoolArg(
             options=["automatically-approve"],
-            help="Specifies Redeploy Scheduled Event related configurations.",
+            help="",
         )
 
         scheduled_events_profile = cls._args_schema.scheduled_events_profile
         scheduled_events_profile.os_image_notification_profile = AAZObjectArg(
             options=["os-image-notification-profile"],
-            help="Specifies OS Image Scheduled Event related configurations.",
+            help="",
         )
         scheduled_events_profile.terminate_notification_profile = AAZObjectArg(
             options=["terminate-notification-profile"],
-            help="Specifies Terminate Scheduled Event related configurations.",
+            help="",
         )
 
         os_image_notification_profile = cls._args_schema.scheduled_events_profile.os_image_notification_profile
         os_image_notification_profile.enable = AAZBoolArg(
             options=["enable"],
-            help="Specifies whether the OS Image Scheduled event is enabled or disabled.",
+            help="",
         )
         os_image_notification_profile.not_before_timeout = AAZStrArg(
             options=["not-before-timeout"],
-            help="Length of time a Virtual Machine being reimaged or having its OS upgraded will have to potentially approve the OS Image Scheduled Event before the event is auto approved (timed out). The configuration is specified in ISO 8601 format, and the value must be 15 minutes (PT15M)",
+            help="",
         )
 
         terminate_notification_profile = cls._args_schema.scheduled_events_profile.terminate_notification_profile
         terminate_notification_profile.enable = AAZBoolArg(
             options=["enable"],
-            help="Specifies whether the Terminate Scheduled event is enabled or disabled.",
+            help="",
         )
         terminate_notification_profile.not_before_timeout = AAZStrArg(
             options=["not-before-timeout"],
-            help="Configurable length of time a Virtual Machine being deleted will have to potentially approve the Terminate Scheduled Event before the event is auto approved (timed out). The configuration must be specified in ISO 8601 format, the default value is 5 minutes (PT5M)",
+            help="",
         )
 
         security_profile = cls._args_schema.security_profile
         security_profile.encryption_at_host = AAZBoolArg(
             options=["encryption-at-host"],
-            help="This property can be used by user in the request to enable or disable the Host Encryption for the virtual machine or virtual machine scale set. This will enable the encryption for all the disks including Resource/Temp disk at host itself. The default behavior is: The Encryption at host will be disabled unless this property is set to true for the resource.",
+            help="",
         )
         security_profile.encryption_identity = AAZObjectArg(
             options=["encryption-identity"],
-            help="Specifies the Managed Identity used by ADE to get access token for keyvault operations.",
+            help="",
         )
         security_profile.proxy_agent_settings = AAZObjectArg(
             options=["proxy-agent-settings"],
-            help="Specifies ProxyAgent settings while creating the virtual machine. Minimum api-version: 2023-09-01.",
+            help="",
         )
         security_profile.security_type = AAZStrArg(
             options=["security-type"],
-            help="Specifies the SecurityType of the virtual machine. It has to be set to any specified value to enable UefiSettings. The default behavior is: UefiSettings will not be enabled unless this property is set.",
+            help="",
             enum={"ConfidentialVM": "ConfidentialVM", "TrustedLaunch": "TrustedLaunch"},
         )
         security_profile.uefi_settings = AAZObjectArg(
             options=["uefi-settings"],
-            help="Specifies the security settings like secure boot and vTPM used while creating the virtual machine. Minimum api-version: 2020-12-01.",
+            help="",
         )
 
         encryption_identity = cls._args_schema.security_profile.encryption_identity
         encryption_identity.user_assigned_identity_resource_id = AAZStrArg(
             options=["user-assigned-identity-resource-id"],
-            help="Specifies ARM Resource ID of one of the user identities associated with the VM.",
+            help="",
         )
 
         proxy_agent_settings = cls._args_schema.security_profile.proxy_agent_settings
         proxy_agent_settings.enabled = AAZBoolArg(
             options=["enabled"],
-            help="Specifies whether ProxyAgent feature should be enabled on the virtual machine or virtual machine scale set.",
+            help="",
         )
         proxy_agent_settings.imds = AAZObjectArg(
             options=["imds"],
-            help="Specifies the IMDS endpoint settings while creating the virtual machine or virtual machine scale set. Minimum api-version: 2024-03-01.",
+            help="",
         )
         cls._build_args_host_endpoint_settings_update(proxy_agent_settings.imds)
         proxy_agent_settings.key_incarnation_id = AAZIntArg(
             options=["key-incarnation-id"],
-            help="Increase the value of this property allows users to reset the key used for securing communication channel between guest and host.",
+            help="",
         )
         proxy_agent_settings.mode = AAZStrArg(
             options=["mode"],
-            help="Specifies the mode that ProxyAgent will execute on. Warning: this property has been deprecated, please specify 'mode' under particular hostendpoint setting.",
+            help="",
             enum={"Audit": "Audit", "Enforce": "Enforce"},
         )
         proxy_agent_settings.wire_server = AAZObjectArg(
             options=["wire-server"],
-            help="Specifies the Wire Server endpoint settings while creating the virtual machine or virtual machine scale set. Minimum api-version: 2024-03-01.",
+            help="",
         )
         cls._build_args_host_endpoint_settings_update(proxy_agent_settings.wire_server)
 
         uefi_settings = cls._args_schema.security_profile.uefi_settings
         uefi_settings.secure_boot_enabled = AAZBoolArg(
             options=["secure-boot-enabled"],
-            help="Specifies whether secure boot should be enabled on the virtual machine. Minimum api-version: 2020-12-01.",
+            help="",
         )
         uefi_settings.v_tpm_enabled = AAZBoolArg(
             options=["v-tpm-enabled"],
-            help="Specifies whether vTPM should be enabled on the virtual machine. Minimum api-version: 2020-12-01.",
+            help="",
         )
 
         storage_profile = cls._args_schema.storage_profile
         storage_profile.align_regional_disks_to_vm_zone = AAZBoolArg(
             options=["align-regional-disks-to-vm-zone"],
-            help="Specifies whether the regional disks should be aligned/moved to the VM zone. This is applicable only for VMs with placement property set. Please note that this change is irreversible. Minimum api-version: 2024-11-01.",
+            help="",
         )
         storage_profile.data_disks = AAZListArg(
             options=["data-disks"],
-            help="Specifies the parameters that are used to add a data disk to a virtual machine. For more information about disks, see [About disks and VHDs for Azure virtual machines](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview).",
+            help="",
         )
         storage_profile.disk_controller_type = AAZStrArg(
             options=["disk-controller-type"],
-            help="Specifies the disk controller type configured for the VM. **Note:** This property will be set to the default disk controller type if not specified provided virtual machine is being created with 'hyperVGeneration' set to V2 based on the capabilities of the operating system disk and VM size from the the specified minimum api version. You need to deallocate the VM before updating its disk controller type unless you are updating the VM size in the VM configuration which implicitly deallocates and reallocates the VM. Minimum api-version: 2022-08-01.",
+            help="",
             enum={"NVMe": "NVMe", "SCSI": "SCSI"},
         )
         storage_profile.image_reference = AAZObjectArg(
             options=["image-reference"],
-            help="Specifies information about the image to use. You can specify information about platform images, marketplace images, or virtual machine images. This element is required when you want to use a platform image, marketplace image, or virtual machine image, but is not used in other creation operations.",
+            help="",
         )
         storage_profile.os_disk = AAZObjectArg(
             options=["os-disk"],
-            help="Specifies information about the operating system disk used by the virtual machine. For more information about disks, see [About disks and VHDs for Azure virtual machines](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview).",
+            help="",
         )
 
         data_disks = cls._args_schema.storage_profile.data_disks
@@ -972,195 +972,195 @@ class Patch(AAZCommand):
         _element = cls._args_schema.storage_profile.data_disks.Element
         _element.caching = AAZStrArg(
             options=["caching"],
-            help="Specifies the caching requirements. Possible values are: **None,** **ReadOnly,** **ReadWrite.** The defaulting behavior is: **None for Standard storage. ReadOnly for Premium storage.**",
+            help="",
             enum={"None": "None", "ReadOnly": "ReadOnly", "ReadWrite": "ReadWrite"},
         )
         _element.create_option = AAZStrArg(
             options=["create-option"],
-            help="Specifies how the virtual machine disk should be created. Possible values are **Attach:** This value is used when you are using a specialized disk to create the virtual machine. **FromImage:** This value is used when you are using an image to create the virtual machine data disk. If you are using a platform image, you should also use the imageReference element described above. If you are using a marketplace image, you should also use the plan element previously described. **Empty:** This value is used when creating an empty data disk. **Copy:** This value is used to create a data disk from a snapshot or another disk. **Restore:** This value is used to create a data disk from a disk restore point.",
+            help="",
             required=True,
             enum={"Attach": "Attach", "Copy": "Copy", "Empty": "Empty", "FromImage": "FromImage", "Restore": "Restore"},
         )
         _element.delete_option = AAZStrArg(
             options=["delete-option"],
-            help="Specifies whether data disk should be deleted or detached upon VM deletion. Possible values are: **Delete.** If this value is used, the data disk is deleted when VM is deleted. **Detach.** If this value is used, the data disk is retained after VM is deleted. The default value is set to **Detach**.",
+            help="",
             enum={"Delete": "Delete", "Detach": "Detach"},
         )
         _element.detach_option = AAZStrArg(
             options=["detach-option"],
-            help="Specifies the detach behavior to be used while detaching a disk or which is already in the process of detachment from the virtual machine. Supported values: **ForceDetach.** detachOption: **ForceDetach** is applicable only for managed data disks. If a previous detachment attempt of the data disk did not complete due to an unexpected failure from the virtual machine and the disk is still not released then use force-detach as a last resort option to detach the disk forcibly from the VM. All writes might not have been flushed when using this detach behavior. To force-detach a data disk update toBeDetached to 'true' along with setting detachOption: 'ForceDetach'.",
+            help="",
             enum={"ForceDetach": "ForceDetach"},
         )
         _element.disk_size_gb = AAZIntArg(
             options=["disk-size-gb"],
-            help="Specifies the size of an empty data disk in gigabytes. This element can be used to overwrite the size of the disk in a virtual machine image. The property 'diskSizeGB' is the number of bytes x 1024^3 for the disk and the value cannot be larger than 1023.",
+            help="",
         )
         _element.image = AAZObjectArg(
             options=["image"],
-            help="The source user image virtual hard disk. The virtual hard disk will be copied before being attached to the virtual machine. If SourceImage is provided, the destination virtual hard drive must not exist.",
+            help="",
         )
         cls._build_args_virtual_hard_disk_update(_element.image)
         _element.lun = AAZIntArg(
             options=["lun"],
-            help="Specifies the logical unit number of the data disk. This value is used to identify data disks within the VM and therefore must be unique for each data disk attached to a VM.",
+            help="",
             required=True,
         )
         _element.managed_disk = AAZObjectArg(
             options=["managed-disk"],
-            help="The managed disk parameters.",
+            help="",
         )
         cls._build_args_managed_disk_parameters_update(_element.managed_disk)
         _element.name = AAZStrArg(
             options=["name"],
-            help="The disk name.",
+            help="",
         )
         _element.source_resource = AAZObjectArg(
             options=["source-resource"],
-            help="The source resource identifier. It can be a snapshot, or disk restore point from which to create a disk.",
+            help="",
         )
         _element.to_be_detached = AAZBoolArg(
             options=["to-be-detached"],
-            help="Specifies whether the data disk is in process of detachment from the VirtualMachine/VirtualMachineScaleset",
+            help="",
         )
         _element.vhd = AAZObjectArg(
             options=["vhd"],
-            help="The virtual hard disk.",
+            help="",
         )
         cls._build_args_virtual_hard_disk_update(_element.vhd)
         _element.write_accelerator_enabled = AAZBoolArg(
             options=["write-accelerator-enabled"],
-            help="Specifies whether writeAccelerator should be enabled or disabled on the disk.",
+            help="",
         )
 
         source_resource = cls._args_schema.storage_profile.data_disks.Element.source_resource
         source_resource.id = AAZStrArg(
             options=["id"],
-            help="The ARM resource id in the form of /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/...",
+            help="",
         )
 
         image_reference = cls._args_schema.storage_profile.image_reference
         image_reference.community_gallery_image_id = AAZStrArg(
             options=["community-gallery-image-id"],
-            help="Specified the community gallery image unique id for vm deployment. This can be fetched from community gallery image GET call.",
+            help="",
         )
         image_reference.id = AAZStrArg(
             options=["id"],
-            help="Resource Id",
+            help="",
         )
         image_reference.offer = AAZStrArg(
             options=["offer"],
-            help="Specifies the offer of the platform image or marketplace image used to create the virtual machine.",
+            help="",
         )
         image_reference.publisher = AAZStrArg(
             options=["publisher"],
-            help="The image publisher.",
+            help="",
         )
         image_reference.shared_gallery_image_id = AAZStrArg(
             options=["shared-gallery-image-id"],
-            help="Specified the shared gallery image unique id for vm deployment. This can be fetched from shared gallery image GET call.",
+            help="",
         )
         image_reference.sku = AAZStrArg(
             options=["sku"],
-            help="The image SKU.",
+            help="",
         )
         image_reference.version = AAZStrArg(
             options=["version"],
-            help="Specifies the version of the platform image or marketplace image used to create the virtual machine. The allowed formats are Major.Minor.Build or 'latest'. Major, Minor, and Build are decimal numbers. Specify 'latest' to use the latest version of an image available at deploy time. Even if you use 'latest', the VM image will not automatically update after deploy time even if a new version becomes available. Please do not use field 'version' for gallery image deployment, gallery image should always use 'id' field for deployment, to use 'latest' version of gallery image, just set '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{imageName}' in the 'id' field without version input.",
+            help="",
         )
 
         os_disk = cls._args_schema.storage_profile.os_disk
         os_disk.caching = AAZStrArg(
             options=["caching"],
-            help="Specifies the caching requirements. Possible values are: **None,** **ReadOnly,** **ReadWrite.** The defaulting behavior is: **None for Standard storage. ReadOnly for Premium storage.**",
+            help="",
             enum={"None": "None", "ReadOnly": "ReadOnly", "ReadWrite": "ReadWrite"},
         )
         os_disk.create_option = AAZStrArg(
             options=["create-option"],
-            help="Specifies how the virtual machine disk should be created. Possible values are **Attach:** This value is used when you are using a specialized disk to create the virtual machine. **FromImage:** This value is used when you are using an image to create the virtual machine. If you are using a platform image, you should also use the imageReference element described above. If you are using a marketplace image, you should also use the plan element previously described.",
+            help="",
             required=True,
             enum={"Attach": "Attach", "Copy": "Copy", "Empty": "Empty", "FromImage": "FromImage", "Restore": "Restore"},
         )
         os_disk.delete_option = AAZStrArg(
             options=["delete-option"],
-            help="Specifies whether OS Disk should be deleted or detached upon VM deletion. Possible values are: **Delete.** If this value is used, the OS disk is deleted when VM is deleted. **Detach.** If this value is used, the os disk is retained after VM is deleted. The default value is set to **Detach**. For an ephemeral OS Disk, the default value is set to **Delete**. The user cannot change the delete option for an ephemeral OS Disk.",
+            help="",
             enum={"Delete": "Delete", "Detach": "Detach"},
         )
         os_disk.diff_disk_settings = AAZObjectArg(
             options=["diff-disk-settings"],
-            help="Specifies the ephemeral Disk Settings for the operating system disk used by the virtual machine.",
+            help="",
         )
         os_disk.disk_size_gb = AAZIntArg(
             options=["disk-size-gb"],
-            help="Specifies the size of an empty data disk in gigabytes. This element can be used to overwrite the size of the disk in a virtual machine image. The property 'diskSizeGB' is the number of bytes x 1024^3 for the disk and the value cannot be larger than 1023.",
+            help="",
         )
         os_disk.encryption_settings = AAZObjectArg(
             options=["encryption-settings"],
-            help="Specifies the encryption settings for the OS Disk. Minimum api-version: 2015-06-15.",
+            help="",
         )
         os_disk.image = AAZObjectArg(
             options=["image"],
-            help="The source user image virtual hard disk. The virtual hard disk will be copied before being attached to the virtual machine. If SourceImage is provided, the destination virtual hard drive must not exist.",
+            help="",
         )
         cls._build_args_virtual_hard_disk_update(os_disk.image)
         os_disk.managed_disk = AAZObjectArg(
             options=["managed-disk"],
-            help="The managed disk parameters.",
+            help="",
         )
         cls._build_args_managed_disk_parameters_update(os_disk.managed_disk)
         os_disk.name = AAZStrArg(
             options=["name"],
-            help="The disk name.",
+            help="",
         )
         os_disk.os_type = AAZStrArg(
             options=["os-type"],
-            help="This property allows you to specify the type of the OS that is included in the disk if creating a VM from user-image or a specialized VHD. Possible values are: **Windows,** **Linux.**",
+            help="",
             enum={"Linux": "Linux", "Windows": "Windows"},
         )
         os_disk.vhd = AAZObjectArg(
             options=["vhd"],
-            help="The virtual hard disk.",
+            help="",
         )
         cls._build_args_virtual_hard_disk_update(os_disk.vhd)
         os_disk.write_accelerator_enabled = AAZBoolArg(
             options=["write-accelerator-enabled"],
-            help="Specifies whether writeAccelerator should be enabled or disabled on the disk.",
+            help="",
         )
 
         diff_disk_settings = cls._args_schema.storage_profile.os_disk.diff_disk_settings
         diff_disk_settings.option = AAZStrArg(
             options=["option"],
-            help="Specifies the ephemeral disk settings for operating system disk.",
+            help="",
             enum={"Local": "Local"},
         )
         diff_disk_settings.placement = AAZStrArg(
             options=["placement"],
-            help="Specifies the ephemeral disk placement for operating system disk. Possible values are: **CacheDisk,** **ResourceDisk,** **NvmeDisk.** The defaulting behavior is: **CacheDisk** if one is configured for the VM size otherwise **ResourceDisk** or **NvmeDisk** is used. Refer to the VM size documentation for Windows VM at https://docs.microsoft.com/azure/virtual-machines/windows/sizes and Linux VM at https://docs.microsoft.com/azure/virtual-machines/linux/sizes to check which VM sizes exposes a cache disk. Minimum api-version for NvmeDisk: 2024-03-01.",
+            help="",
             enum={"CacheDisk": "CacheDisk", "NvmeDisk": "NvmeDisk", "ResourceDisk": "ResourceDisk"},
         )
 
         encryption_settings = cls._args_schema.storage_profile.os_disk.encryption_settings
         encryption_settings.disk_encryption_key = AAZObjectArg(
             options=["disk-encryption-key"],
-            help="Specifies the location of the disk encryption key, which is a Key Vault Secret.",
+            help="",
         )
         encryption_settings.enabled = AAZBoolArg(
             options=["enabled"],
-            help="Specifies whether disk encryption should be enabled on the virtual machine.",
+            help="",
         )
         encryption_settings.key_encryption_key = AAZObjectArg(
             options=["key-encryption-key"],
-            help="Specifies the location of the key encryption key in Key Vault.",
+            help="",
         )
 
         disk_encryption_key = cls._args_schema.storage_profile.os_disk.encryption_settings.disk_encryption_key
         disk_encryption_key.secret_url = AAZStrArg(
             options=["secret-url"],
-            help="The URL referencing a secret in a Key Vault.",
+            help="",
             required=True,
         )
         disk_encryption_key.source_vault = AAZObjectArg(
             options=["source-vault"],
-            help="The relative URL of the Key Vault containing the secret.",
+            help="",
             required=True,
         )
         cls._build_args_sub_resource_update(disk_encryption_key.source_vault)
@@ -1168,12 +1168,12 @@ class Patch(AAZCommand):
         key_encryption_key = cls._args_schema.storage_profile.os_disk.encryption_settings.key_encryption_key
         key_encryption_key.key_url = AAZStrArg(
             options=["key-url"],
-            help="The URL referencing a key encryption key in Key Vault.",
+            help="",
             required=True,
         )
         key_encryption_key.source_vault = AAZObjectArg(
             options=["source-vault"],
-            help="The relative URL of the Key Vault containing the key.",
+            help="",
             required=True,
         )
         cls._build_args_sub_resource_update(key_encryption_key.source_vault)
@@ -1192,7 +1192,7 @@ class Patch(AAZCommand):
         disk_encryption_set_parameters_update = cls._args_disk_encryption_set_parameters_update
         disk_encryption_set_parameters_update.id = AAZStrArg(
             options=["id"],
-            help="Resource Id",
+            help="",
         )
 
         _schema.id = cls._args_disk_encryption_set_parameters_update.id
@@ -1211,11 +1211,11 @@ class Patch(AAZCommand):
         host_endpoint_settings_update = cls._args_host_endpoint_settings_update
         host_endpoint_settings_update.in_vm_access_control_profile_reference_id = AAZStrArg(
             options=["in-vm-access-control-profile-reference-id"],
-            help="Specifies the InVMAccessControlProfileVersion resource id in the format of /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/inVMAccessControlProfiles/{profile}/versions/{version}",
+            help="",
         )
         host_endpoint_settings_update.mode = AAZStrArg(
             options=["mode"],
-            help="Specifies the execution mode. In Audit mode, the system acts as if it is enforcing the access control policy, including emitting access denial entries in the logs but it does not actually deny any requests to host endpoints. In Enforce mode, the system will enforce the access control and it is the recommended mode of operation.",
+            help="",
             enum={"Audit": "Audit", "Disabled": "Disabled", "Enforce": "Enforce"},
         )
 
@@ -1238,32 +1238,32 @@ class Patch(AAZCommand):
         managed_disk_parameters_update = cls._args_managed_disk_parameters_update
         managed_disk_parameters_update.disk_encryption_set = AAZObjectArg(
             options=["disk-encryption-set"],
-            help="Specifies the customer managed disk encryption set resource id for the managed disk.",
+            help="",
         )
         cls._build_args_disk_encryption_set_parameters_update(managed_disk_parameters_update.disk_encryption_set)
         managed_disk_parameters_update.id = AAZStrArg(
             options=["id"],
-            help="Resource Id",
+            help="",
         )
         managed_disk_parameters_update.security_profile = AAZObjectArg(
             options=["security-profile"],
-            help="Specifies the security profile for the managed disk.",
+            help="",
         )
         managed_disk_parameters_update.storage_account_type = AAZStrArg(
             options=["storage-account-type"],
-            help="Specifies the storage account type for the managed disk. NOTE: UltraSSD_LRS can only be used with data disks, it cannot be used with OS Disk.",
+            help="",
             enum={"PremiumV2_LRS": "PremiumV2_LRS", "Premium_LRS": "Premium_LRS", "Premium_ZRS": "Premium_ZRS", "StandardSSD_LRS": "StandardSSD_LRS", "StandardSSD_ZRS": "StandardSSD_ZRS", "Standard_LRS": "Standard_LRS", "UltraSSD_LRS": "UltraSSD_LRS"},
         )
 
         security_profile = cls._args_managed_disk_parameters_update.security_profile
         security_profile.disk_encryption_set = AAZObjectArg(
             options=["disk-encryption-set"],
-            help="Specifies the customer managed disk encryption set resource id for the managed disk that is used for Customer Managed Key encrypted ConfidentialVM OS Disk and VMGuest blob.",
+            help="",
         )
         cls._build_args_disk_encryption_set_parameters_update(security_profile.disk_encryption_set)
         security_profile.security_encryption_type = AAZStrArg(
             options=["security-encryption-type"],
-            help="Specifies the EncryptionType of the managed disk. It is set to DiskWithVMGuestState for encryption of the managed disk along with VMGuestState blob, VMGuestStateOnly for encryption of just the VMGuestState blob, and NonPersistedTPM for not persisting firmware state in the VMGuestState blob.. **Note:** It can be set for only Confidential VMs.",
+            help="",
             enum={"DiskWithVMGuestState": "DiskWithVMGuestState", "NonPersistedTPM": "NonPersistedTPM", "VMGuestStateOnly": "VMGuestStateOnly"},
         )
 
@@ -1285,7 +1285,7 @@ class Patch(AAZCommand):
         sub_resource_update = cls._args_sub_resource_update
         sub_resource_update.id = AAZStrArg(
             options=["id"],
-            help="Resource Id",
+            help="",
         )
 
         _schema.id = cls._args_sub_resource_update.id
@@ -1303,7 +1303,7 @@ class Patch(AAZCommand):
         virtual_hard_disk_update = cls._args_virtual_hard_disk_update
         virtual_hard_disk_update.uri = AAZStrArg(
             options=["uri"],
-            help="Specifies the virtual hard disk's uri.",
+            help="",
         )
 
         _schema.uri = cls._args_virtual_hard_disk_update.uri
