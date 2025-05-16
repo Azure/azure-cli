@@ -6432,5 +6432,13 @@ configuration:
       - addLabel:
           label: Service Attention
       description: '[Quantum] auto assign labels and users based on issue description.'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      then:
+      - requestReview:
+          reviewer: Copilot
+      description: '[Copilot] Auto-assign Copilot to Pull Request Reviewers.'
 onFailure:
 onSuccess:
