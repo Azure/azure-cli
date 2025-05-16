@@ -26,7 +26,8 @@ from azure.mgmt.datamigration.models import (DataMigrationService,
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.util import sdk_no_wait, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.dms._client_factory import (dms_cf_projects,
-                                                           get_resource_groups_client)
+                                                           get_resource_groups_client,
+                                                           dms_cf_services)
 from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sqldb_offline_input,
                                                            get_migrate_postgresql_to_azuredbforpostgresql_sync_input,
                                                            get_migrate_mysql_to_azuredbformysql_offline_input,
@@ -49,9 +50,11 @@ def create_service(cmd,
                    resource_group_name,
                    subnet,
                    sku_name,
+                   location=None,
                    tags=None,
                    no_wait=False):
-    location = get_rg_location(cmd.cli_ctx, resource_group_name)
+    if location is None:
+        location = get_rg_location(cmd.cli_ctx, resource_group_name)
     parameters = DataMigrationService(location=location,
                                       virtual_subnet_id=subnet,
                                       sku=ServiceSku(name=sku_name),
@@ -117,7 +120,7 @@ def create_or_update_project(cmd,
     necessary at the Task level, there is no need to include it at the Project level where for CLI it is more of a
     useless redundancy."""
 
-    location = get_rg_location(cmd.cli_ctx, resource_group_name)
+    location = get_dms_location(cmd.cli_ctx, resource_group_name, service_name)
 
     # Set inputs to lowercase
     source_platform = source_platform.lower()
@@ -485,6 +488,15 @@ def get_rg_location(ctx, resource_group_name, subscription_id=None):
     if rg is None:
         raise CLIError(f"Resource group {resource_group_name} not found.")
     return rg.location
+
+
+def get_dms_location(ctx, resource_group_name, dms_name):
+    services = dms_cf_services(ctx)
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    service = services.get(group_name=resource_group_name, service_name=dms_name)
+    if service is None:
+        raise CLIError(f"Service {dms_name} not found.")
+    return service.location
 
 
 class ScenarioType(Enum):

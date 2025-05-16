@@ -50,7 +50,7 @@ class DmsServiceTests(ScenarioTest):
                          JMESPathCheck('tags.area', 'cli'),
                          JMESPathCheck('tags.env', 'test'),
                          JMESPathCheck('type', 'Microsoft.DataMigration/services')]
-        self.cmd('az dms create -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test', checks=create_checks)
+        self.cmd('az dms create -l {lname} -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test', checks=create_checks)
 
         self.cmd('az dms show -g {rg} -n {sname}', checks=create_checks)
 
@@ -105,7 +105,7 @@ class DmsServiceTests(ScenarioTest):
         })
 
         # Set up container service
-        self.cmd('az dms create -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test')
+        self.cmd('az dms create -l {lname} -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test')
 
         self.cmd('az dms project show -g {rg} --service-name {sname} -n {pname1}', expect_failure=True)
 
