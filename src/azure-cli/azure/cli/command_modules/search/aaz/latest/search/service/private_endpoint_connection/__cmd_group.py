@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "search",
+    "search service private-endpoint-connection",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Search
+    """Manage Private Endpoint Connection
     """
     pass
 

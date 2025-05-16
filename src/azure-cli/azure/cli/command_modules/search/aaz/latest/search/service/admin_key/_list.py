@@ -12,24 +12,23 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "search service delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "search service admin-key list",
 )
-class Delete(AAZCommand):
-    """Delete a search service in the given resource group, along with its associated resources.
+class List(AAZCommand):
+    """Gets the primary and secondary admin API keys for the specified Azure AI Search service.
     """
 
     _aaz_info = {
         "version": "2025-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}/listadminkeys", "2025-05-01"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
         self._execute_operations()
-        return None
+        return self._output()
 
     _args_schema = None
 
@@ -46,10 +45,9 @@ class Delete(AAZCommand):
             required=True,
         )
         _args_schema.search_service_name = AAZStrArg(
-            options=["-n", "--name", "--search-service-name"],
+            options=["--search-service-name"],
             help="The name of the Azure AI Search service associated with the specified resource group.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^(?=.{2,60}$)[a-z0-9][a-z0-9]+(-[a-z0-9]+)*$",
             ),
@@ -58,7 +56,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ServicesDelete(ctx=self.ctx)()
+        self.AdminKeysGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,7 +67,11 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class ServicesDelete(AAZHttpOperation):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class AdminKeysGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -77,21 +79,19 @@ class Delete(AAZCommand):
             session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [200]:
                 return self.on_200(session)
-            if session.http_response.status_code in [204]:
-                return self.on_204(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/listAdminKeys",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -125,15 +125,47 @@ class Delete(AAZCommand):
             }
             return parameters
 
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
         def on_200(self, session):
-            pass
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
 
-        def on_204(self, session):
-            pass
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.primary_key = AAZStrType(
+                serialized_name="primaryKey",
+                flags={"read_only": True},
+            )
+            _schema_on_200.secondary_key = AAZStrType(
+                serialized_name="secondaryKey",
+                flags={"read_only": True},
+            )
+
+            return cls._schema_on_200
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _ListHelper:
+    """Helper class for List"""
 
 
-__all__ = ["Delete"]
+__all__ = ["List"]
