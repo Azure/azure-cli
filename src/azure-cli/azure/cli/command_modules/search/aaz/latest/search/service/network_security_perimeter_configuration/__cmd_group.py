@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "search",
+    "search service network-security-perimeter-configuration",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Search
+    """Manage Network Security Perimeter Configuration
     """
     pass
 

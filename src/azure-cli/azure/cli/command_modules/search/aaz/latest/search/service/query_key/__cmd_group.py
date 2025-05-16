@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "search",
+    "search service query-key",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Search
+    """Manage Create Query Key
     """
     pass
 

@@ -12,17 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "search service delete",
+    "search service query-key delete",
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete a search service in the given resource group, along with its associated resources.
+    """Delete the specified query key. Unlike admin keys, query keys are not regenerated. The process for regenerating a query key is to delete and then recreate it.
     """
 
     _aaz_info = {
         "version": "2025-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}/deletequerykey/{}", "2025-05-01"],
         ]
     }
 
@@ -42,11 +42,17 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--key", "--name"],
+            help="The query key to be deleted. Query keys are identified by value, not by name.",
+            required=True,
+            id_part="child_name_1",
+        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
         _args_schema.search_service_name = AAZStrArg(
-            options=["-n", "--name", "--search-service-name"],
+            options=["--search-service-name"],
             help="The name of the Azure AI Search service associated with the specified resource group.",
             required=True,
             id_part="name",
@@ -58,7 +64,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ServicesDelete(ctx=self.ctx)()
+        self.QueryKeysDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,7 +75,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class ServicesDelete(AAZHttpOperation):
+    class QueryKeysDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -85,7 +91,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/deleteQueryKey/{key}",
                 **self.url_parameters
             )
 
@@ -100,6 +106,10 @@ class Delete(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
+                **self.serialize_url_param(
+                    "key", self.ctx.args.name,
+                    required=True,
+                ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
