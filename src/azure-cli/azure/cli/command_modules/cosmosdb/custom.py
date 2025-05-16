@@ -728,7 +728,7 @@ def cli_cosmosdb_sql_container_update(client,
                                           None,
                                           None,
                                           analytical_storage_ttl,
-                                          vector_embedding_policy
+                                          vector_embedding_policy,
                                           full_text_policy):
         logger.debug('replacing SQL container')
 
