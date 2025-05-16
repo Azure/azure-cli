@@ -12,8 +12,9 @@ from azure.cli.command_modules.resource._completers import (
 from ._validators import (validate_resource, validate_expand)
 from azure.cli.command_modules.resource._validators import validate_metadata
 
-from ._completers import get_policy_set_completion_list, get_policy_completion_list, get_policy_assignment_completion_list,
-    get_policy_remediation_completion_list, get_policy_metadata_completion_list
+from ._completers import (
+    get_policy_set_completion_list, get_policy_completion_list, get_policy_assignment_completion_list,
+    get_policy_remediation_completion_list, get_policy_metadata_completion_list)
 
 from ._actions import AttestationEvidenceAddAction
 
