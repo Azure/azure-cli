@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-06-01",
+        "version": "2024-10-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/actiongroups/{}/createnotifications", "2022-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/actiongroups/{}/createnotifications", "2024-10-01-preview"],
         ]
     }
 
@@ -95,6 +95,11 @@ class Create(AAZCommand):
             arg_group="NotificationRequest",
             help="The list of event hub receivers that are part of this action group.",
         )
+        _args_schema.incident_receivers = AAZListArg(
+            options=["--incident-receivers"],
+            arg_group="NotificationRequest",
+            help="The list of incident receivers that are part of this action group.",
+        )
         _args_schema.itsm_receivers = AAZListArg(
             options=["--itsm-receivers"],
             arg_group="NotificationRequest",
@@ -155,6 +160,10 @@ class Create(AAZCommand):
             help="Indicates whether this instance is global runbook.",
             required=True,
         )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
+        )
         _element.name = AAZStrArg(
             options=["name"],
             help="Indicates name of the webhook.",
@@ -213,6 +222,10 @@ class Create(AAZCommand):
             help="The http trigger url where http request sent to.",
             required=True,
         )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
+        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The name of the azure function receiver. Names must be unique across all receivers within an action group.",
@@ -258,6 +271,10 @@ class Create(AAZCommand):
             help="The Event Hub namespace",
             required=True,
         )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
+        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The name of the Event hub receiver. Names must be unique across all receivers within an action group.",
@@ -277,6 +294,47 @@ class Create(AAZCommand):
             help="Indicates whether to use common alert schema.",
             default=False,
         )
+
+        incident_receivers = cls._args_schema.incident_receivers
+        incident_receivers.Element = AAZObjectArg()
+
+        _element = cls._args_schema.incident_receivers.Element
+        _element.connection = AAZObjectArg(
+            options=["connection"],
+            help="The incident service connection",
+            required=True,
+        )
+        _element.incident_management_service = AAZStrArg(
+            options=["incident-management-service"],
+            help="The incident management service type",
+            required=True,
+            enum={"Icm": "Icm"},
+        )
+        _element.mappings = AAZDictArg(
+            options=["mappings"],
+            help="Field mappings for the incident service",
+            required=True,
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the Incident receiver. Names must be unique across all receivers within an action group.",
+            required=True,
+        )
+
+        connection = cls._args_schema.incident_receivers.Element.connection
+        connection.id = AAZStrArg(
+            options=["id"],
+            help="GUID value representing the connection ID for the incident management service.",
+            required=True,
+        )
+        connection.name = AAZStrArg(
+            options=["name"],
+            help="The name of the connection.",
+            required=True,
+        )
+
+        mappings = cls._args_schema.incident_receivers.Element.mappings
+        mappings.Element = AAZStrArg()
 
         itsm_receivers = cls._args_schema.itsm_receivers
         itsm_receivers.Element = AAZObjectArg()
@@ -316,6 +374,10 @@ class Create(AAZCommand):
             options=["callback-url"],
             help="The callback url where http request sent to.",
             required=True,
+        )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -380,6 +442,10 @@ class Create(AAZCommand):
         _element.identifier_uri = AAZStrArg(
             options=["identifier-uri"],
             help="Indicates the identifier uri for aad auth.",
+        )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -492,7 +558,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-06-01",
+                    "api-version", "2024-10-01-preview",
                     required=True,
                 ),
             }
@@ -524,6 +590,7 @@ class Create(AAZCommand):
             _builder.set_prop("azureFunctionReceivers", AAZListType, ".azure_function_receivers")
             _builder.set_prop("emailReceivers", AAZListType, ".email_receivers")
             _builder.set_prop("eventHubReceivers", AAZListType, ".event_hub_receivers")
+            _builder.set_prop("incidentReceivers", AAZListType, ".incident_receivers")
             _builder.set_prop("itsmReceivers", AAZListType, ".itsm_receivers")
             _builder.set_prop("logicAppReceivers", AAZListType, ".logic_app_receivers")
             _builder.set_prop("smsReceivers", AAZListType, ".sms_receivers")
@@ -548,6 +615,7 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("automationAccountId", AAZStrType, ".automation_account_id", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("isGlobalRunbook", AAZBoolType, ".is_global_runbook", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("runbookName", AAZStrType, ".runbook_name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("serviceUri", AAZStrType, ".service_uri")
@@ -572,6 +640,7 @@ class Create(AAZCommand):
                 _elements.set_prop("functionAppResourceId", AAZStrType, ".function_app_resource_id", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("functionName", AAZStrType, ".function_name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("httpTriggerUrl", AAZStrType, ".http_trigger_url", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("useCommonAlertSchema", AAZBoolType, ".use_common_alert_schema")
 
@@ -593,10 +662,31 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("eventHubName", AAZStrType, ".event_hub_name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("eventHubNameSpace", AAZStrType, ".event_hub_name_space", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("subscriptionId", AAZStrType, ".subscription_id", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("tenantId", AAZStrType, ".tenant_id")
                 _elements.set_prop("useCommonAlertSchema", AAZBoolType, ".use_common_alert_schema")
+
+            incident_receivers = _builder.get(".incidentReceivers")
+            if incident_receivers is not None:
+                incident_receivers.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".incidentReceivers[]")
+            if _elements is not None:
+                _elements.set_prop("connection", AAZObjectType, ".connection", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("incidentManagementService", AAZStrType, ".incident_management_service", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("mappings", AAZDictType, ".mappings", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+
+            connection = _builder.get(".incidentReceivers[].connection")
+            if connection is not None:
+                connection.set_prop("id", AAZStrType, ".id", typ_kwargs={"flags": {"required": True}})
+                connection.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+
+            mappings = _builder.get(".incidentReceivers[].mappings")
+            if mappings is not None:
+                mappings.set_elements(AAZStrType, ".")
 
             itsm_receivers = _builder.get(".itsmReceivers")
             if itsm_receivers is not None:
@@ -617,6 +707,7 @@ class Create(AAZCommand):
             _elements = _builder.get(".logicAppReceivers[]")
             if _elements is not None:
                 _elements.set_prop("callbackUrl", AAZStrType, ".callback_url", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("resourceId", AAZStrType, ".resource_id", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("useCommonAlertSchema", AAZBoolType, ".use_common_alert_schema")
@@ -648,6 +739,7 @@ class Create(AAZCommand):
             _elements = _builder.get(".webhookReceivers[]")
             if _elements is not None:
                 _elements.set_prop("identifierUri", AAZStrType, ".identifier_uri")
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("objectId", AAZStrType, ".object_id")
                 _elements.set_prop("serviceUri", AAZStrType, ".service_uri", typ_kwargs={"flags": {"required": True}})
