@@ -590,6 +590,9 @@ parameters:
     short-summary: Configure artifact source when bootstraping the cluster.
     long-summary: |
         The artifacts include the addon image. Use "Direct" to download artifacts from MCR, "Cache" to downalod artifacts from Azure Container Registry.
+  - name: --enable-ai-toolchain-operator
+    type: bool
+    short-summary: Enable AI toolchain operator to the cluster.
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
@@ -1048,6 +1051,12 @@ parameters:
     short-summary: Configure artifact source when bootstraping the cluster.
     long-summary: |
         The artifacts include the addon image. Use "Direct" to download artifacts from MCR, "Cache" to downalod artifacts from Azure Container Registry.
+  - name: --enable-ai-toolchain-operator
+    type: bool
+    short-summary: Enable AI toolchain operator to the cluster
+  - name: --disable-ai-toolchain-operator
+    type: bool
+    short-summary: Disable AI toolchain operator.
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
