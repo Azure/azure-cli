@@ -434,6 +434,7 @@ def load_arguments(self, _):
         c.argument('rotation_poll_interval')
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_app_routing', action="store_true")
+        c.argument('enable_ai_toolchain_operator', is_preview=True, action='store_true')
         c.argument(
             "app_routing_default_nginx_controller",
             arg_type=get_enum_type(app_routing_nginx_configs),
@@ -633,6 +634,8 @@ def load_arguments(self, _):
         # addons
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('disable_secret_rotation', action='store_true', validator=validate_keyvault_secrets_provider_disable_and_enable_parameters)
+        c.argument('enable_ai_toolchain_operator', is_preview=True, action='store_true')
+        c.argument('disable_ai_toolchain_operator', is_preview=True, action='store_true')
         c.argument('rotation_poll_interval')
         c.argument('enable_static_egress_gateway', action='store_true')
         c.argument('disable_static_egress_gateway', action='store_true')
