@@ -23,7 +23,7 @@ from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
 from azure.cli.core.azclierror import ResourceNotFoundError
-
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 class ResourceGroupScenarioTest(ScenarioTest):
 
@@ -3478,7 +3478,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('displayName', '{padn}')
         ])
 
-        self.cmd('policy assignment delete -n {pan2} -g {rg}')
+        self.cmd('policy assignment delete -n {pan2} -g {rg} -y')
 
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath
@@ -3491,7 +3491,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 1))
 
         # delete the assignment and validate it's gone
-        self.cmd('policy assignment delete -n {pan} -g {rg}')
+        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
     def applyPolicyAtScope(self, scope, policyId, enforcementMode='Default', atMGLevel=False):
@@ -3522,7 +3522,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment list --scope {scope}', checks=self.check("length([?name=='{pan}'])", 1))
 
         # delete the assignment and validate it's gone
-        self.cmd('policy assignment delete -n {pan} --scope {scope}')
+        self.cmd('policy assignment delete -n {pan} --scope {scope} -y')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
     def resource_policy_operations(self, resource_group, management_group=None, subscription=None):
@@ -3601,7 +3601,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.applyPolicy()
 
         # delete the policy
-        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {pn} -y', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -3698,11 +3698,11 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd('policy assignment list --resource-group {rg}', checks=self.check("length([?name=='{pan}'])", 1))
 
             # delete the assignment and validate it's gone
-            self.cmd('policy assignment delete -n {pan} -g {rg}')
+            self.cmd('policy assignment delete -n {pan} -g {rg} -y')
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
         # delete the policy set
-        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition delete -n {psn} -y', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -3724,7 +3724,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('displayName', '{psdn}'),
             self.check('description', '{ps_desc}'),
             self.check('policyDefinitions[0].parameters.allowedLocations.value', "[parameters('allowedLocations')]"),
-            self.check('parameters.allowedLocations.type', 'array'),
+            self.check('parameters.allowedLocations.type', 'Array'),
             self.check('metadata.category', '{updated_metadata}')
         ])
 
@@ -3738,7 +3738,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # delete the parameterized policy set
-        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition delete -n {psn} -y', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -3747,13 +3747,13 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
 
         # delete the policy
-        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {pn} -y', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)
 
         # delete the data policy
-        cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {dpn} -y', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)
@@ -3779,7 +3779,7 @@ class PolicyScenarioTest(ScenarioTest):
             'em': 'DoNotEnforce'
         })
 
-        with self.assertRaises(IncorrectUsageError):
+        with self.assertRaises(InvalidArgumentValueError):
             self.cmd('policy assignment create --policy \'test/error_policy\' -n {pan} -g {rg} --location {location} --assign-identity --enforcement-mode {em}')
 
         # create a policy assignment with managed identity using a built in policy definition
@@ -3869,7 +3869,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
         ])
 
-        self.cmd('policy assignment delete -n {pan} -g {rg}')
+        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_systemassigned')
     @AllowLargeResponse(8192)
@@ -3969,7 +3969,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
         ])
 
-        self.cmd('policy assignment delete -n {pan} -g {rg}')
+        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_userassigned')
     @AllowLargeResponse(8192)
@@ -4014,7 +4014,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # remove the managed identity and ensure it is removed when retrieving the policy assignment
-        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+        self.cmd('policy assignment identity remove -n {pan} -g {rg} --user-assigned', checks=[
             self.check('type', 'None')
         ])
         self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
@@ -4039,6 +4039,11 @@ class PolicyScenarioTest(ScenarioTest):
         self.assertEqual(msis[0], msi_result['id'].lower())
 
         # replace an identity with system assigned msi
+        # cstack 5/6/2025: replacement is not supported in auto-generated commands, existing MSI must be removed before assigning a new one
+        self.cmd('policy assignment identity remove -n {pan} -g {rg} --user-assigned', checks=[
+            self.check('type', 'None')
+        ])
+
         self.cmd('policy assignment identity assign --system-assigned -n {pan} -g {rg}', checks=[
             self.check('type', 'SystemAssigned'),
             self.exists('principalId'),
@@ -4053,7 +4058,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
             self.check('type', 'None')
         ])
-        self.cmd('policy assignment delete -n {pan} -g {rg}')
+        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_ncm')
     @AllowLargeResponse(8192)
@@ -4080,17 +4085,13 @@ class PolicyScenarioTest(ScenarioTest):
 
         # Add two non-compliance messages
         self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "General message"', checks=[
-            self.check('length([])', 1),
-            self.check('[0].message', 'General message'),
-            self.not_exists('[0].policyDefinitionReferenceId')
+            self.check('message', 'General message'),
+            self.not_exists('policyDefinitionReferenceId')
         ])
 
         self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
-            self.check('length([])', 2),
-            self.check('[0].message', 'General message'),
-            self.not_exists('[0].policyDefinitionReferenceId'),
-            self.check('[1].message', 'Specific message'),
-            self.check('[1].policyDefinitionReferenceId', '{drid}')
+            self.check('message', 'Specific message'),
+            self.check('policyDefinitionReferenceId', '{drid}')
         ])
 
         # list the non-compliance messages, should be two
@@ -4124,16 +4125,36 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # remove a non-compliance message that does not exist
-        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Unknown message"', checks=[
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Unknown message" -y', checks=[
+             self.is_empty()
+        ])
+
+        # list the non-compliance messages, should still be two
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
             self.check('length([])', 2),
             self.check('[0].message', 'General message'),
             self.not_exists('[0].policyDefinitionReferenceId'),
             self.check('[1].message', 'Specific message'),
             self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # show the assignment, should should still contain both non-compliance messages
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
         ])
 
         # remove a non-compliance message that exists but without the right reference ID
-        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message"', checks=[
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message" -y', checks=[
+            self.is_empty()
+        ])
+
+        # list the non-compliance messages, should still be two
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
             self.check('length([])', 2),
             self.check('[0].message', 'General message'),
             self.not_exists('[0].policyDefinitionReferenceId'),
@@ -4141,83 +4162,95 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('[1].policyDefinitionReferenceId', '{drid}')
         ])
 
+        # show the assignment, should should still contain both non-compliance messages
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
         # remove a non-compliance message
-        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "General message"', checks=[
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "General message" -y', checks=[
+            self.is_empty()
+        ])
+
+        # verify the other one is still there
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
             self.check('length([])', 1),
             self.check('[0].message', 'Specific message'),
             self.check('[0].policyDefinitionReferenceId', '{drid}')
         ])
 
         # remove a non-compliance message with a reference ID
-        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message" -r {drid} -y', checks=[
             self.is_empty()
         ])
 
-        # list the non-compliance messages, should be 0
+        # list the non-compliance messages, should be none
         self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
             self.is_empty()
         ])
 
-        self.cmd('policy assignment delete -n {pan} -g {rg}')
+        # show the assignment, should have empty non-compliance messages array
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('length(nonComplianceMessages)', 0)
+        ])
+
+        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse(4096)
     def test_resource_policy_management_group(self, resource_group):
-        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
-        self.cmd('account management-group create -n ' + management_group_name)
-        try:
-            self.resource_policy_operations(resource_group, management_group_name)
+        management_group_name = 'PowershellTesting'
+        self.resource_policy_operations(resource_group, management_group_name)
 
-            # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(IncorrectUsageError):
-                self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
-        finally:
-            self.cmd('account management-group delete -n ' + management_group_name)
+        # Attempt to get a policy definition at an invalid management group scope
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
 
-    @live_only()
-    @unittest.skip('mock doesnt work when the subscription comes from --scope')
     @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policy_subscription_id(self, resource_group):
-        # under playback, we mock it so the subscription id will be '00000000...' and it will match
-        # the same sanitized value in the recording
         if not self.in_recording:
-            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
-                            return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policy_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+            other_sub_id = '00000000-0000-0000-0000-000000000000'     # subscription id in recording file
         else:
-            self.resource_policy_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+            # This must be a subscription you have Owner access to OTHER THAN the current subscription
+            other_sub_id = 'e5a130f3-57fd-46b6-9c55-03d21a853935'     # Azure Governance Perf 20
+            sub_id = get_subscription_id(self.cli_ctx)
+            self.assertFalse(sub_id == other_sub_id, 'This test requires a subscription other than that of the current context')
+
+        self.resource_policy_operations(resource_group, None, other_sub_id)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyset_default(self, resource_group):
         self.resource_policyset_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyset_management_group(self, resource_group):
-        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
-        self.cmd('account management-group create -n ' + management_group_name)
-        try:
-            self.resource_policyset_operations(resource_group, management_group_name)
-        finally:
-            self.cmd('account management-group delete -n ' + management_group_name)
+        management_group_name = 'PowershellTesting'
+        self.resource_policyset_operations(resource_group, management_group_name)
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyset_subscription_id(self, resource_group):
-        # under playback, we mock it so the subscription id will be '00000000...' and it will match
-        # the same sanitized value in the recording
         if not self.in_recording:
-            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
-                            return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+            other_sub_id = '00000000-0000-0000-0000-000000000000'     # subscription id in recording file
         else:
-            self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+            # This must be a subscription you have Owner access to OTHER THAN the current subscription
+            other_sub_id = 'e5a130f3-57fd-46b6-9c55-03d21a853935'     # Azure Governance Perf 20
+            sub_id = get_subscription_id(self.cli_ctx)
+            self.assertFalse(sub_id == other_sub_id, 'This test requires a subscription other than that of the current context')
+
+        self.resource_policyset_operations(resource_group, None, other_sub_id)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyset_grouping(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -4271,7 +4304,7 @@ class PolicyScenarioTest(ScenarioTest):
                  checks=self.check('length(policyDefinitionGroups)', 2))
 
         # delete the policy set
-        self.cmd('policy set-definition delete -n {psn}')
+        self.cmd('policy set-definition delete -n {psn} -y')
 
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -4280,7 +4313,7 @@ class PolicyScenarioTest(ScenarioTest):
                  checks=self.check("length([?name=='{psn}'])", 0))
 
         # delete the policy
-        self.cmd('policy definition delete -n {pn}')
+        self.cmd('policy definition delete -n {pn} -y')
 
     @AllowLargeResponse(8192)
     def test_show_built_in_policy(self):
@@ -4303,8 +4336,11 @@ class PolicyScenarioTest(ScenarioTest):
     # so it cannot be rerecord.
     @ResourceGroupPreparer(name_prefix='cli_test_resource_create_policy_assignment_random')
     @AllowLargeResponse(4096)
-    @live_only()
     def test_resource_create_policy_assignment_random(self, resource_group, management_group=None, subscription=None):
+
+        if self.in_recording:
+            return
+
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'pn': self.create_random_name('azure-cli-test-policy', 30),
@@ -4323,10 +4359,10 @@ class PolicyScenarioTest(ScenarioTest):
         ]).get_output_in_json()['name']
 
         # clean policy assignment and policy
-        self.cmd('policy assignment delete -n {pan_random} -g {rg}')
+        self.cmd('policy assignment delete -n {pan_random} -g {rg} -y')
         self.cmd('policy assignment list --disable-scope-strict-match',
                  checks=self.check("length([?name=='{pan_random}'])", 0))
-        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {pn} -y', management_group, subscription)
         self.cmd(cmd)
 
         if not self.in_recording:
@@ -4411,7 +4447,7 @@ class PolicyScenarioTest(ScenarioTest):
             # update the exemption
             self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
             self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
-            self.kwargs['expiration'] = '3021-04-05T00:45:13+00:00'
+            self.kwargs['expiration'] = '3021-04-05T00:45:13Z'
             cmd = self.cmdstring('policy exemption update -n {pen} -e mitigated --scope {scope} -r {prids} --expires-on {expiration} --display-name {pedn} --description {pe_desc} --metadata category={updated_metadata}'.format(**self.kwargs))
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
@@ -4435,8 +4471,8 @@ class PolicyScenarioTest(ScenarioTest):
             ])
 
             # delete the exemption and validate it's gone
-            self.cmd('policy exemption delete -n {pen} --scope {scope}'.format(**self.kwargs))
-            self.cmd('policy assignment delete -n {pan} --scope {scope}'.format(**self.kwargs))
+            self.cmd('policy exemption delete -n {pen} --scope {scope} -y'.format(**self.kwargs))
+            self.cmd('policy assignment delete -n {pan} --scope {scope} -y'.format(**self.kwargs))
             self.cmd('policy exemption list --disable-scope-strict-match', checks=self.check("length([?name=='{pen}'])", 0))
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
         else:
@@ -4463,7 +4499,7 @@ class PolicyScenarioTest(ScenarioTest):
             # update the exemption
             self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
             self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
-            self.kwargs['expiration'] = '3021-04-05T00:45:13+00:00'
+            self.kwargs['expiration'] = '3021-04-05T00:45:13Z'
             cmd = self.cmdstring('policy exemption update -n {pen} -e mitigated -g {rg} -r {prids} --expires-on {expiration} --display-name {pedn} --description {pe_desc} --metadata category={updated_metadata}'.format(**self.kwargs))
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
@@ -4487,8 +4523,8 @@ class PolicyScenarioTest(ScenarioTest):
             ])
 
             # delete the exemption and validate it's gone
-            self.cmd('policy exemption delete -n {pen} -g {rg}'.format(**self.kwargs))
-            self.cmd('policy assignment delete -n {pan} -g {rg}'.format(**self.kwargs))
+            self.cmd('policy exemption delete -n {pen} -g {rg} -y'.format(**self.kwargs))
+            self.cmd('policy assignment delete -n {pan} -g {rg} -y'.format(**self.kwargs))
             self.cmd('policy exemption list', checks=self.check("length([?name=='{pen}'])", 0))
 
         # list and show it
@@ -4502,7 +4538,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # delete the policy set
-        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition delete -n {psn} -y', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -4511,13 +4547,13 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
 
         # delete the policy
-        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {pn} -y', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)
 
         # delete the data policy
-        cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {dpn} -y', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)
@@ -4528,34 +4564,50 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=self.check("length([?name=='{dpn}'])", 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyexemption')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyexemption_default(self, resource_group):
         self.resource_policyexemption_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyexemption_management_group')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyexemption_management_group(self, resource_group):
-        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
-        self.cmd('account management-group create -n ' + management_group_name)
-        try:
-            self.resource_policyexemption_operations(resource_group, management_group_name)
-        finally:
-            self.cmd('account management-group delete -n ' + management_group_name)
+        management_group_name = 'PowershellTesting'
+        self.resource_policyexemption_operations(resource_group, management_group_name)
 
-    # mock doesnt work when the subscription comes from --scope, so it cannot be rerecord.
-    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policyexemption_subscription')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyexemption_subscription(self, resource_group):
         # under playback, we mock it so the subscription id will be '00000000...' and it will match
         # the same sanitized value in the recording
         if not self.in_recording:
-            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
-                            return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyexemption_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+            other_sub_id = '00000000-0000-0000-0000-000000000000'     # subscription id in recording file
         else:
-            self.resource_policyexemption_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+            # This must be a subscription you have Owner access to OTHER THAN the current subscription
+            other_sub_id = 'e5a130f3-57fd-46b6-9c55-03d21a853935'     # Azure Governance Perf 20
+            sub_id = get_subscription_id(self.cli_ctx)
+            self.assertFalse(sub_id == other_sub_id, 'This test requires a subscription other than that of the current context')
 
+        self.resource_policyexemption_operations(resource_group, None, other_sub_id)
+
+    def test_resource_policy_arg_validate(self):
+
+        from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
+
+        self.kwargs['sub'] = get_subscription_id(self.cli_ctx)
+
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('policy assignment create --name someName --scope someScope --policy somePolicyDefinition --policy-set-definition somePolicySetDefinition')
+
+        # with self.assertRaises(ArgumentUsageError):
+        #     self.cmd('policy assignment create --name someName --scope someScope --subscription {sub} --policy somePolicyDefinition'.format(**self.kwargs))
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('policy assignment create --name someName --scope someScope --policy somePolicyDefinition')
+
+        # Get a handy built-in (without parameters)
+        definitionId = self.cmd('policy definition show -n fee5cb2b-9d9b-410e-afe3-2902d90d0004').get_output_in_json()['id']
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('policy assignment create --name someName --scope someScope --policy {}'.format(definitionId))
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
 
@@ -5525,7 +5577,7 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_bicepparam_inline_params')
     def test_resource_group_level_deployment_with_bicepparams_and_inline_params(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
