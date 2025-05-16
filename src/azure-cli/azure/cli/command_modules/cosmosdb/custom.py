@@ -2195,7 +2195,7 @@ def _populate_collection_definition(collection,
 
     if vector_embedding_policy is not None:
         collection['vectorIndexingPolicy'] = vector_embedding_policy
-    
+
     if full_text_policy is not None:
         collection['fullTextPolicy'] = full_text_policy
 
