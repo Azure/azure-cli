@@ -54,7 +54,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
-
     def register_item(self):
         # Check if the item is already registered for backup. If not, register, if it is, undelete + reprotect as appropriate.
         existing_item = self.cmd('backup item show --backup-management-type AzureWorkload -g "{rg}" -v "{vault}" -c "{name}" -n "{item}"').get_output_in_json()
@@ -87,7 +86,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                 self.check("resourceGroup", '{rg}')
             ])
 
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_container(self):
 
         self.kwargs.update({
@@ -138,7 +137,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
         #     self.check("length([?name == '{name}'])", 0)])
 
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_policy(self):
 
         self.kwargs.update({
@@ -201,7 +200,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{policy_new}'])", 0)
         ])
 
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_protectable_item(self):
 
         self.kwargs.update({
@@ -245,7 +244,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
         #     self.check("length([?name == '{name}'])", 0)])
 
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_rp(self):
         resource_group = rg_sql.lower()
         self.kwargs.update({
@@ -329,7 +328,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 0)])
 
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_item(self):
         resource_group = rg_sql.lower()
         self.kwargs.update({
@@ -420,7 +419,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
         #     self.check("length([?name == '{name}'])", 0)])
 
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_protection(self):
         resource_group = rg_sql.lower()
         self.kwargs.update({
@@ -493,7 +492,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
         #     self.check("length([?name == '{name}'])", 0)])
 
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_restore(self):
         resource_group = rg_sql.lower()
         self.kwargs.update({
@@ -587,7 +586,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
         #     self.check("length([?name == '{name}'])", 0)])
 
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_restore_as_files(self):
         resource_group = rg_sql.lower()
         self.kwargs.update({
@@ -664,7 +663,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         #     self.check("length([?name == '{name}'])", 0)])
 
     @AllowLargeResponse()
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_crr(self):
         self.kwargs.update({
             'vault': "sql-clitest-vault",
@@ -726,7 +725,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
     @AllowLargeResponse()
-    # @record_only()
+    @record_only()
     def test_backup_wl_sql_archive (self):
         self.kwargs.update({
             'vault': "archiveccyvault1",
