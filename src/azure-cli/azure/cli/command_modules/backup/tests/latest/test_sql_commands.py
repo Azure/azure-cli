@@ -726,7 +726,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
     @AllowLargeResponse()
-    @record_only()
+    # @record_only()
     def test_backup_wl_sql_archive (self):
         self.kwargs.update({
             'vault': "archiveccyvault1",
