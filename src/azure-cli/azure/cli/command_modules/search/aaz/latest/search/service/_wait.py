@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
         ]
     }
 
@@ -45,9 +45,12 @@ class Wait(AAZWaitCommand):
         )
         _args_schema.search_service_name = AAZStrArg(
             options=["-n", "--name", "--search-service-name"],
-            help="The name of the Azure Cognitive Search service associated with the specified resource group.",
+            help="The name of the Azure AI Search service associated with the specified resource group.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^(?=.{2,60}$)[a-z0-9][a-z0-9]+(-[a-z0-9]+)*$",
+            ),
         )
         return cls._args_schema
 
@@ -116,7 +119,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-05-01",
                     required=True,
                 ),
             }
@@ -152,7 +155,7 @@ class Wait(AAZWaitCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -162,9 +165,12 @@ class Wait(AAZWaitCommand):
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.sku = AAZObjectType(
-                flags={"required": True},
+            _schema_on_200.sku = AAZObjectType()
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
             )
+            _WaitHelper._build_schema_system_data_read(_schema_on_200.system_data)
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -182,18 +188,45 @@ class Wait(AAZWaitCommand):
             identity.type = AAZStrType(
                 flags={"required": True},
             )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200.properties
             properties.auth_options = AAZObjectType(
                 serialized_name="authOptions",
             )
+            properties.compute_type = AAZStrType(
+                serialized_name="computeType",
+            )
+            properties.data_exfiltration_protections = AAZListType(
+                serialized_name="dataExfiltrationProtections",
+            )
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
                 nullable=True,
             )
+            properties.e_tag = AAZStrType(
+                serialized_name="eTag",
+                flags={"read_only": True},
+            )
             properties.encryption_with_cmk = AAZObjectType(
                 serialized_name="encryptionWithCmk",
             )
+            properties.endpoint = AAZStrType()
             properties.hosting_mode = AAZStrType(
                 serialized_name="hostingMode",
             )
@@ -221,6 +254,10 @@ class Wait(AAZWaitCommand):
                 serialized_name="semanticSearch",
                 nullable=True,
             )
+            properties.service_upgraded_at = AAZStrType(
+                serialized_name="serviceUpgradedAt",
+                flags={"read_only": True},
+            )
             properties.shared_private_link_resources = AAZListType(
                 serialized_name="sharedPrivateLinkResources",
                 flags={"read_only": True},
@@ -231,6 +268,9 @@ class Wait(AAZWaitCommand):
             properties.status_details = AAZStrType(
                 serialized_name="statusDetails",
                 flags={"read_only": True},
+            )
+            properties.upgrade_available = AAZStrType(
+                serialized_name="upgradeAvailable",
             )
 
             auth_options = cls._schema_on_200.properties.auth_options
@@ -246,6 +286,9 @@ class Wait(AAZWaitCommand):
                 serialized_name="aadAuthFailureMode",
             )
 
+            data_exfiltration_protections = cls._schema_on_200.properties.data_exfiltration_protections
+            data_exfiltration_protections.Element = AAZStrType()
+
             encryption_with_cmk = cls._schema_on_200.properties.encryption_with_cmk
             encryption_with_cmk.encryption_compliance_status = AAZStrType(
                 serialized_name="encryptionComplianceStatus",
@@ -254,6 +297,7 @@ class Wait(AAZWaitCommand):
             encryption_with_cmk.enforcement = AAZStrType()
 
             network_rule_set = cls._schema_on_200.properties.network_rule_set
+            network_rule_set.bypass = AAZStrType()
             network_rule_set.ip_rules = AAZListType(
                 serialized_name="ipRules",
             )
@@ -275,6 +319,11 @@ class Wait(AAZWaitCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType()
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _WaitHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -314,6 +363,11 @@ class Wait(AAZWaitCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType()
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _WaitHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -337,9 +391,7 @@ class Wait(AAZWaitCommand):
             properties.status = AAZStrType()
 
             sku = cls._schema_on_200.sku
-            sku.name = AAZStrType(
-                flags={"required": True},
-            )
+            sku.name = AAZStrType()
 
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
@@ -349,6 +401,50 @@ class Wait(AAZWaitCommand):
 
 class _WaitHelper:
     """Helper class for Wait"""
+
+    _schema_system_data_read = None
+
+    @classmethod
+    def _build_schema_system_data_read(cls, _schema):
+        if cls._schema_system_data_read is not None:
+            _schema.created_at = cls._schema_system_data_read.created_at
+            _schema.created_by = cls._schema_system_data_read.created_by
+            _schema.created_by_type = cls._schema_system_data_read.created_by_type
+            _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+            _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+            _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+            return
+
+        cls._schema_system_data_read = _schema_system_data_read = AAZObjectType(
+            flags={"read_only": True}
+        )
+
+        system_data_read = _schema_system_data_read
+        system_data_read.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data_read.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data_read.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data_read.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data_read.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data_read.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        _schema.created_at = cls._schema_system_data_read.created_at
+        _schema.created_by = cls._schema_system_data_read.created_by
+        _schema.created_by_type = cls._schema_system_data_read.created_by_type
+        _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+        _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+        _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
 __all__ = ["Wait"]

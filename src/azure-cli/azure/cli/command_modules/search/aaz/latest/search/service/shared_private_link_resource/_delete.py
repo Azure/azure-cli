@@ -12,24 +12,25 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "search service delete",
+    "search service shared-private-link-resource delete",
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete a search service in the given resource group, along with its associated resources.
+    """Delete the deletion of the shared private link resource from the search service.
     """
 
     _aaz_info = {
         "version": "2025-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}/sharedprivatelinkresources/{}", "2025-05-01"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return None
+        return self.build_lro_poller(self._execute_operations, None)
 
     _args_schema = None
 
@@ -46,7 +47,7 @@ class Delete(AAZCommand):
             required=True,
         )
         _args_schema.search_service_name = AAZStrArg(
-            options=["-n", "--name", "--search-service-name"],
+            options=["--search-service-name"],
             help="The name of the Azure AI Search service associated with the specified resource group.",
             required=True,
             id_part="name",
@@ -54,11 +55,17 @@ class Delete(AAZCommand):
                 pattern="^(?=.{2,60}$)[a-z0-9][a-z0-9]+(-[a-z0-9]+)*$",
             ),
         )
+        _args_schema.shared_private_link_resource_name = AAZStrArg(
+            options=["-n", "--name", "--shared-private-link-resource-name"],
+            help="The name of the shared private link resource managed by the Azure AI Search service within the specified resource group.",
+            required=True,
+            id_part="child_name_1",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ServicesDelete(ctx=self.ctx)()
+        yield self.SharedPrivateLinkResourcesDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,23 +76,46 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class ServicesDelete(AAZHttpOperation):
+    class SharedPrivateLinkResourcesDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [204]:
-                return self.on_204(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_204,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/sharedPrivateLinkResources/{sharedPrivateLinkResourceName}",
                 **self.url_parameters
             )
 
@@ -109,6 +139,10 @@ class Delete(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "sharedPrivateLinkResourceName", self.ctx.args.shared_private_link_resource_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -125,10 +159,10 @@ class Delete(AAZCommand):
             }
             return parameters
 
-        def on_200(self, session):
+        def on_204(self, session):
             pass
 
-        def on_204(self, session):
+        def on_200_201(self, session):
             pass
 
 

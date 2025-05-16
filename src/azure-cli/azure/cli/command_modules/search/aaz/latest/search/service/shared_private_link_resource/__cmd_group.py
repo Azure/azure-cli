@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "search",
+    "search service shared-private-link-resource",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Search
+    """Manage Shared Private Link Resource
     """
     pass
 

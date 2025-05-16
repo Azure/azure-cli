@@ -12,23 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "search service show",
+    "search service upgrade",
 )
-class Show(AAZCommand):
-    """Get the search service with the given name in the given resource group.
+class Upgrade(AAZCommand):
+    """Upgrades the Azure AI Search service to the latest version available.
     """
 
     _aaz_info = {
         "version": "2025-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}/upgrade", "2025-05-01"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -45,7 +46,7 @@ class Show(AAZCommand):
             required=True,
         )
         _args_schema.search_service_name = AAZStrArg(
-            options=["-n", "--name", "--search-service-name"],
+            options=["--search-service-name"],
             help="The name of the Azure AI Search service associated with the specified resource group.",
             required=True,
             id_part="name",
@@ -57,7 +58,7 @@ class Show(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ServicesGet(ctx=self.ctx)()
+        yield self.ServicesUpgrade(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -72,27 +73,43 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ServicesGet(AAZHttpOperation):
+    class ServicesUpgrade(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [200]:
-                return self.on_200(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/upgrade",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "GET"
+            return "POST"
 
         @property
         def error_format(self):
@@ -171,7 +188,7 @@ class Show(AAZCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _ShowHelper._build_schema_system_data_read(_schema_on_200.system_data)
+            _UpgradeHelper._build_schema_system_data_read(_schema_on_200.system_data)
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -324,7 +341,7 @@ class Show(AAZCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _ShowHelper._build_schema_system_data_read(_element.system_data)
+            _UpgradeHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -368,7 +385,7 @@ class Show(AAZCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _ShowHelper._build_schema_system_data_read(_element.system_data)
+            _UpgradeHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -400,8 +417,8 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _UpgradeHelper:
+    """Helper class for Upgrade"""
 
     _schema_system_data_read = None
 
@@ -448,4 +465,4 @@ class _ShowHelper:
         _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
-__all__ = ["Show"]
+__all__ = ["Upgrade"]
