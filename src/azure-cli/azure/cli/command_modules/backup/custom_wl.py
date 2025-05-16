@@ -17,10 +17,12 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import AzureVMAppConta
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
     ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, \
-    AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
-    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
+    AzureWorkloadSAPAseRestoreRequest, AzureWorkloadSAPHanaPointInTimeRestoreRequest, \
+    AzureWorkloadSQLPointInTimeRestoreRequest, AzureWorkloadSAPAsePointInTimeRestoreRequest, \
+    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, \
     RecoveryPointRehydrationInfo, AzureWorkloadSAPHanaRestoreWithRehydrateRequest, \
-    AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState
+    AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState, AzureVmWorkloadSAPAseDatabaseProtectedItem, \
+    MoveRPAcrossTiersRequest \
 
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
@@ -49,7 +51,8 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SQLDataBase': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
-                     'SAPASE': 'SAPAseDatabase'}
+                     'SAPASE': 'SAPAseDatabase',
+                     'SAPAseDatabase': 'SAPAseDatabase'}
 
 # Mapping of module name
 module_map = {'sqldatabase': 'sql_database',
@@ -67,7 +70,9 @@ protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
                              'HANAInstance': 'SAPHanaSystem',
                              'SAPHanaSystem': 'SAPHanaSystem',
                              'SQLInstance': 'SQLInstance',
-                             'SQLAG': 'SQLAvailabilityGroupContainer'}
+                             'SQLAG': 'SQLAvailabilityGroupContainer',
+                             'SAPASE': 'SAPAseDatabase',
+                             'SAPAseDatabase': 'SAPAseDatabase'}
 
 
 def show_wl_policy(client, resource_group_name, vault_name, name):
@@ -203,8 +208,10 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
     backup_item_type = item_uri.split(';')[0]
-    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
-        raise InvalidArgumentValueError("Item must be either of type SQLDataBase or SAPHanaDatabase.")
+    if (not cust_help.is_sql(backup_item_type) and not
+        cust_help.is_hana(backup_item_type) and not
+            cust_help.is_sapase(backup_item_type)):
+        raise InvalidArgumentValueError("Item must be of type SQLDataBase, SAPHanaDatabase, or SAPAseDatabase")
 
     item_properties = _get_protected_item_instance(backup_item_type)
     item_properties.policy_id = policy.id
@@ -434,10 +441,12 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     # Get protectable item.
     protectable_item_object = protectable_item
     protectable_item_type = protectable_item_object.properties.protectable_item_type
-    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase", "saphanasystem"]:
+    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase", "saphanasystem",
+                                             "sapasedatabase"]:
         raise CLIError(
             """
-            Protectable Item must be either of type SQLDataBase, HANADatabase, HANAInstance or SQLInstance.
+            Protectable Item must be either of type SQLDataBase, HANADatabase, HANAInstance, SAPAseDatabase or
+            SQLInstance.
             """)
 
     item_name = protectable_item_object.name
@@ -794,7 +803,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     item_type = item.properties.workload_type
     item_name = item.name
 
-    if not cust_help.is_sql(item_type) and not cust_help.is_hana(item_type):
+    if not cust_help.is_sql(item_type) and not cust_help.is_hana(item_type) and not cust_help.is_sapase(item_type):
         raise CLIError(
             """
             Item must be either of type SQLDataBase or SAPHanaDatabase.
@@ -860,7 +869,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'item_uri': item_name,
         'recovery_point_id': recovery_point.name,
         'log_point_in_time': log_point_in_time,
-        'item_type': 'SQL' if 'sql' in item_type.lower() else 'SAPHana',
+        'item_type': 'SQL' if 'sql' in item_type.lower() else 'SAPASE' if 'sapase' in item_type.lower() else 'SAPHana',
         'workload_type': item_type,
         'source_resource_id': item.properties.source_resource_id,
         'database_name': db_name,
@@ -931,16 +940,22 @@ def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondar
 
 
 def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
-    if rehydration_priority is None:
-        if item_type.lower() == "saphana":
-            if log_point_in_time is not None:
-                return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
-            return AzureWorkloadSAPHanaRestoreRequest()
+    workload_restore_request_map = {
+        "saphana": AzureWorkloadSAPHanaRestoreRequest,
+        "sql": AzureWorkloadSQLRestoreRequest,
+        "sapase": AzureWorkloadSAPAseRestoreRequest
+    }
 
-        if item_type.lower() == "sql":
-            if log_point_in_time is not None:
-                return AzureWorkloadSQLPointInTimeRestoreRequest()
-            return AzureWorkloadSQLRestoreRequest()
+    workload_pit_restore_request_map = {
+        "saphana": AzureWorkloadSAPHanaPointInTimeRestoreRequest,
+        "sql": AzureWorkloadSQLPointInTimeRestoreRequest,
+        "sapase": AzureWorkloadSAPAsePointInTimeRestoreRequest
+    }
+
+    if rehydration_priority is None:
+        if log_point_in_time is not None:
+            return workload_pit_restore_request_map[item_type.lower()]()
+        return workload_restore_request_map[item_type.lower()]()
 
     if item_type.lower() == "saphana":
         if log_point_in_time is not None:
@@ -956,6 +971,8 @@ def _get_restore_request_instance(item_type, log_point_in_time, rehydration_prio
 def _get_protected_item_instance(item_type):
     if item_type.lower() == "saphanadatabase":
         return AzureVmWorkloadSAPHanaDatabaseProtectedItem()
+    if item_type.lower() == "sapasedatabase":
+        return AzureVmWorkloadSAPAseDatabaseProtectedItem()
     return AzureVmWorkloadSQLDatabaseProtectedItem()
 
 
