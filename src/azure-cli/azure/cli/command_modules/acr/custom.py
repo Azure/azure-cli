@@ -299,17 +299,25 @@ def acr_login(cmd,
             password=password,
             resource_group_name=resource_group_name)
 
-        logger.warning("You can perform manual login using the provided access token below, "
-                       "for example: 'docker login loginServer -u %s -p accessToken'", EMPTY_GUID)
+        logger.warning("Note: The token in both the accessToken and refreshToken fields is "
+                       "an ACR Refresh Token, not an ACR Access Token. This ACR Refresh Token cannot be used "
+                       "directly to authenticate with registry APIs such as pushing/pulling images and listing "
+                       "repositories/tags. This ACR Refresh Token must be subsequently exchanged for an ACR Access."
+                       "Please see https://aka.ms/acr/auth/oauth")
+
+        logger.warning("You can perform manual login using the provided refresh token below, "
+                       "for example: 'docker login loginServer -u %s -p refreshToken'", EMPTY_GUID)
 
         token_info = {
             "loginServer": login_server,
-            "accessToken": password
+            "username": EMPTY_GUID,
+            "accessToken": password,
+            "refreshToken": password
         }
 
         return token_info
 
-    tips = "You may want to use 'az acr login -n {} --expose-token' to get an access token, " \
+    tips = "You may want to use 'az acr login -n {} --expose-token' to get a refresh token, " \
            "which does not require Docker to be installed.".format(registry_name)
 
     from azure.cli.core.util import in_cloud_console
