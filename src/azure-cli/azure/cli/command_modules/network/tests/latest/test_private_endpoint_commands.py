@@ -271,13 +271,23 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkFluidRelayScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_sa_plr000001')
+    @ResourceGroupPreparer(name_prefix='cli_test_fr_plr000001')
     def test_private_link_resource_fluid_relay(self):
         self.kwargs.update({
-            'fluidrelay': 'saplr000002'
+            'fluidrelay': 'frplr000001'
         })
-        self.cmd('network private-link-resource list --name {sa} -g {rg} --type Microsoft.FluidRelay/fluidRelayServers', checks=[
-            self.check('length(@)', 6)])
+        self.cmd('network private-link-resource list --name {fluidrelay} -g {rg} --type Microsoft.FluidRelay/fluidRelayServers', checks=[
+            self.check('length(@)', 1),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_fr_plc000002')
+    def test_private_link_connection_fluid_relay(self):
+        self.kwargs.update({
+            'fluidrelay': 'frplr000002'
+        })
+        self.cmd('network private-endpoint-connection list --name {fluidrelay} -g {rg} --type Microsoft.FluidRelay/fluidRelayServers', checks=[
+            self.check('length(@)', 2),
+        ])
 
 class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
