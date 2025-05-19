@@ -477,7 +477,7 @@ class WebAppUpE2ETests(ScenarioTest):
         # the zip contains more than one projects, it is assumed that the user is in this directory
         # when he makes the webapp up.
         up_working_dir = temp_dir
-        os.chdir(os.join(up_working_dir, "WebApplication1"))
+        os.chdir(os.path.join(up_working_dir, "dotnet6-webapi-with-dependencies-up"))
 
         # test dryrun operation
         result = self.cmd('webapp up -n {} --dryrun --os-type Linux'

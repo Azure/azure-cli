@@ -5720,6 +5720,12 @@ examples:
 helps['network routeserver create'] = """
 type: command
 short-summary: Create a route server.
+parameters:
+  - name: --auto-scale-config
+    short-summary: VirtualHub Router autoscale configuration. Use space-separated property=value [property=value ...].
+    long-summary: |
+      Supported properties:
+      min-capacity: The minimum number of scale units for VirtualHub Router.
 examples:
   - name: Create a route server.
     text: |

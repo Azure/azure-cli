@@ -37,6 +37,17 @@ class TestAAZField(unittest.TestCase):
 
         with self.assertRaises(AAZInvalidValueError):
             v.properties.count = "a"
+        
+        with self.assertRaises(AAZInvalidValueError):
+            v.properties.count = "1a"
+        
+        with self.assertRaises(AAZInvalidValueError):
+            v.properties.count = "1.1"
+
+        # support string input with json parsing
+        v.properties.count = "12"
+        assert v.properties.count == 12
+        assert v.properties.count._data == 12
 
         # test string type
         model_schema.properties.name = AAZStrType()
@@ -70,6 +81,17 @@ class TestAAZField(unittest.TestCase):
         assert not v.properties.enable
         assert v.properties.enable is not False
 
+        with self.assertRaises(AAZInvalidValueError):
+            v.properties.enable = 1
+
+        # support string input with json parsing
+        v.properties.enable = "false"
+        v.properties.enable = "true"
+        assert v.properties.enable == True
+        assert not (v.properties.enable != True)
+        assert v.properties.enable
+        assert v.properties.enable is not True  # cannot us is
+
         # test float type
         model_schema.properties.height = AAZFloatType()
         v.properties.height = 10.0
@@ -86,6 +108,17 @@ class TestAAZField(unittest.TestCase):
         v.properties.height = 10  # test assign int
         assert str(v.properties.height) == "10.0"
 
+        with self.assertRaises(AAZInvalidValueError):
+            v.properties.height = "1a"
+        
+        v.properties.height = "12.1"
+        assert v.properties.height == 12.1
+        assert v.properties.height._data == 12.1
+
+        v.properties.height = "12"
+        assert v.properties.height == 12
+        assert v.properties.height._data == 12
+
         # test assign properties by dict
         v.properties = {
             "count": 100,
@@ -99,6 +132,129 @@ class TestAAZField(unittest.TestCase):
         assert v.properties.count._data == 100
         assert v.properties.enable._data == True
         assert v.properties.height._data == 111
+
+        # test assign properties by dict with all string value
+        v.properties = {
+            "count": "101",
+            "name": "abcd",
+            "enable": "False",
+            "height": "121"
+        }
+
+        assert not v.properties._is_patch
+        assert v.properties.name._data == "abcd"
+        assert v.properties.count._data == 101
+        assert v.properties.enable._data == False
+        assert v.properties.height._data == 121
+
+
+    def test_aaz_any_type(self):
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZDictType, AAZAnyType, AAZListType, AAZIntType, AAZStrType, AAZBoolType
+        from azure.cli.core.aaz._field_value import AAZObject, AAZAnyValue, AAZValuePatch, AAZUndefined
+        model_schema = AAZObjectType()
+        model_schema.any = AAZAnyType()
+        model_schema.nullable_any = AAZAnyType(nullable=True)
+        model_schema.additional = AAZDictType()
+        model_schema.additional.Element = AAZAnyType()
+        model_schema.nullable_additional = AAZDictType()
+        model_schema.nullable_additional.Element = AAZAnyType(nullable=True)
+        model_schema.array = AAZListType()
+        model_schema.array.Element = AAZAnyType()
+        model_schema.nullable_array = AAZListType()
+        model_schema.nullable_array.Element = AAZAnyType(nullable=True)
+        model_schema.patch_object = AAZObjectType(nullable=True)
+        model_schema.patch_object.obj = AAZObjectType()
+        model_schema.patch_object.obj.a = AAZIntType()
+        model_schema.patch_object.obj.b = AAZStrType()
+        model_schema.patch_object.obj.c = AAZBoolType()
+        model_schema.patch_object.obj.d = AAZAnyType(nullable=True)
+
+        v = AAZObject(schema=model_schema, data={})
+        assert v.any._is_patch
+        self.assertEqual(v.to_serialized_data(), {})
+
+        v.any = 1
+        self.assertEqual(v.any.to_serialized_data(), 1)
+        v.any = 0.1
+        self.assertEqual(v.any.to_serialized_data(), 0.1)
+        v.any = "1"
+        self.assertEqual(v.any.to_serialized_data(), "1")
+        v.any = True
+        self.assertEqual(v.any.to_serialized_data(), True)
+        v.any = False
+        self.assertEqual(v.any.to_serialized_data(), False)
+        v.any = [1, "123", None]
+        self.assertEqual(v.any.to_serialized_data(), [1, "123", None])
+        v.any = None
+        self.assertEqual(v.to_serialized_data(), {})
+        v.nullable_any = None
+        self.assertEqual(v.to_serialized_data(), {"nullable_any": None})
+
+        # verify additional and nullable_additional
+        v.additional = {"a": 1, "b": "str", "c": True, "d": None}
+        self.assertEqual(v.additional.to_serialized_data(), {"a": 1, "b": "str", "c": True})
+        v.nullable_additional = {"a": 1, "b": "str", "c": True, "d": None}
+        self.assertEqual(v.nullable_additional.to_serialized_data(), {"a": 1, "b": "str", "c": True, "d": None})
+
+        # verify array and nullable_array
+        v.array = [1, "123", None]
+        self.assertEqual(v.array.to_serialized_data(), [1, "123"])
+        v.nullable_array = [1, "123", None]
+        self.assertEqual(v.nullable_array.to_serialized_data(), [1, "123", None])
+
+        # verify the patch value assign to any type
+        # undefined patch value
+        _ = v.patch_object.obj.a
+        self.assertEqual(v.patch_object.obj.a._is_patch, True)
+        
+        v.any = v.patch_object
+        self.assertEqual(v.any._is_patch, True)
+        self.assertEqual(v.any.to_serialized_data(), AAZUndefined)
+        
+        v.array[2] = v.patch_object
+        self.assertEqual(v.array[2]._is_patch, True)
+        self.assertEqual(v.array.to_serialized_data(), [1, "123"])
+        
+        v.nullable_array[3] = v.patch_object
+        self.assertEqual(v.nullable_array[3]._is_patch, True)
+        self.assertEqual(v.nullable_array.to_serialized_data(), [1, "123", None])
+
+        # defined patch value
+        v.patch_object.obj.a = 1
+        v.patch_object.obj.b = "str"
+
+        v.any = v.patch_object
+        self.assertEqual(v.any._is_patch, False)
+        self.assertEqual(v.any.to_serialized_data(), {"obj": {"a": 1, "b": "str"}})
+        
+        v.array[2] = v.patch_object
+        self.assertEqual(v.array[2]._is_patch, False)
+        self.assertEqual(v.array.to_serialized_data(), [1, "123", {"obj": {"a": 1, "b": "str"}}])
+        
+        v.nullable_array[3] = v.patch_object
+        self.assertEqual(v.nullable_array[3]._is_patch, False)
+        self.assertEqual(v.nullable_array.to_serialized_data(), [1, "123", None, {"obj": {"a": 1, "b": "str"}}])
+
+        # defined patch value is None
+        v.patch_object = None
+        
+        v.any = v.patch_object
+        self.assertEqual(v.any._is_patch, True)
+        self.assertEqual(v.any.to_serialized_data(), AAZUndefined)
+        
+        v.nullable_any = v.patch_object
+        self.assertEqual(v.nullable_any._is_patch, False)
+        self.assertEqual(v.nullable_any.to_serialized_data(), None)
+
+         
+        v.array[2] = v.patch_object
+        self.assertEqual(v.array[2]._is_patch, True)
+        self.assertEqual(v.array.to_serialized_data(), [1, "123"])
+        
+        v.nullable_array[3] = v.patch_object
+        self.assertEqual(v.nullable_array[3]._is_patch, False)
+        self.assertEqual(v.nullable_array.to_serialized_data(), [1, "123", None, None])
+
 
     def test_aaz_dict_type(self):
         from azure.cli.core.aaz._field_type import AAZObjectType, AAZDictType, AAZStrType
@@ -165,7 +321,7 @@ class TestAAZField(unittest.TestCase):
 
     def test_aaz_free_form_dict_type(self):
         from azure.cli.core.aaz._field_type import AAZObjectType, AAZFreeFormDictType, AAZDictType, AAZListType
-        from azure.cli.core.aaz._field_value import AAZObject, AAZBaseValue, AAZUndefined, AAZValuePatch
+        from azure.cli.core.aaz._field_value import AAZObject, AAZBaseValue, AAZUndefined, AAZValuePatch, AAZAnyValue
         from azure.cli.core.aaz.exceptions import AAZInvalidValueError
 
         model_schema = AAZObjectType()
@@ -177,8 +333,10 @@ class TestAAZField(unittest.TestCase):
         v = AAZObject(schema=model_schema, data={})
 
         assert 'A' not in v.additional
+        assert v.additional['A']._is_patch
+        del v.additional['A']
         with self.assertRaises(KeyError):
-            v.additional['A']
+            del v.additional['A']
 
         v.additional['number'] = 1
         self.assertEqual(v.additional['number'], 1)
@@ -192,7 +350,7 @@ class TestAAZField(unittest.TestCase):
         for key, value in v.additional.items():
             self.assertEqual(key, 'number')
             self.assertEqual(value, 1)
-            self.assertTrue(isinstance(value, int))
+            self.assertTrue(isinstance(value, AAZAnyValue))
 
         v.additional.clear()
         self.assertEqual(len(v.additional), 0)
@@ -225,7 +383,7 @@ class TestAAZField(unittest.TestCase):
 
         del v.additional['bool']
         with self.assertRaises(KeyError):
-            v.additional['bool']
+            del v.additional['bool']
 
         v.additional['none'] = None
         self.assertEqual(v.additional['none'], None)
@@ -247,22 +405,25 @@ class TestAAZField(unittest.TestCase):
         })
 
         v.configs[0] = {'a': 1, 'b': 'str', 'c': True, 'd': None}
-        self.assertEqual(v.configs[0], {'a': 1, 'b': 'str', 'c': True, 'd': None})
+        self.assertEqual(v.configs[0].to_serialized_data(), {'a': 1, 'b': 'str', 'c': True, 'd': None})
         self.assertEqual(v.configs[0]._data, {'a': 1, 'b': 'str', 'c': True, 'd': None})
 
         v.configs[1] = {"obj": {"a": 1, "c": 2}}
-        del v.configs[1]['obj']['a']
-        self.assertEqual(v.configs[1], {"obj": {"c": 2}})
+        # AAZAnyValue is not support delete
+        with self.assertRaises(TypeError):
+            del v.configs[1]['obj']['a']
+        self.assertEqual(v.configs[1].to_serialized_data(), {"obj": {"a": 1, "c": 2}})
+        self.assertEqual(v.configs[1]._data, {"obj": {"a": 1, "c": 2}})
+        v.configs[1] = {"obj": {"c": 2}}
 
         v.configs[0] = None
         self.assertEqual(v.configs.to_serialized_data(), [{"obj": {"c": 2}}])
 
-        with self.assertRaises(AAZInvalidValueError):
-            v.nullable_additional['a'] = AAZValuePatch(AAZUndefined)
+        v.nullable_additional['a'] = AAZValuePatch(AAZUndefined)
+        self.assertTrue(v.nullable_additional._is_patch)
 
         self.assertTrue(v.additional._is_patch)
-        with self.assertRaises(AAZInvalidValueError):
-            v.nullable_additional['p'] = v.additional
+        v.nullable_additional['p'] = v.additional
 
         self.assertTrue(v.configs[1]._is_patch is False)
 
@@ -270,6 +431,11 @@ class TestAAZField(unittest.TestCase):
 
         v.configs[1]['more'] = True
         self.assertEqual(v.nullable_additional.to_serialized_data(), {
+            "p": {
+                'none': None,
+                'obj': {'a': 1, 'b': 'str', 'c': True, 'd': None},
+                'list': ['a', 1, True, None, ['s', 'v'], {'a': 1, 'b': 2}]
+            },
             "z": {"obj": {"c": 2}},
         })
 
@@ -280,7 +446,13 @@ class TestAAZField(unittest.TestCase):
                 'list': ['a', 1, True, None, ['s', 'v'], {'a': 1, 'b': 2}]
             },
             "configs": [{"obj": {"c": 2}, "more": True}],
-            "nullable_additional": {"z": {"obj": {"c": 2}}}
+            "nullable_additional": {
+                "p": {
+                    'none': None,
+                    'obj': {'a': 1, 'b': 'str', 'c': True, 'd': None},
+                    'list': ['a', 1, True, None, ['s', 'v'], {'a': 1, 'b': 2}]
+                },
+                "z": {"obj": {"c": 2}}}
         })
 
         v.nullable_additional = None

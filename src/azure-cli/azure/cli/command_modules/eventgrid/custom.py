@@ -715,7 +715,7 @@ def cli_domain_topic_event_subscription_delete(
         domain_topic_name,
         event_subscription_name):
 
-    client.begin_delete(
+    return client.begin_delete(
         resource_group_name=resource_group_name,
         domain_name=domain_name,
         topic_name=domain_topic_name,

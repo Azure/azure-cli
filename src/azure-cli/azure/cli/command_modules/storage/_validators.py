@@ -84,6 +84,32 @@ def parse_storage_account(cmd, namespace):
         namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
 
 
+def parse_storage_account_aaz(cmd, args):
+    """Parse storage account which can be either account name or account id for aaz"""
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
+
+    account_name = str(args.storage_account)
+    if account_name and is_valid_resource_id(account_name):
+        args.resource_group = parse_resource_id(account_name)['resource_group']
+        args.storage_account = parse_resource_id(account_name)['name']
+    elif account_name and not is_valid_resource_id(account_name) and \
+            not args.resource_group:
+        args.resource_group = _query_account_rg(cmd.cli_ctx, account_name)[0]
+
+
+def parse_account_name_aaz(cmd, args):
+    """Parse storage account which can be either account name or account id for aaz"""
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
+
+    account_name = str(args.account_name)
+    if account_name and is_valid_resource_id(account_name):
+        args.resource_group = parse_resource_id(account_name)['resource_group']
+        args.account_name = parse_resource_id(account_name)['name']
+    elif account_name and not is_valid_resource_id(account_name) and \
+            not args.resource_group:
+        args.resource_group = _query_account_rg(cmd.cli_ctx, account_name)[0]
+
+
 def process_resource_group(cmd, namespace):
     """Processes the resource group parameter from the account name"""
     if namespace.account_name and not namespace.resource_group_name:
@@ -2025,18 +2051,28 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
         client = cf_blob_service(cmd.cli_ctx, kwargs)
         if blob is None:
             blob = ''
-        from .operations.blob import create_blob_url
-        url = create_blob_url(client, container, blob, snapshot=None)
+        if '*' in container or '*' in blob:
+            url = client.url
+            if not url.endswith('/'):
+                url = url + '/'
+            url = url + container + '/' + blob
+        else:
+            from .operations.blob import create_blob_url
+            url = create_blob_url(client, container, blob, snapshot=None)
         service = 'blob'
     elif share:
         if hasattr(namespace, 'enable_file_backup_request_intent'):
             kwargs.update({'enable_file_backup_request_intent': namespace.enable_file_backup_request_intent})
         client = cf_share_service(cmd.cli_ctx, kwargs)
         client = client.get_share_client(share)
-        dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
-        dir_name = None if dir_name in ('', '.') else dir_name
-        from .operations.file import create_file_url
-        url = create_file_url(client, directory_name=dir_name, file_name=file_name)
+        # if wildcard '*' in file path, skip manually parsing the url
+        if file_path and '*' in file_path:
+            url = client.url + '/' + file_path
+        else:
+            dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
+            dir_name = None if dir_name in ('', '.') else dir_name
+            from .operations.file import create_file_url
+            url = create_file_url(client, directory_name=dir_name, file_name=file_name)
         service = 'file'
     elif not any([url, container, share]):  # In account level, only blob service is supported
         service = 'blob'

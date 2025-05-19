@@ -5,12 +5,10 @@
 
 import tempfile
 import time
-import sys
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, LiveScenarioTest)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.profiles import ResourceType, get_sdk
-from .batch_preparers import BatchScenarioMixin, BatchMgmtScenarioMixin
+from .batch_preparers import BatchMgmtScenarioMixin
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
@@ -24,15 +22,15 @@ class BatchMgmtScenarioTests(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
     def test_batch_general_arm_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         account_name2 = self.create_random_name(prefix='clibatchtestacct', length=24)
         self.kwargs.update({
             'rg': resource_group,
             'str_n': storage_account,
-            'loc': 'eastus',
+            'loc': 'eastus2',
             'acc': account_name,
             'acc2': account_name2,
             'ip': resource_group + 'ip',
@@ -114,8 +112,8 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         ])
 
 
-    @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
     def test_batch_privateendpoint_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
@@ -127,7 +125,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'str_n': storage_account,
-            'loc': 'eastus',
+            'loc': 'eastus2',
             'acc': account_name,
             'app': 'testapp',
             'app_p': '1.0',
@@ -163,8 +161,8 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
              self.check('name', '{endpointId}')])
 
 
-    @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
     def test_batch_network_profile_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
@@ -176,7 +174,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'str_n': storage_account,
-            'loc': 'eastus',
+            'loc': 'eastus2',
             'acc': account_name,
             'app': 'testapp',
             'app_p': '1.0',
@@ -199,8 +197,8 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
             self.check('accountAccess.ipRules[0].value', '1.2.3.6')]).get_output_in_json()
 
 
-    @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
     def test_batch_managed_identity_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
@@ -212,7 +210,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'str_n': storage_account,
-            'loc': 'eastus',
+            'loc': 'eastus2',
             'acc': account_name,
             'app': 'testapp',
             'app_p': '1.0',
@@ -269,18 +267,17 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self. check('length(userAssignedIdentities)', 1)])
 
 
-    @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
+    @ResourceGroupPreparer(location='eastus2')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
     def test_batch_application_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
-
 
         _, package_file_name = tempfile.mkstemp()
 
         self.kwargs.update({
             'rg': resource_group,
             'str_n': storage_account,
-            'loc': 'eastus',
+            'loc': 'eastus2',
             'acc': account_name,
             'app': 'testapp',
             'app_p': '1.0',
@@ -339,18 +336,15 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
         super().__init__(method_name)
 
     # Note for this test to run you subscrition needs to give access to batch https://learn.microsoft.com/azure/batch/batch-account-create-portal#allow-batch-to-access-the-subscription
-    @live_only()
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='eastus2')
     def test_batch_byos_account_cmd(self, resource_group):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         kv_name = self.create_random_name('clibatchtestkv', 24)
 
-        
-
         self.kwargs.update({
             'rg': resource_group,
             'byos_n': account_name,
-            'byos_l': 'eastus',
+            'byos_l': 'eastus2',
             'kv': kv_name,
             'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',  # object id for Microsoft Azure Batch
             'perm_s': "get list set delete recover",
@@ -377,10 +371,6 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
                 self.check('location', '{byos_l}'),
                 self.check('resourceGroup', '{rg}')])
 
-        # test for resource tags
-
-
-        # test create certificate with default set
         self.set_account_info(account_name, resource_group)    
 
         self.batch_cmd('batch pool create --id xplatCreatedPool --vm-size "standard_d2s_v3" '
@@ -388,7 +378,7 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
                         '--node-agent-sku-id "batch.node.ubuntu 20.04" '
                         '--resource-tags "dept=finance env=prod"')
 
-
+        # test for resource tags
         self.batch_cmd('batch pool show --pool-id xplatCreatedPool').assert_with_checks([
             self.check('resourceTags.dept', 'finance'),
             self.check('resourceTags.env', 'prod'),

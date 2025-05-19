@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+import base64
 import codecs
 import hashlib
 import json
@@ -34,7 +35,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
 
 from knack.log import get_logger
-from knack.util import CLIError
+from knack.util import CLIError, todict
 
 
 logger = get_logger(__name__)
@@ -310,8 +311,12 @@ def _create_network_rule_set(cmd, bypass=None, default_action=None):
     NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions', resource_type=ResourceType.MGMT_KEYVAULT)
     NetworkRuleAction = cmd.get_models('NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
-    return NetworkRuleSet(bypass=bypass or NetworkRuleBypassOptions.azure_services.value,
-                          default_action=default_action or NetworkRuleAction.allow.value)
+    # We actually should not set any default value from client side
+    # Keep this 'if' section to avoid breaking change
+    if not bypass and not default_action:
+        return NetworkRuleSet(bypass=NetworkRuleBypassOptions.azure_services.value,
+                              default_action=NetworkRuleAction.allow.value)
+    return NetworkRuleSet(bypass=bypass, default_action=default_action)
 
 
 # region KeyVault Vault
@@ -550,6 +555,7 @@ def create_hsm(cmd, client,
 
     if not sku:
         sku = 'Standard_B1'
+    sku_family = sku.split('_')[1][0]
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT,
                                 operation_group='managed_hsms')
@@ -569,7 +575,7 @@ def create_hsm(cmd, client,
                                       public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
-                            sku=ManagedHsmSku(name=sku, family='B'),
+                            sku=ManagedHsmSku(name=sku, family=sku_family),
                             properties=properties)
 
     if user_identities:
@@ -1096,6 +1102,25 @@ def list_keys(client, maxresults=None, include_managed=False):
     return result
 
 
+def get_key_attestation(client, name, version=None, file_path=None):
+    key = client.get_key_attestation(name=name, version=version)
+    key_attestation = key.properties.attestation
+    if not file_path:
+        return key_attestation
+
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
+    try:
+        from ._command_type import _encode_hex
+        with open(file_path, 'w') as outfile:
+            json.dump(todict(_encode_hex(key_attestation)), outfile)
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
+
+
 def delete_key(client, name):
     return client.begin_delete_key(name).result()
 
@@ -1130,16 +1155,15 @@ def sign_key(cmd, client, algorithm, digest, name=None, version=None):
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
-    return crypto_client.sign(SignatureAlgorithm(algorithm), digest.encode('utf-8'))
+    return crypto_client.sign(SignatureAlgorithm(algorithm), base64.b64decode(digest.encode('utf-8')))
 
 
 def verify_key(cmd, client, algorithm, digest, signature, name=None, version=None):
-    import base64
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.verify(SignatureAlgorithm(algorithm),
-                                digest.encode('utf-8'),
+                                base64.b64decode(digest.encode('utf-8')),
                                 base64.b64decode(signature.encode('utf-8')))
 
 
@@ -1493,7 +1517,6 @@ def download_secret(client, file_path, name=None, encoding=None, version=''):  #
                 f.write(secret_value)
         else:
             if encoding == 'base64':
-                import base64
                 decoded = base64.b64decode(secret_value)
             elif encoding == 'hex':
                 import binascii
@@ -1558,7 +1581,6 @@ def download_certificate(client, file_path, certificate_name=None, encoding='PEM
             if encoding == 'DER':
                 f.write(cert)
             else:
-                import base64
                 encoded = base64.encodebytes(cert)
                 if isinstance(encoded, bytes):
                     encoded = encoded.decode("utf-8")
@@ -2113,7 +2135,6 @@ def full_backup(cmd, client, storage_resource_uri=None, storage_account_name=Non
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     poller = client.begin_backup(storage_resource_uri, sas_token=token, use_managed_identity=use_managed_identity)
-    from knack.util import todict
     result = todict(poller.result())
     result['status'] = poller.status()
     return result

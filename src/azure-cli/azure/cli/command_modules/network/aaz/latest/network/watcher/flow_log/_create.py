@@ -40,12 +40,15 @@ class Create(AAZCommand):
 
     :example: Create a flow log with Network Interface ID (could be in other resource group)
         az network watcher flow-log create --location westus --name MyFlowLog --nic MyNetworkInterfaceID --storage-account account
+
+    :example: Create or update flow log
+        az network watcher flow-log create --location westus --resource-group MtRGContainingVNet --name MyVNetName-flowlog --vnet MyVNetName --storage-account MyStorageAccountName  --filtering-criteria "dstip=20.252.145.59 || DstPort=443"
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2024-03-01"],
         ]
     }
 
@@ -127,6 +130,7 @@ class Create(AAZCommand):
         )
 
         identity = cls._args_schema.identity
+        
         identity.type = AAZStrArg(
             options=["type"],
             help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine.",
@@ -145,6 +149,11 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.filtering_criteria = AAZStrArg(
+            options=["--filtering-criteria"],
+            arg_group="Properties",
+            help="Optional field to filter flowlogs based on SrcIP, SrcPort, DstIP, DstPort, Protocol, Encryption, Direction and Action. If not specified, all flowlogs will be logged.",
+        )
         _args_schema.flow_analytics_configuration = AAZObjectArg(
             options=["--flow-analytics-configuration"],
             arg_group="Properties",
@@ -281,7 +290,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -320,9 +329,11 @@ class Create(AAZCommand):
             if user_assigned_identities is not None:
                 user_assigned_identities.set_elements(AAZObjectType, ".")
 
+
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("enabled", AAZBoolType, ".enabled")
+                properties.set_prop("enabledFilteringCriteria", AAZStrType, ".filtering_criteria")
                 properties.set_prop("flowAnalyticsConfiguration", AAZObjectType, ".flow_analytics_configuration")
                 properties.set_prop("format", AAZObjectType)
                 properties.set_prop("retentionPolicy", AAZObjectType, ".retention_policy")
@@ -421,6 +432,9 @@ class Create(AAZCommand):
 
             properties = cls._schema_on_200_201.properties
             properties.enabled = AAZBoolType()
+            properties.enabled_filtering_criteria = AAZStrType(
+                serialized_name="enabledFilteringCriteria",
+            )
             properties.flow_analytics_configuration = AAZObjectType(
                 serialized_name="flowAnalyticsConfiguration",
             )
