@@ -75,7 +75,6 @@ class StorageImmutabilityPolicy(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2euap')
-    @api_version_constraint(resource_type=ResourceType.MGMT_STORAGE, min_api='2021-06-01')
     def test_immutability_policy_with_allow_protected_append_writes_all(self, resource_group, storage_account):
         container_name = 'container1'
         self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))

@@ -189,7 +189,6 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
         validate_arg(cmd, Namespace(arg=False))
 
 
-@api_version_constraint(resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class TestEncryptionValidators(unittest.TestCase):
     def setUp(self):
         self.cli = MockCLI()
