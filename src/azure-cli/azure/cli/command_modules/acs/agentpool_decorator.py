@@ -1142,7 +1142,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_soak_duration
-    
+
     def get_undrainable_node_behavior(self) -> str:
         """Obtain the value of undrainable_node_behavior.
 
