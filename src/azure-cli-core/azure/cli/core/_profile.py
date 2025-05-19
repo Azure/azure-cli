@@ -466,6 +466,14 @@ class Profile:
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
 
+    def get_msal_token(self, scopes, data):
+        """Get VM SSH certificate. Do not use it for other purposes. To get an access token, use get_raw_token instead.
+        """
+        credential, _, _ = self.get_login_credentials()
+        certificate_string = credential.get_token(*scopes, data=data).token
+        # The first value used to be username, but it is no longer used.
+        return None, certificate_string
+
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
                               user_assigned_identity_id=None):
         consolidated = []
