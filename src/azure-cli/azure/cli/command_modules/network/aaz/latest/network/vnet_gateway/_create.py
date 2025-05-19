@@ -90,7 +90,7 @@ class Create(AAZCommand):
         )
         _args_schema.enable_high_bandwidth_vpn_gateway = AAZBoolArg(
             options=["--enable-high-bandwidth", "--enable-high-bandwidth-vpn-gateway"],
-            help="To enable high-bandwidth Advanced Connectivity feature for VPN gateway",
+            help="To enable Advanced Connectivity feature for VPN gateway",
         )
         _args_schema.enable_private_ip = AAZBoolArg(
             options=["--enable-private-ip"],
@@ -327,6 +327,27 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Gateway SKU tier.",
             enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "ErGwScale": "ErGwScale", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
+        )
+        _args_schema.virtual_network_gateway_migration_status = AAZObjectArg(
+            options=["--virtual-network-gateway-migration-status"],
+            arg_group="Properties",
+            help="The reference to the VirtualNetworkGatewayMigrationStatus which represents the status of migration.",
+        )
+
+        virtual_network_gateway_migration_status = cls._args_schema.virtual_network_gateway_migration_status
+        virtual_network_gateway_migration_status.error_message = AAZStrArg(
+            options=["error-message"],
+            help="Error if any occurs during migration.",
+        )
+        virtual_network_gateway_migration_status.phase = AAZStrArg(
+            options=["phase"],
+            help="Represent the current migration phase of gateway.",
+            enum={"Abort": "Abort", "AbortSucceeded": "AbortSucceeded", "Commit": "Commit", "CommitSucceeded": "CommitSucceeded", "Execute": "Execute", "ExecuteSucceeded": "ExecuteSucceeded", "None": "None", "Prepare": "Prepare", "PrepareSucceeded": "PrepareSucceeded"},
+        )
+        virtual_network_gateway_migration_status.state = AAZStrArg(
+            options=["state"],
+            help="Represent the current state of gateway migration.",
+            enum={"Failed": "Failed", "InProgress": "InProgress", "None": "None", "Succeeded": "Succeeded"},
         )
 
         # define Arg Group "Root Cert Authentication"
@@ -579,6 +600,7 @@ class Create(AAZCommand):
                 properties.set_prop("resiliencyModel", AAZStrType, ".resiliency_model")
                 properties.set_prop("sku", AAZObjectType)
                 properties.set_prop("vNetExtendedLocationResourceId", AAZStrType, ".edge_zone_vnet_id")
+                properties.set_prop("virtualNetworkGatewayMigrationStatus", AAZObjectType, ".virtual_network_gateway_migration_status")
                 properties.set_prop("vpnClientConfiguration", AAZObjectType)
                 properties.set_prop("vpnGatewayGeneration", AAZStrType, ".vpn_gateway_generation")
                 properties.set_prop("vpnType", AAZStrType, ".vpn_type")
@@ -671,6 +693,12 @@ class Create(AAZCommand):
             if sku is not None:
                 sku.set_prop("name", AAZStrType, ".sku")
                 sku.set_prop("tier", AAZStrType, ".sku_tier")
+
+            virtual_network_gateway_migration_status = _builder.get(".properties.virtualNetworkGatewayMigrationStatus")
+            if virtual_network_gateway_migration_status is not None:
+                virtual_network_gateway_migration_status.set_prop("errorMessage", AAZStrType, ".error_message")
+                virtual_network_gateway_migration_status.set_prop("phase", AAZStrType, ".phase")
+                virtual_network_gateway_migration_status.set_prop("state", AAZStrType, ".state")
 
             vpn_client_configuration = _builder.get(".properties.vpnClientConfiguration")
             if vpn_client_configuration is not None:
