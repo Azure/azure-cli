@@ -234,7 +234,6 @@ class MonitorTests(ScenarioTest):
                  '--add-action webhook {}'.format(resource_group, rule1, webhook1, webhook2))
         _check_webhooks(result['actions'], [webhook2])
 
-    @unittest.skip("Uses VMPreparers from backup module")
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1')
     @VMPreparer(parameter_name='vm1')
     def test_metric_alert_single_scope(self, resource_group, vm1):
@@ -298,7 +297,6 @@ class MonitorTests(ScenarioTest):
                      self.check('length(scopes)', 1),
                  ])
 
-    @unittest.skip("Uses VMPreparers from backup module")
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2')
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -337,7 +335,6 @@ class MonitorTests(ScenarioTest):
                      self.check('length(scopes)', 2)
                  ])
 
-    @unittest.skip("Uses VMPreparers from backup module")
     @ResourceGroupPreparer(name_prefix='cli_test_dynamic_metric_alert')
     @VMPreparer(parameter_name='vm1')
     def test_dynamic_metric_alert_basic(self, resource_group, vm1):
@@ -374,7 +371,6 @@ class MonitorTests(ScenarioTest):
                 self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00.000Z')
             ])
 
-    @unittest.skip("Uses VMPreparers from backup module")
     @ResourceGroupPreparer(name_prefix='cli_test_dynamic_metric_alert_v2')
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -445,7 +441,6 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 0))
 
-    @unittest.skip("Uses VMPreparers from backup module")
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_condition_create')
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -511,7 +506,6 @@ class MonitorTests(ScenarioTest):
                 self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-02T12:11:11.000Z')
             ])
 
-    @unittest.skip("Uses VMPreparers from backup module")
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group')
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group_2')
     @VMPreparer(parameter_name='vm1')
