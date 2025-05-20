@@ -281,7 +281,7 @@ class NetworkPrivateLinkFluidRelayScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_fr_plc000002')
-    def test_private_link_connection_fluid_relay(self):
+    def test_private_endpoint_connection_fluid_relay(self):
         self.kwargs.update({
             'fluidrelay': 'frplr000002'
         })
