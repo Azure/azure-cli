@@ -87,6 +87,8 @@ DEPENDENCIES = [
     'azure-mgmt-eventgrid==10.2.0b2',
     'azure-mgmt-eventhub~=10.1.0',
     'azure-mgmt-extendedlocation~=1.0.0',
+    # There are breaking changes between v9.0.0b3 and v9.0.0. For example:
+    # `AttributeError: type object 'ExtensionsOperations' has no attribute 'get_azure_monitor_agent_status'. Did you mean: 'get_azure_monitor_status'?`
     'azure-mgmt-hdinsight==9.0.0b3',
     'azure-mgmt-imagebuilder~=1.3.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
