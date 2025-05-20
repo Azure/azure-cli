@@ -82,7 +82,9 @@ DEPENDENCIES = [
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-dns~=8.0.0',
-    'azure-mgmt-eventgrid~=10.2.0',
+    # There are breaking changes between v10.2.0b2 and v10.2.0. For example: 
+    # `ImportError: cannot import name 'ResourceSku' from 'azure.mgmt.eventgrid.models' (/home/runner/work/azure-cli/azure-cli/env/lib/python3.12/site-packages/azure/mgmt/eventgrid/models/__init__.py). Did you mean: 'Resource'?`
+    'azure-mgmt-eventgrid==10.2.0b2',
     'azure-mgmt-eventhub~=10.1.0',
     'azure-mgmt-extendedlocation~=1.0.0',
     'azure-mgmt-hdinsight~=9.0.0',
