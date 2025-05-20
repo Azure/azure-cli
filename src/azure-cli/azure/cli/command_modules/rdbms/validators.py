@@ -470,9 +470,9 @@ def compare_sku_names(sku_1, sku_2):
         return -1
 
     # the case where version number is the same, we want to sort by the core number
-    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
-        return 1
     if int(sku_2_match.group('core_number')) < int(sku_1_match.group('core_number')):
+        return 1
+    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
         return -1
 
     return 0

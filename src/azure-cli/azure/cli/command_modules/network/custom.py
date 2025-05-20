@@ -5970,6 +5970,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         args_schema.active._registered = False
@@ -6081,6 +6082,8 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.enable_high_bandwidth_vpn_gateway._registered = False
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.active._registered = False
         args_schema.vpn_client_root_certificates._registered = False

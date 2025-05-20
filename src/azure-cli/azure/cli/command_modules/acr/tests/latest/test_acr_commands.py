@@ -5,7 +5,7 @@
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
-from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
+from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE, EMPTY_GUID
 from azure.cli.core.commands.client_factory import get_subscription_id
 import time
 
@@ -94,7 +94,30 @@ class AcrCommandsTests(ScenarioTest):
             self.check('nameAvailable', True),
             self.check_pattern('availableLoginServerName',r'{name}-[a-zA-Z0-9]+\.*')
         ])
+    
+    @live_only()
+    @ResourceGroupPreparer()
+    def test_acr_login_expose_token(self, resource_group):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg': resource_group,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('provisioningState', 'Succeeded')])
         
+        tokens = self.cmd('acr login -n {} --expose-token'.format(registry_name), checks=[
+            self.exists('accessToken'),
+            self.exists('refreshToken'),
+            self.exists('loginServer'),
+            self.check('username', EMPTY_GUID)]).get_output_in_json()
+        
+        self.assertEqual(tokens['accessToken'], tokens['refreshToken'])
+
     @ResourceGroupPreparer()
     @live_only()
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):

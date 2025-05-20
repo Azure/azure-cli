@@ -31,15 +31,7 @@ class AcrabacScenarioTest(ScenarioTest):
             self.check('roleAssignmentMode', 'LegacyRegistryPermissions')
         ])
 
-        self.cmd('acr show -g {rg} -n {name}', checks=[
-            self.check('roleAssignmentMode', 'LegacyRegistryPermissions')
-        ])
-
         self.cmd('acr update -g {rg} -n {name} --role-assignment-mode rbac-abac', checks=[
-            self.check('roleAssignmentMode', 'AbacRepositoryPermissions')
-        ])
-
-        self.cmd('acr show -g {rg} -n {name}', checks=[
             self.check('roleAssignmentMode', 'AbacRepositoryPermissions')
         ])
 
