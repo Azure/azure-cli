@@ -857,7 +857,7 @@ examples:
 
 helps['postgres server'] = """
 type: group
-short-summary: Manage Azure Database for PostgreSQL Single Server. Is scheduled to retire by March 28, 2025. You can migrate to the Azure Database for PostgreSQL - Flexible Server.
+short-summary: Manage Azure Database for PostgreSQL Single Server. Is scheduled to retire by March 28, 2025. You can migrate to the Azure Database for PostgreSQL flexible server.
 """
 
 helps['postgres server configuration'] = """

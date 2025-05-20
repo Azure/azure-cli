@@ -48,6 +48,7 @@ def register_providers():
     _register_one_provider("Microsoft.HDInsight/clusters", '2018-06-01-preview', True)
     _register_one_provider("Microsoft.HybridCompute/privateLinkScopes", '2021-05-20', True)
     _register_one_provider("Microsoft.HealthcareApis/services", "2020-03-30", True)
+    _register_one_provider("Microsoft.HealthDataAiservices/deidservices", "2024-09-20", True)
     _register_one_provider('microsoft.insights/privateLinkScopes', '2019-10-17-preview', True)
     _register_one_provider('Microsoft.KeyVault/managedHSMs', '2021-04-01-preview', True)
     _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
@@ -83,6 +84,7 @@ def register_providers():
     _register_one_provider("Microsoft.DocumentDB/mongoClusters", '2023-03-01-preview', True)
     _register_one_provider('Microsoft.DBforPostgreSQL/flexibleServers', '2023-06-01-preview', False)
     _register_one_provider('Microsoft.App/managedEnvironments', '2024-02-02-preview', True)
+    _register_one_provider('Microsoft.FluidRelay/fluidRelayServers', '2025-03-10-preview', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

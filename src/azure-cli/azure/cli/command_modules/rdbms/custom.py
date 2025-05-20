@@ -35,7 +35,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 DEFAULT_DB_NAME = 'defaultdb'
 MYSQL_RETIRE_WARNING_MSG = 'Azure Database for MySQL - Single Server is scheduled for retirement (https://go.microsoft.com/fwlink/?linkid=2216041) by September 16, 2024. Migrate (https://go.microsoft.com/fwlink/?linkid=2202255) to Azure Database for MySQL- Flexible Server now.'
 MARIADB_RETIRE_WARNING_MSG = 'Azure Database for MariaDB is scheduled for retirement (https://go.microsoft.com/fwlink/?linkid=2248931) by September 19, 2025. Migrate (https://go.microsoft.com/fwlink/?linkid=2263092) to Azure Database for MySQL- Flexible Server now.'
-POSTGRESQL_RETIRE_WARNING_MSG = 'Azure Database for PostgreSQL – Single Server is scheduled for retirement by March 28 2025, (https://go.microsoft.com/fwlink/?linkid=2300058). Migrate to Azure Database for PostgreSQL - Flexible Server now, (https://go.microsoft.com/fwlink/?linkid=2197657).'
+POSTGRESQL_RETIRE_WARNING_MSG = 'Azure Database for PostgreSQL – Single Server is scheduled for retirement by March 28 2025, (https://go.microsoft.com/fwlink/?linkid=2300058). Migrate to Azure Database for PostgreSQL flexible server now, (https://go.microsoft.com/fwlink/?linkid=2197657).'
 
 
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from

@@ -16,11 +16,43 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
+# Temporary Resource Group Preparer for testing while we update the RecoveryServices SDK to deal with new Soft Delete rules
+class RGPreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest.rg',
+                 parameter_name='resource_group',
+                 parameter_name_for_location='resource_group_location', location='westus',
+                 dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
+                 dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
+                 random_name_length=75, key='rg', subscription=None, additional_tags=None):
+        if ' ' in name_prefix:
+            raise CliTestError('Error: Space character in resource group name prefix \'%s\'' % name_prefix)
+        super().__init__(name_prefix, random_name_length)
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
+        self.location = location
+        self.subscription = subscription
+        self.parameter_name = parameter_name
+        self.parameter_name_for_location = parameter_name_for_location
+        self.key = key
+        self.additional_tags = additional_tags
+ 
+        self.dev_setting_name = os.environ.get(dev_setting_name, None)
+        self.dev_setting_location = os.environ.get(dev_setting_location, location)
+
+    def create_resource(self, name, **kwargs):
+        cmd = 'az group create --location {} --name {}'.format(self.location, name)
+        execute(self.cli_ctx, cmd)
+        return {self.parameter_name: name, self.parameter_name_for_location: self.location}
+ 
+    def remove_resource(self, name, **kwargs):
+        pass
+
+
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=too-many-instance-attributes
     def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group',
-                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME', soft_delete=True):
+                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME', soft_delete=True, storageRedundancy = None):
         super().__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -31,6 +63,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
         self.resource_group_location_parameter_name = resource_group_location_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
         self.soft_delete = soft_delete
+        self.storageRedundancy = storageRedundancy
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
@@ -43,6 +76,10 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
             execute(self.cli_ctx, cmd)
             if not self.soft_delete:
                 cmd = 'az backup vault backup-properties set -n {} -g {} --soft-delete-feature-state Disable'.format(name, self.resource_group)
+                execute(self.cli_ctx, cmd)
+                
+            if self.storageRedundancy:
+                cmd = 'az backup vault update -n {} -g {} --backup-storage-redundancy {}'.format(name, self.resource_group, self.storageRedundancy)
                 execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
@@ -82,14 +119,13 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
         try:
             execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
         except HttpResponseError as ex:
-            if "Operation returned an invalid status 'Bad Request'" not in str(ex):
-                raise ex
+            logger.warning('Unable to delete the vault. Please delete it manually.')
 
 
 class VMPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-vm', parameter_name='vm_name',
                  resource_group_location_parameter_name='resource_group_location',
-                 resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME'):
+                 resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME', image = "Win2022Datacenter"):
         super().__init__(name_prefix, 15)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -99,6 +135,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         self.location = None
         self.resource_group_location_parameter_name = resource_group_location_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
+        self.image = image
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
@@ -108,7 +145,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
             param_format += '--tags {} --nsg-rule None'
             # param_format += '--tags {} --size {} --nsg-rule None'
             param_tags = 'MabUsed=Yes Owner=sisi Purpose=CLITest DeleteBy=12-2099 AutoShutdown=No'
-            param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
+            param_string = param_format.format(name, self.resource_group, self.image, name,
                                                '%j^VYw9Q3Z@Cu$*h', param_tags)  #, 'Standard_D2a_v4')
             cmd = 'az vm create {}'.format(param_string)
             execute(self.cli_ctx, cmd)
@@ -117,6 +154,11 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
 
     def remove_resource(self, name, **kwargs):
         # Resource group deletion will take care of this.
+        cmd = 'az vm delete -g {} -n {} --yes'.format(self.resource_group, name)
+        try:
+            execute(self.cli_ctx, cmd)
+        except:
+            logger.warning("Unable to delete the Virtual Machine. Please delete it manually.")
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -395,7 +437,7 @@ class DESPreparer(AbstractPreparer, SingleValueReplacer):
 class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group',
-                 instant_rp_days=None):
+                 backup_tier="Snapshot"):
         super().__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -404,7 +446,7 @@ class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
         self.resource_group_parameter_name = resource_group_parameter_name
         self.vault = None
         self.vault_parameter_name = vault_parameter_name
-        self.instant_rp_days = instant_rp_days
+        self.backup_tier = backup_tier
 
     def create_resource(self, name, **kwargs):
         if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None):
@@ -413,10 +455,46 @@ class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
 
             policy_json = execute(self.cli_ctx, 'az backup policy show -g {} -v {} -n {}'
                                   .format(self.resource_group, self.vault, 'DefaultPolicy')).get_output_in_json()
+            
+            # Remove unwanted keys from default AzureVM policy
+            keys_to_remove = [
+                'instantRpDetails',
+                'instantRpRetentionRangeInDays',
+                'policyType',
+                'snapshotConsistencyType',
+                'tieringPolicy'
+            ]
+
+            for key in keys_to_remove:
+                policy_json['properties'].pop(key, None)
+
             policy_json['name'] = name
-            if self.instant_rp_days:
-                policy_json['properties']['instantRpRetentionRangeInDays'] = self.instant_rp_days
+           
             policy_json['properties']['backupManagementType'] = "AzureStorage"
+            policy_json['properties']['workLoadType'] = "AzureFileShare"
+
+            # Modify the policy based on the backup tier
+            if self.backup_tier.lower() == 'vaultstandard':
+                # Set retentionPolicy to null
+                policy_json['properties'].pop('retentionPolicy', None)
+
+                # Add vaultRetentionPolicy with the required properties
+                policy_json['properties']['vaultRetentionPolicy'] = {
+                    "snapshotRetentionInDays": 5,
+                    "vaultRetention": {
+                        "dailySchedule": {
+                            "retentionDuration": {
+                                "count": 30,
+                                "durationType": "Days"
+                            },
+                            "retentionTimes": policy_json['properties']['schedulePolicy']['scheduleRunTimes']
+                        },
+                        "monthlySchedule": None,
+                        "retentionPolicyType": "LongTermRetentionPolicy",
+                        "weeklySchedule": None,
+                        "yearlySchedule": None
+                    }
+                }
             policy_json = json.dumps(policy_json)
 
             command_string = 'az backup policy create -g {} -v {} --policy \'{}\' -n {} --backup-management-type {}'
@@ -602,7 +680,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
             command_string = 'az lock delete --ids {}'.format(lock_id)
             execute(self.cli_ctx, command_string)
         except Exception:
-            raise CliTestError('Unable to delete the lock with ID {}, please delete it manually'.format(lock_id))
+            logger.warning('Unable to delete the lock with ID {}, please delete it manually'.format(lock_id))
 
     def _cleanup(self, resource_group, storage_account, vault, afs):
         # Need to remove any resource locks on the Storage Account, and also manually delete the item

@@ -16,6 +16,7 @@ short-summary: Manage HDInsight resources.
 helps['hdinsight application'] = """
 type: group
 short-summary: Manage HDInsight applications.
+long-summary: We no longer maintain module before version 2.30.0. It is recommended to upgrade to at least version 2.30.0.
 """
 
 helps['hdinsight application create'] = """

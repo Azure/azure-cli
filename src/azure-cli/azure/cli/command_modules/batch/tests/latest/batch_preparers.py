@@ -10,7 +10,7 @@ from azure.cli.testsdk.base import execute
 
 
 class BatchAccountPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clibatch', parameter_name='batch_account_name', location='eastus',
+    def __init__(self, name_prefix='clibatch', parameter_name='batch_account_name', location='eastus2',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_BATCH_ACCT_NAME'):
         super().__init__(name_prefix, 24)

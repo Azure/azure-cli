@@ -35,7 +35,9 @@ from dateutil.parser import parse
 import colorama
 import requests
 import yaml
-from azure.cli.command_modules.acs._client_factory import cf_agent_pools
+from azure.cli.command_modules.acs._client_factory import (
+    cf_agent_pools
+)
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
@@ -67,6 +69,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
     CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
     CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
+    CONST_ARTIFACT_SOURCE_DIRECT,
 )
 from azure.cli.command_modules.acs._polling import RunCommandLocationPolling
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
@@ -92,6 +95,7 @@ from azure.cli.core.azclierror import (
     ValidationError,
     RequiredArgumentMissingError,
 )
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
@@ -357,6 +361,14 @@ def which(binary):
     return None
 
 
+def aks_machine_list(cmd, client, resource_group_name, cluster_name, nodepool_name):
+    return client.list(resource_group_name, cluster_name, nodepool_name)
+
+
+def aks_machine_show(cmd, client, resource_group_name, cluster_name, nodepool_name, machine_name):
+    return client.get(resource_group_name, cluster_name, nodepool_name, machine_name)
+
+
 def aks_maintenanceconfiguration_list(
     cmd,
     client,
@@ -563,10 +575,14 @@ def aks_create(
     image_cleaner_interval_hours=None,
     enable_keda=False,
     enable_vpa=False,
+    custom_ca_trust_certificates=None,
     # advanced networking
     enable_acns=None,
     disable_acns_observability=None,
     disable_acns_security=None,
+    # network isoalted cluster
+    bootstrap_artifact_source=CONST_ARTIFACT_SOURCE_DIRECT,
+    bootstrap_container_registry_resource_id=None,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -585,6 +601,7 @@ def aks_create(
     enable_secret_rotation=False,
     rotation_poll_interval=None,
     enable_app_routing=False,
+    app_routing_default_nginx_controller=None,
     # nodepool paramerters
     nodepool_name="nodepool1",
     node_vm_size=None,
@@ -618,6 +635,7 @@ def aks_create(
     host_group_id=None,
     crg_id=None,
     gpu_instance_profile=None,
+    message_of_the_day=None,
     # azure service mesh
     enable_azure_service_mesh=None,
     revision=None,
@@ -641,11 +659,16 @@ def aks_create(
     no_wait=False,
     aks_custom_headers=None,
     node_public_ip_tags=None,
+    if_match=None,
+    if_none_match=None,
     # metrics profile
     enable_cost_analysis=False,
     # trusted launch
     enable_vtpm=False,
     enable_secure_boot=False,
+    # apiserver vnet integration
+    enable_apiserver_vnet_integration=False,
+    apiserver_subnet_id=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -763,11 +786,15 @@ def aks_update(
     enable_force_upgrade=False,
     disable_force_upgrade=False,
     upgrade_override_until=None,
+    custom_ca_trust_certificates=None,
     # advanced networking
     disable_acns=None,
     enable_acns=None,
     disable_acns_observability=None,
     disable_acns_security=None,
+    # network isoalted cluster
+    bootstrap_artifact_source=None,
+    bootstrap_container_registry_resource_id=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -802,9 +829,16 @@ def aks_update(
     yes=False,
     no_wait=False,
     aks_custom_headers=None,
+    if_match=None,
+    if_none_match=None,
     # metrics profile
     enable_cost_analysis=False,
     disable_cost_analysis=False,
+    # apiserver vnet integration
+    enable_apiserver_vnet_integration=False,
+    apiserver_subnet_id=None,
+    enable_private_cluster=False,
+    disable_private_cluster=False
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -840,7 +874,9 @@ def aks_upgrade(cmd,
                 upgrade_override_until=None,
                 tier=None,
                 k8s_support_plan=None,
-                yes=False):
+                yes=False,
+                if_match=None,
+                if_none_match=None):
     msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
     if not yes and not prompt_y_n(msg, default="n"):
         return None
@@ -933,7 +969,11 @@ def aks_upgrade(cmd,
     # null out the SP profile because otherwise validation complains
     instance.service_principal_profile = None
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
+    active_cloud = get_active_cloud(cmd.cli_ctx)
+    if active_cloud.profile != "latest":
+        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance, if_match=if_match, if_none_match=if_none_match)
 
 
 def _update_upgrade_settings(cmd, instance,
@@ -2364,6 +2404,7 @@ def aks_agentpool_add(
     labels=None,
     tags=None,
     node_taints=None,
+    message_of_the_day=None,
     node_osdisk_type=None,
     node_osdisk_size=None,
     max_surge=None,
@@ -2391,6 +2432,11 @@ def aks_agentpool_add(
     # trusted launch
     enable_vtpm=False,
     enable_secure_boot=False,
+    # etag headers
+    if_match=None,
+    if_none_match=None,
+    # gpu driver
+    gpu_driver=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2446,6 +2492,9 @@ def aks_agentpool_update(
     disable_vtpm=False,
     enable_secure_boot=False,
     disable_secure_boot=False,
+    # etag headers
+    if_match=None,
+    if_none_match=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2484,7 +2533,9 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           snapshot_id=None,
                           no_wait=False,
                           aks_custom_headers=None,
-                          yes=False):
+                          yes=False,
+                          if_match=None,
+                          if_none_match=None):
     AgentPoolUpgradeSettings = cmd.get_models(
         "AgentPoolUpgradeSettings",
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -2551,7 +2602,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         instance.upgrade_settings.max_surge = max_surge
     if drain_timeout:
         instance.upgrade_settings.drain_timeout_in_minutes = drain_timeout
-    if node_soak_duration:
+    if isinstance(node_soak_duration, int) and node_soak_duration >= 0:
         instance.upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
 
     # custom headers
@@ -2571,6 +2622,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         nodepool_name,
         instance,
         headers=aks_custom_headers,
+        if_match=if_match,
+        if_none_match=if_none_match,
     )
 
 
@@ -2644,7 +2697,9 @@ def aks_agentpool_stop(cmd,   # pylint: disable=unused-argument
 
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                          nodepool_name,
-                         no_wait=False):
+                         no_wait=False,
+                         if_match=None,
+                         ignore_pdb=None):
     agentpool_exists = False
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2656,7 +2711,10 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
         raise CLIError("Node pool {} doesnt exist, "
                        "use 'aks nodepool list' to get current node pool list".format(nodepool_name))
 
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
+    if cmd.cli_ctx.cloud.profile != "latest":
+        return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
+
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name, if_match=if_match, ignore_pod_disruption_budget=ignore_pdb)
 
 
 def aks_agentpool_operation_abort(cmd,
@@ -3144,7 +3202,8 @@ def aks_approuting_enable(
         resource_group_name,
         name,
         enable_kv=False,
-        keyvault_id=None
+        keyvault_id=None,
+        nginx=None
 ):
     return _aks_approuting_update(
         cmd,
@@ -3153,7 +3212,8 @@ def aks_approuting_enable(
         name,
         enable_app_routing=True,
         keyvault_id=keyvault_id,
-        enable_kv=enable_kv)
+        enable_kv=enable_kv,
+        nginx=nginx)
 
 
 def aks_approuting_disable(
@@ -3176,7 +3236,8 @@ def aks_approuting_update(
         resource_group_name,
         name,
         keyvault_id=None,
-        enable_kv=False
+        enable_kv=False,
+        nginx=None
 ):
     return _aks_approuting_update(
         cmd,
@@ -3184,7 +3245,8 @@ def aks_approuting_update(
         resource_group_name,
         name,
         keyvault_id=keyvault_id,
-        enable_kv=enable_kv)
+        enable_kv=enable_kv,
+        nginx=nginx)
 
 
 def aks_approuting_zone_add(
@@ -3279,7 +3341,8 @@ def _aks_approuting_update(
         delete_dns_zone=None,
         update_dns_zone=None,
         dns_zone_resource_ids=None,
-        attach_zones=None
+        attach_zones=None,
+        nginx=None
 ):
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
 

@@ -65,7 +65,7 @@ parameters:
     short-summary: Secret associated with the service principal. This argument is required if `--service-principal` is specified.
   - name: --node-vm-size -s
     type: string
-    short-summary: Size of Virtual Machines to create as Kubernetes nodes.
+    short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
   - name: --dns-name-prefix -p
     type: string
     short-summary: Prefix for hostnames that are created. If not specified, generate a hostname using the managed cluster and resource group names.
@@ -182,7 +182,7 @@ parameters:
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
-    long-summary: Select between loadBalancer, userDefinedRouting, managedNATGateway and userAssignedNATGateway. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
+    long-summary: Select between loadBalancer, userDefinedRouting, managedNATGateway, userAssignedNATGateway and none. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
@@ -265,6 +265,9 @@ parameters:
     type: string
     short-summary: A CIDR notation IP range from which to assign pod IPs when kubenet is used.
     long-summary: This range must not overlap with any Subnet IP ranges. For example, 172.244.0.0/16.
+  - name: --message-of-the-day
+    type: string
+    short-summary: Path to a file containing the desired message of the day. Only valid for linux nodes. Will be written to /etc/motd.
   - name: --service-cidr
     type: string
     short-summary: A CIDR notation IP range from which to assign service cluster IPs.
@@ -320,6 +323,12 @@ parameters:
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --enable-apiserver-vnet-integration
+    type: bool
+    short-summary: Enable integration of user vnet with control plane apiserver pods.
+  - name: --apiserver-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
@@ -432,6 +441,10 @@ parameters:
   - name: --k8s-support-plan
     type: string
     short-summary: Choose from "KubernetesOfficial" or "AKSLongTermSupport", with "AKSLongTermSupport" you get 1 extra year of CVE patchs.
+  - name: --ca-certs --custom-ca-trust-certificates
+    type: string
+    short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
+    long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
   - name: --enable-defender
     type: bool
     short-summary: Enable Microsoft Defender security profile.
@@ -529,6 +542,9 @@ parameters:
   - name: --enable-app-routing
     type: bool
     short-summary: Enable Application Routing addon.
+  - name: --app-routing-default-nginx-controller --ardnc
+    type: string
+    short-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
   - name: --revision
     type: string
     short-summary: Azure Service Mesh revision to install.
@@ -554,6 +570,20 @@ parameters:
     type: string
     short-summary: Restriction level on the managed node resource group.
     long-summary: The restriction level of permissions allowed on the cluster's managed node resource group, supported values are Unrestricted, and ReadOnly (recommended ReadOnly).
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new cluster.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
+  - name: --bootstrap-artifact-source
+    type: string
+    short-summary: Configure artifact source when bootstraping the cluster.
+    long-summary: |
+        The artifacts include the addon image. Use "Direct" to download artifacts from MCR, "Cache" to downalod artifacts from Azure Container Registry.
+  - name: --bootstrap-container-registry-resource-id
+    type: string
+    short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -723,7 +753,7 @@ parameters:
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
-    long-summary: This option will change the way how the outbound connections are managed in the AKS cluster. Available options are loadbalancer, managedNATGateway, userAssignedNATGateway, userDefinedRouting. For custom vnet, loadbalancer, userAssignedNATGateway and userDefinedRouting are supported. For aks managed vnet, loadbalancer, managedNATGateway and userDefinedRouting are supported.
+    long-summary: This option will change the way how the outbound connections are managed in the AKS cluster. Available options are loadbalancer, managedNATGateway, userAssignedNATGateway, userDefinedRouting and none. For custom vnet, loadbalancer, userAssignedNATGateway and userDefinedRouting are supported. For aks managed vnet, loadbalancer, managedNATGateway and userDefinedRouting are supported.
   - name: --auto-upgrade-channel
     type: string
     short-summary: Specify the upgrade channel for autoupgrade.
@@ -848,6 +878,10 @@ parameters:
   - name: --disable-defender
     type: bool
     short-summary: Disable defender profile.
+  - name: --ca-certs --custom-ca-trust-certificates
+    type: string
+    short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
+    long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
   - name: --defender-config
     type: string
     short-summary: Path to JSON file containing Microsoft Defender profile configurations.
@@ -906,6 +940,18 @@ parameters:
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.
+  - name: --enable-apiserver-vnet-integration
+    type: bool
+    short-summary: Enable integration of user vnet with control plane apiserver pods.
+  - name: --apiserver-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
+  - name: --enable-private-cluster
+    type: bool
+    short-summary: Enable private cluster for apiserver vnet integration cluster.
+  - name: --disable-private-cluster
+    type: bool
+    short-summary: Disable private cluster for apiserver vnet integration cluster.
   - name: --enable-keda
     type: bool
     short-summary: Enable KEDA workload auto-scaler.
@@ -976,7 +1022,20 @@ parameters:
     type: string
     short-summary: Restriction level on the managed node resource group.
     long-summary: The restriction level of permissions allowed on the cluster's managed node resource group, supported values are Unrestricted, and ReadOnly (recommended ReadOnly).
-
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new cluster.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
+  - name: --bootstrap-artifact-source
+    type: string
+    short-summary: Configure artifact source when bootstraping the cluster.
+    long-summary: |
+        The artifacts include the addon image. Use "Direct" to download artifacts from MCR, "Cache" to downalod artifacts from Azure Container Registry.
+  - name: --bootstrap-container-registry-resource-id
+    type: string
+    short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
@@ -1494,7 +1553,7 @@ short-summary: Add a node pool to the managed Kubernetes cluster.
 parameters:
   - name: --node-vm-size -s
     type: string
-    short-summary: Size of Virtual Machines to create as Kubernetes nodes.
+    short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
   - name: --node-count -c
     type: int
     short-summary: Number of nodes in the Kubernetes agent pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
@@ -1536,7 +1595,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner for Linux. Windows2019 or Windows2022 for Windows.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, AzureLinux or Ubuntu2204 for Linux. Windows2019 or Windows2022 for Windows.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -1597,6 +1656,9 @@ parameters:
   - name: --linux-os-config
     type: string
     short-summary: Path to JSON file containing OS configurations for Linux agent nodes. https://aka.ms/aks/custom-node-config
+  - name: --message-of-the-day
+    type: string
+    short-summary: Path to a file containing the desired message of the day. Only valid for linux nodes. Will be written to /etc/motd.
   - name: --host-group-id
     type: string
     short-summary: The fully qualified dedicated host group id used to provision agent node pool.
@@ -1624,6 +1686,15 @@ parameters:
   - name: --enable-vtpm
     type: bool
     short-summary: Enable vTPM on agent node pool. Must use VMSS agent pool type.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the agentpool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new agentpool to be created, but to prevent updating an existing agentpool. Other values will be ignored.
+  - name: --gpu-driver
+    type: string
+    short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None". Default is "Install".
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -1647,6 +1718,16 @@ examples:
 helps['aks nodepool delete'] = """
 type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
+parameters:
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+  - name: --ignore-pdb -i
+    type: bool
+    short-summary: Delete an existing nodepool without considering Pod Disruption Budget.
+examples:
+  - name: Delete an agent pool with ignore-pdb
+    text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --if-match etag --ignore-pdb
 """
 
 helps['aks nodepool get-upgrades'] = """
@@ -1748,6 +1829,12 @@ parameters:
   - name: --disable-vtpm
     type: bool
     short-summary: Disable vTPM on an existing Trusted Launch enabled agent node pool.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -1784,6 +1871,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool. For upgrade node image version requests this will be ignored.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
 """
 
 helps['aks nodepool stop'] = """
@@ -1952,6 +2045,12 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' does not have a financially backed SLA. '--tier premium' is required for '--k8s-support-plan AKSLongTermSupport'.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new cluster.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
 
 examples:
   - name: Upgrade a managed Kubernetes cluster to a newer version. (autogenerated)
@@ -2356,7 +2455,7 @@ helps['aks mesh upgrade rollback'] = """
 
 helps['aks approuting'] = """
     type: group
-    short-summary: Commands to manage App Routing aadon.
+    short-summary: Commands to manage App Routing addon.
     long-summary: A group of commands to manage App Routing in given cluster.
 """
 
@@ -2373,6 +2472,10 @@ helps['aks approuting enable'] = """
         type: string
         short-summary: Attach a keyvault id to access secrets and certificates.
         long-summary: This optional flag attaches a keyvault id to access secrets and certificates.
+      - name: --nginx
+        type: string
+        short-summary: Configure default NginxIngressController resource
+        long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
 helps['aks approuting disable'] = """
@@ -2394,6 +2497,10 @@ helps['aks approuting update'] = """
         type: bool
         short-summary: Enable the keyvault secrets provider addon.
         long-summary: This optional flag enables the keyvault-secrets-provider addon in given cluster. This is required for most App Routing use-cases.
+      - name: --nginx
+        type: string
+        short-summary: Configure default NginxIngressController resource
+        long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
 helps['aks approuting zone'] = """
@@ -2442,4 +2549,40 @@ helps['aks approuting zone list'] = """
     type: command
     short-summary: List DNS Zone IDs in App Routing.
     long-summary: This command lists the DNS zone resources used in App Routing.
+"""
+
+helps['aks machine'] = """
+   type: group
+   short-summary: Get information about machines in a nodepool of a managed clusters
+"""
+helps['aks machine list'] = """
+   type: command
+   short-summary: Get information about IP Addresses, Hostname for all machines in an agentpool
+   parameters:
+       - name: --cluster-name
+         type: string
+         short-summary: Name of the managed cluster
+       - name: --nodepool-name
+         type: string
+         short-summary: Name of the agentpool of a managed cluster
+   exmaples:
+       - name: Get information about IP Addresses, Hostname for all machines in an agentpool
+         text: az aks machine list --cluster-name <clusterName> --nodepool-name <apName>
+"""
+helps['aks machine show'] = """
+   type: command
+   short-summary: Show IP Addresses, Hostname for a specific machine in an agentpool for a managedcluster.
+   parameters:
+       - name: --cluster-name
+         type: string
+         short-summary: Name of the managed cluster
+       - name: --nodepool-name
+         type: string
+         short-summary: Name of the agentpool of a managed cluster
+       - name: --machine-name
+         type: string
+         short-summary: Name of the machine in the agentpool of a managed cluster
+   exmaples:
+       - name: Get IP Addresses, Hostname for a specific machine in an agentpool
+         text: az aks machine show --cluster-name <clusterName> --nodepool-name <apName> --machine-name <machineName>
 """

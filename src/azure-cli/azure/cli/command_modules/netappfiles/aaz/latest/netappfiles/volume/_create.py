@@ -30,9 +30,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-01-01"],
         ]
     }
 
@@ -269,6 +269,12 @@ class Create(AAZCommand):
             help="coolAccessRetrievalPolicy determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. The possible values for this field are:   Default - Data will be pulled from cool tier to standard storage on random reads. This policy is the default.  OnRead - All client-driven data read is pulled from cool tier to standard storage on both sequential and random reads.  Never - No client-driven data is pulled from cool tier to standard storage.",
             enum={"Default": "Default", "Never": "Never", "OnRead": "OnRead"},
         )
+        _args_schema.cool_access_tiering_policy = AAZStrArg(
+            options=["--ca-tiering-policy", "--cool-access-tiering-policy"],
+            arg_group="Properties",
+            help="coolAccessTieringPolicy determines which cold data blocks are moved to cool tier. The possible values for this field are: Auto - Moves cold user data blocks in both the Snapshot copies and the active file system to the cool tier tier. This policy is the default. SnapshotOnly - Moves user data blocks of the Volume Snapshot copies that are not associated with the active file system to the cool tier.",
+            enum={"Auto": "Auto", "SnapshotOnly": "SnapshotOnly"},
+        )
         _args_schema.coolness_period = AAZIntArg(
             options=["--coolness-period"],
             arg_group="Properties",
@@ -324,11 +330,6 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Specifies whether volume is a Large Volume or Regular Volume.",
             default=False,
-        )
-        _args_schema.is_restoring = AAZBoolArg(
-            options=["--is-restoring"],
-            arg_group="Properties",
-            help="Restoring",
         )
         _args_schema.kerberos_enabled = AAZBoolArg(
             options=["--kerberos-enabled"],
@@ -631,7 +632,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -668,6 +669,7 @@ class Create(AAZCommand):
                 properties.set_prop("capacityPoolResourceId", AAZStrType, ".capacity_pool_resource_id")
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
                 properties.set_prop("coolAccessRetrievalPolicy", AAZStrType, ".cool_access_retrieval_policy")
+                properties.set_prop("coolAccessTieringPolicy", AAZStrType, ".cool_access_tiering_policy")
                 properties.set_prop("coolnessPeriod", AAZIntType, ".coolness_period")
                 properties.set_prop("creationToken", AAZStrType, ".creation_token", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("dataProtection", AAZObjectType)
@@ -679,7 +681,6 @@ class Create(AAZCommand):
                 properties.set_prop("exportPolicy", AAZObjectType)
                 properties.set_prop("isDefaultQuotaEnabled", AAZBoolType, ".is_default_quota_enabled")
                 properties.set_prop("isLargeVolume", AAZBoolType, ".is_large_volume")
-                properties.set_prop("isRestoring", AAZBoolType, ".is_restoring")
                 properties.set_prop("kerberosEnabled", AAZBoolType, ".kerberos_enabled")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
                 properties.set_prop("ldapEnabled", AAZBoolType, ".ldap_enabled")
@@ -859,6 +860,9 @@ class Create(AAZCommand):
             properties.cool_access_retrieval_policy = AAZStrType(
                 serialized_name="coolAccessRetrievalPolicy",
             )
+            properties.cool_access_tiering_policy = AAZStrType(
+                serialized_name="coolAccessTieringPolicy",
+            )
             properties.coolness_period = AAZIntType(
                 serialized_name="coolnessPeriod",
             )
@@ -913,6 +917,7 @@ class Create(AAZCommand):
             )
             properties.is_restoring = AAZBoolType(
                 serialized_name="isRestoring",
+                flags={"read_only": True},
             )
             properties.kerberos_enabled = AAZBoolType(
                 serialized_name="kerberosEnabled",
@@ -1042,6 +1047,10 @@ class Create(AAZCommand):
             )
 
             replication = cls._schema_on_200_201.properties.data_protection.replication
+            replication.destination_replications = AAZListType(
+                serialized_name="destinationReplications",
+                flags={"read_only": True},
+            )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
             )
@@ -1061,6 +1070,19 @@ class Create(AAZCommand):
             replication.replication_schedule = AAZStrType(
                 serialized_name="replicationSchedule",
             )
+
+            destination_replications = cls._schema_on_200_201.properties.data_protection.replication.destination_replications
+            destination_replications.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.data_protection.replication.destination_replications.Element
+            _element.region = AAZStrType()
+            _element.replication_type = AAZStrType(
+                serialized_name="replicationType",
+            )
+            _element.resource_id = AAZStrType(
+                serialized_name="resourceId",
+            )
+            _element.zone = AAZStrType()
 
             remote_path = cls._schema_on_200_201.properties.data_protection.replication.remote_path
             remote_path.external_host_name = AAZStrType(
