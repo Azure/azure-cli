@@ -316,6 +316,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       appinsights=None,                                      # Resource.AppInsights
                       target_app_name=None,                                  # Resource.ContainerApp
                       connstr_props=None,                                    # Resource.FabricSql
+                      fabric_workspace_uuid=None,
+                      fabric_sql_db_uuid=None
                       ):
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
@@ -336,15 +338,17 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                                       user_identity_auth_info, system_identity_auth_info,
                                                       service_principal_auth_info_secret,
                                                       key_vault_id,
+                                                      app_config_id,
                                                       service_endpoint,
                                                       private_endpoint,
                                                       store_in_connection_string,
                                                       new_addon, no_wait,
-                                                      cluster, scope, enable_csi,
+                                                      cluster=cluster, scope=scope, enable_csi=enable_csi,
                                                       customized_keys=customized_keys,
                                                       opt_out_list=opt_out_list,
-                                                      app_config_id=app_config_id,
-                                                      connstr_props=connstr_props)
+                                                      connstr_props=connstr_props,
+                                                      fabric_workspace_uuid=fabric_workspace_uuid,
+                                                      fabric_sql_db_uuid=fabric_sql_db_uuid)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
                                " and rerun the command")
@@ -365,6 +369,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   opt_out_list=opt_out_list,
                                   app_config_id=app_config_id,
                                   enable_appconfig_extension=enable_appconfig_extension,
+                                  server=server, database=database,
                                   connstr_props=connstr_props
                                   )
 
@@ -437,6 +442,12 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             "type": "AzureResource",
             "id": target_id
         }
+
+    if target_type == RESOURCE.NeonPostgres:
+        if connstr_props is None:
+            connstr_props = {}
+        connstr_props['Database'] = database
+        connstr_props['Server'] = server
 
     parameters = {
         'target_service': targetService,

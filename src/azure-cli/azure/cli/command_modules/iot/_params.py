@@ -235,8 +235,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                         "refer to the system-assigned managed identity or a resource ID to refer to a "
                         "user-assigned managed identity.")
         c.argument('min_tls_version', options_list=['--min-tls-version', '--mintls'],
-                   type=str, help='Specify the minimum TLS version to support for this hub. Can be set to'
-                                  ' "1.2" to have clients that use a TLS version below 1.2 to be rejected.')
+                   type=str, help='Specify the minimum TLS version to support for this hub. Can be set to '
+                                  '"1.0" or "1.2". For example, minimum TLS version set to "1.2" '
+                                  'results in clients that use a TLS version below 1.2 to be rejected.')
         c.argument('tags', tags_type)
         c.argument('system_identity', options_list=['--mi-system-assigned'],
                    arg_type=get_three_state_flag(),

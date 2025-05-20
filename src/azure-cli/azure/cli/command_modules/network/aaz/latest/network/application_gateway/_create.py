@@ -783,7 +783,7 @@ class Create(AAZCommand):
         )
         _element.path = AAZStrArg(
             options=["path"],
-            help="Relative path of probe. Valid path starts from '/'. Probe is sent to <Protocol>://<host>:<port><path>.",
+            help="Relative path of probe. Valid path starts from '/'. Probe is sent to `<Protocol>://<host>:<port><path>`.",
         )
         _element.pick_host_name_from_backend_http_settings = AAZBoolArg(
             options=["pick-host-name-from-backend-http-settings"],

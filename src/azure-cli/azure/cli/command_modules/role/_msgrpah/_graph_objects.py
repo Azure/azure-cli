@@ -15,6 +15,8 @@ _application_property_map = {
     'sign_in_audience': 'signInAudience',
     'service_management_reference': 'serviceManagementReference',
     'key_credentials': 'keyCredentials',
+    # api
+    'requested_access_token_version': ['api', 'requestedAccessTokenVersion'],
     # web
     'web_home_page_url': ['web', 'homePageUrl'],
     'web_redirect_uris': ['web', 'redirectUris'],

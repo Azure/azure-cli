@@ -25,6 +25,8 @@ class List(AAZCommand):
         ]
     }
 
+    AZ_SUPPORT_PAGINATION = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
         return self.build_paging(self._execute_operations, self._output)
@@ -51,7 +53,6 @@ class List(AAZCommand):
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         return cls._args_schema
@@ -198,6 +199,7 @@ class List(AAZCommand):
             )
             properties.replication_status = AAZObjectType(
                 serialized_name="replicationStatus",
+                flags={"read_only": True},
             )
 
             publishing_profile = cls._schema_on_200.value.Element.properties.publishing_profile

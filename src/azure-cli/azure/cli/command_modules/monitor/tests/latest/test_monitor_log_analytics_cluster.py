@@ -59,6 +59,7 @@ class TestClusterScenarios(ScenarioTest):
         ])
 
     @record_only()
+    @unittest.skip('resource not available')
     def test_monitor_log_analytics_cluster_update_key(self):
         new_key_name = 'log-analytics-cluster'
         new_key_version = '5f37dcb0f24642c3ab800ab845acde4f'

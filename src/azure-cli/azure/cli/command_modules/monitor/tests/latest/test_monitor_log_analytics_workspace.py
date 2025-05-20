@@ -2,10 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import unittest
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import HttpResponseError, ResourceExistsError
 
 
 class TestLogProfileScenarios(ScenarioTest):
@@ -83,6 +83,39 @@ class TestLogProfileScenarios(ScenarioTest):
         ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
+
+    @record_only()
+    def test_monitor_log_analytics_workspace_failover_failback(self):
+        self.kwargs.update({
+            'name': "clitestfailoverfailback",
+            'rg': "workspace-test"
+        })
+        # workspace enabled with replication cannot be processed in 24 hours, manage this resource manually, resource group in westus, test failover and failback api only
+        # self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --tags clitest=liwa --replication-enabled 1 --replication-location eastus", checks=[
+        #     self.check('provisioningState', 'Succeeded'),
+        #     self.check('tags.clitest', 'liwa'),
+        #     self.check('replication.enabled', True),
+        #     self.check('replication.location', 'eastus')
+        # ])
+
+        self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
+            self.check('tags.clitest', 'liwa'),
+            self.check('replication.enabled', True),
+            self.check('replication.location', 'eastus')
+        ])
+
+        # following error message is given from servic side based on service business logic and might change at runtime
+        with self.assertRaisesRegex(HttpResponseError, "Workspace failover can't be triggered at this time because replication was enabled less than 24 hours ago."):
+            self.cmd('monitor log-analytics workspace failover -g {rg} --workspace-name {name} --location eastus')
+
+        with self.assertRaisesRegex(ResourceExistsError, "Failover is not active for this workspace."):
+            self.cmd("monitor log-analytics workspace failback -g {rg} --workspace-name {name}")
+
+        with self.assertRaisesRegex(HttpResponseError, " Workspace replication cannot be disabled at this time because it was enabled in the last hour"):
+            self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --replication-enabled 0")
+
+        with self.assertRaisesRegex(ResourceExistsError, "Workspace '{0}' cannot be deleted because it is linked to DataCollectionEndpoint".format(self.kwargs['name'])):
+            self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
 
     @record_only()
     def test_monitor_log_analytics_workspace_linked_service_common_scenario(self):
@@ -500,6 +533,7 @@ class TestLogProfileScenarios(ScenarioTest):
         ])
 
     @record_only()
+    @unittest.skip('resource not available')
     def test_monitor_log_analytics_workspace_data_collection_rules(self):
         self.kwargs.update({
             'ws_name': 'wsn1',
@@ -737,7 +771,7 @@ class TestLogProfileScenarios(ScenarioTest):
         })
 
         self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
-        from azure.core.exceptions import ClientAuthenticationError
-        with self.assertRaises(ClientAuthenticationError):
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
             self.cmd("monitor log-analytics workspace list-link-target")
         self.cmd("monitor log-analytics workspace list-available-service-tier -g {rg} --workspace-name {ws_name}")

@@ -45,7 +45,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('login') as c:
             c.argument('username', options_list=['--username', '-u'],
-                       help='User name, service principal client ID, or managed identity ID.')
+                       help='User name or service principal client ID.')
             c.argument('password', options_list=['--password', '-p'],
                        help='User password or service principal secret. Will prompt if not given.')
             c.argument('tenant', options_list=['--tenant', '-t'], validator=validate_tenant,
@@ -75,6 +75,12 @@ class ProfileCommandsLoader(AzCommandsLoader):
             # Managed identity
             c.argument('identity', options_list=('-i', '--identity'), action='store_true',
                        help="Log in using managed identity", arg_group='Managed Identity')
+            c.argument('client_id',
+                       help="Client ID of the user-assigned managed identity", arg_group='Managed Identity')
+            c.argument('object_id',
+                       help="Object ID of the user-assigned managed identity", arg_group='Managed Identity')
+            c.argument('resource_id',
+                       help="Resource ID of the user-assigned managed identity", arg_group='Managed Identity')
 
         with self.argument_context('logout') as c:
             c.argument('username', help='account user, if missing, logout the current active account')

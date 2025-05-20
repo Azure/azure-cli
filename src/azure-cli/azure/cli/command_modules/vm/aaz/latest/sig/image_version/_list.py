@@ -19,9 +19,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-03-03",
+        "version": "2024-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions", "2022-03-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions", "2024-03-03"],
         ]
     }
 
@@ -127,7 +127,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-03-03",
+                    "api-version", "2024-03-03",
                     required=True,
                 ),
             }
@@ -198,13 +198,22 @@ class List(AAZCommand):
             )
             properties.replication_status = AAZObjectType(
                 serialized_name="replicationStatus",
+                flags={"read_only": True},
             )
+            properties.restore = AAZBoolType()
             properties.safety_profile = AAZObjectType(
                 serialized_name="safetyProfile",
+            )
+            properties.security_profile = AAZObjectType(
+                serialized_name="securityProfile",
             )
             properties.storage_profile = AAZObjectType(
                 serialized_name="storageProfile",
                 flags={"required": True},
+            )
+            properties.validations_profile = AAZObjectType(
+                serialized_name="validationsProfile",
+                flags={"read_only": True},
             )
 
             publishing_profile = cls._schema_on_200.value.Element.properties.publishing_profile
@@ -259,6 +268,9 @@ class List(AAZCommand):
             target_regions.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.publishing_profile.target_regions.Element
+            _element.additional_replica_sets = AAZListType(
+                serialized_name="additionalReplicaSets",
+            )
             _element.encryption = AAZObjectType()
             _ListHelper._build_schema_encryption_images_read(_element.encryption)
             _element.exclude_from_latest = AAZBoolType(
@@ -267,6 +279,17 @@ class List(AAZCommand):
             _element.name = AAZStrType(
                 flags={"required": True},
             )
+            _element.regional_replica_count = AAZIntType(
+                serialized_name="regionalReplicaCount",
+            )
+            _element.storage_account_type = AAZStrType(
+                serialized_name="storageAccountType",
+            )
+
+            additional_replica_sets = cls._schema_on_200.value.Element.properties.publishing_profile.target_regions.Element.additional_replica_sets
+            additional_replica_sets.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.publishing_profile.target_regions.Element.additional_replica_sets.Element
             _element.regional_replica_count = AAZIntType(
                 serialized_name="regionalReplicaCount",
             )
@@ -304,6 +327,9 @@ class List(AAZCommand):
             safety_profile.allow_deletion_of_replicated_locations = AAZBoolType(
                 serialized_name="allowDeletionOfReplicatedLocations",
             )
+            safety_profile.block_deletion_before_end_of_life = AAZBoolType(
+                serialized_name="blockDeletionBeforeEndOfLife",
+            )
             safety_profile.policy_violations = AAZListType(
                 serialized_name="policyViolations",
                 flags={"read_only": True},
@@ -319,6 +345,41 @@ class List(AAZCommand):
             _element = cls._schema_on_200.value.Element.properties.safety_profile.policy_violations.Element
             _element.category = AAZStrType()
             _element.details = AAZStrType()
+
+            security_profile = cls._schema_on_200.value.Element.properties.security_profile
+            security_profile.uefi_settings = AAZObjectType(
+                serialized_name="uefiSettings",
+            )
+
+            uefi_settings = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings
+            uefi_settings.additional_signatures = AAZObjectType(
+                serialized_name="additionalSignatures",
+            )
+            uefi_settings.signature_template_names = AAZListType(
+                serialized_name="signatureTemplateNames",
+            )
+
+            additional_signatures = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.additional_signatures
+            additional_signatures.db = AAZListType()
+            additional_signatures.dbx = AAZListType()
+            additional_signatures.kek = AAZListType()
+            additional_signatures.pk = AAZObjectType()
+            _ListHelper._build_schema_uefi_key_read(additional_signatures.pk)
+
+            db = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.additional_signatures.db
+            db.Element = AAZObjectType()
+            _ListHelper._build_schema_uefi_key_read(db.Element)
+
+            dbx = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.additional_signatures.dbx
+            dbx.Element = AAZObjectType()
+            _ListHelper._build_schema_uefi_key_read(dbx.Element)
+
+            kek = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.additional_signatures.kek
+            kek.Element = AAZObjectType()
+            _ListHelper._build_schema_uefi_key_read(kek.Element)
+
+            signature_template_names = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.signature_template_names
+            signature_template_names.Element = AAZStrType()
 
             storage_profile = cls._schema_on_200.value.Element.properties.storage_profile
             storage_profile.data_disk_images = AAZListType(
@@ -362,6 +423,42 @@ class List(AAZCommand):
                 serialized_name="communityGalleryImageId",
             )
             source.id = AAZStrType()
+            source.virtual_machine_id = AAZStrType(
+                serialized_name="virtualMachineId",
+            )
+
+            validations_profile = cls._schema_on_200.value.Element.properties.validations_profile
+            validations_profile.executed_validations = AAZListType(
+                serialized_name="executedValidations",
+            )
+            validations_profile.platform_attributes = AAZListType(
+                serialized_name="platformAttributes",
+            )
+            validations_profile.validation_etag = AAZStrType(
+                serialized_name="validationEtag",
+            )
+
+            executed_validations = cls._schema_on_200.value.Element.properties.validations_profile.executed_validations
+            executed_validations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.validations_profile.executed_validations.Element
+            _element.execution_time = AAZStrType(
+                serialized_name="executionTime",
+            )
+            _element.status = AAZStrType()
+            _element.type = AAZStrType()
+            _element.version = AAZStrType()
+
+            platform_attributes = cls._schema_on_200.value.Element.properties.validations_profile.platform_attributes
+            platform_attributes.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.validations_profile.platform_attributes.Element
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.value = AAZStrType(
+                flags={"read_only": True},
+            )
 
             tags = cls._schema_on_200.value.Element.tags
             tags.Element = AAZStrType()
@@ -443,6 +540,27 @@ class _ListHelper:
         _schema.id = cls._schema_gallery_disk_image_source_read.id
         _schema.storage_account_id = cls._schema_gallery_disk_image_source_read.storage_account_id
         _schema.uri = cls._schema_gallery_disk_image_source_read.uri
+
+    _schema_uefi_key_read = None
+
+    @classmethod
+    def _build_schema_uefi_key_read(cls, _schema):
+        if cls._schema_uefi_key_read is not None:
+            _schema.type = cls._schema_uefi_key_read.type
+            _schema.value = cls._schema_uefi_key_read.value
+            return
+
+        cls._schema_uefi_key_read = _schema_uefi_key_read = AAZObjectType()
+
+        uefi_key_read = _schema_uefi_key_read
+        uefi_key_read.type = AAZStrType()
+        uefi_key_read.value = AAZListType()
+
+        value = _schema_uefi_key_read.value
+        value.Element = AAZStrType()
+
+        _schema.type = cls._schema_uefi_key_read.type
+        _schema.value = cls._schema_uefi_key_read.value
 
 
 __all__ = ["List"]

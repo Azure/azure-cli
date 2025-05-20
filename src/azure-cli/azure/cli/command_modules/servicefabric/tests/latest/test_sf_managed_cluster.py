@@ -179,7 +179,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', location='eastasia', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', location='eastasia', additional_params='--enabled-for-deployment --enabled-for-template-deployment --enable-rbac-authorization false')
     def test_cert_and_ext(self, key_vault, resource_group):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',

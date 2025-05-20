@@ -46,7 +46,7 @@ def load_arguments(self, _):
                    help='The theme to format styled text. If unspecified, the default theme is used.')
 
     with self.argument_context('demo secret-store save') as c:
-        c.positional('key_value', nargs='+', help="Space-separated data: <key>=<value> [<key>=<value> ...]")
+        c.positional('key_value', nargs='+', help="Space-separated data: `<key>=<value> [<key>=<value> ...]`")
 
     with self.argument_context('demo byo-access-token') as c:
         c.argument('access_token', help="Your own access token")

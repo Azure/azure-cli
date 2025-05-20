@@ -82,7 +82,7 @@ class Create(AAZCommand):
         )
         _args_schema.path = AAZStrArg(
             options=["--path"],
-            help="Relative path of probe. Valid path starts from \"/\". Probe is sent to <Protocol>://<host>:<port><path>.",
+            help="Relative path of probe. Valid path starts from \"/\". Probe is sent to `<Protocol>://<host>:<port><path>`.",
         )
         _args_schema.host_name_from_http_settings = AAZBoolArg(
             options=["--from-http-settings", "--host-name-from-http-settings"],

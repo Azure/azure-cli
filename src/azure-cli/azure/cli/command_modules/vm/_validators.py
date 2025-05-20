@@ -359,11 +359,11 @@ def _validate_location(cmd, namespace, zone_info, size_info):
         get_default_location_from_resource_group(cmd, namespace)
         if zone_info and size_info:
             sku_infos = list_sku_info(cmd.cli_ctx, namespace.location)
-            temp = next((x for x in sku_infos if x.name.lower() == size_info.lower()), None)
+            temp = next((x for x in sku_infos if x['name'].lower() == size_info.lower()), None)
             # For Stack (compute - 2017-03-30), Resource_sku doesn't implement location_info property
-            if not hasattr(temp, 'location_info'):
+            if not temp.get('locationInfo', None):
                 return
-            if not temp or not [x for x in (temp.location_info or []) if x.zones]:
+            if not temp or not [x for x in temp.get('locationInfo', []) if x.get('zones', None)]:
                 raise CLIError("{}'s location can't be used to create the VM/VMSS because availability zone is not yet "
                                "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
                                "used to find such locations".format(namespace.resource_group_name))
@@ -514,19 +514,32 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             namespace.os_type = image_info.os_type
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
-                image_version_infos = compute_client.gallery_image_versions.list_by_gallery_image(
-                    resource_group_name=res['resource_group'], gallery_name=res['name'],
-                    gallery_image_name=res['child_name_1'])
-                image_version_infos = [x for x in image_version_infos if not x.publishing_profile.exclude_from_latest]
+                from .aaz.latest.sig.image_version import List as _SigImageVersionList
+                image_version_infos = _SigImageVersionList(cli_ctx=cmd.cli_ctx)(command_args={
+                    "resource_group": res['resource_group'],
+                    "gallery_name": res['name'],
+                    "gallery_image_definition": res['child_name_1'],
+                    "subscription": res['subscription']
+                })
+                image_version_infos = [x for x in image_version_infos
+                                       if not x.get("publishingProfile", {}).get("excludeFromLatest", None)]
                 if not image_version_infos:
                     raise CLIError('There is no latest image version exists for "{}"'.format(namespace.image))
-                image_version_info = sorted(image_version_infos, key=lambda x: x.publishing_profile.published_date)[-1]
+                image_version_info = sorted(image_version_infos,
+                                            key=lambda x: x["publishingProfile"]["publishedDate"])[-1]
+                image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", []) or []
+                image_data_disks = [{'lun': disk["lun"]} for disk in image_data_disks]
             else:
-                image_version_info = compute_client.gallery_image_versions.get(
-                    resource_group_name=res['resource_group'], gallery_name=res['name'],
-                    gallery_image_name=res['child_name_1'], gallery_image_version_name=res['child_name_2'])
-            image_data_disks = image_version_info.storage_profile.data_disk_images or []
-            image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
+                from .aaz.latest.sig.image_version import Show as _SigImageVersionShow
+                image_version_info = _SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
+                    "resource_group": res['resource_group'],
+                    "gallery_name": res['name'],
+                    "gallery_image_definition": res['child_name_1'],
+                    "gallery_image_version_name": res['child_name_2'],
+                    "subscription": res['subscription']
+                })
+                image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", []) or []
+                image_data_disks = [{'lun': disk["lun"]} for disk in image_data_disks]
 
         else:
             raise CLIError('usage error: unrecognized image information "{}"'.format(namespace.image))
@@ -1402,8 +1415,6 @@ def trusted_launch_set_default(namespace, generation_version, features):
                 if namespace.enable_secure_boot is None:
                     namespace.enable_secure_boot = True
         else:
-            if namespace.security_type is None:
-                namespace.security_type = COMPATIBLE_SECURITY_TYPE_VALUE
             logger.warning(UPGRADE_SECURITY_HINT)
 
 
@@ -1413,11 +1424,6 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         return
     from ._vm_utils import validate_image_trusted_launch, validate_vm_disk_trusted_launch
     if namespace.image is not None:
-        from ._vm_utils import is_valid_image_version_id
-        if is_valid_image_version_id(namespace.image):
-            if namespace.security_type is None:
-                namespace.security_type = 'Standard'
-
         image_type = _parse_image_argument(cmd, namespace)
 
         if image_type == 'image_id':
@@ -2190,10 +2196,6 @@ def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unuse
 
 def process_gallery_image_version_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, \
-        ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
-            'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
-            'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
 
     if namespace.target_regions:
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
@@ -2202,7 +2204,6 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     'usage error: Length of --target-region-encryption should be as same as length of target regions')
 
         if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
-            OSDiskImageSecurityProfile = cmd.get_models('OSDiskImageSecurityProfile')
             if len(namespace.target_regions) != len(namespace.target_region_cvm_encryption):
                 raise InvalidArgumentValueError(
                     'usage error: Length of --target_region_cvm_encryption should be as same as '
@@ -2256,7 +2257,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image = None
                 else:
                     des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
+                    os_disk_image = {"disk_encryption_set_id": des_id}
                 # Data disk
                 if len(terms) > 1:
                     data_disk_images = terms[1:]
@@ -2270,8 +2271,15 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         lun = data_disk_images[j * 2]
                         des_id = data_disk_images[j * 2 + 1]
                         des_id = _disk_encryption_set_format(cmd, namespace, des_id)
-                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
-                            lun=lun, disk_encryption_set_id=des_id))
+                        try:
+                            data_disk_image_encryption_list.append({"lun": int(lun), "disk_encryption_set_id": des_id})
+                        except:
+                            raise ArgumentUsageError(
+                                "usage error: {} is an invalid target region encryption argument. "
+                                "LUN and disk encryption set for data disk should appear in pair in "
+                                "--target-region-encryption. Example: osdes,0,datades0,1,datades1"
+                            )
+
                     data_disk_images = data_disk_image_encryption_list
 
             if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
@@ -2281,7 +2289,12 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         "usage error: {} is an invalid target region cvm encryption. "
                         "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
 
-                storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
+                storage_profile_types = [
+                    "EncryptedVMGuestStateOnlyWithPmk",
+                    "EncryptedWithPmk",
+                    "EncryptedWithCmk",
+                    "NonPersistedTPM"
+                ]
                 storage_profile_types_str = ", ".join(storage_profile_types)
                 if cvm_terms[0] not in storage_profile_types:
                     raise ArgumentUsageError(
@@ -2291,21 +2304,22 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 cvm_des_id = None
                 if cvm_terms[1]:
                     cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
-                security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
-                                                              secure_vm_disk_encryption_set_id=cvm_des_id)
+                security_profile = {"confidential_vm_encryption_type": cvm_terms[0],
+                                    "secure_vm_disk_encryption_set_id": cvm_des_id}
                 if os_disk_image:
-                    os_disk_image.security_profile = security_profile
+                    os_disk_image["security_profile"] = security_profile
                 else:
-                    os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
+                    os_disk_image = {"security_profile": security_profile}
 
             if os_disk_image or data_disk_images:
-                encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
+                encryption = {"os_disk_image": os_disk_image, "data_disk_images": data_disk_images}
 
             # At least the region is specified
             if len(parts) >= 1:
-                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count,
-                                                 storage_account_type=storage_account_type,
-                                                 encryption=encryption))
+                regions_info.append({"name": parts[0],
+                                     "regional_replica_count": replica_count,
+                                     "storage_account_type": storage_account_type,
+                                     "encryption": encryption})
 
         namespace.target_regions = regions_info
 
@@ -2379,7 +2393,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image = None
                 else:
                     des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
+                    os_disk_image = {"disk_encryption_set_id": des_id}
                 # Data disk
                 if len(terms) > 2:
                     data_disk_images = terms[2:]
@@ -2393,20 +2407,29 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         lun = data_disk_images[j * 2]
                         des_id = data_disk_images[j * 2 + 1]
                         des_id = _disk_encryption_set_format(cmd, namespace, des_id)
-                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
-                            lun=lun, disk_encryption_set_id=des_id))
+                        try:
+                            data_disk_image_encryption_list.append({"lun": int(lun), "disk_encryption_set_id": des_id})
+                        except:
+                            raise ArgumentUsageError(
+                                "usage error: {} is an invalid target edge zone encryption. "
+                                "LUN and disk encryption set for data disk should appear in pair in "
+                                "--target-edge-zone-encryption. Example: 1,osdes,0,datades0,1,datades1"
+                            )
                     data_disk_images = data_disk_image_encryption_list
 
             if os_disk_image or data_disk_images:
-                encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
+                encryption = {"os_disk_image": os_disk_image, "data_disk_images": data_disk_images}
 
-            extended_location = GalleryExtendedLocation(name=edge_zone, type='EdgeZone')
+            extended_location = {"name": edge_zone, "type": "EdgeZone"}
 
             edge_zone_info.append(
-                GalleryTargetExtendedLocation(name=region, extended_location_replica_count=replica_count,
-                                              extended_location=extended_location,
-                                              storage_account_type=storage_account_type,
-                                              encryption=encryption)
+                {
+                    "name": region,
+                    "extended_location_replica_count": replica_count,
+                    "extended_location": extended_location,
+                    "storage_account_type": storage_account_type,
+                    "encryption": encryption
+                }
             )
 
         namespace.target_edge_zones = edge_zone_info
@@ -2425,16 +2448,6 @@ def _disk_encryption_set_format(cmd, namespace, name):
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=name)
     return name
-# endregion
-
-
-def process_ppg_create_namespace(namespace):
-    validate_tags(namespace)
-    # The availability zone can be provided only when an intent is provided
-    if namespace.zone and not namespace.intent_vm_sizes:
-        raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
-                                           'Please use parameter --intent-vm-sizes to specify possible sizes of '
-                                           'virtual machines that can be created in the proximity placement group.')
 # endregion
 
 
