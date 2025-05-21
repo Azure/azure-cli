@@ -84,11 +84,13 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=8.0.0',
     # There are breaking changes between v10.2.0b2 and v10.2.0. For example:
     # `ImportError: cannot import name 'ResourceSku' from 'azure.mgmt.eventgrid.models' (/home/runner/work/azure-cli/azure-cli/env/lib/python3.12/site-packages/azure/mgmt/eventgrid/models/__init__.py). Did you mean: 'Resource'?`
+    # Ref.: https://github.com/Azure/azure-cli/issues/31520
     'azure-mgmt-eventgrid==10.2.0b2',
     'azure-mgmt-eventhub~=10.1.0',
     'azure-mgmt-extendedlocation~=1.0.0',
     # There are breaking changes between v9.0.0b3 and v9.0.0. For example:
     # `AttributeError: type object 'ExtensionsOperations' has no attribute 'get_azure_monitor_agent_status'. Did you mean: 'get_azure_monitor_status'?`
+    # Ref.: https://github.com/Azure/azure-cli/issues/31521
     'azure-mgmt-hdinsight==9.0.0b3',
     'azure-mgmt-imagebuilder~=1.3.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
@@ -146,6 +148,8 @@ DEPENDENCIES = [
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
+    # semver v2.13 was released in October 2020. Moving to v3 is strongly recommended.
+    # Ref.: https://github.com/Azure/azure-cli/issues/31519
     'semver==2.13.0',
     'setuptools',
     'six>=1.10.0',  # six is still used by countless extensions
