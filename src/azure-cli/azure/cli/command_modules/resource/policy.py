@@ -21,7 +21,7 @@ from azure.cli.command_modules.resource.aaz.latest.policy.assignment.identity._s
     import Show as AssignmentIdentityShow
 
 from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._create \
-   import Create as NonComplianceMessageCreate
+    import Create as NonComplianceMessageCreate
 from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._delete \
     import Delete as NonComplianceMessageDelete
 from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._list \
@@ -169,9 +169,7 @@ class Common:
     # Get policy definition ID from policy name if not specified
     # pylint: disable=protected-access
     @staticmethod
-    def ResolvePolicyId(ctx, cli_ctx):
-        from azure.cli.command_modules.resource.aaz.latest.policy.definition._show import Show as DefinitionShow
-        from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._show import Show as SetDefinitionShow
+    def ResolvePolicyId(ctx):
         policy_id = ctx.args.policy._data or ctx.args.policy_set_definition._data
         if not is_valid_resource_id(policy_id):
             definition = None
@@ -198,7 +196,7 @@ class Common:
 
     # Get user assigned identity IDs from names if not specified
     # pylint: disable=protected-access
-    # pyling: disable=consider-using-enumerate
+    # pylint: disable=consider-using-enumerate
     @staticmethod
     def ResolveUserAssignedIdentityId(ctx, cli_ctx):
         from azure.cli.command_modules.resource.custom import _get_resource_id
@@ -214,6 +212,7 @@ class Common:
 
     # Remove parameter values that are defaulted to <NotSpecified>
     # pylint: disable=protected-access
+    @staticmethod
     def RemoveUnspecifiedParameters(ctx):
         toRemove = []
         for arg in ctx.args._data:
@@ -333,7 +332,7 @@ class PolicyAssignmentCreate(AssignmentCreate):
         Common.RemoveUnspecifiedParameters(self.ctx)
         Common.ValidateNotScopes(self.ctx)
         Common.GenerateNameIfNone(self.ctx)
-        Common.ResolvePolicyId(self.ctx, self.cli_ctx)
+        Common.ResolvePolicyId(self.ctx)
         Common.ResolveUserAssignedIdentityId(self.ctx, self.cli_ctx)
         Common.ResolveCreateIdentityType(self.ctx)
 
@@ -348,6 +347,8 @@ class PolicyAssignmentCreate(AssignmentCreate):
 
 
 class PolicyAssignmentDelete(AssignmentDelete):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -367,8 +368,8 @@ class PolicyAssignmentList(AssignmentList):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.scope = AAZStrArg(
             options=['--scope'],
-            help='Scope at which to list applicable policy assignments.' \
-                ' If scope is not provided, the scope will be the implied or specified subscription.')
+            help='Scope at which to list applicable policy assignments. '
+                 'If scope is not provided, the scope will be the implied or specified subscription.')
         args_schema.disable_scope_strict_match = AAZBoolArg(
             options=['-d', '--disable-scope-strict-match'],
             help='Include policy assignments either inherited from parent scopes or at child scopes.')
@@ -419,6 +420,8 @@ class PolicyAssignmentList(AssignmentList):
 
 
 class PolicyAssignmentShow(AssignmentShow):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -433,6 +436,8 @@ class PolicyAssignmentShow(AssignmentShow):
 
 
 class PolicyAssignmentUpdate(AssignmentUpdate):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -449,6 +454,7 @@ class PolicyAssignmentUpdate(AssignmentUpdate):
         Common.RemoveUnspecifiedParameters(self.ctx)
         Common.ValidateNotScopes(self.ctx)
 
+    # pylint: disable=arguments-differ
     def _output(self):
         Common.AdjustNotScopesOutput(self)
         result = super()._output(self)
@@ -581,9 +587,8 @@ class PolicyAssignmentNonComplianceMessageUpdate(NonComplianceMessageUpdate):
 
 class PolicyDefinitionCreate(DefinitionCreate):
 
-
     class PolicyDefinitionsCreateOrUpdateAtManagementGroup(
-        DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
+            DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
         pass
 
     class PolicyDefinitionsCreateOrUpdate(DefinitionCreate.PolicyDefinitionsCreateOrUpdate):
@@ -686,7 +691,7 @@ class PolicyDefinitionShow(DefinitionShow):
             try:
                 self.PolicyDefinitionsGetBuiltIn(ctx=self.ctx)()
                 done = True
-            except (ResourceNotFoundError):
+            except ResourceNotFoundError:
                 pass
 
         if not done and has_value(self.ctx.args.name) and has_value(self.ctx.args.management_group):
@@ -710,7 +715,7 @@ class PolicyDefinitionUpdate(DefinitionUpdate):
         return args_schema
 
     class PolicyDefinitionsCreateOrUpdateAtManagementGroup(
-        DefinitionUpdate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
+            DefinitionUpdate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
         pass
 
     class PolicyDefinitionsCreateOrUpdate(DefinitionUpdate.PolicyDefinitionsCreateOrUpdate):
@@ -790,8 +795,8 @@ class PolicyExemptionList(ExemptionList):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.scope = AAZStrArg(
             options=['--scope'],
-            help='Scope at which to list applicable policy exemptions. ' \
-                'If scope is not provided, the scope will be the implied or specified subscription.')
+            help='Scope at which to list applicable policy exemptions. '
+                 'If scope is not provided, the scope will be the implied or specified subscription.')
         args_schema.disable_scope_strict_match = AAZBoolArg(
             options=['-d', '--disable-scope-strict-match'],
             help='Include policy exemptions either inherited from parent scopes or at child scopes.')
@@ -876,7 +881,7 @@ class PolicyExemptionUpdate(ExemptionUpdate):
 class PolicySetDefinitionCreate(SetDefinitionCreate):
 
     class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(
-        SetDefinitionCreate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
+            SetDefinitionCreate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
         pass
 
     class PolicySetDefinitionsCreateOrUpdate(SetDefinitionCreate.PolicySetDefinitionsCreateOrUpdate):
@@ -978,7 +983,7 @@ class PolicySetDefinitionShow(SetDefinitionShow):
             try:
                 self.PolicySetDefinitionsGetBuiltIn(ctx=self.ctx)()
                 done = True
-            except (ResourceNotFoundError):
+            except ResourceNotFoundError:
                 pass
 
         if not done and has_value(self.ctx.args.name) and has_value(self.ctx.args.management_group):
@@ -1002,7 +1007,7 @@ class PolicySetDefinitionUpdate(SetDefinitionUpdate):
         return args_schema
 
     class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(
-        SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
+            SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
         pass
 
     class PolicySetDefinitionsCreateOrUpdate(SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdate):
