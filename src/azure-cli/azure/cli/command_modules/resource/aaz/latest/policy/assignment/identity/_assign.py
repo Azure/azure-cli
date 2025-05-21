@@ -18,6 +18,15 @@ class Assign(AAZCommand):
     """Assigns a managed identity.
 
     Assigns the system or user assigned managed identity to the policy assignment matching the given name and scope.
+
+    :example: Add a system assigned managed identity to a policy assignment
+        az policy assignment identity assign --system-assigned -g MyResourceGroup -n MyPolicyAssignment
+
+    :example: Add a system assigned managed identity to a policy assignment and grant it the Contributor role for a resource group
+        az policy assignment identity assign --system-assigned -g MyResourceGroup -n MyPolicyAssignment --role Contributor --identity-scope /subscriptions/{subscriptionId}/resourceGroups/MyResourceGroup
+
+    :example: Add a user assigned managed identity to a policy assignment
+        az policy assignment identity assign --user-assigned MyAssignedId -g MyResourceGroup -n MyPolicyAssignment
     """
 
     _aaz_info = {

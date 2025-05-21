@@ -18,6 +18,15 @@ class Create(AAZCommand):
     """Creates a policy exemption.
 
     Creates a policy exemption with the given name and scope. Policy exemptions apply to all resources contained within their scope. For example, when you create a policy exemption at resource group scope for a policy assignment at the same or higher scope level, the exemption exempts all applicable resources in the resource group from applying to that policy assignment.
+
+    :example: Create a policy exemption in default subscription
+        az policy exemption create -n exemptTestVM --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --exemption-category "Waiver"
+
+    :example: Create a policy exemption in the resource group
+        az policy exemption create -n exemptTestVM --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --exemption-category "Waiver" --resource-group "myResourceGroup"
+
+    :example: Create a policy exemption in a management group
+        az policy exemption create -n exemptTestVM --policy-assignment "/providers/Microsoft.Management/managementGroups/{managementGroupName}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --exemption-category "Waiver" --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}"
     """
 
     _aaz_info = {
@@ -59,7 +68,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.assignment_scope_validation = AAZStrArg(
-            options=["--assignment-scope-validation"],
+            options=["-v", "--assignment-scope-validation"],
             arg_group="Properties",
             help={"short-summary": "The assignment scope validation", "long-summary": "Indicates the type of validation to perform on the assignment scope. Valid values are Default, DoNotValidate."},
             default="Default",

@@ -18,6 +18,12 @@ class List(AAZCommand):
     """Retrieves policy set definitions.
 
     Retrieves the list of all policy set definitions in the given subscription or management group.
+
+    :example: List policy set definitions
+        az policy set-definition list
+
+    :example: List policy set definitions at management group level
+        az policy set-definition list --management-group MyManagementGroup
     """
 
     _aaz_info = {

@@ -12,8 +12,6 @@ import json
 import os
 import re
 import ssl
-import uuid
-import base64
 
 from urllib.request import urlopen
 from urllib.parse import urlparse, unquote
@@ -22,7 +20,7 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError, ResourceNotFoundError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, ResourceNotFoundError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -42,7 +40,6 @@ from knack.log import get_logger
 from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
 from knack.util import CLIError
 
-from ._validators import MSI_LOCAL_ID
 from ._formatters import format_what_if_operation_result
 from ._bicep import (
     run_bicep_command,
@@ -1486,6 +1483,7 @@ def _update_provider(cmd, namespace, registering, wait, properties=None, mg_id=N
         action = 'Registering' if registering else 'Unregistering'
         msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
         logger.warning(msg_template, action, namespace)
+
 
 def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
     if file_or_string_or_uri is None:
@@ -3114,6 +3112,7 @@ def create_feature_registration(client, resource_provider_namespace, feature_nam
 def delete_feature_registration(client, resource_provider_namespace, feature_name):
     return client.delete(resource_provider_namespace, feature_name)
 
+
 def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_namespace):
     from azure.mgmt.core.tools import resource_id
     if is_valid_resource_id(val):
@@ -3129,6 +3128,7 @@ def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_names
     missing_kwargs = {k: v for k, v in kwargs.items() if not v}
 
     return resource_id(**kwargs) if not missing_kwargs else None
+
 
 def _register_rp(cli_ctx, subscription_id=None):
     rp = "Microsoft.Management"

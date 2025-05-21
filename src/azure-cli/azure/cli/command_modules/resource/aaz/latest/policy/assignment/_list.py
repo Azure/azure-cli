@@ -18,6 +18,15 @@ class List(AAZCommand):
     """Retrieves all applicable policy assignments.
 
     Retrieves the list of all policy assignments applicable to the given subscription or management group.
+
+    :example: List policy assignments that apply to a resource group
+        az policy assignment list --resource-group TestResourceGroup --filter atScope() --expand LatestDefinitionVersion, EffectiveDefinitionVersion
+
+    :example: List policy assignments that apply to a management group
+        az policy assignment list --management-group TestManagementGroup --filter atScope()
+
+    :example: List policy assignments that apply to a subscription
+        az policy assignment list --filter atScope()
     """
 
     _aaz_info = {

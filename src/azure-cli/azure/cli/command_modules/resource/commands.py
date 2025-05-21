@@ -18,8 +18,7 @@ from azure.cli.command_modules.resource._client_factory import (
     cf_deployment_operations, cf_resource_links, cf_resource_deploymentstacks,
     cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_groups_mixin, cf_management_group_subscriptions, cf_management_group_entities, cf_hierarchy_settings, cf_resource_templatespecs, cf_resource_resourcemanagementprivatelinks, cf_resource_privatelinkassociations)
 from azure.cli.command_modules.resource._validators import (
-    process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out,
-    process_assign_identity_namespace, process_assignment_create_namespace, validate_deployment_stack_files)
+    process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out, validate_deployment_stack_files)
 
 from ._exception_handler import managementgroups_exception_handler
 

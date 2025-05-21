@@ -19,6 +19,12 @@ class Delete(AAZCommand):
     """Deletes a policy assignment.
 
     Deletes the policy assignment with the given name and scope.
+
+    :example: Delete a policy assignment at scope
+        az policy assignment delete --scope subscriptions/{subscriptionId} --name EnforceNaming
+
+    :example: Delete a policy assignment
+        az policy assignment delete --name MyPolicyAssignment
     """
 
     _aaz_info = {

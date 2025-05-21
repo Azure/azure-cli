@@ -18,6 +18,9 @@ class Update(AAZCommand):
     """Updates a policy definition.
 
     Updates the policy definition in the given subscription or management group with the given name by applying the given properties.
+
+    :example: Update a policy definition display name
+        az policy definition update --name MyPolicyDefinition --display-name "Updated display name goes here"
     """
 
     _aaz_info = {
@@ -83,7 +86,7 @@ class Update(AAZCommand):
         _args_schema.mode = AAZStrArg(
             options=["-m", "--mode"],
             arg_group="Properties",
-            help={"short-summary": "The policy definition mode.", "long-summary": "The policy definition mode. Valid values for control plane policy definitions: All, Indexed. Some examples for data plane policy definitions: Microsoft.KeyVault.Data, Microsoft.Network.Data."},
+            help={"short-summary": "The policy definition mode.", "long-summary": "The policy definition mode. Valid values for control plane policy definitions: All, Indexed. The mode 'Indexed' indicates the policy should be evaluated only for resource types that support tags and location. Some examples for data plane policy definitions: Microsoft.KeyVault.Data, Microsoft.Network.Data."},
             nullable=True,
         )
         _args_schema.params = AAZDictArg(

@@ -18,6 +18,15 @@ class List(AAZCommand):
     """Retrieves policy definitions.
 
     Retrieves the list of all policy definitions in the given subscription or management group.
+
+    :example: List built-in policy definitions
+        az policy definition list --filter atScopeAndBelow()
+
+    :example: List policy definitions by management group
+        az policy definition list --management-group MyManagementGroup
+
+    :example: List policy definitions by subscription
+        az policy definition list
     """
 
     _aaz_info = {

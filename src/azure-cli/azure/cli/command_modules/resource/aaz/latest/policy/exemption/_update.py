@@ -18,6 +18,15 @@ class Update(AAZCommand):
     """Updates a policy exemption.
 
     Updates the policy exemption with the given name and scope by applying the given property values.
+
+    :example: Update a policy exemption category
+        az policy exemption update -n exemptTestVM --exemption-category "Mitigated"
+
+    :example: Update a policy exemption in a resource group
+        az policy exemption update -n exemptTestVM --display-name "Updated display name" --resource-group myResourceGroup
+
+    :example: Update a policy exemption at scope
+        az policy exemption update -n exemptTestVM --description "This exemption is very cool." --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}"
     """
 
     _aaz_info = {
@@ -61,7 +70,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.assignment_scope_validation = AAZStrArg(
-            options=["--assignment-scope-validation"],
+            options=["-v", "--assignment-scope-validation"],
             arg_group="Properties",
             help={"short-summary": "The assignment scope validation", "long-summary": "Indicates the type of validation to perform on the assignment scope. Valid values are Default, DoNotValidate."},
             nullable=True,

@@ -18,6 +18,9 @@ class Update(AAZCommand):
     """Updates a policy assignment.
 
     Updates the policy assignment with the given name and scope by applying the given property values.
+
+    :example: Update a resource policy assignment's description
+        az policy assignment update --name myPolicy --description 'My policy description'
     """
 
     _aaz_info = {
@@ -214,7 +217,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.non_compliance_messages = AAZListArg(
-            options=["--non-compliance-messages"],
+            options=["-m", "--non-compliance-messages"],
             arg_group="non-compliance-message",
             help="The messages that describe why a resource is non-compliant with the policy.",
             nullable=True,

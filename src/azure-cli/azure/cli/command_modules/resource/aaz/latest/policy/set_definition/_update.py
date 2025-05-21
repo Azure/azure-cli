@@ -18,6 +18,12 @@ class Update(AAZCommand):
     """Updates a policy set definition.
 
     Updates the policy set definition in the given subscription or management group with the given name by applying the given properties.
+
+    :example: Update a policy set definition
+        az policy set-definition update --definitions '[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/storagePolicy' } ]' --name MyPolicySetDefinition
+
+    :example: Update the groups and definitions within a policy set definition
+        az policy set-definition update -n computeRequirements --definitions "[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/storagePolicy', 'groupNames': [ 'CostSaving', 'Organizational' ] }, { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/tagPolicy', 'groupNames': [ 'Organizational' ] } ]" --definition-groups "[{ 'name': 'CostSaving' }, { 'name': 'Organizational' } ]"
     """
 
     _aaz_info = {

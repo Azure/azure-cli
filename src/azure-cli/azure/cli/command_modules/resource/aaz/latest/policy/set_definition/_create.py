@@ -18,6 +18,18 @@ class Create(AAZCommand):
     """Creates a policy set definition.
 
     Creates a policy set definition in the given subscription or management group with the given name and other properties.
+
+    :example: Create a policy set definition
+        az policy set-definition create -n readOnlyStorage --definitions '[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}' } ]'
+
+    :example: Create a policy set definition with parameters
+        az policy set-definition create -n readOnlyStorage --definitions "[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}', 'parameters': { 'storageSku': { 'value': '[parameters(\\'requiredSku\\')]' } } }]" --params "{ 'requiredSku': { 'type': 'String' } }"
+
+    :example: Create a policy set definition in a subscription
+        az policy set-definition create -n readOnlyStorage --subscription {subscriptionName} --definitions "[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}' } ]"
+
+    :example: Create a policy set definition with policy definition groups
+        az policy set-definition create -n computeRequirements --definitions "[ { 'policyDefinitionId ': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/storagePolicy', 'groupNames': [ 'CostSaving', 'Organizational' ] }, { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/tagPolicy', 'groupNames': [ 'Organizational' ] } ]" --definition-groups "[{ 'name': 'CostSaving' }, { 'name': 'Organizational' } ]"
     """
 
     _aaz_info = {

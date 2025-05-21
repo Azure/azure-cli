@@ -18,6 +18,12 @@ class Show(AAZCommand):
     """Retrieves a policy set definition.
 
     Retrieves and shows the details of the policy set definition in the given subscription or management group with the given name.
+
+    :example: Retrieve a policy set definition at management group level
+        az policy set-definition show --management-group MyManagementGroup --name CostManagement
+
+    :example: Retrieve a policy set definition
+        az policy set-definition show --name CostManagement
     """
 
     _aaz_info = {

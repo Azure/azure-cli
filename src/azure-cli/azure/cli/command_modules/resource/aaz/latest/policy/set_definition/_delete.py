@@ -19,6 +19,9 @@ class Delete(AAZCommand):
     """Deletes a policy set definition.
 
     Deletes the policy set definition in the given subscription or management group with the given name.
+
+    :example: Delete a policy set definition
+        az policy set-definition delete --management-group myMg --name MyPolicySetDefinition
     """
 
     _aaz_info = {

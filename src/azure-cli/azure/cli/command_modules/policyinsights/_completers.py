@@ -9,6 +9,7 @@ from azure.cli.command_modules.resource._client_factory import _resource_policy_
 
 from ._client_factory import cf_policy_insights
 
+
 @Completer
 def get_policy_remediation_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     client = cf_policy_insights(cmd.cli_ctx)
@@ -24,6 +25,7 @@ def get_policy_remediation_completion_list(cmd, prefix, namespace, **kwargs):  #
 
     return [i.name for i in result]
 
+
 @Completer
 def get_policy_metadata_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     client = cf_policy_insights(cmd.cli_ctx).policy_metadata
@@ -33,11 +35,13 @@ def get_policy_metadata_completion_list(cmd, prefix, namespace, **kwargs):  # py
 
     return [metadata.name for metadata in client.list(query_options) if metadata.name.startswith(prefix)]
 
+
 @Completer
 def get_policy_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     result = policy_client.policy_definitions.list()
     return [i.name for i in result]
+
 
 @Completer
 def get_policy_set_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
@@ -45,11 +49,13 @@ def get_policy_set_completion_list(cmd, prefix, namespace, **kwargs):  # pylint:
     result = policy_client.policy_set_definitions.list()
     return [i.name for i in result]
 
+
 @Completer
 def get_policy_assignment_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     result = policy_client.policy_assignments.list()
     return [i.name for i in result]
+
 
 @Completer
 def get_policy_exemption_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument

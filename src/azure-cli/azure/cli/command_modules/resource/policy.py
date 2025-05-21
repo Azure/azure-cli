@@ -3,12 +3,58 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import shlex, json
+import shlex
+import json
 from io import StringIO
+
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment._create import Create as AssignmentCreate
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment._delete import Delete as AssignmentDelete
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment._list import List as AssignmentList
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment._show import Show as AssignmentShow
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment._update import Update as AssignmentUpdate
+
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment.identity._assign \
+    import Assign as AssignmentIdentityAssign
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment.identity._remove \
+    import Remove as AssignmentIdentityRemove
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment.identity._show \
+    import Show as AssignmentIdentityShow
+
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._create \
+   import Create as NonComplianceMessageCreate
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._delete \
+    import Delete as NonComplianceMessageDelete
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._list \
+    import List as NonComplianceMessageList
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._show \
+    import Show as NonComplianceMessageShow
+from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._update \
+    import Update as NonComplianceMessageUpdate
+
+from azure.cli.command_modules.resource.aaz.latest.policy.definition._create import Create as DefinitionCreate
+from azure.cli.command_modules.resource.aaz.latest.policy.definition._delete import Delete as DefinitionDelete
+from azure.cli.command_modules.resource.aaz.latest.policy.definition._list import List as DefinitionList
+from azure.cli.command_modules.resource.aaz.latest.policy.definition._show import Show as DefinitionShow
+from azure.cli.command_modules.resource.aaz.latest.policy.definition._update import Update as DefinitionUpdate
+
+from azure.cli.command_modules.resource.aaz.latest.policy.exemption._create import Create as ExemptionCreate
+from azure.cli.command_modules.resource.aaz.latest.policy.exemption._delete import Delete as ExemptionDelete
+from azure.cli.command_modules.resource.aaz.latest.policy.exemption._list import List as ExemptionList
+from azure.cli.command_modules.resource.aaz.latest.policy.exemption._show import Show as ExemptionShow
+from azure.cli.command_modules.resource.aaz.latest.policy.exemption._update import Update as ExemptionUpdate
+
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._create import Create as SetDefinitionCreate
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._delete import Delete as SetDefinitionDelete
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._list import List as SetDefinitionList
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._show import Show as SetDefinitionShow
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._update import Update as SetDefinitionUpdate
+
+from azure.cli.command_modules.resource._client_factory import _resource_policy_client_factory
 from azure.cli.core.aaz import has_value, AAZResourceGroupNameArg, AAZStrArg, AAZBoolArg
 from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.decorators import Completer
+from azure.core.exceptions import ResourceNotFoundError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 # --------------------------------------------------------------------------------------------
@@ -39,21 +85,26 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 #     is ISO 8601, e.g. now 2025-08-05T00:45:13Z instead of 2025-08-05T00:45:13+00:00.
 # --------------------------------------------------------------------------------------------
 
+
 # Shared code for policy command customization
 class Common:
     @staticmethod
     # Ensure that both --policy and -policy-set-definition are not specified, or that one of them is specified
-    def ValidatePolicyDefinitionId(ctx, cli_ctx):
+    def ValidatePolicyDefinitionId(ctx):
         if bool(has_value(ctx.args.policy)) == bool(has_value(ctx.args.policy_set_definition)):
             raise ArgumentUsageError('usage error: --policy NAME_OR_ID | --policy-set-definition NAME_OR_ID')
 
-    # Ensure that both --scope and --subscription are not specified
-    def ValidateScope(ctx, cli_ctx):
-        # if ctx.args.scope != '<NotSpecified>' and ctx._subscription_id != None:
-        #     raise ArgumentUsageError('usage error: --scope SCOPE | --subscription NAME_OR_ID')
-        pass
+    # Ensure that --scope is not used with other scoping parameters
+    @staticmethod
+    def ValidateScope(ctx):
+        if has_value(ctx.args.scope) and ctx.args.scope != '<NotSpecified>' and has_value(ctx.args.resource_group):
+            raise ArgumentUsageError('usage error: --scope SCOPE | --resource-group NAME')
+        # Should also validate that both --scope and --subscription are not specified together. Unfortunately
+        # it's not possible to make this check since there is no way to determine whether the user entered
+        # --subscription on the command line. Current behavior is to ignore --subscription if both are provided.
 
     # If --scope is not provided, set it by subscription or resource group scope
+    @staticmethod
     def PopulateScopeFromContext(ctx, cli_ctx):
         if ctx.args.scope == '<NotSpecified>':
             subscription_id = get_subscription_id(cli_ctx)
@@ -63,25 +114,33 @@ class Common:
                 ctx.args.scope = f"/subscriptions/{subscription_id}"
 
     # Create role assignment for the system assigned identity of the policy assignment
+    # pylint: disable=protected-access
+    @staticmethod
     def CreateRoleAssignment(ctx, cli_ctx, assignment):
         from azure.cli.core.commands.arm import assign_identity
         if has_value(ctx.args.identity_scope):
             identity_role = None
             if has_value(ctx.args.role):
                 identity_role = ctx.args.role
-            assign_identity(cli_ctx, lambda: assignment, lambda resource: assignment, identity_role._data, ctx.args.identity_scope._data)
+            assign_identity(
+                cli_ctx, lambda: assignment, lambda resource: assignment,
+                identity_role._data, ctx.args.identity_scope._data)
 
     # Implement default identity type behavior for policy assignment create
-    def ResolveCreateIdentityType(ctx, cli_ctx):
+    @staticmethod
+    def ResolveCreateIdentityType(ctx):
         if has_value(ctx.args.identity_scope) or has_value(ctx.args.location) or has_value(ctx.args.role):
-            Common.ResolveIdentityType(ctx, cli_ctx)
+            Common.ResolveIdentityType(ctx)
 
     # Set identity type to system assigned if not specified
-    def ResolveIdentityType(ctx, cli_ctx):
+    @staticmethod
+    def ResolveIdentityType(ctx):
         if not has_value(ctx.args.mi_system_assigned) and not has_value(ctx.args.mi_user_assigned):
             ctx.args.mi_system_assigned = 'True'
 
     # Implement default scope behavior for policy assignment and exemption list commands
+    # pylint: disable=protected-access
+    # pylint: disable=attribute-defined-outside-init
     def ResolveScopeForList(self):
         ctx = self.ctx
         if has_value(ctx.args.scope):
@@ -92,7 +151,7 @@ class Common:
             elif scope_parts[1] == 'subscriptions':
                 # store subscription from scope for later use
                 self.subscription_from_scope = scope_parts[2]
-                if (len(scope_parts) > 3):
+                if len(scope_parts) > 3:
                     ctx.args.resource_group = scope_parts[4]
                 else:
                     ctx.args.resource_group = None
@@ -100,12 +159,16 @@ class Common:
                 raise InvalidArgumentValueError("Invalid value in --scope: '%s'" % ctx.args.scope._data)
 
     # Implement default name behavior for policy assignment and exemption create commands
+    @staticmethod
     def GenerateNameIfNone(ctx):
         if not has_value(ctx.args.name):
-            import base64, uuid
+            import base64
+            import uuid
             ctx.args.name = (base64.urlsafe_b64encode(uuid.uuid4().bytes).decode())[:-2]
 
     # Get policy definition ID from policy name if not specified
+    # pylint: disable=protected-access
+    @staticmethod
     def ResolvePolicyId(ctx, cli_ctx):
         from azure.cli.command_modules.resource.aaz.latest.policy.definition._show import Show as DefinitionShow
         from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._show import Show as SetDefinitionShow
@@ -126,13 +189,17 @@ class Common:
             try:
                 definition = Common.run_cli_deserialize(command_string)
             except Exception as ex:
-                raise InvalidArgumentValueError(f"Invalid value in --policy or --policy-set-definition: '{policy_id}'") from ex
+                raise InvalidArgumentValueError(
+                    f"Invalid value in --policy or --policy-set-definition: '{policy_id}'") from ex
 
             policy_id = definition.get('id')
 
         ctx.args.policy_set_definition = policy_id
 
     # Get user assigned identity IDs from names if not specified
+    # pylint: disable=protected-access
+    # pyling: disable=consider-using-enumerate
+    @staticmethod
     def ResolveUserAssignedIdentityId(ctx, cli_ctx):
         from azure.cli.command_modules.resource.custom import _get_resource_id
         if has_value(ctx.args.mi_user_assigned):
@@ -141,9 +208,12 @@ class Common:
             for i in range(len(user_assigned_identities)):
                 user_assigned_identity = user_assigned_identities[i]._data
                 if not is_valid_resource_id(user_assigned_identity):
-                    user_assigned_identities[i] = _get_resource_id(cli_ctx, user_assigned_identity, resource_group, 'userAssignedIdentities', 'Microsoft.ManagedIdentity')
+                    user_assigned_identities[i] = _get_resource_id(
+                        cli_ctx, user_assigned_identity, resource_group,
+                        'userAssignedIdentities', 'Microsoft.ManagedIdentity')
 
     # Remove parameter values that are defaulted to <NotSpecified>
+    # pylint: disable=protected-access
     def RemoveUnspecifiedParameters(ctx):
         toRemove = []
         for arg in ctx.args._data:
@@ -153,10 +223,13 @@ class Common:
             ctx.args._data.pop(arg)
 
     # Helper function to check whether a scope is a management group scope
+    @staticmethod
     def _is_management_group_scope(scope):
         return scope is not None and scope.lower().startswith("/providers/microsoft.management/managementgroups")
 
     # Validate that not_scopes are valid subscription or management group scopes
+    # pylint: disable=protected-access
+    @staticmethod
     def ValidateNotScopes(ctx):
         not_scopes = ctx.args.not_scopes
         if has_value(not_scopes):
@@ -174,6 +247,7 @@ class Common:
             self.ctx.vars.instance.properties.notScopes = split
 
     # Apply filter to list commands based on --disable-scope-strict-match argument
+    @staticmethod
     def ApplyListFilter(ctx):
         if not has_value(ctx.args.filter):
             if has_value(ctx.args.disable_scope_strict_match):
@@ -202,69 +276,76 @@ class Common:
 
         return None
 
+
 # Completers for policy command arguments
-from azure.cli.command_modules.resource._client_factory import _resource_policy_client_factory
 class Completers:
+    @staticmethod
     @Completer
     def get_policy_definition_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         policy_client = _resource_policy_client_factory(cmd.cli_ctx)
         result = policy_client.policy_definitions.list(filter="policyType eq 'Custom'")
         return [i.name for i in result]
 
+    @staticmethod
     @Completer
     def get_policy_set_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         policy_client = _resource_policy_client_factory(cmd.cli_ctx)
         result = policy_client.policy_set_definitions.list(filter="policyType eq 'Custom'")
         return [i.name for i in result]
 
+    @staticmethod
     @Completer
     def get_policy_assignment_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         policy_client = _resource_policy_client_factory(cmd.cli_ctx)
         result = policy_client.policy_assignments.list()
         return [i.name for i in result]
 
+    @staticmethod
     @Completer
     def get_policy_exemption_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         policy_client = _resource_policy_client_factory(cmd.cli_ctx)
         result = policy_client.policy_exemptions.list()
         return [i.name for i in result]
 
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment._create import Create as AssignmentCreate
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment._delete import Delete as AssignmentDelete
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment._list import List as AssignmentList
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment._show import Show as AssignmentShow
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment._update import Update as AssignmentUpdate
 
 class PolicyAssignmentCreate(AssignmentCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.name._required = False
+        args_schema.name._required = False                # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
-        args_schema.policy = AAZStrArg(options=['--policy'], help='The name or resource ID of the policy definition or policy set definition to be assigned.')
-        args_schema.identity_scope = AAZStrArg(options=['--identity-scope'], help='Scope that the system assigned identity can access.')
-        args_schema.role = AAZStrArg(options=['--role'], help='Role name or id that will be assigned to the managed identity.')
+        args_schema.policy = AAZStrArg(
+            options=['--policy'],
+            help='The name or resource ID of the policy definition or policy set definition to be assigned.')
+        args_schema.identity_scope = AAZStrArg(
+            options=['--identity-scope'],
+            help='Scope that the system assigned identity can access.')
+        args_schema.role = AAZStrArg(
+            options=['--role'],
+            help='Role name or id that will be assigned to the managed identity.')
         return args_schema
 
     def pre_operations(self):
-        Common.ValidatePolicyDefinitionId(self.ctx, self.cli_ctx)
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidatePolicyDefinitionId(self.ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
         Common.ValidateNotScopes(self.ctx)
         Common.GenerateNameIfNone(self.ctx)
         Common.ResolvePolicyId(self.ctx, self.cli_ctx)
         Common.ResolveUserAssignedIdentityId(self.ctx, self.cli_ctx)
-        Common.ResolveCreateIdentityType(self.ctx, self.cli_ctx)
+        Common.ResolveCreateIdentityType(self.ctx)
 
     def post_operations(self):
         Common.CreateRoleAssignment(self.ctx, self.cli_ctx, self.ctx.vars.instance)
 
+    # pylint: disable=arguments-differ
     def _output(self):
         Common.AdjustNotScopesOutput(self)
         result = super()._output(self)
         return result
+
 
 class PolicyAssignmentDelete(AssignmentDelete):
     @classmethod
@@ -275,16 +356,22 @@ class PolicyAssignmentDelete(AssignmentDelete):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
+
 
 class PolicyAssignmentList(AssignmentList):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.scope = AAZStrArg(options=['--scope'], help='Scope at which to list applicable policy assignments.  If scope is not provided, the scope will be the implied or specified subscription.')
-        args_schema.disable_scope_strict_match = AAZBoolArg(options=['--disable-scope-strict-match'], help='Include policy assignments either inherited from parent scopes or at child scopes.')
+        args_schema.scope = AAZStrArg(
+            options=['--scope'],
+            help='Scope at which to list applicable policy assignments.' \
+                ' If scope is not provided, the scope will be the implied or specified subscription.')
+        args_schema.disable_scope_strict_match = AAZBoolArg(
+            options=['-d', '--disable-scope-strict-match'],
+            help='Include policy assignments either inherited from parent scopes or at child scopes.')
         return args_schema
 
     # subscription provided by --scope argument (may be different from context subscription)
@@ -305,7 +392,7 @@ class PolicyAssignmentList(AssignmentList):
 
         @property
         def url(self):
-            if (self.subscription_from_scope is not None):
+            if self.subscription_from_scope is not None:
                 return self.client.format_url(
                     "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments",
                     subscriptionId=self.subscription_from_scope
@@ -314,7 +401,7 @@ class PolicyAssignmentList(AssignmentList):
             return super().url
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.ResolveScopeForList(self)
         Common.ApplyListFilter(self.ctx)
 
@@ -330,6 +417,7 @@ class PolicyAssignmentList(AssignmentList):
 
         self.post_operations()
 
+
 class PolicyAssignmentShow(AssignmentShow):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -339,9 +427,10 @@ class PolicyAssignmentShow(AssignmentShow):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
+
 
 class PolicyAssignmentUpdate(AssignmentUpdate):
     @classmethod
@@ -349,11 +438,13 @@ class PolicyAssignmentUpdate(AssignmentUpdate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_assignment_completion_list
         args_schema.resource_group = AAZResourceGroupNameArg()
-        args_schema.policy = AAZStrArg(options=['--policy'], help='The name or resource ID of the policy definition or policy set definition to be assigned.')
+        args_schema.policy = AAZStrArg(
+            options=['--policy'],
+            help='The name or resource ID of the policy definition or policy set definition to be assigned.')
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
         Common.ValidateNotScopes(self.ctx)
@@ -363,27 +454,29 @@ class PolicyAssignmentUpdate(AssignmentUpdate):
         result = super()._output(self)
         return result
 
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment.identity._assign import Assign as AssignmentIdentityAssign
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment.identity._remove import Remove as AssignmentIdentityRemove
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment.identity._show import Show as AssignmentIdentityShow
 
 class PolicyAssignmentIdentityAssign(AssignmentIdentityAssign):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.resource_group = AAZResourceGroupNameArg()
-        args_schema.identity_scope = AAZStrArg(options=['--identity-scope'], help='Scope that the system assigned identity can access.')
-        args_schema.role = AAZStrArg(options=['--role'], help='Role name or id that will be assigned to the managed identity.')
+        args_schema.identity_scope = AAZStrArg(
+            options=['--identity-scope'],
+            help='Scope that the system assigned identity can access.')
+        args_schema.role = AAZStrArg(
+            options=['--role'],
+            help='Role name or id that will be assigned to the managed identity.')
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.ResolveIdentityType(self.ctx, self.cli_ctx)
+        Common.ResolveIdentityType(self.ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
 
     def post_operations(self):
         Common.CreateRoleAssignment(self.ctx, self.cli_ctx, self.ctx.vars.instance)
+
 
 class PolicyAssignmentIdentityRemove(AssignmentIdentityRemove):
     @classmethod
@@ -393,10 +486,11 @@ class PolicyAssignmentIdentityRemove(AssignmentIdentityRemove):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.ResolveIdentityType(self.ctx, self.cli_ctx)
+        Common.ResolveIdentityType(self.ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
+
 
 class PolicyAssignmentIdentityShow(AssignmentIdentityShow):
     @classmethod
@@ -406,15 +500,10 @@ class PolicyAssignmentIdentityShow(AssignmentIdentityShow):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
 
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._create import Create as NonComplianceMessageCreate
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._delete import Delete as NonComplianceMessageDelete
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._list import List as NonComplianceMessageList
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._show import Show as NonComplianceMessageShow
-from azure.cli.command_modules.resource.aaz.latest.policy.assignment.non_compliance_message._update import Update as NonComplianceMessageUpdate
 
 class PolicyAssignmentNonComplianceMessageCreate(NonComplianceMessageCreate):
     @classmethod
@@ -424,9 +513,10 @@ class PolicyAssignmentNonComplianceMessageCreate(NonComplianceMessageCreate):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
+
 
 class PolicyAssignmentNonComplianceMessageDelete(NonComplianceMessageDelete):
     @classmethod
@@ -436,9 +526,10 @@ class PolicyAssignmentNonComplianceMessageDelete(NonComplianceMessageDelete):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
+
 
 class PolicyAssignmentNonComplianceMessageList(NonComplianceMessageList):
     @classmethod
@@ -448,10 +539,11 @@ class PolicyAssignmentNonComplianceMessageList(NonComplianceMessageList):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
 
+    # pylint: disable=arguments-differ
     def _output(self):
         value = self.ctx.selectors.subresource.get()
         if has_value(value):
@@ -459,6 +551,7 @@ class PolicyAssignmentNonComplianceMessageList(NonComplianceMessageList):
         else:
             result = None
         return result
+
 
 class PolicyAssignmentNonComplianceMessageShow(NonComplianceMessageShow):
     @classmethod
@@ -468,9 +561,10 @@ class PolicyAssignmentNonComplianceMessageShow(NonComplianceMessageShow):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
+
 
 class PolicyAssignmentNonComplianceMessageUpdate(NonComplianceMessageUpdate):
     @classmethod
@@ -480,19 +574,16 @@ class PolicyAssignmentNonComplianceMessageUpdate(NonComplianceMessageUpdate):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
 
-from azure.cli.command_modules.resource.aaz.latest.policy.definition._create import Create as DefinitionCreate
-from azure.cli.command_modules.resource.aaz.latest.policy.definition._delete import Delete as DefinitionDelete
-from azure.cli.command_modules.resource.aaz.latest.policy.definition._list import List as DefinitionList
-from azure.cli.command_modules.resource.aaz.latest.policy.definition._show import Show as DefinitionShow
-from azure.cli.command_modules.resource.aaz.latest.policy.definition._update import Update as DefinitionUpdate
 
 class PolicyDefinitionCreate(DefinitionCreate):
 
-    class PolicyDefinitionsCreateOrUpdateAtManagementGroup(DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
+
+    class PolicyDefinitionsCreateOrUpdateAtManagementGroup(
+        DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
         pass
 
     class PolicyDefinitionsCreateOrUpdate(DefinitionCreate.PolicyDefinitionsCreateOrUpdate):
@@ -514,12 +605,16 @@ class PolicyDefinitionCreate(DefinitionCreate):
     def post_operations(self):
         pass
 
+
 class PolicyDefinitionDelete(DefinitionDelete):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_definition_completion_list
         return args_schema
+
 
 class PolicyDefinitionList(DefinitionList):
 
@@ -545,7 +640,10 @@ class PolicyDefinitionList(DefinitionList):
     def post_operations(self):
         pass
 
+
 class PolicyDefinitionShow(DefinitionShow):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -553,9 +651,6 @@ class PolicyDefinitionShow(DefinitionShow):
         return args_schema
 
     class PolicyDefinitionsGetBuiltIn(DefinitionShow.PolicyDefinitionsGet):
-
-        def __init__(self, ctx):
-            super().__init__(ctx)
 
         @property
         def url(self):
@@ -584,14 +679,14 @@ class PolicyDefinitionShow(DefinitionShow):
         pass
 
     def _execute_operations(self):
+
         self.pre_operations()
         done = False
-        # $$$ add a check for not has_value --subscription if possible for better performance
         if has_value(self.ctx.args.name) and not has_value(self.ctx.args.management_group):
             try:
                 self.PolicyDefinitionsGetBuiltIn(ctx=self.ctx)()
                 done = True
-            except (Exception) as ex:
+            except (ResourceNotFoundError):
                 pass
 
         if not done and has_value(self.ctx.args.name) and has_value(self.ctx.args.management_group):
@@ -604,14 +699,18 @@ class PolicyDefinitionShow(DefinitionShow):
     def post_operations(self):
         pass
 
+
 class PolicyDefinitionUpdate(DefinitionUpdate):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_definition_completion_list
         return args_schema
 
-    class PolicyDefinitionsCreateOrUpdateAtManagementGroup(DefinitionUpdate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
+    class PolicyDefinitionsCreateOrUpdateAtManagementGroup(
+        DefinitionUpdate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
         pass
 
     class PolicyDefinitionsCreateOrUpdate(DefinitionUpdate.PolicyDefinitionsCreateOrUpdate):
@@ -623,9 +722,11 @@ class PolicyDefinitionUpdate(DefinitionUpdate):
     class PolicyDefinitionsGet(DefinitionUpdate.PolicyDefinitionsGet):
         pass
 
+    # pylint: disable=too-few-public-methods
     class InstanceUpdateByJson(DefinitionUpdate.InstanceUpdateByJson):
         pass
 
+    # pylint: disable=too-few-public-methods
     class InstanceUpdateByGeneric(DefinitionUpdate.InstanceUpdateByGeneric):
         pass
 
@@ -651,27 +752,25 @@ class PolicyDefinitionUpdate(DefinitionUpdate):
     def post_operations(self):
         pass
 
-from azure.cli.command_modules.resource.aaz.latest.policy.exemption._create import Create as ExemptionCreate
-from azure.cli.command_modules.resource.aaz.latest.policy.exemption._delete import Delete as ExemptionDelete
-from azure.cli.command_modules.resource.aaz.latest.policy.exemption._list import List as ExemptionList
-from azure.cli.command_modules.resource.aaz.latest.policy.exemption._show import Show as ExemptionShow
-from azure.cli.command_modules.resource.aaz.latest.policy.exemption._update import Update as ExemptionUpdate
 
 class PolicyExemptionCreate(ExemptionCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.name._required = False
+        args_schema.name._required = False            # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
         Common.GenerateNameIfNone(self.ctx)
 
+
 class PolicyExemptionDelete(ExemptionDelete):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -680,16 +779,22 @@ class PolicyExemptionDelete(ExemptionDelete):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
+
 
 class PolicyExemptionList(ExemptionList):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.scope = AAZStrArg(options=['--scope'], help='Scope at which to list applicable policy exemptions.  If scope is not provided, the scope will be the implied or specified subscription.')
-        args_schema.disable_scope_strict_match = AAZBoolArg(options=['--disable-scope-strict-match'], help='Include policy exemptions either inherited from parent scopes or at child scopes.')
+        args_schema.scope = AAZStrArg(
+            options=['--scope'],
+            help='Scope at which to list applicable policy exemptions. ' \
+                'If scope is not provided, the scope will be the implied or specified subscription.')
+        args_schema.disable_scope_strict_match = AAZBoolArg(
+            options=['-d', '--disable-scope-strict-match'],
+            help='Include policy exemptions either inherited from parent scopes or at child scopes.')
         return args_schema
 
     # subscription provided by --scope argument (may be different from context subscription)
@@ -710,7 +815,7 @@ class PolicyExemptionList(ExemptionList):
 
         @property
         def url(self):
-            if (self.subscription_from_scope is not None):
+            if self.subscription_from_scope is not None:
                 return self.client.format_url(
                     "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyExemptions",
                     subscriptionId=self.subscription_from_scope
@@ -719,7 +824,7 @@ class PolicyExemptionList(ExemptionList):
             return super().url
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.ResolveScopeForList(self)
         Common.ApplyListFilter(self.ctx)
 
@@ -735,7 +840,10 @@ class PolicyExemptionList(ExemptionList):
 
         self.post_operations()
 
+
 class PolicyExemptionShow(ExemptionShow):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -744,11 +852,14 @@ class PolicyExemptionShow(ExemptionShow):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
+
 
 class PolicyExemptionUpdate(ExemptionUpdate):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -757,19 +868,15 @@ class PolicyExemptionUpdate(ExemptionUpdate):
         return args_schema
 
     def pre_operations(self):
-        Common.ValidateScope(self.ctx, self.cli_ctx)
+        Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.RemoveUnspecifiedParameters(self.ctx)
 
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._create import Create as SetDefinitionCreate
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._delete import Delete as SetDefinitionDelete
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._list import List as SetDefinitionList
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._show import Show as SetDefinitionShow
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._update import Update as SetDefinitionUpdate
 
 class PolicySetDefinitionCreate(SetDefinitionCreate):
 
-    class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(SetDefinitionCreate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
+    class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(
+        SetDefinitionCreate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
         pass
 
     class PolicySetDefinitionsCreateOrUpdate(SetDefinitionCreate.PolicySetDefinitionsCreateOrUpdate):
@@ -791,12 +898,16 @@ class PolicySetDefinitionCreate(SetDefinitionCreate):
     def post_operations(self):
         pass
 
+
 class PolicySetDefinitionDelete(SetDefinitionDelete):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_set_completion_list
         return args_schema
+
 
 class PolicySetDefinitionList(SetDefinitionList):
 
@@ -822,7 +933,10 @@ class PolicySetDefinitionList(SetDefinitionList):
     def post_operations(self):
         pass
 
+
 class PolicySetDefinitionShow(SetDefinitionShow):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -830,9 +944,6 @@ class PolicySetDefinitionShow(SetDefinitionShow):
         return args_schema
 
     class PolicySetDefinitionsGetBuiltIn(SetDefinitionShow.PolicySetDefinitionsGet):
-
-        def __init__(self, ctx):
-            super().__init__(ctx)
 
         @property
         def url(self):
@@ -863,12 +974,11 @@ class PolicySetDefinitionShow(SetDefinitionShow):
     def _execute_operations(self):
         self.pre_operations()
         done = False
-        # $$$ add a check for not has_value --subscription if possible for better performance
         if has_value(self.ctx.args.name) and not has_value(self.ctx.args.management_group):
             try:
                 self.PolicySetDefinitionsGetBuiltIn(ctx=self.ctx)()
                 done = True
-            except (Exception) as ex:
+            except (ResourceNotFoundError):
                 pass
 
         if not done and has_value(self.ctx.args.name) and has_value(self.ctx.args.management_group):
@@ -881,14 +991,18 @@ class PolicySetDefinitionShow(SetDefinitionShow):
     def post_operations(self):
         pass
 
+
 class PolicySetDefinitionUpdate(SetDefinitionUpdate):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_set_completion_list
         return args_schema
 
-    class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
+    class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(
+        SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
         pass
 
     class PolicySetDefinitionsCreateOrUpdate(SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdate):
@@ -900,9 +1014,11 @@ class PolicySetDefinitionUpdate(SetDefinitionUpdate):
     class PolicySetDefinitionsGet(SetDefinitionUpdate.PolicySetDefinitionsGet):
         pass
 
+    # pylint: disable=too-few-public-methods
     class InstanceUpdateByJson(SetDefinitionUpdate.InstanceUpdateByJson):
         pass
 
+    # pylint: disable=too-few-public-methods
     class InstanceUpdateByGeneric(SetDefinitionUpdate.InstanceUpdateByGeneric):
         pass
 

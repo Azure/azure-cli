@@ -18,6 +18,24 @@ class Create(AAZCommand):
     """Creates a policy assignment.
 
     Creates a policy assignment with the given scope and name. Policy assignments apply to all resources contained within their scope. For example, when you assign a policy at resource group scope, that policy applies to all resources in the group.
+
+    :example: Create a resource policy assignment at scope
+        az policy assignment create --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}" --policy {policyName} -p "{ 'allowedLocations': { 'value': [ 'australiaeast', 'eastus', 'japaneast' ] } }"
+
+    :example: Create a resource policy assignment and provide rule parameter values
+        az Create a resource policy assignment and provide rule parameter values policy assignment create --policy {policyName} -p "{ 'allowedLocations': { 'value': [ 'australiaeast', 'eastus', 'japaneast' ] } }"
+
+    :example: Create a resource policy assignment with a system assigned identity
+        az policy assignment create --name myPolicy --policy {policyName} --mi-system-assigned --location eastus
+
+    :example: Create a resource policy assignment with a system assigned identity with Contributor role access to the subscription
+        az policy assignment create --name myPolicy --policy {policyName} --mi-system-assigned --identity-scope /subscriptions/{subscriptionId} --role Contributor --location eastus
+
+    :example: Create a resource policy assignment with a user assigned identity
+        az policy assignment create --name myPolicy --policy {policyName} -g MyResourceGroup --mi-user-assigned myAssignedId --location westus
+
+    :example: Create a resource policy assignment with an enforcement mode
+        az policy assignment create --name myPolicy --policy {policyName} --enforcement-mode DoNotEnforce
     """
 
     _aaz_info = {
@@ -199,7 +217,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.non_compliance_messages = AAZListArg(
-            options=["--non-compliance-messages"],
+            options=["-m", "--non-compliance-messages"],
             arg_group="non-compliance-message",
             help="The messages that describe why a resource is non-compliant with the policy.",
         )

@@ -18,6 +18,9 @@ class Show(AAZCommand):
     """Retrieves a policy assignment.
 
     Retrieves and shows the details of a single policy assignment with the given name and scope.
+
+    :example: Show a resource policy assignment
+        az policy assignment show --name MyPolicyAssignment
     """
 
     _aaz_info = {

@@ -18,6 +18,9 @@ class Update(AAZCommand):
     """Updates a non-compliance message.
 
     Updates a non-compliance message belonging to the policy assignment matching the given name and scope.
+
+    :example: Update the non-compliance message for a specific policy in an assigned policy set definition
+        az policy assignment non-compliance-message update -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources may only use SKUs from [preferredSKU, anotherGoodSKU]' --policy-definition-reference-id SkuPolicyRefId
     """
 
     _aaz_info = {

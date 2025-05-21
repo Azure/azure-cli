@@ -18,6 +18,18 @@ class Create(AAZCommand):
     """Creates a policy definition.
 
     Creates a policy definition in the given subscription or management group with the given name and other properties.
+
+    :example: Create a read-only storage policy
+        az policy definition create --name readOnlyStorage --rules "{ 'if': { 'field': 'type', 'equals': 'Microsoft.Storage/storageAccounts/write' }, 'then': { 'effect': 'deny' } }"
+
+    :example: Create a policy definition with parameters
+        az policy definition create --name allowedLocations --rules "{ 'if': { 'allOf': [{ 'field': 'location','notIn': '[parameters(\\'listOfAllowedLocations\\')]' }, { 'field': 'location', 'notEquals': 'global' }, { 'field': 'type', 'notEquals': 'Microsoft.AzureActiveDirectory/b2cDirectories'}] }, 'then': { 'effect': 'deny' } }" --params "{ 'allowedLocations': {'type': 'array', 'metadata': { 'description': 'The list of locations that can be specified when deploying resources', 'strongType': 'location', 'displayName': 'Allowed locations' } } }"
+
+    :example: Create a read-only storage policy that can be applied within a management group
+        az policy definition create -n readOnlyStorage --management-group "MyManagementGroup" --rules "{ 'if': { 'field': 'type', 'equals': 'Microsoft.Storage/storageAccounts/write' }, 'then': { 'effect': 'deny' } }"
+
+    :example: Create a policy definition with mode
+        az policy definition create --name TagsPolicyDefinition --subscription "MySubscription" --mode Indexed --rules "{ 'if': { 'field': 'tags', 'exists': 'false' }, 'then': { 'effect': 'deny' } }"
     """
 
     _aaz_info = {
@@ -78,7 +90,7 @@ class Create(AAZCommand):
         _args_schema.mode = AAZStrArg(
             options=["-m", "--mode"],
             arg_group="Properties",
-            help={"short-summary": "The policy definition mode.", "long-summary": "The policy definition mode. Valid values for control plane policy definitions: All, Indexed. Some examples for data plane policy definitions: Microsoft.KeyVault.Data, Microsoft.Network.Data."},
+            help={"short-summary": "The policy definition mode.", "long-summary": "The policy definition mode. Valid values for control plane policy definitions: All, Indexed. The mode 'Indexed' indicates the policy should be evaluated only for resource types that support tags and location. Some examples for data plane policy definitions: Microsoft.KeyVault.Data, Microsoft.Network.Data."},
             default="Indexed",
         )
         _args_schema.params = AAZDictArg(

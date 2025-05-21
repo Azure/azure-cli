@@ -19,6 +19,9 @@ class Delete(AAZCommand):
     """Deletes a policy exemption.
 
     Deletes the policy exemption with the given name and scope.
+
+    :example: Delete a policy exemption
+        az policy exemption delete --name MyPolicyExemption --resource-group "myResourceGroup"
     """
 
     _aaz_info = {

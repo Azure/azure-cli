@@ -4598,8 +4598,8 @@ class PolicyScenarioTest(ScenarioTest):
         with self.assertRaises(ArgumentUsageError):
             self.cmd('policy assignment create --name someName --scope someScope --policy somePolicyDefinition --policy-set-definition somePolicySetDefinition')
 
-        # with self.assertRaises(ArgumentUsageError):
-        #     self.cmd('policy assignment create --name someName --scope someScope --subscription {sub} --policy somePolicyDefinition'.format(**self.kwargs))
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('policy assignment create --name someName --scope someScope --subscription {sub} --resource-group someName --policy somePolicyDefinition'.format(**self.kwargs))
 
         with self.assertRaises(InvalidArgumentValueError):
             self.cmd('policy assignment create --name someName --scope someScope --policy somePolicyDefinition')

@@ -18,6 +18,15 @@ class List(AAZCommand):
     """Retrieves all applicable policy exemptions.
 
     Retrieves the list of all policy assignments applicable to the given subscription or management group.
+
+    :example: List policy exemptions that apply to a management group
+        az policy exemption list --management-group DevOrg --filter atScopeAndBelow()
+
+    :example: List policy exemptions that apply to a resource group
+        az policy exemption list --resource-group TestResourceGroup
+
+    :example: List policy exemptions that apply to a subscription
+        az policy exemption list
     """
 
     _aaz_info = {

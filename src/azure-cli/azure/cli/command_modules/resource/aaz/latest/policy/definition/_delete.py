@@ -19,6 +19,9 @@ class Delete(AAZCommand):
     """Deletes a policy definition.
 
     Deletes the policy definition in the given subscription or management group with the given name and other properties.
+
+    :example: Delete a policy definition
+        az policy definition delete --name MyPolicyDefinition
     """
 
     _aaz_info = {
