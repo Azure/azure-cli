@@ -198,7 +198,7 @@ def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_arg
 def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
     from azure.keyvault.certificates import CertificateClient
 
-    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
+    vault_url, credential, _ = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_CERTIFICATES)
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
@@ -213,7 +213,7 @@ def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
 def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     from azure.keyvault.keys import KeyClient
 
-    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
+    vault_url, credential, _ = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_KEYS)
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
@@ -228,7 +228,7 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
 def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
     from azure.keyvault.secrets import SecretClient
 
-    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
+    vault_url, credential, _ = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_SECRETS)
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
