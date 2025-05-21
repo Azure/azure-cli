@@ -148,18 +148,6 @@ def get_client(cli_ctx, resource_type, client_name=''):
     return ClientEntity(client_factory, command_type, operations_docs_tmpl, models_docs_tmpl)
 
 
-def is_azure_stack_profile(cmd=None, cli_ctx=None):
-    cli_ctx = cmd.cli_ctx if cmd else cli_ctx
-    if not cli_ctx:
-        raise CLIError("Can't judge profile without cli_ctx!")
-    return cli_ctx.cloud.profile in [
-        '2020-09-01-hybrid',
-        '2019-03-01-hybrid',
-        '2018-03-01-hybrid',
-        '2017-03-09-profile'
-    ]
-
-
 def keyvault_mgmt_client_factory(resource_type, client_name):
     def _keyvault_mgmt_client_factory(cli_ctx, _):
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -195,7 +183,7 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
 def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_args):
     from azure.keyvault.administration import KeyVaultSettingsClient
 
-    vault_url, credential, _ = _prepare_data_plane_azure_keyvault_client(
+    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
@@ -203,7 +191,7 @@ def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_arg
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return KeyVaultSettingsClient(
-        vault_url=vault_url, credential=credential, api_version='7.4',
+        vault_url=vault_url, credential=credential, api_version=version,
         verify_challenge_resource=False, **client_kwargs)
 
 
@@ -215,11 +203,10 @@ def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
-    api_version = '7.4' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return CertificateClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version,
+        vault_url=vault_url, credential=credential, api_version=version,
         verify_challenge_resource=False, **client_kwargs)
 
 
@@ -231,11 +218,10 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
-    api_version = '7.6-preview.2' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return KeyClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version,
+        vault_url=vault_url, credential=credential, api_version=version,
         verify_challenge_resource=False, **client_kwargs)
 
 
@@ -247,11 +233,10 @@ def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
-    api_version = '7.4' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return SecretClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version,
+        vault_url=vault_url, credential=credential, api_version=version,
         verify_challenge_resource=False, **client_kwargs)
 
 
