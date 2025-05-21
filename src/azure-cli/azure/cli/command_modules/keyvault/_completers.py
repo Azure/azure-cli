@@ -5,7 +5,6 @@
 
 from azure.cli.core.decorators import Completer
 from azure.cli.core._profile import Profile
-from azure.cli.core.profiles import get_api_version, ResourceType
 
 
 def get_keyvault_name_completion_list(resource_name):
@@ -18,18 +17,15 @@ def get_keyvault_name_completion_list(resource_name):
         credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
         if resource_name == 'key':
             from azure.keyvault.keys import KeyClient
-            version = str(get_api_version(cmd.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS))
-            client = KeyClient(vault_url=vault, credential=credential, api_version=version,
+            client = KeyClient(vault_url=vault, credential=credential, api_version='7.6-preview.2',
                                verify_challenge_resource=False)
         elif resource_name == 'secret':
             from azure.keyvault.secrets import SecretClient
-            version = str(get_api_version(cmd.cli_ctx, ResourceType.DATA_KEYVAULT_SECRETS))
-            client = SecretClient(vault_url=vault, credential=credential, api_version=version,
+            client = SecretClient(vault_url=vault, credential=credential, api_version='7.4',
                                   verify_challenge_resource=False)
         else:
             from azure.keyvault.certificates import CertificateClient
-            version = str(get_api_version(cmd.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES))
-            client = CertificateClient(vault_url=vault, credential=credential, api_version=version,
+            client = CertificateClient(vault_url=vault, credential=credential, api_version='7.4',
                                        verify_challenge_resource=False)
         items = []
         for y in list(getattr(client, func_name)()):
@@ -49,18 +45,15 @@ def get_keyvault_version_completion_list(resource_name):
         credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
         if resource_name == 'key':
             from azure.keyvault.keys import KeyClient
-            version = str(get_api_version(cmd.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS))
-            client = KeyClient(vault_url=vault, credential=credential, api_version=version,
+            client = KeyClient(vault_url=vault, credential=credential, api_version='7.6-preview.2',
                                verify_challenge_resource=False)
         elif resource_name == 'secret':
             from azure.keyvault.secrets import SecretClient
-            version = str(get_api_version(cmd.cli_ctx, ResourceType.DATA_KEYVAULT_SECRETS))
-            client = SecretClient(vault_url=vault, credential=credential, api_version=version,
+            client = SecretClient(vault_url=vault, credential=credential, api_version='7.4',
                                   verify_challenge_resource=False)
         else:
             from azure.keyvault.certificates import CertificateClient
-            version = str(get_api_version(cmd.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES))
-            client = CertificateClient(vault_url=vault, credential=credential, api_version=version,
+            client = CertificateClient(vault_url=vault, credential=credential, api_version='7.4',
                                        verify_challenge_resource=False)
         items = []
         for y in list(getattr(client, func_name)()):

@@ -205,11 +205,11 @@ AZURE_API_PROFILES = {
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
-        ResourceType.DATA_KEYVAULT_CERTIFICATES: '7.4',
-        ResourceType.DATA_KEYVAULT_KEYS: '7.6-preview.2',
-        ResourceType.DATA_KEYVAULT_SECRETS: '7.4',
+        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
+        ResourceType.DATA_KEYVAULT_KEYS: None,
+        ResourceType.DATA_KEYVAULT_SECRETS: None,
         ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN: None,
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: '7.4',
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.5-preview.1',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
         ResourceType.DATA_STORAGE: '2018-11-09',

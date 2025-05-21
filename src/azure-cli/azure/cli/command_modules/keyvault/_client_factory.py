@@ -183,7 +183,7 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
 def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_args):
     from azure.keyvault.administration import KeyVaultSettingsClient
 
-    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
+    vault_url, credential, _ = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
@@ -191,7 +191,7 @@ def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_arg
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return KeyVaultSettingsClient(
-        vault_url=vault_url, credential=credential, api_version=version,
+        vault_url=vault_url, credential=credential, api_version='7.4',
         verify_challenge_resource=False, **client_kwargs)
 
 
@@ -206,7 +206,7 @@ def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return CertificateClient(
-        vault_url=vault_url, credential=credential, api_version=version,
+        vault_url=vault_url, credential=credential, api_version='7.4',
         verify_challenge_resource=False, **client_kwargs)
 
 
@@ -221,7 +221,7 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return KeyClient(
-        vault_url=vault_url, credential=credential, api_version=version,
+        vault_url=vault_url, credential=credential, api_version='7.6-preview.2',
         verify_challenge_resource=False, **client_kwargs)
 
 
@@ -236,7 +236,7 @@ def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return SecretClient(
-        vault_url=vault_url, credential=credential, api_version=version,
+        vault_url=vault_url, credential=credential, api_version='7.4',
         verify_challenge_resource=False, **client_kwargs)
 
 
