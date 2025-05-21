@@ -851,6 +851,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None):
+    i = 8808
+    j = 8809
+    test_port = 8810
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
