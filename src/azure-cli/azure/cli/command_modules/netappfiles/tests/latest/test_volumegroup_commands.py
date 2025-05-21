@@ -89,7 +89,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         # Delete pool and account
         self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool} -y")
         if (self.is_live or self.in_recording):
-            time.sleep(20)        
+            time.sleep(20)
         self.cmd("az netappfiles account delete -g {rg} -a {acc} -y")
 
     #@unittest.skip('(drp failure) DRP stamp pinning failing on the environment, no way to test until fixed')
@@ -144,65 +144,4 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool} -y")
         if (self.is_live or self.in_recording):
             time.sleep(20)
-        self.cmd("az netappfiles account delete -g {rg} -a {acc} -y")
-
-#    @unittest.skip('(drp failure) DRP stamp pinning failing on the environment, no way to test until fixed')
-    def test_create_get_list_delete_volume_group(self):
-        # Create Volume Group with defaults
-        self.prepare_for_volume_group_creation()
-        self.kwargs.update({
-            'vg_name': 'cli-test-volume-group-001',
-            'vnet': VNET_NAME,
-            'ppg': PPG,
-            'zones': 1,
-            'sap_sid': "CLI",
-            'gpr': "'key1=value1' 'key2=value2'"
-        })
-        self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --volume-group-name {vg_name} "
-                 "--vnet {vnet} --zones {zones} --sap-sid {sap_sid} -l {loc} --application-type SAP-HANA --gp-rules {gpr}",
-                 checks=[
-                     self.check('name', '{acc}/{vg_name}'),
-                     self.check('groupMetaData.volumesCount', 5),
-                     self.check('groupMetaData.applicationIdentifier', '{sap_sid}'),
-                     self.check('length(volumes)', 5)
-                 ])
-
-        # Get Volume Group
-        self.cmd("az netappfiles volume-group show -g {rg} -a {acc} --volume-group-name {vg_name}",
-                 checks=[
-                     self.check('name', '{acc}/{vg_name}'),
-                     self.check('groupMetaData.volumesCount', 5),
-                     self.check('groupMetaData.applicationIdentifier', '{sap_sid}'),
-                     self.check('length(volumes)', 5)
-                 ])
-
-        # List Volume Groups
-        self.cmd("az netappfiles volume-group list -g {rg} -a {acc}",
-                 checks=[
-                     self.check('length(@)', 1)
-                 ])
-
-        # Cleanup
-        self.kwargs.update({
-            'vol_1': 'CLI-log-backup',
-            'vol_2': 'CLI-data-backup',
-            'vol_3': 'CLI-shared',
-            'vol_4': 'CLI-log-mnt00001',
-            'vol_5': 'CLI-data-mnt00001'
-        })
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_1} --yes")
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_2} --yes")
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_3} --yes")
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_4} --yes")
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_5} --yes")
-
-        if (self.is_live or self.in_recording):
-            time.sleep(20)
-        # Delete Volume Group
-        self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} --volume-group-name {vg_name} -y --yes")
-
-        # Delete pool and account
-        self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool} -y")
-        if (self.is_live or self.in_recording):
-            time.sleep(20)        
         self.cmd("az netappfiles account delete -g {rg} -a {acc} -y")

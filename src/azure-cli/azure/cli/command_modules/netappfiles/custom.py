@@ -820,8 +820,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         args_schema.number_of_oracle_volumes = AAZIntArg(
             options=["--number-of-volumes"],
             arg_group="Volume Group Oracle sizing",
-            help="Total Number of Oracle data volumes (currently min 2 and max 8 nodes can be configured)",
-            default=1,
+            help="Total Number of Oracle data volumes (currently min 2 and max 8 nodes can be configured)"
         )
         args_schema.database_throughput = AAZIntArg(
             options=["--database-throughput"],
@@ -1083,7 +1082,7 @@ def create_data_volume_properties(subnet_id, application_identifier, application
         name = prefix + application_identifier + "-" + OracleVolumeType.DATA.value + (host_id)
         volume_spec = OracleVolumeType.DATA.value + host_id
         if data_size is None:
-            size = calculate_oracle_usage_threshold(memory, VolumeType.DATA, add_snap_capacity=add_snap_capacity)
+            size = calculate_oracle_usage_threshold(memory, OracleVolumeType.DATA, add_snap_capacity=add_snap_capacity)
         else:
             size = data_size * gib_scale
         if throughput is None:
