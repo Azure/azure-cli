@@ -26,19 +26,10 @@ class SearchServiceCreate(_SearchServiceCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.ip_rules = AAZStrArg(
-            arg_group="Properties",
-            options=['--ip-rules'],
-            help="Some help"
-        )
-        args_schema.auth_options = AAZStrArg(
-            arg_group="Properties",
-            options=['--auth-options'],
-            help="Some Help",
-            enum=["aadOrApiKey", "apiKeyOnly"],
-        )
-        args_schema.ip_rules_internal._registered = False
-        args_schema.api_key_only._registered = False
+
+        args_schema.upgrade_available._registered = False
+        args_schema.endpoint._registered = False
+
         return args_schema
 
     def pre_operations(self):
@@ -49,10 +40,6 @@ class SearchServiceCreate(_SearchServiceCreate):
         if args.hosting_mode == "highDensity" and args.sku != "standard3":
             raise UnrecognizedArgumentError(
                 "SearchService.HostingMode: highDensity is only allowed when sku is standard3")
-
-        if has_value(args.ip_rules):
-            ip_rules = re.split(';|,', args.ip_rules.to_serialized_data())
-            args.ip_rules_internal = [{"value": ip_rule} for ip_rule in ip_rules]
 
         if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialized_data() is True:
             if has_value(args.auth_options):
@@ -67,7 +54,6 @@ class SearchServiceCreate(_SearchServiceCreate):
                     raise MutuallyExclusiveArgumentError(
                         "Both an AuthOptions value of apiKeyOnly and an AadAuthFailureMode "
                         "can't be given at the same time")
-                args.api_key_only = {}
             elif args.auth_options == "aadOrApiKey" and not has_value(args.aad_auth_failure_mode):
                 raise RequiredArgumentMissingError("An AuthOptions value of aadOrApiKey requires "
                                                    "an AadAuthFailureMode parameter")
@@ -80,35 +66,16 @@ class SearchServiceUpdate(_SearchServiceUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.ip_rules = AAZStrArg(
-            arg_group="Properties",
-            options=['--ip-rules'],
-            help="Some help",
-            nullable=True,  # allow to remove all the value when it's assigned by null
-        )
-        args_schema.auth_options = AAZStrArg(
-            arg_group="Properties",
-            options=['--auth-options'],
-            help="Some Help",
-            enum=["aadOrApiKey", "apiKeyOnly"],
-        )
 
-        args_schema.ip_rules_internal._registered = False
-        args_schema.api_key_only._registered = False
+        args_schema.upgrade_available._registered = False
+        args_schema.endpoint._registered = False
+
         return args_schema
 
     def pre_operations(self):
         from azure.cli.core.aaz import has_value
         import re
         args = self.ctx.args
-
-        if has_value(args.ip_rules):
-            if args.ip_rules.to_serialized_data() is None or args.ip_rules in [';', ',']:
-                # cleanup all ip_rules
-                args.ip_rules_internal = None
-            else:
-                ip_rules = re.split(';|,', args.ip_rules.to_serialized_data())
-                args.ip_rules_internal = [{"value": ip_rule} for ip_rule in ip_rules]
 
         if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialized_data() is True:
             if has_value(args.auth_options):
@@ -123,7 +90,6 @@ class SearchServiceUpdate(_SearchServiceUpdate):
                     raise MutuallyExclusiveArgumentError(
                         "Both an AuthOptions value of apiKeyOnly and an AadAuthFailureMode "
                         "can't be given at the same time")
-                args.api_key_only = {}
             elif args.auth_options == "aadOrApiKey" and not has_value(args.aad_auth_failure_mode):
                 raise RequiredArgumentMissingError("An AuthOptions value of aadOrApiKey requires "
                                                    "an AadAuthFailureMode parameter")
