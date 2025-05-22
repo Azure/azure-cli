@@ -200,4 +200,17 @@ aks nodepool add:
       disable_windows_outbound_nat:
         rule_exclusions:
         - option_length_too_long
+      undrainable_node_behavior:
+        rule_exclusions:
+        - option_length_too_long
+aks nodepool update:
+  parameters:
+      undrainable_node_behavior:
+        rule_exclusions:
+        - option_length_too_long
+aks nodepool upgrade:
+  parameters:
+      undrainable_node_behavior:
+        rule_exclusions:
+        - option_length_too_long
 ...
