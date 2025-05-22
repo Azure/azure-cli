@@ -1850,7 +1850,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip1?api-version=2022-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip1?api-version=2024-07-01
   response:
     body:
       string: '{"name":"pip1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip1","etag":"W/\"4c9e5461-587b-4154-a1df-c0e759d443e6\"","location":"westcentralus","properties":{"provisioningState":"Updating","resourceGuid":"f7681899-69df-4bd3-8fac-04ed6b7a5c3c","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}'
@@ -2037,6 +2037,102 @@ interactions:
       code: 200
       message: OK
 - request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.73.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip1?api-version=2024-07-01
+  response:
+    body:
+      string: '{"name":"pip1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip1","etag":"W/\"405eb32b-9ddc-498f-babf-e016494bb7c4\"","location":"westcentralus","properties":{"provisioningState":"Succeeded","resourceGuid":"e2cc5024-8277-4317-bce2-e14c78265219","ipAddress":"4.255.173.166","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '641'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 21 May 2025 06:58:00 GMT
+      etag:
+      - W/"405eb32b-9ddc-498f-babf-e016494bb7c4"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9fcf049e-cab8-457d-80d1-e31135c3aabc
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 31AE93C0FA6F4E3FA3AE02ECD7946F08 Ref B: SIN221080712047 Ref C: 2025-05-21T06:58:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.73.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_app_gateway_waf_policy_000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001","name":"cli_test_app_gateway_waf_policy_000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_network_app_gateway_waf_policy_with_application_gateway","date":"2025-05-21T06:57:04Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '450'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 21 May 2025 06:58:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 2A551E0BDBFC4854BE9A3F2A1624F65E Ref B: SIN221080711027 Ref C: 2025-05-21T06:58:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"location": "westcentralus", "properties": {"idleTimeoutInMinutes": 4,
       "publicIPAllocationMethod": "Static"}, "sku": {"name": "Standard"}}'
     headers:
@@ -2057,7 +2153,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip2?api-version=2022-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip2?api-version=2024-07-01
   response:
     body:
       string: '{"name":"pip2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip2","etag":"W/\"4cb73d52-7880-46c4-9c0d-a3760896ec3b\"","location":"westcentralus","properties":{"provisioningState":"Updating","resourceGuid":"bdf1ba10-a16a-4cf9-8a27-982f79576ae7","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}'
@@ -2163,7 +2259,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip2?api-version=2022-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip2?api-version=2024-07-01
   response:
     body:
       string: '{"name":"pip2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_000001/providers/Microsoft.Network/publicIPAddresses/pip2","etag":"W/\"2e139081-6b2d-492d-881b-084af44c3710\"","location":"westcentralus","properties":{"provisioningState":"Succeeded","resourceGuid":"bdf1ba10-a16a-4cf9-8a27-982f79576ae7","ipAddress":"52.161.162.45","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}'
@@ -2259,7 +2355,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_app_gateway_waf_policy_000001%27%20and%20name%20eq%20%27vnet1%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_app_gateway_waf_policy_000001?api-version=2022-09-01
   response:
     body:
       string: '{"value":[]}'
@@ -2393,7 +2489,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1249'
+      - '1250'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3041,7 +3137,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '8400'
+      - '8401'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3918,10 +4014,11 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
@@ -3968,10 +4065,11 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
@@ -4018,10 +4116,11 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
@@ -4068,10 +4167,11 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
@@ -4139,10 +4239,11 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
@@ -4193,10 +4294,11 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
