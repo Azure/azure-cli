@@ -32,3 +32,6 @@ def cf_search_admin_keys(cli_ctx, _):
 
 def cf_search_query_keys(cli_ctx, _):
     return cf_search(cli_ctx).query_keys
+
+def cf_search_network_security_perimeter_configurations(cli_ctx, _):
+    return cf_search(cli_ctx).network_security_perimeter_configurations
