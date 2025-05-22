@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -n -o
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.6 (macOS-14.0-x86_64-i386-64bit)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_create_full_fledged_activity_log_alert","date":"2023-10-18T07:10:30Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_create_full_fledged_activity_log_alert","date":"2025-04-08T02:22:12Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,23 +27,27 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Oct 2023 07:10:36 GMT
+      - Tue, 08 Apr 2025 02:22:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 3B9FC985FF6746279F6EAB5D9119460A Ref B: MAA201060515025 Ref C: 2025-04-08T02:22:24Z'
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "Global", "properties": {"enabled": true, "groupShortName":
-      "cliact47qe62"}}'
+      "cliactkrfr5i"}}'
     headers:
       Accept:
       - application/json
@@ -60,19 +64,19 @@ interactions:
       ParameterSetName:
       - -n -g -o
       User-Agent:
-      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-14.0-x86_64-i386-64bit)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/actionGroups/cliact000002?api-version=2022-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/actionGroups/cliact000002?api-version=2024-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliact000002","type":"Microsoft.Insights/ActionGroups","name":"cliact000002","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"cliact47qe62","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"eventHubReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliact000002","type":"Microsoft.Insights/ActionGroups","name":"cliact000002","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"cliactkrfr5i","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"eventHubReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]}}'
     headers:
       access-control-expose-headers:
       - x-activityid
       api-supported-versions:
       - 2016-09-01-preview, 2017-03-01-preview, 2017-04-01, 2018-03-01, 2018-09-01,
         2019-03-01, 2019-06-01, 2021-09-01, 2022-04-01, 2022-06-01, 2023-01-01, 2023-03-01-preview,
-        2023-05-01-preview, 2023-05-01, 2023-08-01-preview, 2023-09-01-preview
+        2023-05-01-preview, 2023-05-01, 2023-08-01-preview, 2023-09-01-preview, 2024-10-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -80,25 +84,29 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Oct 2023 07:10:49 GMT
+      - Tue, 08 Apr 2025 02:22:32 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-activityid:
-      - 6fe8c4c8-6d85-11ee-a78e-acde48001122
+      - 4f85f0b3-1420-11f0-b394-902e1671aeaf
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-frame-options:
       - SAMEORIGIN
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=52a2fda8-c59f-4bde-8c4d-48ffa466fefc/southeastasia/04b1ce8f-3445-4299-bf34-2d0257f4db2e
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '24'
+      x-msedge-ref:
+      - 'Ref A: AB1104B1EE3B492D9944BD4BC58EAA0D Ref B: MAA201060515031 Ref C: 2025-04-08T02:22:27Z'
       x-servedby:
-      - EUS2ONEIM000004
+      - EUS2ONEIM000005
     status:
       code: 201
       message: Created
@@ -116,12 +124,12 @@ interactions:
       ParameterSetName:
       - -n -g -s --action --condition --disable -o
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-resource/23.1.0b2 Python/3.10.6 (macOS-14.0-x86_64-i386-64bit)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_create_full_fledged_activity_log_alert","date":"2023-10-18T07:10:30Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_create_full_fledged_activity_log_alert","date":"2025-04-08T02:22:12Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -130,17 +138,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Oct 2023 07:10:50 GMT
+      - Tue, 08 Apr 2025 02:22:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: E5304D14B5FF4956B011AF18E722FB69 Ref B: MAA201060513031 Ref C: 2025-04-08T02:22:33Z'
     status:
       code: 200
       message: OK
@@ -158,7 +170,7 @@ interactions:
       ParameterSetName:
       - -n -g -s --action --condition --disable -o
       User-Agent:
-      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-14.0-x86_64-i386-64bit)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000003?api-version=2020-10-01
   response:
@@ -174,17 +186,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Oct 2023 07:10:50 GMT
+      - Tue, 08 Apr 2025 02:22:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-failure-cause:
       - gateway
+      x-msedge-ref:
+      - 'Ref A: E998B46DA9524FA3824523121355118E Ref B: MAA201060516009 Ref C: 2025-04-08T02:22:36Z'
     status:
       code: 404
       message: Not Found
@@ -210,23 +226,22 @@ interactions:
       ParameterSetName:
       - -n -g -s --action --condition --disable -o
       User-Agent:
-      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-14.0-x86_64-i386-64bit)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000003?api-version=2020-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000003\"\
-        ,\r\n  \"name\": \"clialert000003\",\r\n  \"type\": \"Microsoft.Insights/ActivityLogAlerts\"\
-        ,\r\n  \"location\": \"Global\",\r\n  \"properties\": {\r\n    \"scopes\"\
-        : [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001\"\
-        \r\n    ],\r\n    \"condition\": {\r\n      \"allOf\": [\r\n        {\r\n\
-        \          \"field\": \"category\",\r\n          \"equals\": \"Security\"\r\
-        \n        },\r\n        {\r\n          \"field\": \"level\",\r\n         \
-        \ \"equals\": \"Error\"\r\n        }\r\n      ]\r\n    },\r\n    \"actions\"\
-        : {\r\n      \"actionGroups\": [\r\n        {\r\n          \"actionGroupId\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliact000002\"\
-        ,\r\n          \"webhookProperties\": {}\r\n        }\r\n      ]\r\n    },\r\
-        \n    \"enabled\": false\r\n  }\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000003\",\r\n
+        \ \"name\": \"clialert000003\",\r\n  \"type\": \"Microsoft.Insights/ActivityLogAlerts\",\r\n
+        \ \"location\": \"Global\",\r\n  \"properties\": {\r\n    \"scopes\": [\r\n
+        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001\"\r\n
+        \   ],\r\n    \"condition\": {\r\n      \"allOf\": [\r\n        {\r\n          \"field\":
+        \"category\",\r\n          \"equals\": \"Security\"\r\n        },\r\n        {\r\n
+        \         \"field\": \"level\",\r\n          \"equals\": \"Error\"\r\n        }\r\n
+        \     ]\r\n    },\r\n    \"actions\": {\r\n      \"actionGroups\": [\r\n        {\r\n
+        \         \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliact000002\",\r\n
+        \         \"webhookProperties\": {}\r\n        }\r\n      ]\r\n    },\r\n
+        \   \"enabled\": false\r\n  }\r\n}"
     headers:
       api-supported-versions:
       - 2017-03-01-preview, 2017-04-01, 2020-10-01, 2023-01-01-preview
@@ -239,21 +254,27 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Oct 2023 07:10:58 GMT
+      - Tue, 08 Apr 2025 02:22:46 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=52a2fda8-c59f-4bde-8c4d-48ffa466fefc/indonesiacentral/9e472af9-2935-47d9-886c-bd29b456b63e
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: F1561893C99B40E994D7457FF16D8F2A Ref B: MAA201060513033 Ref C: 2025-04-08T02:22:37Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -273,25 +294,12 @@ interactions:
       ParameterSetName:
       - -g -o
       User-Agent:
-      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-14.0-x86_64-i386-64bit)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts?api-version=2020-10-01
   response:
     body:
-      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000003\"\
-        ,\r\n      \"name\": \"clialert000003\",\r\n      \"type\": \"Microsoft.Insights/ActivityLogAlerts\"\
-        ,\r\n      \"location\": \"Global\",\r\n      \"properties\": {\r\n      \
-        \  \"scopes\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001\"\
-        \r\n        ],\r\n        \"condition\": {\r\n          \"allOf\": [\r\n \
-        \           {\r\n              \"field\": \"category\",\r\n              \"\
-        equals\": \"Security\"\r\n            },\r\n            {\r\n            \
-        \  \"field\": \"level\",\r\n              \"equals\": \"Error\"\r\n      \
-        \      }\r\n          ]\r\n        },\r\n        \"actions\": {\r\n      \
-        \    \"actionGroups\": [\r\n            {\r\n              \"actionGroupId\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliact000002\"\
-        ,\r\n              \"webhookProperties\": {}\r\n            }\r\n        \
-        \  ]\r\n        },\r\n        \"enabled\": false\r\n      }\r\n    }\r\n \
-        \ ]\r\n}"
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000003","name":"clialert000003","type":"Microsoft.Insights/ActivityLogAlerts","location":"Global","properties":{"scopes":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001"],"condition":{"allOf":[{"field":"category","equals":"Security"},{"field":"level","equals":"Error"}]},"actions":{"actionGroups":[{"actionGroupId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliact000002","webhookProperties":{}}]},"enabled":false}}]}'
     headers:
       api-supported-versions:
       - 2017-03-01-preview, 2017-04-01, 2020-10-01, 2023-01-01-preview
@@ -300,27 +308,29 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1093'
+      - '695'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Oct 2023 07:11:00 GMT
-      expires:
-      - '-1'
+      - Tue, 08 Apr 2025 02:22:48 GMT
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-original-request-ids:
+      - dfaa38dc-7f30-4231-9fda-bd83a1a0ce2c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: B2C3C79BC28D4CA5BC53649ED487E0FA Ref B: MAA201060514053 Ref C: 2025-04-08T02:22:47Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -338,7 +348,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - AZURECLI/2.53.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.6 (macOS-14.0-x86_64-i386-64bit)
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Insights/eventcategories?api-version=2015-04-01
   response:
@@ -347,6 +357,10 @@ interactions:
         Health"},{"value":"Alert","localizedValue":"Alert"},{"value":"Recommendation","localizedValue":"Recommendation"},{"value":"Policy","localizedValue":"Policy"},{"value":"Autoscale","localizedValue":"Autoscale"},{"value":"ResourceHealth","localizedValue":"Resource
         Health"}]}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - '2015-04-01'
       cache-control:
       - no-cache
       content-length:
@@ -354,21 +368,25 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Oct 2023 07:11:00 GMT
+      - Tue, 08 Apr 2025 02:22:48 GMT
       expires:
       - '-1'
+      mise-correlation-id:
+      - 107adda4-bdd7-4429-99a9-f711e0472a3f
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
+      request-context:
+      - appId=cid-v1:e9ce6014-b708-4056-a18d-21dc38a7abb0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - ''
+      x-msedge-ref:
+      - 'Ref A: A5E621B4D28749E480DB44F7F98529B0 Ref B: MAA201060515035 Ref C: 2025-04-08T02:22:49Z'
     status:
       code: 200
       message: OK

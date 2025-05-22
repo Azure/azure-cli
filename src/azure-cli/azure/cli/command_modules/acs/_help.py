@@ -1638,6 +1638,9 @@ parameters:
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
@@ -1799,6 +1802,9 @@ parameters:
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
@@ -1874,6 +1880,9 @@ parameters:
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to upgrade this nodepool.

@@ -19,10 +19,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-06-01",
+        "version": "2024-10-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.insights/actiongroups", "2022-06-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/actiongroups", "2022-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.insights/actiongroups", "2024-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/actiongroups", "2024-10-01-preview"],
         ]
     }
 
@@ -42,19 +42,17 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-        )
+        _args_schema.resource_group = AAZResourceGroupNameArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.ActionGroupsListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
             self.ActionGroupsListBySubscriptionId(ctx=self.ctx)()
+        if condition_1:
+            self.ActionGroupsListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -68,6 +66,457 @@ class List(AAZCommand):
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         return result
+
+    class ActionGroupsListBySubscriptionId(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/actionGroups",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2024-10-01-preview",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.identity = AAZIdentityObjectType()
+            _element.location = AAZStrType(
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.tags = AAZDictType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.arm_role_receivers = AAZListType(
+                serialized_name="armRoleReceivers",
+            )
+            properties.automation_runbook_receivers = AAZListType(
+                serialized_name="automationRunbookReceivers",
+            )
+            properties.azure_app_push_receivers = AAZListType(
+                serialized_name="azureAppPushReceivers",
+            )
+            properties.azure_function_receivers = AAZListType(
+                serialized_name="azureFunctionReceivers",
+            )
+            properties.email_receivers = AAZListType(
+                serialized_name="emailReceivers",
+            )
+            properties.enabled = AAZBoolType(
+                flags={"required": True},
+            )
+            properties.event_hub_receivers = AAZListType(
+                serialized_name="eventHubReceivers",
+            )
+            properties.group_short_name = AAZStrType(
+                serialized_name="groupShortName",
+                flags={"required": True},
+            )
+            properties.incident_receivers = AAZListType(
+                serialized_name="incidentReceivers",
+            )
+            properties.itsm_receivers = AAZListType(
+                serialized_name="itsmReceivers",
+            )
+            properties.logic_app_receivers = AAZListType(
+                serialized_name="logicAppReceivers",
+            )
+            properties.sms_receivers = AAZListType(
+                serialized_name="smsReceivers",
+            )
+            properties.voice_receivers = AAZListType(
+                serialized_name="voiceReceivers",
+            )
+            properties.webhook_receivers = AAZListType(
+                serialized_name="webhookReceivers",
+            )
+
+            arm_role_receivers = cls._schema_on_200.value.Element.properties.arm_role_receivers
+            arm_role_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.arm_role_receivers.Element
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.role_id = AAZStrType(
+                serialized_name="roleId",
+                flags={"required": True},
+            )
+            _element.use_common_alert_schema = AAZBoolType(
+                serialized_name="useCommonAlertSchema",
+            )
+
+            automation_runbook_receivers = cls._schema_on_200.value.Element.properties.automation_runbook_receivers
+            automation_runbook_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.automation_runbook_receivers.Element
+            _element.automation_account_id = AAZStrType(
+                serialized_name="automationAccountId",
+                flags={"required": True},
+            )
+            _element.is_global_runbook = AAZBoolType(
+                serialized_name="isGlobalRunbook",
+                flags={"required": True},
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
+            _element.name = AAZStrType()
+            _element.runbook_name = AAZStrType(
+                serialized_name="runbookName",
+                flags={"required": True},
+            )
+            _element.service_uri = AAZStrType(
+                serialized_name="serviceUri",
+            )
+            _element.use_common_alert_schema = AAZBoolType(
+                serialized_name="useCommonAlertSchema",
+            )
+            _element.webhook_resource_id = AAZStrType(
+                serialized_name="webhookResourceId",
+                flags={"required": True},
+            )
+
+            azure_app_push_receivers = cls._schema_on_200.value.Element.properties.azure_app_push_receivers
+            azure_app_push_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.azure_app_push_receivers.Element
+            _element.email_address = AAZStrType(
+                serialized_name="emailAddress",
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            azure_function_receivers = cls._schema_on_200.value.Element.properties.azure_function_receivers
+            azure_function_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.azure_function_receivers.Element
+            _element.function_app_resource_id = AAZStrType(
+                serialized_name="functionAppResourceId",
+                flags={"required": True},
+            )
+            _element.function_name = AAZStrType(
+                serialized_name="functionName",
+                flags={"required": True},
+            )
+            _element.http_trigger_url = AAZStrType(
+                serialized_name="httpTriggerUrl",
+                flags={"required": True},
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.use_common_alert_schema = AAZBoolType(
+                serialized_name="useCommonAlertSchema",
+            )
+
+            email_receivers = cls._schema_on_200.value.Element.properties.email_receivers
+            email_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.email_receivers.Element
+            _element.email_address = AAZStrType(
+                serialized_name="emailAddress",
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.use_common_alert_schema = AAZBoolType(
+                serialized_name="useCommonAlertSchema",
+            )
+
+            event_hub_receivers = cls._schema_on_200.value.Element.properties.event_hub_receivers
+            event_hub_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.event_hub_receivers.Element
+            _element.event_hub_name = AAZStrType(
+                serialized_name="eventHubName",
+                flags={"required": True},
+            )
+            _element.event_hub_name_space = AAZStrType(
+                serialized_name="eventHubNameSpace",
+                flags={"required": True},
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.subscription_id = AAZStrType(
+                serialized_name="subscriptionId",
+                flags={"required": True},
+            )
+            _element.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+            )
+            _element.use_common_alert_schema = AAZBoolType(
+                serialized_name="useCommonAlertSchema",
+            )
+
+            incident_receivers = cls._schema_on_200.value.Element.properties.incident_receivers
+            incident_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.incident_receivers.Element
+            _element.connection = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.incident_management_service = AAZStrType(
+                serialized_name="incidentManagementService",
+                flags={"required": True},
+            )
+            _element.mappings = AAZDictType(
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            connection = cls._schema_on_200.value.Element.properties.incident_receivers.Element.connection
+            connection.id = AAZStrType(
+                flags={"required": True},
+            )
+            connection.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            mappings = cls._schema_on_200.value.Element.properties.incident_receivers.Element.mappings
+            mappings.Element = AAZStrType()
+
+            itsm_receivers = cls._schema_on_200.value.Element.properties.itsm_receivers
+            itsm_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.itsm_receivers.Element
+            _element.connection_id = AAZStrType(
+                serialized_name="connectionId",
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.region = AAZStrType(
+                flags={"required": True},
+            )
+            _element.ticket_configuration = AAZStrType(
+                serialized_name="ticketConfiguration",
+                flags={"required": True},
+            )
+            _element.workspace_id = AAZStrType(
+                serialized_name="workspaceId",
+                flags={"required": True},
+            )
+
+            logic_app_receivers = cls._schema_on_200.value.Element.properties.logic_app_receivers
+            logic_app_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.logic_app_receivers.Element
+            _element.callback_url = AAZStrType(
+                serialized_name="callbackUrl",
+                flags={"required": True},
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.resource_id = AAZStrType(
+                serialized_name="resourceId",
+                flags={"required": True},
+            )
+            _element.use_common_alert_schema = AAZBoolType(
+                serialized_name="useCommonAlertSchema",
+            )
+
+            sms_receivers = cls._schema_on_200.value.Element.properties.sms_receivers
+            sms_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.sms_receivers.Element
+            _element.country_code = AAZStrType(
+                serialized_name="countryCode",
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.phone_number = AAZStrType(
+                serialized_name="phoneNumber",
+                flags={"required": True},
+            )
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            voice_receivers = cls._schema_on_200.value.Element.properties.voice_receivers
+            voice_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.voice_receivers.Element
+            _element.country_code = AAZStrType(
+                serialized_name="countryCode",
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.phone_number = AAZStrType(
+                serialized_name="phoneNumber",
+                flags={"required": True},
+            )
+
+            webhook_receivers = cls._schema_on_200.value.Element.properties.webhook_receivers
+            webhook_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.webhook_receivers.Element
+            _element.identifier_uri = AAZStrType(
+                serialized_name="identifierUri",
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.object_id = AAZStrType(
+                serialized_name="objectId",
+            )
+            _element.service_uri = AAZStrType(
+                serialized_name="serviceUri",
+                flags={"required": True},
+            )
+            _element.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+            )
+            _element.use_aad_auth = AAZBoolType(
+                serialized_name="useAadAuth",
+            )
+            _element.use_common_alert_schema = AAZBoolType(
+                serialized_name="useCommonAlertSchema",
+            )
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
+
+            return cls._schema_on_200
 
     class ActionGroupsListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -113,7 +562,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-06-01",
+                    "api-version", "2024-10-01-preview",
                     required=True,
                 ),
             }
@@ -158,6 +607,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -169,6 +619,37 @@ class List(AAZCommand):
             )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
                 flags={"read_only": True},
             )
 
@@ -197,6 +678,9 @@ class List(AAZCommand):
             properties.group_short_name = AAZStrType(
                 serialized_name="groupShortName",
                 flags={"required": True},
+            )
+            properties.incident_receivers = AAZListType(
+                serialized_name="incidentReceivers",
             )
             properties.itsm_receivers = AAZListType(
                 serialized_name="itsmReceivers",
@@ -240,6 +724,9 @@ class List(AAZCommand):
             _element.is_global_runbook = AAZBoolType(
                 serialized_name="isGlobalRunbook",
                 flags={"required": True},
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
             )
             _element.name = AAZStrType()
             _element.runbook_name = AAZStrType(
@@ -285,6 +772,9 @@ class List(AAZCommand):
                 serialized_name="httpTriggerUrl",
                 flags={"required": True},
             )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
             _element.name = AAZStrType(
                 flags={"required": True},
             )
@@ -303,7 +793,9 @@ class List(AAZCommand):
             _element.name = AAZStrType(
                 flags={"required": True},
             )
-            _element.status = AAZStrType()
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.use_common_alert_schema = AAZBoolType(
                 serialized_name="useCommonAlertSchema",
             )
@@ -320,6 +812,9 @@ class List(AAZCommand):
                 serialized_name="eventHubNameSpace",
                 flags={"required": True},
             )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
             _element.name = AAZStrType(
                 flags={"required": True},
             )
@@ -333,6 +828,35 @@ class List(AAZCommand):
             _element.use_common_alert_schema = AAZBoolType(
                 serialized_name="useCommonAlertSchema",
             )
+
+            incident_receivers = cls._schema_on_200.value.Element.properties.incident_receivers
+            incident_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.incident_receivers.Element
+            _element.connection = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.incident_management_service = AAZStrType(
+                serialized_name="incidentManagementService",
+                flags={"required": True},
+            )
+            _element.mappings = AAZDictType(
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            connection = cls._schema_on_200.value.Element.properties.incident_receivers.Element.connection
+            connection.id = AAZStrType(
+                flags={"required": True},
+            )
+            connection.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            mappings = cls._schema_on_200.value.Element.properties.incident_receivers.Element.mappings
+            mappings.Element = AAZStrType()
 
             itsm_receivers = cls._schema_on_200.value.Element.properties.itsm_receivers
             itsm_receivers.Element = AAZObjectType()
@@ -365,373 +889,8 @@ class List(AAZCommand):
                 serialized_name="callbackUrl",
                 flags={"required": True},
             )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.resource_id = AAZStrType(
-                serialized_name="resourceId",
-                flags={"required": True},
-            )
-            _element.use_common_alert_schema = AAZBoolType(
-                serialized_name="useCommonAlertSchema",
-            )
-
-            sms_receivers = cls._schema_on_200.value.Element.properties.sms_receivers
-            sms_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.sms_receivers.Element
-            _element.country_code = AAZStrType(
-                serialized_name="countryCode",
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.phone_number = AAZStrType(
-                serialized_name="phoneNumber",
-                flags={"required": True},
-            )
-            _element.status = AAZStrType()
-
-            voice_receivers = cls._schema_on_200.value.Element.properties.voice_receivers
-            voice_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.voice_receivers.Element
-            _element.country_code = AAZStrType(
-                serialized_name="countryCode",
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.phone_number = AAZStrType(
-                serialized_name="phoneNumber",
-                flags={"required": True},
-            )
-
-            webhook_receivers = cls._schema_on_200.value.Element.properties.webhook_receivers
-            webhook_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.webhook_receivers.Element
-            _element.identifier_uri = AAZStrType(
-                serialized_name="identifierUri",
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.object_id = AAZStrType(
-                serialized_name="objectId",
-            )
-            _element.service_uri = AAZStrType(
-                serialized_name="serviceUri",
-                flags={"required": True},
-            )
-            _element.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-            )
-            _element.use_aad_auth = AAZBoolType(
-                serialized_name="useAadAuth",
-            )
-            _element.use_common_alert_schema = AAZBoolType(
-                serialized_name="useCommonAlertSchema",
-            )
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
-
-            return cls._schema_on_200
-
-    class ActionGroupsListBySubscriptionId(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/actionGroups",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2022-06-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType()
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.arm_role_receivers = AAZListType(
-                serialized_name="armRoleReceivers",
-            )
-            properties.automation_runbook_receivers = AAZListType(
-                serialized_name="automationRunbookReceivers",
-            )
-            properties.azure_app_push_receivers = AAZListType(
-                serialized_name="azureAppPushReceivers",
-            )
-            properties.azure_function_receivers = AAZListType(
-                serialized_name="azureFunctionReceivers",
-            )
-            properties.email_receivers = AAZListType(
-                serialized_name="emailReceivers",
-            )
-            properties.enabled = AAZBoolType(
-                flags={"required": True},
-            )
-            properties.event_hub_receivers = AAZListType(
-                serialized_name="eventHubReceivers",
-            )
-            properties.group_short_name = AAZStrType(
-                serialized_name="groupShortName",
-                flags={"required": True},
-            )
-            properties.itsm_receivers = AAZListType(
-                serialized_name="itsmReceivers",
-            )
-            properties.logic_app_receivers = AAZListType(
-                serialized_name="logicAppReceivers",
-            )
-            properties.sms_receivers = AAZListType(
-                serialized_name="smsReceivers",
-            )
-            properties.voice_receivers = AAZListType(
-                serialized_name="voiceReceivers",
-            )
-            properties.webhook_receivers = AAZListType(
-                serialized_name="webhookReceivers",
-            )
-
-            arm_role_receivers = cls._schema_on_200.value.Element.properties.arm_role_receivers
-            arm_role_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.arm_role_receivers.Element
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.role_id = AAZStrType(
-                serialized_name="roleId",
-                flags={"required": True},
-            )
-            _element.use_common_alert_schema = AAZBoolType(
-                serialized_name="useCommonAlertSchema",
-            )
-
-            automation_runbook_receivers = cls._schema_on_200.value.Element.properties.automation_runbook_receivers
-            automation_runbook_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.automation_runbook_receivers.Element
-            _element.automation_account_id = AAZStrType(
-                serialized_name="automationAccountId",
-                flags={"required": True},
-            )
-            _element.is_global_runbook = AAZBoolType(
-                serialized_name="isGlobalRunbook",
-                flags={"required": True},
-            )
-            _element.name = AAZStrType()
-            _element.runbook_name = AAZStrType(
-                serialized_name="runbookName",
-                flags={"required": True},
-            )
-            _element.service_uri = AAZStrType(
-                serialized_name="serviceUri",
-            )
-            _element.use_common_alert_schema = AAZBoolType(
-                serialized_name="useCommonAlertSchema",
-            )
-            _element.webhook_resource_id = AAZStrType(
-                serialized_name="webhookResourceId",
-                flags={"required": True},
-            )
-
-            azure_app_push_receivers = cls._schema_on_200.value.Element.properties.azure_app_push_receivers
-            azure_app_push_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.azure_app_push_receivers.Element
-            _element.email_address = AAZStrType(
-                serialized_name="emailAddress",
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-
-            azure_function_receivers = cls._schema_on_200.value.Element.properties.azure_function_receivers
-            azure_function_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.azure_function_receivers.Element
-            _element.function_app_resource_id = AAZStrType(
-                serialized_name="functionAppResourceId",
-                flags={"required": True},
-            )
-            _element.function_name = AAZStrType(
-                serialized_name="functionName",
-                flags={"required": True},
-            )
-            _element.http_trigger_url = AAZStrType(
-                serialized_name="httpTriggerUrl",
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.use_common_alert_schema = AAZBoolType(
-                serialized_name="useCommonAlertSchema",
-            )
-
-            email_receivers = cls._schema_on_200.value.Element.properties.email_receivers
-            email_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.email_receivers.Element
-            _element.email_address = AAZStrType(
-                serialized_name="emailAddress",
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.status = AAZStrType()
-            _element.use_common_alert_schema = AAZBoolType(
-                serialized_name="useCommonAlertSchema",
-            )
-
-            event_hub_receivers = cls._schema_on_200.value.Element.properties.event_hub_receivers
-            event_hub_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.event_hub_receivers.Element
-            _element.event_hub_name = AAZStrType(
-                serialized_name="eventHubName",
-                flags={"required": True},
-            )
-            _element.event_hub_name_space = AAZStrType(
-                serialized_name="eventHubNameSpace",
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.subscription_id = AAZStrType(
-                serialized_name="subscriptionId",
-                flags={"required": True},
-            )
-            _element.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-            )
-            _element.use_common_alert_schema = AAZBoolType(
-                serialized_name="useCommonAlertSchema",
-            )
-
-            itsm_receivers = cls._schema_on_200.value.Element.properties.itsm_receivers
-            itsm_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.itsm_receivers.Element
-            _element.connection_id = AAZStrType(
-                serialized_name="connectionId",
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.region = AAZStrType(
-                flags={"required": True},
-            )
-            _element.ticket_configuration = AAZStrType(
-                serialized_name="ticketConfiguration",
-                flags={"required": True},
-            )
-            _element.workspace_id = AAZStrType(
-                serialized_name="workspaceId",
-                flags={"required": True},
-            )
-
-            logic_app_receivers = cls._schema_on_200.value.Element.properties.logic_app_receivers
-            logic_app_receivers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.logic_app_receivers.Element
-            _element.callback_url = AAZStrType(
-                serialized_name="callbackUrl",
-                flags={"required": True},
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
             )
             _element.name = AAZStrType(
                 flags={"required": True},
@@ -759,7 +918,9 @@ class List(AAZCommand):
                 serialized_name="phoneNumber",
                 flags={"required": True},
             )
-            _element.status = AAZStrType()
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
 
             voice_receivers = cls._schema_on_200.value.Element.properties.voice_receivers
             voice_receivers.Element = AAZObjectType()
@@ -783,6 +944,9 @@ class List(AAZCommand):
             _element = cls._schema_on_200.value.Element.properties.webhook_receivers.Element
             _element.identifier_uri = AAZStrType(
                 serialized_name="identifierUri",
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
             )
             _element.name = AAZStrType(
                 flags={"required": True},
