@@ -29,7 +29,6 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
     process_hsm_name, KeyEncryptionDataType, process_key_release_policy, process_certificate_policy,
     process_certificate_import)
-from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
 
 # CUSTOM CHOICE LISTS
 
@@ -684,11 +683,10 @@ def load_arguments(self, _):
                 type=get_json_object, validator=process_certificate_policy)
         c.extra('tags', tags_type)
 
-    if not is_azure_stack_profile(self):
-        for cmd in ['list', 'list-deleted']:
-            with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
-                c.extra('include_pending', arg_type=get_three_state_flag(),
-                        help='Specifies whether to include certificates which are not completely provisioned.')
+    for cmd in ['list', 'list-deleted']:
+        with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
+            c.extra('include_pending', arg_type=get_three_state_flag(),
+                    help='Specifies whether to include certificates which are not completely provisioned.')
 
     with self.argument_context('keyvault certificate import') as c:
         c.argument('certificate_name', options_list=['--name', '-n'], required=True, arg_group='Id',

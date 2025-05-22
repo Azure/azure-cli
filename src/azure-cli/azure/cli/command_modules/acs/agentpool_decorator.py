@@ -1143,6 +1143,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return node_soak_duration
 
+    def get_undrainable_node_behavior(self) -> str:
+        """Obtain the value of undrainable_node_behavior.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        undrainable_node_behavior = self.raw_param.get("undrainable_node_behavior")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.undrainable_node_behavior is not None
+            ):
+                undrainable_node_behavior = self.agentpool.upgrade_settings.undrainable_node_behavior
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return undrainable_node_behavior
+
     def get_vm_set_type(self) -> str:
         """Obtain the value of vm_set_type, default value is CONST_VIRTUAL_MACHINE_SCALE_SETS.
 
@@ -1821,6 +1841,10 @@ class AKSAgentPoolAddDecorator:
         if node_soak_duration:
             upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
 
+        undrainable_node_behavior = self.context.get_undrainable_node_behavior()
+        if undrainable_node_behavior:
+            upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
+
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
 
@@ -2208,6 +2232,11 @@ class AKSAgentPoolUpdateDecorator:
         node_soak_duration = self.context.get_node_soak_duration()
         if node_soak_duration:
             upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
+            agentpool.upgrade_settings = upgrade_settings
+
+        undrainable_node_behavior = self.context.get_undrainable_node_behavior()
+        if undrainable_node_behavior:
+            upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
             agentpool.upgrade_settings = upgrade_settings
 
         return agentpool
