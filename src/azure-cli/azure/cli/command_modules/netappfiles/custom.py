@@ -650,7 +650,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         args_schema.start_host_id = AAZIntArg(
             options=["--start-host-id"],
             arg_group="Volumes",
-            help="Starting SAP HANA Host ID. Host ID 1 indicates Master Host. Shared, Data Backup and Log Backup volumes are only provisioned for Master Host i.e. `HostID == 1`.",
+            help="Starting SAP-HANA Host ID. Host ID 1 indicates Master Host. Shared, Data Backup and Log Backup volumes are only provisioned for Master Host i.e. `HostID == 1`.",
             default=1
         )
         args_schema.subnet = AAZStrArg(
@@ -662,7 +662,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         args_schema.system_role = AAZStrArg(
             options=["--system-role"],
             arg_group="Volumes",
-            help=" Type of role for the storage account. Primary indicates first of a SAP HANA Replication (HSR) setup or No HSR. High Availability (HA) specifies local scenario. Default is PRIMARY.  Allowed values: DR, HA, PRIMARY.",
+            help=" Type of role for the storage account. Primary indicates first of a SAP-HANA Replication (HSR) setup or No HSR. High Availability (HA) specifies local scenario. Default is PRIMARY.  Allowed values: DR, HA, PRIMARY.",
             enum={"DR": "DR", "HA": "HA", "PRIMARY": "PRIMARY"},
             default="PRIMARY"
         )
@@ -801,14 +801,14 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         )
         args_schema.memory = AAZIntArg(
             options=["--memory"],
-            arg_group="Volume Group SAP HANA sizing",
-            help="System (SAP HANA) memory in GiB (max 12000 GiB), used to auto compute storage size and throughput.",
+            arg_group="Volume Group SAP-HANA sizing",
+            help="System (SAP-HANA) memory in GiB (max 12000 GiB), used to auto compute storage size and throughput.",
             default=100
         )
         args_schema.number_of_hosts = AAZIntArg(
             options=["--number-of-hosts", "--number-of-hots"],
-            arg_group="Volume Group SAP HANA sizing",
-            help="Total Number of system (SAP HANA) host in this deployment (currently max 3 nodes can be configured)",
+            arg_group="Volume Group SAP-HANA sizing",
+            help="Total Number of system (SAP-HANA) host in this deployment (currently max 3 nodes can be configured)",
             default=1,
         )
         args_schema.database_size = AAZIntArg(
@@ -878,7 +878,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         else:
             if application_type == "ORACLE":
                 application_identifier = "ORA1"
-            elif application_type == "SAP HANA":
+            elif application_type == "SAP-HANA":
                 application_identifier = "SH1"
 
         if has_value(args.data_size):
@@ -962,7 +962,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
                     raise ValidationError("Number of volumes must be between 2 and 8")
             else:
                 number_of_volumes = 2
-        elif application_type == "SAP HANA":
+        elif application_type == "SAP-HANA":
             if number_of_hosts < 1 or number_of_hosts > 3:
                 raise ValidationError("Number of hosts must be between 1 and 3")
             if memory < 1 or memory > 12000:
@@ -1030,7 +1030,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
 
             # Create log volume(s)
             log_volumes = []
-            if application_type == "SAP HANA":
+            if application_type == "SAP-HANA":
                 for i in range(start_host_id, start_host_id + number_of_hosts):
                     log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, str(i), log_size,
                                                                     log_throughput, prefix, kv_private_endpoint_id, encryption_key_source,
@@ -1069,7 +1069,7 @@ def create_data_volume_properties(subnet_id, application_identifier, application
                                   encryption_key_source=None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
 
     throughput = data_throughput
-    if application_type == "SAP HANA":
+    if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.DATA.value + "-mnt" + (host_id.rjust(5, '0'))
         volume_spec = VolumeType.DATA.value
         if data_size is None:
@@ -1123,7 +1123,7 @@ def create_log_volume_properties(subnet_id, application_identifier, application_
                                  log_throughput, prefix, kv_private_endpoint_id=None, encryption_key_source=None,
                                  smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
     throughput = log_throughput
-    if application_type == "SAP HANA":
+    if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.LOG.value + "-mnt" + (host_id.rjust(5, '0'))
         volume_spec = VolumeType.LOG.value
         if log_size is None:
@@ -1174,7 +1174,7 @@ def create_shared_volume_properties(subnet_id, application_identifier, applicati
                                     shared_src_id=None, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
                                     smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
     throughput = shared_throughput
-    if application_type == "SAP HANA":
+    if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.SHARED.value
         volume_spec = VolumeType.SHARED.value
         if has_value(shared_size):
@@ -1235,7 +1235,7 @@ def create_data_backup_volume_properties(subnet_id, application_identifier, appl
                                          smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
     logger.debug("ANF LOG: create_data_backup_volume_properties  => data_backup_size: %s * %s ", data_backup_size, gib_scale)
     throughput = data_backup_throughput
-    if application_type == "SAP HANA":
+    if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.DATA_BACKUP.value
         volume_spec = VolumeType.DATA_BACKUP.value
         if data_backup_size is None:
@@ -1294,7 +1294,7 @@ def create_log_backup_volume_properties(subnet_id, application_identifier, appli
                                         smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
 
     throughput = log_backup_throughput
-    if application_type == "SAP HANA":
+    if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.LOG_BACKUP.value
         volume_spec = VolumeType.LOG_BACKUP.value
         if log_backup_size is None:

@@ -44,11 +44,11 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
             'gpr': "'key1=value1' 'key2=value2'"
         })
         self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --volume-group-name {vg_name} "
-                 "--vnet {vnet} --zones {zones} --application_identifier {application_identifier} -l {loc} --application-type {application_type} --gp-rules {gpr}",
+                 "--vnet {vnet} --zones {zones} --application-identifier {application_identifier} -l {loc} --application-type {application_type} --gp-rules {gpr}",
                  checks=[
                      self.check('name', '{acc}/{vg_name}'),
                      self.check('groupMetaData.volumesCount', 5),
-                     self.check('groupMetaData.applicationIdentifier', '{sap_sid}'),
+                     self.check('groupMetaData.applicationIdentifier', '{application_identifier}'),
                      self.check('length(volumes)', 5)
                  ])
 
@@ -57,7 +57,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
                  checks=[
                      self.check('name', '{acc}/{vg_name}'),
                      self.check('groupMetaData.volumesCount', 5),
-                     self.check('groupMetaData.applicationIdentifier', '{sap_sid}'),
+                     self.check('groupMetaData.applicationIdentifier', '{application_identifier}'),
                      self.check('length(volumes)', 5)
                  ])
 
@@ -69,11 +69,11 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
 
         # Cleanup
         self.kwargs.update({
-            'vol_1': 'CLI-log-backup',
-            'vol_2': 'CLI-data-backup',
-            'vol_3': 'CLI-shared',
-            'vol_4': 'CLI-log-mnt00001',
-            'vol_5': 'CLI-data-mnt00001'
+            'vol_1': 'sh1-data-mnt00001',
+            'vol_2': 'sh1-log-mnt00001',
+            'vol_3': 'sh1-shared',
+            'vol_4': 'sh1-data-backup',
+            'vol_5': 'sh1-log-backup'
         })
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_1} --yes")
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_2} --yes")
