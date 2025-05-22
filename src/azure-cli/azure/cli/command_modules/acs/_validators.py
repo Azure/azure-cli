@@ -486,9 +486,9 @@ def validate_max_unavailable(namespace):
 
     try:
         if int(int_or_percent) < 0:
-            raise CLIError("--max-unavailable must be positive")
+            raise InvalidArgumentValueError("--max-unavailable must be positive")
     except ValueError:
-        raise CLIError("--max-unavailable should be an int or percentage")
+        raise InvalidArgumentValueError("--max-unavailable should be an int or percentage")
 
 
 def validate_assign_identity(namespace):
