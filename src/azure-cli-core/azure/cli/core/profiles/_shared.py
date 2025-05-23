@@ -195,10 +195,10 @@ AZURE_API_PROFILES = {
             'provider_operations_metadata': '2018-01-01-preview'
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2025-03-01-preview', {
-            'agent_pools': '2019-06-01-preview',
-            'tasks': '2019-06-01-preview',
-            'task_runs': '2019-06-01-preview',
-            'runs': '2019-06-01-preview',
+            'agent_pools': '2025-03-01-preview',
+            'tasks': '2025-03-01-preview',
+            'task_runs': '2025-03-01-preview',
+            'runs': '2025-03-01-preview',
             'network_rule': '2021-08-01-preview',
             'cache_rules': '2023-01-01-preview',
             'credential_sets': '2023-01-01-preview'
@@ -220,39 +220,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
-            'action_groups': '2022-06-01',
-            'activity_log_alerts': '2017-04-01',
-            'activity_logs': '2015-04-01',
-            'alert_rule_incidents': '2016-03-01',
-            'alert_rules': '2016-03-01',
-            'autoscale_settings': '2022-10-01',
-            'baseline': '2018-09-01',
-            'baselines': '2019-03-01',
-            'diagnostic_settings': '2021-05-01-preview',
-            'diagnostic_settings_category': '2017-05-01-preview',
-            'event_categories': '2015-04-01',
-            'guest_diagnostics_settings': '2018-06-01-preview',
-            'guest_diagnostics_settings_association': '2018-06-01-preview',
-            'log_profiles': '2016-03-01',
-            'metric_alerts': '2018-03-01',
-            'metric_alerts_status': '2018-03-01',
-            'metric_baseline': '2018-09-01',
-            'metric_definitions': '2018-01-01',
-            'metric_namespaces': '2017-12-01-preview',
-            'metrics': '2018-01-01',
-            'operations': '2015-04-01',
-            'scheduled_query_rules': '2018-04-16',
-            'service_diagnostic_settings': '2016-09-01',
-            'tenant_activity_logs': '2015-04-01',
-            'vm_insights': '2018-11-27-preview',
-            'private_link_resources': '2019-10-17-preview',
-            'private_link_scoped_resources': '2019-10-17-preview',
-            'private_link_scope_operation_status': '2019-10-17-preview',
-            'private_link_scopes': '2019-10-17-preview',
-            'private_endpoint_connections': '2019-10-17-preview',
-            'subscription_diagnostic_settings': '2017-05-01-preview'
-        }),
+        ResourceType.MGMT_MONITOR: None,
         ResourceType.MGMT_MSI: '2023-01-31',
         ResourceType.MGMT_APPSERVICE: '2023-01-01',
         ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
@@ -261,7 +229,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-02-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-03-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     }
 }
@@ -288,6 +256,7 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
         'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
         'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
+        'VERSION_2025_04_01': "2025-04-01"
     },
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50

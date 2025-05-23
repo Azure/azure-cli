@@ -5575,7 +5575,7 @@ class VNetUpdate(_VNetUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.ipam_pool_prefix_allocations):
+        if args.ipam_pool_prefix_allocations.to_serialized_data():
             args.address_prefixes = []
 
     def post_instance_update(self, instance):
@@ -5970,6 +5970,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         args_schema.active._registered = False
@@ -6081,6 +6082,8 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.enable_high_bandwidth_vpn_gateway._registered = False
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.active._registered = False
         args_schema.vpn_client_root_certificates._registered = False

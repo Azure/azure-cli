@@ -19,10 +19,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/workspaces", "2023-09-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/workspaces", "2025-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces", "2025-02-01"],
         ]
     }
 
@@ -47,12 +47,12 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.WorkspacesListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
             self.WorkspacesList(ctx=self.ctx)()
+        if condition_1:
+            self.WorkspacesListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -67,7 +67,7 @@ class List(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         return result
 
-    class WorkspacesListByResourceGroup(AAZHttpOperation):
+    class WorkspacesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -81,7 +81,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.OperationalInsights/workspaces",
                 **self.url_parameters
             )
 
@@ -97,10 +97,6 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -111,7 +107,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -154,7 +150,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -214,7 +210,8 @@ class List(AAZCommand):
             properties.default_data_collection_rule_resource_id = AAZStrType(
                 serialized_name="defaultDataCollectionRuleResourceId",
             )
-            properties.features = AAZObjectType()
+            properties.failover = AAZObjectType()
+            properties.features = AAZFreeFormDictType()
             properties.force_cmk_for_query = AAZBoolType(
                 serialized_name="forceCmkForQuery",
             )
@@ -236,6 +233,7 @@ class List(AAZCommand):
             properties.public_network_access_for_query = AAZStrType(
                 serialized_name="publicNetworkAccessForQuery",
             )
+            properties.replication = AAZObjectType()
             properties.retention_in_days = AAZIntType(
                 serialized_name="retentionInDays",
                 nullable=True,
@@ -245,30 +243,12 @@ class List(AAZCommand):
                 serialized_name="workspaceCapping",
             )
 
-            features = cls._schema_on_200.value.Element.properties.features
-            features.cluster_resource_id = AAZStrType(
-                serialized_name="clusterResourceId",
-                nullable=True,
+            failover = cls._schema_on_200.value.Element.properties.failover
+            failover.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
             )
-            features.disable_local_auth = AAZBoolType(
-                serialized_name="disableLocalAuth",
-                nullable=True,
-            )
-            features.enable_data_export = AAZBoolType(
-                serialized_name="enableDataExport",
-                nullable=True,
-            )
-            features.enable_log_access_using_only_resource_permissions = AAZBoolType(
-                serialized_name="enableLogAccessUsingOnlyResourcePermissions",
-                nullable=True,
-            )
-            features.immediate_purge_data_on30_days = AAZBoolType(
-                serialized_name="immediatePurgeDataOn30Days",
-                nullable=True,
-            )
-            features.unified_sentinel_billing_only = AAZBoolType(
-                serialized_name="unifiedSentinelBillingOnly",
-                nullable=True,
+            failover.state = AAZStrType(
                 flags={"read_only": True},
             )
 
@@ -281,6 +261,22 @@ class List(AAZCommand):
             )
             _element.scope_id = AAZStrType(
                 serialized_name="scopeId",
+            )
+
+            replication = cls._schema_on_200.value.Element.properties.replication
+            replication.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            replication.enabled = AAZBoolType()
+            replication.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            replication.location = AAZStrType()
+            replication.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
             )
 
             sku = cls._schema_on_200.value.Element.properties.sku
@@ -333,7 +329,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class WorkspacesList(AAZHttpOperation):
+    class WorkspacesListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -347,7 +343,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.OperationalInsights/workspaces",
+                "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces",
                 **self.url_parameters
             )
 
@@ -363,6 +359,10 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -373,7 +373,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -416,7 +416,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -476,7 +476,8 @@ class List(AAZCommand):
             properties.default_data_collection_rule_resource_id = AAZStrType(
                 serialized_name="defaultDataCollectionRuleResourceId",
             )
-            properties.features = AAZObjectType()
+            properties.failover = AAZObjectType()
+            properties.features = AAZFreeFormDictType()
             properties.force_cmk_for_query = AAZBoolType(
                 serialized_name="forceCmkForQuery",
             )
@@ -498,6 +499,7 @@ class List(AAZCommand):
             properties.public_network_access_for_query = AAZStrType(
                 serialized_name="publicNetworkAccessForQuery",
             )
+            properties.replication = AAZObjectType()
             properties.retention_in_days = AAZIntType(
                 serialized_name="retentionInDays",
                 nullable=True,
@@ -507,30 +509,12 @@ class List(AAZCommand):
                 serialized_name="workspaceCapping",
             )
 
-            features = cls._schema_on_200.value.Element.properties.features
-            features.cluster_resource_id = AAZStrType(
-                serialized_name="clusterResourceId",
-                nullable=True,
+            failover = cls._schema_on_200.value.Element.properties.failover
+            failover.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
             )
-            features.disable_local_auth = AAZBoolType(
-                serialized_name="disableLocalAuth",
-                nullable=True,
-            )
-            features.enable_data_export = AAZBoolType(
-                serialized_name="enableDataExport",
-                nullable=True,
-            )
-            features.enable_log_access_using_only_resource_permissions = AAZBoolType(
-                serialized_name="enableLogAccessUsingOnlyResourcePermissions",
-                nullable=True,
-            )
-            features.immediate_purge_data_on30_days = AAZBoolType(
-                serialized_name="immediatePurgeDataOn30Days",
-                nullable=True,
-            )
-            features.unified_sentinel_billing_only = AAZBoolType(
-                serialized_name="unifiedSentinelBillingOnly",
-                nullable=True,
+            failover.state = AAZStrType(
                 flags={"read_only": True},
             )
 
@@ -543,6 +527,22 @@ class List(AAZCommand):
             )
             _element.scope_id = AAZStrType(
                 serialized_name="scopeId",
+            )
+
+            replication = cls._schema_on_200.value.Element.properties.replication
+            replication.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            replication.enabled = AAZBoolType()
+            replication.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            replication.location = AAZStrType()
+            replication.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
             )
 
             sku = cls._schema_on_200.value.Element.properties.sku

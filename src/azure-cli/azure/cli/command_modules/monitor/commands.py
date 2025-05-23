@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 # pylint: disable=line-too-long, too-many-locals, too-many-statements
 def load_command_table(self, _):
     from ._client_factory import (
-        cf_alert_rules, cf_autoscale,
+        cf_autoscale,
         cf_action_groups, cf_event_categories,
         cf_metric_alerts, cf_log_analytics_workspace, cf_log_analytics_linked_storage)
     from .transformers import (action_group_list_table)
@@ -52,8 +52,6 @@ def load_command_table(self, _):
 
     alert_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.metric_alert#{}',
-        client_factory=cf_alert_rules,
-        operation_group='alert_rules',
         exception_handler=exception_handler)
 
     metric_alert_sdk = CliCommandType(
@@ -95,6 +93,11 @@ def load_command_table(self, _):
 
     self.command_table['monitor action-group test-notifications create'] = \
         ActionGroupTestNotificationCreate(loader=self, table_transformer=action_group_list_table)
+
+    from .operations.action_groups_identity import AGIdentityAssign, AGIdentityRemove, AGIdentityShow
+    self.command_table['monitor action-group identity assign'] = AGIdentityAssign(loader=self)
+    self.command_table['monitor action-group identity remove'] = AGIdentityRemove(loader=self)
+    self.command_table['monitor action-group identity show'] = AGIdentityShow(loader=self)
 
     with self.command_group('monitor activity-log', activity_log_sdk) as g:
         g.custom_command('list', 'list_activity_log')

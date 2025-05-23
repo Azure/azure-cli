@@ -43,8 +43,8 @@ CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
 CONST_AVAILABILITY_SET = "AvailabilitySet"
 
 # vm size
-CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
-CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
+CONST_DEFAULT_NODE_VM_SIZE = ""
+CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = ""
 
 # gpu instance
 CONST_GPU_INSTANCE_PROFILE_MIG1_G = "MIG1g"
@@ -167,6 +167,13 @@ CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
 
+# app routing nginx config options
+CONST_WEB_APPLICATION_ROUTING_KEY_NAME = "ingress/webApplicationRouting"
+CONST_APP_ROUTING_ANNOTATION_CONTROLLED_NGINX = "AnnotationControlled"
+CONST_APP_ROUTING_EXTERNAL_NGINX = "External"
+CONST_APP_ROUTING_INTERNAL_NGINX = "Internal"
+CONST_APP_ROUTING_NONE_NGINX = "None"
+
 # all supported addons
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
@@ -177,7 +184,8 @@ ADDONS = {
     'ingress-appgw': CONST_INGRESS_APPGW_ADDON_NAME,
     "confcom": CONST_CONFCOM_ADDON_NAME,
     'open-service-mesh': CONST_OPEN_SERVICE_MESH_ADDON_NAME,
-    'azure-keyvault-secrets-provider': CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+    'azure-keyvault-secrets-provider': CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
+    "web_application_routing": CONST_WEB_APPLICATION_ROUTING_KEY_NAME,
 }
 
 # consts for check-acr command

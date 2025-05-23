@@ -3,10 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import register_output_breaking_change, register_command_group_deprecate
-
-register_output_breaking_change(command_name='acr login',
-                                description='Exit code will be 1 if command fails for docker login')
+from azure.cli.core.breaking_change import register_command_group_deprecate
 
 helm_bc_msg = 'In November 2020, Helm 2 reached end of life. ' \
               'Starting on March 30th, 2025 Azure Container Registry will no longer support Helm 2. ' \

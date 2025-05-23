@@ -256,6 +256,16 @@ def _is_linux_os(vm):
     return False
 
 
+# separated for aaz implementation
+def _is_linux_os_aaz(vm):
+    if os_type := vm.get('storageProfile', {}).get('osDisk', {}).get('osType', None):
+        return os_type.lower() == 'linux'
+    # the os_type could be None for VM scaleset, let us check out os configurations
+    if linux_config := vm.get('osProfile', {}).get('linuxConfiguration', ''):
+        return bool(linux_config)
+    return False
+
+
 def _merge_secrets(secrets):
     """
     Merge a list of secrets. Each secret should be a dict fitting the following JSON structure:
@@ -3247,7 +3257,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
+                enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
+                skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                 imds_mode=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
@@ -3566,6 +3577,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
             skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
+            skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
             zone_balance=zone_balance, wire_server_mode=wire_server_mode, imds_mode=imds_mode,
             wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
@@ -4021,7 +4033,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
-                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, zone_balance=None,
+                skuprofile_allostrat=None, skuprofile_rank=None,
+                security_posture_reference_is_overridable=None, zone_balance=None,
                 wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
@@ -4286,6 +4299,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 }
                 sku_profile_vmsizes_list.append(vmsize_obj)
             sku_profile['vmSizes'] = sku_profile_vmsizes_list
+
+            if skuprofile_rank:
+                for vm_size, rank in zip(sku_profile_vmsizes_list, skuprofile_rank):
+                    vm_size['rank'] = rank
+
         if skuprofile_allostrat is not None:
             sku_profile['allocationStrategy'] = skuprofile_allostrat
         vmss.sku_profile = sku_profile
