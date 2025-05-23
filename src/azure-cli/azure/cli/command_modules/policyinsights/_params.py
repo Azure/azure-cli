@@ -7,13 +7,14 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type, get_enum_type)
 
 from azure.cli.command_modules.resource._completers import (
-    get_policy_set_completion_list, get_policy_completion_list,
-    get_policy_assignment_completion_list, get_providers_completion_list, get_resource_types_completion_list)
+    get_providers_completion_list, get_resource_types_completion_list)
 
 from ._validators import (validate_resource, validate_expand)
 from azure.cli.command_modules.resource._validators import validate_metadata
 
-from ._completers import get_policy_remediation_completion_list, get_policy_metadata_completion_list
+from ._completers import (
+    get_policy_set_completion_list, get_policy_completion_list, get_policy_assignment_completion_list,
+    get_policy_remediation_completion_list, get_policy_metadata_completion_list)
 
 from ._actions import AttestationEvidenceAddAction
 
