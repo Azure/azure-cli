@@ -1,4 +1,4 @@
-ARG image=mcr.microsoft.com/cbl-mariner/base/core:2.0
+ARG image=mcr.microsoft.com/azurelinux/base/core:3.0
 
 FROM ${image} AS build-env
 ARG cli_version=dev
@@ -6,7 +6,7 @@ ARG cli_version=dev
 RUN tdnf update -y
 
 # kernel-headers, glibc-devel, binutils are needed to install psutil python package on ARM64
-# ca-certificates: Mariner by default only adds a very minimal set of root certs to trust certain Microsoft
+# ca-certificates: Azure Linux by default only adds a very minimal set of root certs to trust certain Microsoft
 # resources (primarily packages.microsoft.com). ca-certificates contains the official Microsoft curated set of
 # trusted root certificates. It has replaced the set of Mozilla Trusted Root Certificates.
 RUN tdnf install -y binutils file rpm-build gcc libffi-devel python3-devel openssl-devel make diffutils patch \
@@ -16,9 +16,6 @@ WORKDIR /azure-cli
 
 COPY . .
 
-# Mariner 2.0's python3 is 3.9, the rpm paths are
-#   /usr/src/mariner/RPMS/x86_64/azure-cli-2.63.0-1.cm2.x86_64.rpm
-#   /usr/src/mariner/RPMS/aarch64/azure-cli-2.63.0-1.cm2.aarch64.rpm
 # Azure Linux 3's python3 is 3.12, the rpm paths are
 #   /usr/src/azl/RPMS/x86_64/azure-cli-2.63.0-1.azl3.x86_64.rpm
 #   /usr/src/azl/RPMS/aarch64/azure-cli-2.63.0-1.azl3.aarch64.rpm
