@@ -26,7 +26,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEn
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin_group import Show as _AFDOriginGroupShow, \
     Create as _AFDOriginGroupCreate, Update as _AFDOriginGroupUpdate
-from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg
+from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg, AAZIntArgFormat
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom_rule_util import (create_condition, create_action,
@@ -264,15 +264,57 @@ class AFDOriginGroupCreate(_AFDOriginGroupCreate):
             help='Indicates whether to enable probe on the origin group.',
             blank=True,
         )
+        args_schema.probe_interval_in_seconds = AAZIntArg(
+            options=["--probe-interval-in-seconds"],
+            arg_group="HealthProbeSettings",
+            help="The number of seconds between health probes.Default is 240sec.",
+            fmt=AAZIntArgFormat(
+                maximum=255,
+                minimum=1,
+            ),
+        )
+        args_schema.probe_path = AAZStrArg(
+            options=["--probe-path"],
+            arg_group="HealthProbeSettings",
+            help="The path relative to the origin that is used to determine the health of the origin.",
+        )
+        args_schema.probe_protocol = AAZStrArg(
+            options=["--probe-protocol"],
+            arg_group="HealthProbeSettings",
+            help="Protocol to use for health probe.",
+            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
+        )
+        args_schema.probe_request_type = AAZStrArg(
+            options=["--probe-request-type"],
+            arg_group="HealthProbeSettings",
+            help="The type of health probe request that is made.",
+            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
+        )
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        if not has_value(args.enable_health_probe) or args.enable_health_probe.to_serialized_data() is False:
-            args.probe_path = None
-            args.probe_protocol = None
-            args.probe_interval_in_seconds = None
-            args.probe_request_type = None
+        probe_interval_in_seconds = None
+        probe_path = None
+        probe_protocol = None
+        probe_request_type = None
+        if has_value(args.probe_interval_in_seconds):
+            probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
+        if has_value(args.probe_path):
+            probe_path = args.probe_path.to_serialized_data()
+        if has_value(args.probe_protocol):
+            probe_protocol = args.probe_protocol.to_serialized_data()
+        if has_value(args.probe_request_type):
+            probe_request_type = args.probe_request_type.to_serialized_data()
+        args.health_probe_settings = {
+            'probeIntervalInSeconds': probe_interval_in_seconds,
+            'probePath': probe_path,
+            'probeProtocol': probe_protocol,
+            'probeRequestType': probe_request_type
+        }
+
+        if args.enable_health_probe.to_serialized_data() is False:
+            args.health_probe_settings = None
 
 
 class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
@@ -284,6 +326,32 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             help='Indicates whether to enable probe on the origin group.',
             blank=True,
         )
+        args_schema.probe_interval_in_seconds = AAZIntArg(
+            options=["--probe-interval-in-seconds"],
+            arg_group="HealthProbeSettings",
+            help="The number of seconds between health probes.Default is 240sec.",
+            fmt=AAZIntArgFormat(
+                maximum=255,
+                minimum=1,
+            ),
+        )
+        args_schema.probe_path = AAZStrArg(
+            options=["--probe-path"],
+            arg_group="HealthProbeSettings",
+            help="The path relative to the origin that is used to determine the health of the origin.",
+        )
+        args_schema.probe_protocol = AAZStrArg(
+            options=["--probe-protocol"],
+            arg_group="HealthProbeSettings",
+            help="Protocol to use for health probe.",
+            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
+        )
+        args_schema.probe_request_type = AAZStrArg(
+            options=["--probe-request-type"],
+            arg_group="HealthProbeSettings",
+            help="The type of health probe request that is made.",
+            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
+        )
         return args_schema
 
     def pre_operations(self):
@@ -293,23 +361,73 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             'profile_name': args.profile_name,
             'origin_group_name': args.origin_group_name
         })
-        if not has_value(args.enable_health_probe):
-            if existing['healthProbeSettings'] is not None:
-                if 'probePath' in existing['healthProbeSettings'] \
-                        or 'probeProtocol' in existing['healthProbeSettings'] \
-                        or 'probeIntervalInSeconds' in existing['healthProbeSettings'] \
-                        or 'probeRequestType' in existing['healthProbeSettings']:
-                    args.enable_health_probe = True
-                else:
-                    args.enable_health_probe = False
-            else:
-                args.enable_health_probe = False
 
-        if args.enable_health_probe.to_serialized_data() is False:
-            args.probe_path = None
-            args.probe_protocol = None
-            args.probe_interval_in_seconds = None
-            args.probe_request_type = None
+        probe_interval_in_seconds = None
+        probe_path = None
+        probe_protocol = None
+        probe_request_type = None
+
+        if not has_value(args.enable_health_probe):
+            if 'healthProbeSettings' not in existing:
+                args.enable_health_probe = False
+            else:
+                args.enable_health_probe = True
+                if has_value(args.probe_path):
+                    probe_path = args.probe_path.to_serialized_data()
+                elif 'probePath' in existing['healthProbeSettings']:
+                    probe_path = existing['healthProbeSettings']['probePath']
+
+                if has_value(args.probe_protocol):
+                    probe_protocol = args.probe_protocol.to_serialized_data()
+                elif 'probeProtocol' in existing['healthProbeSettings']:
+                    probe_protocol = existing['healthProbeSettings']['probeProtocol']
+
+                if has_value(args.probe_interval_in_seconds):
+                    probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
+                elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
+                    probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
+
+                if has_value(args.probe_request_type):
+                    probe_request_type = args.probe_request_type.to_serialized_data()
+                elif 'probeRequestType' in existing['healthProbeSettings']:
+                    probe_request_type = existing['healthProbeSettings']['probeRequestType']
+
+                args.health_probe_settings = {
+                    'probeIntervalInSeconds': probe_interval_in_seconds,
+                    'probePath': probe_path,
+                    'probeProtocol': probe_protocol,
+                    'probeRequestType': probe_request_type
+                }
+        elif args.enable_health_probe.to_serialized_data() is True:
+            args.enable_health_probe = True
+            if has_value(args.probe_path):
+                probe_path = args.probe_path.to_serialized_data()
+            elif 'probePath' in existing['healthProbeSettings']:
+                probe_path = existing['healthProbeSettings']['probePath']
+
+            if has_value(args.probe_protocol):
+                probe_protocol = args.probe_protocol.to_serialized_data()
+            elif 'probeProtocol' in existing['healthProbeSettings']:
+                probe_protocol = existing['healthProbeSettings']['probeProtocol']
+
+            if has_value(args.probe_interval_in_seconds):
+                probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
+            elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
+                probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
+
+            if has_value(args.probe_request_type):
+                probe_request_type = args.probe_request_type.to_serialized_data()
+            elif 'probeRequestType' in existing['healthProbeSettings']:
+                probe_request_type = existing['healthProbeSettings']['probeRequestType']
+
+            args.health_probe_settings = {
+                'probeIntervalInSeconds': probe_interval_in_seconds,
+                'probePath': probe_path,
+                'probeProtocol': probe_protocol,
+                'probeRequestType': probe_request_type
+            }
+        else:
+            args.health_probe_settings = None
 
 
 class AFDOriginCreate(_AFDOriginCreate):

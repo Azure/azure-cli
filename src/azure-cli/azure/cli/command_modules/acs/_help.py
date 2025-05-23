@@ -65,7 +65,7 @@ parameters:
     short-summary: Secret associated with the service principal. This argument is required if `--service-principal` is specified.
   - name: --node-vm-size -s
     type: string
-    short-summary: Size of Virtual Machines to create as Kubernetes nodes.
+    short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
   - name: --dns-name-prefix -p
     type: string
     short-summary: Prefix for hostnames that are created. If not specified, generate a hostname using the managed cluster and resource group names.
@@ -1553,7 +1553,7 @@ short-summary: Add a node pool to the managed Kubernetes cluster.
 parameters:
   - name: --node-vm-size -s
     type: string
-    short-summary: Size of Virtual Machines to create as Kubernetes nodes.
+    short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
   - name: --node-count -c
     type: int
     short-summary: Number of nodes in the Kubernetes agent pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
@@ -1635,6 +1635,9 @@ parameters:
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
@@ -1793,6 +1796,9 @@ parameters:
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
@@ -1865,6 +1871,9 @@ parameters:
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to upgrade this nodepool.

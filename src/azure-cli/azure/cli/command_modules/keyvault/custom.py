@@ -16,7 +16,7 @@ import time
 import uuid
 from ipaddress import ip_network
 
-from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients, is_azure_stack_profile
+from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients
 from azure.cli.command_modules.keyvault._validators import _construct_vnet, secret_text_encoding_values
 from azure.cli.command_modules.keyvault.security_domain.jwe import JWE
 from azure.cli.command_modules.keyvault.security_domain.security_domain import Datum, SecurityDomainRestoreData
@@ -35,7 +35,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
 
 from knack.log import get_logger
-from knack.util import CLIError
+from knack.util import CLIError, todict
 
 
 logger = get_logger(__name__)
@@ -64,18 +64,6 @@ def _not_less_than(current_profile, resource_type, min_api_version, sub_resource
                        format(sub_resource_name, resource_type, current_profile))
     api_version = sub_profile[sub_resource_name]
     return api_version >= min_api_version
-
-
-def _azure_stack_wrapper(cmd, client, function_name, resource_type, min_api_version, sub_resource_name=None, **kwargs):
-    no_wait = False
-    if 'no_wait' in kwargs:
-        no_wait = kwargs.pop('no_wait')
-
-    if _not_less_than(cmd.cli_ctx.cloud.profile, resource_type, min_api_version, sub_resource_name):
-        function_name = 'begin_' + function_name
-        return sdk_no_wait(no_wait, getattr(client, function_name), **kwargs)
-
-    return getattr(client, function_name)(**kwargs)
 
 
 def _default_certificate_profile(cmd):
@@ -207,7 +195,7 @@ def _scaffold_certificate_profile(cmd):
 
 
 def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, hsm_name=None, no_wait=False):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client.delete(resource_group_name=resource_group_name, vault_name=vault_name)
 
     assert hsm_name
@@ -222,7 +210,7 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
 
 
 def get_deleted_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client.get_deleted(vault_name=vault_name, location=location)
 
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -231,7 +219,7 @@ def get_deleted_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_na
 
 def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None,  # pylint: disable=unused-argument
                        no_wait=False):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return sdk_no_wait(
             no_wait,
             client.begin_purge_deleted,
@@ -249,9 +237,6 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
 
 
 def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
-    if is_azure_stack_profile(cmd):
-        return client.list_deleted()
-
     if resource_type is None:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         resources = []
@@ -270,9 +255,6 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
 
 
 def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None):
-    if is_azure_stack_profile(cmd):
-        return list_vault(client, resource_group_name)
-
     if resource_type is None:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         resources = []
@@ -332,7 +314,7 @@ def get_default_policy(cmd, scaffold=False):  # pylint: disable=unused-argument
 
 def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, vault_name=None, hsm_name=None,
                          no_wait=False):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return recover_vault(cmd=cmd,
                              client=client,
                              resource_group_name=resource_group_name,
@@ -394,13 +376,10 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
                                                        'sku': Sku(name=SkuName.standard.value, family='A'),
                                                        'create_mode': CreateMode.recover.value})
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=params,
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=params)
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets,
@@ -454,7 +433,7 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
 
 
 def get_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
 
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -483,7 +462,7 @@ def create_vault_or_hsm(cmd, client,
                         public_network_access=None,
                         user_identities=None,
                         ):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return create_vault(cmd=cmd,
                             client=client,
                             resource_group_name=resource_group_name,
@@ -731,28 +710,22 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                                tags=tags,
                                                properties=properties)
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=parameters,
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=parameters)
 
 
 def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name, no_wait=False):
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=parameters.location,
-                                    tags=parameters.tags,
-                                    properties=parameters.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=parameters.location,
+                           tags=parameters.tags,
+                           properties=parameters.properties))
 
 
 def update_hsm_setter(cmd, client, parameters, resource_group_name, name, no_wait=False):
@@ -913,16 +886,13 @@ def set_policy(cmd, client, resource_group_name, vault_name,
         storage = policy.permissions.storage if storage_permissions is None else storage_permissions
         policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=vault.location,
-                                    tags=vault.tags,
-                                    properties=vault.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=vault.location,
+                           tags=vault.tags,
+                           properties=vault.properties))
 
 
 def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
@@ -975,16 +945,13 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
     if not to_update:
         return vault
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=vault.location,
-                                    tags=vault.tags,
-                                    properties=vault.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=vault.location,
+                           tags=vault.tags,
+                           properties=vault.properties))
 
 
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
@@ -1021,16 +988,13 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
         return vault
 
     # otherwise update
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=vault.location,
-                                    tags=vault.tags,
-                                    properties=vault.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=vault.location,
+                           tags=vault.tags,
+                           properties=vault.properties))
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
@@ -1064,16 +1028,13 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=vault.location,
-                                    tags=vault.tags,
-                                    properties=vault.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=vault.location,
+                           tags=vault.tags,
+                           properties=vault.properties))
 # endregion
 
 
@@ -1100,6 +1061,25 @@ def list_keys(client, maxresults=None, include_managed=False):
     if not include_managed:
         return [_ for _ in result if not getattr(_, 'managed')] if result else result
     return result
+
+
+def get_key_attestation(client, name, version=None, file_path=None):
+    key = client.get_key_attestation(name=name, version=version)
+    key_attestation = key.properties.attestation
+    if not file_path:
+        return key_attestation
+
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
+    try:
+        from ._command_type import _encode_hex
+        with open(file_path, 'w') as outfile:
+            json.dump(todict(_encode_hex(key_attestation)), outfile)
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
 
 
 def delete_key(client, name):
@@ -1686,7 +1666,7 @@ def _verify_vault_or_hsm_name(vault_name, hsm_name):
 def list_private_link_resource(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
     _verify_vault_or_hsm_name(vault_name, hsm_name)
 
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client.list_by_vault(resource_group_name=resource_group_name, vault_name=vault_name)
 
     hsm_plr_client = get_client_factory(ResourceType.MGMT_KEYVAULT,
@@ -1739,7 +1719,7 @@ def _wait_private_link_operation(client, resource_group_name, name, private_endp
 
 def _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name):
     _verify_vault_or_hsm_name(vault_name, hsm_name)
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client
     return get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.mhsm_private_endpoint_connections)(cmd.cli_ctx, None)
 
@@ -2116,7 +2096,6 @@ def full_backup(cmd, client, storage_resource_uri=None, storage_account_name=Non
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     poller = client.begin_backup(storage_resource_uri, sas_token=token, use_managed_identity=use_managed_identity)
-    from knack.util import todict
     result = todict(poller.result())
     result['status'] = poller.status()
     return result

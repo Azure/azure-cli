@@ -53,10 +53,10 @@ def validate_wl_restore(item, item_type, restore_mode, recovery_mode):
     #        operation. Correct value should be - {}.
     #        """.format(item.properties.workload_type))
 
-    if item_type is None or item_type.lower() not in ['sql', 'saphana']:
+    if item_type is None or item_type.lower() not in ['sql', 'saphana', 'sapase']:
         raise InvalidArgumentValueError("""
             The item_type specified in recovery config file is incorrect. Please correct it and retry the
-            operation. Allowed values are: 'SQL', 'SAPHana'.
+            operation. Allowed values are: 'SQL', 'SAPHana', 'SAPAse'.
             """)
 
     if item_type.lower() not in item.properties.workload_type.lower():

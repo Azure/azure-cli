@@ -17,21 +17,15 @@ def get_keyvault_name_completion_list(resource_name):
         credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
         if resource_name == 'key':
             from azure.keyvault.keys import KeyClient
-            from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
-            version = '7.6-preview.2' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
-            client = KeyClient(vault_url=vault, credential=credential, api_version=version,
+            client = KeyClient(vault_url=vault, credential=credential, api_version='7.6-preview.2',
                                verify_challenge_resource=False)
         elif resource_name == 'secret':
             from azure.keyvault.secrets import SecretClient
-            from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
-            version = '7.4' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
-            client = SecretClient(vault_url=vault, credential=credential, api_version=version,
+            client = SecretClient(vault_url=vault, credential=credential, api_version='7.4',
                                   verify_challenge_resource=False)
         else:
             from azure.keyvault.certificates import CertificateClient
-            from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
-            version = '7.4' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
-            client = CertificateClient(vault_url=vault, credential=credential, api_version=version,
+            client = CertificateClient(vault_url=vault, credential=credential, api_version='7.4',
                                        verify_challenge_resource=False)
         items = []
         for y in list(getattr(client, func_name)()):
@@ -51,21 +45,15 @@ def get_keyvault_version_completion_list(resource_name):
         credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
         if resource_name == 'key':
             from azure.keyvault.keys import KeyClient
-            from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
-            version = '7.6-preview.2' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
-            client = KeyClient(vault_url=vault, credential=credential, api_version=version,
+            client = KeyClient(vault_url=vault, credential=credential, api_version='7.6-preview.2',
                                verify_challenge_resource=False)
         elif resource_name == 'secret':
             from azure.keyvault.secrets import SecretClient
-            from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
-            version = '7.4' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
-            client = SecretClient(vault_url=vault, credential=credential, api_version=version,
+            client = SecretClient(vault_url=vault, credential=credential, api_version='7.4',
                                   verify_challenge_resource=False)
         else:
             from azure.keyvault.certificates import CertificateClient
-            from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
-            version = '7.4' if not is_azure_stack_profile(cmd=cmd) else '2016-10-01'
-            client = CertificateClient(vault_url=vault, credential=credential, api_version=version,
+            client = CertificateClient(vault_url=vault, credential=credential, api_version='7.4',
                                        verify_challenge_resource=False)
         items = []
         for y in list(getattr(client, func_name)()):
