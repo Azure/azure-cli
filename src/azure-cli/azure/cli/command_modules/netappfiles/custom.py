@@ -650,7 +650,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         args_schema.start_host_id = AAZIntArg(
             options=["--start-host-id"],
             arg_group="Volumes",
-            help="Starting SAP HANA Host ID. Host ID 1 indicates Master Host. Shared, Data Backup and Log Backup volumes are only provisioned for Master Host i.e. `HostID == 1`.",
+            help="Starting SAP-HANA Host ID. Host ID 1 indicates Master Host. Shared, Data Backup and Log Backup volumes are only provisioned for Master Host i.e. `HostID == 1`.",
             default=1
         )
         args_schema.subnet = AAZStrArg(
@@ -662,7 +662,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         args_schema.system_role = AAZStrArg(
             options=["--system-role"],
             arg_group="Volumes",
-            help=" Type of role for the storage account. Primary indicates first of a SAP HANA Replication (HSR) setup or No HSR. High Availability (HA) specifies local scenario. Default is PRIMARY.  Allowed values: DR, HA, PRIMARY.",
+            help=" Type of role for the storage account. Primary indicates first of a SAP-HANA Replication (HSR) setup or No HSR. High Availability (HA) specifies local scenario. Default is PRIMARY.  Allowed values: DR, HA, PRIMARY.",
             enum={"DR": "DR", "HA": "HA", "PRIMARY": "PRIMARY"},
             default="PRIMARY"
         )
@@ -801,15 +801,62 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         )
         args_schema.memory = AAZIntArg(
             options=["--memory"],
-            arg_group="Volume Group SAP HANA sizing",
-            help="System (SAP HANA) memory in GiB (max 12000 GiB), used to auto compute storage size and throughput.",
+            arg_group="Volume Group SAP-HANA sizing",
+            help="System (SAP-HANA) memory in GiB (max 12000 GiB), used to auto compute storage size and throughput.",
             default=100
         )
         args_schema.number_of_hosts = AAZIntArg(
             options=["--number-of-hosts", "--number-of-hots"],
-            arg_group="Volume Group SAP HANA sizing",
-            help="Total Number of system (SAP HANA) host in this deployment (currently max 3 nodes can be configured)",
+            arg_group="Volume Group SAP-HANA sizing",
+            help="Total Number of system (SAP-HANA) host in this deployment (currently max 3 nodes can be configured)",
             default=1,
+        )
+        args_schema.database_size = AAZIntArg(
+            options=["--database-size"],
+            arg_group="Volume Group Oracle sizing",
+            help="Oracle database size in (TiB), used to auto compute storage size and throughput.",
+            default=100
+        )
+        args_schema.number_of_oracle_volumes = AAZIntArg(
+            options=["--number-of-volumes"],
+            arg_group="Volume Group Oracle sizing",
+            help="Total Number of Oracle data volumes (currently min 2 and max 8 nodes can be configured)"
+        )
+        args_schema.database_throughput = AAZIntArg(
+            options=["--database-throughput"],
+            arg_group="Volume Group Oracle sizing",
+            help="Oracle database throughput in (MiB/s), used to auto compute storage size and throughput.",
+            default=1,
+        )
+        args_schema.log_mirror_size = AAZIntArg(
+            options=["--log-mirror-size"],
+            arg_group="Oracle Volumes",
+            help="Capacity (in GiB) for log mirror volume. If not provided size will automatically be calculated.",
+            required=False,
+        )
+        # args_schema.log_backup_src_id = AAZStrArg(
+        #     options=["--log-backup-src-id"],
+        #     arg_group="Oracle Volumes",
+        #     help="ResourceId of the log backup source volume.",
+        #     required=False
+        # )
+        args_schema.log_mirror_throughput = AAZIntArg(
+            options=["--log-mirror-throughput"],
+            arg_group="Oracle Volumes",
+            help="Throughput in MiB/s for log mirror volume. If not provided size will automatically be calculated.",
+            required=False,
+        )
+        args_schema.binary_size = AAZIntArg(
+            options=["--binary-size"],
+            arg_group="Oracle Volumes",
+            help="Capacity (in GiB) for binary volume. If not provided size will automatically be calculated.",
+            required=False,
+        )
+        args_schema.binary_throughput = AAZIntArg(
+            options=["--binary-throughput"],
+            arg_group="Oracle Volumes",
+            help="Throughput in MiB/s for log binary volume. If not provided size will automatically be calculated.",
+            required=False,
         )
         return args_schema
 
@@ -818,12 +865,22 @@ class VolumeGroupCreate(_VolumeGroupCreate):
     def pre_operations(self):
         args = self.ctx.args
         account_name = args.account_name.to_serialized_data()
-        application_identifier = args.application_identifier.to_serialized_data()
+        application_type = args.application_type.to_serialized_data()
         number_of_hosts = args.number_of_hosts.to_serialized_data()
+        number_of_volumes = args.number_of_oracle_volumes.to_serialized_data()
         memory = args.memory.to_serialized_data()
         add_snapshot_capacity = args.add_snapshot_capacity.to_serialized_data()
         system_role = args.system_role.to_serialized_data()
         pool_name = args.pool_name.to_serialized_data()
+
+        if has_value(args.application_identifier):
+            application_identifier = args.application_identifier.to_serialized_data()
+        else:
+            if application_type == "ORACLE":
+                application_identifier = "ORA1"
+            elif application_type == "SAP-HANA":
+                application_identifier = "SH1"
+
         if has_value(args.data_size):
             data_size = args.data_size.to_serialized_data()
         else:
@@ -832,6 +889,8 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             data_throughput = args.data_throughput.to_serialized_data()
         else:
             data_throughput = None
+        if has_value(args.database_throughput):
+            database_throughput = args.database_throughput.to_serialized_data()
 
         data_repl_skd = args.data_repl_skd.to_serialized_data()
         data_src_id = args.data_src_id.to_serialized_data()
@@ -897,14 +956,22 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             zones = None
 
         logger.debug("ANF log: VolumeGroupCreate.pre_operations: Pool: %s, Hosts: %s, memory: %s, additional snapshot capacity: {add_snapshot_capacity}", {pool_name}, {number_of_hosts}, {memory})
-        if number_of_hosts < 1 or number_of_hosts > 3:
-            raise ValidationError("Number of hosts must be between 1 and 3")
-        if memory < 1 or memory > 12000:
-            raise ValidationError("Memory must be between 1 and 12000")
+        if application_type == "ORACLE":
+            if has_value(args.number_of_oracle_volumes):
+                if args.number_of_oracle_volumes < 2 or args.number_of_oracle_volumes > 8:
+                    raise ValidationError("Number of volumes must be between 2 and 8")
+            else:
+                number_of_volumes = 2
+        elif application_type == "SAP-HANA":
+            if number_of_hosts < 1 or number_of_hosts > 3:
+                raise ValidationError("Number of hosts must be between 1 and 3")
+            if memory < 1 or memory > 12000:
+                raise ValidationError("Memory must be between 1 and 12000")
+            if system_role == "DR" and number_of_hosts != 1:
+                raise ValidationError("Number of hosts must be 1 when creating a Disaster Recovery (DR) volume group")
+
         if add_snapshot_capacity < 0 or add_snapshot_capacity > 200:
             raise ValidationError("Additional capacity for snapshot must be between 0 and 200")
-        if system_role == "DR" and number_of_hosts != 1:
-            raise ValidationError("Number of hosts must be 1 when creating a Disaster Recovery (DR) volume group")
 
         if not has_value(args.prefix):
             prefix = ""
@@ -949,21 +1016,29 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         logger.debug("ANF LOG: VolumeGroupCreate.pre_operations()  => Received: %s volumes ", len(args.volumes))
         if not has_value(args.volumes) or len(args.volumes) == 0:
             # Create data volume(s)
+            if application_type == "SAP-HANA":
+                number_of_volumes = number_of_hosts
+
             data_volumes = []
             start_host_id = args.start_host_id.to_serialized_data()
             # args.volumes.append({"name":"testname"})
-            for i in range(start_host_id, start_host_id + number_of_hosts):
-                data_volumes.append(create_data_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory,
+            for i in range(start_host_id, start_host_id + number_of_volumes):
+                data_volumes.append(create_data_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory,
                                                                   add_snapshot_capacity, str(i), data_size, data_throughput,
                                                                   prefix, data_repl_skd, data_src_id, kv_private_endpoint_id, encryption_key_source,
-                                                                  smb_access_based_enumeration, smb_non_browsable, zones))
+                                                                  smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes))
 
             # Create log volume(s)
             log_volumes = []
-            for i in range(start_host_id, start_host_id + number_of_hosts):
-                log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, str(i), log_size,
+            if application_type == "SAP-HANA":
+                for i in range(start_host_id, start_host_id + number_of_hosts):
+                    log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, str(i), log_size,
+                                                                    log_throughput, prefix, kv_private_endpoint_id, encryption_key_source,
+                                                                    smb_access_based_enumeration, smb_non_browsable, zones, database_throughput))
+            elif application_type == "ORACLE":
+                log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, 1, log_size,
                                                                 log_throughput, prefix, kv_private_endpoint_id, encryption_key_source,
-                                                                smb_access_based_enumeration, smb_non_browsable, zones))
+                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes))
             total_data_volume_size = sum(int(vol["usage_threshold"]) for vol in data_volumes)
             total_log_volume_size = sum(int(vol["usage_threshold"]) for vol in log_volumes)
 
@@ -972,35 +1047,49 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             args.volumes.extend(data_volumes)
             args.volumes.extend(log_volumes)
 
-            args.volumes.append(create_shared_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, shared_size,
+            args.volumes.append(create_shared_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, shared_size,
                                                                 shared_throughput, number_of_hosts, prefix, shared_repl_skd, shared_src_id, kv_private_endpoint_id, encryption_key_source,
-                                                                smb_access_based_enumeration, smb_non_browsable, zones))
-            args.volumes.append(create_data_backup_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, data_backup_size,
+                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes))
+            args.volumes.append(create_data_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, data_backup_size,
                                                                      data_backup_throughput, total_data_volume_size,
                                                                      total_log_volume_size, prefix, backup_nfsv3,
                                                                      data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id, encryption_key_source,
                                                                      smb_access_based_enumeration,
-                                                                     smb_non_browsable, zones))
-            args.volumes.append(create_log_backup_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, log_backup_size,
+                                                                     smb_non_browsable, zones, database_throughput, number_of_volumes))
+            args.volumes.append(create_log_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, log_backup_size,
                                                                     log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
                                                                     log_backup_src_id, kv_private_endpoint_id, encryption_key_source,
                                                                     smb_access_based_enumeration,
-                                                                    smb_non_browsable, zones))
+                                                                    smb_non_browsable, zones, database_throughput, number_of_volumes))
 
 
-def create_data_volume_properties(subnet_id, application_identifier, pool_id, ppg, memory, add_snap_capacity, host_id,
+# pylint: disable=too-many-locals
+def create_data_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, add_snap_capacity, host_id,
                                   data_size, data_throughput, prefix, data_repl_skd=None, data_src_id=None, kv_private_endpoint_id=None,
-                                  encryption_key_source=None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None):
-    name = prefix + application_identifier + "-" + VolumeType.DATA.value + "-mnt" + (host_id.rjust(5, '0'))
-
-    if data_size is None:
-        size = calculate_usage_threshold(memory, VolumeType.DATA, add_snap_capacity=add_snap_capacity)
-    else:
-        size = data_size * gib_scale
+                                  encryption_key_source=None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
 
     throughput = data_throughput
-    if throughput is None:
-        throughput = calculate_throughput(memory, VolumeType.DATA)
+    if application_type == "SAP-HANA":
+        name = prefix + application_identifier + "-" + VolumeType.DATA.value + "-mnt" + (host_id.rjust(5, '0'))
+        volume_spec = VolumeType.DATA.value
+        if data_size is None:
+            size = calculate_usage_threshold(memory, VolumeType.DATA, add_snap_capacity=add_snap_capacity)
+        else:
+            size = data_size * gib_scale
+        if throughput is None:
+            throughput = calculate_throughput(memory, VolumeType.DATA)
+    elif application_type == "ORACLE":
+        name = prefix + application_identifier + "-" + OracleVolumeType.DATA.value + (host_id)
+        volume_spec = OracleVolumeType.DATA.value + host_id
+        if data_size is None:
+            size = calculate_oracle_usage_threshold(memory, OracleVolumeType.DATA, add_snap_capacity=add_snap_capacity)
+        else:
+            size = data_size * gib_scale
+        if throughput is None:
+            if data_throughput is not None:
+                throughput = calculate_oracle_throughput(databaseThroughput=data_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.DATA)
+            else:
+                throughput = calculate_oracle_throughput(databaseThroughput=database_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.DATA)
 
     data_protection = None
     if data_repl_skd is not None and data_src_id is not None:
@@ -1013,7 +1102,7 @@ def create_data_volume_properties(subnet_id, application_identifier, pool_id, pp
         "creation_token": name,
         "capacity_pool_resource_id": pool_id,
         "proximity_placement_group": ppg,
-        "volume_spec_name": VolumeType.DATA.value,
+        "volume_spec_name": volume_spec,
         "protocol_types": ["NFSv4.1"],
         "name": name,
         "usage_threshold": size,
@@ -1030,29 +1119,44 @@ def create_data_volume_properties(subnet_id, application_identifier, pool_id, pp
     return data_volume
 
 
-def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_id, log_size,
+def create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, host_id, log_size,
                                  log_throughput, prefix, kv_private_endpoint_id=None, encryption_key_source=None,
-                                 smb_access_based_enumeration=None, smb_non_browsable=None, zones=None):
-    name = prefix + sap_sid + "-" + VolumeType.LOG.value + "-mnt" + (host_id.rjust(5, '0'))
+                                 smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+    throughput = log_throughput
+    if application_type == "SAP-HANA":
+        name = prefix + application_identifier + "-" + VolumeType.LOG.value + "-mnt" + (host_id.rjust(5, '0'))
+        volume_spec = VolumeType.LOG.value
+        if log_size is None:
+            size = calculate_usage_threshold(memory, VolumeType.LOG)
+        else:
+            size = log_size * gib_scale
+        if log_throughput is None:
+            throughput = calculate_throughput(memory, VolumeType.LOG)
+        else:
+            throughput = log_throughput
 
-    if log_size is None:
-        size = calculate_usage_threshold(memory, VolumeType.LOG)
-    else:
-        size = log_size * gib_scale
-
-    if log_throughput is None:
-        log_throughput = calculate_throughput(memory, VolumeType.LOG)
+    if application_type == "ORACLE":
+        name = prefix + application_identifier + "-" + OracleVolumeType.LOG.value
+        volume_spec = OracleVolumeType.LOG.value
+        if log_size is None:
+            size = calculate_oracle_usage_threshold(memory, OracleVolumeType.LOG)
+        else:
+            size = log_size * gib_scale
+        if log_throughput is not None:
+            throughput = calculate_oracle_throughput(databaseThroughput=log_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.LOG)
+        else:
+            throughput = calculate_oracle_throughput(databaseThroughput=database_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.LOG)
 
     log_volume = {
         "subnet_id": subnet_id,
         "creation_token": name,
         "capacity_pool_resource_id": pool_id,
         "proximity_placement_group": ppg,
-        "volume_spec_name": VolumeType.LOG.value,
+        "volume_spec_name": volume_spec,
         "protocol_types": ["NFSv4.1"],
         "name": name,
         "usage_threshold": size,
-        "throughput_mibps": log_throughput,
+        "throughput_mibps": throughput,
         "export_policy": create_default_export_policy_for_vg(),
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
         "encryption_key_source": encryption_key_source,
@@ -1064,19 +1168,36 @@ def create_log_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, host_
     return log_volume
 
 
-def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, shared_size,
+# pylint: disable=too-many-locals
+def create_shared_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, shared_size,
                                     shared_throughput, number_of_hosts, prefix, shared_repl_skd=None,
                                     shared_src_id=None, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
-                                    smb_non_browsable=None, zones=None):
-    name = prefix + sap_sid + "-" + VolumeType.SHARED.value
+                                    smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+    throughput = shared_throughput
+    if application_type == "SAP-HANA":
+        name = prefix + application_identifier + "-" + VolumeType.SHARED.value
+        volume_spec = VolumeType.SHARED.value
+        if has_value(shared_size):
+            size = calculate_usage_threshold(memory, VolumeType.SHARED, total_host_count=number_of_hosts)
+        else:
+            size = shared_size * gib_scale
 
-    if has_value(shared_size):
-        size = calculate_usage_threshold(memory, VolumeType.SHARED, total_host_count=number_of_hosts)
-    else:
-        size = shared_size * gib_scale
+        if shared_throughput is None:
+            throughput = calculate_throughput(memory, VolumeType.SHARED)
+        else:
+            throughput = shared_throughput
 
-    if shared_throughput is None:
-        shared_throughput = calculate_throughput(memory, VolumeType.SHARED)
+    if application_type == "ORACLE":
+        name = prefix + application_identifier + "-" + OracleVolumeType.BINARY.value
+        volume_spec = OracleVolumeType.BINARY.value
+        if shared_size is None:
+            size = calculate_oracle_usage_threshold(memory, OracleVolumeType.BINARY)
+        else:
+            size = shared_size * gib_scale
+        if shared_throughput is not None:
+            throughput = calculate_oracle_throughput(databaseThroughput=shared_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.BINARY)
+        else:
+            throughput = calculate_oracle_throughput(databaseThroughput=database_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.BINARY)
 
     data_protection = None
     if shared_repl_skd is not None and shared_src_id is not None:
@@ -1089,11 +1210,11 @@ def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, sh
         "creation_token": name,
         "capacity_pool_resource_id": pool_id,
         "proximity_placement_group": ppg,
-        "volume_spec_name": VolumeType.SHARED.value,
+        "volume_spec_name": volume_spec,
         "protocol_types": ["NFSv4.1"],
         "name": name,
         "usage_threshold": size,
-        "throughput_mibps": shared_throughput,
+        "throughput_mibps": throughput,
         "export_policy": create_default_export_policy_for_vg(),
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
@@ -1106,22 +1227,38 @@ def create_shared_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, sh
     return shared_volume
 
 
-def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, data_backup_size,
+# pylint: disable=too-many-locals
+def create_data_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, data_backup_size,
                                          data_backup_throughput, total_data_volume_size, total_log_volume_size,
                                          prefix, backup_nfsv3, data_backup_repl_skd, data_backup_src_id,
                                          kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
-                                         smb_non_browsable=None, zones=None):
-    name = prefix + sap_sid + "-" + VolumeType.DATA_BACKUP.value
-
+                                         smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
     logger.debug("ANF LOG: create_data_backup_volume_properties  => data_backup_size: %s * %s ", data_backup_size, gib_scale)
-    if data_backup_size is None:
-        size = calculate_usage_threshold(memory, VolumeType.DATA_BACKUP, data_size=total_data_volume_size,
-                                         log_size=total_log_volume_size)
-    else:
-        size = data_backup_size * gib_scale
+    throughput = data_backup_throughput
+    if application_type == "SAP-HANA":
+        name = prefix + application_identifier + "-" + VolumeType.DATA_BACKUP.value
+        volume_spec = VolumeType.DATA_BACKUP.value
+        if data_backup_size is None:
+            size = calculate_usage_threshold(memory, VolumeType.DATA_BACKUP, data_size=total_data_volume_size,
+                                             log_size=total_log_volume_size)
+        else:
+            size = data_backup_size * gib_scale
+        if data_backup_throughput is None:
+            throughput = calculate_throughput(memory, VolumeType.DATA_BACKUP)
+        else:
+            throughput = data_backup_throughput
 
-    if data_backup_throughput is None:
-        data_backup_throughput = calculate_throughput(memory, VolumeType.DATA_BACKUP)
+    elif application_type == "ORACLE":
+        name = prefix + application_identifier + "-" + OracleVolumeType.BACKUP.value
+        volume_spec = OracleVolumeType.BACKUP.value
+        if data_backup_size is None:
+            size = calculate_oracle_usage_threshold(memory, OracleVolumeType.BACKUP)
+        else:
+            size = data_backup_size * gib_scale
+        if data_backup_throughput is not None:
+            throughput = calculate_oracle_throughput(databaseThroughput=data_backup_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.BACKUP)
+        else:
+            throughput = calculate_oracle_throughput(databaseThroughput=database_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.BACKUP)
 
     data_protection = None
     if data_backup_repl_skd is not None and data_backup_src_id is not None:
@@ -1134,11 +1271,11 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
         "creation_token": name,
         "capacity_pool_resource_id": pool_id,
         "proximity_placement_group": ppg,
-        "volume_spec_name": VolumeType.DATA_BACKUP.value,
+        "volume_spec_name": volume_spec,
         "protocol_types": ['NFSv4.1'] if not backup_nfsv3 else ['NFSv3'],
         "name": name,
         "usage_threshold": size,
-        "throughput_mibps": data_backup_throughput,
+        "throughput_mibps": throughput,
         "export_policy": create_default_export_policy_for_vg(backup_nfsv3),
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
@@ -1151,19 +1288,35 @@ def create_data_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memor
     return data_backup_volume
 
 
-def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory, log_backup_size,
+def create_log_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, log_backup_size,
                                         log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
                                         log_backup_src_id, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
-                                        smb_non_browsable=None, zones=None):
-    name = prefix + sap_sid + "-" + VolumeType.LOG_BACKUP.value
+                                        smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
 
-    if log_backup_size is None:
-        size = calculate_usage_threshold(memory, VolumeType.LOG_BACKUP)
-    else:
-        size = log_backup_size * gib_scale
+    throughput = log_backup_throughput
+    if application_type == "SAP-HANA":
+        name = prefix + application_identifier + "-" + VolumeType.LOG_BACKUP.value
+        volume_spec = VolumeType.LOG_BACKUP.value
+        if log_backup_size is None:
+            size = calculate_usage_threshold(memory, VolumeType.LOG_BACKUP)
+        else:
+            size = log_backup_size * gib_scale
+        if log_backup_throughput is None:
+            throughput = calculate_throughput(memory, VolumeType.LOG_BACKUP)
+        else:
+            throughput = log_backup_throughput
 
-    if log_backup_throughput is None:
-        log_backup_throughput = calculate_throughput(memory, VolumeType.LOG_BACKUP)
+    if application_type == "ORACLE":
+        name = prefix + application_identifier + "-" + OracleVolumeType.LOG_MIRROR.value
+        volume_spec = OracleVolumeType.LOG_MIRROR.value
+        if log_backup_size is None:
+            size = calculate_oracle_usage_threshold(memory, OracleVolumeType.LOG_MIRROR)
+        else:
+            size = log_backup_size * gib_scale
+        if log_backup_throughput is not None:
+            throughput = calculate_oracle_throughput(databaseThroughput=log_backup_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.LOG_MIRROR)
+        else:
+            throughput = calculate_oracle_throughput(databaseThroughput=database_throughput, numberOfDataVolumes=number_of_volumes, volume_type=OracleVolumeType.BACKUP)
 
     data_protection = None
     if log_backup_repl_skd is not None and log_backup_src_id is not None:
@@ -1176,11 +1329,11 @@ def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory
         "creation_token": name,
         "capacity_pool_resource_id": pool_id,
         "proximity_placement_group": ppg,
-        "volume_spec_name": VolumeType.LOG_BACKUP.value,
+        "volume_spec_name": volume_spec,
         "protocol_types": ['NFSv4.1'] if not backup_nfsv3 else ['NFSv3'],
         "name": name,
         "usage_threshold": size,
-        "throughput_mibps": log_backup_throughput,
+        "throughput_mibps": throughput,
         "export_policy": create_default_export_policy_for_vg(backup_nfsv3),
         "data_protection": data_protection,
         "key_vault_private_endpoint_resource_id": kv_private_endpoint_id,
@@ -1242,6 +1395,26 @@ def calculate_throughput(memory, volume_type):
         return 250
 
 
+# Usage is returned in bytes
+def calculate_oracle_usage_threshold(databaseSize, volume_type, add_snap_capacity=50, total_volume_count=1):
+    if volume_type == OracleVolumeType.DATA:
+        sizeFactor = databaseSize / total_volume_count
+        capacityFactor = (add_snap_capacity / 100) * sizeFactor
+        usage = sizeFactor + capacityFactor
+        return int(usage) * gib_scale if usage > 100 else 100 * gib_scale  # MIN 100 GiB
+    return 100 * gib_scale
+
+
+# pylint: disable=too-many-return-statements
+def calculate_oracle_throughput(databaseThroughput, numberOfDataVolumes, volume_type):
+    oracle_throughput = 150
+    if volume_type == OracleVolumeType.DATA:
+        oracle_throughput = max(100, databaseThroughput / numberOfDataVolumes)
+    elif volume_type == OracleVolumeType.BINARY:
+        oracle_throughput = 64
+    return oracle_throughput
+
+
 def create_default_export_policy_for_vg(nfsv3=False):
     rules = []
     export_policy = ({"rule_index": 1,
@@ -1267,5 +1440,13 @@ class VolumeType(Enum):
     SHARED = "shared"
     DATA_BACKUP = "data-backup"
     LOG_BACKUP = "log-backup"
+
+
+class OracleVolumeType(Enum):
+    DATA = "ora-data"
+    LOG = "ora-log"
+    BINARY = "ora-binary"
+    BACKUP = "ora-backup"
+    LOG_MIRROR = "ora-log-mirror"
 
 # endregion
