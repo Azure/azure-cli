@@ -234,13 +234,13 @@ parameters:
   - name: --network-plugin
     type: string
     short-summary: The Kubernetes network plugin to use.
-    long-summary: Specify "azure" for routable pod IPs from VNET, "kubenet" for non-routable pod IPs with an overlay network, or "none" for no networking configured. Defaults to "kubenet".
+    long-summary: Specify "azure" for highly scalable networking, "kubenet" for IP assignment from subnet NAT-based routing, or "none" for no networking configured. Defaults to "azure".
   - name: --network-plugin-mode
     type: string
     short-summary: The network plugin mode to use.
     long-summary: |
-        Used to control the mode the network plugin should operate in. For example, "overlay" used with
-        --network-plugin=azure will use an overlay network (non-VNET IPs) for pods in the cluster.
+        Used to control the mode the network plugin should operate in. Defaults to "overlay". If not specified with "azure" as
+        network plugin, pods are given routable IPs from VNET.
   - name: --network-policy
     type: string
     short-summary: Network Policy Engine to use.
@@ -1629,6 +1629,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
@@ -1790,6 +1793,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
@@ -1865,6 +1871,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how long to wait for all pods to be evicted
