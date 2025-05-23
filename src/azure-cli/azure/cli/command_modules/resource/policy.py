@@ -77,8 +77,9 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 #     message items.
 #   o non-compliance-message delete now returns nothing instead of the array of remaining
 #     message items.
-#   o delete commands now require -y to automatically bypass the confirmation prompt. Previously
-#     the delete commands did not prompt for confirmation.
+#   o 'az policy definition delete' and 'az policy set-definition delete' commands now
+#     require -y to automatically bypass the confirmation prompt. Previously these two did not
+#     prompt for confirmation.
 #   o Providing an invalid/nonexistent management group name for --management-group parameter
 #     now raises InvalidArgumentValueError instead of IncorrectUsageError
 #   o The date format used for policy exemption --expires-on has changed slightly. The new format
@@ -88,6 +89,7 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 # Shared code for policy command customization
 class Common:
+
     @staticmethod
     # Ensure that both --policy and -policy-set-definition are not specified, or that one of them is specified
     def ValidatePolicyDefinitionId(ctx):
@@ -97,7 +99,7 @@ class Common:
     # Ensure that --scope is not used with other scoping parameters
     @staticmethod
     def ValidateScope(ctx):
-        if has_value(ctx.args.scope) and ctx.args.scope != '<NotSpecified>' and has_value(ctx.args.resource_group):
+        if has_value(ctx.args.scope) and has_value(ctx.args.resource_group):
             raise ArgumentUsageError('usage error: --scope SCOPE | --resource-group NAME')
         # Should also validate that both --scope and --subscription are not specified together. Unfortunately
         # it's not possible to make this check since there is no way to determine whether the user entered
@@ -106,7 +108,7 @@ class Common:
     # If --scope is not provided, set it by subscription or resource group scope
     @staticmethod
     def PopulateScopeFromContext(ctx, cli_ctx):
-        if ctx.args.scope == '<NotSpecified>':
+        if not has_value(ctx.args.scope):
             subscription_id = get_subscription_id(cli_ctx)
             if has_value(ctx.args.resource_group):
                 ctx.args.scope = f"/subscriptions/{subscription_id}/resourceGroups/{ctx.args.resource_group}"
@@ -210,17 +212,6 @@ class Common:
                         cli_ctx, user_assigned_identity, resource_group,
                         'userAssignedIdentities', 'Microsoft.ManagedIdentity')
 
-    # Remove parameter values that are defaulted to <NotSpecified>
-    # pylint: disable=protected-access
-    @staticmethod
-    def RemoveUnspecifiedParameters(ctx):
-        toRemove = []
-        for arg in ctx.args._data:
-            if ctx.args._data.get(arg) == '<NotSpecified>':
-                toRemove.append(arg)
-        for arg in toRemove:
-            ctx.args._data.pop(arg)
-
     # Helper function to check whether a scope is a management group scope
     @staticmethod
     def _is_management_group_scope(scope):
@@ -278,6 +269,7 @@ class Common:
 
 # Completers for policy command arguments
 class Completers:
+
     @staticmethod
     @Completer
     def get_policy_definition_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
@@ -313,6 +305,7 @@ class PolicyAssignmentCreate(AssignmentCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._required = False                # pylint: disable=protected-access
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         args_schema.policy = AAZStrArg(
             options=['--policy'],
@@ -329,7 +322,6 @@ class PolicyAssignmentCreate(AssignmentCreate):
         Common.ValidatePolicyDefinitionId(self.ctx)
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
         Common.ValidateNotScopes(self.ctx)
         Common.GenerateNameIfNone(self.ctx)
         Common.ResolvePolicyId(self.ctx)
@@ -353,16 +345,17 @@ class PolicyAssignmentDelete(AssignmentDelete):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_assignment_completion_list
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyAssignmentList(AssignmentList):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -426,13 +419,13 @@ class PolicyAssignmentShow(AssignmentShow):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_assignment_completion_list
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyAssignmentUpdate(AssignmentUpdate):
@@ -442,6 +435,7 @@ class PolicyAssignmentUpdate(AssignmentUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_assignment_completion_list
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         args_schema.policy = AAZStrArg(
             options=['--policy'],
@@ -451,7 +445,6 @@ class PolicyAssignmentUpdate(AssignmentUpdate):
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
         Common.ValidateNotScopes(self.ctx)
 
     # pylint: disable=arguments-differ
@@ -462,9 +455,11 @@ class PolicyAssignmentUpdate(AssignmentUpdate):
 
 
 class PolicyAssignmentIdentityAssign(AssignmentIdentityAssign):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         args_schema.identity_scope = AAZStrArg(
             options=['--identity-scope'],
@@ -478,16 +473,17 @@ class PolicyAssignmentIdentityAssign(AssignmentIdentityAssign):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.ResolveIdentityType(self.ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
     def post_operations(self):
         Common.CreateRoleAssignment(self.ctx, self.cli_ctx, self.ctx.vars.instance)
 
 
 class PolicyAssignmentIdentityRemove(AssignmentIdentityRemove):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
@@ -495,59 +491,66 @@ class PolicyAssignmentIdentityRemove(AssignmentIdentityRemove):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.ResolveIdentityType(self.ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyAssignmentIdentityShow(AssignmentIdentityShow):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyAssignmentNonComplianceMessageCreate(NonComplianceMessageCreate):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._required = False
+        args_schema.policy_definition_reference_id._required = False
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyAssignmentNonComplianceMessageDelete(NonComplianceMessageDelete):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._required = False
+        args_schema.policy_definition_reference_id._required = False
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyAssignmentNonComplianceMessageList(NonComplianceMessageList):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
     # pylint: disable=arguments-differ
     def _output(self):
@@ -560,29 +563,35 @@ class PolicyAssignmentNonComplianceMessageList(NonComplianceMessageList):
 
 
 class PolicyAssignmentNonComplianceMessageShow(NonComplianceMessageShow):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._required = False
+        args_schema.policy_definition_reference_id._required = False
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyAssignmentNonComplianceMessageUpdate(NonComplianceMessageUpdate):
+
+    # pylint: disable=protected-access
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._required = False               # pylint: disable=protected-access
+        args_schema.policy_definition_reference_id._required = False
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyDefinitionCreate(DefinitionCreate):
@@ -759,17 +768,18 @@ class PolicyDefinitionUpdate(DefinitionUpdate):
 
 
 class PolicyExemptionCreate(ExemptionCreate):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._required = False            # pylint: disable=protected-access
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
         Common.GenerateNameIfNone(self.ctx)
 
 
@@ -780,16 +790,17 @@ class PolicyExemptionDelete(ExemptionDelete):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_exemption_completion_list
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyExemptionList(ExemptionList):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -853,13 +864,13 @@ class PolicyExemptionShow(ExemptionShow):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_exemption_completion_list
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicyExemptionUpdate(ExemptionUpdate):
@@ -869,13 +880,13 @@ class PolicyExemptionUpdate(ExemptionUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.name._completer = Completers.get_policy_exemption_completion_list
+        args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
-        Common.RemoveUnspecifiedParameters(self.ctx)
 
 
 class PolicySetDefinitionCreate(SetDefinitionCreate):

@@ -1266,7 +1266,7 @@ class DeploymentTestsWithQueryString(LiveScenarioTest):
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
     def tearDown(self):
         self.cmd('policy assignment delete -n location-lock')
-        self.cmd('policy definition delete -n policy2')
+        self.cmd('policy definition delete -n policy2 --yes')
         self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
     @AllowLargeResponse(4096)
@@ -3478,7 +3478,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('displayName', '{padn}')
         ])
 
-        self.cmd('policy assignment delete -n {pan2} -g {rg} -y')
+        self.cmd('policy assignment delete -n {pan2} -g {rg}')
 
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath
@@ -3491,7 +3491,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 1))
 
         # delete the assignment and validate it's gone
-        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
     def applyPolicyAtScope(self, scope, policyId, enforcementMode='Default', atMGLevel=False):
@@ -3522,7 +3522,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment list --scope {scope}', checks=self.check("length([?name=='{pan}'])", 1))
 
         # delete the assignment and validate it's gone
-        self.cmd('policy assignment delete -n {pan} --scope {scope} -y')
+        self.cmd('policy assignment delete -n {pan} --scope {scope}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
     def resource_policy_operations(self, resource_group, management_group=None, subscription=None):
@@ -3698,7 +3698,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd('policy assignment list --resource-group {rg}', checks=self.check("length([?name=='{pan}'])", 1))
 
             # delete the assignment and validate it's gone
-            self.cmd('policy assignment delete -n {pan} -g {rg} -y')
+            self.cmd('policy assignment delete -n {pan} -g {rg}')
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
         # delete the policy set
@@ -3869,7 +3869,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
         ])
 
-        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_systemassigned')
     @AllowLargeResponse(8192)
@@ -3969,7 +3969,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
         ])
 
-        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_userassigned')
     @AllowLargeResponse(8192)
@@ -4058,7 +4058,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
             self.check('type', 'None')
         ])
-        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_ncm')
     @AllowLargeResponse(8192)
@@ -4125,7 +4125,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # remove a non-compliance message that does not exist
-        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Unknown message" -y', checks=[
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Unknown message"', checks=[
              self.is_empty()
         ])
 
@@ -4149,7 +4149,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # remove a non-compliance message that exists but without the right reference ID
-        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message" -y', checks=[
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message"', checks=[
             self.is_empty()
         ])
 
@@ -4173,7 +4173,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # remove a non-compliance message
-        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "General message" -y', checks=[
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "General message"', checks=[
             self.is_empty()
         ])
 
@@ -4185,7 +4185,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # remove a non-compliance message with a reference ID
-        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message" -r {drid} -y', checks=[
+        self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
             self.is_empty()
         ])
 
@@ -4200,7 +4200,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('length(nonComplianceMessages)', 0)
         ])
 
-        self.cmd('policy assignment delete -n {pan} -g {rg} -y')
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse(4096)
@@ -4338,7 +4338,7 @@ class PolicyScenarioTest(ScenarioTest):
     @AllowLargeResponse(4096)
     def test_resource_create_policy_assignment_random(self, resource_group, management_group=None, subscription=None):
 
-        if self.in_recording:
+        if not self.in_recording:
             return
 
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -4359,7 +4359,7 @@ class PolicyScenarioTest(ScenarioTest):
         ]).get_output_in_json()['name']
 
         # clean policy assignment and policy
-        self.cmd('policy assignment delete -n {pan_random} -g {rg} -y')
+        self.cmd('policy assignment delete -n {pan_random} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match',
                  checks=self.check("length([?name=='{pan_random}'])", 0))
         cmd = self.cmdstring('policy definition delete -n {pn} -y', management_group, subscription)
@@ -4471,8 +4471,8 @@ class PolicyScenarioTest(ScenarioTest):
             ])
 
             # delete the exemption and validate it's gone
-            self.cmd('policy exemption delete -n {pen} --scope {scope} -y'.format(**self.kwargs))
-            self.cmd('policy assignment delete -n {pan} --scope {scope} -y'.format(**self.kwargs))
+            self.cmd('policy exemption delete -n {pen} --scope {scope}'.format(**self.kwargs))
+            self.cmd('policy assignment delete -n {pan} --scope {scope}'.format(**self.kwargs))
             self.cmd('policy exemption list --disable-scope-strict-match', checks=self.check("length([?name=='{pen}'])", 0))
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
         else:
@@ -4523,8 +4523,8 @@ class PolicyScenarioTest(ScenarioTest):
             ])
 
             # delete the exemption and validate it's gone
-            self.cmd('policy exemption delete -n {pen} -g {rg} -y'.format(**self.kwargs))
-            self.cmd('policy assignment delete -n {pan} -g {rg} -y'.format(**self.kwargs))
+            self.cmd('policy exemption delete -n {pen} -g {rg}'.format(**self.kwargs))
+            self.cmd('policy assignment delete -n {pan} -g {rg}'.format(**self.kwargs))
             self.cmd('policy exemption list', checks=self.check("length([?name=='{pen}'])", 0))
 
         # list and show it

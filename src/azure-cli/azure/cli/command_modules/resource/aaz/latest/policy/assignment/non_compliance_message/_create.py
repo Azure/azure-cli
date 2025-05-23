@@ -62,7 +62,6 @@ class Create(AAZCommand):
             options=["--scope"],
             help={"short-summary": "The scope of the policy assignment.", "long-summary": "Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'), resource group (format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}', or resource (format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/[{parentResourcePath}/]{resourceType}/{resourceName}'. The scope of an assignment is always the part of its ID preceding '/providers/Microsoft.Authorization/policyAssignments/{policyAssignmentName}'. If scope is not provided, the scope will be the implied or specified subscription."},
             required=True,
-            default="<NotSpecified>",
         )
         _args_schema.message = AAZStrArg(
             options=["-m", "--message"],
@@ -73,7 +72,6 @@ class Create(AAZCommand):
             options=["-r", "--policy-definition-reference-id"],
             help={"short-summary": "The policy definition reference ID.", "long-summary": "The policy definition reference ID within a policy set definition the message is intended for. This is only applicable if the policy assignment assigns a policy set definition. If not provided, the message applies to all policy definitions assigned by this policy assignment."},
             required=True,
-            default="<NotSpecified>",
         )
         return cls._args_schema
 
