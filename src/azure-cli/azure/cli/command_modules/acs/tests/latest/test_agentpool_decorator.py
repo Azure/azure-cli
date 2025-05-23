@@ -661,6 +661,37 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool = self.create_initialized_agentpool_instance(pod_subnet_id="test_pod_subnet_id")
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_pod_subnet_id(), "test_pod_subnet_id")
+    
+    def common_get_pod_ip_allocation_mode(self):
+        # default
+        ctx_1 = AKSPreviewAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"pod_ip_allocation_mode": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_pod_ip_allocation_mode(), None)
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            pod_ip_allocation_mode="StaticBlock"
+        )
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_pod_ip_allocation_mode(), None)
+
+        # default to raw even if agentpool has different value
+        ctx_2 = AKSPreviewAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"pod_ip_allocation_mode": "DynamicIndividual"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_pod_ip_allocation_mode(), "DynamicIndividual")
+        agentpool_2 = self.create_initialized_agentpool_instance(
+            pod_ip_allocation_mode="StaticBlock"
+        )
+        ctx_2.attach_agentpool(agentpool_2)
+        self.assertEqual(ctx_2.get_pod_ip_allocation_mode(), "StaticBlock")
 
     def common_get_enable_node_public_ip(self):
         # default
@@ -1694,6 +1725,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
 
     def test_get_pod_subnet_id(self):
         self.common_get_pod_subnet_id()
+    
+    def test_get_pod_ip_allocation_mode(self):
+        self.common_get_pod_ip_allocation_mode()
 
     def test_get_enable_node_public_ip(self):
         self.common_get_enable_node_public_ip()
@@ -1878,6 +1912,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_pod_subnet_id(self):
         self.common_get_pod_subnet_id()
+
+    def test_get_pod_ip_allocation_mode(self):
+        self.common_get_pod_ip_allocation_mode()
 
     def test_get_enable_node_public_ip(self):
         self.common_get_enable_node_public_ip()
@@ -2157,6 +2194,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "pod_subnet_id": "test_pod_subnet_id",
+                "pod_ip_allocation_mode": "DynamicIndividual",
                 "enable_node_public_ip": True,
                 "node_public_ip_prefix_id": "test_node_public_ip_prefix_id",
             },
@@ -2174,6 +2212,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             vnet_subnet_id="test_vnet_subnet_id",
             pod_subnet_id="test_pod_subnet_id",
+            pod_ip_allocation_mode="DynamicIndividual",
             enable_node_public_ip=True,
             node_public_ip_prefix_id="test_node_public_ip_prefix_id",
         )
