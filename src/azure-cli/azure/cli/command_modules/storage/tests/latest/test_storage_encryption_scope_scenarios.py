@@ -13,7 +13,6 @@ from ..storage_test_util import StorageScenarioMixin
 
 class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_encryption')
     @StorageAccountPreparer(name_prefix='encryption', kind="StorageV2")
     @KeyVaultPreparer(name_prefix='envault', key='vault', additional_params='--enable-purge-protection '
@@ -135,7 +134,6 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
             self.kwargs['con'], blob2, file, self.kwargs['encryption'], result['connectionString']))
 
     @AllowLargeResponse()
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-09-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_encryption')
     @StorageAccountPreparer(name_prefix='encryption', kind="StorageV2")
     def test_storage_account_encryption_scope_list(self, resource_group, storage_account):
