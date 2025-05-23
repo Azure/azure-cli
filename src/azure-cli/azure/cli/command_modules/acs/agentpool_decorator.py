@@ -1103,6 +1103,25 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return max_surge
 
+    def get_max_unavailable(self):
+        """Obtain the value of max_unavailable.
+        :return: string
+        """
+        # read the original value passed by the command
+        max_unavailable = self.raw_param.get("max_unavailable")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.max_unavailable is not None
+            ):
+                max_unavailable = self.agentpool.upgrade_settings.max_unavailable
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return max_unavailable
+
     def get_drain_timeout(self):
         """Obtain the value of drain_timeout.
 
@@ -1833,6 +1852,10 @@ class AKSAgentPoolAddDecorator:
         if max_surge:
             upgrade_settings.max_surge = max_surge
 
+        max_unavailable = self.context.get_max_unavailable()
+        if max_unavailable:
+            upgrade_settings.max_unavailable = max_unavailable
+
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
@@ -2223,6 +2246,10 @@ class AKSAgentPoolUpdateDecorator:
             upgrade_settings.max_surge = max_surge
             # why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
             agentpool.upgrade_settings = upgrade_settings
+
+        max_unavailable = self.context.get_max_unavailable()
+        if max_unavailable:
+            upgrade_settings.max_unavailable = max_unavailable
 
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:

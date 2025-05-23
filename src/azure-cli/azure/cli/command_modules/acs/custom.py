@@ -2408,6 +2408,7 @@ def aks_agentpool_add(
     node_osdisk_type=None,
     node_osdisk_size=None,
     max_surge=None,
+    max_unavailable=None,
     drain_timeout=None,
     node_soak_duration=None,
     undrainable_node_behavior=None,
@@ -2477,6 +2478,7 @@ def aks_agentpool_update(
     tags=None,
     node_taints=None,
     max_surge=None,
+    max_unavailable=None,
     drain_timeout=None,
     node_soak_duration=None,
     undrainable_node_behavior=None,
@@ -2530,6 +2532,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           max_surge=None,
+                          max_unavailable=None,
                           drain_timeout=None,
                           node_soak_duration=None,
                           undrainable_node_behavior=None,
@@ -2552,11 +2555,12 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         )
 
     # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
-    if (max_surge or drain_timeout or node_soak_duration or undrainable_node_behavior) and node_image_only:
+    hasUpgradeSetting = max_surge or drain_timeout or node_soak_duration or undrainable_node_behavior or max_unavailable
+    if hasUpgradeSetting and node_image_only:
         raise MutuallyExclusiveArgumentError(
-            'Conflicting flags. Unable to specify max-surge/drain-timeout/node-soak-duration with node-image-only.'
+            'Conflicting flags. Unable to specify max-surge/drain-timeout/node-soak-duration/max-unavailable with node-image-only.'
             'If you want to use max-surge/drain-timeout/node-soak-duration with a node image upgrade, please first '
-            'update max-surge/drain-timeout/node-soak-duration using "az aks nodepool update --max-surge/--drain-timeout/--node-soak-duration".'
+            'update max-surge/drain-timeout/node-soak-duration/max-unavailable using "az aks nodepool update --max-surge/--drain-timeout/--node-soak-duration/--max-unavailable".'
         )
 
     if node_image_only:

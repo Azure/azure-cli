@@ -1629,6 +1629,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
@@ -1790,6 +1793,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
@@ -1865,6 +1871,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how long to wait for all pods to be evicted
