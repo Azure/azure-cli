@@ -9,6 +9,7 @@ import timeit
 start_time = timeit.default_timer()
 
 import sys
+import os
 
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
@@ -21,6 +22,12 @@ __version__ = "2.73.0"
 
 
 logger = get_logger(__name__)
+
+AZURELINUX2_WARNING_MESSAGE = (
+    "Azure CLI 2.74.0 is the last version available on Azure Linux (Mariner) 2.0 and will not receive updates. "
+    "Consider migrating to Azure Linux 3.0 to use newer versions of Azure CLI. "
+    "To disable this warning message, set AZURE_CLI_DISABLE_AZURELINUX2_WARNING environment variable to any value."
+)
 
 
 def cli_main(cli, args):
@@ -114,6 +121,9 @@ finally:
         prompt_survey_message(az_cli)
     except Exception as ex:  # pylint: disable=broad-except
         logger.debug("Intercept survey prompt failed. %s", str(ex))
+
+    if 'AZURE_CLI_DISABLE_AZURELINUX2_WARNING' not in os.environ:
+        logger.warning(AZURELINUX2_WARNING_MESSAGE)
 
     telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
     telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
