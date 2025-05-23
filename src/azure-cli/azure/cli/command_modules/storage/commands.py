@@ -109,18 +109,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get_properties')
         g.custom_command('list', 'list_storage_accounts')
         g.custom_command(
-            'show-usage', 'show_storage_account_usage', min_api='2018-02-01')
-        g.custom_command(
-            'show-usage', 'show_storage_account_usage_no_location', max_api='2017-10-01')
+            'show-usage', 'show_storage_account_usage')
         g.custom_command('show-connection-string',
                          'show_storage_account_connection_string')
         g.generic_update_command('update', getter_name='get_properties', setter_name='update',
-                                 custom_func_name='update_storage_account', min_api='2016-12-01')
-        g.custom_command('failover', 'begin_failover', supports_no_wait=True, is_preview=True, min_api='2018-07-01')
+                                 custom_func_name='update_storage_account')
+        g.custom_command('failover', 'begin_failover', supports_no_wait=True, is_preview=True)
         g.command('hns-migration start', 'begin_hierarchical_namespace_migration',
-                  supports_no_wait=True, min_api='2021-06-01')
+                  supports_no_wait=True)
         g.command('hns-migration stop', 'begin_abort_hierarchical_namespace_migration',
-                  supports_no_wait=True, min_api='2021-06-01')
+                  supports_no_wait=True)
 
     with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
@@ -128,7 +126,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          transform=lambda x: getattr(x, 'keys', x))
         g.command('keys list', 'list_keys',
                   transform=lambda x: getattr(x, 'keys', x))
-        g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
+        g.command('revoke-delegation-keys', 'revoke_user_delegation_keys')
 
     account_blob_service_custom_sdk = get_custom_sdk('account', client_factory=cf_blob_service,
                                                      resource_type=ResourceType.DATA_STORAGE_BLOB)
@@ -150,7 +148,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account blob-inventory-policy', blob_inventory_sdk,
                             custom_command_type=blob_inventory_custom_type, is_preview=True,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview') as g:
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
         g.custom_command('create', 'create_blob_inventory_policy')
         g.generic_update_command('update', getter_name='get_blob_inventory_policy',
                                  getter_type=blob_inventory_custom_type,
@@ -173,7 +171,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account encryption-scope', encryption_scope_sdk,
                             custom_command_type=encryption_scope_custom_type,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
 
         g.custom_command('create', 'create_encryption_scope')
         g.show_command('show', 'get')
@@ -196,7 +194,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.MGMT_STORAGE)
 
     with self.command_group('storage account management-policy', management_policy_sdk,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-11-01',
+                            resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=management_policy_custom_type) as g:
         g.custom_show_command('show', 'get_management_policy')
         g.custom_command('create', 'create_management_policies')
@@ -208,7 +206,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account network-rule', storage_account_sdk,
                             custom_command_type=storage_account_custom_type,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
         g.custom_command('add', 'add_network_rule')
         g.custom_command('list', 'list_network_rules')
         g.custom_command('remove', 'remove_network_rule')
@@ -223,7 +221,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=cf_or_policy)
 
     with self.command_group('storage account or-policy', or_policy_sdk, is_preview=True,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01',
+                            resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=or_policy_custom_type) as g:
         g.show_command('show', 'get')
         g.command('list', 'list')
@@ -232,7 +230,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('delete', 'delete')
 
     with self.command_group('storage account or-policy rule', or_policy_sdk, is_preview=True,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01',
+                            resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=or_policy_custom_type) as g:
         g.custom_show_command('show', 'get_or_rule')
         g.custom_command('list', 'list_or_rules')
@@ -242,7 +240,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account private-endpoint-connection', private_endpoint_sdk,
                             custom_command_type=private_endpoint_custom_type, is_preview=True,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
         from ._validators import validate_private_endpoint_connection_id
         g.command('delete', 'delete', confirmation=True, validator=validate_private_endpoint_connection_id)
         g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
@@ -254,12 +252,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account private-link-resource', private_link_resource_sdk,
                             resource_type=ResourceType.MGMT_STORAGE) as g:
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.command('list', 'list_by_storage_account', is_preview=True, min_api='2019-06-01',
+        g.command('list', 'list_by_storage_account', is_preview=True,
                   transform=gen_dict_to_list_transform(key="value"))
 
     with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
                             custom_command_type=storage_account_custom_type,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
         from ._transformers import transform_restore_policy_output
         g.show_command('show', 'get_service_properties', transform=transform_restore_policy_output)
         g.generic_update_command('update',
@@ -269,7 +267,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  transform=transform_restore_policy_output)
 
     with self.command_group('storage account blob-service-properties cors-rule',
-                            blob_service_mgmt_sdk, resource_type=ResourceType.MGMT_STORAGE, min_api='2022-09-01',
+                            blob_service_mgmt_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=get_custom_sdk('account',
                                                                client_factory=cf_mgmt_blob_services,
                                                                resource_type=ResourceType.MGMT_STORAGE)) as g:
@@ -280,7 +278,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account file-service-properties', file_service_mgmt_sdk,
                             custom_command_type=get_custom_sdk('account', client_factory=cf_mgmt_file_services,
                                                                resource_type=ResourceType.MGMT_STORAGE),
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
         g.show_command('show', 'get_service_properties')
         g.generic_update_command('update',
                                  getter_name='get_service_properties',
@@ -302,7 +300,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account local-user', local_users_sdk,
                             custom_command_type=local_users_custom_type,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2021-08-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
         g.custom_command('create', 'create_local_user')
         g.custom_command('update', 'update_local_user')
         g.command('delete', 'delete')
@@ -432,7 +430,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage blob', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_blob_custom_type) as g:
-        g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', supports_no_wait=True)
+        g.custom_command('restore', 'restore_blob_ranges', supports_no_wait=True)
 
     with self.command_group('storage blob incremental-copy',
                             operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',
@@ -560,12 +558,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage container-rm', command_type=blob_container_mgmt_sdk,
                             custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
                                                                resource_type=ResourceType.MGMT_STORAGE),
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-02-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
         g.custom_command('create', 'create_container_rm')
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', setter_name='update', max_api='2019-04-01')
         g.generic_update_command('update', setter_name='update', setter_arg_name='blob_container',
-                                 custom_func_name='update_container_rm', min_api='2019-06-01')
+                                 custom_func_name='update_container_rm')
         g.custom_command('list', 'list_container_rm')
         g.custom_command('exists', 'container_rm_exists', transform=create_boolean_result_output_transformer('exists'),
                          table_transformer=transform_boolean_for_table)
@@ -596,12 +593,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('file',
                                                                cf_mgmt_file_shares,
                                                                resource_type=ResourceType.MGMT_STORAGE),
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-04-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
         from ._transformers import transform_share_rm_output
         g.custom_command('exists', '_file_share_exists', transform=create_boolean_result_output_transformer('exists'))
         g.custom_command('stats', 'get_stats', transform=lambda x: getattr(x, 'share_usage_bytes'))
         g.custom_command('restore', 'restore_share_rm')
-        g.custom_command('snapshot', 'snapshot_share_rm', min_api='2020-08-01-preview', is_preview=True,
+        g.custom_command('snapshot', 'snapshot_share_rm', is_preview=True,
                          transform=transform_share_rm_output)
 
     with self.command_group('storage share-rm'):
