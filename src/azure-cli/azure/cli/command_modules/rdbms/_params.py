@@ -267,8 +267,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             id_part='child_name_1',
             help='The name of the database to be created when provisioning the database server. '
                  'Database name must begin with a letter (a-z) or underscore (_). Subsequent characters '
-                 'in a name can be letters, digits (0-9), or underscores. Database name length must be less '
-                 'than 32 characters.',
+                 'in a name can be letters, digits (0-9), hyphens (-), or underscores. '
+                 'Database name length must be less than 64 characters.',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.SET],
