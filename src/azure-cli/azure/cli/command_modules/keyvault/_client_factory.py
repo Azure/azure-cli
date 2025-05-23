@@ -53,8 +53,7 @@ KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.DATA_KEYVAULT_SECRETS:
         'azure.keyvault.secrets._client#SecretClient{obj_name}',
     ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN:
-        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_securitydomain.'
-        '_patch#SecurityDomainClient{obj_name}',
+        'azure.keyvault.securitydomain._client#SecurityDomainClient{obj_name}',
 }
 
 
@@ -241,7 +240,7 @@ def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
 
 
 def data_plane_azure_keyvault_security_domain_client(cli_ctx, command_args):
-    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_securitydomain import SecurityDomainClient
+    from azure.keyvault.securitydomain import SecurityDomainClient
     vault_url, credential, _ = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN)
     command_args.pop('hsm_name', None)
