@@ -124,6 +124,10 @@ CONST_NETWORK_POLICY_CILIUM = "cilium"
 CONST_NETWORK_POLICY_CALICO = "calico"
 CONST_NETWORK_POLICY_NONE = "none"
 
+# network pod ip allocation mode
+CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL = "DynamicIndividual"
+CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK = "StaticBlock"
+
 # consts for addons
 # http application routing
 CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = "httpApplicationRouting"
