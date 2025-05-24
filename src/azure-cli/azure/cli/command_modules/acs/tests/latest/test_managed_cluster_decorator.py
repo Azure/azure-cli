@@ -8222,6 +8222,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             acr_name_or_id="test_attach_acr",
             subscription_id="1234-5678-9012",
             is_service_principal=False,
+            assignee_principal_type=None,
         )
 
     def test_put_mc(self):
@@ -8946,6 +8947,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                         acr_name_or_id="test_attach_acr",
                         subscription_id="test_subscription_id",
                         is_service_principal=False,
+                        assignee_principal_type=None,
                     ),
                     call(
                         self.cmd,
@@ -8954,6 +8956,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                         subscription_id="test_subscription_id",
                         detach=True,
                         is_service_principal=False,
+                        assignee_principal_type=None,
                     ),
                 ]
             )
@@ -11929,6 +11932,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             acr_name_or_id="test_attach_acr",
             subscription_id="1234-5678-9012",
             is_service_principal=False,
+            assignee_principal_type=None,
         )
 
     def test_put_mc(self):
