@@ -1307,8 +1307,7 @@ def load_arguments(self, _):
                 'monthly_retention',
                 'yearly_retention',
                 'week_of_year',
-                'make_backups_immutable',
-                'backup_storage_access_tier'])
+                'make_backups_immutable'])
 
         c.argument('weekly_retention',
                    help='Retention for the weekly backup. '
@@ -1331,12 +1330,6 @@ def load_arguments(self, _):
         c.argument('make_backups_immutable',
                    help='Whether to make the LTR backups immutable.',
                    arg_type=get_three_state_flag())
-
-        c.argument('backup_storage_access_tier',
-                   options_list=['--access-tier', '--backup-storage-access-tier'],
-                   arg_type=get_enum_type(["Hot", "Archive"]),
-                   help='The access tier of a LTR backup.'
-                   'Possible values = [Hot, Archive]')
 
     with self.argument_context('sql db ltr-backup') as c:
         c.argument('location_name',
