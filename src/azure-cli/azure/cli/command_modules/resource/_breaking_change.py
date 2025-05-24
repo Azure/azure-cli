@@ -18,20 +18,15 @@ register_other_breaking_change(
     'The return value will change in a future release of the resource commands. '
     'It will be the single created message object rather than the full array of message objects.')
 register_other_breaking_change(
-    'policy assignment delete',
-    'Behavior will change in a future release of the resource commands. '
-    'Bypassing the confirmation prompt will require providing the -y switch.')
-register_other_breaking_change(
     'policy assignment non-compliance-message delete',
-    'Behavior will change in a future release of the resource commands. '
-    'Bypassing the confirmation prompt will require providing the -y switch and '
-    'nothing will be returned instead of the remaining list of messages.')
+    'The return value will change in a future release of the resource commands. '
+    'It will be empty rather than the full array of remaining message objects.')
+register_other_breaking_change(
+    'policy assignment non-compliance-message create',
+    'The return value will change in a future release of the resource commands. '
+    'It will be the single created message object rather than the full array of message objects.')
 register_other_breaking_change(
     'policy definition delete',
-    'Behavior will change in a future release of the resource commands. '
-    'Bypassing the confirmation prompt will require providing the -y switch.')
-register_other_breaking_change(
-    'policy exemption delete',
     'Behavior will change in a future release of the resource commands. '
     'Bypassing the confirmation prompt will require providing the -y switch.')
 register_other_breaking_change(
