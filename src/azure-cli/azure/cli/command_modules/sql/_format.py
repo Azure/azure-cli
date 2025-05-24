@@ -421,3 +421,27 @@ def outbound_firewall_rule_table_format(result):
         ])
 
     return _apply_format(result, _outbound_firewall_rule_table_format)
+
+########################################################
+#        sql server soft-delete retention days         #
+########################################################
+
+
+def retention_days_table_format(result):
+    '''
+    Formats a single or list of server soft delete retention settings as summary results for display with "-o table".
+    '''
+
+    def _retention_days_table_format(result):
+        '''
+        Formats a single or list of server soft delete retention settings as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
+
+        return OrderedDict([
+            ('resourceGroupName', result['resourceGroupName']),
+            ('serverName', result['serverName']),
+            ('retentionDays', result['retentionDays'])
+        ])
+
+    return _apply_format(result, _retention_days_table_format)
