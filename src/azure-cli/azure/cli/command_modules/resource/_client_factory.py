@@ -3,8 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 def _resource_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+
+def _resource_deployments_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -76,7 +81,7 @@ def _resource_privatelinks_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_PRIVATELINKS)
 
 
-def cf_resource_groups(cli_ctx, _):
+def cf_resource_groups(cli_ctx, *_):
     return _resource_client_factory(cli_ctx).resource_groups
 
 
@@ -92,12 +97,16 @@ def cf_tags(cli_ctx, _):
     return _resource_client_factory(cli_ctx).tags
 
 
-def cf_deployments(cli_ctx, _):
-    return _resource_client_factory(cli_ctx).deployments
+def cf_deployments(cli_ctx, *_):
+    return _resource_deployments_client_factory(cli_ctx).deployments
 
 
-def cf_deployment_operations(cli_ctx, _):
-    return _resource_client_factory(cli_ctx).deployment_operations
+def cf_deployment_operations(cli_ctx, *_):
+    return _resource_deployments_client_factory(cli_ctx).deployment_operations
+
+
+def cf_deploymentscripts(cli_ctx, *_):
+    return _resource_deploymentscripts_client_factory(cli_ctx).deployment_scripts
 
 
 def cf_features(cli_ctx, _):
@@ -128,10 +137,6 @@ def cf_resource_links(cli_ctx, _):
     return _resource_links_client_factory(cli_ctx).resource_links
 
 
-def cf_resource_deploymentscripts(cli_ctx, _):
-    return _resource_deploymentscripts_client_factory(cli_ctx).deployment_scripts
-
-
 def cf_resource_managedapplications(cli_ctx, _):
     return _resource_managedapps_client_factory(cli_ctx).applications
 
@@ -160,11 +165,11 @@ def cf_hierarchy_settings(cli_ctx, _):
     return _resource_managementgroups_client_factory(cli_ctx).hierarchy_settings
 
 
-def cf_resource_templatespecs(cli_ctx, _):
+def cf_resource_templatespecs(cli_ctx, *_):
     return _resource_templatespecs_client_factory(cli_ctx).template_specs
 
 
-def cf_resource_deploymentstacks(cli_ctx, _):
+def cf_resource_deploymentstacks(cli_ctx, *_):
     return _resource_deploymentstacks_client_factory(cli_ctx).deployment_stacks
 
 
