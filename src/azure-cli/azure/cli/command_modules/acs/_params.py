@@ -582,7 +582,7 @@ def load_arguments(self, _):
         c.argument('disable_windows_gmsa', action='store_true')
         c.argument('attach_acr', acr_arg_type, validator=validate_acr, help='Attach an ACR to the AKS cluster.')
         c.argument('detach_acr', acr_arg_type, validator=validate_acr, help='Detach an ACR from the AKS cluster.')
-        c.argument('assignee_principal_type', validator=validate_acr, options_list=['--assignee-principal-type'],
+        c.argument('assignee_principal_type', validator=validate_acr, options_list=['--assignee-principal-type', '-t'],
                    help='Use this parameter in conjunction with --attach-acr to explicitly set the principal type in the ACR role assignment. This helps avoid RBAC-related errors by ensuring the correct principal type is applied. Valid values are \'User\', \'Group\' or \'ServicePrincipal\'')
         c.argument('disable_defender', action='store_true', validator=validate_defender_disable_and_enable_parameters)
         c.argument('enable_defender', action='store_true')
