@@ -37,6 +37,9 @@ examples:
   - name: Queue a local context as a Linux build on arm/v7 architecture, tag it, and push it to the registry.
     text: >
         az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry . --platform linux/arm/v7
+  - name: Queue a local context as a Linux build, tag it, and push it to the ABAC-based Repository Permission enabled registry and use the caller's Entra identity to authenticate with the source registry.
+    text: >
+        az acr build -t sample/hello-world:{{.Run.ID}} -r myregistry . --source-acr-auth-id [caller]
 """
 
 helps['acr check-health'] = """
@@ -49,6 +52,9 @@ examples:
   - name: Gets health state of the environment, without stopping on first error.
     text: >
         az acr check-health --ignore-errors
+  - name: Gets health state with target registry 'myregistry', and checks allowed permissions to the specific repository 'myrepo'.
+    text: >
+        az acr check-health -n myregistry --repository myrepo
 """
 
 helps['acr check-name'] = """
@@ -170,6 +176,9 @@ examples:
   - name: Create a managed container registry with the Standard SKU.
     text: >
         az acr create -n myregistry -g MyResourceGroup --sku Standard
+  - name: Create a registry with ABAC-based Repository Permission enabled.
+    text: >
+        az acr create -n myregistry -g MyResourceGroup --sku Standard --role-assignment-mode rbac-abac
 """
 
 helps['acr credential'] = """
@@ -806,6 +815,9 @@ examples:
   - name: Queue a remote OCI Artifact context and runs the task.
     text: >
         az acr run -r myregistry oci://myregistry.azurecr.io/myartifact:mytag -f hello-world.yaml
+  - name: Queue a run to execute a container command in an ABAC-based Repository Permission enabled registry and use the caller's Entra identity to authenticate with the source registry.
+    text: >
+        az acr run -r myregistry --cmd '$Registry/myimage' /dev/null --source-acr-auth-id [caller]
 """
 
 helps['acr scope-map'] = """
@@ -874,6 +886,9 @@ examples:
   - name: Get the details of an Azure Container Registry
     text: az acr show --name myregistry --resource-group MyResourceGroup
     crafted: true
+  - name: Check status of ABAC-based Repository Permission on a registry.
+    text: >
+        az acr show --name myregistry --resource-group MyResourceGroup --query roleAssignmentMode
 """
 
 helps['acr show-usage'] = """
@@ -932,11 +947,21 @@ examples:
         az acr task create -t acb:{{.Run.ID}} -n acb-win -r myregistry \\
             -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile \\
             --commit-trigger-enabled false --platform Windows/amd64
-  - name: Create a Linux multi-step task from a public GitHub repository with with both system-assigned and user-assigned managed identities and base image, git commit, pull request, and timer triggers that run the task at noon on Mondays through Fridays with the timer trigger name provided.
+  - name: Create a Linux multi-step task from a public GitHub repository with both system-assigned and user-assigned managed identities and base image, git commit, pull request, and timer triggers that run the task at noon on Mondays through Fridays with the timer trigger name provided.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r myregistry \\
             --pull-request-trigger-enabled true --schedule "dailyTimer:0 12 * * Mon-Fri" \\
             -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
+            --assign-identity [system] "/subscriptions/<subscriptionId>/resourcegroups/<myResourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<myUserAssignedIdentitiy>"
+  - name: Create a task without the source location in an ABAC-based Repository Permission registry and specify a system-assigned managed identity used for auth with the source registry.
+    text: >
+        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-acr-auth-id [system]
+  - name: Create a task without the source location in an ABAC-based Repository Permission registry and specify a user-assigned managed identity used for auth with the source registry.
+    text: >
+        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-acr-auth-id "/subscriptions/<subscriptionId>/resourcegroups/<myResourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<myUserAssignedIdentitiy>"
+  - name: Create a task without the source location in an ABAC-based Repository Permission registry with both system-assigned and user-assigned managed identities, and specify the system-assigned managed identity used for auth with the source registry.
+    text: |
+        az acr task create -n hello-world -r myregistry --cmd '$Registry/myimage' -c /dev/null --source-acr-auth-id [system]
             --assign-identity [system] "/subscriptions/<subscriptionId>/resourcegroups/<myResourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<myUserAssignedIdentitiy>"
 """
 
@@ -1211,6 +1236,12 @@ examples:
         az acr task update --image MyImage --name MyTask --registry myregistry \\
             --context https://github.com/Azure-Samples/acr-build-helloworld-node.git
     crafted: true
+  - name: Update the task using the system-assigned managed identity for authentication with the source registry in Azure Container Registry.
+    text: >
+        az acr task update -n MyTask -r myregistry --source-acr-auth-id [system]
+  - name: Update the task using the user-assigned managed identity for authentication with the source registry in Azure Container Registry.
+    text: >
+        az acr task update -n MyTask -r myregistry --source-acr-auth-id "/subscriptions/<subscriptionId>/resourcegroups/<myResourceGroup>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<myUserAssignedIdentitiy>"
 """
 
 helps['acr task update-run'] = """
@@ -1471,6 +1502,9 @@ examples:
   - name: Enable the administrator user account for an Azure Container Registry.
     text: >
         az acr update -n myregistry --admin-enabled true
+  - name: Turn on ABAC-based Repository Permission on an existing registry.
+    text: >
+        az acr update -n myregistry --role-assignment-mode rbac-abac
 """
 
 helps['acr webhook'] = """

@@ -309,6 +309,15 @@ examples:
     crafted: true
 """
 
+helps['cosmosdb offline-region'] = """
+type: command
+short-summary: Offline the specified region for the specified Azure Cosmos DB database account.
+examples:
+  - name: Offlines North Europe regional account for the Azure Cosmos DB database account MyCosmosDBDatabaseAccount.
+    text: az cosmosdb offline-region --name MyCosmosDBDatabaseAccount --resource-group MyResourceGroup --region NorthEurope
+    crafted: true
+"""
+
 helps['cosmosdb gremlin'] = """
 type: group
 short-summary: Manage Gremlin resources of Azure Cosmos DB account.

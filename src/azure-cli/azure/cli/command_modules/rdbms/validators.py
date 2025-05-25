@@ -19,7 +19,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operations import FirewallRulesOperations \
     as MySqlFirewallRulesOperations
-from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
+from ._client_factory import (cf_mysql_flexible_servers, cf_postgres_flexible_servers,
+                              cf_postgres_check_resource_availability)
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
@@ -304,13 +305,16 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
         logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
 
 
-def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
-                           standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
-                           version=None, instance=None, geo_redundant_backup=None,
+def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
+                           zone=None, standby_availability_zone=None, high_availability=None, subnet=None,
+                           public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None):
+                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
+                           password_auth=None, microsoft_entra_auth=None,
+                           admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+    validate_database_name(database_name)
     is_create = not instance
     if is_create:
         list_location_capability_info = get_postgres_location_capability_info(
@@ -347,8 +351,11 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
+    _pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+    is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
+                                 admin_name, admin_id, admin_type, instance)
 
 
 def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
@@ -389,13 +396,14 @@ def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throug
         if instance is not None:
             original_size = instance.storage.storage_size_gb
             if original_size > storage_gb:
-                raise CLIError('Updating storage cannot be smaller than the original storage size {} GiB.'
-                               .format(original_size))
+                raise CLIError('Decrease of current storage size isn\'t supported. Current storage size is {} GiB \
+                                and you\'re trying to set it to {} GiB.'
+                               .format(original_size, storage_gb))
         if not is_ssdv2:
             storage_sizes = get_postgres_storage_sizes(sku_info, tier)
             if storage_gb not in storage_sizes:
                 storage_sizes = sorted([int(size) for size in storage_sizes])
-                raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
+                raise CLIError('Incorrect value for --storage-size : Allowed values (in GiB) : {}'
                                .format(storage_sizes))
 
     # ssdv2 range validation
@@ -420,29 +428,26 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     storage = storage_gib * 1.07374182
     # find min and max values for IOPS
     min_iops = sku_info[sku_tier]["supported_storageV2_iops"]
-    if sku_info[sku_tier]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
-        max_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
-    else:
-        max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
+    supported_max_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
+    calculated_max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
+    max_iops = min(supported_max_iops, calculated_max_iops)
 
     if not min_iops <= storage_iops <= max_iops:
         raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'
                        .format(min_iops, max_iops))
 
-    # find min and max values for throughout
-    min_throughout = sku_info[sku_tier]["supported_storageV2_throughput"]
+    # find min and max values for throughput
+    min_throughput = sku_info[sku_tier]["supported_storageV2_throughput"]
+    supported_max_throughput = sku_info[sku_tier]["supported_storageV2_throughput_max"]
     if storage > 6:
-        max_storage_throughout = math.floor(max(0.25 * storage_iops, min_throughout))
+        max_storage_throughput = math.floor(max(0.25 * storage_iops, min_throughput))
     else:
-        max_storage_throughout = min_throughout
-    if sku_info[sku_tier]["supported_storageV2_throughput_max"] < max_storage_throughout:
-        max_throughout = sku_info[sku_tier]["supported_storageV2_throughput_max"]
-    else:
-        max_throughout = max_storage_throughout
+        max_storage_throughput = min_throughput
+    max_throughput = min(supported_max_throughput, max_storage_throughput)
 
-    if not min_throughout <= storage_throughput <= max_throughout:
+    if not min_throughput <= storage_throughput <= max_throughput:
         raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'
-                       .format(min_throughout, max_throughout))
+                       .format(min_throughput, max_throughput))
 
 
 def _pg_tier_validator(tier, sku_info):
@@ -465,23 +470,27 @@ def compare_sku_names(sku_1, sku_2):
         return -1
 
     # the case where version number is the same, we want to sort by the core number
-    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
-        return 1
     if int(sku_2_match.group('core_number')) < int(sku_1_match.group('core_number')):
+        return 1
+    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
         return -1
 
     return 0
 
 
 def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
+    additional_error = ''
     if instance is not None:
         tier = instance.sku.tier if tier is None else tier
+    else:
+        additional_error = 'When --tier is not specified, it defaults to GeneralPurpose. '
     if sku_name:
         skus = [item.lower() for item in get_postgres_skus(sku_info, tier.lower())]
         if sku_name.lower() not in skus:
-            raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
-                           'Specify --tier if you did not. Or CLI will set GeneralPurpose as the default tier. '
-                           'Allowed values : {}'.format(tier, sorted(skus, key=cmp_to_key(compare_sku_names))))
+            raise CLIError('Incorrect value for --sku-name. The SKU name does not exist in {} tier. {}'
+                           'Provide a valid SKU name for this tier, or specify --tier with the right tier for the '
+                           'SKU name chosen. Allowed values : {}'
+                           .format(tier, additional_error, sorted(skus, key=cmp_to_key(compare_sku_names))))
 
 
 def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None, storage_size=None):
@@ -501,20 +510,14 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
-def _pg_version_validator(version, versions, is_create):
+def _pg_version_validator(version, versions):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
         if version == '12':
-            logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
-                           "the option to select version 12 will be removed in the near future. "
+            raise CLIError("Support for PostgreSQL 12 has officially ended. "
                            "We recommend selecting PostgreSQL 13 or a later version for "
                            "all future operations.")
-
-    if is_create:
-        # Warning for upcoming breaking change to default value of pg version
-        logger.warning("The default value for the PostgreSQL server major version "
-                       "will be updating to 17 in the near future.")
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
@@ -554,6 +557,11 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
                                  "Please provide --backup-identity and --backup-key together.")
 
+    if bool(byok_identity is not None) and bool(backup_byok_identity is not None) and \
+       byok_identity.lower() == backup_byok_identity.lower():
+        raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
+                                 "Please provide different identities for --identity and --backup-identity.")
+
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
        (byok_key or backup_byok_key):
@@ -568,6 +576,14 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         if instance is None and (bool(byok_key is not None) ^ bool(backup_byok_key is not None)):
             raise ArgumentUsageError("Please provide both primary as well as geo-back user assigned identity "
                                      "and keyvault key to enable Data encryption for geo-redundant backup.")
+        if instance is not None and (bool(byok_identity is None) ^ bool(backup_byok_identity is None)):
+            primary_user_assigned_identity_id = byok_identity if byok_identity else \
+                instance.data_encryption.primary_user_assigned_identity_id
+            geo_backup_user_assigned_identity_id = backup_byok_identity if backup_byok_identity else \
+                instance.data_encryption.geo_backup_user_assigned_identity_id
+            if primary_user_assigned_identity_id.lower() == geo_backup_user_assigned_identity_id.lower():
+                raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
+                                         "Please provide different identities for --identity and --backup-identity.")
 
 
 def _network_arg_validator(subnet, public_access):
@@ -682,6 +698,15 @@ def firewall_rule_name_validator(ns):
                               "and no more than 128 characters in length. ")
 
 
+def postgres_firewall_rule_name_validator(ns):
+    if not ns.firewall_rule_name:
+        return
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', ns.firewall_rule_name):
+        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
+                              "Additionally, the name of the firewall rule must be at least 1, "
+                              "and no more than 80 characters in length. Firewall rule must not end with '-'.")
+
+
 def validate_server_name(db_context, server_name, type_):
     client = db_context.cf_availability(db_context.cmd.cli_ctx, '_')
 
@@ -704,6 +729,14 @@ def validate_server_name(db_context, server_name, type_):
 
     if not result.name_available:
         raise ValidationError(result.message)
+
+
+def validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name):
+    client = cf_postgres_check_resource_availability(cmd.cli_ctx, '_')
+    resource_type = 'Microsoft.DBforPostgreSQL/flexibleServers/virtualendpoints'
+    result = client.execute(name_availability_request={'name': virtual_endpoint_name, 'type': resource_type})
+    if result and result.name_available is False:
+        raise ValidationError("Virtual endpoint's base name is not available.")
 
 
 def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_resource_group_name, target_server_name):
@@ -831,7 +864,8 @@ def validate_public_access_server(cmd, client, resource_group_name, server_name)
 
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
-        raise ValidationError("Firewall rule operations cannot be requested for a private access enabled server.")
+        raise ValidationError("Firewall rule operations cannot be requested for "
+                              "a server that doesn't have public access enabled.")
 
 
 def _validate_identity(cmd, namespace, identity):
@@ -897,6 +931,22 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
 
 
+def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,
+                                 admin_name, admin_id, admin_type, instance):
+    if instance is None:
+        if (password_auth is not None and password_auth.lower() == 'disabled') and not is_microsoft_entra_auth_enabled:
+            raise CLIError('Need to have an authentication method enabled, please set --microsoft-entra-auth '
+                           'to "Enabled" or --password-auth to "Enabled".')
+
+        if not is_microsoft_entra_auth_enabled and (admin_name or admin_id or admin_type):
+            raise CLIError('To provide values for --admin-object-id, --admin-display-name, and --admin-type '
+                           'please set --microsoft-entra-auth to "Enabled".')
+        if (admin_name is not None or admin_id is not None or admin_type is not None) and \
+           not (admin_name is not None and admin_id is not None and admin_type is not None):
+            raise CLIError('To add Microsoft Entra admin, please provide values for --admin-object-id, '
+                           '--admin-display-name, and --admin-type.')
+
+
 def check_resource_group(resource_group_name):
     # check if rg is already null originally
     if not resource_group_name:
@@ -933,3 +983,10 @@ def validate_backup_name(backup_name):
     # check if backup_name exceeds 128 characters
     if len(backup_name) > 128:
         raise CLIError('Backup name cannot exceed 128 characters.')
+
+
+def validate_database_name(database_name):
+    if database_name is not None and not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]{0,30}$', database_name):
+        raise ValidationError("Database name must begin with a letter (a-z) or underscore (_). "
+                              "Subsequent characters in a name can be letters, digits (0-9), or underscores. "
+                              "Database name length must be less than 32 characters.")

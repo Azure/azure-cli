@@ -216,60 +216,69 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
     from concurrent.futures import ThreadPoolExecutor, as_completed
     from packaging.version import parse  # pylint: disable=no-name-in-module,import-error
     all_images = []
-    client = _compute_client_factory(cli_ctx)
     if location is None:
         location = get_one_of_subscription_locations(cli_ctx)
 
     def _load_extension_images_from_publisher(publisher):
         from azure.core.exceptions import ResourceNotFoundError
+        from .aaz.latest.vm.extension.image import ListNames as _ListTypes, ListVersions as _ListVersions
         try:
-            types = client.virtual_machine_extension_images.list_types(location, publisher)
+            types = _ListTypes(cli_ctx=cli_ctx)(command_args={
+                'location': location,
+                'publisher_name': publisher
+            })
         except ResourceNotFoundError as e:
             # PIR image publishers might not have any extension images, exception could raise
             logger.warning(str(e))
             types = []
         if name:
-            types = [t for t in types if _matched(name, t.name, partial_match)]
+            types = [t for t in types if _matched(name, t['name'], partial_match)]
         for t in types:
             try:
-                versions = client.virtual_machine_extension_images.list_versions(
-                    location, publisher, t.name)
+                versions = _ListVersions(cli_ctx=cli_ctx)(command_args={
+                    'location': location,
+                    'publisher_name': publisher,
+                    'name': t['name']
+                })
             except ResourceNotFoundError as e:
                 logger.warning(str(e))
                 continue
             if version:
-                versions = [v for v in versions if _matched(version, v.name, partial_match)]
+                versions = [v for v in versions if _matched(version, v['name'], partial_match)]
 
             if show_latest:
                 # pylint: disable=no-member
-                versions.sort(key=lambda v: parse(v.name), reverse=True)
+                versions.sort(key=lambda v: parse(v['name']), reverse=True)
                 try:
                     all_images.append({
                         'publisher': publisher,
-                        'name': t.name,
-                        'version': versions[0].name})
+                        'name': t['name'],
+                        'version': versions[0]['name']})
                 except IndexError:
                     pass  # if no versions for this type continue to next type.
             else:
                 for v in versions:
                     all_images.append({
                         'publisher': publisher,
-                        'name': t.name,
-                        'version': v.name})
+                        'name': t['name'],
+                        'version': v['name']})
 
-    publishers = client.virtual_machine_images.list_publishers(location=location)
+    from .aaz.latest.vm.image import ListPublishers
+    publishers = ListPublishers(cli_ctx=cli_ctx)(command_args={
+        'location': location
+    })
     if publisher:
-        publishers = [p for p in publishers if _matched(publisher, p.name, partial_match)]
+        publishers = [p for p in publishers if _matched(publisher, p['name'], partial_match)]
 
     publisher_num = len(publishers)
     if publisher_num > 1:
         with ThreadPoolExecutor(max_workers=_get_thread_count()) as executor:
             tasks = [executor.submit(_load_extension_images_from_publisher,
-                                     p.name) for p in publishers]
+                                     p['name']) for p in publishers]
             for t in as_completed(tasks):
                 t.result()  # don't use the result but expose exceptions from the threads
     elif publisher_num == 1:
-        _load_extension_images_from_publisher(publishers[0].name)
+        _load_extension_images_from_publisher(publishers[0]['name'])
 
     return all_images
 

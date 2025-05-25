@@ -20,6 +20,10 @@ helps['ams account'] = """
 helps['ams account create'] = """
     type: command
     short-summary: Create an Azure Media Services account.
+    examples:
+        - name: Create an Azure Media Services account.
+          text: >
+            az ams account create -n ams -g rg --storage-account mystorage -l westus
 """
 
 helps['ams account update'] = """
@@ -119,6 +123,10 @@ helps['ams account storage'] = """
 helps['ams account storage add'] = """
     type: command
     short-summary: Attach a secondary storage to an Azure Media Services account.
+    examples:
+        - name: Attach a secondary storage to an Azure Media Services account.
+          text: >
+            az ams account storage add -a myAMS -g rg -n myStorage
 """
 
 helps['ams account storage remove'] = """
@@ -254,6 +262,10 @@ helps['ams asset-track show'] = """
 helps['ams asset-track create'] = """
     type: command
     short-summary: Create a track for an Azure Media Services asset.
+    examples:
+        - name: Create a track for an Azure Media Services asset.
+          text: >
+            az ams asset-track create -a myAMS -g rg --track-name track --track-type Text --asset-name asset --file-name assetTrack.ttml
 """
 
 helps['ams asset-track update'] = """
@@ -288,6 +300,10 @@ helps['ams asset list-streaming-locators'] = """
 helps['ams asset create'] = """
     type: command
     short-summary: Create an asset.
+    examples:
+        - name: Create an asset.
+          text: >
+            az ams asset create -a myAMS -n asset -g rg
 """
 
 helps['ams asset update'] = """
@@ -455,6 +471,10 @@ helps['ams streaming-locator'] = """
 helps['ams streaming-locator create'] = """
     type: command
     short-summary: Create a streaming locator.
+    examples:
+        - name: Create a streaming locator.
+          text: >
+            az ams streaming-locator create -n mylocator -a ams -g rg --streaming-policy-name Predefined_ClearStreamingOnly --asset-name asset
 """
 
 helps['ams streaming-locator list'] = """
@@ -485,6 +505,10 @@ helps['ams streaming-policy'] = """
 helps['ams streaming-policy create'] = """
     type: command
     short-summary: Create a streaming policy.
+    examples:
+        - name: Create a streaming policy.
+          text: >
+            az ams streaming-policy create -a ams -n mypolicy -g rg --no-encryption-protocols HLS
 """
 
 helps['ams streaming-policy list'] = """
@@ -525,6 +549,10 @@ helps['ams streaming-endpoint list'] = """
 helps['ams streaming-endpoint create'] = """
     type: command
     short-summary: Create a streaming endpoint.
+    examples:
+        - name: Create a streaming endpoint.
+          text: >
+            az ams streaming-endpoint create -g rg -a ams -n myendpoint --scale-units 6
 """
 
 helps['ams streaming-endpoint wait'] = """
@@ -543,6 +571,10 @@ helps['ams streaming-endpoint akamai'] = """
 helps['ams streaming-endpoint akamai add'] = """
     type: command
     short-summary: Add an AkamaiAccessControl to an existing streaming endpoint.
+    examples:
+        - name: Add an AkamaiAccessControl to an existing streaming endpoint.
+          text: >
+            az ams streaming-endpoint akamai add -g rg -a ams -n myendpoint --identifier id1 --expiration xxxT16:00:00-08:00 --base64-key dGVzdGlkMQ==
 """
 
 helps['ams streaming-endpoint show'] = """
@@ -578,6 +610,10 @@ helps['ams live-event'] = """
 helps['ams live-event create'] = """
     type: command
     short-summary: Create a live event.
+    examples:
+        - name: Create a live event.
+          text: >
+            az ams live-event create -a myAMS -n liveevent -g rg --ips AllowAll --streaming-protocol FragmentedMP4
 """
 
 helps['ams live-event start'] = """
@@ -648,6 +684,10 @@ helps['ams live-output'] = """
 helps['ams live-output create'] = """
     type: command
     short-summary: Create a live output.
+    examples:
+        - name: Create a live output.
+          text: >
+            az ams live-output create -a myAMS -n liveoutput -g rg --asset-name asset --live-event-name liveevent --archive-window-length PT5M --manifest-name man
 """
 
 helps['ams live-output show'] = """

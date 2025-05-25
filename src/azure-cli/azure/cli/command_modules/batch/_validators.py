@@ -332,8 +332,7 @@ def validate_client_parameters(cmd, namespace):
         # check to see if we are using the default credentials
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
-        resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
-        token_credential, _, _ = profile.get_login_credentials(resource=resource)
+        token_credential, _, _ = profile.get_login_credentials()
 
         # if not we query for the account key
         if token_credential is None:

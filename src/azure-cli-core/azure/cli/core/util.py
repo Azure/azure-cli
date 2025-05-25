@@ -256,8 +256,8 @@ def is_azure_connection_error(error_msg):
 
 # pylint: disable=inconsistent-return-statements
 def empty_on_404(ex):
-    from msrestazure.azure_exceptions import CloudError
-    if isinstance(ex, CloudError) and ex.status_code == 404:
+    from azure.core.exceptions import HttpResponseError
+    if isinstance(ex, HttpResponseError) and ex.status_code == 404:
         return None
     raise ex
 

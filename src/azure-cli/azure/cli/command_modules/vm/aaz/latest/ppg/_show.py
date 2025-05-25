@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/proximityplacementgroups/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/proximityplacementgroups/{}", "2024-07-01"],
         ]
     }
 
@@ -127,7 +127,7 @@ class Show(AAZCommand):
                     "includeColocationStatus", self.ctx.args.include_colocation_status,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }

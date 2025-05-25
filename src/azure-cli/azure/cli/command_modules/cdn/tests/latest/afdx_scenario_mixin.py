@@ -133,6 +133,12 @@ class CdnAfdScenarioMixin:
 
         return self.cmd(command, checks)
 
+    def afd_rule_action_show_cmd(self, resource_group_name, rule_set_name, rule_name, profile_name, checks=None):
+        command = f'az afd rule action list -g {resource_group_name} --rule-set-name {rule_set_name} ' \
+                  f'--profile-name {profile_name} -n {rule_name}'
+
+        return self.cmd(command, checks)
+
     def afd_rule_add_cmd(self, resource_group_name, rule_set_name, rule_name, profile_name, options=None, checks=None):
         command = f'az afd rule create -g {resource_group_name} --rule-set-name {rule_set_name} ' \
                   f'--profile-name {profile_name} --rule-name {rule_name}'

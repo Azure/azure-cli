@@ -142,6 +142,9 @@ def load_arguments(self, _):
         c.argument('failover_parameters', options_list=['--failover-policies'], validator=validate_failover_policies,
                    help="space-separated failover policies in 'regionName=failoverPriority' format. Number of policies must match the number of regions the account is currently replicated. All regionName values must match those of the regions the account is currently replicated. All failoverPriority values must be unique. There must be one failoverPriority value zero (0) specified. All remaining failoverPriority values can be any positive integer and they don't have to be contiguos, neither written in any specific order. E.g eastus=0 westus=1", nargs='+')
 
+    with self.argument_context('cosmosdb offline-region') as c:
+        c.argument('region', help='The region to offline for the CosmosDB account.')
+
     with self.argument_context('cosmosdb network-rule list') as c:
         c.argument('account_name', id_part=None)
 
@@ -163,7 +166,7 @@ def load_arguments(self, _):
         c.argument('throughput', type=int, help='Offer Throughput (RU/s)')
         c.argument('partition_key_path', help='Partition Key Path, e.g., \'/properties/name\'')
         c.argument('client_encryption_policy', options_list=['--cep'], type=shell_safe_json_parse, completer=FilesCompleter(), validator=validate_client_encryption_policy, help='Client Encryption Policy, you can enter it as a string or as a file, e.g., --cep @policy-file.json or ' + SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE)
-        c.argument('vector_embedding_policy', options_list=['--vector-embeddings'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Vector Encryption Policy, you can enter it as a string or as a file, e.g., --vector-embeddings @policy-file.json or ' + SQL_VECTOR_EMBEDDING_POLICY_EXAMPLE)
+        c.argument('vector_embedding_policy', options_list=['--vector-embeddings'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Vector Embedding Policy, you can enter it as a string or as a file, e.g., --vector-embeddings @policy-file.json or ' + SQL_VECTOR_EMBEDDING_POLICY_EXAMPLE)
         c.argument('indexing_policy', type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)')
         c.argument('default_ttl', type=int, help='Default TTL. Provide 0 to disable.')
 
@@ -218,7 +221,7 @@ def load_arguments(self, _):
         c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
         c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or ' + SQL_INDEXING_POLICY_EXAMPLE)
         c.argument('client_encryption_policy', options_list=['--cep'], type=shell_safe_json_parse, completer=FilesCompleter(), validator=validate_client_encryption_policy, help='Client Encryption Policy, you can enter it as a string or as a file, e.g., --cep @policy-file.json or ' + SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE)
-        c.argument('vector_embedding_policy', options_list=['--vector-embeddings'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Vector Encryption Policy, you can enter it as a string or as a file, e.g., --vector-embeddings @policy-file.json or ' + SQL_VECTOR_EMBEDDING_POLICY_EXAMPLE)
+        c.argument('vector_embedding_policy', options_list=['--vector-embeddings'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Vector Embedding Policy, you can enter it as a string or as a file, e.g., --vector-embeddings @policy-file.json or ' + SQL_VECTOR_EMBEDDING_POLICY_EXAMPLE)
         c.argument('unique_key_policy', options_list=['--unique-key-policy', '-u'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Unique Key Policy, you can enter it as a string or as a file, e.g., --unique-key-policy @policy-file.json or ' + SQL_UNIQUE_KEY_POLICY_EXAMPLE)
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('max_throughput', max_throughput_type)

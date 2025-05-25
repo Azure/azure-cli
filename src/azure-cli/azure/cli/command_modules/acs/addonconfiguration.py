@@ -770,11 +770,11 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
 def validate_data_collection_settings(dataCollectionSettings):
     if 'interval' in dataCollectionSettings.keys():
         intervalValue = dataCollectionSettings["interval"]
-    if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:  # pylint: disable=used-before-assignment
-        raise InvalidArgumentValueError('interval format must be in <number>m')
-    intervalValue = int(intervalValue.rstrip("m"))
-    if intervalValue <= 0 or intervalValue > 30:
-        raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
+        if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:  # pylint: disable=used-before-assignment
+            raise InvalidArgumentValueError('interval format must be in <number>m')
+        intervalValue = int(intervalValue.rstrip("m"))
+        if intervalValue <= 0 or intervalValue > 30:
+            raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
     if 'namespaceFilteringMode' in dataCollectionSettings.keys():
         namespaceFilteringModeValue = dataCollectionSettings["namespaceFilteringMode"].lower()
         if namespaceFilteringModeValue not in ["off", "exclude", "include"]:
