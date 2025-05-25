@@ -78,44 +78,44 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
                                     action='store_true', validator=add_progress_callback)
     large_file_share_type = CLIArgumentType(
-        action='store_true', min_api='2019-04-01',
+        action='store_true',
         help='Enable the capability to support large file shares with more than 5 TiB capacity for storage account.'
              'Once the property is enabled, the feature cannot be disabled. Currently only supported for LRS and '
              'ZRS replication types, hence account conversions to geo-redundant accounts would not be possible. '
              'For more information, please refer to https://go.microsoft.com/fwlink/?linkid=2086047.')
-    adds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2019-04-01',
+    adds_type = CLIArgumentType(arg_type=get_three_state_flag(),
                                 arg_group='Azure Files Identity Based Authentication',
                                 help='Enable Azure Files Active Directory Domain Service Authentication for '
                                      'storage account. When --enable-files-adds is set to true, Azure Active '
                                      'Directory Properties arguments must be provided.')
-    aadkerb_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2022-05-01',
+    aadkerb_type = CLIArgumentType(arg_type=get_three_state_flag(),
                                    arg_group='Azure Files Identity Based Authentication',
                                    help='Enable Azure Files Active Directory Domain Service Kerberos Authentication '
                                         'for the storage account')
-    aadds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-11-01',
+    aadds_type = CLIArgumentType(arg_type=get_three_state_flag(),
                                  arg_group='Azure Files Identity Based Authentication',
                                  help='Enable Azure Active Directory Domain Services authentication for Azure Files')
-    domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+    domain_name_type = CLIArgumentType(arg_group="Azure Active Directory Properties",
                                        help="Specify the primary domain that the AD DNS server is authoritative for. "
                                             "Required when --enable-files-adds is set to True")
-    net_bios_domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+    net_bios_domain_name_type = CLIArgumentType(arg_group="Azure Active Directory Properties",
                                                 help="Specify the NetBIOS domain name. "
                                                      "Required when --enable-files-adds is set to True")
-    forest_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+    forest_name_type = CLIArgumentType(arg_group="Azure Active Directory Properties",
                                        help="Specify the Active Directory forest to get. "
                                             "Required when --enable-files-adds is set to True")
-    domain_guid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+    domain_guid_type = CLIArgumentType(arg_group="Azure Active Directory Properties",
                                        help="Specify the domain GUID. Required when --enable-files-adds is set to True")
-    domain_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+    domain_sid_type = CLIArgumentType(arg_group="Azure Active Directory Properties",
                                       help="Specify the security identifier (SID). Required when --enable-files-adds "
                                            "is set to True")
-    azure_storage_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+    azure_storage_sid_type = CLIArgumentType(arg_group="Azure Active Directory Properties",
                                              help="Specify the security identifier (SID) for Azure Storage. "
                                                   "Required when --enable-files-adds is set to True")
-    sam_account_name_type = CLIArgumentType(min_api='2021-08-01', arg_group="Azure Active Directory Properties",
+    sam_account_name_type = CLIArgumentType(arg_group="Azure Active Directory Properties",
                                             help="Specify the Active Directory SAMAccountName for Azure Storage.")
-    t_account_type = self.get_models('ActiveDirectoryPropertiesAccountType', resource_type=ResourceType.MGMT_STORAGE)
-    account_type_type = CLIArgumentType(min_api='2021-08-01', arg_group="Azure Active Directory Properties",
+    t_account_type = self.get_models('AccountType', resource_type=ResourceType.MGMT_STORAGE)
+    account_type_type = CLIArgumentType(arg_group="Azure Active Directory Properties",
                                         arg_type=get_enum_type(t_account_type),
                                         help="Specify the Active Directory account type for Azure Storage.")
     exclude_pattern_type = CLIArgumentType(arg_group='Additional Flags', help='Exclude these files where the name '
@@ -137,13 +137,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     t_routing_choice = self.get_models('RoutingChoice', resource_type=ResourceType.MGMT_STORAGE)
     routing_choice_type = CLIArgumentType(
         arg_group='Routing Preference', arg_type=get_enum_type(t_routing_choice),
-        help='Routing Choice defines the kind of network routing opted by the user.',
-        min_api='2019-06-01')
+        help='Routing Choice defines the kind of network routing opted by the user.')
     publish_microsoft_endpoints_type = CLIArgumentType(
-        arg_group='Routing Preference', arg_type=get_three_state_flag(), min_api='2019-06-01',
+        arg_group='Routing Preference', arg_type=get_three_state_flag(),
         help='A boolean flag which indicates whether microsoft routing storage endpoints are to be published.')
     publish_internet_endpoints_type = CLIArgumentType(
-        arg_group='Routing Preference', arg_type=get_three_state_flag(), min_api='2019-06-01',
+        arg_group='Routing Preference', arg_type=get_three_state_flag(),
         help='A boolean flag which indicates whether internet routing storage endpoints are to be published.')
 
     umask_type = CLIArgumentType(
@@ -190,23 +189,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         type=get_datetime_type(False))
 
     allow_shared_key_access_type = CLIArgumentType(
-        arg_type=get_three_state_flag(), options_list=['--allow-shared-key-access', '-k'], min_api='2019-04-01',
+        arg_type=get_three_state_flag(), options_list=['--allow-shared-key-access', '-k'],
         help='Indicate whether the storage account permits requests to be authorized with the account access key via '
              'Shared Key. If false, then all requests, including shared access signatures, must be authorized with '
              'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
 
     sas_expiration_period_type = CLIArgumentType(
-        options_list=['--sas-expiration-period', '--sas-exp'], min_api='2021-02-01',
+        options_list=['--sas-expiration-period', '--sas-exp'],
         help='Expiration period of the SAS Policy assigned to the storage account, DD.HH:MM:SS.'
     )
 
     key_expiration_period_in_days_type = CLIArgumentType(
-        options_list=['--key-expiration-period-in-days', '--key-exp-days'], min_api='2021-02-01', type=int,
+        options_list=['--key-expiration-period-in-days', '--key-exp-days'], type=int,
         help='Expiration period in days of the Key Policy assigned to the storage account'
     )
 
     allow_cross_tenant_replication_type = CLIArgumentType(
-        arg_type=get_three_state_flag(), options_list=['--allow-cross-tenant-replication', '-r'], min_api='2021-04-01',
+        arg_type=get_three_state_flag(), options_list=['--allow-cross-tenant-replication', '-r'],
         help='Allow or disallow cross AAD tenant object replication. Set this property to true for new or existing '
              'accounts only if object replication policies will involve storage accounts in different AAD tenants. '
              'If not specified, the default value is false for new accounts to follow best security practices.')
@@ -216,7 +215,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     default_share_permission_type = CLIArgumentType(
         options_list=['--default-share-permission', '-d'],
         arg_type=get_enum_type(t_share_permission),
-        min_api='2020-08-01-preview',
         arg_group='Azure Files Identity Based Authentication',
         help='Default share permission for users using Kerberos authentication if RBAC role is not assigned.')
 
@@ -225,7 +223,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     t_rehydrate_priority = self.get_sdk('_generated.models._azure_blob_storage_enums#RehydratePriority',
                                         resource_type=ResourceType.DATA_STORAGE_BLOB)
     tier_type = CLIArgumentType(
-        arg_type=get_enum_type(t_blob_tier), min_api='2019-02-02',
+        arg_type=get_enum_type(t_blob_tier),
         help='The tier value to set the blob to. For page blob, the tier correlates to the size of the blob '
              'and number of allowed IOPS. Possible values are P10, P15, P20, P30, P4, P40, P50, P6, P60, P70, P80 '
              'and this is only applicable to page blobs on premium storage accounts; For block blob, possible '
@@ -242,7 +240,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     )
 
     immutability_period_since_creation_in_days_type = CLIArgumentType(
-        options_list=['--immutability-period-in-days', '--immutability-period'], min_api='2021-06-01',
+        options_list=['--immutability-period-in-days', '--immutability-period'],
         help='The immutability period for the blobs in the container since the policy creation, in days.'
     )
 
@@ -251,7 +249,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         resource_type=ResourceType.MGMT_STORAGE)
     immutability_policy_state_type = CLIArgumentType(
         arg_type=get_enum_type(account_immutability_policy_state_enum),
-        options_list='--immutability-state', min_api='2021-06-01',
+        options_list='--immutability-state',
         help='Defines the mode of the policy. Disabled state disables the policy, '
         'Unlocked state allows increase and decrease of immutability retention time '
         'and also allows toggling allow-protected-append-write property, '
@@ -329,16 +327,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('kind', help='Indicate the type of storage account.',
                    arg_type=get_enum_type(t_kind),
                    default='StorageV2' if self.cli_ctx.cloud.profile == 'latest' else 'Storage')
-        c.argument('https_only', arg_type=get_three_state_flag(), min_api='2019-04-01',
+        c.argument('https_only', arg_type=get_three_state_flag(),
                    help='Allow https traffic only to storage service if set to true. The default value is true.')
-        c.argument('https_only', arg_type=get_three_state_flag(), max_api='2018-11-01',
-                   help='Allow https traffic only to storage service if set to true. The default value is false.')
         c.argument('tags', tags_type)
         c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
-        c.argument('enable_sftp', arg_type=get_three_state_flag(), min_api='2021-08-01',
+        c.argument('enable_sftp', arg_type=get_three_state_flag(),
                    help='Enable Secure File Transfer Protocol.')
-        c.argument('enable_local_user', arg_type=get_three_state_flag(), min_api='2021-08-01',
+        c.argument('enable_local_user', arg_type=get_three_state_flag(),
                    help='Enable local user features.')
         c.argument('enable_files_aadds', aadds_type)
         c.argument('enable_files_adds', adds_type)
@@ -356,18 +352,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    options_list=['--enable-hierarchical-namespace', '--hns',
                                  c.deprecate(target='--hierarchical-namespace', redirect='--hns', hide=True)],
                    help=" Allow the blob service to exhibit filesystem semantics. This property can be enabled only "
-                   "when storage account kind is StorageV2.",
-                   min_api='2018-02-01')
+                   "when storage account kind is StorageV2.")
         c.argument('encryption_key_type_for_table', arg_type=get_enum_type(['Account', 'Service']),
                    help='Set the encryption key type for Table service. "Account": Table will be encrypted '
                         'with account-scoped encryption key. "Service": Table will always be encrypted with '
                         'service-scoped keys. Currently the default encryption key type is "Service".',
-                   min_api='2019-06-01', options_list=['--encryption-key-type-for-table', '-t'])
+                   options_list=['--encryption-key-type-for-table', '-t'])
         c.argument('encryption_key_type_for_queue', arg_type=get_enum_type(['Account', 'Service']),
                    help='Set the encryption key type for Queue service. "Account": Queue will be encrypted '
                         'with account-scoped encryption key. "Service": Queue will always be encrypted with '
                         'service-scoped keys. Currently the default encryption key type is "Service".',
-                   min_api='2019-06-01', options_list=['--encryption-key-type-for-queue', '-q'])
+                   options_list=['--encryption-key-type-for-queue', '-q'])
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
@@ -375,7 +370,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_three_state_flag(),
                    help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
                    'platform managed keys for data at rest.')
-        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(),
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
                    'If not specified, the default value is false for new accounts to follow best security practices. '
                    'When true, containers in the account may '
@@ -387,7 +382,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'While the default setting is TLS 1.0 for this property, '
                         'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
-        c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
+        c.argument('edge_zone', edge_zone_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
                    help='The identity type.')
         c.argument('user_identity_id', arg_group='Identity',
@@ -397,9 +392,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
-        c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), min_api='2021-01-01',
+        c.argument('enable_nfs_v3', arg_type=get_three_state_flag(),
                    help='NFS 3.0 protocol support enabled if sets to true.')
-        c.argument('enable_alw', arg_type=get_three_state_flag(), min_api='2021-06-01',
+        c.argument('enable_alw', arg_type=get_three_state_flag(),
                    help='The account level immutability property. The property is immutable and can only be set to true'
                         ' at the account creation time. When set to true, it enables object level immutability for all '
                         'the containers in the account by default.',
@@ -414,18 +409,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=validate_immutability_arguments)
         c.argument('allow_protected_append_writes', arg_type=get_three_state_flag(),
                    options_list=['--allow-protected-append-writes', '--allow-append', '-w'],
-                   min_api='2021-06-01',
                    help='This property can only be changed for disabled and unlocked time-based retention policies. '
                         'When enabled, new blocks can be written to an append blob while maintaining immutability '
                         'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
                         'modified or deleted.',
                    arg_group='Account Level Immutability',
                    validator=validate_immutability_arguments)
-        c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
+        c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum),
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
         c.argument('dns_endpoint_type', arg_type=get_enum_type(t_dns_endpoint_type),
-                   options_list=['--dns-endpoint-type', '--endpoint'], min_api='2021-09-01',
+                   options_list=['--dns-endpoint-type', '--endpoint'],
                    help='Allow you to specify the type of endpoint. Set this to AzureDNSZone to create a large number '
                         'of accounts in a single subscription, which creates accounts in an Azure DNS Zone and the '
                         'endpoint URL will have an alphanumeric DNS Zone identifier.')
@@ -461,9 +455,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('use_subdomain', help='Specify whether to use indirect CNAME validation.',
                    arg_type=get_enum_type(['true', 'false']))
         c.argument('tags', tags_type, default=None)
-        c.argument('enable_sftp', arg_type=get_three_state_flag(), min_api='2021-08-01',
+        c.argument('enable_sftp', arg_type=get_three_state_flag(),
                    help='Enable Secure File Transfer Protocol.')
-        c.argument('enable_local_user', arg_type=get_three_state_flag(), min_api='2021-08-01',
+        c.argument('enable_local_user', arg_type=get_three_state_flag(),
                    help='Enable local user features.')
         c.argument('enable_files_aadds', aadds_type)
         c.argument('enable_files_adds', adds_type)
@@ -480,7 +474,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
-        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(),
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
                    'If not specified, the default value is false for new account to follow best security practices. '
                    'When true, containers '
@@ -508,13 +502,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_group='Account Level Immutability')
         c.argument('allow_protected_append_writes', arg_type=get_three_state_flag(),
                    options_list=['--allow-protected-append-writes', '--allow-append', '-w'],
-                   min_api='2021-06-01',
                    help='This property can only be changed for disabled and unlocked time-based retention policies. '
                         'When enabled, new blocks can be written to an append blob while maintaining immutability '
                         'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
                         'modified or deleted.',
                    arg_group='Account Level Immutability')
-        c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
+        c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum),
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
         c.argument('upgrade_to_storagev2', arg_type=get_three_state_flag(),
@@ -522,7 +515,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     for scope in ['storage account create', 'storage account update']:
-        with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
+        with self.argument_context(scope, arg_group='Customer managed key',
                                    resource_type=ResourceType.MGMT_STORAGE) as c:
             t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
             c.argument('encryption_key_name', help='The name of the KeyVault key.', )
@@ -535,17 +528,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='The default encryption key source',
                        validator=validate_encryption_source)
             c.argument('key_vault_user_identity_id', options_list=['--key-vault-user-identity-id', '-u'],
-                       min_api='2021-01-01',
                        help='Resource identifier of the UserAssigned identity to be associated with server-side '
                             'encryption on the storage account.')
             c.argument('federated_identity_client_id', options_list=['--key-vault-federated-client-id', '-f'],
-                       min_api='2021-08-01',
                        help='ClientId of the multi-tenant application to be used '
                             'in conjunction with the user-assigned identity for '
                             'cross-tenant customer-managed-keys server-side encryption on the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
-        with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE,
                                    arg_group='Network Rule') as c:
             t_bypass, t_default_action = self.get_models('Bypass', 'DefaultAction',
                                                          resource_type=ResourceType.MGMT_STORAGE)
@@ -585,7 +576,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        'use the key referenced by the identifier to enable customer-managed key support on this '
                        'encryption scope.')
             c.argument('require_infrastructure_encryption', options_list=['--require-infrastructure-encryption', '-i'],
-                       arg_type=get_three_state_flag(), min_api='2021-01-01',
+                       arg_type=get_three_state_flag(),
                        help='A boolean indicating whether or not the service applies a secondary layer of encryption '
                        'with platform managed keys for data at rest.')
 
@@ -609,9 +600,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('marker', arg_type=marker_type)
 
     with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_expand_key_type = self.get_models('ListKeyExpand', resource_type=ResourceType.MGMT_STORAGE)
         c.argument("expand", options_list=['--expand-key-type'], help='Specify the expanded key types to be listed.',
-                   arg_type=get_enum_type(t_expand_key_type), min_api='2019-04-01', is_preview=True)
+                   arg_type=get_enum_type(['kerb']), is_preview=True)
 
     with self.argument_context('storage account keys renew', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import validate_key_name
@@ -619,7 +609,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=validate_key_name,
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         c.extra('key_type', help='The key type to regenerate. If --key-type is not specified, one of access keys will '
-                'be regenerated by default.', arg_type=get_enum_type(['kerb']), min_api='2019-04-01')
+                'be regenerated by default.', arg_type=get_enum_type(['kerb']))
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account management-policy create') as c:
@@ -642,10 +632,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', action_type)
-        c.argument('resource_id', help='The resource id to add in network rule.', arg_group='Resource Access Rule',
-                   min_api='2020-08-01-preview')
-        c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
-                   min_api='2020-08-01-preview')
+        c.argument('resource_id', help='The resource id to add in network rule.', arg_group='Resource Access Rule')
+        c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule')
 
     with self.argument_context('storage account blob-service-properties',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -656,11 +644,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
-        c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01',
+        c.argument('enable_change_feed', arg_type=get_three_state_flag(),
                    arg_group='Change Feed Policy')
         c.argument('change_feed_retention_days', is_preview=True,
                    options_list=['--change-feed-retention-days', '--change-feed-days'],
-                   type=int, min_api='2019-06-01', arg_group='Change Feed Policy',
+                   type=int, arg_group='Change Feed Policy',
                    validator=validator_change_feed_retention_days,
                    help='Indicate the duration of changeFeed retention in days. '
                         'Minimum value is 1 day and maximum value is 146000 days (400 years). '
@@ -669,31 +657,29 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_container_delete_retention',
                    arg_type=get_three_state_flag(),
                    options_list=['--enable-container-delete-retention', '--container-retention'],
-                   arg_group='Container Delete Retention Policy', min_api='2019-06-01',
+                   arg_group='Container Delete Retention Policy',
                    help='Enable container delete retention policy for container soft delete when set to true. '
                         'Disable container delete retention policy when set to false.')
         c.argument('container_delete_retention_days',
                    options_list=['--container-delete-retention-days', '--container-days'],
                    type=int, arg_group='Container Delete Retention Policy',
-                   min_api='2019-06-01', validator=validate_container_delete_retention_days,
+                   validator=validate_container_delete_retention_days,
                    help='Indicate the number of days that the deleted container should be retained. The minimum '
                         'specified value can be 1 and the maximum value can be 365.')
-        c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
-                   min_api='2018-07-01')
+        c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
-                   validator=validate_delete_retention_days, min_api='2018-07-01')
+                   validator=validate_delete_retention_days)
         c.argument('enable_restore_policy', arg_type=get_three_state_flag(), arg_group='Restore Policy',
-                   min_api='2019-06-01', help="Enable blob restore policy when it set to true.")
+                   help="Enable blob restore policy when it set to true.")
         c.argument('restore_days', type=int, arg_group='Restore Policy',
-                   min_api='2019-06-01', help="The number of days for the blob can be restored. It should be greater "
+                   help="The number of days for the blob can be restored. It should be greater "
                    "than zero and less than Delete Retention Days.")
-        c.argument('enable_versioning', arg_type=get_three_state_flag(), help='Versioning is enabled if set to true.',
-                   min_api='2019-06-01')
+        c.argument('enable_versioning', arg_type=get_three_state_flag(), help='Versioning is enabled if set to true.')
         c.argument('default_service_version', options_list=['--default-service-version', '-d'],
-                   type=get_api_version_type(), min_api='2018-07-01',
+                   type=get_api_version_type(),
                    help="Indicate the default version to use for requests to the Blob service if an incoming request's "
                         "version is not specified.")
-        c.argument('enable_last_access_tracking', arg_type=get_three_state_flag(), min_api='2019-06-01',
+        c.argument('enable_last_access_tracking', arg_type=get_three_state_flag(),
                    options_list=['--enable-last-access-tracking', '-t'],
                    help='When set to true last access time based tracking policy is enabled.')
 
@@ -721,26 +707,25 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
-                   min_api='2019-06-01', help='Enable file service properties for share soft delete.')
+                   help='Enable file service properties for share soft delete.')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
-                   validator=validate_file_delete_retention_days, min_api='2019-06-01',
+                   validator=validate_file_delete_retention_days,
                    help='Indicate the number of days that the deleted item should be retained. The minimum specified '
                    'value can be 1 and the maximum value can be 365.')
         c.argument('enable_smb_multichannel', options_list=['--enable-smb-multichannel', '--mc'],
-                   arg_type=get_three_state_flag(), min_api='2020-08-01-preview', arg_group='SMB Setting',
+                   arg_type=get_three_state_flag(), arg_group='SMB Setting',
                    help='Set SMB Multichannel setting for file service. Applies to Premium FileStorage only.')
-        c.argument('versions', arg_group='SMB Setting', min_api='2020-08-01-preview',
+        c.argument('versions', arg_group='SMB Setting',
                    help="SMB protocol versions supported by server. Valid values are SMB2.1, SMB3.0, "
                         "SMB3.1.1. Should be passed as a string with delimiter ';'.")
         c.argument('authentication_methods', options_list='--auth-methods', arg_group='SMB Setting',
-                   min_api='2020-08-01-preview',
                    help="SMB authentication methods supported by server. Valid values are NTLMv2, Kerberos. "
                         "Should be passed as a string with delimiter ';'.")
         c.argument('kerberos_ticket_encryption', options_list=['--kerb-ticket-encryption', '-k'],
-                   arg_group='SMB Setting', min_api='2020-08-01-preview',
+                   arg_group='SMB Setting',
                    help="Kerberos ticket encryption supported by server. Valid values are RC4-HMAC, AES-256. "
                         "Should be passed as a string with delimiter ';'.")
-        c.argument('channel_encryption', arg_group='SMB Setting', min_api='2020-08-01-preview',
+        c.argument('channel_encryption', arg_group='SMB Setting',
                    help="SMB channel encryption supported by server. Valid values are AES-128-CCM, AES-128-GCM, "
                         "AES-256-GCM. Should be passed as a string with delimiter ';' ")
 
@@ -1702,7 +1687,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
-        c.argument('enable_vlw', arg_type=get_three_state_flag(), min_api='2021-01-01', is_preview=True,
+        c.argument('enable_vlw', arg_type=get_three_state_flag(), is_preview=True,
                    help='The object level immutability property of the container. The property is immutable and can '
                    'only be set to true at the container creation time. Existing containers must undergo a migration '
                    'process.')
@@ -1712,18 +1697,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                    resource_type=ResourceType.MGMT_STORAGE) as c:
             from ._validators import validate_container_nfsv3_squash
             t_root_squash = self.get_models('RootSquashType', resource_type=ResourceType.MGMT_STORAGE)
-            c.extra('root_squash', arg_type=get_enum_type(t_root_squash), min_api='2021-06-01',
+            c.extra('root_squash', arg_type=get_enum_type(t_root_squash),
                     help='Enable NFSv3 squash on blob container.', validator=validate_container_nfsv3_squash)
             c.ignore('enable_nfs_v3_root_squash')
             c.ignore('enable_nfs_v3_all_squash')
 
     with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
-                   arg_group='Encryption Policy', min_api='2019-06-01',
+                   arg_group='Encryption Policy',
                    help='Default the container to use specified encryption scope for all writes.')
         c.argument('deny_encryption_scope_override',
                    options_list=['--deny-encryption-scope-override', '--deny-override'],
-                   arg_type=get_three_state_flag(), arg_group='Encryption Policy', min_api='2019-06-01',
+                   arg_type=get_three_state_flag(), arg_group='Encryption Policy',
                    help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage container-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -1756,11 +1741,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                             'This overwrites any existing metadata',
                        validator=validate_metadata)
             c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols),
-                       min_api='2019-06-01', help='Immutable property for file shares protocol. NFS protocol will be '
+                       help='Immutable property for file shares protocol. NFS protocol will be '
                        'only available for premium file shares (file shares in the FileStorage account type).')
             c.argument('root_squash', arg_type=get_enum_type(t_root_squash),
-                       min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
-            c.argument('access_tier', arg_type=get_enum_type(t_access_tier), min_api='2019-06-01',
+                       help='Reduction of the access rights for the remote superuser.')
+            c.argument('access_tier', arg_type=get_enum_type(t_access_tier),
                        help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '
                        '(default), Hot, and Cool. FileStorage account can choose Premium.')
 
@@ -2210,8 +2195,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 options_list='--services', required=False)
 
     with self.argument_context('storage cors add') as c:
-        t_cors_rule_allowed_methods = self.get_models('CorsRuleAllowedMethodsItem',
-                                                      resource_type=ResourceType.MGMT_STORAGE)
+        t_cors_rule_allowed_methods = self.get_models('AllowedMethods', resource_type=ResourceType.MGMT_STORAGE)
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), required=True,
                 options_list='--services')
         c.argument('max_age')

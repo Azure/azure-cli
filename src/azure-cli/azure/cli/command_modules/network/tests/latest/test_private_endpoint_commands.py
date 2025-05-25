@@ -270,6 +270,25 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
 
 
+class NetworkPrivateLinkFluidRelayScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_fr_plr000001')
+    def test_private_link_resource_fluid_relay(self):
+        self.kwargs.update({
+            'fluidrelay': 'frplr000001'
+        })
+        self.cmd('network private-link-resource list --name {fluidrelay} -g {rg} --type Microsoft.FluidRelay/fluidRelayServers', checks=[
+            self.check('length(@)', 1),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_fr_plc000002')
+    def test_private_endpoint_connection_fluid_relay(self):
+        self.kwargs.update({
+            'fluidrelay': 'frplr000002'
+        })
+        self.cmd('network private-endpoint-connection list --name {fluidrelay} -g {rg} --type Microsoft.FluidRelay/fluidRelayServers', checks=[
+            self.check('length(@)', 2),
+        ])
+
 class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2', sku='Standard_LRS')

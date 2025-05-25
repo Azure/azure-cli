@@ -9,7 +9,6 @@ from azure.cli.testsdk import (ScenarioTest, api_version_constraint,
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
 class StorageContainerRmScenarios(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="cli", location="eastus")
