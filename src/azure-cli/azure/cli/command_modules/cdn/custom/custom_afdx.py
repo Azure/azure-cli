@@ -993,6 +993,11 @@ class AFDRuleCreate(_AFDRuleCreate):
 
 
 class AFDRuleconditionAdd(_AFDRuleUpdate):
+    """Add a match condition to the specified delivery rule.
+
+    :example: Add a match condition to a delivery rule.
+        az afd rule condition add --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --match-variable RequestMethod --operator Any --match-values GET HTTP --negate-condition false --transforms Lowercase
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1047,6 +1052,11 @@ class AFDRuleconditionAdd(_AFDRuleUpdate):
 
 
 class AFDRuleconditionRemove(_AFDRuleUpdate):
+    """Remove a condition from the specified delivery rule.
+
+    :example: Remove a condition from a delivery rule.
+        az afd rule condition remove --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --index 0
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1078,6 +1088,11 @@ class AFDRuleconditionRemove(_AFDRuleUpdate):
 
 
 class AFDRuleActionCreate(_AFDRuleUpdate):
+    """Update a new delivery rule within the specified rule set.
+
+    :example: Create a new delivery rule with a modify response header action.
+        az afd rule action create --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --action-name Redirect --redirect-type "Found" --redirect-protocol "Https" --destination "www.example.com
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1211,6 +1226,11 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
 
 
 class AFDRuleActionRemove(_AFDRuleUpdate):
+    """Remove an action from the specified delivery rule.
+
+    :example: Remove an action from a delivery rule.
+        az afd rule action remove --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --index 0
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1240,6 +1260,11 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
 
 
 class AFDRuleActionShow(_RuleShow):
+    """Show the actions of a delivery rule.
+
+    :example: Show the actions of a delivery rule.
+        az afd rule action show --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1251,6 +1276,11 @@ class AFDRuleActionShow(_RuleShow):
 
 
 class AFDRuleConditionShow(_RuleShow):
+    """Show the conditions of a delivery rule.
+
+    :example: Show the conditions of a delivery rule.
+        az afd rule condition show --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
