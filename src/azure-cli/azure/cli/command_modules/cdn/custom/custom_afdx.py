@@ -255,6 +255,38 @@ class AFDEndpointUpdate(_AFDEndpointUpdate):
         args.location = existing_location
 
 
+def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type):
+    params = [probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type]
+    if enable_health_probe is True:
+        if any(param is None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type must be specified.'
+            )
+    elif any(param is not None for param in params):
+        enable_health_probe = True
+        if any(param is None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type must be specified.'
+            )
+    else:
+        enable_health_probe = False
+        if any(param is not None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is not set, none of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type can be specified.'
+            )
+        return None
+
+    return {
+        'probeIntervalInSeconds': probe_interval_in_seconds,
+        'probePath': probe_path,
+        'probeProtocol': probe_protocol,
+        'probeRequestType': probe_request_type
+    }
+
+
 class AFDOriginGroupCreate(_AFDOriginGroupCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -294,10 +326,14 @@ class AFDOriginGroupCreate(_AFDOriginGroupCreate):
 
     def pre_operations(self):
         args = self.ctx.args
+
+        enable_health_probe = None
         probe_interval_in_seconds = None
         probe_path = None
         probe_protocol = None
         probe_request_type = None
+        if has_value(args.enable_health_probe):
+            enable_health_probe = args.enable_health_probe.to_serialized_data()
         if has_value(args.probe_interval_in_seconds):
             probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
         if has_value(args.probe_path):
@@ -306,15 +342,14 @@ class AFDOriginGroupCreate(_AFDOriginGroupCreate):
             probe_protocol = args.probe_protocol.to_serialized_data()
         if has_value(args.probe_request_type):
             probe_request_type = args.probe_request_type.to_serialized_data()
-        args.health_probe_settings = {
-            'probeIntervalInSeconds': probe_interval_in_seconds,
-            'probePath': probe_path,
-            'probeProtocol': probe_protocol,
-            'probeRequestType': probe_request_type
-        }
 
-        if args.enable_health_probe.to_serialized_data() is False:
-            args.health_probe_settings = None
+        args.health_probe_settings = get_health_probe_settings(
+            enable_health_probe,
+            probe_interval_in_seconds,
+            probe_path,
+            probe_protocol,
+            probe_request_type
+        )
 
 
 class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
@@ -362,6 +397,7 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             'origin_group_name': args.origin_group_name
         })
 
+        enable_health_probe = None
         probe_interval_in_seconds = None
         probe_path = None
         probe_protocol = None
@@ -369,9 +405,9 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
 
         if not has_value(args.enable_health_probe):
             if 'healthProbeSettings' not in existing:
-                args.enable_health_probe = False
+                enable_health_probe = False
             else:
-                args.enable_health_probe = True
+                enable_health_probe = True
                 if has_value(args.probe_path):
                     probe_path = args.probe_path.to_serialized_data()
                 elif 'probePath' in existing['healthProbeSettings']:
@@ -398,36 +434,13 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
                     'probeProtocol': probe_protocol,
                     'probeRequestType': probe_request_type
                 }
-        elif args.enable_health_probe.to_serialized_data() is True:
-            args.enable_health_probe = True
-            if has_value(args.probe_path):
-                probe_path = args.probe_path.to_serialized_data()
-            elif 'probePath' in existing['healthProbeSettings']:
-                probe_path = existing['healthProbeSettings']['probePath']
-
-            if has_value(args.probe_protocol):
-                probe_protocol = args.probe_protocol.to_serialized_data()
-            elif 'probeProtocol' in existing['healthProbeSettings']:
-                probe_protocol = existing['healthProbeSettings']['probeProtocol']
-
-            if has_value(args.probe_interval_in_seconds):
-                probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
-            elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
-                probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
-
-            if has_value(args.probe_request_type):
-                probe_request_type = args.probe_request_type.to_serialized_data()
-            elif 'probeRequestType' in existing['healthProbeSettings']:
-                probe_request_type = existing['healthProbeSettings']['probeRequestType']
-
-            args.health_probe_settings = {
-                'probeIntervalInSeconds': probe_interval_in_seconds,
-                'probePath': probe_path,
-                'probeProtocol': probe_protocol,
-                'probeRequestType': probe_request_type
-            }
-        else:
-            args.health_probe_settings = None
+        args.health_probe_settings = get_health_probe_settings(
+            enable_health_probe,
+            probe_interval_in_seconds,
+            probe_path,
+            probe_protocol,
+            probe_request_type
+        )
 
 
 class AFDOriginCreate(_AFDOriginCreate):
