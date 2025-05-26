@@ -2189,8 +2189,11 @@ class VideoIndexerNetworkARMTemplateBasedScenarioTest(ScenarioTest):
             'pe_connection': self.create_random_name('cli-pec-', 24)
         })
 
-        param_file_name = "{}_{}_parameters.json".format(resource_type.split('/')[0].split('.')[1].lower(), resource_type.split('/')[1].lower())
-        template_file_name = "{}_{}_template.json".format(resource_type.split('/')[0].split('.')[1].lower(), resource_type.split('/')[1].lower())
+        split_resource_type = resource_type.split('/')
+        resource_type_name = split_resource_type[0].split('.')[1].lower()
+        resource_type_kind = split_resource_type[1].lower()
+        param_file_name = "{}_{}_parameters.json".format(resource_type_name, resource_type_kind)
+        template_file_name = "{}_{}_template.json".format(resource_type_name, resource_type_kind)
         self.kwargs.update({
             'param_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', param_file_name),
             'template_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', template_file_name)
@@ -2253,11 +2256,11 @@ class VideoIndexerNetworkARMTemplateBasedScenarioTest(ScenarioTest):
         # Test delete
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y -o json')
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_video_indexer", location="westus")
     @StorageAccountPreparer(name_prefix="testpevi", allow_shared_key_access=False)
     def test_private_endpoint_connection_video_indexer(self, resource_group, storage_account):
-        from azure.cli.testsdk.scenario_tests.utilities import create_random_name
-        vi_name = create_random_name(prefix='clitestvideoindexer')
+        vi_name = self.create_random_name(prefix='clitestvideoindexer', length=24)
         self._test_private_endpoint_connection_scenario(resource_group, storage_account, vi_name)
 
 
