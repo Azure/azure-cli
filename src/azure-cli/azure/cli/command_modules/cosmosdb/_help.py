@@ -25,6 +25,9 @@ short-summary: Manage Azure Cosmos DB Cassandra keyspaces.
 helps['cosmosdb cassandra keyspace create'] = """
 type: command
 short-summary: Create an Cassandra keyspace under an Azure Cosmos DB account.
+examples:
+  - name: Create an Cassandra keyspace under an Azure Cosmos DB account.
+    text: az cosmosdb cassandra keyspace create -g rg -a myaccount -n mydb
 """
 
 helps['cosmosdb cassandra keyspace delete'] = """
@@ -331,6 +334,9 @@ short-summary: Manage Azure Cosmos DB Gremlin databases.
 helps['cosmosdb gremlin database create'] = """
 type: command
 short-summary: Create an Gremlin database under an Azure Cosmos DB account.
+examples:
+  - name: Create an Gremlin database under an Azure Cosmos DB account.
+    text: az cosmosdb gremlin database create -g rg -a myaccount -n mydb
 """
 
 helps['cosmosdb gremlin database delete'] = """
@@ -577,6 +583,9 @@ short-summary: Manage Azure Cosmos DB MongoDB databases.
 helps['cosmosdb mongodb database create'] = """
 type: command
 short-summary: Create an MongoDB database under an Azure Cosmos DB account.
+examples:
+  - name: Create an MongoDB database under an Azure Cosmos DB account.
+    text: az cosmosdb mongodb database create -g rg -a account -n dbname
 """
 
 helps['cosmosdb mongodb database delete'] = """
@@ -630,6 +639,14 @@ short-summary: Migrate the throughput of the MongoDB database between autoscale 
 helps['cosmosdb network-rule'] = """
 type: group
 short-summary: Manage Azure Cosmos DB network rules.
+"""
+
+helps['cosmosdb network-rule add'] = """
+type: command
+short-summary: Adds a virtual network rule to an existing Cosmos DB database account.
+example:
+  - name: Adds a virtual network rule to an existing Cosmos DB database account.
+    text: az cosmosdb network-rule add -n accountname -g rg --subnet subnet
 """
 
 helps['cosmosdb private-endpoint-connection'] = """
@@ -860,6 +877,9 @@ short-summary: Manage Azure Cosmos DB SQL databases.
 helps['cosmosdb sql database create'] = """
 type: command
 short-summary: Create an SQL database under an Azure Cosmos DB account.
+examples:
+  - name: Create an Azure Cosmos DB SQL database.
+    text: az cosmosdb sql database create -g MyResourceGroup -a MyAccount -n MyDatabase
 """
 
 helps['cosmosdb sql database delete'] = """
@@ -909,6 +929,9 @@ short-summary: Manage Table resources of Azure Cosmos DB account.
 helps['cosmosdb table create'] = """
 type: command
 short-summary: Create an Table under an Azure Cosmos DB account.
+examples:
+  - name: Create an Azure Cosmos DB Table.
+    text: az cosmosdb table create -g rg -a account -n mytable
 """
 
 helps['cosmosdb table delete'] = """
