@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-locals, too-many-statements too-many-boolean-expressions too-many-branches protected-access
+# pylint: disable=line-too-long
 
 from azure.mgmt.cdn.models import SkuName
 from azure.cli.core.aaz._base import has_value
@@ -26,7 +27,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEn
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin_group import Show as _AFDOriginGroupShow, \
     Create as _AFDOriginGroupCreate, Update as _AFDOriginGroupUpdate
-from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg, AAZIntArgFormat
+from azure.cli.core.aaz import register_command, AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg, AAZIntArgFormat
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom_rule_util import (create_condition, create_action,
@@ -978,7 +979,15 @@ class AFDRuleCreate(_AFDRuleCreate):
         args.actions = actions
 
 
+@register_command(
+    "afd rule condition add",
+)
 class AFDRuleconditionAdd(_AFDRuleUpdate):
+    """Add a condition to a delivery rule within the specified rule set.
+
+    :example: Add a condition to an Azure Front Door rule to match requests based on geographic location.
+        az afd rule condition add -g rg --rule-set-name ruleset --profile-name profile --rule-name rule --match-variable RemoteAddress --operator GeoMatch --match-values "TH" "US"
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1063,7 +1072,15 @@ class AFDRuleconditionRemove(_AFDRuleUpdate):
         args.conditions = conditions
 
 
+@register_command(
+    "afd rule action add",
+)
 class AFDRuleActionCreate(_AFDRuleUpdate):
+    """Add an action to a delivery rule within the specified rule set.
+
+    :example: Add an action to a delivery rule in an Azure Front Door rule set to perform URL rewriting.
+        az afd rule action add -g rg --rule-set-name ruleset --profile-name profile --rule-name rule --action-name "UrlRewrite" --source-pattern "/abc" --destination "/def"
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
