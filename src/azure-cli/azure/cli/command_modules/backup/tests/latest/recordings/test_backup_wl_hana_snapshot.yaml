@@ -1,0 +1,163 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n
+      User-Agent:
+      - AZURECLI/2.73.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault/backupPolicies/hanasnaptest?api-version=2025-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault/backupPolicies/hanasnaptest","name":"hanasnaptest","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDBInstance","vmWorkloadPolicyType":"","settings":{"timeZone":"UTC","issqlcompression":false},"subProtectionPolicy":[{"policyType":"SnapshotFull","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2025-05-26T10:30:00Z"],"scheduleWeeklyFrequency":0},"snapshotBackupAdditionalDetails":{"instantRpRetentionRangeInDays":2,"instantRPDetails":"saphana-clitest-rg","userAssignedManagedIdentityDetails":{"identityArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/saphana-clitest-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/hanasnapmi","identityName":"hanasnapmi","userAssignedIdentityProperties":{"clientId":"69def136-6076-40a8-a05b-cddbf6edcbc6","principalId":"acb21fd0-f1cb-42db-a47c-4488aaeed533"}}}}],"protectedItemsCount":0}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1171'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 May 2025 07:36:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/centraluseuap/742fed76-512a-4f86-be6c-23f2d2b9652f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: A2E6CBB17B7F4B59A268A02A7A049303 Ref B: MAA201060513045 Ref C: 2025-05-26T07:36:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"protectedItemsCount": 0, "backupManagementType": "AzureWorkload",
+      "workLoadType": "SAPHanaDBInstance", "settings": {"timeZone": "UTC", "issqlcompression":
+      false}, "subProtectionPolicy": [{"policyType": "SnapshotFull", "schedulePolicy":
+      {"schedulePolicyType": "SimpleSchedulePolicy", "scheduleRunFrequency": "Daily",
+      "scheduleRunTimes": ["2025-05-26T10:30:00.000Z"], "scheduleWeeklyFrequency":
+      0}, "snapshotBackupAdditionalDetails": {"instantRpRetentionRangeInDays": 2,
+      "instantRPDetails": "saphana-clitest-rg", "userAssignedManagedIdentityDetails":
+      {"identityArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/saphana-clitest-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/hanasnapmi",
+      "identityName": "hanasnapmi", "userAssignedIdentityProperties": {"clientId":
+      "69def136-6076-40a8-a05b-cddbf6edcbc6", "principalId": "acb21fd0-f1cb-42db-a47c-4488aaeed533"}}}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '920'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --backup-management-type --workload-type --subscription -g -v -n --policy
+      User-Agent:
+      - AZURECLI/2.73.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault/backupPolicies/hanasnap2?api-version=2025-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault/backupPolicies/hanasnap2","name":"hanasnap2","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SAPHanaDBInstance","settings":{"timeZone":"UTC","issqlcompression":false},"subProtectionPolicy":[{"policyType":"SnapshotFull","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2025-05-26T10:30:00Z"],"scheduleWeeklyFrequency":0},"snapshotBackupAdditionalDetails":{"instantRpRetentionRangeInDays":2,"instantRPDetails":"saphana-clitest-rg","userAssignedManagedIdentityDetails":{"identityArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/saphana-clitest-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/hanasnapmi","identityName":"hanasnapmi","userAssignedIdentityProperties":{"clientId":"69def136-6076-40a8-a05b-cddbf6edcbc6","principalId":"acb21fd0-f1cb-42db-a47c-4488aaeed533"}}}}],"protectedItemsCount":0}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1139'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 May 2025 07:36:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southeastasia/998ec617-5be4-4217-abf4-61bed5f7b0fc
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 8EE89B8DD75B498DA879D050A6EA515F Ref B: MAA201060516037 Ref C: 2025-05-26T07:36:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --subscription -g -v -n
+      User-Agent:
+      - AZURECLI/2.73.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault/backupPolicies/hanasnap2?api-version=2025-02-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 26 May 2025 07:36:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southeastasia/aab31912-9cbd-4c45-9cfb-a1ec9568bb5f
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 2F248CFA1C1C47F68493213B06098FEB Ref B: MAA201060516047 Ref C: 2025-05-26T07:36:53Z'
+    status:
+      code: 200
+      message: OK
+version: 1
