@@ -1770,6 +1770,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
+    @unittest.skip('No match for the request (<Request (GET) https://azcliprod.blob.core.windows.net/cli-extensions/elastic_san-1.1.0-py3-none-any.whl>) was found.')
     @ResourceGroupPreparer(name_prefix='cli_disk_and_snapshot_with_elastic_san', location='westus2')
     @AllowLargeResponse(size_kb=99999)
     def test_disk_and_snapshot_with_elastic_san(self, resource_group):
