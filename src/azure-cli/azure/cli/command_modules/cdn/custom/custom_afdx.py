@@ -255,7 +255,8 @@ class AFDEndpointUpdate(_AFDEndpointUpdate):
         args.location = existing_location
 
 
-def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type):
+def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds,
+                              probe_path, probe_protocol, probe_request_type):
     params = [probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type]
     if enable_health_probe is True:
         if any(param is None for param in params):
