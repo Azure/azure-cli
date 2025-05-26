@@ -6578,7 +6578,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             return_value=registry,
         ), patch("azure.cli.command_modules.acs._roleassignments.ensure_aks_acr_role_assignment") as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
-        ensure_assignment.assert_called_once_with(self.cmd, "test_service_principal", "test_registry_id", False, True)
+        ensure_assignment.assert_called_once_with(self.cmd, "test_service_principal", "test_registry_id", False, True, None)
 
     def test_set_up_network_profile(self):
         # default value in `aks_create`
