@@ -67,7 +67,7 @@ Release History
 * `az network vpn-connection show`: Support new properties output with virtual network gateway (#31100)
 * `az network vnet-gateway migration`: Support vpn gateway migration feature (#31429)
 * `az network private-endpoint-connection`: Add provider `Microsoft.FluidRelay/fluidRelayServers` (#31472)
-* `az network network-watcher packet-capture`: Support to packet capture include ring buffer (#30784)
+* `az network network-watcher packet-capture`: Support for packet capture includes a ring buffer (#30784)
 * `az network private-endpoint-connection`: Add provider `Microsoft.VideoIndexer/accounts` (#31549)
 
 **RDBMS**
