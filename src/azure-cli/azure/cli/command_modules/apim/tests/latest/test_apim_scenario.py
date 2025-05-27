@@ -807,7 +807,7 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
 
-        # eaait for creation
+        # wait for creation
         self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
 
         # delete service
