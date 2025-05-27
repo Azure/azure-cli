@@ -17,12 +17,11 @@ Release History
 * `az aks nodepool add/update/upgrade`: Add new parameter `--undrainable-node-behavior` to specify whether nodes can be cordoned during upgrade (#31495)
 * `az aks create/enable-addons`: Remove preview flag for `--enable-high-log-scale-mode` parameter (#31531)
 * `az aks nodepool add/update/upgrade`: Add `--max-unavailable` to specify he maximum number or percentage of nodes that can be simultaneously unavailable during upgrade (#31510)
-* `--network-plugin`: Update longer summary to show "azure" is default instead of kubenet (#31516)
 
 **App Config**
 
-* Fix #30619: `az appconfig feature set`: Fix  invalid value for `--requirement-type` (#31471)
-* Fix #30619: `az appconfig kv import`: Fix  invalid value for `--requirement-type` (#31471)
+* Fix #30619: `az appconfig feature set`: Fix invalid value for `--requirement-type` (#31471)
+* Fix #30619: `az appconfig kv import`: Fix invalid value for `--requirement-type` (#31471)
 
 **App Service**
 
@@ -31,16 +30,12 @@ Release History
 
 **ARM**
 
-* `az policy`: Add deprecation message for breaking change pre-announcement (#31458)
+* `az policy`: Add breaking change pre-announcement (#31458)
 
 **Backup**
 
 * `az backup container/item/policy/protection`: Add support for ASE backup operations (#31413)
 * `az backup`: Add support for HANA Snapshot (#27932)
-
-**Batch**
-
-* `az batch`: Add some new command examples (#31486)
 
 **Compute**
 
@@ -52,11 +47,11 @@ Release History
 
 **Identity**
 
-* `az identity federated-credential create/update: ` Add support for claims matching expressions (#31436)
+* `az identity federated-credential create/update`: Add support for claims matching expressions (#31436)
 
 **Monitor**
 
-* `az monitor action-group`: Support `Incident Receivers` and `Managed Identity` (#31205)
+* `az monitor action-group`: Support `--incident-receivers`,  `--mi-user-assigned` and `--mi-system-assigned`(#31205)
 
 **MySQL**
 
@@ -77,7 +72,7 @@ Release History
 
 **RDBMS**
 
-* `az postgres flexible-server create/db`: Fix for `--database-name` validation. (#31542)
+* `az postgres flexible-server create/db`: Fix for `--database-name` validation (#31542)
 
 2.73.0
 ++++++
