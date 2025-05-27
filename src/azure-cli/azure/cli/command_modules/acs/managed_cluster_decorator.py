@@ -7021,6 +7021,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     acr_name_or_id=attach_acr,
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
+                    assignee_principal_type=self.context.get_assignee_principal_type()
                 )
 
         # azure monitor metrics addon (v2)
