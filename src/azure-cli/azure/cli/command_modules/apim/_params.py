@@ -44,6 +44,13 @@ class ExportFormat(Enum):
     WsdlUrl = "WsdlUrl"
 
 
+class PolicyImportFormat(Enum):
+    RawXml = "rawxml"
+    RawXmlLink = "rawxml-link"
+    Xml = "xml"
+    XmlLink = "xml-link"
+
+
 def load_arguments(self, _):
 
     # REUSABLE ARGUMENT DEFINITIONS
@@ -318,7 +325,7 @@ def load_arguments(self, _):
         c.argument('api_id', arg_type=api_id)
         c.argument('operation_id', help='Operation identifier within an API. Must be unique in the current API Management service instance.')
         c.argument('specification_path', help='Contents of the Policy as defined by the format.')
-        c.argument('policy_format', help='Format of the policy content. Allowed formats: rawxml, rawxml-link, xml, xml-link')
+        c.argument('policy_format', arg_type=get_enum_type(PolicyImportFormat), help='Format of the policy content.')
         c.argument('policy_id', help='Policy identifier within an API. Must be unique in the current API context.')
 
     with self.argument_context('apim policy show') as c:
