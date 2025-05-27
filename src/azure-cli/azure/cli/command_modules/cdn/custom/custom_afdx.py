@@ -992,6 +992,7 @@ class AFDRuleCreate(_AFDRuleCreate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleconditionAdd(_AFDRuleUpdate):
     """Add a match condition to the specified delivery rule.
 
@@ -1051,6 +1052,7 @@ class AFDRuleconditionAdd(_AFDRuleUpdate):
         args.conditions = conditions
 
 
+# pylint: disable=line-too-long
 class AFDRuleconditionRemove(_AFDRuleUpdate):
     """Remove a condition from the specified delivery rule.
 
@@ -1087,6 +1089,7 @@ class AFDRuleconditionRemove(_AFDRuleUpdate):
         args.conditions = conditions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionCreate(_AFDRuleUpdate):
     """Update a new delivery rule within the specified rule set.
 
@@ -1225,6 +1228,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionRemove(_AFDRuleUpdate):
     """Remove an action from the specified delivery rule.
 
@@ -1259,6 +1263,7 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionShow(_RuleShow):
     """Show the actions of a delivery rule.
 
@@ -1275,6 +1280,7 @@ class AFDRuleActionShow(_RuleShow):
         return existing['actions']
 
 
+# pylint: disable=line-too-long
 class AFDRuleConditionShow(_RuleShow):
     """Show the conditions of a delivery rule.
 
