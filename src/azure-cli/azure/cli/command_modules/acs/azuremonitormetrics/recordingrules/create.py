@@ -78,7 +78,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         # - If the rule is a Windows rule AND windows recording rules are enabled → enable the rule group (enable_rules = True)
         # - If the rule is NOT a Windows rule (i.e., a Linux or general rule) → always enable the rule group (enable_rules = True)
         enable_rules = not (is_windows_rule and not enable_windows_recording_rules)
-        
+
         rule_group_name = truncate_rule_group_name(f"{rule_template['name']}-{cluster_name}")
         rule_group_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{rule_group_name}"
         url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{rule_group_id}?api-version={RULES_API}"
