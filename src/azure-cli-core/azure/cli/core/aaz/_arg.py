@@ -22,7 +22,7 @@ from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
     AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat, AAZFileArgTextFormat, AAZPaginationTokenArgFormat, \
-    AAZIntArgFormat
+    AAZIntArgFormat, AAZFileBytesArgFormat
 from .exceptions import AAZUnregisteredArg
 from ._prompt import AAZPromptInput
 
@@ -597,6 +597,18 @@ class AAZFileArg(AAZStrArg):
     def __init__(self, fmt=None, **kwargs):
         fmt = fmt or AAZFileArgTextFormat()
         super().__init__(fmt=fmt, **kwargs)
+
+
+class AAZFileBytesArg(AAZStrArg):
+    """Argument that accepts a file path and returns both file content in bytes"""
+    
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZFileBytesArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
+        
+    @property
+    def _type_in_help(self):
+        return "File Bytes"
 
 
 # Generic Update arguments

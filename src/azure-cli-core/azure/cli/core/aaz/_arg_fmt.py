@@ -748,6 +748,28 @@ class AAZFileArgBase64EncodeFormat(AAZFileArgFormat):
         return data
 
 
+class AAZFileBytesArgFormat(AAZBaseArgFormat):
+    """Format for file info argument that returns both filename and content"""
+    
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        
+        if not os.path.isfile(data):
+            raise AAZInvalidArgValueError(f"File '{data}' doesn't exist")
+
+        try:
+            with open(data, 'rb') as f:
+                value._data = f.read()
+            return value
+        except Exception as e:
+            raise AAZInvalidArgValueError(f"Failed to read file '{data}': {str(e)}")
+
+
 class AAZPaginationTokenArgFormat(AAZBaseArgFormat):
     def __call__(self, ctx, value):
         def validate_json(s):

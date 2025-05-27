@@ -13,7 +13,7 @@ from ._arg import AAZArgumentsSchema, AAZArgEnum, AAZStrArg, AAZIntArg, AAZObjec
     AAZFreeFormDictArg, AAZFloatArg, AAZBaseArg, AAZBoolArg, AAZListArg, AAZResourceGroupNameArg, \
     AAZResourceLocationArg, AAZResourceIdArg, AAZSubscriptionIdArg, AAZUuidArg, AAZDateArg, AAZTimeArg, \
     AAZDateTimeArg, AAZDurationArg, AAZFileArg, AAZPasswordArg, AAZPaginationTokenArg, AAZPaginationLimitArg, \
-    AAZAnyTypeArg
+    AAZAnyTypeArg, AAZFileBytesArg
 from ._arg_fmt import AAZStrArgFormat, AAZIntArgFormat, AAZFloatArgFormat, AAZBoolArgFormat, AAZObjectArgFormat, \
     AAZDictArgFormat, AAZFreeFormDictArgFormat, AAZListArgFormat, AAZResourceLocationArgFormat, \
     AAZResourceIdArgFormat, AAZSubscriptionIdArgFormat, AAZUuidFormat, AAZDateFormat, AAZTimeFormat, \
