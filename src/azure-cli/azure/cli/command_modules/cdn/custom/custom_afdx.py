@@ -255,6 +255,39 @@ class AFDEndpointUpdate(_AFDEndpointUpdate):
         args.location = existing_location
 
 
+def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds,
+                              probe_path, probe_protocol, probe_request_type):
+    params = [probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type]
+    if enable_health_probe is True:
+        if any(param is None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type must be specified.'
+            )
+    elif any(param is not None for param in params):
+        enable_health_probe = True
+        if any(param is None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type must be specified.'
+            )
+    else:
+        enable_health_probe = False
+        if any(param is not None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is not set, none of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type can be specified.'
+            )
+        return None
+
+    return {
+        'probeIntervalInSeconds': probe_interval_in_seconds,
+        'probePath': probe_path,
+        'probeProtocol': probe_protocol,
+        'probeRequestType': probe_request_type
+    }
+
+
 class AFDOriginGroupCreate(_AFDOriginGroupCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -294,10 +327,14 @@ class AFDOriginGroupCreate(_AFDOriginGroupCreate):
 
     def pre_operations(self):
         args = self.ctx.args
+
+        enable_health_probe = None
         probe_interval_in_seconds = None
         probe_path = None
         probe_protocol = None
         probe_request_type = None
+        if has_value(args.enable_health_probe):
+            enable_health_probe = args.enable_health_probe.to_serialized_data()
         if has_value(args.probe_interval_in_seconds):
             probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
         if has_value(args.probe_path):
@@ -306,15 +343,14 @@ class AFDOriginGroupCreate(_AFDOriginGroupCreate):
             probe_protocol = args.probe_protocol.to_serialized_data()
         if has_value(args.probe_request_type):
             probe_request_type = args.probe_request_type.to_serialized_data()
-        args.health_probe_settings = {
-            'probeIntervalInSeconds': probe_interval_in_seconds,
-            'probePath': probe_path,
-            'probeProtocol': probe_protocol,
-            'probeRequestType': probe_request_type
-        }
 
-        if args.enable_health_probe.to_serialized_data() is False:
-            args.health_probe_settings = None
+        args.health_probe_settings = get_health_probe_settings(
+            enable_health_probe,
+            probe_interval_in_seconds,
+            probe_path,
+            probe_protocol,
+            probe_request_type
+        )
 
 
 class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
@@ -362,6 +398,7 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             'origin_group_name': args.origin_group_name
         })
 
+        enable_health_probe = None
         probe_interval_in_seconds = None
         probe_path = None
         probe_protocol = None
@@ -369,9 +406,9 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
 
         if not has_value(args.enable_health_probe):
             if 'healthProbeSettings' not in existing:
-                args.enable_health_probe = False
+                enable_health_probe = False
             else:
-                args.enable_health_probe = True
+                enable_health_probe = True
                 if has_value(args.probe_path):
                     probe_path = args.probe_path.to_serialized_data()
                 elif 'probePath' in existing['healthProbeSettings']:
@@ -398,36 +435,13 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
                     'probeProtocol': probe_protocol,
                     'probeRequestType': probe_request_type
                 }
-        elif args.enable_health_probe.to_serialized_data() is True:
-            args.enable_health_probe = True
-            if has_value(args.probe_path):
-                probe_path = args.probe_path.to_serialized_data()
-            elif 'probePath' in existing['healthProbeSettings']:
-                probe_path = existing['healthProbeSettings']['probePath']
-
-            if has_value(args.probe_protocol):
-                probe_protocol = args.probe_protocol.to_serialized_data()
-            elif 'probeProtocol' in existing['healthProbeSettings']:
-                probe_protocol = existing['healthProbeSettings']['probeProtocol']
-
-            if has_value(args.probe_interval_in_seconds):
-                probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
-            elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
-                probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
-
-            if has_value(args.probe_request_type):
-                probe_request_type = args.probe_request_type.to_serialized_data()
-            elif 'probeRequestType' in existing['healthProbeSettings']:
-                probe_request_type = existing['healthProbeSettings']['probeRequestType']
-
-            args.health_probe_settings = {
-                'probeIntervalInSeconds': probe_interval_in_seconds,
-                'probePath': probe_path,
-                'probeProtocol': probe_protocol,
-                'probeRequestType': probe_request_type
-            }
-        else:
-            args.health_probe_settings = None
+        args.health_probe_settings = get_health_probe_settings(
+            enable_health_probe,
+            probe_interval_in_seconds,
+            probe_path,
+            probe_protocol,
+            probe_request_type
+        )
 
 
 class AFDOriginCreate(_AFDOriginCreate):
@@ -978,7 +992,13 @@ class AFDRuleCreate(_AFDRuleCreate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleconditionAdd(_AFDRuleUpdate):
+    """Add a match condition to the specified delivery rule.
+
+    :example: Add a match condition to a delivery rule.
+        az afd rule condition add --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --match-variable RequestMethod --operator Any --match-values GET HTTP --negate-condition false --transforms Lowercase
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1032,7 +1052,13 @@ class AFDRuleconditionAdd(_AFDRuleUpdate):
         args.conditions = conditions
 
 
+# pylint: disable=line-too-long
 class AFDRuleconditionRemove(_AFDRuleUpdate):
+    """Remove a condition from the specified delivery rule.
+
+    :example: Remove a condition from a delivery rule.
+        az afd rule condition remove --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --index 0
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1063,7 +1089,13 @@ class AFDRuleconditionRemove(_AFDRuleUpdate):
         args.conditions = conditions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionCreate(_AFDRuleUpdate):
+    """Update a new delivery rule within the specified rule set.
+
+    :example: Create a new delivery rule with a modify response header action.
+        az afd rule action create --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --action-name Redirect --redirect-type "Found" --redirect-protocol "Https" --destination "www.example.com
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1196,7 +1228,13 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionRemove(_AFDRuleUpdate):
+    """Remove an action from the specified delivery rule.
+
+    :example: Remove an action from a delivery rule.
+        az afd rule action remove --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --index 0
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1225,7 +1263,13 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionShow(_RuleShow):
+    """Show the actions of a delivery rule.
+
+    :example: Show the actions of a delivery rule.
+        az afd rule action show --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1236,7 +1280,13 @@ class AFDRuleActionShow(_RuleShow):
         return existing['actions']
 
 
+# pylint: disable=line-too-long
 class AFDRuleConditionShow(_RuleShow):
+    """Show the conditions of a delivery rule.
+
+    :example: Show the conditions of a delivery rule.
+        az afd rule condition show --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
