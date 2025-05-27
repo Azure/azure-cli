@@ -259,7 +259,7 @@ examples:
 
 helps['apim policy set'] = """
 type: command
-short-summary: Create or update policy for the given Scope
+short-summary: Create or update policy for the given scope.
 examples:
   - name: Create or update policy for API Operation
     text: |-
@@ -274,7 +274,7 @@ examples:
 
 helps['apim policy show'] = """
 type: command
-short-summary: Get policy for the given Scope
+short-summary: Get policy for the given scope.
 examples:
   - name: Get policy for API Operation
     text: |-
@@ -289,7 +289,7 @@ examples:
 
 helps['apim policy delete'] = """
 type: command
-short-summary: Delete policy for the given Scope
+short-summary: Delete policy for the given scope.
 examples:
   - name: Delete policy for API Operation
     text: |-
@@ -304,7 +304,7 @@ examples:
 
 helps['apim policy list'] = """
 type: command
-short-summary: List policies for the given Scope
+short-summary: List policies for the given scope.
 examples:
   - name: List policies for API Operation
     text: |-
