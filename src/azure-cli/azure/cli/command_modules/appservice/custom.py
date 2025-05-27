@@ -814,7 +814,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
         if app_is_linux_webapp and not app_is_function_app and enable_kudu_warmup:
             try:
-                logger.info("Warming up Kudu before deployment.")
+                logger.warning("Warming up Kudu before deployment.")
                 cookies = _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, name, slot)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie. Deployment "
@@ -1816,7 +1816,7 @@ def list_flex_function_app_runtimes(cmd, location, runtime):
     if not runtimes:
         raise ValidationError("Runtime '{}' not supported for function apps on the Flex Consumption plan."
                               .format(runtime))
-    return runtimes
+    return runtime_helper.stacks
 
 
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
@@ -2180,8 +2180,6 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                 get_current_stack_from_runtime(runtime_version) != "tomcat" else "java"
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
-    if number_of_workers is not None:
-        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
             if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
@@ -2270,7 +2268,18 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    try:
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        error_message = str(ex)
+        if "Conflict" in error_message:
+            logger.error("Operation returned an invalid status 'Conflict'. "
+                         "For more details, run the command with the --debug parameter.")
+        elif "Bad Request" in error_message:
+            logger.error("Operation returned an invalid status 'Bad Request'. "
+                         "For more details, run the command with the --debug parameter.")
+        else:
+            raise
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
@@ -2498,8 +2507,10 @@ def _build_app_settings_output(app_settings, slot_cfg_names, redact=False):
 
 
 def _redact_appsettings(settings):
-    logger.warning('App settings have been redacted. '
-                   'Use `az webapp/logicapp/functionapp config appsettings list` to view.')
+    # Removing the redaction message as it's breaking people's pipelines
+    # Addresses https://github.com/Azure/azure-cli/issues/27724
+    # logger.warning('App settings have been redacted. '
+    #                'Use `az webapp/logicapp/functionapp config appsettings list` to view.')
     for x in settings:
         settings[x] = None
     return settings
@@ -2595,8 +2606,10 @@ def delete_connection_strings(cmd, resource_group_name, name, setting_names, slo
 
 
 def _redact_connection_strings(properties):
-    logger.warning('Connection string values have been redacted. '
-                   'Use `az webapp config connection-string list` to view.')
+    # Removing the redaction message as it's breaking people's pipelines
+    # Addresses https://github.com/Azure/azure-cli/issues/27724
+    # logger.warning('Connection string values have been redacted. '
+    #                'Use `az webapp config connection-string list` to view.')
     for setting in properties:
         properties[setting].value = None
     return properties
@@ -2864,6 +2877,17 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
+
+    # Do not clone site config when cloning from production
+    if configuration_source and configuration_source.lower() == webapp.lower():
+        slot_def.site_config = None
+
+    # Match cloned site settings from Azure portal
+    slot_def.https_only = site.https_only
+    slot_def.client_cert_enabled = site.client_cert_enabled
+    slot_def.client_cert_mode = site.client_cert_mode
+    slot_def.client_cert_exclusion_paths = site.client_cert_exclusion_paths
+    slot_def.public_network_access = site.public_network_access
 
     # if it is a Windows Container site, at least pass the necessary
     # app settings to perform the container image validation:
@@ -3216,6 +3240,9 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-instances',
                                                        number_of_workers, min_val=0, max_val=20)
+    if is_plan_flex(cmd, instance):
+        return update_flex_app_service_plan(instance)
+
     return update_app_service_plan(cmd, instance, sku, number_of_workers)
 
 
@@ -3296,10 +3323,10 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
 
     db_setting = _create_db_setting(cmd, db_name, db_type=db_type, db_connection_string=db_connection_string)
 
-    backup_schedule = BackupSchedule(frequency_interval=frequency_num, frequency_unit=frequency_unit.name,
+    backup_schedule = BackupSchedule(frequency_interval=frequency_num, frequency_unit=frequency_unit,
                                      keep_at_least_one_backup=keep_at_least_one_backup,
                                      retention_period_in_days=retention_period_in_days)
-    backup_request = BackupRequest(backup_request_name=backup_name, backup_schedule=backup_schedule,
+    backup_request = BackupRequest(backup_name=backup_name, backup_schedule=backup_schedule,
                                    enabled=True, storage_account_url=storage_account_url,
                                    databases=db_setting)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'update_backup_configuration',
@@ -3339,18 +3366,14 @@ def list_snapshots(cmd, resource_group_name, name, slot=None):
 
 def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_content_only=False,  # pylint: disable=redefined-outer-name
                      source_resource_group=None, source_name=None, source_slot=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     SnapshotRecoverySource, SnapshotRestoreRequest = cmd.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
     client = web_client_factory(cmd.cli_ctx)
     recover_config = not restore_content_only
     if all([source_resource_group, source_name]):
         # Restore from source app to target app
-        sub_id = get_subscription_id(cmd.cli_ctx)
-        source_id = "/subscriptions/" + sub_id + "/resourceGroups/" + source_resource_group + \
-            "/providers/Microsoft.Web/sites/" + source_name
-        if source_slot:
-            source_id = source_id + "/slots/" + source_slot
-        source = SnapshotRecoverySource(id=source_id)
+        src_webapp = _generic_site_operation(cmd.cli_ctx, source_resource_group, source_name, 'get', source_slot)
+
+        source = SnapshotRecoverySource(id=src_webapp.id, location=src_webapp.location)
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
                                          recover_configuration=recover_config)
         if slot:
@@ -3956,14 +3979,22 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name, certificate_name=None):
+def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
-    webapp = client.web_apps.get(resource_group_name, name)
-    if not webapp:
-        raise ResourceNotFoundError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
-    server_farm_id = webapp.server_farm_id
-    location = webapp.location
+
+    # Webapp name is not required for this command, but the location of the webspace is required since the certificate
+    # is associated with the webspace, not the app. All apps and plans in the same webspace will share the same
+    # certificates. If the app is not provided, the location of the resource group is used.
+    if name:
+        webapp = client.web_apps.get(resource_group_name, name)
+        if not webapp:
+            raise ResourceNotFoundError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+        location = webapp.location
+    else:
+        rg_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+        location = rg_client.resource_groups.get(resource_group_name).location
+
     kv_id = None
     if not is_valid_resource_id(key_vault):
         kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
@@ -3978,9 +4009,9 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     if kv_id is None:
         kv_msg = 'The Key Vault {0} was not found in the subscription in context. ' \
                  'If your Key Vault is in a different subscription, please specify the full Resource ID: ' \
-                 '\naz .. ssl import -n {1} -g {2} --key-vault-certificate-name {3} ' \
+                 '\naz .. ssl import -g {1} --key-vault-certificate-name {2} ' \
                  '--key-vault /subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/' \
-                 'vaults/{0}'.format(key_vault, name, resource_group_name, key_vault_certificate_name)
+                 'vaults/{0}'.format(key_vault, resource_group_name, key_vault_certificate_name)
         logger.warning(kv_msg)
         return
 
@@ -4025,7 +4056,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
-                              key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
+                              key_vault_secret_name=kv_secret_name)
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
@@ -4261,6 +4292,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         linux_auto_updates = [
             s.display_name for s in self.stacks if
             s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
+
+        def is_valid_runtime_name(name):
+            # Accepts names like "node|18-lts", "python|3.11", but not "NODE:lts" or "node"
+            parts = name.split(self.DEFAULT_DELIMETER)
+            return len(parts) == 2 and parts[1] and not parts[1].lower() in ("lts", "default", "stable")
+
+        windows_stacks = [n for n in windows_stacks if is_valid_runtime_name(n)]
+        linux_stacks = [n for n in linux_stacks if is_valid_runtime_name(n)]
+        windows_auto_updates = [n for n in windows_auto_updates if is_valid_runtime_name(n)]
+        linux_auto_updates = [n for n in linux_auto_updates if is_valid_runtime_name(n)]
+
         if delimiter is not None:
             windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
             linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
@@ -4383,7 +4425,35 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting):
-        return runtime_setting is not None and not runtime_setting.is_hidden and not runtime_setting.is_deprecated
+        # Using datetime module imported at the top level
+        if runtime_setting is None or getattr(runtime_setting, 'is_hidden', False):
+            return False
+        if getattr(runtime_setting, 'is_deprecated', False):
+            return False
+        end_of_life = getattr(runtime_setting, 'end_of_life_date', None)
+        if end_of_life:
+            try:
+                if isinstance(end_of_life, str):
+                    try:
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%S.%fZ"
+                        ).replace(tzinfo=datetime.timezone.utc)
+                    except ValueError:
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%SZ"
+                        ).replace(tzinfo=datetime.timezone.utc)
+                else:
+                    # If already a datetime, ensure it's timezone-aware
+                    if end_of_life.tzinfo is None:
+                        end_of_life_dt = end_of_life.replace(tzinfo=datetime.timezone.utc)
+                    else:
+                        end_of_life_dt = end_of_life
+                now_utc = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+                if now_utc >= end_of_life_dt:
+                    return False
+            except (ValueError, AttributeError):
+                pass
+        return True
 
     @classmethod
     def _get_runtime_setting(cls, minor_version, linux, java):
@@ -4964,6 +5034,20 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
+def update_flex_app_service_plan(instance):
+    instance.target_worker_count = None
+    instance.target_worker_size = None
+    instance.is_xenon = None
+    instance.hyper_v = None
+    instance.per_site_scaling = None
+    instance.maximum_elastic_worker_count = None
+    instance.elastic_scale_enabled = None
+    instance.is_spot = None
+    instance.target_worker_size_id = None
+    instance.sku.capacity = None
+    return instance
+
+
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
@@ -4991,6 +5075,14 @@ def is_plan_consumption(cmd, plan_info):
     if isinstance(plan_info, AppServicePlan):
         if isinstance(plan_info.sku, SkuDescription):
             return plan_info.sku.tier.lower() == 'dynamic'
+    return False
+
+
+def is_plan_flex(cmd, plan_info):
+    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier.lower() == 'flexconsumption'
     return False
 
 
@@ -5123,13 +5215,6 @@ def is_exactly_one_true(*args):
                 return False
             found = True
     return found
-
-
-def list_flexconsumption_zone_redundant_locations(cmd):
-    client = web_client_factory(cmd.cli_ctx)
-    regions = client.list_geo_regions(sku="FlexConsumption")
-    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
-    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
@@ -6132,18 +6217,52 @@ def get_subscription_locations(cli_ctx):
     return [item.name for item in result]
 
 
-def list_flexconsumption_locations(cmd, zone_redundant=False):
-    if zone_redundant:
-        return list_flexconsumption_zone_redundant_locations(cmd)
+def list_flexconsumption_locations(cmd, zone_redundant=False, show_details=False, runtime=None):
+    client = web_client_factory(cmd.cli_ctx)
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    sub_id = get_subscription_id(cmd.cli_ctx)
-    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
-    flex_regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
-    flex_regions_list = [{'name': x['name'].lower().replace(' ', '')} for x in flex_regions]
+    if runtime and not show_details:
+        raise ArgumentUsageError(
+            '--runtime is only valid with --details parameter. '
+            'Please try again without the --details parameter.')
+
+    regions = client.list_geo_regions(sku="FlexConsumption")
+
+    if zone_redundant:
+        regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
+
+    regions = [x.name.lower().replace(' ', '') for x in regions]
     sub_regions_list = get_subscription_locations(cmd.cli_ctx)
-    return [x for x in flex_regions_list if x['name'] in sub_regions_list]
+    regions = [x for x in regions if x in sub_regions_list]
+
+    if not show_details:
+        return [{'name': x} for x in regions]
+
+    return [{'name': x, 'details': list_flex_function_app_all_runtimes(cmd, x, runtime)} for x in regions]
+
+
+def list_flex_function_app_all_runtimes(cmd, location, runtime=None):
+    runtimes = ["dotnet-isolated", "node", "python", "java", "powershell"]
+    if runtime:
+        runtimes = [runtime]
+
+    return [{'runtime': x,
+             'runtime-details': get_runtime_details_ignore_error(cmd, location, x)}
+            for x in runtimes]
+
+
+def get_runtime_details_ignore_error(cmd, location, runtime):
+    try:
+        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
+        return runtime_helper.stacks
+    except Exception:  # pylint: disable=broad-except
+        return None
+
+
+def list_flexconsumption_zone_redundant_locations(cmd):
+    client = web_client_factory(cmd.cli_ctx)
+    regions = client.list_geo_regions(sku="FlexConsumption")
+    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
@@ -7249,6 +7368,8 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=
         ssh_user_name = 'root'
         ssh_user_password = 'Docker!'
         logger.warning('SSH is available { username: %s, password: %s }', ssh_user_name, ssh_user_password)
+        logger.warning('Enter a full SSH session with: ssh %s@%s -m hmac-sha1 -p %s', ssh_user_name,
+                       tunnel_server.local_addr, tunnel_server.local_port)
 
     logger.warning('Ctrl + C to close')
 
@@ -7379,9 +7500,9 @@ class OneDeployParams:
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
-def _build_onedeploy_url(params):
+def _build_onedeploy_url(params, instance_id=None):
     if params.src_url:
-        return _build_onedeploy_arm_url(params)
+        return _build_onedeploy_arm_url(params, instance_id)
     return _build_onedeploy_scm_url(params)
 
 
@@ -7407,19 +7528,20 @@ def _build_onedeploy_scm_url(params):
     return deploy_url
 
 
-def _build_onedeploy_arm_url(params):
+def _build_onedeploy_arm_url(params, instance_id):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(params.cmd.cli_ctx)
     sub_id = get_subscription_id(params.cmd.cli_ctx)
+    instances_param = f"/instances/{instance_id}" if instance_id is not None else ""
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
+            f"{params.webapp_name}{instances_param}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
         )
     else:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/slots/{params.slot}/extensions/onedeploy"
+            f"{params.webapp_name}/slots/{params.slot}{instances_param}/extensions/onedeploy"
             f"?api-version={client.DEFAULT_API_VERSION}"
         )
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
@@ -7618,7 +7740,24 @@ def _make_onedeploy_request(params):
                                      verify=not should_disable_connection_verify())
         poll_async_deployment_for_debugging = True
     else:
-        response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+        if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
+            try:
+                logger.warning("Warming up Kudu before deployment.")
+                cookies = _warmup_kudu_and_get_cookie_internal(params.cmd, params.resource_group_name,
+                                                               params.webapp_name, params.slot)
+                if cookies is None:
+                    logger.info("Failed to fetch affinity cookie for Kudu. "
+                                "Deployment will proceed without pre-warming a Kudu instance.")
+                    response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+                else:
+                    deploy_arm_url = _build_onedeploy_url(params, cookies.get("ARRAffinity"))
+                    response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_arm_url, body=body)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info("Failed to deploy using instances endpoint. "
+                            "Deployment will proceed without pre-warming a Kudu instance. Ex: %s", ex)
+                response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+        else:
+            response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
         poll_async_deployment_for_debugging = False
 
     # check the status of deployment

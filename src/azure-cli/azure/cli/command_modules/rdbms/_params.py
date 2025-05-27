@@ -70,7 +70,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
             c.argument('auto_scale_iops', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-scale-iops'], help='Enable or disable autoscale of iops. Default value is Disabled.')
             c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
-            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Microsoft Entra Identity for this server for use with key management services like Azure KeyVault.')
             c.argument('tags', tags_type)
 
             if command_group == 'mariadb':
@@ -90,7 +90,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
             c.argument('auto_scale_iops', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-scale-iops'], help='Enable or disable autogrow of the storage. Default value is Disabled.')
             c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
-            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Microsoft Entra Identity for this server for use with key management services like Azure KeyVault.')
 
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             if command_group == 'postgres':
@@ -102,7 +102,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} server update'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')
             c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
-            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Microsoft Entra Identity for this server for use with key management services like Azure KeyVault.')
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], arg_type=overriding_none_arg_type)
@@ -211,8 +211,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
             with self.argument_context('{} server ad-admin'.format(command_group)) as c:
                 c.argument('server_name', options_list=['--server-name', '-s'])
-                c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
-                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
+                c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Microsoft Entra administrator user or group.')
+                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
 
         if command_group == 'mysql':
             with self.argument_context('{} server upgrade'.format(command_group)) as c:
@@ -261,11 +261,24 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             arg_group='Authentication'
         )
 
+        database_name_create_arg_type = CLIArgumentType(
+            metavar='NAME',
+            options_list=['--database-name', '-d'],
+            id_part='child_name_1',
+            help='The name of the database to be created when provisioning the database server. '
+                 'Database name must begin with a letter (a-z) or underscore (_). Subsequent characters '
+                 'in a name can be letters, digits (0-9), hyphens (-), or underscores. '
+                 'Database name length must be less than 64 characters.',
+            local_context_attribute=LocalContextAttribute(
+                name='database_name',
+                actions=[LocalContextAction.SET],
+                scopes=['{} flexible-server'.format(command_group)]))
+
         database_name_arg_type = CLIArgumentType(
             metavar='NAME',
             options_list=['--database-name', '-d'],
             id_part='child_name_1',
-            help='The name of the database to be created when provisioning the database server',
+            help='The name of the database',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
@@ -330,7 +343,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         create_default_db_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--create-default-database', '-c'],
-            help='Enable or disable the creation of default database flexibleserverdb. Default value is Enabled.'
+            help='Enable or disable the creation of default database flexibleserverdb. Default value is Disabled.'
         )
 
         cluster_option_arg_type = CLIArgumentType(
@@ -459,7 +472,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         pg_version_upgrade_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['12', '13', '14', '15', '16']),
+            arg_type=get_enum_type(['13', '14', '15', '16', '17']),
             options_list=['--version', '-v'],
             help='Server major version.'
         )
@@ -526,10 +539,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             validator=validate_identities
         )
 
-        active_directory_auth_arg_type = CLIArgumentType(
-            options_list=['--active-directory-auth'],
+        microsoft_entra_auth_arg_type = CLIArgumentType(
+            options_list=['--microsoft-entra-auth'],
             arg_type=get_enum_type(['Enabled', 'Disabled']),
-            help='Whether Azure Active Directory authentication is enabled.'
+            help='Whether Microsoft Entra authentication is enabled.'
         )
 
         password_auth_arg_type = CLIArgumentType(
@@ -589,18 +602,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             # Add create mode as a parameter
             if command_group == 'postgres':
                 c.argument('tier', default='GeneralPurpose', arg_type=tier_arg_type)
-                c.argument('sku_name', default='Standard_D2s_v3', arg_type=sku_name_arg_type)
+                c.argument('sku_name', arg_type=sku_name_arg_type)
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
-                c.argument('version', default='16', arg_type=version_arg_type)
+                c.argument('version', default='17', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
-                c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
+                c.argument('microsoft_entra_auth', default='Disabled', arg_type=microsoft_entra_auth_arg_type)
+                c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
+                c.argument('admin_name', options_list=['--admin-display-name', '-m'], help='Display name of the Microsoft Entra administrator user or group.')
+                c.argument('admin_type', options_list=['--admin-type', '-t'],
+                           arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
                 c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
                 c.argument('storage_type', default=None, arg_type=storage_type_arg_type)
                 c.argument('iops', default=None, arg_type=iops_v2_arg_type)
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
-                c.argument('create_default_db', default='Enabled', arg_type=create_default_db_arg_type)
+                c.argument('create_default_db', default='Disabled', arg_type=create_default_db_arg_type)
                 c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
                 c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
             elif command_group == 'mysql':
@@ -630,7 +647,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('zone', zone_arg_type)
             c.argument('tags', tags_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
-            c.argument('database_name', arg_type=database_name_arg_type)
+            c.argument('database_name', arg_type=database_name_create_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server list'.format(command_group)) as c:
@@ -742,7 +759,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', default=None, arg_type=iops_v2_arg_type)
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
-                c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
+                c.argument('microsoft_entra_auth', arg_type=microsoft_entra_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
                 c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
                 c.argument('cluster_size', default=None, arg_type=update_node_count_arg_type)
@@ -812,6 +829,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             argument_context_string = '{} flexible-server db {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+        for scope in ['delete', 'list', 'show', 'update']:
+            argument_context_string = '{} flexible-server db {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
                 c.argument('database_name', arg_type=database_name_arg_type)
 
         with self.argument_context('{} flexible-server db list'.format(command_group)) as c:
@@ -820,6 +841,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
             c.argument('charset', help='The charset of the database. The default value is UTF8')
             c.argument('collation', help='The collation of the database.')
+            c.argument('database_name', arg_type=database_name_create_arg_type)
 
         with self.argument_context('{} flexible-server db delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
@@ -971,18 +993,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('database_names', options_list=['--database-names', '-d'], nargs='+',
                                help='Space-separated list of the database names to be mirrored. Required if --mirroring is enabled.')
 
-        # ad-admin
-        with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
+        # microsoft-entra-admin
+        with self.argument_context('{} flexible-server microsoft-entra-admin'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
         for scope in ['create', 'show', 'delete', 'wait']:
-            with self.argument_context('{} flexible-server ad-admin {}'.format(command_group, scope)) as c:
-                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
+            with self.argument_context('{} flexible-server microsoft-entra-admin {}'.format(command_group, scope)) as c:
+                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
 
-        with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
-            c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
-            c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Azure AD administrator.')
-            c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
+        with self.argument_context('{} flexible-server microsoft-entra-admin create'.format(command_group)) as c:
+            c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Microsoft Entra administrator user or group.')
+            c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
+            c.argument('identity', help='Name or ID of identity used for Microsoft Entra Authentication.', validator=validate_identity)
 
         # server advanced threat protection settings
         for scope in ['update', 'show']:

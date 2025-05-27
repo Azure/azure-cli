@@ -14,10 +14,14 @@ resources:
     type: git
     name: internal.wiki
 
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+
 jobs:
 - job: UpdateYaml
   displayName: Update resourceManagement.yml
-  pool: pool-windows-2019
+  pool: 
+    name: ${{ variables.windows_pool }}
   uses:
     repositories:
     - ServiceContactList
@@ -71,14 +75,14 @@ jobs:
       git add .github/policies
       git commit -m "Sync resourceManagement.yml"
 
-      git remote set-url origin https://azclibot:$(GithubToken)@github.com/Azure/azure-cli.git;
-      git push origin "sync_alias_$env:Build_BuildId" --force
+      git remote add azclibot https://azclibot:$(GithubToken)@github.com/azclibot/azure-cli.git
+      git push azclibot "sync_alias_$env:Build_BuildId" --force
     displayName: Git commit and push
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
 
   - pwsh: |
       $Title = "{CI} Sync resourceManagement.yml according To ADO Wiki Page - Service Contact List"
-      $HeadBranch = "sync_alias_$env:Build_BuildId"
+      $HeadBranch = "azclibot:sync_alias_$env:Build_BuildId"
       $BaseBranch = "dev"
       $Description = "This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
       
@@ -88,5 +92,5 @@ jobs:
 
       Invoke-WebRequest -Uri $Uri -Method POST -Headers $Headers -Body ($RequestBody | ConvertTo-Json)
 
-    displayName: Create PR to dev branch
+    displayName: Create PR to azure/azure-cli dev branch
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))

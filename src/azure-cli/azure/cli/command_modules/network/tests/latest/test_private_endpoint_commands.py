@@ -69,7 +69,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='uksouth')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='uksouth', additional_params='--enable-rbac-authorization false')
     def test_private_endpoint_connection_keyvault(self, resource_group):
         self.kwargs.update({
             'loc': 'uksouth',
@@ -269,6 +269,25 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         # clear resources
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
 
+
+class NetworkPrivateLinkFluidRelayScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_fr_plr000001')
+    def test_private_link_resource_fluid_relay(self):
+        self.kwargs.update({
+            'fluidrelay': 'frplr000001'
+        })
+        self.cmd('network private-link-resource list --name {fluidrelay} -g {rg} --type Microsoft.FluidRelay/fluidRelayServers', checks=[
+            self.check('length(@)', 1),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_fr_plc000002')
+    def test_private_endpoint_connection_fluid_relay(self):
+        self.kwargs.update({
+            'fluidrelay': 'frplr000002'
+        })
+        self.cmd('network private-endpoint-connection list --name {fluidrelay} -g {rg} --type Microsoft.FluidRelay/fluidRelayServers', checks=[
+            self.check('length(@)', 2),
+        ])
 
 class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
@@ -2537,7 +2556,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self)
 
-    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="eastus")
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="westus")
     def test_private_endpoint_connection_sql_server(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,

@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-06-01",
+        "version": "2024-10-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/actiongroups/{}", "2022-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/actiongroups/{}", "2024-10-01-preview"],
         ]
     }
 
@@ -51,7 +51,6 @@ class Show(AAZCommand):
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         return cls._args_schema
@@ -121,7 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-06-01",
+                    "api-version", "2024-10-01-preview",
                     required=True,
                 ),
             }
@@ -157,6 +156,7 @@ class Show(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -168,6 +168,37 @@ class Show(AAZCommand):
             )
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
                 flags={"read_only": True},
             )
 
@@ -196,6 +227,9 @@ class Show(AAZCommand):
             properties.group_short_name = AAZStrType(
                 serialized_name="groupShortName",
                 flags={"required": True},
+            )
+            properties.incident_receivers = AAZListType(
+                serialized_name="incidentReceivers",
             )
             properties.itsm_receivers = AAZListType(
                 serialized_name="itsmReceivers",
@@ -239,6 +273,9 @@ class Show(AAZCommand):
             _element.is_global_runbook = AAZBoolType(
                 serialized_name="isGlobalRunbook",
                 flags={"required": True},
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
             )
             _element.name = AAZStrType()
             _element.runbook_name = AAZStrType(
@@ -284,6 +321,9 @@ class Show(AAZCommand):
                 serialized_name="httpTriggerUrl",
                 flags={"required": True},
             )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
             _element.name = AAZStrType(
                 flags={"required": True},
             )
@@ -302,7 +342,9 @@ class Show(AAZCommand):
             _element.name = AAZStrType(
                 flags={"required": True},
             )
-            _element.status = AAZStrType()
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.use_common_alert_schema = AAZBoolType(
                 serialized_name="useCommonAlertSchema",
             )
@@ -319,6 +361,9 @@ class Show(AAZCommand):
                 serialized_name="eventHubNameSpace",
                 flags={"required": True},
             )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
             _element.name = AAZStrType(
                 flags={"required": True},
             )
@@ -332,6 +377,35 @@ class Show(AAZCommand):
             _element.use_common_alert_schema = AAZBoolType(
                 serialized_name="useCommonAlertSchema",
             )
+
+            incident_receivers = cls._schema_on_200.properties.incident_receivers
+            incident_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.incident_receivers.Element
+            _element.connection = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.incident_management_service = AAZStrType(
+                serialized_name="incidentManagementService",
+                flags={"required": True},
+            )
+            _element.mappings = AAZDictType(
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            connection = cls._schema_on_200.properties.incident_receivers.Element.connection
+            connection.id = AAZStrType(
+                flags={"required": True},
+            )
+            connection.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            mappings = cls._schema_on_200.properties.incident_receivers.Element.mappings
+            mappings.Element = AAZStrType()
 
             itsm_receivers = cls._schema_on_200.properties.itsm_receivers
             itsm_receivers.Element = AAZObjectType()
@@ -364,6 +438,9 @@ class Show(AAZCommand):
                 serialized_name="callbackUrl",
                 flags={"required": True},
             )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
             _element.name = AAZStrType(
                 flags={"required": True},
             )
@@ -390,7 +467,9 @@ class Show(AAZCommand):
                 serialized_name="phoneNumber",
                 flags={"required": True},
             )
-            _element.status = AAZStrType()
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
 
             voice_receivers = cls._schema_on_200.properties.voice_receivers
             voice_receivers.Element = AAZObjectType()
@@ -414,6 +493,9 @@ class Show(AAZCommand):
             _element = cls._schema_on_200.properties.webhook_receivers.Element
             _element.identifier_uri = AAZStrType(
                 serialized_name="identifierUri",
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
             )
             _element.name = AAZStrType(
                 flags={"required": True},

@@ -11,6 +11,7 @@
 from .__cmd_group import *
 from ._create import *
 from ._delete import *
+from ._get_boot_diagnostic_log import *
 from ._list import *
 from ._reimage import *
 from ._restart import *

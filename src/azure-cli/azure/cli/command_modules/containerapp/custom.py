@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation
 # pylint: disable=unused-argument, no-else-raise
+from copy import deepcopy
 import json
 import threading
 import sys
@@ -3942,7 +3943,7 @@ def upload_ssl(cmd, resource_group_name, name, environment, certificate_file, ho
         cert = upload_certificate(cmd, env_name, resource_group_name, certificate_file, certificate_name, certificate_password, location)
     cert_id = cert["id"]
 
-    new_domain = ContainerAppCustomDomainModel
+    new_domain = deepcopy(ContainerAppCustomDomainModel)
     new_domain["name"] = hostname
     new_domain["certificateId"] = cert_id
     new_custom_domains.append(new_domain)
@@ -4021,7 +4022,7 @@ def bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint=Non
 
     custom_domains = get_custom_domains(cmd, resource_group_name, name, location, environment)
     new_custom_domains = list(filter(lambda c: safe_get(c, "name", default=[]) != standardized_hostname, custom_domains))
-    new_domain = ContainerAppCustomDomainModel
+    new_domain = deepcopy(ContainerAppCustomDomainModel)
     new_domain["name"] = standardized_hostname
     new_domain["certificateId"] = cert_id
     new_custom_domains.append(new_domain)
@@ -4036,7 +4037,7 @@ def add_hostname(cmd, resource_group_name, name, hostname, location=None):
     existing_hostname = list(filter(lambda c: safe_get(c, "name", default=[]) == standardized_hostname, custom_domains))
     if len(existing_hostname) > 0:
         raise InvalidArgumentValueError("'{standardized_hostname}' already exists in container app '{name}'.")
-    new_domain = ContainerAppCustomDomainModel
+    new_domain = deepcopy(ContainerAppCustomDomainModel)
     new_domain["name"] = standardized_hostname
     new_domain["bindingType"] = "Disabled"
     custom_domains.append(new_domain)

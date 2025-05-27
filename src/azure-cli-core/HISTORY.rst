@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.73.0
+++++++
+* [BREAKING CHANGE] Remove azure stack profiles `2020-09-01-hybrid`, `2019-03-01-hybrid`, `2018-03-01-hybrid` and `2017-03-09-profile` (#31307)
+* Use MSAL for managed identity authentication (#25959)
+
+2.72.0
+++++++
+* Minor fixes
+
+2.71.0
+++++++
+* PREVIEW: Support managed identity authentication with MSAL. Run `az config set core.use_msal_managed_identity=true` or set environment variable `AZURE_CORE_USE_MSAL_MANAGED_IDENTITY` to enable it (#31092)
+
 2.70.0
 ++++++
 * Resolve CVE-2024-12797 (#30816)

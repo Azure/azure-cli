@@ -56,9 +56,9 @@ def acr_cache_create(cmd,
                      resource_group_name=None,
                      cred_set=None):
 
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     if cred_set:
         sub_id = get_subscription_id(cmd.cli_ctx)
-        rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
         # Format the credential set ID using subscription ID, resource group, registry name, and credential set name
         cred_set_id = CREDENTIAL_SET_RESOURCE_ID_TEMPLATE.format(
             sub_id=sub_id,

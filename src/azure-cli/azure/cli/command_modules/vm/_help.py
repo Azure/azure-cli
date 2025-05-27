@@ -695,32 +695,6 @@ examples:
         --release-note-uri path_to_release_notes
 """
 
-helps['sig image-definition list-shared'] = """
-type: command
-short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
-long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
-examples:
-  - name: List an image definition in a gallery shared directly to your subscription in the given location.
-    text: |
-        az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
-        --location myLocation
-  - name: List an image definition in a gallery shared directly to your tenant in the given location.
-    text: |
-        az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
-        --location myLocation --shared-to tenant
-"""
-
-helps['sig image-definition list-community'] = """
-type: command
-short-summary: List VM Image definitions in a gallery community
-long-summary: List VM Image definitions in a gallery community
-examples:
-  - name: List an image definition in a gallery community.
-    text: |
-        az sig image-definition list-community --public-gallery-name publicGalleryName \\
-        --location myLocation
-"""
-
 helps['sig image-version create'] = """
 type: command
 short-summary: create a new image version
@@ -852,21 +826,14 @@ examples:
         --gallery-image-version 1.0.0 \\
         --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
         --end-of-life-date 2024-08-02T00:00:00+00:00
-"""
-
-helps['sig image-version list-shared'] = """
-type: command
-short-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant
-long-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant
-examples:
-  - name: List image versions in a gallery shared directly to your subscription in the given location and image definition.
+  - name: Add a new image version and block the deletion for this image version if its end of life has not expired
     text: |
-        az sig image-version list-shared --gallery-unique-name galleryUniqueName \\
-        --gallery-image-definition MyImage --location myLocation
-  - name: List image versions in a gallery shared directly to your tenant in the given location and image definition.
-    text: |
-        az sig image-version list-shared --gallery-unique-name galleryUniqueName \\
-        --gallery-image-definition MyImage --location myLocation --shared-to tenant
+        az sig image-version create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
+        --end-of-life-date 2024-08-02T00:00:00+00:00 \\
+        --block-deletion-before-end-of-life true
 """
 
 helps['sig image-version update'] = """
@@ -913,6 +880,11 @@ examples:
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
         --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
         --set safetyProfile.allowDeletionOfReplicatedLocations=true
+  - name: Block the deletion for this gallery image version if its end of life has not expired.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
+        --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
+        --block-deletion-before-end-of-life true
 """
 
 helps['sig image-version undelete'] = """
@@ -926,17 +898,6 @@ examples:
         az sig image-version undelete --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.1.1
-"""
-
-helps['sig image-version list-community'] = """
-type: command
-short-summary: List VM Image Versions in a gallery community
-long-summary: List VM Image Versions in a gallery community
-examples:
-  - name: List an image versions in a gallery community.
-    text: |
-        az sig image-version list-community --public-gallery-name publicGalleryName \\
-        --gallery-image-definition MyImage --location myLocation
 """
 
 helps['sig image-version wait'] = """
@@ -1018,15 +979,12 @@ examples:
     text: az vm auto-shutdown -g MyResourceGroup -n MyVm --off
 """
 
-helps['vm availability-set convert'] = """
+helps['vm list-sizes'] = """
 type: command
-short-summary: Convert an Azure Availability Set to contain VMs with managed disks.
+short-summary: List available sizes for VMs.
 examples:
-  - name: Convert an availabiity set to use managed disks by name.
-    text: az vm availability-set convert -g MyResourceGroup -n MyAvSet
-  - name: Convert an availability set to use managed disks by ID.
-    text: >
-        az vm availability-set convert --ids $(az vm availability-set list -g MyResourceGroup --query "[].id" -o tsv)
+  - name: List the available VM sizes in the West US region.
+    text: az vm list-sizes -l westus
 """
 
 helps['vm availability-set create'] = """
@@ -1036,26 +994,6 @@ long-summary: 'For more information, see https://learn.microsoft.com/azure/virtu
 examples:
   - name: Create an availability set.
     text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2
-"""
-
-helps['vm availability-set list'] = """
-type: command
-short-summary: List availability sets.
-examples:
-  - name: List availability sets.
-    text: az vm availability-set list -g MyResourceGroup
-"""
-
-helps['vm availability-set update'] = """
-type: command
-short-summary: Update an Azure Availability Set.
-examples:
-  - name: Update an availability set.
-    text: az vm availability-set update -n MyAvSet -g MyResourceGroup
-  - name: Update an availability set tag.
-    text: az vm availability-set update -n MyAvSet -g MyResourceGroup --set tags.foo=value
-  - name: Remove an availability set tag.
-    text: az vm availability-set update -n MyAvSet -g MyResourceGroup --remove tags.foo
 """
 
 helps['vm boot-diagnostics'] = """
@@ -1511,24 +1449,6 @@ short-summary: Display information about extensions attached to a VM.
 examples:
   - name: Use VM name and extension name to show the extensions attached to a VM.
     text: az vm extension show -g MyResourceGroup --vm-name MyVm -n extension_name
-"""
-
-helps['vm extension wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of a virtual machine extension is met.
-examples:
-  - name: Place the CLI in a waiting state until a condition of a virtual machine extension is met. (autogenerated)
-    text: |
-        az vm extension wait --created --name MyExtension --resource-group MyResourceGroup --vm-name MyVm
-    crafted: true
-  - name: Place the CLI in a waiting state until a condition of a virtual machine extension is met. (autogenerated)
-    text: |
-        az vm extension wait --exists --name MyExtension --resource-group MyResourceGroup --vm-name MyVm
-    crafted: true
-  - name: Place the CLI in a waiting state until a condition of a virtual machine extension is met. (autogenerated)
-    text: |
-        az vm extension wait --ids @- --name MyExtension --subscription MySubscription --updated --vm-name MyVm
-    crafted: true
 """
 
 helps['vm get-instance-view'] = """

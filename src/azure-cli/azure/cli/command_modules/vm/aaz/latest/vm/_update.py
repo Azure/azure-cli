@@ -16,9 +16,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2024-11-01"],
         ]
     }
 
@@ -77,6 +77,12 @@ class Update(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
+        _args_schema.placement = AAZObjectArg(
+            options=["--placement"],
+            arg_group="Parameters",
+            help="Placement section specifies the user-defined constraints for virtual machine hardware placement. This property cannot be changed once VM is provisioned. Minimum api-version: 2024-11-01.",
+            nullable=True,
+        )
         _args_schema.plan = AAZObjectArg(
             options=["--plan"],
             arg_group="Parameters",
@@ -107,6 +113,34 @@ class Update(AAZCommand):
             help="The type of the extended location.",
             nullable=True,
             enum={"EdgeZone": "EdgeZone"},
+        )
+
+        placement = cls._args_schema.placement
+        placement.exclude_zones = AAZListArg(
+            options=["exclude-zones"],
+            help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any', availability zone selected by the system must not be present in the list of availability zones passed with 'excludeZones'. If 'excludeZones' is not provided, all availability zones in region will be considered for selection.",
+            nullable=True,
+        )
+        placement.include_zones = AAZListArg(
+            options=["include-zones"],
+            help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any', availability zone selected by the system must be present in the list of availability zones passed with 'includeZones'. If 'includeZones' is not provided, all availability zones in region will be considered for selection.",
+            nullable=True,
+        )
+        placement.zone_placement_policy = AAZStrArg(
+            options=["zone-placement-policy"],
+            help="Specifies the policy for virtual machine's placement in availability zone. Possible values are: **Any** - An availability zone will be automatically picked by system as part of virtual machine creation.",
+            nullable=True,
+            enum={"Any": "Any"},
+        )
+
+        exclude_zones = cls._args_schema.placement.exclude_zones
+        exclude_zones.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        include_zones = cls._args_schema.placement.include_zones
+        include_zones.Element = AAZStrArg(
+            nullable=True,
         )
 
         plan = cls._args_schema.plan
@@ -403,7 +437,7 @@ class Update(AAZCommand):
             options=["network-api-version"],
             help="specifies the Microsoft.Network API version used when creating networking resources in the Network Interface Configurations",
             nullable=True,
-            enum={"2020-11-01": "2020-11-01"},
+            enum={"2020-11-01": "2020-11-01", "2022-11-01": "2022-11-01"},
         )
         network_profile.network_interface_configurations = AAZListArg(
             options=["network-interface-configurations"],
@@ -1084,6 +1118,12 @@ class Update(AAZCommand):
             help="Specifies whether ProxyAgent feature should be enabled on the virtual machine or virtual machine scale set.",
             nullable=True,
         )
+        proxy_agent_settings.imds = AAZObjectArg(
+            options=["imds"],
+            help="Specifies the IMDS endpoint settings while creating the virtual machine or virtual machine scale set. Minimum api-version: 2024-03-01.",
+            nullable=True,
+        )
+        cls._build_args_host_endpoint_settings_update(proxy_agent_settings.imds)
         proxy_agent_settings.key_incarnation_id = AAZIntArg(
             options=["key-incarnation-id"],
             help="Increase the value of this property allows user to reset the key used for securing communication channel between guest and host.",
@@ -1095,6 +1135,12 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Audit": "Audit", "Enforce": "Enforce"},
         )
+        proxy_agent_settings.wire_server = AAZObjectArg(
+            options=["wire-server"],
+            help="Specifies the Wire Server endpoint settings while creating the virtual machine or virtual machine scale set. Minimum api-version: 2024-03-01.",
+            nullable=True,
+        )
+        cls._build_args_host_endpoint_settings_update(proxy_agent_settings.wire_server)
 
         uefi_settings = cls._args_schema.security_profile.uefi_settings
         uefi_settings.secure_boot_enabled = AAZBoolArg(
@@ -1109,6 +1155,11 @@ class Update(AAZCommand):
         )
 
         storage_profile = cls._args_schema.storage_profile
+        storage_profile.align_regional_disks_to_vm_zone = AAZBoolArg(
+            options=["align-regional-disks-to-vm-zone"],
+            help="Specifies whether the regional disks should be aligned/moved to the VM zone. This is applicable only for VMs with placement property set. Please note that this change is irreversible. Minimum api-version: 2024-11-01.",
+            nullable=True,
+        )
         storage_profile.data_disks = AAZListArg(
             options=["data-disks"],
             help="Specifies the parameters that are used to add a data disk to a virtual machine. For more information about disks, see [About disks and VHDs for Azure virtual machines](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview).",
@@ -1395,6 +1446,35 @@ class Update(AAZCommand):
 
         _schema.id = cls._args_disk_encryption_set_parameters_update.id
 
+    _args_host_endpoint_settings_update = None
+
+    @classmethod
+    def _build_args_host_endpoint_settings_update(cls, _schema):
+        if cls._args_host_endpoint_settings_update is not None:
+            _schema.in_vm_access_control_profile_reference_id = cls._args_host_endpoint_settings_update.in_vm_access_control_profile_reference_id
+            _schema.mode = cls._args_host_endpoint_settings_update.mode
+            return
+
+        cls._args_host_endpoint_settings_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        host_endpoint_settings_update = cls._args_host_endpoint_settings_update
+        host_endpoint_settings_update.in_vm_access_control_profile_reference_id = AAZStrArg(
+            options=["in-vm-access-control-profile-reference-id"],
+            help="Specifies the InVMAccessControlProfileVersion resource id in the format of /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/inVMAccessControlProfiles/{profile}/versions/{version}",
+            nullable=True,
+        )
+        host_endpoint_settings_update.mode = AAZStrArg(
+            options=["mode"],
+            help="Specifies the execution mode. In Audit mode, the system acts as if it is enforcing the access control policy, including emitting access denial entries in the logs but it does not actually deny any requests to host endpoints. In Enforce mode, the system will enforce the access control and it is the recommended mode of operation.",
+            nullable=True,
+            enum={"Audit": "Audit", "Disabled": "Disabled", "Enforce": "Enforce"},
+        )
+
+        _schema.in_vm_access_control_profile_reference_id = cls._args_host_endpoint_settings_update.in_vm_access_control_profile_reference_id
+        _schema.mode = cls._args_host_endpoint_settings_update.mode
+
     _args_managed_disk_parameters_update = None
 
     @classmethod
@@ -1571,7 +1651,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -1670,7 +1750,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -1737,6 +1817,7 @@ class Update(AAZCommand):
             _builder.set_prop("extendedLocation", AAZObjectType, ".extended_location")
             _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("placement", AAZObjectType, ".placement")
             _builder.set_prop("plan", AAZObjectType, ".plan")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -1746,6 +1827,20 @@ class Update(AAZCommand):
             if extended_location is not None:
                 extended_location.set_prop("name", AAZStrType, ".name")
                 extended_location.set_prop("type", AAZStrType, ".type")
+
+            placement = _builder.get(".placement")
+            if placement is not None:
+                placement.set_prop("excludeZones", AAZListType, ".exclude_zones")
+                placement.set_prop("includeZones", AAZListType, ".include_zones")
+                placement.set_prop("zonePlacementPolicy", AAZStrType, ".zone_placement_policy")
+
+            exclude_zones = _builder.get(".placement.excludeZones")
+            if exclude_zones is not None:
+                exclude_zones.set_elements(AAZStrType, ".")
+
+            include_zones = _builder.get(".placement.includeZones")
+            if include_zones is not None:
+                include_zones.set_elements(AAZStrType, ".")
 
             plan = _builder.get(".plan")
             if plan is not None:
@@ -2106,8 +2201,10 @@ class Update(AAZCommand):
             proxy_agent_settings = _builder.get(".properties.securityProfile.proxyAgentSettings")
             if proxy_agent_settings is not None:
                 proxy_agent_settings.set_prop("enabled", AAZBoolType, ".enabled")
+                _UpdateHelper._build_schema_host_endpoint_settings_update(proxy_agent_settings.set_prop("imds", AAZObjectType, ".imds"))
                 proxy_agent_settings.set_prop("keyIncarnationId", AAZIntType, ".key_incarnation_id")
                 proxy_agent_settings.set_prop("mode", AAZStrType, ".mode")
+                _UpdateHelper._build_schema_host_endpoint_settings_update(proxy_agent_settings.set_prop("wireServer", AAZObjectType, ".wire_server"))
 
             uefi_settings = _builder.get(".properties.securityProfile.uefiSettings")
             if uefi_settings is not None:
@@ -2116,6 +2213,7 @@ class Update(AAZCommand):
 
             storage_profile = _builder.get(".properties.storageProfile")
             if storage_profile is not None:
+                storage_profile.set_prop("alignRegionalDisksToVMZone", AAZBoolType, ".align_regional_disks_to_vm_zone")
                 storage_profile.set_prop("dataDisks", AAZListType, ".data_disks")
                 storage_profile.set_prop("diskControllerType", AAZStrType, ".disk_controller_type")
                 storage_profile.set_prop("imageReference", AAZObjectType, ".image_reference")
@@ -2218,6 +2316,13 @@ class _UpdateHelper:
         if _builder is None:
             return
         _builder.set_prop("id", AAZStrType, ".id")
+
+    @classmethod
+    def _build_schema_host_endpoint_settings_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("inVMAccessControlProfileReferenceId", AAZStrType, ".in_vm_access_control_profile_reference_id")
+        _builder.set_prop("mode", AAZStrType, ".mode")
 
     @classmethod
     def _build_schema_managed_disk_parameters_update(cls, _builder):
@@ -2337,6 +2442,26 @@ class _UpdateHelper:
         _schema.disk_encryption_key = cls._schema_disk_encryption_settings_read.disk_encryption_key
         _schema.enabled = cls._schema_disk_encryption_settings_read.enabled
         _schema.key_encryption_key = cls._schema_disk_encryption_settings_read.key_encryption_key
+
+    _schema_host_endpoint_settings_read = None
+
+    @classmethod
+    def _build_schema_host_endpoint_settings_read(cls, _schema):
+        if cls._schema_host_endpoint_settings_read is not None:
+            _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+            _schema.mode = cls._schema_host_endpoint_settings_read.mode
+            return
+
+        cls._schema_host_endpoint_settings_read = _schema_host_endpoint_settings_read = AAZObjectType()
+
+        host_endpoint_settings_read = _schema_host_endpoint_settings_read
+        host_endpoint_settings_read.in_vm_access_control_profile_reference_id = AAZStrType(
+            serialized_name="inVMAccessControlProfileReferenceId",
+        )
+        host_endpoint_settings_read.mode = AAZStrType()
+
+        _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+        _schema.mode = cls._schema_host_endpoint_settings_read.mode
 
     _schema_instance_view_status_read = None
 
@@ -2511,6 +2636,7 @@ class _UpdateHelper:
             _schema.location = cls._schema_virtual_machine_read.location
             _schema.managed_by = cls._schema_virtual_machine_read.managed_by
             _schema.name = cls._schema_virtual_machine_read.name
+            _schema.placement = cls._schema_virtual_machine_read.placement
             _schema.plan = cls._schema_virtual_machine_read.plan
             _schema.properties = cls._schema_virtual_machine_read.properties
             _schema.resources = cls._schema_virtual_machine_read.resources
@@ -2542,6 +2668,7 @@ class _UpdateHelper:
         virtual_machine_read.name = AAZStrType(
             flags={"read_only": True},
         )
+        virtual_machine_read.placement = AAZObjectType()
         virtual_machine_read.plan = AAZObjectType()
         virtual_machine_read.properties = AAZObjectType(
             flags={"client_flatten": True},
@@ -2585,6 +2712,23 @@ class _UpdateHelper:
             serialized_name="principalId",
             flags={"read_only": True},
         )
+
+        placement = _schema_virtual_machine_read.placement
+        placement.exclude_zones = AAZListType(
+            serialized_name="excludeZones",
+        )
+        placement.include_zones = AAZListType(
+            serialized_name="includeZones",
+        )
+        placement.zone_placement_policy = AAZStrType(
+            serialized_name="zonePlacementPolicy",
+        )
+
+        exclude_zones = _schema_virtual_machine_read.placement.exclude_zones
+        exclude_zones.Element = AAZStrType()
+
+        include_zones = _schema_virtual_machine_read.placement.include_zones
+        include_zones.Element = AAZStrType()
 
         plan = _schema_virtual_machine_read.plan
         plan.name = AAZStrType()
@@ -3417,10 +3561,16 @@ class _UpdateHelper:
 
         proxy_agent_settings = _schema_virtual_machine_read.properties.security_profile.proxy_agent_settings
         proxy_agent_settings.enabled = AAZBoolType()
+        proxy_agent_settings.imds = AAZObjectType()
+        cls._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
         proxy_agent_settings.key_incarnation_id = AAZIntType(
             serialized_name="keyIncarnationId",
         )
         proxy_agent_settings.mode = AAZStrType()
+        proxy_agent_settings.wire_server = AAZObjectType(
+            serialized_name="wireServer",
+        )
+        cls._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
         uefi_settings = _schema_virtual_machine_read.properties.security_profile.uefi_settings
         uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -3431,6 +3581,9 @@ class _UpdateHelper:
         )
 
         storage_profile = _schema_virtual_machine_read.properties.storage_profile
+        storage_profile.align_regional_disks_to_vm_zone = AAZBoolType(
+            serialized_name="alignRegionalDisksToVMZone",
+        )
         storage_profile.data_disks = AAZListType(
             serialized_name="dataDisks",
         )
@@ -3627,6 +3780,7 @@ class _UpdateHelper:
         _schema.location = cls._schema_virtual_machine_read.location
         _schema.managed_by = cls._schema_virtual_machine_read.managed_by
         _schema.name = cls._schema_virtual_machine_read.name
+        _schema.placement = cls._schema_virtual_machine_read.placement
         _schema.plan = cls._schema_virtual_machine_read.plan
         _schema.properties = cls._schema_virtual_machine_read.properties
         _schema.resources = cls._schema_virtual_machine_read.resources

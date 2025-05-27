@@ -25,9 +25,37 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_azconfig_mgmt(self, resource_group, location):
         mgmt_prefix = get_resource_name_prefix('MgmtTest')
-        config_store_name = self.create_random_name(prefix=mgmt_prefix, length=36)
 
+        # Create store with developer sku
+        developer_config_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
+        developer_sku = 'developer'
         location = 'eastus'
+
+        self.kwargs.update({
+            'config_store_name': developer_config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': developer_sku
+        })
+        
+        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}',
+                         checks=[self.check('name', '{config_store_name}'),
+                                 self.check('location', '{rg_loc}'),
+                                 self.check('resourceGroup', resource_group),
+                                 self.check('provisioningState', 'Succeeded'),
+                                 self.check('sku.name', developer_sku)]).get_output_in_json()
+
+
+        self.cmd('appconfig show -n {config_store_name} -g {rg}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', developer_sku)])
+
+        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+        
+        config_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
         standard_sku = 'standard'
         premium_sku = 'premium'
         tag_key = "key"
@@ -243,7 +271,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         # create store in premium tier without replica
 
-        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=24)
         
         self.kwargs.update({
             "premium_sku": premium_sku,
@@ -282,7 +310,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
         test_del_prefix = get_resource_name_prefix('MgmtTestdel')
-        config_store_name = self.create_random_name(prefix=test_del_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=test_del_prefix, length=24)
 
         self.kwargs.update({
             'config_store_name': config_store_name
@@ -323,7 +351,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_local_auth(self, resource_group, location):
         disable_local_auth_prefix = get_resource_name_prefix('DisableLocalAuth')
-        config_store_name = self.create_random_name(prefix=disable_local_auth_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=disable_local_auth_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -367,7 +395,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_public_network_access(self, resource_group, location):
         pub_network_prefix = get_resource_name_prefix('PubNetworkTrue')
-        config_store_name = self.create_random_name(prefix=pub_network_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=pub_network_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -390,7 +418,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('publicNetworkAccess', 'Enabled')])
 
         pub_network_null_prefix = get_resource_name_prefix('PubNetworkNull')
-        config_store_name = self.create_random_name(prefix=pub_network_null_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=pub_network_null_prefix, length=24)
 
         self.kwargs.update({
             'config_store_name': config_store_name

@@ -24,7 +24,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature(self, resource_group, location):
         feature_test_store_prefix = get_resource_name_prefix('FeatureTest')
-        config_store_name = self.create_random_name(prefix=feature_test_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=feature_test_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -77,6 +77,23 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('state', default_state),
                          self.check('conditions.client_filters', []),
                          self.check('conditions.requirement_type', updated_requirement_type)])
+
+        # update an existing feature flag entry with requirement type "all" (case-insensitive input, should be stored as "All")
+        case_sensitive_requirement_type = FeatureFlagConstants.REQUIREMENT_TYPE_ALL
+
+        self.kwargs.update({
+            'description': updated_entry_description,
+            'requirement_type': "all"
+        })
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
+             checks=[self.check('locked', default_locked),
+                 self.check('name', entry_feature),
+                 self.check('key', internal_feature_key),
+                 self.check('description', updated_entry_description),
+                 self.check('label', entry_label),
+                 self.check('state', default_state),
+                 self.check('conditions.client_filters', []),
+                 self.check('conditions.requirement_type', case_sensitive_requirement_type)])
 
         # add a new label - this should create a new KV in the config store
         updated_label = 'v2'
@@ -340,7 +357,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_namespacing(self, resource_group, location):
         feature_namespace_store_prefix = get_resource_name_prefix('FeatureNamespaceTest')
-        config_store_name = self.create_random_name(prefix=feature_namespace_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=feature_namespace_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
@@ -447,7 +464,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_filter(self, resource_group, location):
         feature_filter_store_prefix = get_resource_name_prefix('FeatureFilterTest')
-        config_store_name = self.create_random_name(prefix=feature_filter_store_prefix, length=36)
+        config_store_name = self.create_random_name(prefix=feature_filter_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'

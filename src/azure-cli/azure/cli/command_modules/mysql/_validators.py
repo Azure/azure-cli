@@ -105,10 +105,10 @@ def mysql_restore_tier_validator(target_tier, source_tier, sku_info):
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None, server_name=None,
                               zone=None, standby_availability_zone=None, high_availability=None, backup_byok_key=None,
                               public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
-                              byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
-                              disable_data_encryption=None, iops=None, auto_io_scaling=None, accelerated_logs=None,
-                              storage_redundancy=None, instance=None, data_source_type=None, mode=None,
-                              data_source_backup_dir=None, data_source_sas_token=None):
+                              byok_identity=None, backup_interval=None, backup_byok_identity=None, byok_key=None,
+                              geo_redundant_backup=None, disable_data_encryption=None, iops=None, auto_io_scaling=None,
+                              accelerated_logs=None, storage_redundancy=None, instance=None, data_source_type=None,
+                              mode=None, data_source_backup_dir=None, data_source_sas_token=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
@@ -132,6 +132,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
+    _mysql_backup_interval_validator(backup_interval)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
     mysql_accelerated_logs_validator(accelerated_logs, tier)
     storage_redundancy_validator(storage_redundancy, tier)
@@ -300,6 +301,13 @@ def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_
     if (instance and instance.replication_role == "Replica") and (disable_data_encryption or byok_key):
         raise CLIError("Data encryption cannot be modified on a server with replication role. "
                        "Use the primary server instead.")
+
+
+def _mysql_backup_interval_validator(backup_interval):
+    if backup_interval is None:
+        return
+    if backup_interval not in [6, 12, 24]:
+        raise ArgumentUsageError("Incorrect value for --backup-interval. Allowed values: [6, 12, 24]")
 
 
 def _mysql_iops_validator(iops, auto_io_scaling, instance):
