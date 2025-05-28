@@ -443,8 +443,8 @@ helps['ad group member add'] = """
 type: command
 short-summary: Add a member to a group.
 examples:
-- name: Add a member to a group
-  text: az ad group member add --group groupname --member-id xxxx-xxxx-xxxx-xxxx-xxxxxxx
+  - name: Add a member to a group
+    text: az ad group member add --group groupname --member-id xxxx-xxxx-xxxx-xxxx-xxxxxxx
 """
 
 helps['ad group member remove'] = """
