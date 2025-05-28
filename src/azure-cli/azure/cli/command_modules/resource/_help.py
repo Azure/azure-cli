@@ -1402,6 +1402,11 @@ type: group
 short-summary: Manage deployment operations.
 """
 
+helps['group deployment operation show'] = """
+type: command
+short-summary: Show a deployment operation at resource group.
+"""
+
 helps['group deployment validate'] = """
 type: command
 short-summary: Validate whether a template is syntactically correct.
