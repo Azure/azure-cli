@@ -140,7 +140,7 @@ def _format_change_type_legend(builder, resource_changes):
         builder.append_line(change_type.title())
 
 
-def _format_resource_changes_stats(builder, resource_changes, definite_changes = True):
+def _format_resource_changes_stats(builder, resource_changes, definite_changes=True):
     if definite_changes:
         builder.append_line().append("Resource changes: ")
 
@@ -208,7 +208,7 @@ def _format_diagnostics(builder, resource_changes, potential_changes, diagnostic
                 builder.append_line()
 
 
-def _format_resource_changes(builder, resource_changes, definite_changes = True):
+def _format_resource_changes(builder, resource_changes, definite_changes=True):
     if not resource_changes:
         return
 
