@@ -26,6 +26,7 @@ MOCK_EXPIRES_ON_INT = 1630920323
 MOCK_EXPIRES_ON_DATETIME = datetime.datetime.fromtimestamp(MOCK_EXPIRES_ON_INT).strftime("%Y-%m-%d %H:%M:%S.%f")
 BEARER = 'Bearer'
 
+MOCK_TENANT_ID = '15027ca3-935c-4327-92a5-da7bfd15c8cb'
 MOCK_TENANT_DISPLAY_NAME = 'TEST_TENANT_DISPLAY_NAME'
 MOCK_TENANT_DEFAULT_DOMAIN = 'test.onmicrosoft.com'
 
@@ -137,7 +138,7 @@ class TestProfile(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tenant_id = 'test.onmicrosoft.com'
+        cls.tenant_id = MOCK_TENANT_ID
         cls.tenant_display_name = MOCK_TENANT_DISPLAY_NAME
         cls.tenant_default_domain = MOCK_TENANT_DEFAULT_DOMAIN
 
@@ -164,14 +165,14 @@ class TestProfile(unittest.TestCase):
                                                  managed_by_tenants=cls.managed_by_tenants)
 
         cls.subscription1_output = [{'environmentName': 'AzureCloud',
-                                     'homeTenantId': 'test.onmicrosoft.com',
+                                     'homeTenantId': MOCK_TENANT_ID,
                                      'id': '1',
                                      'isDefault': True,
                                      'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
                                                           {'tenantId': '00000004-0000-0000-0000-000000000000'}],
                                      'name': 'foo account',
                                      'state': 'Enabled',
-                                     'tenantId': 'test.onmicrosoft.com',
+                                     'tenantId': MOCK_TENANT_ID,
                                      'user': {
                                          'name': 'foo@foo.com',
                                          'type': 'user'
@@ -179,14 +180,14 @@ class TestProfile(unittest.TestCase):
 
         cls.subscription1_with_tenant_info_output = [{
             'environmentName': 'AzureCloud',
-            'homeTenantId': 'test.onmicrosoft.com',
+            'homeTenantId': MOCK_TENANT_ID,
             'id': '1',
             'isDefault': True,
             'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
                                  {'tenantId': '00000004-0000-0000-0000-000000000000'}],
             'name': 'foo account',
             'state': 'Enabled',
-            'tenantId': 'test.onmicrosoft.com',
+            'tenantId': MOCK_TENANT_ID,
             'tenantDisplayName': MOCK_TENANT_DISPLAY_NAME,
             'tenantDefaultDomain': MOCK_TENANT_DEFAULT_DOMAIN,
             'user': {
@@ -200,15 +201,16 @@ class TestProfile(unittest.TestCase):
                                              cls.display_name1,
                                              cls.state1,
                                              tenant_id=cls.tenant_id,
-                                             managed_by_tenants=cls.managed_by_tenants,
-                                             home_tenant_id=cls.tenant_id)
+                                             home_tenant_id=cls.tenant_id,
+                                             managed_by_tenants=cls.managed_by_tenants)
 
         # Dummy result of azure.cli.core._profile.SubscriptionFinder.find_using_common_tenant
         # It also contains tenant information, compared to the result of find_using_specific_tenant
         cls.subscription1_with_tenant_info = SubscriptionStub(
             cls.id1, cls.display_name1, cls.state1,
-            tenant_id=cls.tenant_id, managed_by_tenants=cls.managed_by_tenants,
+            tenant_id=cls.tenant_id,
             home_tenant_id=cls.tenant_id,
+            managed_by_tenants=cls.managed_by_tenants,
             tenant_display_name=cls.tenant_display_name, tenant_default_domain=cls.tenant_default_domain)
 
         # Dummy result of azure.cli.core._profile.Profile._normalize_properties
@@ -490,14 +492,14 @@ class TestProfile(unittest.TestCase):
         subs = profile.login(False, 'my app', {'secret': 'very_secret'}, True, self.tenant_id, use_device_code=True,
                              allow_no_subscriptions=False)
         output = [{'environmentName': 'AzureCloud',
-                   'homeTenantId': 'test.onmicrosoft.com',
+                   'homeTenantId': MOCK_TENANT_ID,
                    'id': '1',
                    'isDefault': True,
                    'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
                                         {'tenantId': '00000004-0000-0000-0000-000000000000'}],
                    'name': 'foo account',
                    'state': 'Enabled',
-                   'tenantId': 'test.onmicrosoft.com',
+                   'tenantId': MOCK_TENANT_ID,
                    'user': {
                        'name': 'my app',
                        'type': 'servicePrincipal'}}]
@@ -1842,7 +1844,7 @@ class FileHandleStub:  # pylint: disable=too-few-public-methods
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[], home_tenant_id=None,
+    def __init__(self, id, display_name, state, tenant_id, home_tenant_id=None, managed_by_tenants=[],
                  tenant_display_name=None, tenant_default_domain=None):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
@@ -1858,8 +1860,7 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         self.managed_by_tenants = managed_by_tenants
 
         # Below attributes are added by CLI. Without them, this denotes a Subscription from SDK
-        if home_tenant_id:
-            self.home_tenant_id = home_tenant_id
+        self.home_tenant_id = home_tenant_id
         if tenant_display_name:
             self.tenant_display_name = tenant_display_name
         if tenant_default_domain:
@@ -1894,39 +1895,29 @@ class TestUtils(unittest.TestCase):
     def test_transform_subscription_for_multiapi(self):
 
         class SimpleSubscription:
-            pass
+            def __init__(self):
+                self.home_tenant_id = tenant_id
+                self.managed_by_tenants = []
 
         class SimpleManagedByTenant:
             pass
 
         tenant_id = "00000001-0000-0000-0000-000000000000"
 
-        # No 2019-06-01 property is set.
+        # managed_by_tenants is set, but is []. It is still preserved.
         s = SimpleSubscription()
         d = {}
         _transform_subscription_for_multiapi(s, d)
-        assert d == {}
-
-        # home_tenant_id is set.
-        s = SimpleSubscription()
-        s.home_tenant_id = tenant_id
-        d = {}
-        _transform_subscription_for_multiapi(s, d)
-        assert d == {'homeTenantId': '00000001-0000-0000-0000-000000000000'}
+        assert d == {'homeTenantId': '00000001-0000-0000-0000-000000000000',
+                     'managedByTenants': []}
 
         # managed_by_tenants is set, but is None. It is still preserved.
         s = SimpleSubscription()
         s.managed_by_tenants = None
         d = {}
         _transform_subscription_for_multiapi(s, d)
-        assert d == {'managedByTenants': None}
-
-        # managed_by_tenants is set, but is []. It is still preserved.
-        s = SimpleSubscription()
-        s.managed_by_tenants = []
-        d = {}
-        _transform_subscription_for_multiapi(s, d)
-        assert d == {'managedByTenants': []}
+        assert d == {'homeTenantId': '00000001-0000-0000-0000-000000000000',
+                     'managedByTenants': None}
 
         # managed_by_tenants is set, and has valid items. It is preserved.
         s = SimpleSubscription()
@@ -1935,7 +1926,8 @@ class TestUtils(unittest.TestCase):
         s.managed_by_tenants = [t]
         d = {}
         _transform_subscription_for_multiapi(s, d)
-        assert d == {'managedByTenants': [{"tenantId": tenant_id}]}
+        assert d == {'homeTenantId': '00000001-0000-0000-0000-000000000000',
+                     'managedByTenants': [{"tenantId": tenant_id}]}
 
 
 if __name__ == '__main__':
