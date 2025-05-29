@@ -249,6 +249,33 @@ class AAZAnyTypeArgAction(AAZArgAction):
         return data
 
 
+class AAZFileUploadTypeArgAction(AAZArgAction):
+
+    @classmethod
+    def setup_operations(cls, dest_ops, values):
+        if values is None:
+            data = AAZBlankArgValue  # use blank data when values string is None
+        else:
+            data = values
+        data = cls.format_data(data)
+        dest_ops.add(data)
+
+    @classmethod
+    def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            data = copy.deepcopy(cls._schema._blank)
+
+        if data is None:
+            if cls._schema._nullable:
+                return data
+            raise AAZInvalidValueError("field is not nullable")
+        if not os.path.exists(data):
+            raise AAZInvalidValueError(f"File '{data}' doesn't exist")
+        return data
+
+
 class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
 
     @classmethod

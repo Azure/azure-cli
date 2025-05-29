@@ -9,7 +9,7 @@ from collections import OrderedDict
 from azure.cli.core.util import shell_safe_json_parse
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
 from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue, \
-    AAZIdentityObject, AAZAnyValue
+    AAZIdentityObject, AAZAnyValue, AAZFileUploadValue
 from ._utils import to_snack_case
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZInvalidFieldError, AAZInvalidValueError
@@ -113,6 +113,10 @@ class AAZFloatType(AAZSimpleType):
 
 class AAZBytesType(AAZSimpleType):
     DataType = bytes
+
+
+class AAZFileUploadType(AAZStrType):
+    _ValueCls = AAZFileUploadValue
 
 
 class AAZAnyType(AAZSimpleType):
