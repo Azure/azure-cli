@@ -111,6 +111,10 @@ class AAZFloatType(AAZSimpleType):
         return data
 
 
+class AAZBytesType(AAZSimpleType):
+    DataType = bytes
+
+
 class AAZAnyType(AAZSimpleType):
     """Any type"""
 
