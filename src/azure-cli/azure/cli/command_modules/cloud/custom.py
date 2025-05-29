@@ -49,7 +49,7 @@ def _populate_from_metadata_endpoint(arm_endpoint, session=None):
             metadata = response.json()
             if isinstance(metadata, dict) and metadata:
                 return _arm_to_cli_mapper(metadata)
-            elif isinstance(metadata, list) and metadata:
+            if isinstance(metadata, list) and metadata:
                 return _arm_to_cli_mapper(metadata[0])
             msg = 'Response body does not contain valid json. Response content: {}'.format(str(metadata))
             raise CLIError(error_msg_fmt.format(msg))
