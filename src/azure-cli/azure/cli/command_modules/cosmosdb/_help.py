@@ -644,7 +644,7 @@ short-summary: Manage Azure Cosmos DB network rules.
 helps['cosmosdb network-rule add'] = """
 type: command
 short-summary: Adds a virtual network rule to an existing Cosmos DB database account.
-example:
+examples:
   - name: Adds a virtual network rule to an existing Cosmos DB database account.
     text: az cosmosdb network-rule add -n accountname -g rg --subnet subnet
 """
