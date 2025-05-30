@@ -9,7 +9,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
 
-TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '../data/'))
 
 
 class ApimScenarioTest(ScenarioTest):
