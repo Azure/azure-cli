@@ -14,6 +14,11 @@ trigger:
 variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 
+parameters:
+  - name: maxParallel
+    displayName: Max Parallel Count
+    type: number
+    default: 5
 #schedules:
 #- cron: "0 18 * * 5"
 #  displayName: Weekly Friday test
@@ -34,7 +39,7 @@ stages:
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
-      parallel: ${{ variables.MAX_PARALLEL }}
+      maxParallel: ${{ parameters.maxParallel }}
       matrix:
         acr:
           Target: acr
@@ -610,7 +615,7 @@ stages:
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
-      parallel: ${{ variables.MAX_PARALLEL }}
+      maxParallel: ${{ parameters.maxParallel }}
       matrix:
         acr:
           Target: acr
@@ -1186,7 +1191,7 @@ stages:
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
-      parallel: ${{ variables.MAX_PARALLEL }}
+      maxParallel: ${{ parameters.maxParallel }}
       matrix:
         acr:
           Target: acr
