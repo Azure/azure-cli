@@ -1793,7 +1793,7 @@ stages:
             # Send notification
             az -v
             echo "login to user azureclilivetest"
-            # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTRESULTTENANTID)
+            az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTRESULTTENANTID)
             az account set -s $(AZURECLITESTRESULTSUBSCRIPTIONID)
             echo "set account"
             echo "send email to grid"
@@ -1844,7 +1844,7 @@ stages:
             pip install tqdm
             az -v
             echo "login to user azureclilivetest"
-            # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+            az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
             az account set -s $(AZURECLITESTSUBSCRIPTIONID)
             echo "set account"
             echo "clean resource"
