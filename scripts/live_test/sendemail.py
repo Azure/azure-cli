@@ -51,6 +51,7 @@ USER_LIVE = os.environ.get('USER_LIVE')
 USER_REPO = os.environ.get('USER_REPO')
 USER_REPO_EXT = os.environ.get('USER_REPO_EXT')
 USER_TARGET = os.environ.get('USER_TARGET')
+STATIC_WEB_URL = os.environ.get('STATIC_WEB_URL')
 
 resource_html = """
 <!DOCTYPE html>
@@ -315,7 +316,7 @@ def main():
     summary_data(testdata)
 
     # Upload results to storage account, container
-    container = ''
+    container = '$web'
     try:
         logger.info('Uploading test results to storage account...')
         container = get_container_name()
@@ -326,7 +327,7 @@ def main():
     # Generate index.html, send email
     try:
         # Generate index.html
-        container_url = 'https://clitestresultstac.blob.core.windows.net/' + container
+        container_url = '{}/'.format(STATIC_WEB_URL) + container
         html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, ACCOUNT_KEY, USER_REPO_EXT, USER_BRANCH_EXT)
         # Send email
         send_email(html_content)
@@ -522,7 +523,8 @@ def send_to_kusto(data):
         writer.writerows(data)
     logger.info('Finish generate csv file for live test.')
 
-    kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(KUSTO_CLUSTER, KUSTO_CLIENT_ID, KUSTO_CLIENT_SECRET, KUSTO_TENANT_ID)
+    # kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(KUSTO_CLUSTER, KUSTO_CLIENT_ID, KUSTO_CLIENT_SECRET, KUSTO_TENANT_ID)
+    kcsb = KustoConnectionStringBuilder.with_aad_managed_service_identity_authentication(KUSTO_CLUSTER)
     # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
     client = QueuedIngestClient(kcsb)
 
