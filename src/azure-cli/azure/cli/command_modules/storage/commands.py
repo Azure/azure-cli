@@ -429,13 +429,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=storage_blob_custom_type) as g:
         g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', supports_no_wait=True)
 
-    # with self.command_group('storage blob incremental-copy',
-    #                         operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',
-    #                         client_factory=page_blob_service_factory,
-    #                         resource_type=ResourceType.DATA_STORAGE,
-    #                         min_api='2016-05-31') as g:
-    #     g.storage_command_oauth('start', 'incremental_copy_blob')
-
     with self.command_group('storage blob incremental-copy',
                             operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
                             client_factory=page_blob_service_factory,

@@ -1366,20 +1366,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Defines the type of blob at the destination. '
                      'Value of "Detect" determines the type based on source blob type.', arg_group=None)
 
-    # with self.argument_context('storage blob incremental-copy start') as c:
-    #     from azure.cli.command_modules.storage._validators import process_blob_source_uri
-    #
-    #     c.register_source_uri_arguments(validator=process_blob_source_uri, blob_only=True)
-    #     c.argument('destination_if_modified_since', arg_group='Pre-condition', arg_type=if_modified_since_type)
-    #     c.argument('destination_if_unmodified_since', arg_group='Pre-condition', arg_type=if_unmodified_since_type)
-    #     c.argument('destination_if_match', arg_group='Pre-condition')
-    #     c.argument('destination_if_none_match', arg_group='Pre-condition')
-    #     c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
-    #     c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
-    #                help='Name of the destination blob. If the exists, it will be overwritten.')
-    #     c.argument('source_lease_id', arg_group='Copy Source')
-
-
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
 
@@ -1412,7 +1398,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('metadata', nargs='+',
                    help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
                    validator=validate_metadata)
-
 
     with self.argument_context('storage blob query') as c:
         from ._validators import validate_text_configuration
