@@ -34,7 +34,7 @@ stages:
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
-      maxParallel: ${{ variables.max_parallel }}
+      maxParallel: ${{ variables.MAX_PARALLEL }}
       matrix:
         acr:
           Target: acr
@@ -610,7 +610,7 @@ stages:
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
-      maxParallel: ${{ variables.max_parallel }}
+      maxParallel: ${{ variables.MAX_PARALLEL }}
       matrix:
         acr:
           Target: acr
@@ -1186,7 +1186,7 @@ stages:
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
-      maxParallel: ${{ variables.max_parallel }}
+      maxParallel: ${{ variables.MAX_PARALLEL }}
       matrix:
         acr:
           Target: acr
@@ -1793,8 +1793,8 @@ stages:
             # Send notification
             az -v
             echo "login to user azureclilivetest"
-            # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
-            az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+            # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTRESULTTENANTID)
+            az account set -s $(AZURECLITESTRESULTTENANTID)
             echo "set account"
             echo "send email to grid"
             python $workDir/scripts/live_test/sendemail.py "$commit_id"
@@ -1804,12 +1804,12 @@ stages:
           BUILD_ID: $(Build.BuildId)
           EMAIL_ADDRESS: $(Build.RequestedForEmail)
           EMAIL_KEY: $(SENDGRID_KEY)
-#          KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
-#          KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
+          KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
+          KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
           KUSTO_CLUSTER: $(KUSTO_CLUSTER)
           KUSTO_DATABASE: $(KUSTO_DATABASE)
           KUSTO_TABLE: $(KUSTO_TABLE)
-#          KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
+          KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
           PYTHON_VERSION: $(PYTHON_VERSION)
           USER_BRANCH: $(USER_BRANCH)
           USER_BRANCH_EXT: $(USER_BRANCH_EXT)
