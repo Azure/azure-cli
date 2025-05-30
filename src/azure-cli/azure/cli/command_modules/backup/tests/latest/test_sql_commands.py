@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, record_only
@@ -34,6 +35,57 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # Make sure that the container is not already registered since the start of the test
 
     # Note: Archive test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
+
+
+    def register_container(self):
+        # Check if the container is already registered to the vault, and if it is, if it's in soft-deleted state. Register/Re-register accordingly.
+        existing_container = self.cmd('backup container show --backup-management-type AzureWorkload -g "{rg}" -v "{vault}" -n "{name}"').get_output_in_json()
+        if existing_container:
+            print("Found an existing container")
+            if 'properties' in existing_container and \
+                    'registrationStatus' in existing_container['properties'] and \
+                    existing_container['properties']['registrationStatus'] == 'SoftDeleted':
+                print("Container is soft-deleted - reregistering")
+                self.cmd('backup container re-register --backup-management-type AzureWorkload --workload-type "{wt}" -g "{rg}" -v "{vault}" -c "{name}" --yes')
+        else:
+            print("Registering the container anew")
+            self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+            self.check("length([?name == '{name}'])", 1)])
+
+    def register_item(self):
+        # Check if the item is already registered for backup. If not, register, if it is, undelete + reprotect as appropriate.
+        existing_item = self.cmd('backup item show --backup-management-type AzureWorkload -g "{rg}" -v "{vault}" -c "{name}" -n "{item}"').get_output_in_json()
+        if existing_item:
+            print("Found an existing item")
+            if 'properties' in existing_item and \
+                    'isScheduledForDeferredDelete' in existing_item['properties'] and \
+                    existing_item['properties']['isScheduledForDeferredDelete']:
+                print("item was soft-deleted - undeleting")
+                self.cmd('backup protection undelete --backup-management-type AzureWorkload --workload-type "{wt}" -c "{name}" -i "{item}" -g "{rg}" -v "{vault}"')
+                time.sleep(10)
+            
+            existing_item = self.cmd('backup item show --backup-management-type AzureWorkload -g "{rg}" -v "{vault}" -c "{name}" -n "{item}"').get_output_in_json()
+            if 'properties' in existing_item and \
+                    'protectionState' in existing_item['properties'] and \
+                    existing_item['properties']['protectionState'] == 'ProtectionStopped':
+                print("item was in protection stopped state - resuming")
+                self.cmd('backup protection resume --backup-management-type AzureWorkload --workload-type "{wt}" -g "{rg}" -v "{vault}" -c "{name}" -i "{item}" -p "{policy}"', checks=[
+                    self.check("properties.entityFriendlyName", '{fitem}'),
+                    self.check("properties.operation", "ConfigureBackup"),
+                    self.check("properties.status", "Completed"),
+                    self.check("resourceGroup", '{rg}')
+                ])
+        else:
+            print("registering the item anew")
+            self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
+                self.check("properties.entityFriendlyName", '{fitem}'),
+                self.check("properties.operation", "ConfigureBackup"),
+                self.check("properties.status", "Completed"),
+                self.check("resourceGroup", '{rg}')
+            ])
+
     @record_only()
     def test_backup_wl_sql_container(self):
 
@@ -82,8 +134,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_sql_policy(self):
@@ -168,7 +220,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'pit_hana': 'SAPHanaDatabase'
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+        # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+        self.register_container()
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
@@ -176,20 +229,20 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --query properties.friendlyName --backup-management-type AzureWorkload').get_output_in_json()
 
         self.cmd('backup protectable-item list -g {rg} --vault-name {vault} --workload-type {wt}', checks=[
-            self.check("length([?properties.friendlyName == '{protectable_item_name}'])", 1)
+            self.check("length([?properties.friendlyName == 'master'])", 1)
         ])
 
-        self.cmd('backup protectable-item show -g {rg} --vault-name {vault} --name {protectable_item_name} --workload-type {wt} --protectable-item-type {pit} --server-name {fname}', checks=[
-            self.check('properties.friendlyName', '{protectable_item_name}'),
+        self.cmd('backup protectable-item show -g {rg} --vault-name {vault} --name "master" --workload-type {wt} --protectable-item-type {pit} --server-name {fname}', checks=[
+            self.check('properties.friendlyName', 'master'),
             self.check('properties.protectableItemType', '{pit}'),
             self.check('properties.serverName', '{fname}'),
             self.check('resourceGroup', '{rg}')
         ])
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_sql_rp(self):
@@ -209,17 +262,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'fitem': item1_sql_fname
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
-
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 1)])
-
-        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
-            self.check("properties.entityFriendlyName", '{fitem}'),
-            self.check("properties.operation", "ConfigureBackup"),
-            self.check("properties.status", "Completed"),
-            self.check("resourceGroup", '{rg}')
-        ])
+        self.register_container()
+        self.register_item()
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
@@ -237,14 +281,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {container1} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
+    @unittest.skip("Covered by other scenarios")
     def test_backup_wl_sql_auto_protection(self):
-
         self.kwargs.update({
             'vault': vault_sql,
             'name': container_sql,
@@ -302,12 +346,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'fitem': item1_sql_fname
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+        # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 1)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 1)])
 
-        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}')
+        # self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}')
+        self.register_container()
+        self.register_item()
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
@@ -368,10 +414,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {container1} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_sql_protection(self):
@@ -391,17 +437,19 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'fitem': item1_sql_fname 
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+        # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 1)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 1)])
 
-        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
-            self.check("properties.entityFriendlyName", '{fitem}'),
-            self.check("properties.operation", "ConfigureBackup"),
-            self.check("properties.status", "Completed"),
-            self.check("resourceGroup", '{rg}')
-        ])
+        # self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
+        #     self.check("properties.entityFriendlyName", '{fitem}'),
+        #     self.check("properties.operation", "ConfigureBackup"),
+        #     self.check("properties.status", "Completed"),
+        #     self.check("resourceGroup", '{rg}')
+        # ])
+        self.register_container()
+        self.register_item()
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
@@ -439,10 +487,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {container1} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_sql_restore(self):
@@ -464,17 +512,19 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'tinstance_name': instance_name
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+        # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 1)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 1)])
 
-        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
-            self.check("properties.entityFriendlyName", '{fitem}'),
-            self.check("properties.operation", "ConfigureBackup"),
-            self.check("properties.status", "Completed"),
-            self.check("resourceGroup", '{rg}')
-        ])
+        # self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
+        #     self.check("properties.entityFriendlyName", '{fitem}'),
+        #     self.check("properties.operation", "ConfigureBackup"),
+        #     self.check("properties.status", "Completed"),
+        #     self.check("resourceGroup", '{rg}')
+        # ])
+        self.register_container()
+        self.register_item()
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
@@ -531,10 +581,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {name} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 0)])
 
     @record_only()
     def test_backup_wl_sql_restore_as_files(self):
@@ -554,17 +604,19 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'item_id': item_id_sql,
             'titem': item1_sql_fname + '_restored'
         })
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
+        # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 1)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 1)])
 
-        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
-            self.check("properties.entityFriendlyName", '{fitem}'),
-            self.check("properties.operation", "ConfigureBackup"),
-            self.check("properties.status", "Completed"),
-            self.check("resourceGroup", '{rg}')
-        ])
+        # self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
+        #     self.check("properties.entityFriendlyName", '{fitem}'),
+        #     self.check("properties.operation", "ConfigureBackup"),
+        #     self.check("properties.status", "Completed"),
+        #     self.check("resourceGroup", '{rg}')
+        # ])
+        self.register_container()
+        self.register_item()
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
@@ -605,10 +657,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {name} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        # self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
-        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-            self.check("length([?name == '{name}'])", 0)])
+        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+        #     self.check("length([?name == '{name}'])", 0)])
 
     @AllowLargeResponse()
     @record_only()

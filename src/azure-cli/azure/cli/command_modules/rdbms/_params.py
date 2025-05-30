@@ -267,8 +267,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             id_part='child_name_1',
             help='The name of the database to be created when provisioning the database server. '
                  'Database name must begin with a letter (a-z) or underscore (_). Subsequent characters '
-                 'in a name can be letters, digits (0-9), or underscores. Database name length must be less '
-                 'than 32 characters.',
+                 'in a name can be letters, digits (0-9), hyphens (-), or underscores. '
+                 'Database name length must be less than 64 characters.',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.SET],
@@ -602,7 +602,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             # Add create mode as a parameter
             if command_group == 'postgres':
                 c.argument('tier', default='GeneralPurpose', arg_type=tier_arg_type)
-                c.argument('sku_name', default='Standard_D2s_v3', arg_type=sku_name_arg_type)
+                c.argument('sku_name', arg_type=sku_name_arg_type)
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
                 c.argument('version', default='17', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)

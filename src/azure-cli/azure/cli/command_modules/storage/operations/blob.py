@@ -69,22 +69,19 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
                                              account_name=account_name, container_name=container_name):
         raise CLIError('The specified container already exists.')
 
-    if cmd.supported_api_version(min_api='2019-06-01', resource_type=ResourceType.MGMT_STORAGE):
-        BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
-        blob_container = BlobContainer(public_access=public_access,
-                                       default_encryption_scope=default_encryption_scope,
-                                       deny_encryption_scope_override=deny_encryption_scope_override,
-                                       metadata=metadata,
-                                       enable_nfs_v3_all_squash=enable_nfs_v3_all_squash,
-                                       enable_nfs_v3_root_squash=enable_nfs_v3_root_squash)
-        if enable_vlw is not None:
-            ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
-                                                            resource_type=ResourceType.MGMT_STORAGE)
-            blob_container.immutable_storage_with_versioning = ImmutableStorageWithVersioning(enabled=enable_vlw)
-        return client.create(resource_group_name=resource_group_name, account_name=account_name,
-                             container_name=container_name, blob_container=blob_container)
+    BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+    blob_container = BlobContainer(public_access=public_access,
+                                   default_encryption_scope=default_encryption_scope,
+                                   deny_encryption_scope_override=deny_encryption_scope_override,
+                                   metadata=metadata,
+                                   enable_nfs_v3_all_squash=enable_nfs_v3_all_squash,
+                                   enable_nfs_v3_root_squash=enable_nfs_v3_root_squash)
+    if enable_vlw is not None:
+        ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
+                                                        resource_type=ResourceType.MGMT_STORAGE)
+        blob_container.immutable_storage_with_versioning = ImmutableStorageWithVersioning(enabled=enable_vlw)
     return client.create(resource_group_name=resource_group_name, account_name=account_name,
-                         container_name=container_name, public_access=public_access, metadata=metadata)
+                         container_name=container_name, blob_container=blob_container)
 
 
 def update_container_rm(cmd, instance, metadata=None, public_access=None,

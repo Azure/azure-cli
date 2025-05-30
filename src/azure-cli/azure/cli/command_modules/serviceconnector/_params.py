@@ -154,7 +154,7 @@ def add_target_resource_block(context, target):
             context.argument(arg, options_list=content.get('options'), type=str,
                              help='{}. Required if \'--target-id\' is not specified.'.format(content.get('help')))
             required_args.append(content.get('options')[0])
-        if target == RESOURCE.NeonPostgres:
+        if target == RESOURCE.NeonPostgres or target == RESOURCE.MongoDbAtlas:
             context.ignore('target_id')
         else:
             context.argument('target_id', type=str,

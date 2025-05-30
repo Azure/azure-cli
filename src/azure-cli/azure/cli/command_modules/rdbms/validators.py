@@ -470,9 +470,9 @@ def compare_sku_names(sku_1, sku_2):
         return -1
 
     # the case where version number is the same, we want to sort by the core number
-    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
-        return 1
     if int(sku_2_match.group('core_number')) < int(sku_1_match.group('core_number')):
+        return 1
+    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
         return -1
 
     return 0
@@ -986,7 +986,7 @@ def validate_backup_name(backup_name):
 
 
 def validate_database_name(database_name):
-    if database_name is not None and not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]{0,30}$', database_name):
+    if database_name is not None and not re.match(r'^[a-zA-Z_][\w\-]{0,62}$', database_name):
         raise ValidationError("Database name must begin with a letter (a-z) or underscore (_). "
-                              "Subsequent characters in a name can be letters, digits (0-9), or underscores. "
-                              "Database name length must be less than 32 characters.")
+                              "Subsequent characters in a name can be letters, digits (0-9), hyphens (-), "
+                              "or underscores. Database name length must be less than 64 characters.")
