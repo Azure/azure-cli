@@ -1794,7 +1794,7 @@ stages:
             az -v
             echo "login to user azureclilivetest"
             # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTRESULTTENANTID)
-            az account set -s $(AZURECLITESTRESULTTENANTID)
+            az account set -s $(AZURECLITESTRESULTSUBSCRIPTIONID)
             echo "set account"
             echo "send email to grid"
             python $workDir/scripts/live_test/sendemail.py "$commit_id"
