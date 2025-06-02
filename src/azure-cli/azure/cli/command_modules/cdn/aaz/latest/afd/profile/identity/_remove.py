@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Remove(AAZCommand):
     """Remove the user or system managed identities.
+
+    :example: Remove afd profile identity
+        az afd profile identity remove -n P -g RG --mi-user-assigned [url0, url1]
     """
 
     _aaz_info = {

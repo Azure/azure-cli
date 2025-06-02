@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Assign(AAZCommand):
     """Assign the user or system managed identities.
+
+    :example: assign profile identity
+        az afd profile identity assign -n P -g RG --mi-user-assigned [url0, url1]
     """
 
     _aaz_info = {
