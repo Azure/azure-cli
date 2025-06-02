@@ -66,6 +66,7 @@ class Create(AAZCommand):
             arg_group="Profile",
             help="Resource location.",
             required=True,
+            default="global",
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),

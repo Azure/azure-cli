@@ -141,11 +141,12 @@ class AFDProfileCreate(_AFDProfileCreate):
         )
         args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
+        args_schema.location._required = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.location = 'global'
+        args.location = 'global'  # AFD profile location is always global
         user_assigned_identities = {}
         for identity in args.user_assigned_identities:
             user_assigned_identities[identity.to_serialized_data()] = {}
