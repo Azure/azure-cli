@@ -12,19 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "afd profile create",
+    "afd profile identity remove",
 )
-class Create(AAZCommand):
-    """Create a new Azure Front Door Standard or Azure Front Door Premium or CDN profile with a profile name under the specified subscription and resource group.
-
-    :example: Create an AFD profile using Standard SKU.
-        az afd profile create -g group --profile-name profile --sku Standard_AzureFrontDoor
+class Remove(AAZCommand):
+    """Remove the user or system managed identities.
     """
 
     _aaz_info = {
         "version": "2025-04-15",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-04-15"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-04-15", "identity"],
         ]
     }
 
@@ -32,6 +29,7 @@ class Create(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
@@ -54,128 +52,32 @@ class Create(AAZCommand):
             required=True,
         )
 
-        # define Arg Group "Profile"
+        # define Arg Group "Profile.identity"
 
         _args_schema = cls._args_schema
-        _args_schema.identity = AAZObjectArg(
-            options=["--identity"],
-            arg_group="Profile",
-            help="Managed service identity (system assigned and/or user assigned identities).",
-        )
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="Profile",
-            help="Resource location.",
-            required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Profile",
-            help="Resource tags.",
-        )
-
-        identity = cls._args_schema.identity
-        identity.mi_system_assigned = AAZStrArg(
-            options=["system-assigned", "mi-system-assigned"],
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Profile.identity",
             help="Set the system managed identity.",
             blank="True",
         )
-        identity.type = AAZStrArg(
-            options=["type"],
-            help="Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).",
-            required=True,
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
-        )
-        identity.mi_user_assigned = AAZListArg(
-            options=["user-assigned", "mi-user-assigned"],
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Profile.identity",
             help="Set the user managed identities.",
             blank=[],
         )
-        identity.user_assigned_identities = AAZDictArg(
-            options=["user-assigned-identities"],
-            help="The set of user assigned identities associated with the resource. The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}. The dictionary values can be empty objects ({}) in requests.",
-        )
 
-        mi_user_assigned = cls._args_schema.identity.mi_user_assigned
+        mi_user_assigned = cls._args_schema.mi_user_assigned
         mi_user_assigned.Element = AAZStrArg()
-
-        user_assigned_identities = cls._args_schema.identity.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectArg(
-            blank={},
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.log_scrubbing = AAZObjectArg(
-            options=["--log-scrubbing"],
-            arg_group="Properties",
-            help="Defines rules that scrub sensitive fields in the Azure Front Door profile logs.",
-        )
-        _args_schema.origin_response_timeout_seconds = AAZIntArg(
-            options=["--origin-response-timeout-seconds"],
-            arg_group="Properties",
-            help="Send and receive timeout on forwarding request to the origin. When timeout is reached, the request fails and returns.",
-            fmt=AAZIntArgFormat(
-                minimum=16,
-            ),
-        )
-
-        log_scrubbing = cls._args_schema.log_scrubbing
-        log_scrubbing.scrubbing_rules = AAZListArg(
-            options=["scrubbing-rules"],
-            help="List of log scrubbing rules applied to the Azure Front Door profile logs.",
-        )
-        log_scrubbing.state = AAZStrArg(
-            options=["state"],
-            help="State of the log scrubbing config. Default value is Enabled.",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-
-        scrubbing_rules = cls._args_schema.log_scrubbing.scrubbing_rules
-        scrubbing_rules.Element = AAZObjectArg()
-
-        _element = cls._args_schema.log_scrubbing.scrubbing_rules.Element
-        _element.match_variable = AAZStrArg(
-            options=["match-variable"],
-            help="The variable to be scrubbed from the logs.",
-            required=True,
-            enum={"QueryStringArgNames": "QueryStringArgNames", "RequestIPAddress": "RequestIPAddress", "RequestUri": "RequestUri"},
-        )
-        _element.selector = AAZStrArg(
-            options=["selector"],
-            help="When matchVariable is a collection, operator used to specify which elements in the collection this rule applies to.",
-        )
-        _element.selector_match_operator = AAZStrArg(
-            options=["selector-match-operator"],
-            help="When matchVariable is a collection, operate on the selector to specify which elements in the collection this rule applies to.",
-            required=True,
-            enum={"EqualsAny": "EqualsAny"},
-        )
-        _element.state = AAZStrArg(
-            options=["state"],
-            help="Defines the state of a log scrubbing rule. Default value is enabled.",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-
-        # define Arg Group "Sku"
-
-        _args_schema = cls._args_schema
-        _args_schema.sku = AAZStrArg(
-            options=["--sku"],
-            arg_group="Sku",
-            help="Name of the pricing tier.",
-            enum={"Custom_Verizon": "Custom_Verizon", "Premium_AzureFrontDoor": "Premium_AzureFrontDoor", "Premium_Verizon": "Premium_Verizon", "StandardPlus_955BandWidth_ChinaCdn": "StandardPlus_955BandWidth_ChinaCdn", "StandardPlus_AvgBandWidth_ChinaCdn": "StandardPlus_AvgBandWidth_ChinaCdn", "StandardPlus_ChinaCdn": "StandardPlus_ChinaCdn", "Standard_955BandWidth_ChinaCdn": "Standard_955BandWidth_ChinaCdn", "Standard_Akamai": "Standard_Akamai", "Standard_AvgBandWidth_ChinaCdn": "Standard_AvgBandWidth_ChinaCdn", "Standard_AzureFrontDoor": "Standard_AzureFrontDoor", "Standard_ChinaCdn": "Standard_ChinaCdn", "Standard_Microsoft": "Standard_Microsoft", "Standard_Verizon": "Standard_Verizon"},
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
+        self.ProfilesGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.required())
         yield self.ProfilesCreate(ctx=self.ctx)()
         self.post_operations()
 
@@ -187,9 +89,111 @@ class Create(AAZCommand):
     def post_operations(self):
         pass
 
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
+
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            return result.identity
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result.identity = value
+            return
+
+    class ProfilesGet(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "MgmtErrorFormat"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "profileName", self.ctx.args.profile_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2025-04-15",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+            _RemoveHelper._build_schema_profile_read(cls._schema_on_200)
+
+            return cls._schema_on_200
 
     class ProfilesCreate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -277,58 +281,8 @@ class Create(AAZCommand):
         def content(self):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+                value=self.ctx.vars.instance,
             )
-            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
-            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("tags", AAZDictType, ".tags")
-
-            identity = _builder.get(".identity")
-            if identity is not None:
-                identity.set_prop("type", AAZStrType, ".type", typ_kwargs={"flags": {"required": True}})
-                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
-                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
-                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
-
-            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
-            if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".")
-
-            user_assigned = _builder.get(".identity.userAssigned")
-            if user_assigned is not None:
-                user_assigned.set_elements(AAZStrType, ".")
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("logScrubbing", AAZObjectType, ".log_scrubbing")
-                properties.set_prop("originResponseTimeoutSeconds", AAZIntType, ".origin_response_timeout_seconds")
-
-            log_scrubbing = _builder.get(".properties.logScrubbing")
-            if log_scrubbing is not None:
-                log_scrubbing.set_prop("scrubbingRules", AAZListType, ".scrubbing_rules")
-                log_scrubbing.set_prop("state", AAZStrType, ".state")
-
-            scrubbing_rules = _builder.get(".properties.logScrubbing.scrubbingRules")
-            if scrubbing_rules is not None:
-                scrubbing_rules.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.logScrubbing.scrubbingRules[]")
-            if _elements is not None:
-                _elements.set_prop("matchVariable", AAZStrType, ".match_variable", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("selector", AAZStrType, ".selector")
-                _elements.set_prop("selectorMatchOperator", AAZStrType, ".selector_match_operator", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("state", AAZStrType, ".state")
-
-            sku = _builder.get(".sku")
-            if sku is not None:
-                sku.set_prop("name", AAZStrType, ".sku")
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
 
             return self.serialize_content(_content_value)
 
@@ -348,13 +302,33 @@ class Create(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _CreateHelper._build_schema_profile_read(cls._schema_on_200_201)
+            _RemoveHelper._build_schema_profile_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
-class _CreateHelper:
-    """Helper class for Create"""
+        def __call__(self, *args, **kwargs):
+            self._update_instance(self.ctx.selectors.subresource.required())
+
+        def _update_instance(self, instance):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=instance,
+                typ=AAZIdentityObjectType
+            )
+            _builder.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "remove"}})
+            _builder.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "remove"}})
+
+            user_assigned = _builder.get(".userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
+
+            return _instance_value
+
+
+class _RemoveHelper:
+    """Helper class for Remove"""
 
     _schema_profile_read = None
 
@@ -519,4 +493,4 @@ class _CreateHelper:
         _schema.type = cls._schema_profile_read.type
 
 
-__all__ = ["Create"]
+__all__ = ["Remove"]
