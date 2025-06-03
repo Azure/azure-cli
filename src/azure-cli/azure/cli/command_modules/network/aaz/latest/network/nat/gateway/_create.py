@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/natgateways/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/natgateways/{}", "2022-01-01"],
         ]
     }
 
@@ -117,27 +117,9 @@ class Create(AAZCommand):
         sku.name = AAZStrArg(
             options=["name"],
             help="Name of Nat Gateway SKU.",
-            enum={"Standard": "Standard", "StandardV2": "StandardV2"},
+            enum={"Standard": "Standard"},
         )
         return cls._args_schema
-
-    _args_sub_resource_create = None
-
-    @classmethod
-    def _build_args_sub_resource_create(cls, _schema):
-        if cls._args_sub_resource_create is not None:
-            _schema.id = cls._args_sub_resource_create.id
-            return
-
-        cls._args_sub_resource_create = AAZObjectArg()
-
-        sub_resource_create = cls._args_sub_resource_create
-        sub_resource_create.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-
-        _schema.id = cls._args_sub_resource_create.id
 
     def _execute_operations(self):
         self.pre_operations()
@@ -220,7 +202,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -334,23 +316,13 @@ class Create(AAZCommand):
             properties.public_ip_addresses = AAZListType(
                 serialized_name="publicIpAddresses",
             )
-            properties.public_ip_addresses_v6 = AAZListType(
-                serialized_name="publicIpAddressesV6",
-            )
             properties.public_ip_prefixes = AAZListType(
                 serialized_name="publicIpPrefixes",
-            )
-            properties.public_ip_prefixes_v6 = AAZListType(
-                serialized_name="publicIpPrefixesV6",
             )
             properties.resource_guid = AAZStrType(
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
-            properties.source_virtual_network = AAZObjectType(
-                serialized_name="sourceVirtualNetwork",
-            )
-            _CreateHelper._build_schema_sub_resource_read(properties.source_virtual_network)
             properties.subnets = AAZListType(
                 flags={"read_only": True},
             )
@@ -359,17 +331,9 @@ class Create(AAZCommand):
             public_ip_addresses.Element = AAZObjectType()
             _CreateHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
 
-            public_ip_addresses_v6 = cls._schema_on_200_201.properties.public_ip_addresses_v6
-            public_ip_addresses_v6.Element = AAZObjectType()
-            _CreateHelper._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
-
             public_ip_prefixes = cls._schema_on_200_201.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
             _CreateHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
-
-            public_ip_prefixes_v6 = cls._schema_on_200_201.properties.public_ip_prefixes_v6
-            public_ip_prefixes_v6.Element = AAZObjectType()
-            _CreateHelper._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
 
             subnets = cls._schema_on_200_201.properties.subnets
             subnets.Element = AAZObjectType()
@@ -389,12 +353,6 @@ class Create(AAZCommand):
 
 class _CreateHelper:
     """Helper class for Create"""
-
-    @classmethod
-    def _build_schema_sub_resource_create(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("id", AAZStrType, ".id")
 
     _schema_sub_resource_read = None
 

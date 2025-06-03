@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/natgateways/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/natgateways/{}", "2022-01-01"],
         ]
     }
 
@@ -109,27 +109,6 @@ class Update(AAZCommand):
         # define Arg Group "Parameters"
         return cls._args_schema
 
-    _args_sub_resource_update = None
-
-    @classmethod
-    def _build_args_sub_resource_update(cls, _schema):
-        if cls._args_sub_resource_update is not None:
-            _schema.id = cls._args_sub_resource_update.id
-            return
-
-        cls._args_sub_resource_update = AAZObjectArg(
-            nullable=True,
-        )
-
-        sub_resource_update = cls._args_sub_resource_update
-        sub_resource_update.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-            nullable=True,
-        )
-
-        _schema.id = cls._args_sub_resource_update.id
-
     def _execute_operations(self):
         self.pre_operations()
         self.NatGatewaysGet(ctx=self.ctx)()
@@ -208,7 +187,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -307,7 +286,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -408,12 +387,6 @@ class Update(AAZCommand):
 class _UpdateHelper:
     """Helper class for Update"""
 
-    @classmethod
-    def _build_schema_sub_resource_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("id", AAZStrType, ".id")
-
     _schema_nat_gateway_read = None
 
     @classmethod
@@ -462,23 +435,13 @@ class _UpdateHelper:
         properties.public_ip_addresses = AAZListType(
             serialized_name="publicIpAddresses",
         )
-        properties.public_ip_addresses_v6 = AAZListType(
-            serialized_name="publicIpAddressesV6",
-        )
         properties.public_ip_prefixes = AAZListType(
             serialized_name="publicIpPrefixes",
-        )
-        properties.public_ip_prefixes_v6 = AAZListType(
-            serialized_name="publicIpPrefixesV6",
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
-        properties.source_virtual_network = AAZObjectType(
-            serialized_name="sourceVirtualNetwork",
-        )
-        cls._build_schema_sub_resource_read(properties.source_virtual_network)
         properties.subnets = AAZListType(
             flags={"read_only": True},
         )
@@ -487,17 +450,9 @@ class _UpdateHelper:
         public_ip_addresses.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_addresses.Element)
 
-        public_ip_addresses_v6 = _schema_nat_gateway_read.properties.public_ip_addresses_v6
-        public_ip_addresses_v6.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
-
         public_ip_prefixes = _schema_nat_gateway_read.properties.public_ip_prefixes
         public_ip_prefixes.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
-
-        public_ip_prefixes_v6 = _schema_nat_gateway_read.properties.public_ip_prefixes_v6
-        public_ip_prefixes_v6.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
 
         subnets = _schema_nat_gateway_read.properties.subnets
         subnets.Element = AAZObjectType()
