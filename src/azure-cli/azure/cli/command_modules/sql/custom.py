@@ -1412,7 +1412,7 @@ def db_create_replica(
         partner_server_name,
         partner_database_name=None,
         partner_resource_group_name=None,
-        partner_subscription_id=None,
+        partner_sub_id=None,
         secondary_type=None,
         no_wait=False,
         assign_identity=False,
@@ -1432,8 +1432,8 @@ def db_create_replica(
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
     partner_database_name = partner_database_name or database_name
-    if partner_subscription_id is not None:
-        partner_client = get_sql_databases_operations(cmd.cli_ctx, None, partner_subscription_id)
+    if partner_sub_id is not None:
+        partner_client = get_sql_databases_operations(cmd.cli_ctx, None, partner_sub_id)
     else:
         partner_client = client
 
@@ -1454,7 +1454,7 @@ def db_create_replica(
     location = _get_server_location(cmd.cli_ctx,
                                     server_name=partner_server_name,
                                     resource_group_name=partner_resource_group_name,
-                                    subscription_id=partner_subscription_id)
+                                    subscription_id=partner_sub_id)
     if _should_show_backup_storage_redundancy_warnings(location):
         if not kwargs['requested_backup_storage_redundancy']:
             _backup_storage_redundancy_take_source_warning()
@@ -1465,7 +1465,7 @@ def db_create_replica(
         cmd.cli_ctx,
         partner_client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name, partner_subscription_id),
+        DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name, partner_sub_id),
         no_wait,
         secondary_type=secondary_type,
         assign_identity=assign_identity,
