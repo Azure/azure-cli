@@ -1395,14 +1395,14 @@ class WebappACRScenarioTest(ScenarioTest):
         acr_registry_name = self.create_random_name(prefix='acregistrytest', length=24)
         runtime = 'DOTNETCORE:8.0'
         custom_image_name = 'privatewebsite:lnx-v1'
-        custom_container_source = os.path.join(TEST_DIR, 'sample_custom_container')
+        custom_container_source = 'docker.io/library/hello-world:latest'
 
         registry_id = self.cmd('acr create -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name)).get_output_in_json()['id']
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan_name))
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp_name, plan_name, runtime))
 
         # add custom image to ACR
-        self.cmd('acr build -g {} --registry {} --platform Linux --no-logs --image {} {}'.format(resource_group, acr_registry_name, custom_image_name, custom_container_source))
+        self.cmd('acr import -g {} -n {} --image {} --source {}'.format(resource_group, acr_registry_name, custom_image_name, custom_container_source))
 
         self.cmd('webapp config container set -g {} -n {} --assign-identity "[system]" --role "AcrPull" --scope {} --acr-use-identity true --acr-identity "[system]" --container-image-name "{}.azurecr.io/{}"'.format(
             resource_group, webapp_name, registry_id, acr_registry_name, custom_image_name
