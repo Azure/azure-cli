@@ -8,7 +8,6 @@ from enum import Enum
 import calendar
 from datetime import datetime
 from dateutil.parser import parse
-from copy import deepcopy
 
 from azure.cli.core.util import (
     CLIError,
