@@ -28,7 +28,7 @@ class Start(AAZCommand):
     def _handler(self, command_args):
         super()._handler(command_args)
         self._execute_operations()
-        # return None
+        return None
 
     _args_schema = None
 
@@ -162,7 +162,7 @@ class Start(AAZCommand):
 
         @property
         def error_format(self):
-            return "MgmtErrorFormat"
+            return "ODataV4Format"
 
         @property
         def url_parameters(self):
