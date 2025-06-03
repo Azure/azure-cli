@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2022-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipprefixes/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipprefixes/{}", "2022-09-01"],
         ]
     }
 
@@ -176,7 +176,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2022-09-01",
                     required=True,
                 ),
             }
@@ -275,7 +275,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2022-09-01",
                     required=True,
                 ),
             }
@@ -420,7 +420,6 @@ class _UpdateHelper:
         )
         properties.load_balancer_frontend_ip_configuration = AAZObjectType(
             serialized_name="loadBalancerFrontendIpConfiguration",
-            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.nat_gateway = AAZObjectType(
@@ -484,23 +483,13 @@ class _UpdateHelper:
         properties.public_ip_addresses = AAZListType(
             serialized_name="publicIpAddresses",
         )
-        properties.public_ip_addresses_v6 = AAZListType(
-            serialized_name="publicIpAddressesV6",
-        )
         properties.public_ip_prefixes = AAZListType(
             serialized_name="publicIpPrefixes",
-        )
-        properties.public_ip_prefixes_v6 = AAZListType(
-            serialized_name="publicIpPrefixesV6",
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
-        properties.source_virtual_network = AAZObjectType(
-            serialized_name="sourceVirtualNetwork",
-        )
-        cls._build_schema_sub_resource_read(properties.source_virtual_network)
         properties.subnets = AAZListType(
             flags={"read_only": True},
         )
@@ -509,17 +498,9 @@ class _UpdateHelper:
         public_ip_addresses.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_addresses.Element)
 
-        public_ip_addresses_v6 = _schema_public_ip_prefix_read.properties.nat_gateway.properties.public_ip_addresses_v6
-        public_ip_addresses_v6.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
-
         public_ip_prefixes = _schema_public_ip_prefix_read.properties.nat_gateway.properties.public_ip_prefixes
         public_ip_prefixes.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
-
-        public_ip_prefixes_v6 = _schema_public_ip_prefix_read.properties.nat_gateway.properties.public_ip_prefixes_v6
-        public_ip_prefixes_v6.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
 
         subnets = _schema_public_ip_prefix_read.properties.nat_gateway.properties.subnets
         subnets.Element = AAZObjectType()
@@ -569,9 +550,7 @@ class _UpdateHelper:
             _schema.id = cls._schema_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
         sub_resource_read = _schema_sub_resource_read
         sub_resource_read.id = AAZStrType()
