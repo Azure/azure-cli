@@ -880,4 +880,4 @@ def validate_gateway_prefix_size(namespace):
         if not hasattr(namespace, 'mode') or namespace.mode != CONST_NODEPOOL_MODE_GATEWAY:
             raise ArgumentUsageError("--gateway-prefix-size can only be set for Gateway-mode nodepools")
         if namespace.gateway_prefix_size < 28 or namespace.gateway_prefix_size > 31:
-            raise CLIError("--gateway-prefix-size must be in the range [28, 31]")
+            raise InvalidArgumentValueError("--gateway-prefix-size must be in the range [28, 31]")
