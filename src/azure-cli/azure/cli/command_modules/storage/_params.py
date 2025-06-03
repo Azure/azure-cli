@@ -1381,6 +1381,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
                    validator=validate_metadata)
 
+    with self.argument_context('storage blob incremental-copy cancel') as c:
+        c.register_blob_arguments()
+        c.argument('copy_id', help='Copy identifier provided in the copy.id of the original copy_blob operation.')
+
     with self.argument_context('storage blob query') as c:
         from ._validators import validate_text_configuration
         c.register_blob_arguments_track2()

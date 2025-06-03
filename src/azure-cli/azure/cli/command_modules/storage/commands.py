@@ -377,6 +377,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch', client_factory=cf_blob_service,
                                        validator=process_blob_delete_batch_parameters)
         g.storage_custom_command_oauth('incremental-copy start', 'incremental_copy_start')
+        g.storage_command_oauth('incremental-copy cancel', 'abort_copy')
 
     blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
                                              resource_type=ResourceType.DATA_STORAGE_BLOB)
@@ -426,13 +427,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage blob', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_blob_custom_type) as g:
         g.custom_command('restore', 'restore_blob_ranges', supports_no_wait=True)
-
-    with self.command_group('storage blob incremental-copy',
-                            operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
-                            client_factory=page_blob_service_factory,
-                            resource_type=ResourceType.DATA_STORAGE,
-                            min_api='2016-05-31') as g:
-        g.storage_command_oauth('cancel', 'abort_copy_blob')
 
     with self.command_group('storage blob', custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
         g.storage_custom_command_oauth('sync', 'storage_blob_sync', is_preview=True)
