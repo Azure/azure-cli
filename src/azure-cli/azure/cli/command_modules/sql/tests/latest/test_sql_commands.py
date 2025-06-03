@@ -3143,7 +3143,6 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('role', 'Primary'),
                      JMESPathCheck('partnerRole', 'Secondary')])
 
-    # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
                            location='westus2')
@@ -3151,7 +3150,6 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                        resource_group_parameter_name="resource_group_1",
                        location='westus2')
     @AllowLargeResponse()
-    @record_only()
     def test_sql_db_replica_mgmt_cross_subscription(self,
                                  resource_group_1, resource_group_location_1,
                                  server_name_1):
@@ -3189,7 +3187,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', s1.group)])
 
         # create replica in second server with min params
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-subscription-id {}'
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {}'
                  .format(s1.group, s1.name, database_name,
                          s2.name, s2.group, s2.subscription),
                  checks=[
@@ -3198,7 +3196,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
         # create replica in second server with backup storage redundancy
         backup_storage_redundancy = "zone"
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-subscription-id {} --backup-storage-redundancy {}'
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {} --backup-storage-redundancy {}'
                  .format(s1.group, s1.name, database_name,
                          s2.name, s2.group, s2.subscription, backup_storage_redundancy),
                  checks=[
@@ -3207,7 +3205,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
 
         secondary_type = "Geo"
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}  --partner-resource-group {} --partner-subscription-id {}'
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}  --partner-resource-group {} --partner-sub-id {}'
                  ' --service-objective {} --partner-database {} --secondary-type {}'
                  .format(s1.group, s1.name, database_name,
                          s2.name, s2.group, s2.subscription, service_objective, target_database_name, secondary_type),
@@ -3221,7 +3219,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         pool_name = 'cli-automated-tests-pool'
 
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
-                 ' --partner-resource-group {} --partner-subscription-id {} --elastic-pool {}'
+                 ' --partner-resource-group {} --partner-sub-id {} --elastic-pool {}'
                  .format(s1.group, s1.name, database_name,
                          s3.name, s3.group, s3.subscription, pool_name),
                  checks=[
