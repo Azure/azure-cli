@@ -316,7 +316,7 @@ def main():
     summary_data(testdata)
 
     # Upload results to storage account, container
-    container = '$web'
+    container = "'$web'"
     try:
         logger.info('Uploading test results to storage account...')
         # container = get_container_name()
