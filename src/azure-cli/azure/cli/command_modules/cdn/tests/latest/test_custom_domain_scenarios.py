@@ -83,44 +83,6 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.custom_domain_list_cmd(resource_group, profile_name, endpoint_name, checks=list_checks)
 
     @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
-    def test_cdn_custom_domain_https_verizon(self, resource_group):
-        profile_name = 'profile123'
-        self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
-
-        self.profile_create_cmd(resource_group, profile_name, sku=SkuName.standard_verizon.value)
-        # Endpoint name and custom domain hostname are hard-coded because of
-        # custom domain CNAME requirement. If test fails to cleanup, the
-        # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'aaz-09-01-verizon'
-        origin = 'www.microsoft1.com'
-        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
-
-        custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz0901-verizon.clitest.azfdtest.xyz'
-        # # Use alternate hostnames for dogfood.
-        # if '.azureedge-test.net' in endpoint['hostName']:
-        #     hostname = custom_domain_name + '.aaz0901-verizon-fd.clitest.azfdtest.xyz'
-        self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
-
-        checks = [JMESPathCheck('name', custom_domain_name),
-                  JMESPathCheck('hostName', hostname),
-                  JMESPathCheck('customHttpsParameters', None)]
-        self.custom_domain_show_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, checks=checks)
-
-        checks = [JMESPathCheck('name', custom_domain_name),
-                  JMESPathCheck('hostName', hostname),
-                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
-                  JMESPathCheck('customHttpsProvisioningSubstate', 'SubmittingDomainControlValidationRequest')]
-        self.custom_domain_enable_https_command(resource_group,
-                                                profile_name,
-                                                endpoint_name,
-                                                custom_domain_name,
-                                                min_tls_version='None',
-                                                checks=checks)
-
-        self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
-
-    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     # need to switch to a different subscription 3c0124f9-e564-4c42-86f7-fa79457aedc3
     # @KeyVaultPreparer(location='centralus', name_prefix='cdncli-byoc', name_len=24)
     def test_cdn_custom_domain_https_msft(self, resource_group):
