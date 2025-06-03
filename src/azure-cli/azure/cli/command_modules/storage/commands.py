@@ -521,8 +521,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage container immutability-policy', command_type=blob_container_mgmt_sdk,
                             custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
-                                                               resource_type=ResourceType.MGMT_STORAGE),
-                            min_api='2018-02-01') as g:
+                                                               resource_type=ResourceType.MGMT_STORAGE)) as g:
         from azure.cli.command_modules.storage._transformers import transform_immutability_policy
 
         g.show_command('show', 'get_immutability_policy',
@@ -535,8 +534,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage container legal-hold', command_type=blob_container_mgmt_sdk,
                             custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
-                                                               resource_type=ResourceType.MGMT_STORAGE),
-                            min_api='2018-02-01') as g:
+                                                               resource_type=ResourceType.MGMT_STORAGE)) as g:
         g.custom_command('set', 'set_legal_hold')
         g.custom_command('clear', 'clear_legal_hold')
         g.show_command(

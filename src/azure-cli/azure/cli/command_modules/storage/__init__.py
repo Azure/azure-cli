@@ -343,7 +343,7 @@ Authentication failure. This may be caused by either invalid account key, connec
             return
         self.command_loader.cli_ctx.invocation.data['command_string'] = command_name
 
-        with self.command_loader.argument_context(command_name, min_api='2017-11-09') as c:
+        with self.command_loader.argument_context(command_name) as c:
             c.extra('auth_mode', arg_type=get_enum_type(['login', 'key']),
                     help='The mode in which to run the command. "login" mode will directly use your login credentials '
                          'for the authentication. The legacy "key" mode will attempt to query for '

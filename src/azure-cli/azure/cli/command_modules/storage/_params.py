@@ -232,7 +232,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     )
     rehydrate_priority_type = CLIArgumentType(
         arg_type=get_enum_type(t_rehydrate_priority), options_list=('--rehydrate-priority', '-r'),
-        min_api='2019-02-02',
         help='Indicate the priority with which to rehydrate an archived blob.')
 
     action_type = CLIArgumentType(
@@ -263,7 +262,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     version_id_type = CLIArgumentType(
         help='An optional blob version ID. This parameter is only for versioning enabled account. ',
-        min_api='2019-12-12', is_preview=True
+        is_preview=True
     )
 
     with self.argument_context('storage') as c:
@@ -908,7 +907,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                         'using this shared access signature.')
         c.argument('full_uri', action='store_true',
                    help='Indicates that this command return the full blob URI and the shared access signature token.')
-        c.argument('as_user', min_api='2018-11-09', action='store_true',
+        c.argument('as_user', action='store_true',
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
@@ -935,8 +934,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('time_to_restore', type=get_datetime_type(True), options_list=['--time-to-restore', '-t'],
                    help='Restore blob to the specified time, which should be UTC datetime in (Y-m-d\'T\'H:M:S\'Z\').')
 
-    with self.argument_context('storage blob rewrite', resource_type=ResourceType.DATA_STORAGE_BLOB,
-                               min_api='2020-04-08') as c:
+    with self.argument_context('storage blob rewrite', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         c.register_blob_arguments()
         c.register_precondition_options()
 
@@ -1049,10 +1047,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
                    help='Path of the file to upload as the blob content.', validator=validate_upload_blob)
-        c.argument('data', help='The blob data to upload.', required=False, is_preview=True, min_api='2019-02-02')
+        c.argument('data', help='The blob data to upload.', required=False, is_preview=True)
         c.argument('length', type=int, help='Number of bytes to read from the stream. This is optional, but should be '
-                                            'supplied for optimal performance. Cooperate with --data.', is_preview=True,
-                   min_api='2019-02-02')
+                                            'supplied for optimal performance. Cooperate with --data.', is_preview=True)
         c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
                    help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
                         'operation will overwrite the existing data. If set to False, the operation will fail with '
@@ -1066,7 +1063,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='The max length in bytes permitted for the append blob.')
         c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
                    arg_type=get_enum_type(get_blob_types()), arg_group="Additional Flags")
-        c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group="Content Control")
+        c.argument('validate_content', action='store_true', arg_group="Content Control")
         c.extra('no_progress', progress_type, validator=add_progress_callback, arg_group="Additional Flags")
         c.extra('tier', tier_type, validator=blob_tier_validator_track2, arg_group="Additional Flags")
         c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
@@ -1093,7 +1090,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('max_connections', type=int, arg_group="Additional Flags",
                    help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
         c.argument('maxsize_condition', arg_group='Content Control')
-        c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
+        c.argument('validate_content', action='store_true', arg_group='Content Control')
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()),
                    arg_group="Additional Flags")
         c.extra('no_progress', progress_type, validator=add_progress_callback, arg_group="Additional Flags")
@@ -1133,7 +1130,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('open_mode', help='Mode to use when opening the file. Note that specifying append only open_mode '
                                      'prevents parallel download. So, max_connections must be set to 1 '
                                      'if this open_mode is used.')
-        c.extra('validate_content', action='store_true', min_api='2016-05-31',
+        c.extra('validate_content', action='store_true',
                 help='If true, calculates an MD5 hash for each chunk of the blob. The storage service checks the '
                      'hash of the content that has arrived with the hash that was sent. This is primarily valuable for '
                      'detecting bitflips on the wire if using http instead of https, as https (the default), '
@@ -1356,8 +1353,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         c.register_blob_arguments()
         c.register_source_uri_arguments(validator=process_blob_source_uri, blob_only=True)
-        c.argument('destination_if_modified_since', arg_group='Pre-condition', arg_type=if_modified_since_type)
-        c.argument('destination_if_unmodified_since', arg_group='Pre-condition', arg_type=if_unmodified_since_type)
+        c.argument('destination_if_modified_since', arg_group='Pre-condition')
+        c.argument('destination_if_unmodified_since', arg_group='Pre-condition')
         c.argument('destination_if_match', arg_group='Pre-condition',
                    help='An ETag value, or the wildcard character (*). Specify an ETag value for this conditional '
                         'header to copy the blob only if the specified ETag value matches the ETag value for an '
@@ -1631,7 +1628,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                             'using this shared access signature.')
         c.argument('content_type', help='Response header value for Content-Type when resource is accessed '
                                         'using this shared access signature.')
-        c.argument('as_user', min_api='2018-11-09', action='store_true',
+        c.argument('as_user', action='store_true',
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
@@ -1684,7 +1681,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specify that container metadata to be returned in the response.')
         c.argument('show_next_marker', action='store_true', is_preview=True,
                    help='Show nextMarker in result when specified.')
-        c.argument('include_deleted', arg_type=get_three_state_flag(), min_api='2020-02-10',
+        c.argument('include_deleted', arg_type=get_three_state_flag(),
                    help='Specify that deleted containers to be returned in the response. This is for container restore '
                    'enabled account. The default value is `False`')
 
@@ -2160,7 +2157,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
         c.extra('share_name', share_name_type)
-        c.argument('validate_content', action='store_true', min_api='2016-05-31',
+        c.argument('validate_content', action='store_true',
                    help='If true, calculates an MD5 hash for each range of the file. The storage service checks the '
                         'hash of the content that has arrived with the hash that was sent. This is primarily valuable '
                         'for detecting bitflips on the wire if using http instead of https as https (the default) will '
@@ -2192,7 +2189,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
-        c.argument('validate_content', action='store_true', min_api='2016-05-31')
+        c.argument('validate_content', action='store_true')
         c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings')
         c.extra('no_progress', progress_type, validator=add_progress_callback)
 
@@ -2201,7 +2198,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=('--source', '-s'), validator=process_file_download_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
-        c.argument('validate_content', action='store_true', min_api='2016-05-31')
+        c.argument('validate_content', action='store_true')
         c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                  'specifies the snapshot.')
@@ -2488,7 +2485,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                             'using this shared access signature.')
         c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
                                         'using this shared access signature.')
-        c.argument('as_user', min_api='2018-11-09', action='store_true',
+        c.argument('as_user', action='store_true',
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
@@ -2524,8 +2521,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                   'generator will begin returning results from the point where the previous '
                                   'generator stopped.')
 
-    with self.argument_context('storage fs service-properties update', resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
-                               min_api='2020-06-12') as c:
+    with self.argument_context('storage fs service-properties update',
+                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE) as c:
         c.argument('delete_retention', arg_type=get_three_state_flag(), arg_group='Soft Delete',
                    help='Enable soft-delete.')
         c.argument('delete_retention_period', type=int, arg_group='Soft Delete',
