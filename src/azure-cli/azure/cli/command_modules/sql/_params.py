@@ -1133,8 +1133,8 @@ def load_arguments(self, _):
                    help='Type of secondary to create.'
                    ' Allowed values include: Geo, Named.')
 
-        c.argument('partner_subscription_id',
-                   options_list=['--partner-subscription-id'],
+        c.argument('partner_sub_id',
+                   options_list=['--partner-sub-id'],
                    help='Subscription id to create the new replica in.'
                    ' If unspecified, defaults to the origin subscription id.')
 
