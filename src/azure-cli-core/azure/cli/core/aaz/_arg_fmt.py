@@ -747,7 +747,7 @@ class AAZFileArgBase64EncodeFormat(AAZFileArgFormat):
                 data = str(base64_data)
         return data
 
-    
+
 class AAZPaginationTokenArgFormat(AAZBaseArgFormat):
     def __call__(self, ctx, value):
         def validate_json(s):

@@ -111,10 +111,6 @@ class AAZFloatType(AAZSimpleType):
         return data
 
 
-class AAZBytesType(AAZSimpleType):
-    DataType = bytes
-
-
 class AAZFileUploadType(AAZStrType):
     _ValueCls = AAZFileUploadValue
 
