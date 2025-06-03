@@ -319,7 +319,7 @@ def main():
     container = '$web'
     try:
         logger.info('Uploading test results to storage account...')
-        container = get_container_name()
+        # container = get_container_name()
         upload_files(container)
     except Exception:
         logger.exception(traceback.format_exc())
@@ -563,8 +563,8 @@ def upload_files(container):
     logger.info('Enter upload_files()')
 
     # Create container
-    cmd = 'az storage container create -n {} --account-name clitestresultstac --public-access container --auth-mode login'.format(container)
-    os.system(cmd)
+    # cmd = 'az storage container create -n {} --account-name clitestresultstac --public-access container --auth-mode login'.format(container)
+    # os.system(cmd)
 
     # Upload files
     for root, dirs, files in os.walk(ARTIFACT_DIR):
