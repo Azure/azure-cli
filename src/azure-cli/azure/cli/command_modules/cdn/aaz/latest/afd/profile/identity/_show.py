@@ -12,16 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "afd profile log-scrubbing show",
+    "afd profile identity show",
 )
 class Show(AAZCommand):
-    """Defines rules that scrub sensitive fields in the Azure Front Door profile logs.
+    """Show the details of managed identities.
+
+    :example: Show afd profile identity info
+        az afd profile identity show --resource-group RG --profile-name profile1
     """
 
     _aaz_info = {
         "version": "2025-04-15",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-04-15", "properties.logScrubbing"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-04-15", "identity"],
         ]
     }
 
@@ -43,7 +46,7 @@ class Show(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.profile_name = AAZStrArg(
-            options=["--profile-name"],
+            options=["-n", "--name", "--profile-name"],
             help="Name of the Azure Front Door Standard or Azure Front Door Premium or CDN profile which is unique within the resource group.",
             required=True,
         )
@@ -73,11 +76,11 @@ class Show(AAZCommand):
 
         def _get(self):
             result = self.ctx.vars.instance
-            return result.properties.logScrubbing
+            return result.identity
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result.properties.logScrubbing = value
+            result.identity = value
             return
 
     class ProfilesGet(AAZHttpOperation):

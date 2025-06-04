@@ -12,22 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "afd profile log-scrubbing show",
+    "afd profile identity wait",
 )
-class Show(AAZCommand):
-    """Defines rules that scrub sensitive fields in the Azure Front Door profile logs.
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2025-04-15",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-04-15", "properties.logScrubbing"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-04-15", "identity"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         self._execute_operations()
         return self._output()
 
@@ -43,9 +41,10 @@ class Show(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.profile_name = AAZStrArg(
-            options=["--profile-name"],
+            options=["-n", "--name", "--profile-name"],
             help="Name of the Azure Front Door Standard or Azure Front Door Premium or CDN profile which is unique within the resource group.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -66,19 +65,8 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            result = self.ctx.vars.instance
-            return result.properties.logScrubbing
-
-        def _set(self, value):
-            result = self.ctx.vars.instance
-            result.properties.logScrubbing = value
-            return
 
     class ProfilesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -159,13 +147,13 @@ class Show(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _ShowHelper._build_schema_profile_read(cls._schema_on_200)
+            _WaitHelper._build_schema_profile_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_profile_read = None
 
@@ -330,4 +318,4 @@ class _ShowHelper:
         _schema.type = cls._schema_profile_read.type
 
 
-__all__ = ["Show"]
+__all__ = ["Wait"]

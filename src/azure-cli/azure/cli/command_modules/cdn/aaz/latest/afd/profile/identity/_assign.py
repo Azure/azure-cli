@@ -12,28 +12,27 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "afd endpoint update",
+    "afd profile identity assign",
 )
-class Update(AAZCommand):
-    """Update a new AzureFrontDoor endpoint with the specified endpoint name under the specified subscription, resource group and profile.
+class Assign(AAZCommand):
+    """Assign the user or system managed identities.
 
-    :example: Update an endpoint's state to disabled.
-        az afd endpoint update -g group --endpoint-name endpoint1 --profile-name profile --enabled-state Disabled
+    :example: assign profile identity
+        az afd profile identity assign -n P -g RG --mi-user-assigned [url0, url1]
     """
 
     _aaz_info = {
         "version": "2025-04-15",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/afdendpoints/{}", "2025-04-15"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-04-15", "identity"],
         ]
     }
 
     AZ_SUPPORT_NO_WAIT = True
 
-    AZ_SUPPORT_GENERIC_UPDATE = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
@@ -47,76 +46,42 @@ class Update(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.endpoint_name = AAZStrArg(
-            options=["-n", "--name", "--endpoint-name"],
-            help="Name of the endpoint under the profile which is unique globally.",
-            required=True,
-            id_part="child_name_1",
-        )
         _args_schema.profile_name = AAZStrArg(
-            options=["--profile-name"],
-            help="Name of the Azure Front Door Standard or Azure Front Door Premium profile which is unique within the resource group.",
+            options=["-n", "--name", "--profile-name"],
+            help="Name of the Azure Front Door Standard or Azure Front Door Premium or CDN profile which is unique within the resource group.",
             required=True,
-            id_part="name",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$",
-                max_length=260,
-                min_length=1,
-            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
 
-        # define Arg Group "Endpoint"
+        # define Arg Group "Profile.identity"
 
         _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="Endpoint",
-            help="Resource location.",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Profile.identity",
+            help="Set the system managed identity.",
+            blank="True",
         )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Endpoint",
-            help="Resource tags.",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Profile.identity",
+            help="Set the user managed identities.",
+            blank=[],
         )
 
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.name_reuse_scope = AAZStrArg(
-            options=["--name-reuse-scope"],
-            arg_group="Properties",
-            help="Indicates the endpoint name reuse scope. The default value is TenantReuse.",
-            nullable=True,
-            enum={"NoReuse": "NoReuse", "ResourceGroupReuse": "ResourceGroupReuse", "SubscriptionReuse": "SubscriptionReuse", "TenantReuse": "TenantReuse"},
-        )
-        _args_schema.enabled_state = AAZStrArg(
-            options=["--enabled-state"],
-            arg_group="Properties",
-            help="Whether to enable use of this rule. Permitted values are 'Enabled' or 'Disabled'",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.AFDEndpointsGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
+        self.ProfilesGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.selectors.subresource.required())
         self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
-        yield self.AFDEndpointsCreate(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.required())
+        yield self.ProfilesCreate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -136,10 +101,21 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
 
-    class AFDEndpointsGet(AAZHttpOperation):
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            return result.identity
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result.identity = value
+            return
+
+    class ProfilesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -153,7 +129,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/afdEndpoints/{endpointName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
                 **self.url_parameters
             )
 
@@ -168,10 +144,6 @@ class Update(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "endpointName", self.ctx.args.endpoint_name,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "profileName", self.ctx.args.profile_name,
                     required=True,
@@ -222,11 +194,11 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_afd_endpoint_read(cls._schema_on_200)
+            _AssignHelper._build_schema_profile_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class AFDEndpointsCreate(AAZHttpOperation):
+    class ProfilesCreate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -256,7 +228,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/afdEndpoints/{endpointName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
                 **self.url_parameters
             )
 
@@ -271,10 +243,6 @@ class Update(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "endpointName", self.ctx.args.endpoint_name,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "profileName", self.ctx.args.profile_name,
                     required=True,
@@ -337,111 +305,163 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_afd_endpoint_read(cls._schema_on_200_201)
+            _AssignHelper._build_schema_profile_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
+            self._update_instance(self.ctx.selectors.subresource.required())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 value=instance,
-                typ=AAZObjectType
+                typ=AAZIdentityObjectType
             )
-            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("tags", AAZDictType, ".tags")
+            _builder.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "assign"}})
+            _builder.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "assign"}})
 
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("autoGeneratedDomainNameLabelScope", AAZStrType, ".name_reuse_scope")
-                properties.set_prop("enabledState", AAZStrType, ".enabled_state")
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
+            user_assigned = _builder.get(".userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             return _instance_value
 
-    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
-        def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
-            )
+class _AssignHelper:
+    """Helper class for Assign"""
 
-
-class _UpdateHelper:
-    """Helper class for Update"""
-
-    _schema_afd_endpoint_read = None
+    _schema_profile_read = None
 
     @classmethod
-    def _build_schema_afd_endpoint_read(cls, _schema):
-        if cls._schema_afd_endpoint_read is not None:
-            _schema.id = cls._schema_afd_endpoint_read.id
-            _schema.location = cls._schema_afd_endpoint_read.location
-            _schema.name = cls._schema_afd_endpoint_read.name
-            _schema.properties = cls._schema_afd_endpoint_read.properties
-            _schema.system_data = cls._schema_afd_endpoint_read.system_data
-            _schema.tags = cls._schema_afd_endpoint_read.tags
-            _schema.type = cls._schema_afd_endpoint_read.type
+    def _build_schema_profile_read(cls, _schema):
+        if cls._schema_profile_read is not None:
+            _schema.id = cls._schema_profile_read.id
+            _schema.identity = cls._schema_profile_read.identity
+            _schema.kind = cls._schema_profile_read.kind
+            _schema.location = cls._schema_profile_read.location
+            _schema.name = cls._schema_profile_read.name
+            _schema.properties = cls._schema_profile_read.properties
+            _schema.sku = cls._schema_profile_read.sku
+            _schema.system_data = cls._schema_profile_read.system_data
+            _schema.tags = cls._schema_profile_read.tags
+            _schema.type = cls._schema_profile_read.type
             return
 
-        cls._schema_afd_endpoint_read = _schema_afd_endpoint_read = AAZObjectType()
+        cls._schema_profile_read = _schema_profile_read = AAZObjectType()
 
-        afd_endpoint_read = _schema_afd_endpoint_read
-        afd_endpoint_read.id = AAZStrType(
+        profile_read = _schema_profile_read
+        profile_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        afd_endpoint_read.location = AAZStrType(
+        profile_read.identity = AAZIdentityObjectType()
+        profile_read.kind = AAZStrType(
+            flags={"read_only": True},
+        )
+        profile_read.location = AAZStrType(
             flags={"required": True},
         )
-        afd_endpoint_read.name = AAZStrType(
+        profile_read.name = AAZStrType(
             flags={"read_only": True},
         )
-        afd_endpoint_read.properties = AAZObjectType(
+        profile_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        afd_endpoint_read.system_data = AAZObjectType(
+        profile_read.sku = AAZObjectType(
+            flags={"required": True},
+        )
+        profile_read.system_data = AAZObjectType(
             serialized_name="systemData",
             flags={"read_only": True},
         )
-        afd_endpoint_read.tags = AAZDictType()
-        afd_endpoint_read.type = AAZStrType(
+        profile_read.tags = AAZDictType()
+        profile_read.type = AAZStrType(
             flags={"read_only": True},
         )
 
-        properties = _schema_afd_endpoint_read.properties
-        properties.auto_generated_domain_name_label_scope = AAZStrType(
-            serialized_name="autoGeneratedDomainNameLabelScope",
-        )
-        properties.deployment_status = AAZStrType(
-            serialized_name="deploymentStatus",
+        identity = _schema_profile_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
             flags={"read_only": True},
         )
-        properties.enabled_state = AAZStrType(
-            serialized_name="enabledState",
-        )
-        properties.host_name = AAZStrType(
-            serialized_name="hostName",
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
             flags={"read_only": True},
         )
-        properties.profile_name = AAZStrType(
-            serialized_name="profileName",
+        identity.type = AAZStrType(
+            flags={"required": True},
+        )
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_profile_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_profile_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
             flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
+        properties = _schema_profile_read.properties
+        properties.extended_properties = AAZDictType(
+            serialized_name="extendedProperties",
+            flags={"read_only": True},
+        )
+        properties.front_door_id = AAZStrType(
+            serialized_name="frontDoorId",
+            flags={"read_only": True},
+        )
+        properties.log_scrubbing = AAZObjectType(
+            serialized_name="logScrubbing",
+        )
+        properties.origin_response_timeout_seconds = AAZIntType(
+            serialized_name="originResponseTimeoutSeconds",
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+        properties.resource_state = AAZStrType(
+            serialized_name="resourceState",
+            flags={"read_only": True},
+        )
 
-        system_data = _schema_afd_endpoint_read.system_data
+        extended_properties = _schema_profile_read.properties.extended_properties
+        extended_properties.Element = AAZStrType()
+
+        log_scrubbing = _schema_profile_read.properties.log_scrubbing
+        log_scrubbing.scrubbing_rules = AAZListType(
+            serialized_name="scrubbingRules",
+        )
+        log_scrubbing.state = AAZStrType()
+
+        scrubbing_rules = _schema_profile_read.properties.log_scrubbing.scrubbing_rules
+        scrubbing_rules.Element = AAZObjectType()
+
+        _element = _schema_profile_read.properties.log_scrubbing.scrubbing_rules.Element
+        _element.match_variable = AAZStrType(
+            serialized_name="matchVariable",
+            flags={"required": True},
+        )
+        _element.selector = AAZStrType()
+        _element.selector_match_operator = AAZStrType(
+            serialized_name="selectorMatchOperator",
+            flags={"required": True},
+        )
+        _element.state = AAZStrType()
+
+        sku = _schema_profile_read.sku
+        sku.name = AAZStrType()
+
+        system_data = _schema_profile_read.system_data
         system_data.created_at = AAZStrType(
             serialized_name="createdAt",
         )
@@ -461,16 +481,19 @@ class _UpdateHelper:
             serialized_name="lastModifiedByType",
         )
 
-        tags = _schema_afd_endpoint_read.tags
+        tags = _schema_profile_read.tags
         tags.Element = AAZStrType()
 
-        _schema.id = cls._schema_afd_endpoint_read.id
-        _schema.location = cls._schema_afd_endpoint_read.location
-        _schema.name = cls._schema_afd_endpoint_read.name
-        _schema.properties = cls._schema_afd_endpoint_read.properties
-        _schema.system_data = cls._schema_afd_endpoint_read.system_data
-        _schema.tags = cls._schema_afd_endpoint_read.tags
-        _schema.type = cls._schema_afd_endpoint_read.type
+        _schema.id = cls._schema_profile_read.id
+        _schema.identity = cls._schema_profile_read.identity
+        _schema.kind = cls._schema_profile_read.kind
+        _schema.location = cls._schema_profile_read.location
+        _schema.name = cls._schema_profile_read.name
+        _schema.properties = cls._schema_profile_read.properties
+        _schema.sku = cls._schema_profile_read.sku
+        _schema.system_data = cls._schema_profile_read.system_data
+        _schema.tags = cls._schema_profile_read.tags
+        _schema.type = cls._schema_profile_read.type
 
 
-__all__ = ["Update"]
+__all__ = ["Assign"]
