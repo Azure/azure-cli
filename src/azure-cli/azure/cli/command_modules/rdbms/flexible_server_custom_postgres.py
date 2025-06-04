@@ -1059,7 +1059,7 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     for identity in identities:
         identities_map[identity] = None
 
-    system_assigned_identity = instance.identity and instance.identity.additional_properties['principalId'] is not None
+    system_assigned_identity = instance.identity and 'principalId' in instance.identity.additional_properties and instance.identity.additional_properties['principalId'] is not None
 
     # if there are no user-assigned identities or all user-assigned identities are already removed
     if not (instance.identity and instance.identity.user_assigned_identities) or \
