@@ -65,8 +65,6 @@ class AAZFileUploadValue(AAZSimpleValue):
     def to_serialized_data(self, **kwargs):
         _file_size = os.path.getsize(self._data)
         _content = None
-        _file_handle = None
-        
         _file_handle = open(self._data, "rb")
         if _file_size < 5 * 1024 * 1024:  # 5MB
             _content = _file_handle.read()
