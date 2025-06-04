@@ -49,6 +49,8 @@ _STATE = 'state'
 _USER_TYPE = 'type'
 _USER = 'user'
 _SERVICE_PRINCIPAL = 'servicePrincipal'
+_ACCESS_TOKEN_IDENTITY_TYPE = 'accessToken'
+_ACCESS_TOKEN_IDENTITY_NAME = 'ACCESS_TOKEN_ACCOUNT'
 _SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH = 'useCertSNIssuerAuth'
 _TOKEN_ENTRY_USER_ID = 'userId'
 _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
@@ -60,6 +62,11 @@ _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
+
+
+_AZURE_CLI_SUBSCRIPTION_ID = 'AZURE_CLI_SUBSCRIPTION_ID'
+_AZURE_CLI_TENANT_ID = 'AZURE_CLI_TENANT_ID'
+_AZURE_CLI_ACCESS_TOKEN = 'AZURE_CLI_ACCESS_TOKEN'
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -361,6 +368,13 @@ class Profile:
 
         account = self.get_subscription(subscription_id)
 
+        if account[_USER_ENTITY][_USER_TYPE] == _ACCESS_TOKEN_IDENTITY_TYPE:
+            from .auth.credentials import AccessTokenCredential
+            sdk_cred = CredentialAdaptor(AccessTokenCredential(os.environ[_AZURE_CLI_ACCESS_TOKEN]))
+            return (sdk_cred,
+                    str(account[_SUBSCRIPTION_ID]),
+                    str(account[_TENANT_ID]))
+
         managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
 
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
@@ -419,6 +433,26 @@ class Profile:
             raise CLIError("Please specify only one of subscription and tenant, not both")
 
         account = self.get_subscription(subscription)
+
+        if account[_USER_ENTITY][_USER_TYPE] == _ACCESS_TOKEN_IDENTITY_TYPE:
+            access_token = os.environ[_AZURE_CLI_ACCESS_TOKEN]
+            from .auth.util import _now_timestamp
+            expires_on = _now_timestamp() + 3600
+            import datetime
+            expiresOn = datetime.datetime.fromtimestamp(expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+            token_entry = {
+                'accessToken': os.environ[_AZURE_CLI_ACCESS_TOKEN],
+                'expires_on': expires_on,
+                'expiresOn': expiresOn
+            }
+
+            # Build a tuple of (token_type, token, token_entry)
+            token_tuple = 'Bearer', access_token, token_entry
+
+            # Return a tuple of (token_tuple, subscription, tenant)
+            return (token_tuple,
+                    account[_SUBSCRIPTION_ID],
+                    account[_TENANT_ID])
 
         managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
 
@@ -606,6 +640,20 @@ class Profile:
         return active_account[_USER_ENTITY][_USER_NAME]
 
     def get_subscription(self, subscription=None):  # take id or name
+        if _env_vars_configured():
+            return {
+                # Subscription ID is not required for data-plane operations
+                _SUBSCRIPTION_ID: os.environ.get(_AZURE_CLI_SUBSCRIPTION_ID),
+                # Tenant ID is required by some operations.
+                # For example, "Vaults - Create Or Update" requires tenantId property.
+                # https://learn.microsoft.com/en-us/rest/api/keyvault/keyvault/vaults/create-or-update
+                _TENANT_ID: os.environ.get(_AZURE_CLI_TENANT_ID),
+                _USER_ENTITY: {
+                    _USER_NAME: _ACCESS_TOKEN_IDENTITY_NAME,
+                    _USER_TYPE: _ACCESS_TOKEN_IDENTITY_TYPE
+                },
+            }
+
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
             raise CLIError(_AZ_LOGIN_MESSAGE)
@@ -992,3 +1040,8 @@ def _use_msal_managed_identity(cli_ctx):
     use_msal_managed_identity = cli_ctx.config.getboolean('core', 'use_msal_managed_identity', fallback=True)
     set_use_msal_managed_identity(use_msal_managed_identity)
     return use_msal_managed_identity
+
+
+def _env_vars_configured():
+    if _AZURE_CLI_ACCESS_TOKEN in os.environ:
+        return True
