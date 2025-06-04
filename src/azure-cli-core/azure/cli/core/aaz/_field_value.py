@@ -60,9 +60,9 @@ class AAZAnyValue(AAZSimpleValue):  # pylint: disable=too-few-public-methods
     pass
 
 
-class AAZFileUploadValue(AAZSimpleValue):
+class AAZFileUploadValue(AAZSimpleValue):  # pylint: disable=too-few-public-methods
 
-    def to_serialized_data(self, **kwargs):
+    def to_serialized_data(self, processor=None, **kwargs):
         _file_size = os.path.getsize(self._data)
         _content = None
         _file_handle = open(self._data, "rb")
@@ -71,8 +71,8 @@ class AAZFileUploadValue(AAZSimpleValue):
             _file_handle.close()
             _file_handle = None
             return _content, _file_handle, _file_size
-        else:
-            return _content, _file_handle, _file_size
+
+        return _content, _file_handle, _file_size
 
 
 class AAZObject(AAZBaseValue):

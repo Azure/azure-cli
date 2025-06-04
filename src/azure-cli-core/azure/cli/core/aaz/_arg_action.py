@@ -252,7 +252,7 @@ class AAZAnyTypeArgAction(AAZArgAction):
 class AAZFileUploadTypeArgAction(AAZArgAction):
 
     @classmethod
-    def setup_operations(cls, dest_ops, values):
+    def setup_operations(cls, dest_ops, values, prefix_keys=None):
         if values is None:
             data = AAZBlankArgValue  # use blank data when values string is None
         else:
