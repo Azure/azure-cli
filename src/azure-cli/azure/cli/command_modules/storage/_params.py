@@ -16,7 +16,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           add_progress_callback, process_resource_group,
                           storage_account_key_options, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
-                          validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
+                          validate_storage_data_plane_list, validate_azcopy_sync_destination_path,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
@@ -1451,7 +1451,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('destination_container', options_list=['--container', '-c'], required=True,
                 help='The sync destination container.')
         c.extra('destination_path', options_list=['--destination', '-d'],
-                validator=validate_azcopy_upload_destination_url,
+                validator=validate_azcopy_sync_destination_path,
                 help='The sync destination path.')
         c.argument('source', options_list=['--source', '-s'],
                    help='The source file path to sync from.')

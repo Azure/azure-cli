@@ -14,7 +14,6 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
-                                                               blob_data_service_factory,
                                                                storage_client_factory,
                                                                cf_adls_file_system)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
@@ -164,16 +163,9 @@ def validate_client_parameters(cmd, namespace):
             else:
                 n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
-            prefix = cmd.command_kwargs['resource_type'].value[0]
-            # is_storagv2() is used to distinguish if the command is in track2 SDK
-            # If yes, we will use get_login_credentials() as token credential
-            if is_storagev2(prefix):
-                from azure.cli.core._profile import Profile
-                profile = Profile(cli_ctx=cmd.cli_ctx)
-                n.token_credential, _, _ = profile.get_login_credentials(subscription_id=n._subscription)
-            # Otherwise, we will assume it is in track1 and keep previous token updater
-            else:
-                n.token_credential = _create_token_credential(cmd.cli_ctx)
+            from azure.cli.core._profile import Profile
+            profile = Profile(cli_ctx=cmd.cli_ctx)
+            n.token_credential, _, _ = profile.get_login_credentials(subscription_id=n._subscription)
 
     if hasattr(n, 'token_credential') and n.token_credential:
         # give warning if there are account key args being ignored
@@ -1685,13 +1677,19 @@ def blob_rehydrate_priority_validator(namespace):
         namespace.rehydrate_priority = 'Standard'
 
 
-def validate_azcopy_upload_destination_url(cmd, namespace):
-    client = blob_data_service_factory(cmd.cli_ctx, {
-        'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
+def validate_azcopy_sync_destination_path(cmd, namespace):
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token}
+    if hasattr(namespace, 'token_credential'):
+        kwargs.update({'token_credential': namespace.token_credential})
+    client = cf_blob_service(cmd.cli_ctx, kwargs)
     destination_path = namespace.destination_path
     if not destination_path:
         destination_path = ''
-    url = client.make_blob_url(namespace.destination_container, destination_path)
+    from .operations.blob import create_blob_url
+    url = create_blob_url(client, namespace.destination_container, None, snapshot=None)
     namespace.destination = url
     del namespace.destination_container
     del namespace.destination_path

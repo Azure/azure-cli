@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_container_mgmt, blob_data_service_factory,
-                                                               page_blob_service_factory,
+from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_container_mgmt,
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy, cf_sa_for_keys,
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
@@ -88,7 +87,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             resource_type=resource_type
         )
 
-    with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
+    with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', cf_blob_service)) as g:
         g.storage_custom_command_oauth('remove', 'storage_remove')
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
@@ -428,7 +427,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=storage_blob_custom_type) as g:
         g.custom_command('restore', 'restore_blob_ranges', supports_no_wait=True)
 
-    with self.command_group('storage blob', custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
+    with self.command_group('storage blob', custom_command_type=get_custom_sdk('azcopy', cf_blob_service)) as g:
         g.storage_custom_command_oauth('sync', 'storage_blob_sync', is_preview=True)
 
     container_client_sdk = CliCommandType(
