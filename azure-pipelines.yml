@@ -807,6 +807,12 @@ jobs:
           artifact: rpm-ubi9-${{ arch.value }}
           python_package: python3.12
           pool: ${{ arch.pool }}
+        Red Hat Universal Base Image 10 ${{ arch.name }}:
+          dockerfile: ubi
+          image: registry.access.redhat.com/ubi10/ubi:10.0
+          artifact: rpm-ubi10-${{ arch.value }}
+          python_package: python3.12
+          pool: ${{ arch.pool }}
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
@@ -855,6 +861,14 @@ jobs:
           artifact: rpm-ubi9-${{ arch.value }}
           distro: el9
           image: registry.access.redhat.com/ubi9/ubi:9.0.0
+          python_package: python3.12
+          python_cmd: python3.12
+          pip_cmd: pip3.12
+          pool: ${{ arch.pool }}
+        Red Hat Universal Base Image 10 ${{ arch.name }}:
+          artifact: rpm-ubi10-${{ arch.value }}
+          distro: el10
+          image: registry.access.redhat.com/ubi10/ubi:10.0
           python_package: python3.12
           python_cmd: python3.12
           pip_cmd: pip3.12
