@@ -1396,7 +1396,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # Uncomment during live runs
         # role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/e147488a-f6f5-4113-8e2d-b22465e65bf6'.format(subscription)
         # rbac1_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
-        # self.assertEqual(rbac1_json['roleDefinitionId'], role_id)
+        # self.assertEqual(rbac1_json['roleDefinitionId'], role_id) 
 
         # rbac2_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
         # self.assertEqual(rbac2_json['roleDefinitionId'], role_id)
