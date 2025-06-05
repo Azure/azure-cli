@@ -26,7 +26,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEn
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin_group import Show as _AFDOriginGroupShow, \
     Create as _AFDOriginGroupCreate, Update as _AFDOriginGroupUpdate
-from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg
+from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg, AAZIntArgFormat
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom_rule_util import (create_condition, create_action,
@@ -141,11 +141,12 @@ class AFDProfileCreate(_AFDProfileCreate):
         )
         args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
+        args_schema.location._required = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.location = 'global'
+        args.location = 'global'  # AFD profile location is always global
         user_assigned_identities = {}
         for identity in args.user_assigned_identities:
             user_assigned_identities[identity.to_serialized_data()] = {}
@@ -255,6 +256,39 @@ class AFDEndpointUpdate(_AFDEndpointUpdate):
         args.location = existing_location
 
 
+def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds,
+                              probe_path, probe_protocol, probe_request_type):
+    params = [probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type]
+    if enable_health_probe is True:
+        if any(param is None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type must be specified.'
+            )
+    elif any(param is not None for param in params):
+        enable_health_probe = True
+        if any(param is None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type must be specified.'
+            )
+    else:
+        enable_health_probe = False
+        if any(param is not None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is not set, none of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type can be specified.'
+            )
+        return None
+
+    return {
+        'probeIntervalInSeconds': probe_interval_in_seconds,
+        'probePath': probe_path,
+        'probeProtocol': probe_protocol,
+        'probeRequestType': probe_request_type
+    }
+
+
 class AFDOriginGroupCreate(_AFDOriginGroupCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -264,15 +298,60 @@ class AFDOriginGroupCreate(_AFDOriginGroupCreate):
             help='Indicates whether to enable probe on the origin group.',
             blank=True,
         )
+        args_schema.probe_interval_in_seconds = AAZIntArg(
+            options=["--probe-interval-in-seconds"],
+            arg_group="HealthProbeSettings",
+            help="The number of seconds between health probes.Default is 240sec.",
+            fmt=AAZIntArgFormat(
+                maximum=255,
+                minimum=1,
+            ),
+        )
+        args_schema.probe_path = AAZStrArg(
+            options=["--probe-path"],
+            arg_group="HealthProbeSettings",
+            help="The path relative to the origin that is used to determine the health of the origin.",
+        )
+        args_schema.probe_protocol = AAZStrArg(
+            options=["--probe-protocol"],
+            arg_group="HealthProbeSettings",
+            help="Protocol to use for health probe.",
+            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
+        )
+        args_schema.probe_request_type = AAZStrArg(
+            options=["--probe-request-type"],
+            arg_group="HealthProbeSettings",
+            help="The type of health probe request that is made.",
+            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
+        )
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        if not has_value(args.enable_health_probe) or args.enable_health_probe.to_serialized_data() is False:
-            args.probe_path = None
-            args.probe_protocol = None
-            args.probe_interval_in_seconds = None
-            args.probe_request_type = None
+
+        enable_health_probe = None
+        probe_interval_in_seconds = None
+        probe_path = None
+        probe_protocol = None
+        probe_request_type = None
+        if has_value(args.enable_health_probe):
+            enable_health_probe = args.enable_health_probe.to_serialized_data()
+        if has_value(args.probe_interval_in_seconds):
+            probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
+        if has_value(args.probe_path):
+            probe_path = args.probe_path.to_serialized_data()
+        if has_value(args.probe_protocol):
+            probe_protocol = args.probe_protocol.to_serialized_data()
+        if has_value(args.probe_request_type):
+            probe_request_type = args.probe_request_type.to_serialized_data()
+
+        args.health_probe_settings = get_health_probe_settings(
+            enable_health_probe,
+            probe_interval_in_seconds,
+            probe_path,
+            probe_protocol,
+            probe_request_type
+        )
 
 
 class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
@@ -284,6 +363,32 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             help='Indicates whether to enable probe on the origin group.',
             blank=True,
         )
+        args_schema.probe_interval_in_seconds = AAZIntArg(
+            options=["--probe-interval-in-seconds"],
+            arg_group="HealthProbeSettings",
+            help="The number of seconds between health probes.Default is 240sec.",
+            fmt=AAZIntArgFormat(
+                maximum=255,
+                minimum=1,
+            ),
+        )
+        args_schema.probe_path = AAZStrArg(
+            options=["--probe-path"],
+            arg_group="HealthProbeSettings",
+            help="The path relative to the origin that is used to determine the health of the origin.",
+        )
+        args_schema.probe_protocol = AAZStrArg(
+            options=["--probe-protocol"],
+            arg_group="HealthProbeSettings",
+            help="Protocol to use for health probe.",
+            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
+        )
+        args_schema.probe_request_type = AAZStrArg(
+            options=["--probe-request-type"],
+            arg_group="HealthProbeSettings",
+            help="The type of health probe request that is made.",
+            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
+        )
         return args_schema
 
     def pre_operations(self):
@@ -293,23 +398,46 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             'profile_name': args.profile_name,
             'origin_group_name': args.origin_group_name
         })
-        if not has_value(args.enable_health_probe):
-            if existing['healthProbeSettings'] is not None:
-                if 'probePath' in existing['healthProbeSettings'] \
-                        or 'probeProtocol' in existing['healthProbeSettings'] \
-                        or 'probeIntervalInSeconds' in existing['healthProbeSettings'] \
-                        or 'probeRequestType' in existing['healthProbeSettings']:
-                    args.enable_health_probe = True
-                else:
-                    args.enable_health_probe = False
-            else:
-                args.enable_health_probe = False
 
-        if args.enable_health_probe.to_serialized_data() is False:
-            args.probe_path = None
-            args.probe_protocol = None
-            args.probe_interval_in_seconds = None
-            args.probe_request_type = None
+        enable_health_probe = None
+        probe_interval_in_seconds = None
+        probe_path = None
+        probe_protocol = None
+        probe_request_type = None
+
+        if not has_value(args.enable_health_probe):
+            if 'healthProbeSettings' not in existing:
+                enable_health_probe = False
+            else:
+                enable_health_probe = True
+
+        if has_value(args.probe_path):
+            probe_path = args.probe_path.to_serialized_data()
+        elif 'probePath' in existing['healthProbeSettings']:
+            probe_path = existing['healthProbeSettings']['probePath']
+
+        if has_value(args.probe_protocol):
+            probe_protocol = args.probe_protocol.to_serialized_data()
+        elif 'probeProtocol' in existing['healthProbeSettings']:
+            probe_protocol = existing['healthProbeSettings']['probeProtocol']
+
+        if has_value(args.probe_interval_in_seconds):
+            probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
+        elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
+            probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
+
+        if has_value(args.probe_request_type):
+            probe_request_type = args.probe_request_type.to_serialized_data()
+        elif 'probeRequestType' in existing['healthProbeSettings']:
+            probe_request_type = existing['healthProbeSettings']['probeRequestType']
+
+        args.health_probe_settings = get_health_probe_settings(
+            enable_health_probe,
+            probe_interval_in_seconds,
+            probe_path,
+            probe_protocol,
+            probe_request_type
+        )
 
 
 class AFDOriginCreate(_AFDOriginCreate):
@@ -860,7 +988,13 @@ class AFDRuleCreate(_AFDRuleCreate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleconditionAdd(_AFDRuleUpdate):
+    """Add a match condition to the specified delivery rule.
+
+    :example: Add a match condition to a delivery rule.
+        az afd rule condition add --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --match-variable RequestMethod --operator Any --match-values GET HTTP --negate-condition false --transforms Lowercase
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -914,7 +1048,13 @@ class AFDRuleconditionAdd(_AFDRuleUpdate):
         args.conditions = conditions
 
 
+# pylint: disable=line-too-long
 class AFDRuleconditionRemove(_AFDRuleUpdate):
+    """Remove a condition from the specified delivery rule.
+
+    :example: Remove a condition from a delivery rule.
+        az afd rule condition remove --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --index 0
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -945,7 +1085,13 @@ class AFDRuleconditionRemove(_AFDRuleUpdate):
         args.conditions = conditions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionCreate(_AFDRuleUpdate):
+    """Update a new delivery rule within the specified rule set.
+
+    :example: Create a new delivery rule with a modify response header action.
+        az afd rule action create --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --action-name Redirect --redirect-type "Found" --redirect-protocol "Https" --destination "www.example.com
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1078,7 +1224,13 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionRemove(_AFDRuleUpdate):
+    """Remove an action from the specified delivery rule.
+
+    :example: Remove an action from a delivery rule.
+        az afd rule action remove --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --index 0
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1107,7 +1259,13 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionShow(_RuleShow):
+    """Show the actions of a delivery rule.
+
+    :example: Show the actions of a delivery rule.
+        az afd rule action show --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1118,7 +1276,13 @@ class AFDRuleActionShow(_RuleShow):
         return existing['actions']
 
 
+# pylint: disable=line-too-long
 class AFDRuleConditionShow(_RuleShow):
+    """Show the conditions of a delivery rule.
+
+    :example: Show the conditions of a delivery rule.
+        az afd rule condition show --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)

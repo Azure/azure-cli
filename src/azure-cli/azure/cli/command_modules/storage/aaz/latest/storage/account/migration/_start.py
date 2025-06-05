@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "storage account migration start",
+    confirmation="After your request to convert the account’s redundancy configuration is validated, the conversion will typically complete in a few days, but can take several weeks depending on current resource demands in the region, account size, and other factors. The conversion can’t be stopped after being initiated, and for accounts with geo redundancy a failover can’t be initiated while conversion is in progress. The data within the storage account will continue to be accessible with no loss of durability or availability. Confirm redundancy configuration change",
 )
 class Start(AAZCommand):
     """Account Migration request can be triggered for a storage account to change its redundancy level. The migration updates the non-zonal redundant storage account to a zonal redundant account or vice-versa in order to have better reliability and availability. Zone-redundant storage (ZRS) replicates your storage account synchronously across three Azure availability zones in the primary region.

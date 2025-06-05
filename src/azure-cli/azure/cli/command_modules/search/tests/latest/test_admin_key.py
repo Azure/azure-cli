@@ -14,6 +14,7 @@ class AzureSearchAdminKeysTests(ScenarioTest):
         self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
         super().setUp()
 
+    @unittest.skip('This test is skipped because it contain secret keys.')
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_admin_key_show_renew(self, resource_group):
         self.kwargs.update({

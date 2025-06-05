@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.72.0"
+VERSION = "2.74.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -61,6 +61,7 @@ DEPENDENCIES = [
     'azure-keyvault-certificates==4.7.0',
     'azure-keyvault-keys==4.11.0b1',
     'azure-keyvault-secrets==4.7.0',
+    'azure-keyvault-securitydomain==1.0.0b1',
     'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement==4.0.0',
     'azure-mgmt-appconfiguration==3.1.0',
@@ -75,9 +76,9 @@ DEPENDENCIES = [
     'azure-mgmt-cognitiveservices~=13.5.0',
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
-    'azure-mgmt-containerregistry==13.0.0',
-    'azure-mgmt-containerservice~=35.0.0',
-    'azure-mgmt-cosmosdb==9.7.0',
+    'azure-mgmt-containerregistry==14.1.0b1',
+    'azure-mgmt-containerservice~=36.0.0',
+    'azure-mgmt-cosmosdb==9.8.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
@@ -104,7 +105,7 @@ DEPENDENCIES = [
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-mysqlflexibleservers==1.0.0b3',
-    'azure-mgmt-recoveryservicesbackup~=9.1.0',
+    'azure-mgmt-recoveryservicesbackup~=9.2.0',
     'azure-mgmt-recoveryservices~=3.0.0',
     'azure-mgmt-redhatopenshift~=1.5.0',
     'azure-mgmt-redis~=14.5.0',
@@ -118,7 +119,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr==2.0.0b2',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b21',
-    'azure-mgmt-storage==22.1.0',
+    'azure-mgmt-storage==23.0.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.3.1',
@@ -142,7 +143,7 @@ DEPENDENCIES = [
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
-    'semver==2.13.0',
+    'semver~=3.0',
     'setuptools',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',

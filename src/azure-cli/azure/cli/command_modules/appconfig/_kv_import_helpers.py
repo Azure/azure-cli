@@ -330,16 +330,15 @@ def __read_features_from_msfm_schema(feature_flags_list):
                     FeatureFlagConstants.REQUIREMENT_TYPE, None
                 )
                 if requirement_type:
-                    if requirement_type.lower() not in (
-                        FeatureFlagConstants.REQUIREMENT_TYPE_ALL,
-                        FeatureFlagConstants.REQUIREMENT_TYPE_ANY,
-                    ):
+                    # Requirement type is case insensitive.
+                    if requirement_type.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ALL.lower():
+                        new_feature.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = FeatureFlagConstants.REQUIREMENT_TYPE_ALL
+                    elif requirement_type.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ANY.lower():
+                        new_feature.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+                    else:
                         raise ValidationError(
-                            f"Feature '{feature_id}' must have an any/all requirement type."
+                            f"Feature '{feature_id}' must have an Any/All requirement type."
                         )
-                    new_feature.conditions[
-                        FeatureFlagConstants.REQUIREMENT_TYPE
-                    ] = requirement_type
 
             if allocation := feature.get(FeatureFlagConstants.ALLOCATION, None):
                 new_feature.allocation = FeatureAllocation.convert_from_dict(allocation)
@@ -382,18 +381,16 @@ def __read_features_from_dotnet_schema(features_dict, feature_management_keyword
                         condition == feature_management_keywords.requirement_type and
                         condition_value
                     ):
-                        if condition_value.lower() not in (
-                            FeatureFlagConstants.REQUIREMENT_TYPE_ALL,
-                            FeatureFlagConstants.REQUIREMENT_TYPE_ANY,
-                        ):
+                        if condition_value.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ALL.lower():
+                            feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = FeatureFlagConstants.REQUIREMENT_TYPE_ALL
+                        elif condition_value.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ANY.lower():
+                            feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+                        else:
                             raise ValidationError(
-                                "Feature '{0}' must have an any/all requirement type. \n".format(
+                                "Feature '{0}' must have an Any/All requirement type. \n".format(
                                     str(k)
                                 )
                             )
-                        feature_flag_value.conditions[
-                            FeatureFlagConstants.REQUIREMENT_TYPE
-                        ] = condition_value
                     else:
                         feature_flag_value.conditions[condition] = condition_value
                 if not enabled_for_found:

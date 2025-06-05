@@ -17,7 +17,6 @@ from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='source_account')
@@ -932,7 +931,6 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 2))
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
 class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="storage_blob_restore", location="centraluseuap")

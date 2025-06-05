@@ -133,7 +133,6 @@ class StorageArgumentContext(AzArgumentContext):
                       arg_type=get_three_state_flag())
         self.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name))
         self.argument('assign_identity', action='store_true', resource_type=ResourceType.MGMT_STORAGE,
-                      min_api='2017-06-01',
                       help='Generate and assign a new Storage Account Identity for this storage account for use '
                            'with key management services like Azure KeyVault.')
         self.argument('access_tier', arg_type=get_enum_type(t_access_tier),
@@ -146,7 +145,7 @@ class StorageArgumentContext(AzArgumentContext):
             encryption_choices = list(
                 t_encryption_services._attribute_map.keys())  # pylint: disable=protected-access
             self.argument('encryption_services', arg_type=get_enum_type(encryption_choices),
-                          resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01', nargs='+',
+                          resource_type=ResourceType.MGMT_STORAGE, nargs='+',
                           validator=validate_encryption_services, help='Specifies which service(s) to encrypt.')
 
     def register_precondition_options(self, prefix=''):

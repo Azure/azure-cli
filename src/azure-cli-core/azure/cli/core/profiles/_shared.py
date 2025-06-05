@@ -155,7 +155,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2024-01-01',
+        ResourceType.MGMT_STORAGE: None,
         ResourceType.MGMT_NETWORK: '2022-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2024-11-01', {
             'resource_skus': '2019-04-01',
@@ -177,7 +177,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: SDKProfile('2021-06-01', {
             'policy_exemptions': '2020-07-01-preview'
         }),
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2022-09-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2024-11-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2022-12-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
@@ -195,10 +195,10 @@ AZURE_API_PROFILES = {
             'provider_operations_metadata': '2018-01-01-preview'
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2025-03-01-preview', {
-            'agent_pools': '2019-06-01-preview',
-            'tasks': '2019-06-01-preview',
-            'task_runs': '2019-06-01-preview',
-            'runs': '2019-06-01-preview',
+            'agent_pools': '2025-03-01-preview',
+            'tasks': '2025-03-01-preview',
+            'task_runs': '2025-03-01-preview',
+            'runs': '2025-03-01-preview',
             'network_rule': '2021-08-01-preview',
             'cache_rules': '2023-01-01-preview',
             'credential_sets': '2023-01-01-preview'
@@ -229,7 +229,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-02-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-03-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     }
 }
@@ -256,6 +256,7 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
         'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
         'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
+        'VERSION_2025_04_01': "2025-04-01"
     },
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50

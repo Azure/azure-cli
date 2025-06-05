@@ -599,6 +599,7 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
         args_schema.is_http_allowed._registered = False
         args_schema.is_https_allowed._registered = False
         args_schema.is_compression_enabled._registered = False
+        args_schema.query_string_caching_behavior._default = None
         return args_schema
 
     def pre_operations(self):
