@@ -145,10 +145,6 @@ long-summary: >
 examples:
   - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
     text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --sku Standard_LRS
-    unsupported-profiles: 2017-03-09-profile
-  - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
-    text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --account-type Standard_LRS
-    supported-profiles: 2017-03-09-profile
   - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the eastus2euap region with account-scoped encryption key enabled for Table Service.
     text: az storage account create -n mystorageaccount -g MyResourceGroup --kind StorageV2 -l eastus2euap -t Account
 """

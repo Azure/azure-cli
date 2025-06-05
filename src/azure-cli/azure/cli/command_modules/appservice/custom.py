@@ -580,14 +580,6 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
                               share_name, access_key, mount_path=None, slot=None, slot_setting=False):
     AzureStorageInfoValue = cmd.get_models('AzureStorageInfoValue')
-    storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
-
-    # Check if the file share exists
-    try:
-        storage_client.file_shares.get(resource_group_name, account_name, share_name)
-    except:
-        raise ValidationError(f"The share '{share_name}' does not exist in the storage account '{account_name}'.")
-
     azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                                      'list_azure_storage_accounts', slot)
 
@@ -2188,8 +2180,6 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                 get_current_stack_from_runtime(runtime_version) != "tomcat" else "java"
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
-    if number_of_workers is not None:
-        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
             if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
@@ -2278,7 +2268,18 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    try:
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        error_message = str(ex)
+        if "Conflict" in error_message:
+            logger.error("Operation returned an invalid status 'Conflict'. "
+                         "For more details, run the command with the --debug parameter.")
+        elif "Bad Request" in error_message:
+            logger.error("Operation returned an invalid status 'Bad Request'. "
+                         "For more details, run the command with the --debug parameter.")
+        else:
+            raise
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
@@ -3239,6 +3240,9 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-instances',
                                                        number_of_workers, min_val=0, max_val=20)
+    if is_plan_flex(cmd, instance):
+        return update_flex_app_service_plan(instance)
+
     return update_app_service_plan(cmd, instance, sku, number_of_workers)
 
 
@@ -3975,14 +3979,22 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name, certificate_name=None):
+def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
-    webapp = client.web_apps.get(resource_group_name, name)
-    if not webapp:
-        raise ResourceNotFoundError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
-    server_farm_id = webapp.server_farm_id
-    location = webapp.location
+
+    # Webapp name is not required for this command, but the location of the webspace is required since the certificate
+    # is associated with the webspace, not the app. All apps and plans in the same webspace will share the same
+    # certificates. If the app is not provided, the location of the resource group is used.
+    if name:
+        webapp = client.web_apps.get(resource_group_name, name)
+        if not webapp:
+            raise ResourceNotFoundError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+        location = webapp.location
+    else:
+        rg_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+        location = rg_client.resource_groups.get(resource_group_name).location
+
     kv_id = None
     if not is_valid_resource_id(key_vault):
         kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
@@ -3997,9 +4009,9 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     if kv_id is None:
         kv_msg = 'The Key Vault {0} was not found in the subscription in context. ' \
                  'If your Key Vault is in a different subscription, please specify the full Resource ID: ' \
-                 '\naz .. ssl import -n {1} -g {2} --key-vault-certificate-name {3} ' \
+                 '\naz .. ssl import -g {1} --key-vault-certificate-name {2} ' \
                  '--key-vault /subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/' \
-                 'vaults/{0}'.format(key_vault, name, resource_group_name, key_vault_certificate_name)
+                 'vaults/{0}'.format(key_vault, resource_group_name, key_vault_certificate_name)
         logger.warning(kv_msg)
         return
 
@@ -4044,7 +4056,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
-                              key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
+                              key_vault_secret_name=kv_secret_name)
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
@@ -4280,6 +4292,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         linux_auto_updates = [
             s.display_name for s in self.stacks if
             s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
+
+        def is_valid_runtime_name(name):
+            # Accepts names like "node|18-lts", "python|3.11", but not "NODE:lts" or "node"
+            parts = name.split(self.DEFAULT_DELIMETER)
+            return len(parts) == 2 and parts[1] and not parts[1].lower() in ("lts", "default", "stable")
+
+        windows_stacks = [n for n in windows_stacks if is_valid_runtime_name(n)]
+        linux_stacks = [n for n in linux_stacks if is_valid_runtime_name(n)]
+        windows_auto_updates = [n for n in windows_auto_updates if is_valid_runtime_name(n)]
+        linux_auto_updates = [n for n in linux_auto_updates if is_valid_runtime_name(n)]
+
         if delimiter is not None:
             windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
             linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
@@ -4402,7 +4425,35 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting):
-        return runtime_setting is not None and not runtime_setting.is_hidden and not runtime_setting.is_deprecated
+        # Using datetime module imported at the top level
+        if runtime_setting is None or getattr(runtime_setting, 'is_hidden', False):
+            return False
+        if getattr(runtime_setting, 'is_deprecated', False):
+            return False
+        end_of_life = getattr(runtime_setting, 'end_of_life_date', None)
+        if end_of_life:
+            try:
+                if isinstance(end_of_life, str):
+                    try:
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%S.%fZ"
+                        ).replace(tzinfo=datetime.timezone.utc)
+                    except ValueError:
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%SZ"
+                        ).replace(tzinfo=datetime.timezone.utc)
+                else:
+                    # If already a datetime, ensure it's timezone-aware
+                    if end_of_life.tzinfo is None:
+                        end_of_life_dt = end_of_life.replace(tzinfo=datetime.timezone.utc)
+                    else:
+                        end_of_life_dt = end_of_life
+                now_utc = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+                if now_utc >= end_of_life_dt:
+                    return False
+            except (ValueError, AttributeError):
+                pass
+        return True
 
     @classmethod
     def _get_runtime_setting(cls, minor_version, linux, java):
@@ -4983,6 +5034,20 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
+def update_flex_app_service_plan(instance):
+    instance.target_worker_count = None
+    instance.target_worker_size = None
+    instance.is_xenon = None
+    instance.hyper_v = None
+    instance.per_site_scaling = None
+    instance.maximum_elastic_worker_count = None
+    instance.elastic_scale_enabled = None
+    instance.is_spot = None
+    instance.target_worker_size_id = None
+    instance.sku.capacity = None
+    return instance
+
+
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
@@ -5010,6 +5075,14 @@ def is_plan_consumption(cmd, plan_info):
     if isinstance(plan_info, AppServicePlan):
         if isinstance(plan_info.sku, SkuDescription):
             return plan_info.sku.tier.lower() == 'dynamic'
+    return False
+
+
+def is_plan_flex(cmd, plan_info):
+    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier.lower() == 'flexconsumption'
     return False
 
 
@@ -7295,6 +7368,8 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=
         ssh_user_name = 'root'
         ssh_user_password = 'Docker!'
         logger.warning('SSH is available { username: %s, password: %s }', ssh_user_name, ssh_user_password)
+        logger.warning('Enter a full SSH session with: ssh %s@%s -m hmac-sha1 -p %s', ssh_user_name,
+                       tunnel_server.local_addr, tunnel_server.local_port)
 
     logger.warning('Ctrl + C to close')
 

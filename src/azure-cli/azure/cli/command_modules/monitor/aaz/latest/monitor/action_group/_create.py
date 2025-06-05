@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-06-01",
+        "version": "2024-10-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/actiongroups/{}", "2022-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/actiongroups/{}", "2024-10-01-preview"],
         ]
     }
 
@@ -50,7 +50,6 @@ class Create(AAZCommand):
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         _args_schema.location = AAZResourceLocationArg(
@@ -75,6 +74,25 @@ class Create(AAZCommand):
 
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
+
+        # define Arg Group "Identity"
+
+        _args_schema = cls._args_schema
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Identity",
+            help="Set the system managed identity.",
+            blank="True",
+        )
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Identity",
+            help="Set the user managed identities.",
+            blank=[],
+        )
+
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
 
         # define Arg Group "Properties"
 
@@ -114,6 +132,11 @@ class Create(AAZCommand):
             options=["--event-hub-receivers"],
             arg_group="Properties",
             help="The list of event hub receivers that are part of this action group.",
+        )
+        _args_schema.incident_receivers = AAZListArg(
+            options=["--incident-receivers"],
+            arg_group="Properties",
+            help="The list of incident receivers that are part of this action group.",
         )
         _args_schema.itsm_receivers = AAZListArg(
             options=["--itsm-receivers"],
@@ -175,6 +198,10 @@ class Create(AAZCommand):
             help="Indicates whether this instance is global runbook.",
             required=True,
         )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
+        )
         _element.name = AAZStrArg(
             options=["name"],
             help="Indicates name of the webhook.",
@@ -233,6 +260,10 @@ class Create(AAZCommand):
             help="The http trigger url where http request sent to.",
             required=True,
         )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
+        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The name of the azure function receiver. Names must be unique across all receivers within an action group.",
@@ -278,6 +309,10 @@ class Create(AAZCommand):
             help="The Event Hub namespace",
             required=True,
         )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
+        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The name of the Event hub receiver. Names must be unique across all receivers within an action group.",
@@ -297,6 +332,47 @@ class Create(AAZCommand):
             help="Indicates whether to use common alert schema.",
             default=False,
         )
+
+        incident_receivers = cls._args_schema.incident_receivers
+        incident_receivers.Element = AAZObjectArg()
+
+        _element = cls._args_schema.incident_receivers.Element
+        _element.connection = AAZObjectArg(
+            options=["connection"],
+            help="The incident service connection",
+            required=True,
+        )
+        _element.incident_management_service = AAZStrArg(
+            options=["incident-management-service"],
+            help="The incident management service type",
+            required=True,
+            enum={"Icm": "Icm"},
+        )
+        _element.mappings = AAZDictArg(
+            options=["mappings"],
+            help="Field mappings for the incident service",
+            required=True,
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the Incident receiver. Names must be unique across all receivers within an action group.",
+            required=True,
+        )
+
+        connection = cls._args_schema.incident_receivers.Element.connection
+        connection.id = AAZStrArg(
+            options=["id"],
+            help="GUID value representing the connection ID for the incident management service.",
+            required=True,
+        )
+        connection.name = AAZStrArg(
+            options=["name"],
+            help="The name of the connection.",
+            required=True,
+        )
+
+        mappings = cls._args_schema.incident_receivers.Element.mappings
+        mappings.Element = AAZStrArg()
 
         itsm_receivers = cls._args_schema.itsm_receivers
         itsm_receivers.Element = AAZObjectArg()
@@ -336,6 +412,10 @@ class Create(AAZCommand):
             options=["callback-url"],
             help="The callback url where http request sent to.",
             required=True,
+        )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -400,6 +480,10 @@ class Create(AAZCommand):
         _element.identifier_uri = AAZStrArg(
             options=["identifier-uri"],
             help="Indicates the identifier uri for aad auth.",
+        )
+        _element.managed_identity = AAZStrArg(
+            options=["managed-identity"],
+            help="The principal id of the managed identity. The value can be \"None\", \"SystemAssigned\" ",
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -496,7 +580,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-06-01",
+                    "api-version", "2024-10-01-preview",
                     required=True,
                 ),
             }
@@ -521,9 +605,19 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
+
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
+
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -535,6 +629,7 @@ class Create(AAZCommand):
                 properties.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("eventHubReceivers", AAZListType, ".event_hub_receivers")
                 properties.set_prop("groupShortName", AAZStrType, ".group_short_name", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("incidentReceivers", AAZListType, ".incident_receivers")
                 properties.set_prop("itsmReceivers", AAZListType, ".itsm_receivers")
                 properties.set_prop("logicAppReceivers", AAZListType, ".logic_app_receivers")
                 properties.set_prop("smsReceivers", AAZListType, ".sms_receivers")
@@ -559,6 +654,7 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("automationAccountId", AAZStrType, ".automation_account_id", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("isGlobalRunbook", AAZBoolType, ".is_global_runbook", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("runbookName", AAZStrType, ".runbook_name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("serviceUri", AAZStrType, ".service_uri")
@@ -583,6 +679,7 @@ class Create(AAZCommand):
                 _elements.set_prop("functionAppResourceId", AAZStrType, ".function_app_resource_id", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("functionName", AAZStrType, ".function_name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("httpTriggerUrl", AAZStrType, ".http_trigger_url", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("useCommonAlertSchema", AAZBoolType, ".use_common_alert_schema")
 
@@ -604,10 +701,31 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("eventHubName", AAZStrType, ".event_hub_name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("eventHubNameSpace", AAZStrType, ".event_hub_name_space", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("subscriptionId", AAZStrType, ".subscription_id", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("tenantId", AAZStrType, ".tenant_id")
                 _elements.set_prop("useCommonAlertSchema", AAZBoolType, ".use_common_alert_schema")
+
+            incident_receivers = _builder.get(".properties.incidentReceivers")
+            if incident_receivers is not None:
+                incident_receivers.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.incidentReceivers[]")
+            if _elements is not None:
+                _elements.set_prop("connection", AAZObjectType, ".connection", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("incidentManagementService", AAZStrType, ".incident_management_service", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("mappings", AAZDictType, ".mappings", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+
+            connection = _builder.get(".properties.incidentReceivers[].connection")
+            if connection is not None:
+                connection.set_prop("id", AAZStrType, ".id", typ_kwargs={"flags": {"required": True}})
+                connection.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+
+            mappings = _builder.get(".properties.incidentReceivers[].mappings")
+            if mappings is not None:
+                mappings.set_elements(AAZStrType, ".")
 
             itsm_receivers = _builder.get(".properties.itsmReceivers")
             if itsm_receivers is not None:
@@ -628,6 +746,7 @@ class Create(AAZCommand):
             _elements = _builder.get(".properties.logicAppReceivers[]")
             if _elements is not None:
                 _elements.set_prop("callbackUrl", AAZStrType, ".callback_url", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("resourceId", AAZStrType, ".resource_id", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("useCommonAlertSchema", AAZBoolType, ".use_common_alert_schema")
@@ -659,6 +778,7 @@ class Create(AAZCommand):
             _elements = _builder.get(".properties.webhookReceivers[]")
             if _elements is not None:
                 _elements.set_prop("identifierUri", AAZStrType, ".identifier_uri")
+                _elements.set_prop("managedIdentity", AAZStrType, ".managed_identity")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("objectId", AAZStrType, ".object_id")
                 _elements.set_prop("serviceUri", AAZStrType, ".service_uri", typ_kwargs={"flags": {"required": True}})
@@ -693,6 +813,7 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
@@ -704,6 +825,37 @@ class Create(AAZCommand):
             )
             _schema_on_200_201.tags = AAZDictType()
             _schema_on_200_201.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200_201.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
+
+            _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
                 flags={"read_only": True},
             )
 
@@ -732,6 +884,9 @@ class Create(AAZCommand):
             properties.group_short_name = AAZStrType(
                 serialized_name="groupShortName",
                 flags={"required": True},
+            )
+            properties.incident_receivers = AAZListType(
+                serialized_name="incidentReceivers",
             )
             properties.itsm_receivers = AAZListType(
                 serialized_name="itsmReceivers",
@@ -775,6 +930,9 @@ class Create(AAZCommand):
             _element.is_global_runbook = AAZBoolType(
                 serialized_name="isGlobalRunbook",
                 flags={"required": True},
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
             )
             _element.name = AAZStrType()
             _element.runbook_name = AAZStrType(
@@ -820,6 +978,9 @@ class Create(AAZCommand):
                 serialized_name="httpTriggerUrl",
                 flags={"required": True},
             )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
             _element.name = AAZStrType(
                 flags={"required": True},
             )
@@ -838,7 +999,9 @@ class Create(AAZCommand):
             _element.name = AAZStrType(
                 flags={"required": True},
             )
-            _element.status = AAZStrType()
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.use_common_alert_schema = AAZBoolType(
                 serialized_name="useCommonAlertSchema",
             )
@@ -855,6 +1018,9 @@ class Create(AAZCommand):
                 serialized_name="eventHubNameSpace",
                 flags={"required": True},
             )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
             _element.name = AAZStrType(
                 flags={"required": True},
             )
@@ -868,6 +1034,35 @@ class Create(AAZCommand):
             _element.use_common_alert_schema = AAZBoolType(
                 serialized_name="useCommonAlertSchema",
             )
+
+            incident_receivers = cls._schema_on_200_201.properties.incident_receivers
+            incident_receivers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.incident_receivers.Element
+            _element.connection = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.incident_management_service = AAZStrType(
+                serialized_name="incidentManagementService",
+                flags={"required": True},
+            )
+            _element.mappings = AAZDictType(
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            connection = cls._schema_on_200_201.properties.incident_receivers.Element.connection
+            connection.id = AAZStrType(
+                flags={"required": True},
+            )
+            connection.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            mappings = cls._schema_on_200_201.properties.incident_receivers.Element.mappings
+            mappings.Element = AAZStrType()
 
             itsm_receivers = cls._schema_on_200_201.properties.itsm_receivers
             itsm_receivers.Element = AAZObjectType()
@@ -900,6 +1095,9 @@ class Create(AAZCommand):
                 serialized_name="callbackUrl",
                 flags={"required": True},
             )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
+            )
             _element.name = AAZStrType(
                 flags={"required": True},
             )
@@ -926,7 +1124,9 @@ class Create(AAZCommand):
                 serialized_name="phoneNumber",
                 flags={"required": True},
             )
-            _element.status = AAZStrType()
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
 
             voice_receivers = cls._schema_on_200_201.properties.voice_receivers
             voice_receivers.Element = AAZObjectType()
@@ -950,6 +1150,9 @@ class Create(AAZCommand):
             _element = cls._schema_on_200_201.properties.webhook_receivers.Element
             _element.identifier_uri = AAZStrType(
                 serialized_name="identifierUri",
+            )
+            _element.managed_identity = AAZStrType(
+                serialized_name="managedIdentity",
             )
             _element.name = AAZStrType(
                 flags={"required": True},

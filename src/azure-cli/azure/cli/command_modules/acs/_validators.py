@@ -360,6 +360,10 @@ def validate_pod_subnet_id(namespace):
     _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
 
 
+def validate_apiserver_subnet_id(namespace):
+    _validate_subnet_id(namespace.apiserver_subnet_id, "--apiserver-subnet-id")
+
+
 def _validate_subnet_id(subnet_id, name):
     if subnet_id is None or subnet_id == '':
         return
@@ -470,6 +474,21 @@ def validate_max_surge(namespace):
             raise CLIError("--max-surge must be positive")
     except ValueError:
         raise CLIError("--max-surge should be an int or percentage")
+
+
+def validate_max_unavailable(namespace):
+    """validates parameters max unavailable are positive integers or percents."""
+    if namespace.max_unavailable is None:
+        return
+    int_or_percent = namespace.max_unavailable
+    if int_or_percent.endswith('%'):
+        int_or_percent = int_or_percent.rstrip('%')
+
+    try:
+        if int(int_or_percent) < 0:
+            raise InvalidArgumentValueError("--max-unavailable must be positive")
+    except ValueError:
+        raise InvalidArgumentValueError("--max-unavailable should be an int or percentage")
 
 
 def validate_assign_identity(namespace):
@@ -844,3 +863,11 @@ def validate_bootstrap_container_registry_resource_id(namespace):
     from msrestazure.tools import is_valid_resource_id
     if not is_valid_resource_id(container_registry_resource_id):
         raise InvalidArgumentValueError("--bootstrap-container-registry-resource-id is not a valid Azure resource ID.")
+
+
+def validate_custom_ca_trust_certificates(namespace):
+    """Validates Custom CA Trust Certificates can only be used on Linux."""
+    if namespace.custom_ca_trust_certificates is not None and namespace.custom_ca_trust_certificates != "":
+        if hasattr(namespace, 'os_type') and namespace.os_type != "Linux":
+            raise ArgumentUsageError(
+                '--custom-ca-trust-certificates can only be set for linux nodepools')

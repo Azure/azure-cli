@@ -470,6 +470,7 @@ def set_region_identified(region_input, region_identified):
     _session.region_identified = region_identified
 
 
+# region authentication-related
 @decorators.suppress_all_exceptions()
 def set_broker_info(enable_broker_on_windows):
     # Log the value of `enable_broker_on_windows`
@@ -485,6 +486,7 @@ def set_msal_telemetry(msal_telemetry):
 @decorators.suppress_all_exceptions()
 def set_login_experience_v2(login_experience_v2):
     _session.login_experience_v2 = login_experience_v2
+# endregion
 
 
 @decorators.suppress_all_exceptions()

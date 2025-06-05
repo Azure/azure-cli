@@ -36,16 +36,19 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vg_name': 'cli-test-volume-group-001',
             'vnet': VNET_NAME,
+            'application_identifier': "sh1",
+            'application_type': "SAP-HANA",
             'ppg': PPG,
+            'zones': 1,
             'sap_sid': "CLI",
             'gpr': "'key1=value1' 'key2=value2'"
         })
         self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --volume-group-name {vg_name} "
-                 "--vnet {vnet} --ppg {ppg} --sap-sid {sap_sid} -l {loc} --application-type SAP-HANA --gp-rules {gpr}",
+                 "--vnet {vnet} --zones {zones} --application-identifier {application_identifier} -l {loc} --application-type {application_type} --gp-rules {gpr}",
                  checks=[
                      self.check('name', '{acc}/{vg_name}'),
                      self.check('groupMetaData.volumesCount', 5),
-                     self.check('groupMetaData.applicationIdentifier', '{sap_sid}'),
+                     self.check('groupMetaData.applicationIdentifier', '{application_identifier}'),
                      self.check('length(volumes)', 5)
                  ])
 
@@ -54,7 +57,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
                  checks=[
                      self.check('name', '{acc}/{vg_name}'),
                      self.check('groupMetaData.volumesCount', 5),
-                     self.check('groupMetaData.applicationIdentifier', '{sap_sid}'),
+                     self.check('groupMetaData.applicationIdentifier', '{application_identifier}'),
                      self.check('length(volumes)', 5)
                  ])
 
@@ -66,11 +69,11 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
 
         # Cleanup
         self.kwargs.update({
-            'vol_1': 'CLI-log-backup',
-            'vol_2': 'CLI-data-backup',
-            'vol_3': 'CLI-shared',
-            'vol_4': 'CLI-log-mnt00001',
-            'vol_5': 'CLI-data-mnt00001'
+            'vol_1': 'sh1-data-mnt00001',
+            'vol_2': 'sh1-log-mnt00001',
+            'vol_3': 'sh1-shared',
+            'vol_4': 'sh1-data-backup',
+            'vol_5': 'sh1-log-backup'
         })
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_1} --yes")
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_2} --yes")
@@ -86,84 +89,55 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         # Delete pool and account
         self.cmd("az netappfiles pool delete -g {rg} -a {acc} -p {pool} -y")
         if (self.is_live or self.in_recording):
-            time.sleep(20)        
+            time.sleep(20)
         self.cmd("az netappfiles account delete -g {rg} -a {acc} -y")
 
     #@unittest.skip('(drp failure) DRP stamp pinning failing on the environment, no way to test until fixed')
-    def test_hrs_volume_groups(self):
+    def test_oracle_volume_groups(self):
         # Create Volume Group with minimum size
         self.prepare_for_volume_group_creation()
         self.kwargs.update({
             'vg_name': 'cli-test-volume-group-001',
             'vnet': VNET_NAME,
             'ppg': PPG,
-            'sap_sid': "CLI",
+            'zones': 1,
+            'application_identifier': "or1",
+            'application_type': "ORACLE",
             'add_snap_cap': 0,
             'size': 100,
             'throughput': 64
         })
         self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --group-name {vg_name} --vnet {vnet} "
-                 "--ppg {ppg} --sap-sid {sap_sid} -l {loc} --add-snapshot-capacity {add_snap_cap} --data-size {size} "
-                 "--data-throughput {throughput} --log-size {size} --log-throughput {throughput} --shared-size {size} "
-                 "--shared-throughput {throughput} --data-backup-size {size} --data-backup-throughput {throughput} "
-                 "--log-backup-size {size} --log-backup-throughput {throughput}",
+                 "--zones {zones} --application-identifier {application_identifier} --application-type {application_type} -l {loc} --add-snapshot-capacity {add_snap_cap} "
+                 "--database-size {size} --database-throughput 120 --number-of-volumes 3",
                  checks=[
                      self.check('name', '{acc}/{vg_name}'),
-                     self.check('groupMetaData.volumesCount', 5),
-                     self.check('groupMetaData.applicationIdentifier', '{sap_sid}'),
-                     self.check('length(volumes)', 5)
+                     self.check('groupMetaData.volumesCount', 6),
+                     self.check('groupMetaData.applicationIdentifier', '{application_identifier}'),
+                     self.check('length(volumes)', 6)
                  ])
 
-        # Create HRS Volume Group
-        # self.prepare_for_volume_group_creation()
-        self.kwargs.update({
-            'vg_ha_name': 'cli-test-volume-group-HA',
-            'system_role': 'HA'
-        })
-        self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --group-name {vg_ha_name} "
-                 "--vnet {vnet} --ppg {ppg} --sap-sid {sap_sid} -l {loc} --add-snapshot-capacity {add_snap_cap} "
-                 "--data-size {size} --data-throughput {throughput} --log-size {size} --log-throughput {throughput} "
-                 "--shared-size {size} --shared-throughput {throughput} --data-backup-size {size} "
-                 "--data-backup-throughput {throughput} --log-backup-size {size} --log-backup-throughput {throughput} "
-                 "--system-role {system_role}",
-                 checks=[
-                     self.check('name', '{acc}/{vg_ha_name}'),
-                     self.check('groupMetaData.volumesCount', 5),
-                     self.check('groupMetaData.applicationIdentifier', '{sap_sid}'),
-                     self.check('length(volumes)', 5)
-                 ])
 
         # Cleanup
         self.kwargs.update({
-            'vol_1': 'CLI-log-backup',
-            'vol_2': 'CLI-data-backup',
-            'vol_3': 'CLI-shared',
-            'vol_4': 'CLI-log-mnt00001',
-            'vol_5': 'CLI-data-mnt00001'
+            'vol_1': 'or1-ora-data1',
+            'vol_2': 'or1-ora-data2',
+            'vol_3': 'or1-ora-log',
+            'vol_4': 'or1-ora-binary',
+            'vol_5': 'or1-ora-backup',
+            'vol_6': 'or1-ora-log-mirror'
         })
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_1} --yes")
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_2} --yes")
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_3} --yes")
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_4} --yes")
         self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_5} --yes")
+        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_6} --yes")
 
-        self.kwargs.update({
-            'vol_1': 'HA-CLI-log-backup',
-            'vol_2': 'HA-CLI-data-backup',
-            'vol_3': 'HA-CLI-shared',
-            'vol_4': 'HA-CLI-log-mnt00001',
-            'vol_5': 'HA-CLI-data-mnt00001'
-        })
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_1} --yes")
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_2} --yes")
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_3} --yes")
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_4} --yes")
-        self.cmd("az netappfiles volume delete -g {rg} -a {acc} -p {pool} -v {vol_5} --yes")
         if (self.is_live or self.in_recording):
             time.sleep(20)
         # Delete Volume Group
         self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} --group-name {vg_name} -y")
-        self.cmd("az netappfiles volume-group delete -g {rg} -a {acc} --group-name {vg_ha_name} -y")
         if (self.is_live or self.in_recording):
             time.sleep(20)
         # Delete pool and account

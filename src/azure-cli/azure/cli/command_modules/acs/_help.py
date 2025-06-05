@@ -65,7 +65,7 @@ parameters:
     short-summary: Secret associated with the service principal. This argument is required if `--service-principal` is specified.
   - name: --node-vm-size -s
     type: string
-    short-summary: Size of Virtual Machines to create as Kubernetes nodes.
+    short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
   - name: --dns-name-prefix -p
     type: string
     short-summary: Prefix for hostnames that are created. If not specified, generate a hostname using the managed cluster and resource group names.
@@ -234,13 +234,13 @@ parameters:
   - name: --network-plugin
     type: string
     short-summary: The Kubernetes network plugin to use.
-    long-summary: Specify "azure" for routable pod IPs from VNET, "kubenet" for non-routable pod IPs with an overlay network, or "none" for no networking configured. Defaults to "kubenet".
+    long-summary: Specify "azure" for highly scalable networking, "kubenet" for IP assignment from subnet NAT-based routing, or "none" for no networking configured. Defaults to "azure".
   - name: --network-plugin-mode
     type: string
     short-summary: The network plugin mode to use.
     long-summary: |
-        Used to control the mode the network plugin should operate in. For example, "overlay" used with
-        --network-plugin=azure will use an overlay network (non-VNET IPs) for pods in the cluster.
+        Used to control the mode the network plugin should operate in. Defaults to "overlay". If not specified with "azure" as
+        network plugin, pods are given routable IPs from VNET.
   - name: --network-policy
     type: string
     short-summary: Network Policy Engine to use.
@@ -323,6 +323,12 @@ parameters:
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --enable-apiserver-vnet-integration
+    type: bool
+    short-summary: Enable integration of user vnet with control plane apiserver pods.
+  - name: --apiserver-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
@@ -435,6 +441,10 @@ parameters:
   - name: --k8s-support-plan
     type: string
     short-summary: Choose from "KubernetesOfficial" or "AKSLongTermSupport", with "AKSLongTermSupport" you get 1 extra year of CVE patchs.
+  - name: --ca-certs --custom-ca-trust-certificates
+    type: string
+    short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
+    long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
   - name: --enable-defender
     type: bool
     short-summary: Enable Microsoft Defender security profile.
@@ -532,6 +542,9 @@ parameters:
   - name: --enable-app-routing
     type: bool
     short-summary: Enable Application Routing addon.
+  - name: --app-routing-default-nginx-controller --ardnc
+    type: string
+    short-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
   - name: --revision
     type: string
     short-summary: Azure Service Mesh revision to install.
@@ -865,6 +878,10 @@ parameters:
   - name: --disable-defender
     type: bool
     short-summary: Disable defender profile.
+  - name: --ca-certs --custom-ca-trust-certificates
+    type: string
+    short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
+    long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
   - name: --defender-config
     type: string
     short-summary: Path to JSON file containing Microsoft Defender profile configurations.
@@ -923,6 +940,18 @@ parameters:
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.
+  - name: --enable-apiserver-vnet-integration
+    type: bool
+    short-summary: Enable integration of user vnet with control plane apiserver pods.
+  - name: --apiserver-subnet-id
+    type: string
+    short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
+  - name: --enable-private-cluster
+    type: bool
+    short-summary: Enable private cluster for apiserver vnet integration cluster.
+  - name: --disable-private-cluster
+    type: bool
+    short-summary: Disable private cluster for apiserver vnet integration cluster.
   - name: --enable-keda
     type: bool
     short-summary: Enable KEDA workload auto-scaler.
@@ -1524,7 +1553,7 @@ short-summary: Add a node pool to the managed Kubernetes cluster.
 parameters:
   - name: --node-vm-size -s
     type: string
-    short-summary: Size of Virtual Machines to create as Kubernetes nodes.
+    short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
   - name: --node-count -c
     type: int
     short-summary: Number of nodes in the Kubernetes agent pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
@@ -1566,7 +1595,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or CBLMariner for Linux. Windows2019 or Windows2022 for Windows.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, AzureLinux or Ubuntu2204 for Linux. Windows2019 or Windows2022 for Windows.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -1600,12 +1629,18 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
@@ -1663,6 +1698,9 @@ parameters:
   - name: --if-none-match
     type: string
     short-summary: Set to '*' to allow a new agentpool to be created, but to prevent updating an existing agentpool. Other values will be ignored.
+  - name: --gpu-driver
+    type: string
+    short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None". Default is "Install".
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -1755,12 +1793,18 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
@@ -1827,12 +1871,18 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how long to wait for all pods to be evicted
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to upgrade this nodepool.
@@ -2440,6 +2490,10 @@ helps['aks approuting enable'] = """
         type: string
         short-summary: Attach a keyvault id to access secrets and certificates.
         long-summary: This optional flag attaches a keyvault id to access secrets and certificates.
+      - name: --nginx
+        type: string
+        short-summary: Configure default NginxIngressController resource
+        long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
 helps['aks approuting disable'] = """
@@ -2461,6 +2515,10 @@ helps['aks approuting update'] = """
         type: bool
         short-summary: Enable the keyvault secrets provider addon.
         long-summary: This optional flag enables the keyvault-secrets-provider addon in given cluster. This is required for most App Routing use-cases.
+      - name: --nginx
+        type: string
+        short-summary: Configure default NginxIngressController resource
+        long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
 helps['aks approuting zone'] = """

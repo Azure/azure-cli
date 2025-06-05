@@ -122,6 +122,11 @@ def transform_key_output(result, **command_args):
             if value and isinstance(value, bytes):
                 setattr(result.key, attr, base64.b64encode(value))
 
+    # Avoid returning attestation info together with key properties
+    # Customer should use specific `az keyvault key get-attestation` command
+    if result.properties._attributes:
+        result.properties._attributes.attestation = None
+
     output = {
         'attributes': result.properties._attributes,
         'key': result.key,
