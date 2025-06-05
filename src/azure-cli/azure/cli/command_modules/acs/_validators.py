@@ -860,7 +860,7 @@ def validate_bootstrap_container_registry_resource_id(namespace):
     container_registry_resource_id = namespace.bootstrap_container_registry_resource_id
     if container_registry_resource_id is None or container_registry_resource_id == '':
         return
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if not is_valid_resource_id(container_registry_resource_id):
         raise InvalidArgumentValueError("--bootstrap-container-registry-resource-id is not a valid Azure resource ID.")
 
