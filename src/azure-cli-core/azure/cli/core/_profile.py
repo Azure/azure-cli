@@ -220,63 +220,8 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity_msrestazure(self, client_id=None, object_id=None, resource_id=None,
-                                                allow_no_subscriptions=None):
-        # Old way of using msrestazure for managed identity
-        import jwt
-        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
-        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
-        id_arg_count = len([arg for arg in (client_id, object_id, resource_id) if arg])
-        if id_arg_count > 1:
-            raise CLIError('Usage error: Provide only one of --client-id, --object-id, --resource-id.')
-
-        if id_arg_count == 0:
-            identity_type = MsiAccountTypes.system_assigned
-            identity_id = None
-            msi_creds = MSIAuthenticationWrapper(resource=resource)
-        elif client_id:
-            identity_type = MsiAccountTypes.user_assigned_client_id
-            identity_id = client_id
-            msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=client_id)
-        elif object_id:
-            identity_type = MsiAccountTypes.user_assigned_object_id
-            identity_id = object_id
-            msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=object_id)
-        elif resource_id:
-            identity_type = MsiAccountTypes.user_assigned_resource_id
-            identity_id = resource_id
-            msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=resource_id)
-
-        token_entry = msi_creds.token
-        token = token_entry['access_token']
-        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
-        tenant = decode['tid']
-
-        subscription_finder = SubscriptionFinder(self.cli_ctx)
-        subscriptions = subscription_finder.find_using_specific_tenant(tenant, msi_creds)
-        base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
-        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
-        if not subscriptions:
-            if allow_no_subscriptions:
-                subscriptions = self._build_tenant_level_accounts([tenant])
-            else:
-                raise CLIError('No access was configured for the VM, hence no subscriptions were found. '
-                               "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
-
-        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
-                                                  user_assigned_identity_id=base_name)
-        self._set_subscriptions(consolidated)
-        return deepcopy(consolidated)
-
     def login_with_managed_identity(self, client_id=None, object_id=None, resource_id=None,
                                     allow_no_subscriptions=None):
-        if not _use_msal_managed_identity(self.cli_ctx):
-            return self.login_with_managed_identity_msrestazure(
-                client_id=client_id, object_id=object_id, resource_id=resource_id,
-                allow_no_subscriptions=allow_no_subscriptions)
-
         import jwt
         from .auth.constants import ACCESS_TOKEN
 
@@ -366,21 +311,14 @@ class Profile:
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
             from .auth.msal_credentials import CloudShellCredential
-            # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
+            # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
             sdk_cred = CredentialAdaptor(CloudShellCredential())
 
         elif managed_identity_type:
             # managed identity
-            if _use_msal_managed_identity(self.cli_ctx):
-                # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
-                cred = MsiAccountTypes.msal_credential_factory(managed_identity_type, managed_identity_id)
-                sdk_cred = CredentialAdaptor(cred)
-            else:
-                # The resource is merely used by msrestazure to get the first access token.
-                # It is not actually used in an API invocation.
-                sdk_cred = MsiAccountTypes.msi_auth_factory(
-                    managed_identity_type, managed_identity_id,
-                    self.cli_ctx.cloud.endpoints.active_directory_resource_id)
+            # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
+            cred = MsiAccountTypes.msal_credential_factory(managed_identity_type, managed_identity_id)
+            sdk_cred = CredentialAdaptor(cred)
 
         else:
             # user and service principal
@@ -433,15 +371,10 @@ class Profile:
             # managed identity
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
-            if _use_msal_managed_identity(self.cli_ctx):
-                cred = MsiAccountTypes.msal_credential_factory(managed_identity_type, managed_identity_id)
-                if credential_out:
-                    credential_out['credential'] = cred
-                sdk_cred = CredentialAdaptor(cred)
-            else:
-                from .auth.util import scopes_to_resource
-                sdk_cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id,
-                                                            scopes_to_resource(scopes))
+            cred = MsiAccountTypes.msal_credential_factory(managed_identity_type, managed_identity_id)
+            if credential_out:
+                credential_out['credential'] = cred
+            sdk_cred = CredentialAdaptor(cred)
 
         else:
             sdk_cred = CredentialAdaptor(self._create_credential(account, tenant_id=tenant))
@@ -773,19 +706,6 @@ class MsiAccountTypes:
                 MsiAccountTypes.user_assigned_object_id, MsiAccountTypes.user_assigned_resource_id]
 
     @staticmethod
-    def msi_auth_factory(cli_account_name, identity, resource):
-        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
-        if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthenticationWrapper(resource=resource)
-        if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
-        raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
-
-    @staticmethod
     def parse_ids(client_id=None, object_id=None, resource_id=None):
         id_arg_count = len([arg for arg in (client_id, object_id, resource_id) if arg])
         if id_arg_count > 1:
@@ -931,9 +851,7 @@ class SubscriptionFinder:
                                    .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, self.cli_ctx.cloud.profile))
         api_version = get_api_version(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
 
-        # MSIAuthenticationWrapper already implements get_token, so no need to wrap it with CredentialAdaptor
-        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
-        sdk_cred = credential if isinstance(credential, MSIAuthenticationWrapper) else CredentialAdaptor(credential)
+        sdk_cred = CredentialAdaptor(credential)
         client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, sdk_cred)
         client = client_type(sdk_cred, api_version=api_version,
                              base_url=self.cli_ctx.cloud.endpoints.resource_manager,
@@ -984,11 +902,3 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
                     use_msal_http_cache=use_msal_http_cache,
                     enable_broker_on_windows=enable_broker_on_windows,
                     instance_discovery=instance_discovery)
-
-
-def _use_msal_managed_identity(cli_ctx):
-    from azure.cli.core.telemetry import set_use_msal_managed_identity
-    # Use core.use_msal_managed_identity=false to use the old msrestazure implementation
-    use_msal_managed_identity = cli_ctx.config.getboolean('core', 'use_msal_managed_identity', fallback=True)
-    set_use_msal_managed_identity(use_msal_managed_identity)
-    return use_msal_managed_identity
