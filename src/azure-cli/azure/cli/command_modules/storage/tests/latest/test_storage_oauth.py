@@ -10,7 +10,6 @@ from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE, min_api='2017-11-09')
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_storage_oauth')

@@ -301,37 +301,27 @@ Authentication failure. This may be caused by either invalid account key, connec
                              help='Storage account connection string. Environment variable: '
                                   'AZURE_STORAGE_CONNECTION_STRING')
         resource_type = command.command_kwargs['resource_type']
-        if is_storagev2(resource_type.value[0]):
-            endpoint_argument_dict = {
-                ResourceType.DATA_STORAGE_BLOB: '--blob-endpoint',
-                ResourceType.DATA_STORAGE_FILESHARE: '--file-endpoint',
-                ResourceType.DATA_STORAGE_TABLE: '--table-endpoint',
-                ResourceType.DATA_STORAGE_QUEUE: '--queue-endpoint',
-                ResourceType.DATA_STORAGE_FILEDATALAKE: '--blob-endpoint'
-            }
-            command.add_argument('account_url', endpoint_argument_dict.get(resource_type, '--service-endpoint'),
-                                 required=False, default=None, arg_group=group_name,
-                                 help='Storage data service endpoint. Must be used in conjunction with either '
-                                      'storage account key or a SAS token. You can find each service primary endpoint '
-                                      'with `az storage account show`. '
-                                      'Environment variable: AZURE_STORAGE_SERVICE_ENDPOINT')
-            command.add_argument('account_key', '--account-key', required=False, default=None,
-                                 arg_group=group_name,
-                                 help='Storage account key. Must be used in conjunction with storage account '
-                                      'name or service endpoint. Environment variable: AZURE_STORAGE_KEY')
-            command.add_argument('sas_token', '--sas-token', required=False, default=None,
-                                 arg_group=group_name,
-                                 help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
-                                      'account name or service endpoint. Environment variable: AZURE_STORAGE_SAS_TOKEN')
-        else:
-            command.add_argument('account_key', '--account-key', required=False, default=None,
-                                 arg_group=group_name,
-                                 help='Storage account key. Must be used in conjunction with storage account name. '
-                                      'Environment variable: AZURE_STORAGE_KEY')
-            command.add_argument('sas_token', '--sas-token', required=False, default=None,
-                                 arg_group=group_name,
-                                 help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
-                                      'account name. Environment variable: AZURE_STORAGE_SAS_TOKEN')
+        endpoint_argument_dict = {
+            ResourceType.DATA_STORAGE_BLOB: '--blob-endpoint',
+            ResourceType.DATA_STORAGE_FILESHARE: '--file-endpoint',
+            ResourceType.DATA_STORAGE_TABLE: '--table-endpoint',
+            ResourceType.DATA_STORAGE_QUEUE: '--queue-endpoint',
+            ResourceType.DATA_STORAGE_FILEDATALAKE: '--blob-endpoint'
+        }
+        command.add_argument('account_url', endpoint_argument_dict.get(resource_type, '--service-endpoint'),
+                             required=False, default=None, arg_group=group_name,
+                             help='Storage data service endpoint. Must be used in conjunction with either '
+                                  'storage account key or a SAS token. You can find each service primary endpoint '
+                                  'with `az storage account show`. '
+                                  'Environment variable: AZURE_STORAGE_SERVICE_ENDPOINT')
+        command.add_argument('account_key', '--account-key', required=False, default=None,
+                             arg_group=group_name,
+                             help='Storage account key. Must be used in conjunction with storage account '
+                                  'name or service endpoint. Environment variable: AZURE_STORAGE_KEY')
+        command.add_argument('sas_token', '--sas-token', required=False, default=None,
+                             arg_group=group_name,
+                             help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
+                                  'account name or service endpoint. Environment variable: AZURE_STORAGE_SAS_TOKEN')
 
     def _register_data_plane_oauth_arguments(self, command_name):
         from azure.cli.core.commands.parameters import get_enum_type

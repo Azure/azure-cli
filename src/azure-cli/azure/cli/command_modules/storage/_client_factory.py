@@ -36,15 +36,6 @@ def storage_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
 
 
-def cloud_storage_account_service_factory(cli_ctx, kwargs):
-    t_cloud_storage_account = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'common#CloudStorageAccount')
-    account_name = kwargs.pop('account_name', None)
-    account_key = kwargs.pop('account_key', None)
-    sas_token = kwargs.pop('sas_token', None)
-    kwargs.pop('connection_string', None)
-    return t_cloud_storage_account(account_name, account_key, sas_token)
-
-
 def multi_service_properties_factory(cli_ctx, kwargs):
     """Create multiple data services properties instance based on the services option"""
     from .services_wrapper import ServiceProperties
