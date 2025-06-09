@@ -454,7 +454,7 @@ stages:
 #        ext-webpubsub:
 #          Target: ext-webpubsub
     pool:
-      name: ${{ variables.ubuntu-pool }}
+      name: $(ubuntu-pool)
     steps:
       - bash: |
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
@@ -1030,7 +1030,7 @@ stages:
 #        ext-webpubsub:
 #          Target: ext-webpubsub
     pool:
-      vmImage: ${{ variables.macos-pool }}
+      vmImage: $(macos-pool)
     steps:
       - bash: |
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
@@ -1606,7 +1606,7 @@ stages:
 #        ext-webpubsub:
 #          Target: ext-webpubsub
     pool:
-      name: ${{ variables.windows-pool }}
+      name: $(windows-pool)
     steps:
       - bash: |
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
@@ -1765,7 +1765,7 @@ stages:
     timeoutInMinutes: 120
     condition: succeededOrFailed()
     pool:
-      name: ${{ variables.ubuntu-pool }}
+      name: $(ubuntu-pool)
     steps:
       - task: UsePythonVersion@0
         inputs:
@@ -1830,7 +1830,7 @@ stages:
     condition: succeededOrFailed()
     continueOnError: true
     pool:
-      name: ${{ variables.ubuntu-pool }}
+      name: $(ubuntu-pool)
     steps:
       - task: UsePythonVersion@0
         inputs:
