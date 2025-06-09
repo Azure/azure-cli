@@ -627,22 +627,27 @@ def _show_post_action_message(resource_group_name, vmss_name, maunal_mode, enabl
 
 
 def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vm_instances = list(client.virtual_machine_scale_set_vms.list(resource_group_name, vmss_name,
-                                                                  select='instanceView', expand='instanceView'))
+    from .operations.vmss import VMSSListInstances
+    vm_instances = VMSSListInstances(cli_ctx=cmd.cli_ctx)(command_args={
+        'virtual_machine_scale_set_name': vmss_name,
+        'resource_group': resource_group_name,
+        'expand': 'instanceView',
+        'select': 'instanceView'
+    })
+
     result = []
     for instance in vm_instances:
-        view = instance.instance_view
+        view = instance['instanceView']
         disk_infos = []
         vm_enc_info = {
-            'id': instance.id,
+            'id': instance['id'],
             'disks': disk_infos
         }
-        for div in view.disks:
+        for div in view['disks']:
             disk_infos.append({
-                'name': div.name,
-                'encryptionSettings': div.encryption_settings,
-                'statuses': [x for x in (div.statuses or []) if (x.code or '').startswith('EncryptionState')]
+                'name': div['name'],
+                'encryptionSettings': div.get('encryptionSettings', []),
+                'statuses': [x for x in (div.get('statuses', [])) if (x.get('code', '')).startswith('EncryptionState')]
             })
 
         result.append(vm_enc_info)
