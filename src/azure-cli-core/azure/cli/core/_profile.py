@@ -641,13 +641,18 @@ class Profile:
 
     def get_subscription(self, subscription=None):  # take id or name
         if _env_vars_configured():
+            subscription_id = subscription if subscription else os.environ.get(_AZURE_CLI_SUBSCRIPTION_ID)
+            from .auth.credentials import AccessTokenCredential
+            sdk_cred = AccessTokenCredential(os.environ[_AZURE_CLI_ACCESS_TOKEN])
+            subscription_finder = SubscriptionFinder(self.cli_ctx)
+            tenant_id = subscription_finder.find_tenant_for_subscription(subscription_id, sdk_cred)
             return {
                 # Subscription ID is not required for data-plane operations
                 _SUBSCRIPTION_ID: subscription if subscription else os.environ.get(_AZURE_CLI_SUBSCRIPTION_ID),
                 # Tenant ID is required by some operations.
                 # For example, "Vaults - Create Or Update" requires tenantId property.
                 # https://learn.microsoft.com/en-us/rest/api/keyvault/keyvault/vaults/create-or-update
-                _TENANT_ID: os.environ.get(_AZURE_CLI_TENANT_ID),
+                _TENANT_ID: tenant_id,
                 _USER_ENTITY: {
                     _USER_NAME: _ACCESS_TOKEN_IDENTITY_NAME,
                     _USER_TYPE: _ACCESS_TOKEN_IDENTITY_TYPE
@@ -878,6 +883,12 @@ class SubscriptionFinder:
         self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
         self._authority = self.cli_ctx.cloud.endpoints.active_directory
         self.tenants = []
+
+    def find_tenant_for_subscription(self, subscription_id, credential=None):
+        # pylint: disable=too-many-statements
+        client = self._create_subscription_client(credential)
+        subscription = client.subscriptions.get(subscription_id)
+        return subscription.tenant_id
 
     def find_using_common_tenant(self, username, credential=None):
         # pylint: disable=too-many-statements
