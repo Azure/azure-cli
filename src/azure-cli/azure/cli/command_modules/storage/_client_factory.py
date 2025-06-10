@@ -7,8 +7,6 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
     prepare_client_kwargs_track2
 from azure.cli.core.profiles import ResourceType, get_sdk
 
-from azure.cli.command_modules.storage.sdkutil import get_table_data_type
-
 MISSING_CREDENTIALS_ERROR_MESSAGE = """
 Missing credentials to access storage service. The following variations are accepted:
     (1) account name and key (--account-name and --account-key options or

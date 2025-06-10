@@ -17,7 +17,6 @@ from azure.cli.command_modules.storage._client_factory import (get_storage_data_
                                                                storage_client_factory,
                                                                cf_adls_file_system)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
-from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
@@ -99,17 +98,6 @@ def process_resource_group(cmd, namespace):
     """Processes the resource group parameter from the account name"""
     if namespace.account_name and not namespace.resource_group_name:
         namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
-
-
-def validate_table_payload_format(cmd, namespace):
-    t_table_payload = get_table_data_type(cmd.cli_ctx, 'table', 'TablePayloadFormat')
-    if namespace.accept:
-        formats = {
-            'none': t_table_payload.JSON_NO_METADATA,
-            'minimal': t_table_payload.JSON_MINIMAL_METADATA,
-            'full': t_table_payload.JSON_FULL_METADATA
-        }
-        namespace.accept = formats[namespace.accept.lower()]
 
 
 def validate_bypass(namespace):
@@ -1391,9 +1379,9 @@ def page_blob_tier_validator(cmd, namespace):
     try:
         namespace.tier = getattr(cmd.get_models('_models#PremiumPageBlobTier'), namespace.tier)
     except AttributeError:
-        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names_track2
         raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(
-            get_blob_tier_names(cmd.cli_ctx, 'PremiumPageBlobTier'))))
+            get_blob_tier_names_track2(cmd.cli_ctx, '_models#PremiumPageBlobTier'))))
 
 
 def block_blob_tier_validator(cmd, namespace):
@@ -1406,9 +1394,9 @@ def block_blob_tier_validator(cmd, namespace):
     try:
         namespace.tier = getattr(cmd.get_models('_models#StandardBlobTier'), namespace.tier)
     except AttributeError:
-        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names_track2
         raise ValueError('Unknown block blob tier name. Choose among {}'.format(', '.join(
-            get_blob_tier_names(cmd.cli_ctx, 'StandardBlobTier'))))
+            get_blob_tier_names_track2(cmd.cli_ctx, '_models#StandardBlobTier'))))
 
 
 def page_blob_tier_validator_track2(cmd, namespace):

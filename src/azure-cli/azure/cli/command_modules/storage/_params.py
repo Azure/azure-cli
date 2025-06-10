@@ -34,7 +34,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     from azure.cli.core.commands.parameters import get_resource_name_completion_list
 
-    from .sdkutil import get_table_data_type
     from .completers import get_storage_name_completion_list
 
     t_base_blob_service = self.get_sdk('blob.baseblobservice#BaseBlobService')
@@ -43,7 +42,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                    resource_type=ResourceType.DATA_STORAGE_FILESHARE)
     t_queue_service = self.get_sdk('_queue_service_client#QueueServiceClient',
                                    resource_type=ResourceType.DATA_STORAGE_QUEUE)
-    t_table_service = get_table_data_type(self.cli_ctx, 'table', 'TableService')
+    t_table_service = self.get_sdk('_table_service_client#TableServiceClient',
+                                   resource_type=ResourceType.DATA_STORAGE_TABLE)
 
     storage_account_type = CLIArgumentType(options_list='--storage-account',
                                            help='The name or ID of the storage account.',
@@ -914,7 +914,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name', validator=validate_policy,
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
-                                                                  'get_container_acl'))
+                                                                  'get_access_policy'))
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
@@ -1353,8 +1353,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         c.register_blob_arguments()
         c.register_source_uri_arguments(validator=process_blob_source_uri, blob_only=True)
-        c.argument('destination_if_modified_since', arg_group='Pre-condition')
-        c.argument('destination_if_unmodified_since', arg_group='Pre-condition')
+        c.argument('destination_if_modified_since', arg_group='Pre-condition',
+                   help='Commence only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')')
+        c.argument('destination_if_unmodified_since', arg_group='Pre-condition',
+                   help='Commence only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',)
         c.argument('destination_if_match', arg_group='Pre-condition',
                    help='An ETag value, or the wildcard character (*). Specify an ETag value for this conditional '
                         'header to copy the blob only if the specified ETag value matches the ETag value for an '
@@ -1378,8 +1380,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Specify this to perform the Copy Blob operation only if the lease ID given matches the '
                      'active lease ID of the source blob.')
         c.extra('metadata', nargs='+',
-                   help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
-                   validator=validate_metadata)
+                help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
+                validator=validate_metadata)
 
     with self.argument_context('storage blob incremental-copy cancel') as c:
         c.register_blob_arguments()
@@ -1591,7 +1593,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('container_name', container_name_type)
         c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
-                                                                  'get_container_acl'))
+                                                                  'get_access_policy'))
         help_str = 'Allowed values: {}. Can be combined'.format(get_permission_help_string(t_container_permissions))
         c.argument('permission', options_list='--permissions', help=help_str,
                    validator=get_permission_validator(t_container_permissions))
@@ -1618,7 +1620,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name', validator=validate_policy,
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
-                                                                  'get_container_acl'))
+                                                                  'get_access_policy'))
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_container_permissions)),
                    validator=get_permission_validator(t_container_permissions))
@@ -2387,7 +2389,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from .completers import get_storage_acl_name_completion_list
 
         c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
-                   completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_acl'))
+                   completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_access_policy'))
 
         help_str = 'Allowed values: (r)ead/query (a)dd (u)pdate (d)elete. Can be combined.'
         c.argument('permission', options_list='--permissions', help=help_str, validator=table_permission_validator)
@@ -2402,7 +2404,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_sas_arguments()
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the table\'s ACL.',
-                   completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_acl'))
+                   completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_access_policy'))
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format('(r)ead/query (a)dd (u)pdate (d)elete'),
                    validator=table_permission_validator)

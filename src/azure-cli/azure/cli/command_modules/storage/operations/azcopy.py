@@ -133,7 +133,7 @@ def _azcopy_blob_client(cmd, client):
 
 
 def _azcopy_file_client(cmd, client):
-    return AzCopy(creds=client_auth_for_azcopy(cmd, client, service='file'))
+    return AzCopy(creds=client_auth_for_azcopy(cmd, client))
 
 
 def _azcopy_login_client(cmd):

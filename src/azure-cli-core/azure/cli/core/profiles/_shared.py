@@ -218,6 +218,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILESHARE: '2025-05-05',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.DATA_STORAGE_TABLE: None,
         ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: None,

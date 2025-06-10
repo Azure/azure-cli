@@ -145,7 +145,7 @@ def login_auth_for_azcopy(cmd):
     return AzCopyCredentials(token_info=token_info)
 
 
-def client_auth_for_azcopy(cmd, client, service='blob'):
+def client_auth_for_azcopy(cmd, client):
     # prefer oauth mode
     if client.credential:
         raw_token = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)

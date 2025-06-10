@@ -1093,7 +1093,7 @@ def exists(client, container_name, blob_name, snapshot, timeout):
 
 def incremental_copy_start(client, cmd, copy_source=None, metadata=None,
                            destination_if_modified_since=None, destination_if_unmodified_since=None,
-                           destination_if_match=None, destination_if_none_match=None,  **kwargs):
+                           destination_if_match=None, destination_if_none_match=None, **kwargs):
     from ..aaz.latest.storage.blob.incremental_copy import Start
 
     cmd_args = {
