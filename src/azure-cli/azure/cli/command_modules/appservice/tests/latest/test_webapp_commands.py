@@ -1389,6 +1389,7 @@ class WebappACRScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    @AllowLargeResponse()
     def test_acr_msi_integration(self, resource_group):
         plan_name = self.create_random_name(prefix='acrtestplan', length=24)
         webapp_name = self.create_random_name(prefix='webappacrtest', length=24)
