@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-09-01",
+        "version": "2025-04-15",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}", "2025-04-15"],
         ]
     }
 
@@ -145,6 +145,7 @@ class Update(AAZCommand):
             options=["--query-string-caching-behavior"],
             arg_group="Properties",
             help="Defines how CDN caches requests that include query strings. You can ignore any query strings when caching, bypass caching to prevent requests that contain query strings from being cached, or cache every request with a unique URL.",
+            default="NotSet",
             enum={"BypassCaching": "BypassCaching", "IgnoreQueryString": "IgnoreQueryString", "NotSet": "NotSet", "UseQueryString": "UseQueryString"},
         )
         _args_schema.url_signing_keys = AAZListArg(
@@ -1431,7 +1432,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-04-15",
                     required=True,
                 ),
             }
