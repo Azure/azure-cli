@@ -2989,6 +2989,30 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             ]
         )
 
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_exception_', location='eastus2')
+    def test_network_app_gateway_waf_policy_exception(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group
+        })
+
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        self.cmd('network application-gateway waf-policy managed-rule exception add -g {rg} --policy-name {waf} '
+                 '--match-variable "RequestURI" --value-match-operator "Contains" --values "health" "account/images" "default.aspx" '
+                 '--rule-sets [0].rule-set-type=OWASP [0].rule-set-version=3.2')
+        self.cmd('network application-gateway waf-policy managed-rule exception list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('exceptions | length(@)', 1)
+                 ])
+        self.cmd('network application-gateway waf-policy managed-rule exception remove -g {rg} --policy-name {waf}')
+        self.cmd('network application-gateway waf-policy managed-rule exception list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.not_exists('exceptions')
+                 ])
+
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
