@@ -570,49 +570,57 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
 
 
 def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=False):
-    UpgradeMode, VirtualMachineScaleSetExtension = cmd.get_models('UpgradeMode', 'VirtualMachineScaleSetExtension')
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    is_linux = _is_linux_os(vmss.virtual_machine_profile)
-    extension = vm_extension_info['Linux' if is_linux else 'Windows']
+    from .aaz.latest.vmss import Update
 
-    # 1. be nice, figure out the default volume type
-    volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force)
+    class VMSSDecrypt(Update):
+        def pre_instance_update(self, instance):
+            is_linux = _is_linux_os_aaz(instance.properties.virtual_machine_profile.to_serialized_data())
+            extension = vm_extension_info['Linux' if is_linux else 'Windows']
 
-    # 2. update the disk encryption extension
-    public_config = {
-        'VolumeType': volume_type,
-        'EncryptionOperation': 'DisableEncryption',
-    }
+            # 1. be nice, figure out the default volume type
+            _volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force)
 
-    ext = VirtualMachineScaleSetExtension(name=extension['name'],
-                                          publisher=extension['publisher'],
-                                          type_properties_type=extension['name'],
-                                          type_handler_version=extension['version'],
-                                          settings=public_config,
-                                          auto_upgrade_minor_version=True,
-                                          force_update_tag=uuid.uuid4())
-    if (not vmss.virtual_machine_profile.extension_profile or
-            not vmss.virtual_machine_profile.extension_profile.extensions):
-        extensions = []
-    else:
-        extensions = vmss.virtual_machine_profile.extension_profile.extensions
+            # 2. update the disk encryption extension
+            public_config = {
+                'VolumeType': _volume_type,
+                'EncryptionOperation': 'DisableEncryption',
+            }
 
-    ade_extension = [x for x in extensions if
-                     x.type_properties_type.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
-    if not ade_extension:
-        from knack.util import CLIError
-        raise CLIError("VM scale set '{}' was not encrypted".format(vmss_name))
+            ext = {
+                'name': extension['name'],
+                'properties': {
+                    'publisher': extension['publisher'],
+                    'type_handler_version': extension['version'],
+                    'type': extension['name'],
+                    'settings': public_config,
+                    'auto_upgrade_minor_version': True,
+                    'force_update_tag': str(uuid.uuid4())
+                }
+            }
 
-    index = vmss.virtual_machine_profile.extension_profile.extensions.index(ade_extension[0])
-    vmss.virtual_machine_profile.extension_profile.extensions[index] = ext
+            ade_extension_matched = False
+            for i, x in enumerate(instance.properties.virtual_machine_profile.extension_profile.extensions):
+                if (str(x.name).lower() == extension['name'].lower() and
+                        str(x.properties.publisher).lower() == extension['publisher'].lower()):
+                    ade_extension_matched = True
+                    instance.properties.virtual_machine_profile.extension_profile.extensions[i] = ext
+                    break
 
-    # Avoid unnecessary permission error
-    vmss.virtual_machine_profile.storage_profile.image_reference = None
+            if not ade_extension_matched:
+                from knack.util import CLIError
+                raise CLIError("VM scale set '{}' was not encrypted".format(vmss_name))
 
-    poller = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+            # Avoid unnecessary permission error
+            instance.properties.virtual_machine_profile.storage_profile.image_reference = None
+
+        def post_operations(self):
+            _show_post_action_message(resource_group_name, vmss_name, self.ctx.vars.instance.properties.upgrade_policy.mode == "Manual", False)
+
+    poller = VMSSDecrypt(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vmss_name
+    })
     LongRunningOperation(cmd.cli_ctx)(poller)
-    _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, False)
 
 
 def _show_post_action_message(resource_group_name, vmss_name, maunal_mode, enable):
