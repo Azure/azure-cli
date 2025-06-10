@@ -12,7 +12,7 @@ trigger:
     - '*'
 
 variables:
-- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+- group: "CLILIVETESTBAMI"
 
 parameters:
   - name: maxParallel
@@ -454,7 +454,7 @@ stages:
 #        ext-webpubsub:
 #          Target: ext-webpubsub
     pool:
-      name: ${{ variables.ubuntu_pool }}
+      name: $[variables.ubuntu-pool]
     steps:
       - bash: |
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
@@ -1765,7 +1765,7 @@ stages:
     timeoutInMinutes: 120
     condition: succeededOrFailed()
     pool:
-      name: ${{ variables.ubuntu_pool }}
+      name: $[variables.ubuntuPool]
     steps:
       - task: UsePythonVersion@0
         inputs:
