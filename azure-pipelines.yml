@@ -659,6 +659,9 @@ jobs:
       python_version=3.12
       brew unlink python@$python_version && brew link --overwrite python@$python_version
       
+      # update homebrew to latest version in case the formula is not compatible with the current homebrew version
+      brew update
+      
       echo == Remove pre-installed azure-cli ==
       brew uninstall azure-cli
       
