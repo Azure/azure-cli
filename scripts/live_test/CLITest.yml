@@ -456,6 +456,7 @@ stages:
     pool:
       name: $(ubuntu-pool)
     steps:
+      - script: echo "ubuntu-pool is $(ubuntu-pool)"
       - bash: |
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
             echo "Match!"
