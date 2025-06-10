@@ -13,6 +13,65 @@ trigger:
 
 variables:
 - group: "CLILIVETESTBAMI"
+- name: ACCOUNT_KEY
+  value: $[variables.ACCOUNT_KEY]
+- name: AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE
+  value: $[variables.AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE]
+- name: AZURE_CLI_SEND_EMAIL_CONNECTED_SERVICE
+  value: $[variables.AZURE_CLI_SEND_EMAIL_CONNECTED_SERVICE]
+- name: AZURECLITESTRESULTSUBSCRIPTIONID
+  value: $[variables.AZURECLITESTRESULTSUBSCRIPTIONID]
+- name: AZURECLITESTRESULTTENANTID
+  value: $[variables.AZURECLITESTRESULTTENANTID]
+- name: AZURECLITESTSUBSCRIPTIONID
+  value: $[variables.AZURECLITESTSUBSCRIPTIONID]
+- name: AZURECLITESTTENANTID
+  value: $[variables.AZURECLITESTTENANTID]
+- name: AZURECLITESTUSER
+  value: $[variables.AZURECLITESTUSER]
+- name: DB_HOST
+  value: $[variables.DB_HOST]
+- name: DB_PORT
+  value: $[variables.DB_PORT]
+- name: DB_PWD
+  value: $[variables.DB_PWD]
+- name: DB_SCHEME
+  value: $[variables.DB_SCHEME]
+- name: DB_USER
+  value: $[variables.DB_USER]
+- name: KUSTO_CLIENT_ID
+  value: $[variables.KUSTO_CLIENT_ID]
+- name: KUSTO_CLUSTER
+  value: $[variables.KUSTO_CLUSTER]
+- name: KUSTO_DATABASE
+  value: $[variables.KUSTO_DATABASE]
+- name: KUSTO_TABLE
+  value: $[variables.KUSTO_TABLE]
+- name: KUSTO_TENANT_ID
+  value: $[variables.KUSTO_TENANT_ID]
+- name: PYTHON_VERSION
+  value: $[variables.PYTHON_VERSION]
+- name: STATIC_WEB_URL
+  value: $[variables.STATIC_WEB_URL]
+- name: USER_BRANCH
+  value: $[variables.USER_BRANCH]
+- name: USER_BRANCH_EXT
+  value: $[variables.USER_BRANCH_EXT]
+- name: USER_LIVE
+  value: $[variables.USER_LIVE]
+- name: USER_PARALLELISM
+  value: $[variables.USER_PARALLELISM]
+- name: USER_REPO
+  value: $[variables.USER_REPO]
+- name: USER_REPO_EXT
+  value: $[variables.USER_REPO_EXT]
+- name: USER_TARGET
+  value: $[variables.USER_TARGET]
+- name: USER_TOKEN
+  value: $[variables.USER_TOKEN]
+- name: USER_USERNAME
+  value: $[variables.USER_USERNAME]
+
 
 parameters:
   - name: maxParallel
@@ -1808,7 +1867,6 @@ stages:
           ARTIFACTS_DIR: $(System.ArtifactsDirectory)
           BUILD_ID: $(Build.BuildId)
           EMAIL_ADDRESS: $(Build.RequestedForEmail)
-          EMAIL_KEY: $(SENDGRID_KEY)
           KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
           KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
           KUSTO_CLUSTER: $(KUSTO_CLUSTER)
