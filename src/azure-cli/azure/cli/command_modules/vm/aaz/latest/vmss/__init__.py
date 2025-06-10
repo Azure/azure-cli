@@ -15,6 +15,7 @@ from ._list import *
 from ._list_instance_public_ips import *
 from ._list_instances import *
 from ._list_skus import *
+from ._patch import *
 from ._perform_maintenance import *
 from ._simulate_eviction import *
 from ._update import *
