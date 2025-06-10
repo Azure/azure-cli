@@ -2027,10 +2027,10 @@ class AKSAgentPoolAddDecorator:
             agentpool.gpu_profile.driver = gpu_driver
 
         return agentpool
-    
+
     def set_up_pod_ip_allocation_mode(self, agentpool: AgentPool) -> AgentPool:
         """Set up pod ip allocation mode for the AgentPool object.
-        
+ 
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)

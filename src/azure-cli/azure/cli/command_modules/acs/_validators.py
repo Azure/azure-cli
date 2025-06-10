@@ -361,6 +361,7 @@ def validate_vnet_subnet_id(namespace):
 def validate_pod_subnet_id(namespace):
     _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
 
+
 def validate_pod_ip_allocation_mode(namespace):
     """Validates the pod ip allocation mode string."""
     if namespace.pod_ip_allocation_mode is not None:
@@ -369,6 +370,7 @@ def validate_pod_ip_allocation_mode(namespace):
             CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
         ):
             raise InvalidArgumentValueError("--pod-ip-allocation-mode can only be DynamicIndividual or StaticBlock")
+
 
 def validate_apiserver_subnet_id(namespace):
     _validate_subnet_id(namespace.apiserver_subnet_id, "--apiserver-subnet-id")
