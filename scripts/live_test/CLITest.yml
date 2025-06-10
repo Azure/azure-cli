@@ -4,7 +4,7 @@
 #   extensions: ALL extensions
 #   vm ext-account: certain targets
 
-name: CLI TEST RUN ${{ parameters.user-target }} ${{ parameters.user-live }} ${{ parameters.user-username }} $(Date:yyyyMMdd)$(Rev:.r)
+name: CLI TEST RUN ${{ parameters.userTarget }} ${{ parameters.userLive }} ${{ parameters.userUsername }} $(Date:yyyyMMdd)$(Rev:.r)
 
 trigger:
   branches:
@@ -15,51 +15,51 @@ variables:
 - group: "CLILIVETESTBAMI"
 
 parameters:
-- name: max-parallel
+- name: maxParallel
   displayName: Max Parallel Count
   type: number
   default: 5
-- name: python-version
+- name: pythonVersion
   displayName: Python Version
   type: string
   default: '3.12'
-- name: static-web-url
+- name: staticWebUrl
   displayName: Static Web URL
   type: string
   default: 'https://clitestresultstac.z13.web.core.windows.net/'
-- name: user-branch
+- name: userBranch
   displayName: User Branch
   type: string
   default: 'live-test-wzl'
-- name: user-branch-ext
+- name: userBranchExt
   displayName: User Branch for Extensions
   type: string
   default: 'main'
-- name: user-live
+- name: userLive
   displayName: User Live Test Flag
   type: string
   default: '--live'
-- name: user-parallelism
+- name: userParallelism
   displayName: User Parallelism
   type: number
   default: 8
-- name: user-repo
+- name: userRepo
   displayName: User Repo
   type: string
   default: 'https://github.com/Azure/azure-cli.git'
-- name: user-repo-ext
+- name: userRepoExt
   displayName: User Repo for Extensions
   type: string
   default: 'https://github.com/Azure/azure-cli-extensions.git'
-- name: user-target
+- name: userTarget
   displayName: User Target
   type: string
   default: 'all'
-- name: user-token
+- name: userToken
   displayName: User Token
   type: string
   default: ''
-- name: user-username
+- name: userUsername
   displayName: User Username
   type: string
   default: ''
@@ -84,7 +84,7 @@ stages:
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
-      maxParallel: ${{ parameters.max-parallel }}
+      maxParallel: ${{ parameters.maxParallel }}
       matrix:
         acr:
           Target: acr
@@ -502,7 +502,7 @@ stages:
       name: $(ubuntu-pool)
     steps:
       - bash: |
-          if [[ "${{ parameters.user-target }}" =~ "$(Target)" || ("${{ parameters.user-target }}" == "main" && ! "$(Target)" =~ ^ext-.*) || ("${{ parameters.user-target }}" == "extensions" && "$(Target)" =~ ^ext-.*) || ("${{ parameters.user-target }}" == "ALL" || "${{ parameters.user-target }}" == "all" || "${{ parameters.user-target }}" == "") ]]; then
+          if [[ "${{ parameters.userTarget }}" =~ "$(Target)" || ("${{ parameters.userTarget }}" == "main" && ! "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "extensions" && "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "ALL" || "${{ parameters.userTarget }}" == "all" || "${{ parameters.userTarget }}" == "") ]]; then
             echo "Match!"
             echo "##vso[task.setvariable variable=Match]1"
             echo "##vso[task.setvariable variable=platform]ubuntulatest"
@@ -513,7 +513,7 @@ stages:
       - task: UsePythonVersion@0
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
         inputs:
-          versionSpec: '${{ parameters.python-version }}'
+          versionSpec: '${{ parameters.pythonVersion }}'
           addToPath: true
           architecture: 'x64'
       - task: AzureCLI@2
@@ -534,21 +534,21 @@ stages:
     
             # print variables
             echo "PLATFORM: $(PLATFORM)"
-            echo "USER_TARGET: ${{ parameters.user-target }}"
-            echo "USER_REPO: ${{ parameters.user-repo }}"
-            echo "USER_REPO_EXT: ${{ parameters.user-repo-ext }}"
-            echo "USER_BRANCH: ${{ parameters.user-branch }}"
-            echo "USER_BRANCH_EXT: ${{ parameters.user-branch-ext }}"
+            echo "USER_TARGET: ${{ parameters.userTarget }}"
+            echo "USER_REPO: ${{ parameters.userRepo }}"
+            echo "USER_REPO_EXT: ${{ parameters.userRepoExt }}"
+            echo "USER_BRANCH: ${{ parameters.userBranch }}"
+            echo "USER_BRANCH_EXT: ${{ parameters.userBranchExt }}"
             # Whether commit changes
-            if [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" ]]; then
-              REPO="${{ parameters.user-repo }}"
-              EXT_REPO="${{ parameters.user-repo-ext }}"
+            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
+              REPO="${{ parameters.userRepo }}"
+              EXT_REPO="${{ parameters.userRepoExt }}"
               # Pass username and token so that we can commit changes
-              git clone -b ${{ parameters.user-branch }} ${REPO:0:8}${{ parameters.user-username }}:${{ parameters.user-token }}@${REPO:8}
-              git clone -b ${{ parameters.user-branch-ext }} ${EXT_REPO:0:8}${{ parameters.user-username }}:${{ parameters.user-token }}@${EXT_REPO:8}
+              git clone -b ${{ parameters.userBranch }} ${REPO:0:8}${{ parameters.userUsername }}:${{ parameters.userToken }}@${REPO:8}
+              git clone -b ${{ parameters.userBranchExt }} ${EXT_REPO:0:8}${{ parameters.userUsername }}:${{ parameters.userToken }}@${EXT_REPO:8}
             else
-              git clone -b ${{ parameters.user-branch }} ${{ parameters.user-repo }}
-              git clone -b ${{ parameters.user-branch-ext }} ${{ parameters.user-repo-ext }}
+              git clone -b ${{ parameters.userBranch }} ${{ parameters.userRepo }}
+              git clone -b ${{ parameters.userBranchExt }} ${{ parameters.userRepoExt }}
             fi
     
             python -m venv env
@@ -585,36 +585,36 @@ stages:
             
             echo "Run tests"
             # Whether commit changes
-            if [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" ]]; then
+            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
               echo "Commit mode"
-              azdev test ${FinalTarget} --no-exitfirst -a "-n ${{ parameters.user-parallelism }}"
-              azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.user-parallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} --no-exitfirst -a "-n ${{ parameters.userParallelism }}"
+              azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.userParallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
             elif [[ "$serial_modules" =~ "$FinalTarget" ]]; then
               echo "Series mode"
-              azdev test ${FinalTarget} ${{ parameters.user-live }} --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} ${{ parameters.userLive }} --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
             else
               echo "Normal mode"
               # Sequential
-              azdev test ${FinalTarget} ${{ parameters.user-live }} --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} ${{ parameters.userLive }} --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
               # Parallel
-              azdev test ${FinalTarget} ${{ parameters.user-live }} --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.user-parallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} ${{ parameters.userLive }} --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.userParallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
             fi
     
             pwd
             ls
             # Whether commit changes
-            if [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" && ! "${{ parameters.user-target }}" =~ ^ext-.* && "${{ parameters.user-target }}" != "extensions" && "${{ parameters.user-target }}" != ""  && "${{ parameters.user-target }}" != "all" && "${{ parameters.user-target }}" != "ALL" ]]; then
+            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && ! "${{ parameters.userTarget }}" =~ ^ext-.* && "${{ parameters.userTarget }}" != "extensions" && "${{ parameters.userTarget }}" != ""  && "${{ parameters.userTarget }}" != "all" && "${{ parameters.userTarget }}" != "ALL" ]]; then
               cd azure-cli
               git status
               git add .
               git commit -m "Upload recording files"
-              git push origin ${{ parameters.user-branch }}
-            elif [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" && "${{ parameters.user-target }}" =~ ^ext-.* ]]; then
+              git push origin ${{ parameters.userBranch }}
+            elif [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && "${{ parameters.userTarget }}" =~ ^ext-.* ]]; then
               cd azure-cli-extensions
               git status
               git add .
               git commit -m "Upload recording files"
-              git push origin ${{ parameters.user-branch-ext }}
+              git push origin ${{ parameters.userBranchExt }}
             fi
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       - task: PublishTestResults@2
@@ -659,7 +659,7 @@ stages:
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
-      maxParallel: ${{ parameters.max-parallel }}
+      maxParallel: ${{ parameters.maxParallel }}
       matrix:
         acr:
           Target: acr
@@ -1077,7 +1077,7 @@ stages:
       vmImage: $(macos-pool)
     steps:
       - bash: |
-          if [[ "${{ parameters.user-target }}" =~ "$(Target)" || ("${{ parameters.user-target }}" == "main" && ! "$(Target)" =~ ^ext-.*) || ("${{ parameters.user-target }}" == "extensions" && "$(Target)" =~ ^ext-.*) || ("${{ parameters.user-target }}" == "ALL" || "${{ parameters.user-target }}" == "all" || "${{ parameters.user-target }}" == "") ]]; then
+          if [[ "${{ parameters.userTarget }}" =~ "$(Target)" || ("${{ parameters.userTarget }}" == "main" && ! "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "extensions" && "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "ALL" || "${{ parameters.userTarget }}" == "all" || "${{ parameters.userTarget }}" == "") ]]; then
             echo "Match!"
             echo "##vso[task.setvariable variable=Match]1"
             echo "##vso[task.setvariable variable=platform]macos12"
@@ -1088,7 +1088,7 @@ stages:
       - task: UsePythonVersion@0
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
         inputs:
-          versionSpec: '${{ parameters.python-version }}'
+          versionSpec: '${{ parameters.pythonVersion }}'
           addToPath: true
           architecture: 'x64'
       - task: AzureCLI@2
@@ -1109,21 +1109,21 @@ stages:
     
             # print variables
             echo "PLATFORM: $(PLATFORM)"
-            echo "USER_TARGET: ${{ parameters.user-target }}"
-            echo "USER_REPO: ${{ parameters.user-repo }}"
-            echo "USER_REPO_EXT: ${{ parameters.user-repo-ext }}"
-            echo "USER_BRANCH: ${{ parameters.user-branch }}"
-            echo "USER_BRANCH_EXT: ${{ parameters.user-branch-ext }}"
+            echo "USER_TARGET: ${{ parameters.userTarget }}"
+            echo "USER_REPO: ${{ parameters.userRepo }}"
+            echo "USER_REPO_EXT: ${{ parameters.userRepoExt }}"
+            echo "USER_BRANCH: ${{ parameters.userBranch }}"
+            echo "USER_BRANCH_EXT: ${{ parameters.userBranchExt }}"
             # Whether commit changes
-            if [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" ]]; then
-              REPO="${{ parameters.user-repo }}"
-              EXT_REPO="${{ parameters.user-repo-ext }}"
+            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
+              REPO="${{ parameters.userRepo }}"
+              EXT_REPO="${{ parameters.userRepoExt }}"
               # Pass username and token so that we can commit changes
-              git clone -b ${{ parameters.user-branch }} ${REPO:0:8}${{ parameters.user-username }}:${{ parameters.user-token }}@${REPO:8}
-              git clone -b ${{ parameters.user-branch-ext }} ${EXT_REPO:0:8}${{ parameters.user-username }}:${{ parameters.user-token }}@${EXT_REPO:8}
+              git clone -b ${{ parameters.userBranch }} ${REPO:0:8}${{ parameters.userUsername }}:${{ parameters.userToken }}@${REPO:8}
+              git clone -b ${{ parameters.userBranchExt }} ${EXT_REPO:0:8}${{ parameters.userUsername }}:${{ parameters.userToken }}@${EXT_REPO:8}
             else
-              git clone -b ${{ parameters.user-branch }} ${{ parameters.user-repo }}
-              git clone -b ${{ parameters.user-branch-ext }} ${{ parameters.user-repo-ext }}
+              git clone -b ${{ parameters.userBranch }} ${{ parameters.userRepo }}
+              git clone -b ${{ parameters.userBranchExt }} ${{ parameters.userRepoExt }}
             fi
     
             python -m venv env
@@ -1161,36 +1161,36 @@ stages:
             
             echo "Run tests"
             # Whether commit changes
-            if [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" ]]; then
+            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
               echo "Commit mode"
-              azdev test ${FinalTarget} --no-exitfirst -a "-n ${{ parameters.user-parallelism }}"
-              azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.user-parallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} --no-exitfirst -a "-n ${{ parameters.userParallelism }}"
+              azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.userParallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
             elif [[ "$serial_modules" =~ "$FinalTarget" ]]; then
               echo "Series mode"
-              azdev test ${FinalTarget} ${{ parameters.user-live }} --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} ${{ parameters.userLive }} --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
             else
               echo "Normal mode"
               # Sequential
-              azdev test ${FinalTarget} ${{ parameters.user-live }} --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} ${{ parameters.userLive }} --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
               # Parallel
-              azdev test ${FinalTarget} ${{ parameters.user-live }} --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.user-parallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} ${{ parameters.userLive }} --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.userParallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
             fi
     
             pwd
             ls
             # Whether commit changes
-            if [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" && ! "${{ parameters.user-target }}" =~ ^ext-.* && "${{ parameters.user-target }}" != "extensions" && "${{ parameters.user-target }}" != ""  && "${{ parameters.user-target }}" != "all" && "${{ parameters.user-target }}" != "ALL" ]]; then
+            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && ! "${{ parameters.userTarget }}" =~ ^ext-.* && "${{ parameters.userTarget }}" != "extensions" && "${{ parameters.userTarget }}" != ""  && "${{ parameters.userTarget }}" != "all" && "${{ parameters.userTarget }}" != "ALL" ]]; then
               cd azure-cli
               git status
               git add .
               git commit -m "Upload recording files"
-              git push origin ${{ parameters.user-branch }}
-            elif [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" && "${{ parameters.user-target }}" =~ ^ext-.* ]]; then
+              git push origin ${{ parameters.userBranch }}
+            elif [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && "${{ parameters.userTarget }}" =~ ^ext-.* ]]; then
               cd azure-cli-extensions
               git status
               git add .
               git commit -m "Upload recording files"
-              git push origin ${{ parameters.user-branch-ext }}
+              git push origin ${{ parameters.userBranchExt }}
             fi
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       - task: PublishTestResults@2
@@ -1234,7 +1234,7 @@ stages:
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
-      maxParallel: ${{ parameters.max-parallel }}
+      maxParallel: ${{ parameters.maxParallel }}
       matrix:
         acr:
           Target: acr
@@ -1652,7 +1652,7 @@ stages:
       name: $(windows-pool)
     steps:
       - bash: |
-          if [[ "${{ parameters.user-target }}" =~ "$(Target)" || ("${{ parameters.user-target }}" == "main" && ! "$(Target)" =~ ^ext-.*) || ("${{ parameters.user-target }}" == "extensions" && "$(Target)" =~ ^ext-.*) || ("${{ parameters.user-target }}" == "ALL" || "${{ parameters.user-target }}" == "all" || "${{ parameters.user-target }}" == "") ]]; then
+          if [[ "${{ parameters.userTarget }}" =~ "$(Target)" || ("${{ parameters.userTarget }}" == "main" && ! "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "extensions" && "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "ALL" || "${{ parameters.userTarget }}" == "all" || "${{ parameters.userTarget }}" == "") ]]; then
             echo "Match!"
             echo "##vso[task.setvariable variable=Match]1"
             echo "##vso[task.setvariable variable=platform]windows2019"
@@ -1663,7 +1663,7 @@ stages:
       - task: UsePythonVersion@0
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
         inputs:
-          versionSpec: '${{ parameters.python-version }}'
+          versionSpec: '${{ parameters.pythonVersion }}'
           addToPath: true
           architecture: 'x64'
       - task: AzureCLI@2
@@ -1684,21 +1684,21 @@ stages:
     
             # print variables
             echo "PLATFORM: $(PLATFORM)"
-            echo "USER_TARGET: ${{ parameters.user-target }}"
-            echo "USER_REPO: ${{ parameters.user-repo }}"
-            echo "USER_REPO_EXT: ${{ parameters.user-repo-ext }}"
-            echo "USER_BRANCH: ${{ parameters.user-branch }}"
-            echo "USER_BRANCH_EXT: ${{ parameters.user-branch-ext }}"
+            echo "USER_TARGET: ${{ parameters.userTarget }}"
+            echo "USER_REPO: ${{ parameters.userRepo }}"
+            echo "USER_REPO_EXT: ${{ parameters.userRepoExt }}"
+            echo "USER_BRANCH: ${{ parameters.userBranch }}"
+            echo "USER_BRANCH_EXT: ${{ parameters.userBranchExt }}"
             # Whether commit changes
-            if [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" ]]; then
-              REPO="${{ parameters.user-repo }}"
-              EXT_REPO="${{ parameters.user-repo-ext }}"
+            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
+              REPO="${{ parameters.userRepo }}"
+              EXT_REPO="${{ parameters.userRepoExt }}"
               # Pass username and token so that we can commit changes
-              git clone -b ${{ parameters.user-branch }} ${REPO:0:8}${{ parameters.user-username }}:${{ parameters.user-token }}@${REPO:8}
-              git clone -b ${{ parameters.user-branch-ext }} ${EXT_REPO:0:8}${{ parameters.user-username }}:${{ parameters.user-token }}@${EXT_REPO:8}
+              git clone -b ${{ parameters.userBranch }} ${REPO:0:8}${{ parameters.userUsername }}:${{ parameters.userToken }}@${REPO:8}
+              git clone -b ${{ parameters.userBranchExt }} ${EXT_REPO:0:8}${{ parameters.userUsername }}:${{ parameters.userToken }}@${EXT_REPO:8}
             else
-              git clone -b ${{ parameters.user-branch }} ${{ parameters.user-repo }}
-              git clone -b ${{ parameters.user-branch-ext }} ${{ parameters.user-repo-ext }}
+              git clone -b ${{ parameters.userBranch }} ${{ parameters.userRepo }}
+              git clone -b ${{ parameters.userBranchExt }} ${{ parameters.userRepoExt }}
             fi
     
             python -m venv env
@@ -1735,36 +1735,36 @@ stages:
             
             echo "Run tests"
             # Whether commit changes
-            if [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" ]]; then
+            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
               echo "Commit mode"
-              azdev test ${FinalTarget} --no-exitfirst -a "-n ${{ parameters.user-parallelism }}"
-              azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.user-parallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} --no-exitfirst -a "-n ${{ parameters.userParallelism }}"
+              azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.userParallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
             elif [[ "$serial_modules" =~ "$FinalTarget" ]]; then
               echo "Series mode"
-              azdev test ${FinalTarget} ${{ parameters.user-live }} --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} ${{ parameters.userLive }} --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
             else
               echo "Normal mode"
               # Sequential
-              azdev test ${FinalTarget} ${{ parameters.user-live }} --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} ${{ parameters.userLive }} --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
               # Parallel
-              azdev test ${FinalTarget} ${{ parameters.user-live }} --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.user-parallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+              azdev test ${FinalTarget} ${{ parameters.userLive }} --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.userParallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
             fi
     
             pwd
             ls
             # Whether commit changes
-            if [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" && ! "${{ parameters.user-target }}" =~ ^ext-.* && "${{ parameters.user-target }}" != "extensions" && "${{ parameters.user-target }}" != ""  && "${{ parameters.user-target }}" != "all" && "${{ parameters.user-target }}" != "ALL" ]]; then
+            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && ! "${{ parameters.userTarget }}" =~ ^ext-.* && "${{ parameters.userTarget }}" != "extensions" && "${{ parameters.userTarget }}" != ""  && "${{ parameters.userTarget }}" != "all" && "${{ parameters.userTarget }}" != "ALL" ]]; then
               cd azure-cli
               git status
               git add .
               git commit -m "Upload recording files"
-              git push origin ${{ parameters.user-branch }}
-            elif [[ "${{ parameters.user-username }}" != "" && "${{ parameters.user-token }}" != "" && "${{ parameters.user-target }}" =~ ^ext-.* ]]; then
+              git push origin ${{ parameters.userBranch }}
+            elif [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && "${{ parameters.userTarget }}" =~ ^ext-.* ]]; then
               cd azure-cli-extensions
               git status
               git add .
               git commit -m "Upload recording files"
-              git push origin ${{ parameters.user-branch-ext }}
+              git push origin ${{ parameters.userBranchExt }}
             fi
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       - task: PublishTestResults@2
@@ -1811,7 +1811,7 @@ stages:
     steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '${{ parameters.python-version }}'
+          versionSpec: '${{ parameters.pythonVersion }}'
           addToPath: true
           architecture: 'x64'
       - task: DownloadBuildArtifacts@0
@@ -1851,14 +1851,14 @@ stages:
           KUSTO_CLUSTER: $(kusto-cluster)
           KUSTO_DATABASE: $(kusto-database)
           KUSTO_TABLE: $(kusto-table)
-          PYTHON_VERSION: ${{ parameters.python-version }}
-          USER_BRANCH: ${{ parameters.user-branch }}
-          USER_BRANCH_EXT: ${{ parameters.user-branch-ext }}
-          USER_LIVE: ${{ parameters.user-live }}
-          USER_REPO: ${{ parameters.user-repo }}
-          USER_REPO_EXT: ${{ parameters.user-repo-ext }}
-          USER_TARGET: ${{ parameters.user-target }}
-          STATIC_WEB_URL: ${{ parameters.static-web-url }}
+          PYTHON_VERSION: ${{ parameters.pythonVersion }}
+          USER_BRANCH: ${{ parameters.userBranch }}
+          USER_BRANCH_EXT: ${{ parameters.userBranchExt }}
+          USER_LIVE: ${{ parameters.userLive }}
+          USER_REPO: ${{ parameters.userRepo }}
+          USER_REPO_EXT: ${{ parameters.userRepoExt }}
+          USER_TARGET: ${{ parameters.userTarget }}
+          STATIC_WEB_URL: ${{ parameters.staticWebUrl }}
 
   - job: CleanResource
     displayName: Clean Resource Job
@@ -1870,7 +1870,7 @@ stages:
     steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '${{ parameters.python-version }}'
+          versionSpec: '${{ parameters.pythonVersion }}'
           addToPath: true
           architecture: 'x64'
       - task: AzureCLI@2
