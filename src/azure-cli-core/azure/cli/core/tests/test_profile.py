@@ -39,7 +39,7 @@ def _build_test_jwt(claims):
     return '.'.join(base64.urlsafe_b64encode(p.encode('utf-8')).decode('utf-8').replace('=', '') for p in parts)
 
 
-def _now_timestamp_mock():
+def now_timestamp_mock():
     # 2021-09-06 08:55:23
     return 1630918523
 
@@ -1013,7 +1013,7 @@ class TestProfile(unittest.TestCase):
         assert cred._credential.object_id is None
         assert cred._credential.resource_id == self.test_mi_resource_id
 
-    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
+    @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential')
     def test_get_raw_token(self, get_user_credential_mock):
         credential_mock_temp = MsalCredentialStub()
@@ -1061,7 +1061,7 @@ class TestProfile(unittest.TestCase):
         self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
 
-    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
+    @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_credential')
     def test_get_raw_token_for_sp(self, get_service_principal_credential_mock):
         credential_mock_temp = MsalCredentialStub()
@@ -1102,7 +1102,7 @@ class TestProfile(unittest.TestCase):
         self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
 
-    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
+    @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
     def test_get_raw_token_mi_system_assigned(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
@@ -1136,7 +1136,7 @@ class TestProfile(unittest.TestCase):
         with self.assertRaisesRegex(CLIError, "Tenant shouldn't be specified"):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
-    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
+    @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
     def test_get_raw_token_mi_user_assigned_client_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
@@ -1167,7 +1167,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, self.test_mi_subscription_id)
         self.assertEqual(tenant_id, self.test_mi_tenant)
 
-    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
+    @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
     def test_get_raw_token_mi_user_assigned_object_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
@@ -1198,7 +1198,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, self.test_mi_subscription_id)
         self.assertEqual(tenant_id, self.test_mi_tenant)
 
-    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
+    @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
     def test_get_raw_token_mi_user_assigned_resource_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
@@ -1229,7 +1229,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, self.test_mi_subscription_id)
         self.assertEqual(tenant_id, self.test_mi_tenant)
 
-    @mock.patch('azure.cli.core.auth.util._now_timestamp', new=_now_timestamp_mock)
+    @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.CloudShellCredential', autospec=True)
     def test_get_raw_token_in_cloud_shell(self, cloud_shell_credential_mock, mock_in_cloud_console):
