@@ -13,6 +13,12 @@ trigger:
 
 variables:
 - group: "CLILIVETESTBAMI"
+- name: ubuntu-pool
+  value: $[variables.ubuntu-pool]
+- name: windows-pool
+  value: $[variables.windows-pool]
+- name: macos-pool
+  value: $[variables.macos-pool]
 
 parameters:
   - name: maxParallel
@@ -1765,7 +1771,7 @@ stages:
     timeoutInMinutes: 120
     condition: succeededOrFailed()
     pool:
-      name: $[variables.ubuntuPool]
+      name: $(ubuntu-pool)
     steps:
       - task: UsePythonVersion@0
         inputs:
