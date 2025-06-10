@@ -31,7 +31,6 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 COMMIT_ID = sys.argv[1]
-ACCOUNT_KEY = os.environ.get('ACCOUNT_KEY') # not used
 ARTIFACT_DIR = os.environ.get('ARTIFACTS_DIR')
 BUILD_ID = os.environ.get('BUILD_ID')
 EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS')
@@ -328,7 +327,7 @@ def main():
     try:
         # Generate index.html
         container_url = '{}/'.format(STATIC_WEB_URL) + container
-        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, ACCOUNT_KEY, USER_REPO_EXT, USER_BRANCH_EXT)
+        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, USER_REPO_EXT, USER_BRANCH_EXT)
         # Send email
         send_email(html_content)
     except Exception:
