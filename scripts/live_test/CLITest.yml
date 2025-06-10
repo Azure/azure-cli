@@ -454,7 +454,7 @@ stages:
 #        ext-webpubsub:
 #          Target: ext-webpubsub
     pool:
-      name: $[variables.ubuntu-pool]
+      name: $[variables.ubuntuPool]
     steps:
       - bash: |
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
