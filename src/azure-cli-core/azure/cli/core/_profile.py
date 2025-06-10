@@ -452,7 +452,7 @@ class Profile:
             # Return a tuple of (token_tuple, subscription, tenant)
             return (token_tuple,
                     account[_SUBSCRIPTION_ID],
-                    account[_TENANT_ID])
+                    str(tenant if tenant else account[_TENANT_ID]))
 
         managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
 
@@ -643,7 +643,7 @@ class Profile:
         if _env_vars_configured():
             return {
                 # Subscription ID is not required for data-plane operations
-                _SUBSCRIPTION_ID: os.environ.get(_AZURE_CLI_SUBSCRIPTION_ID),
+                _SUBSCRIPTION_ID: subscription if subscription else os.environ.get(_AZURE_CLI_SUBSCRIPTION_ID),
                 # Tenant ID is required by some operations.
                 # For example, "Vaults - Create Or Update" requires tenantId property.
                 # https://learn.microsoft.com/en-us/rest/api/keyvault/keyvault/vaults/create-or-update
