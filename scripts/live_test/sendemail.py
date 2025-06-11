@@ -41,6 +41,7 @@ EMAIL_KEY = os.environ.get('EMAIL_KEY')
 KUSTO_CLUSTER = os.environ.get('KUSTO_CLUSTER')
 KUSTO_DATABASE = os.environ.get('KUSTO_DATABASE')
 KUSTO_TABLE = os.environ.get('KUSTO_TABLE')
+IDENTITY_CLIENT_ID = os.environ.get('IDENTITY_CLIENT_ID')
 # get tenant id from https://learn.microsoft.com/en-us/onedrive/find-your-office-365-tenant-id
 # KUSTO_TENANT_ID = os.environ.get('KUSTO_TENANT_ID')
 PYTHON_VERSION = os.environ.get('PYTHON_VERSION')
@@ -523,7 +524,7 @@ def send_to_kusto(data):
     logger.info('Finish generate csv file for live test.')
 
     # kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(KUSTO_CLUSTER, KUSTO_CLIENT_ID, KUSTO_CLIENT_SECRET, KUSTO_TENANT_ID)
-    kcsb = KustoConnectionStringBuilder.with_aad_managed_service_identity_authentication(KUSTO_CLUSTER)
+    kcsb = KustoConnectionStringBuilder.with_aad_managed_service_identity_authentication(KUSTO_CLUSTER, client_id=IDENTITY_CLIENT_ID)
     # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
     client = QueuedIngestClient(kcsb)
 
