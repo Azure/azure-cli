@@ -21,6 +21,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
@@ -673,7 +675,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_pod_ip_allocation_mode(), None)
         agentpool_1 = self.create_initialized_agentpool_instance(
-            pod_ip_allocation_mode="StaticBlock"
+            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
         )
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_pod_ip_allocation_mode(), None)
@@ -681,17 +683,17 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # default to raw even if agentpool has different value
         ctx_2 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"pod_ip_allocation_mode": "DynamicIndividual"}),
+            AKSAgentPoolParamDict({"pod_ip_allocation_mode": CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_2.get_pod_ip_allocation_mode(), "DynamicIndividual")
+        self.assertEqual(ctx_2.get_pod_ip_allocation_mode(), CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL)
         agentpool_2 = self.create_initialized_agentpool_instance(
-            pod_ip_allocation_mode="StaticBlock"
+            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
         )
         ctx_2.attach_agentpool(agentpool_2)
-        self.assertEqual(ctx_2.get_pod_ip_allocation_mode(), "StaticBlock")
+        self.assertEqual(ctx_2.get_pod_ip_allocation_mode(), CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK)
 
     def common_get_enable_node_public_ip(self):
         # default
@@ -2194,7 +2196,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "pod_subnet_id": "test_pod_subnet_id",
-                "pod_ip_allocation_mode": "DynamicIndividual",
+                "pod_ip_allocation_mode": CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
                 "enable_node_public_ip": True,
                 "node_public_ip_prefix_id": "test_node_public_ip_prefix_id",
             },
@@ -2212,7 +2214,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             vnet_subnet_id="test_vnet_subnet_id",
             pod_subnet_id="test_pod_subnet_id",
-            pod_ip_allocation_mode="DynamicIndividual",
+            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
             enable_node_public_ip=True,
             node_public_ip_prefix_id="test_node_public_ip_prefix_id",
         )
@@ -2628,6 +2630,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
             host_group_id=None,
             capacity_reservation_group_id=None,
+            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -2780,6 +2783,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             host_group_id=None,
             capacity_reservation_group_id=None,
+            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
