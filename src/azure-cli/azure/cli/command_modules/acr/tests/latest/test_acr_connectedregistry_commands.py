@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from unittest import mock
 
 
 class AcrConnectedRegistryCommandsTests(ScenarioTest):
@@ -161,6 +162,71 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
 
         # Delete connected registry child
         self.cmd('acr connected-registry delete -n {child_name} -r {registry_name} -y')
+
+        # Delete registry
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
+
+    @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
+    def test_acr_connectedregistry_dedicated_endpoint_not_enabled(self, resource_group, resource_group_location):
+        # Agentpool prerequisites for connected registry testing
+        registryName = self.create_random_name('clireg', 20)
+        crName = 'connectedregistry'
+        rootName = 'rootregistry'
+        childName = 'child'
+        grandchildName = 'grandchild'
+        repo1 = 'repo1'
+        repo2 = 'repo2'
+        repo3 = 'repo3'
+        self.kwargs.update({
+            'registry_name': registryName,
+            'cr_name': crName,
+            'root_name': rootName,
+            'child_name': childName,
+            'grandchild_name': grandchildName,
+            'rg_loc': 'eastus',
+            'sku': 'Premium',
+            'syncToken': 'syncToken',
+            'clientToken': 'clientToken',
+            'clientToken2': 'clientToken2',
+            'scopeMap': 'scopeMap1',
+            'repo_1': repo1,
+            'repo_2': repo2,
+            'repo_3': repo3,
+            'syncSchedule': '0 0/10 * * *',
+            'defaultSyncSchedule': '* * * * *',
+            'syncWindow': 'PT4H',
+            'notificationStr': 'hello-world:tag:push',
+            'notificationStr2': '*:*',
+            'garbage_collection_enabled_true': True,
+            'garbage_collection_enabled_false': False,
+            'garbage_collection_schedule': '0 0 */2 * *',
+        })
+        # Create Registry without enabling data endpoint
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', '{sku}'),
+                         self.check('sku.tier', '{sku}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # Create a default connected registry.
+        self.cmd('acr connected-registry create -n {cr_name} -r {registry_name} -m ReadWrite --repository {repo_1} {repo_2} {repo_3} --gc-enabled {garbage_collection_enabled_false} -y',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('mode', 'ReadWrite'),
+                         self.check('logging.logLevel', 'Information'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('resourceGroup', '{rg}'),
+                         self.check('garbageCollection.enabled', False)])
+
+        # Verify data endpoint is now enabled
+        self.cmd('acr show -n {registry_name} -g {rg}',
+                 checks=[self.check('dataEndpointEnabled', True),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # Delete connected registry
+        self.cmd('acr connected-registry delete -n {cr_name} -r {registry_name} -y')
 
         # Delete registry
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
