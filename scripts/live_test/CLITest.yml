@@ -519,7 +519,7 @@ stages:
       - task: AzureCLI@2
         displayName: 'Run live test'
         inputs:
-          azureSubscription: $(azure-cli-live-test-bami-connected-service)
+          connectedServiceNameARM: $(azure-cli-live-test-bami-connected-service)
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
@@ -1094,7 +1094,7 @@ stages:
       - task: AzureCLI@2
         displayName: 'Run live test on Macos'
         inputs:
-          azureSubscription: $(azure-cli-live-test-bami-connected-service)
+          connectedServiceNameARM: $(azure-cli-live-test-bami-connected-service)
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
@@ -1669,7 +1669,7 @@ stages:
       - task: AzureCLI@2
         displayName: 'Run live test on Windows'
         inputs:
-          azureSubscription: $(azure-cli-live-test-bami-connected-service)
+          connectedServiceNameARM: $(azure-cli-live-test-bami-connected-service)
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
@@ -1822,7 +1822,7 @@ stages:
       - task: AzureCLI@2
         displayName: 'Send live test email'
         inputs:
-          azureSubscription: $(azure-cli-live-test-sdk-connected-service)
+          connectedServiceNameARM: $(azure-cli-live-test-sdk-connected-service)
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
@@ -1876,7 +1876,7 @@ stages:
       - task: AzureCLI@2
         displayName: 'Clean resource'
         inputs:
-          azureSubscription: $(azure-cli-live-test-bami-connected-service)
+          connectedServiceNameARM: $(azure-cli-live-test-bami-connected-service)
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
