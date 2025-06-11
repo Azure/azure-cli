@@ -541,7 +541,7 @@ stages:
             echo "USER_BRANCH_EXT: ${{ parameters.userBranchExt }}"
             echo "USER_USERNAME: ${{ parameters.userUsername }}"
             # Whether commit changes
-            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
+            if [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " ]]; then
               REPO="${{ parameters.userRepo }}"
               EXT_REPO="${{ parameters.userRepoExt }}"
               # Pass username and token so that we can commit changes
@@ -586,7 +586,7 @@ stages:
             
             echo "Run tests"
             # Whether commit changes
-            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
+            if [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " ]]; then
               echo "Commit mode"
               azdev test ${FinalTarget} --no-exitfirst -a "-n ${{ parameters.userParallelism }}"
               azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.userParallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
@@ -604,13 +604,13 @@ stages:
             pwd
             ls
             # Whether commit changes
-            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && ! "${{ parameters.userTarget }}" =~ ^ext-.* && "${{ parameters.userTarget }}" != "extensions" && "${{ parameters.userTarget }}" != ""  && "${{ parameters.userTarget }}" != "all" && "${{ parameters.userTarget }}" != "ALL" ]]; then
+            if [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " && ! "${{ parameters.userTarget }}" =~ ^ext-.* && "${{ parameters.userTarget }}" != "extensions" && "${{ parameters.userTarget }}" != ""  && "${{ parameters.userTarget }}" != "all" && "${{ parameters.userTarget }}" != "ALL" ]]; then
               cd azure-cli
               git status
               git add .
               git commit -m "Upload recording files"
               git push origin ${{ parameters.userBranch }}
-            elif [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && "${{ parameters.userTarget }}" =~ ^ext-.* ]]; then
+            elif [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " && "${{ parameters.userTarget }}" =~ ^ext-.* ]]; then
               cd azure-cli-extensions
               git status
               git add .
@@ -1116,7 +1116,7 @@ stages:
             echo "USER_BRANCH: ${{ parameters.userBranch }}"
             echo "USER_BRANCH_EXT: ${{ parameters.userBranchExt }}"
             # Whether commit changes
-            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
+            if [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " ]]; then
               REPO="${{ parameters.userRepo }}"
               EXT_REPO="${{ parameters.userRepoExt }}"
               # Pass username and token so that we can commit changes
@@ -1162,7 +1162,7 @@ stages:
             
             echo "Run tests"
             # Whether commit changes
-            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
+            if [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " ]]; then
               echo "Commit mode"
               azdev test ${FinalTarget} --no-exitfirst -a "-n ${{ parameters.userParallelism }}"
               azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.userParallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
@@ -1180,13 +1180,13 @@ stages:
             pwd
             ls
             # Whether commit changes
-            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && ! "${{ parameters.userTarget }}" =~ ^ext-.* && "${{ parameters.userTarget }}" != "extensions" && "${{ parameters.userTarget }}" != ""  && "${{ parameters.userTarget }}" != "all" && "${{ parameters.userTarget }}" != "ALL" ]]; then
+            if [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " && ! "${{ parameters.userTarget }}" =~ ^ext-.* && "${{ parameters.userTarget }}" != "extensions" && "${{ parameters.userTarget }}" != ""  && "${{ parameters.userTarget }}" != "all" && "${{ parameters.userTarget }}" != "ALL" ]]; then
               cd azure-cli
               git status
               git add .
               git commit -m "Upload recording files"
               git push origin ${{ parameters.userBranch }}
-            elif [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && "${{ parameters.userTarget }}" =~ ^ext-.* ]]; then
+            elif [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " && "${{ parameters.userTarget }}" =~ ^ext-.* ]]; then
               cd azure-cli-extensions
               git status
               git add .
@@ -1691,7 +1691,7 @@ stages:
             echo "USER_BRANCH: ${{ parameters.userBranch }}"
             echo "USER_BRANCH_EXT: ${{ parameters.userBranchExt }}"
             # Whether commit changes
-            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
+            if [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " ]]; then
               REPO="${{ parameters.userRepo }}"
               EXT_REPO="${{ parameters.userRepoExt }}"
               # Pass username and token so that we can commit changes
@@ -1736,7 +1736,7 @@ stages:
             
             echo "Run tests"
             # Whether commit changes
-            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" ]]; then
+            if [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " ]]; then
               echo "Commit mode"
               azdev test ${FinalTarget} --no-exitfirst -a "-n ${{ parameters.userParallelism }}"
               azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n ${{ parameters.userParallelism }} --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
@@ -1754,13 +1754,13 @@ stages:
             pwd
             ls
             # Whether commit changes
-            if [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && ! "${{ parameters.userTarget }}" =~ ^ext-.* && "${{ parameters.userTarget }}" != "extensions" && "${{ parameters.userTarget }}" != ""  && "${{ parameters.userTarget }}" != "all" && "${{ parameters.userTarget }}" != "ALL" ]]; then
+            if [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " && ! "${{ parameters.userTarget }}" =~ ^ext-.* && "${{ parameters.userTarget }}" != "extensions" && "${{ parameters.userTarget }}" != ""  && "${{ parameters.userTarget }}" != "all" && "${{ parameters.userTarget }}" != "ALL" ]]; then
               cd azure-cli
               git status
               git add .
               git commit -m "Upload recording files"
               git push origin ${{ parameters.userBranch }}
-            elif [[ "${{ parameters.userUsername }}" != "" && "${{ parameters.userToken }}" != "" && "${{ parameters.userTarget }}" =~ ^ext-.* ]]; then
+            elif [[ "${{ parameters.userUsername }}" != " " && "${{ parameters.userToken }}" != " " && "${{ parameters.userTarget }}" =~ ^ext-.* ]]; then
               cd azure-cli-extensions
               git status
               git add .
