@@ -18,7 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, ACCOUNT_KEY, USER_REPO_EXT, USER_BRANCH_EXT):
+def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, USER_REPO_EXT, USER_BRANCH_EXT):
     """
     Generate index.html. Upload it to storage account
     :param container:
