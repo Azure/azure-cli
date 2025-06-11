@@ -664,7 +664,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
     
     def common_get_pod_ip_allocation_mode(self):
         # default
-        ctx_1 = AKSPreviewAgentPoolContext(
+        ctx_1 = AKSAgentPoolContext(
             self.cmd,
             AKSAgentPoolParamDict({"pod_ip_allocation_mode": None}),
             self.models,
@@ -679,7 +679,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_pod_ip_allocation_mode(), None)
 
         # default to raw even if agentpool has different value
-        ctx_2 = AKSPreviewAgentPoolContext(
+        ctx_2 = AKSAgentPoolContext(
             self.cmd,
             AKSAgentPoolParamDict({"pod_ip_allocation_mode": "DynamicIndividual"}),
             self.models,
