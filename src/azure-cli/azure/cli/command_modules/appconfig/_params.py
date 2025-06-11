@@ -235,7 +235,7 @@ def load_arguments(self, _):
         c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default if --separator is provided. Not applicable for property files or feature flags.")
         # bypass cli allowed values limitation
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
-        c.argument('profile', validator=validate_import_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Import profile to be used for importing the key-values. Options 'depth', 'separator', 'content-type', 'label', 'skip-features' and, 'prefix' are not supported when using '{}' profile.".format(ImportExportProfiles.KVSET))
+        c.argument('profile', validator=validate_import_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Import profile to be used for importing the key-values. Options 'depth', 'separator', 'content-type', 'label', 'skip-features', 'tags' and, 'prefix' are not supported when using '{}' profile.".format(ImportExportProfiles.KVSET))
         c.argument('strict', validator=validate_strict_import, arg_type=get_three_state_flag(), help="Delete all other key-values in the store with specified prefix and label")
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
@@ -274,7 +274,7 @@ def load_arguments(self, _):
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the key-value pairs to json or yaml file. Required for exporting hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('naming_convention', arg_type=get_enum_type(['pascal', 'camel', 'underscore', 'hyphen']), help='Naming convention to be used for "Feature Management" section of file. Example: pascal = FeatureManagement, camel = featureManagement, underscore = feature_management, hyphen = feature-management.')
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), validator=validate_resolve_keyvault, help="Resolve the content of key vault reference.")
-        c.argument('profile', validator=validate_export_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Export profile to be used for exporting the key-values. Options 'depth', 'separator', 'naming-convention', 'prefix', 'dest-label' and, 'resolve-keyvault' are not supported when using '{}' profile".format(ImportExportProfiles.KVSET))
+        c.argument('profile', validator=validate_export_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Export profile to be used for exporting the key-values. Options 'depth', 'separator', 'naming-convention', 'prefix', 'dest-label' , 'dest-tags' and, 'resolve-keyvault' are not supported when using '{}' profile".format(ImportExportProfiles.KVSET))
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
         c.argument('dest_name', help='The name of the destination App Configuration store.')
