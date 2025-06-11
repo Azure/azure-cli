@@ -278,6 +278,7 @@ def clean_backup():
 
 
 def clean_deleted_keyvault():
+    print('Clean keyvault')
     cmd = ['az', 'keyvault', 'list-deleted', '--query', '[][name, properties.scheduledPurgeDate, type]']
     print(cmd)
     out = subprocess.run(cmd, capture_output=True)
@@ -299,6 +300,7 @@ def clean_deleted_keyvault():
 
 
 def clean_resource_group():
+    print('Clean resource group')
     skip_grous = []
     cmd = ['az', 'group', 'list', '--query', '[].name']
     print(cmd)
