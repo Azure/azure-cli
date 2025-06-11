@@ -11,6 +11,9 @@ trigger:
     exclude:
     - '*'
 
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+
 parameters:
 - name: maxParallel
   displayName: Max Parallel Count
@@ -496,7 +499,7 @@ stages:
 #        ext-webpubsub:
 #          Target: ext-webpubsub
     pool:
-      name: $(ubuntu-pool)
+      name: ${{ variables.ubuntu_pool }}
     steps:
       - bash: |
           if [[ "${{ parameters.userTarget }}" =~ "$(Target)" || ("${{ parameters.userTarget }}" == "main" && ! "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "extensions" && "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "ALL" || "${{ parameters.userTarget }}" == "all" || "${{ parameters.userTarget }}" == "") ]]; then
@@ -1071,7 +1074,7 @@ stages:
 #        ext-webpubsub:
 #          Target: ext-webpubsub
     pool:
-      vmImage: $(macos-pool)
+      vmImage: ${{ variables.macos_pool }}
     steps:
       - bash: |
           if [[ "${{ parameters.userTarget }}" =~ "$(Target)" || ("${{ parameters.userTarget }}" == "main" && ! "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "extensions" && "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "ALL" || "${{ parameters.userTarget }}" == "all" || "${{ parameters.userTarget }}" == "") ]]; then
@@ -1646,7 +1649,7 @@ stages:
 #        ext-webpubsub:
 #          Target: ext-webpubsub
     pool:
-      name: $(windows-pool)
+      name: ${{ variables.windows_pool }}
     steps:
       - bash: |
           if [[ "${{ parameters.userTarget }}" =~ "$(Target)" || ("${{ parameters.userTarget }}" == "main" && ! "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "extensions" && "$(Target)" =~ ^ext-.*) || ("${{ parameters.userTarget }}" == "ALL" || "${{ parameters.userTarget }}" == "all" || "${{ parameters.userTarget }}" == "") ]]; then
@@ -1804,7 +1807,7 @@ stages:
     timeoutInMinutes: 120
     condition: succeededOrFailed()
     pool:
-      name: $[variables.ubuntuPool]
+      name: ${{ variables.ubuntu_pool }}
     steps:
       - task: UsePythonVersion@0
         inputs:
@@ -1863,7 +1866,7 @@ stages:
     condition: succeededOrFailed()
     continueOnError: true
     pool:
-      name: $(ubuntu-pool)
+      name: ${{ variables.ubuntu_pool }}
     steps:
       - task: UsePythonVersion@0
         inputs:
