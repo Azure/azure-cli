@@ -16,13 +16,13 @@ from tqdm import tqdm
 
 def main():
     print('Azure cli resource clean up: version 1.0')
+    clean_resource_group()
     clean_lock()
     # clean_sig()
     # clean_storage()
     # clean_servicebus()
     # clean_backup()
     # clean_deleted_keyvault()
-    clean_resource_group()
 
 
 def clean_lock():
