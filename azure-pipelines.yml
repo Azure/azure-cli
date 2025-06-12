@@ -654,9 +654,9 @@ jobs:
 
   - bash: |
       set -ev
-      # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
-      # See: https://github.com/Azure/azure-cli/issues/29054
-      brew unlink python@$3.12 && brew link --overwrite python@$3.12
+      # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS
+      # See: https://github.com/actions/runner-images/issues/9966
+      brew unlink python@3.12 && brew link --overwrite python@3.12
       brew unlink python@3.13 && brew link --overwrite python@3.13
       
       # update homebrew to latest version in case the formula is not compatible with the current homebrew version
