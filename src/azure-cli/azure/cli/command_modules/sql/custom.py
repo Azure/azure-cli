@@ -105,7 +105,7 @@ BACKUP_STORAGE_ACCESS_TIERS = ["hot",
 ###############################################
 
 
-def _get_server_location(cli_ctx, server_name, resource_group_name, subscription_id = None):
+def _get_server_location(cli_ctx, server_name, resource_group_name, subscription_id=None):
     '''
     Returns the location (i.e. Azure region) that the specified server is in.
     '''
@@ -957,7 +957,6 @@ class DatabaseIdentity:  # pylint: disable=too-few-public-methods
     '''
 
     def __init__(self, cli_ctx, database_name, server_name, resource_group_name, subscription_id=None):
-        
         from azure.cli.core.commands.client_factory import get_subscription_id
         self.database_name = database_name
         self.server_name = server_name
@@ -1030,7 +1029,7 @@ def _validate_elastic_pool_id(
         elastic_pool_id,
         server_name,
         resource_group_name,
-        subscription_id = None):
+        subscription_id=None):
     '''
     Validates elastic_pool_id is either None or a valid resource id.
 
@@ -1427,8 +1426,6 @@ def db_create_replica(
     Custom function makes create mode more convenient.
     '''
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
     partner_database_name = partner_database_name or database_name
@@ -1461,11 +1458,19 @@ def db_create_replica(
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
+    primary_database = DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name)
+    secondary_database = DatabaseIdentity(
+                                          cmd.cli_ctx, 
+                                          partner_database_name, 
+                                          partner_server_name, 
+                                          partner_resource_group_name, 
+                                          partner_sub_id)
+
     return _db_dw_create(
         cmd.cli_ctx,
         partner_client,
-        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name, partner_sub_id),
+        primary_database,
+        secondary_database,
         no_wait,
         secondary_type=secondary_type,
         assign_identity=assign_identity,
