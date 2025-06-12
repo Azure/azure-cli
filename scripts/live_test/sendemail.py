@@ -523,8 +523,9 @@ def send_to_kusto(data):
         writer.writerows(data)
     logger.info('Finish generate csv file for live test.')
 
-    # kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(KUSTO_CLUSTER, KUSTO_CLIENT_ID, KUSTO_CLIENT_SECRET, KUSTO_TENANT_ID)
-    kcsb = KustoConnectionStringBuilder.with_aad_managed_service_identity_authentication(KUSTO_CLUSTER, client_id=IDENTITY_CLIENT_ID)
+    token_cmd = 'az account get-access-token --resource "https://api.kusto.windows.net" --query "accessToken"'
+    TOKEN = os.system(token_cmd)
+    kcsb = KustoConnectionStringBuilder.with_aad_application_token_authentication(KUSTO_CLUSTER, TOKEN)
     # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
     client = QueuedIngestClient(kcsb)
 
