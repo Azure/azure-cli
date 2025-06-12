@@ -11,12 +11,14 @@
 from azure.cli.core.aaz import *
 
 
-class Show(AAZCommand):
-    """Get information about the model view or the instance view of a virtual machine.
+@register_command(
+    "vm wait",
+)
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2024-11-01"],
         ]
@@ -68,7 +70,7 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
     class VirtualMachinesGet(AAZHttpOperation):
@@ -255,7 +257,7 @@ class Show(AAZCommand):
             properties.availability_set = AAZObjectType(
                 serialized_name="availabilitySet",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.availability_set)
+            _WaitHelper._build_schema_sub_resource_read(properties.availability_set)
             properties.billing_profile = AAZObjectType(
                 serialized_name="billingProfile",
             )
@@ -275,11 +277,11 @@ class Show(AAZCommand):
                 serialized_name="hardwareProfile",
             )
             properties.host = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(properties.host)
+            _WaitHelper._build_schema_sub_resource_read(properties.host)
             properties.host_group = AAZObjectType(
                 serialized_name="hostGroup",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.host_group)
+            _WaitHelper._build_schema_sub_resource_read(properties.host_group)
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
                 flags={"read_only": True},
@@ -304,7 +306,7 @@ class Show(AAZCommand):
             properties.proximity_placement_group = AAZObjectType(
                 serialized_name="proximityPlacementGroup",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
+            _WaitHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
             properties.scheduled_events_policy = AAZObjectType(
                 serialized_name="scheduledEventsPolicy",
             )
@@ -327,7 +329,7 @@ class Show(AAZCommand):
             properties.virtual_machine_scale_set = AAZObjectType(
                 serialized_name="virtualMachineScaleSet",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.virtual_machine_scale_set)
+            _WaitHelper._build_schema_sub_resource_read(properties.virtual_machine_scale_set)
             properties.vm_id = AAZStrType(
                 serialized_name="vmId",
                 flags={"read_only": True},
@@ -375,7 +377,7 @@ class Show(AAZCommand):
             capacity_reservation.capacity_reservation_group = AAZObjectType(
                 serialized_name="capacityReservationGroup",
             )
-            _ShowHelper._build_schema_sub_resource_read(capacity_reservation.capacity_reservation_group)
+            _WaitHelper._build_schema_sub_resource_read(capacity_reservation.capacity_reservation_group)
 
             diagnostics_profile = cls._schema_on_200.properties.diagnostics_profile
             diagnostics_profile.boot_diagnostics = AAZObjectType(
@@ -466,7 +468,7 @@ class Show(AAZCommand):
             boot_diagnostics.status = AAZObjectType(
                 flags={"read_only": True},
             )
-            _ShowHelper._build_schema_instance_view_status_read(boot_diagnostics.status)
+            _WaitHelper._build_schema_instance_view_status_read(boot_diagnostics.status)
 
             disks = cls._schema_on_200.properties.instance_view.disks
             disks.Element = AAZObjectType()
@@ -480,15 +482,15 @@ class Show(AAZCommand):
 
             encryption_settings = cls._schema_on_200.properties.instance_view.disks.Element.encryption_settings
             encryption_settings.Element = AAZObjectType()
-            _ShowHelper._build_schema_disk_encryption_settings_read(encryption_settings.Element)
+            _WaitHelper._build_schema_disk_encryption_settings_read(encryption_settings.Element)
 
             statuses = cls._schema_on_200.properties.instance_view.disks.Element.statuses
             statuses.Element = AAZObjectType()
-            _ShowHelper._build_schema_instance_view_status_read(statuses.Element)
+            _WaitHelper._build_schema_instance_view_status_read(statuses.Element)
 
             extensions = cls._schema_on_200.properties.instance_view.extensions
             extensions.Element = AAZObjectType()
-            _ShowHelper._build_schema_virtual_machine_extension_instance_view_read(extensions.Element)
+            _WaitHelper._build_schema_virtual_machine_extension_instance_view_read(extensions.Element)
 
             maintenance_redeploy_status = cls._schema_on_200.properties.instance_view.maintenance_redeploy_status
             maintenance_redeploy_status.is_customer_initiated_maintenance_allowed = AAZBoolType(
@@ -537,7 +539,7 @@ class Show(AAZCommand):
             available_patch_summary.error = AAZObjectType(
                 flags={"read_only": True},
             )
-            _ShowHelper._build_schema_api_error_read(available_patch_summary.error)
+            _WaitHelper._build_schema_api_error_read(available_patch_summary.error)
             available_patch_summary.last_modified_time = AAZStrType(
                 serialized_name="lastModifiedTime",
                 flags={"read_only": True},
@@ -560,13 +562,13 @@ class Show(AAZCommand):
 
             configuration_statuses = cls._schema_on_200.properties.instance_view.patch_status.configuration_statuses
             configuration_statuses.Element = AAZObjectType()
-            _ShowHelper._build_schema_instance_view_status_read(configuration_statuses.Element)
+            _WaitHelper._build_schema_instance_view_status_read(configuration_statuses.Element)
 
             last_patch_installation_summary = cls._schema_on_200.properties.instance_view.patch_status.last_patch_installation_summary
             last_patch_installation_summary.error = AAZObjectType(
                 flags={"read_only": True},
             )
-            _ShowHelper._build_schema_api_error_read(last_patch_installation_summary.error)
+            _WaitHelper._build_schema_api_error_read(last_patch_installation_summary.error)
             last_patch_installation_summary.excluded_patch_count = AAZIntType(
                 serialized_name="excludedPatchCount",
                 flags={"read_only": True},
@@ -609,7 +611,7 @@ class Show(AAZCommand):
 
             statuses = cls._schema_on_200.properties.instance_view.statuses
             statuses.Element = AAZObjectType()
-            _ShowHelper._build_schema_instance_view_status_read(statuses.Element)
+            _WaitHelper._build_schema_instance_view_status_read(statuses.Element)
 
             vm_agent = cls._schema_on_200.properties.instance_view.vm_agent
             vm_agent.extension_handlers = AAZListType(
@@ -625,7 +627,7 @@ class Show(AAZCommand):
 
             _element = cls._schema_on_200.properties.instance_view.vm_agent.extension_handlers.Element
             _element.status = AAZObjectType()
-            _ShowHelper._build_schema_instance_view_status_read(_element.status)
+            _WaitHelper._build_schema_instance_view_status_read(_element.status)
             _element.type = AAZStrType()
             _element.type_handler_version = AAZStrType(
                 serialized_name="typeHandlerVersion",
@@ -633,13 +635,13 @@ class Show(AAZCommand):
 
             statuses = cls._schema_on_200.properties.instance_view.vm_agent.statuses
             statuses.Element = AAZObjectType()
-            _ShowHelper._build_schema_instance_view_status_read(statuses.Element)
+            _WaitHelper._build_schema_instance_view_status_read(statuses.Element)
 
             vm_health = cls._schema_on_200.properties.instance_view.vm_health
             vm_health.status = AAZObjectType(
                 flags={"read_only": True},
             )
-            _ShowHelper._build_schema_instance_view_status_read(vm_health.status)
+            _WaitHelper._build_schema_instance_view_status_read(vm_health.status)
 
             network_profile = cls._schema_on_200.properties.network_profile
             network_profile.network_api_version = AAZStrType(
@@ -682,7 +684,7 @@ class Show(AAZCommand):
             properties.dscp_configuration = AAZObjectType(
                 serialized_name="dscpConfiguration",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.dscp_configuration)
+            _WaitHelper._build_schema_sub_resource_read(properties.dscp_configuration)
             properties.enable_accelerated_networking = AAZBoolType(
                 serialized_name="enableAcceleratedNetworking",
             )
@@ -699,7 +701,7 @@ class Show(AAZCommand):
             properties.network_security_group = AAZObjectType(
                 serialized_name="networkSecurityGroup",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.network_security_group)
+            _WaitHelper._build_schema_sub_resource_read(properties.network_security_group)
             properties.primary = AAZBoolType()
 
             dns_settings = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.dns_settings
@@ -739,19 +741,19 @@ class Show(AAZCommand):
                 serialized_name="publicIPAddressConfiguration",
             )
             properties.subnet = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(properties.subnet)
+            _WaitHelper._build_schema_sub_resource_read(properties.subnet)
 
             application_gateway_backend_address_pools = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.application_gateway_backend_address_pools
             application_gateway_backend_address_pools.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(application_gateway_backend_address_pools.Element)
+            _WaitHelper._build_schema_sub_resource_read(application_gateway_backend_address_pools.Element)
 
             application_security_groups = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.application_security_groups
             application_security_groups.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(application_security_groups.Element)
+            _WaitHelper._build_schema_sub_resource_read(application_security_groups.Element)
 
             load_balancer_backend_address_pools = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.load_balancer_backend_address_pools
             load_balancer_backend_address_pools.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(load_balancer_backend_address_pools.Element)
+            _WaitHelper._build_schema_sub_resource_read(load_balancer_backend_address_pools.Element)
 
             public_ip_address_configuration = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration
             public_ip_address_configuration.name = AAZStrType(
@@ -784,7 +786,7 @@ class Show(AAZCommand):
             properties.public_ip_prefix = AAZObjectType(
                 serialized_name="publicIPPrefix",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.public_ip_prefix)
+            _WaitHelper._build_schema_sub_resource_read(properties.public_ip_prefix)
 
             dns_settings = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.dns_settings
             dns_settings.domain_name_label = AAZStrType(
@@ -906,7 +908,7 @@ class Show(AAZCommand):
             _element.source_vault = AAZObjectType(
                 serialized_name="sourceVault",
             )
-            _ShowHelper._build_schema_sub_resource_read(_element.source_vault)
+            _WaitHelper._build_schema_sub_resource_read(_element.source_vault)
             _element.vault_certificates = AAZListType(
                 serialized_name="vaultCertificates",
             )
@@ -1069,7 +1071,7 @@ class Show(AAZCommand):
             proxy_agent_settings = cls._schema_on_200.properties.security_profile.proxy_agent_settings
             proxy_agent_settings.enabled = AAZBoolType()
             proxy_agent_settings.imds = AAZObjectType()
-            _ShowHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
+            _WaitHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
             proxy_agent_settings.key_incarnation_id = AAZIntType(
                 serialized_name="keyIncarnationId",
             )
@@ -1077,7 +1079,7 @@ class Show(AAZCommand):
             proxy_agent_settings.wire_server = AAZObjectType(
                 serialized_name="wireServer",
             )
-            _ShowHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
+            _WaitHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
             uefi_settings = cls._schema_on_200.properties.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -1131,14 +1133,14 @@ class Show(AAZCommand):
                 serialized_name="diskSizeGB",
             )
             _element.image = AAZObjectType()
-            _ShowHelper._build_schema_virtual_hard_disk_read(_element.image)
+            _WaitHelper._build_schema_virtual_hard_disk_read(_element.image)
             _element.lun = AAZIntType(
                 flags={"required": True},
             )
             _element.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
-            _ShowHelper._build_schema_managed_disk_parameters_read(_element.managed_disk)
+            _WaitHelper._build_schema_managed_disk_parameters_read(_element.managed_disk)
             _element.name = AAZStrType()
             _element.source_resource = AAZObjectType(
                 serialized_name="sourceResource",
@@ -1147,7 +1149,7 @@ class Show(AAZCommand):
                 serialized_name="toBeDetached",
             )
             _element.vhd = AAZObjectType()
-            _ShowHelper._build_schema_virtual_hard_disk_read(_element.vhd)
+            _WaitHelper._build_schema_virtual_hard_disk_read(_element.vhd)
             _element.write_accelerator_enabled = AAZBoolType(
                 serialized_name="writeAcceleratorEnabled",
             )
@@ -1190,19 +1192,19 @@ class Show(AAZCommand):
             os_disk.encryption_settings = AAZObjectType(
                 serialized_name="encryptionSettings",
             )
-            _ShowHelper._build_schema_disk_encryption_settings_read(os_disk.encryption_settings)
+            _WaitHelper._build_schema_disk_encryption_settings_read(os_disk.encryption_settings)
             os_disk.image = AAZObjectType()
-            _ShowHelper._build_schema_virtual_hard_disk_read(os_disk.image)
+            _WaitHelper._build_schema_virtual_hard_disk_read(os_disk.image)
             os_disk.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
-            _ShowHelper._build_schema_managed_disk_parameters_read(os_disk.managed_disk)
+            _WaitHelper._build_schema_managed_disk_parameters_read(os_disk.managed_disk)
             os_disk.name = AAZStrType()
             os_disk.os_type = AAZStrType(
                 serialized_name="osType",
             )
             os_disk.vhd = AAZObjectType()
-            _ShowHelper._build_schema_virtual_hard_disk_read(os_disk.vhd)
+            _WaitHelper._build_schema_virtual_hard_disk_read(os_disk.vhd)
             os_disk.write_accelerator_enabled = AAZBoolType(
                 serialized_name="writeAcceleratorEnabled",
             )
@@ -1243,14 +1245,14 @@ class Show(AAZCommand):
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
             )
-            _ShowHelper._build_schema_virtual_machine_extension_instance_view_read(properties.instance_view)
+            _WaitHelper._build_schema_virtual_machine_extension_instance_view_read(properties.instance_view)
             properties.protected_settings = AAZDictType(
                 serialized_name="protectedSettings",
             )
             properties.protected_settings_from_key_vault = AAZObjectType(
                 serialized_name="protectedSettingsFromKeyVault",
             )
-            _ShowHelper._build_schema_key_vault_secret_reference_read(properties.protected_settings_from_key_vault)
+            _WaitHelper._build_schema_key_vault_secret_reference_read(properties.protected_settings_from_key_vault)
             properties.provision_after_extensions = AAZListType(
                 serialized_name="provisionAfterExtensions",
             )
@@ -1289,8 +1291,8 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_api_error_read = None
 
@@ -1567,4 +1569,4 @@ class _ShowHelper:
         _schema.type_handler_version = cls._schema_virtual_machine_extension_instance_view_read.type_handler_version
 
 
-__all__ = ["Show"]
+__all__ = ["Wait"]

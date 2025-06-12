@@ -1270,10 +1270,17 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
 
 
 def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False):
+    from .aaz.latest.vm import Show as VMShow
     expand = 'instanceView'
     if include_user_data:
         expand = expand + ',userData'
-    return get_vm(cmd, resource_group_name, vm_name, expand)
+
+    result = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "vm_name": vm_name,
+        "expand": expand,
+    })
+    return result
 
 
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
