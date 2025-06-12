@@ -53,7 +53,7 @@ def analyze_stats(all_stats):
         
         if stats["manual"] > 0:
             counters["manual"][module_type] += 1
-        if stats["manual"] > 0 and (["codegenV1"] > 0 or stats["codegenV2"] > 0):
+        if stats["manual"] > 0 and (stats["codegenV1"] > 0 or stats["codegenV2"] > 0):
             counters["mixed"][module_type] += 1
         if stats["codegenV1"] > 0 or stats["codegenV2"] > 0:
             counters["codegen"][module_type] += 1
