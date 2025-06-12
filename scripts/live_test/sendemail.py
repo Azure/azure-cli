@@ -517,7 +517,11 @@ def html_to_csv(html_file, module, platform):
 
 def send_to_kusto(data):
     logger.info('Start send csv data to kusto db')
-    from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    try:
+        from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "azure-identity"])
+        from azure.identity import DefaultAzureCredential, get_bearer_token_provider
     token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://kusto.kusto.windows.net/.default")
     with open(f'{ARTIFACT_DIR}/livetest.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
