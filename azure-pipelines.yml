@@ -58,11 +58,11 @@ jobs:
       
       mkdir -p /tmp/module_stats
       
-      for module in $(cat $CLI_REPO_PATH/scripts/ci/core_modules.txt); do
+      for module in $(cat /mnt/vss/_work/1/s/scripts/ci/core_modules.txt); do
         azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json
       done
       
-      for module in $(cat $CLI_REPO_PATH/scripts/ci/extension_modules.txt); do
+      for module in $(cat /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt); do
         azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json
       done
       
