@@ -1459,11 +1459,10 @@ def db_create_replica(
             _backup_storage_redundancy_specify_geo_warning()
 
     primary_database = DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name)
-    secondary_database = DatabaseIdentity(
-                                          cmd.cli_ctx, 
-                                          partner_database_name, 
-                                          partner_server_name, 
-                                          partner_resource_group_name, 
+    secondary_database = DatabaseIdentity(cmd.cli_ctx,
+                                          partner_database_name,
+                                          partner_server_name,
+                                          partner_resource_group_name,
                                           partner_sub_id)
 
     return _db_dw_create(
