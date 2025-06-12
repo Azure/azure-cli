@@ -519,13 +519,12 @@ def send_to_kusto(data):
     logger.info('Start send csv data to kusto db')
     from azure.identity import DefaultAzureCredential, get_bearer_token_provider
     token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://kusto.kusto.windows.net/.default")
-    cluster = f"https://ingest-{KUSTO_CLUSTER}.kusto.windows.net/"
     with open(f'{ARTIFACT_DIR}/livetest.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(data)
     logger.info('Finish generate csv file for live test.')
 
-    kcsb = KustoConnectionStringBuilder.with_aad_application_token_authentication(cluster, token_provider)
+    kcsb = KustoConnectionStringBuilder.with_aad_application_token_authentication(KUSTO_CLUSTER, token_provider)
     # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
     client = QueuedIngestClient(kcsb)
 
