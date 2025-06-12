@@ -58,11 +58,11 @@ jobs:
       
       mkdir -p /tmp/module_stats
       
-      ls -1 /mnt/vss/_work/1/s/src/azure-cli/azure/cli/command_modules/ > /mnt/vss/_work/1/s/scripts/ci/core_modules.txt
+      find /mnt/vss/_work/1/s/src/azure-cli/azure/cli/command_modules/ -mindepth 1 -maxdepth 1 -type d -printf "%f\n" > /mnt/vss/_work/1/s/scripts/ci/core_modules.txt
       echo "=== Core Modules ==="
       cat /mnt/vss/_work/1/s/scripts/ci/core_modules.txt
       
-      ls -1 /mnt/vss/_work/1/azure-cli-extensions/src/ > /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt
+      find /mnt/vss/_work/1/azure-cli-extensions/src/ -mindepth 1 -maxdepth 1 -type d -printf "%f\n" > /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt
       echo "=== Extension Modules ==="
       cat /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt
       
