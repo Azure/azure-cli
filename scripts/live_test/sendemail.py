@@ -373,7 +373,7 @@ def get_remaining_tests():
         with open('resource.html', 'w') as f:
             f.write(str(soup))
             logger.info('resource.html: ' + str(soup))
-        cmd = 'az storage blob upload -f resource.html -c {} -n resource.html --account-name clitestresultstac --auth-mode login'.format(BUILD_ID)
+        cmd = 'az storage blob upload -f resource.html -c {} -n resource.html --account-name clitestresultstac --auth-mode login --overwrite'.format(BUILD_ID)
         logger.info('Running: ' + cmd)
         os.system(cmd)
 
@@ -562,16 +562,12 @@ def upload_files(container):
     """
     logger.info('Enter upload_files()')
 
-    # Create container
-    # cmd = 'az storage container create -n {} --account-name clitestresultstac --public-access container --auth-mode login'.format(container)
-    # os.system(cmd)
-
     # Upload files
     for root, dirs, files in os.walk(ARTIFACT_DIR):
         for name in files:
             if name.endswith('html') or name.endswith('json'):
                 fullpath = os.path.join(root, name)
-                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --auth-mode login'.format(fullpath, container, name)
+                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --auth-mode login --overwrite'.format(fullpath, container, name)
                 os.system(cmd)
 
     logger.info('Exit upload_files()')
