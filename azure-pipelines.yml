@@ -56,20 +56,16 @@ jobs:
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
       azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
       
-      # 创建临时目录存储每个模块的数据
       mkdir -p /tmp/module_stats
       
-      # 获取所有core模块的统计数据
       for module in $(cat $CLI_REPO_PATH/scripts/ci/core_modules.txt); do
         azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json
       done
       
-      # 获取所有extension模块的统计数据
       for module in $(cat $CLI_REPO_PATH/scripts/ci/extension_modules.txt); do
         azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json
       done
       
-      # 运行分析脚本
       python $CLI_REPO_PATH/scripts/ci/analyze_module_stats.py
     env:
       BUILD_ID: $(Build.BuildId)
