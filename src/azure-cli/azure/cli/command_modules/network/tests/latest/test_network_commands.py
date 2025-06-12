@@ -5007,14 +5007,15 @@ class NetworkVNetScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_ipam_pool_test', location='westus')
     @AllowLargeResponse(size_kb=99999)
-    def test_network_vnet_with_ipam_pool(self, resource_group, resource_group_location):
+    def test_network_vnet_subnet_with_ipam_pool(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'rg': resource_group,
             'location': resource_group_location,
             'manager': 'manager1',
             'pool': 'pool1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'subnet': 'subnet1'
         })
         self.cmd('extension add -n virtual-network-manager')
         self.kwargs['sub_id'] = self.get_subscription_id()
@@ -5025,6 +5026,12 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].id', '{pool_id}'),
             self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].numberOfIpAddresses', 10),
             self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].resourceGroup', '{rg}')
+        ])
+
+        self.cmd('network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet} --ipam-allocations [0].id={pool_id} [0].number-of-ip-addresses=5', checks=[
+            self.check('ipamPoolPrefixAllocations[0].id', '{pool_id}'),
+            self.check('ipamPoolPrefixAllocations[0].numberOfIpAddresses', 5),
+            self.check('ipamPoolPrefixAllocations[0].resourceGroup', '{rg}')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_subnet_nsg_test')
