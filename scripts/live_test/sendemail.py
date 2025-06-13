@@ -316,10 +316,10 @@ def main():
     summary_data(testdata)
 
     # Upload results to storage account, container
-    container = "'$web'"
+    container = ''
     try:
         logger.info('Uploading test results to storage account...')
-        # container = get_container_name()
+        container = get_container_name()
         upload_files(container)
     except Exception:
         logger.exception(traceback.format_exc())
@@ -565,12 +565,19 @@ def upload_files(container):
     """
     logger.info('Enter upload_files()')
 
+    # Create container
+    cmd = 'az storage container create -n {} --account-name clitestresultstac --public-access container --auth-mode login'.format(
+        container)
+    os.system(cmd)
+
     # Upload files
     for root, dirs, files in os.walk(ARTIFACT_DIR):
         for name in files:
             if name.endswith('html') or name.endswith('json'):
                 fullpath = os.path.join(root, name)
-                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --auth-mode login --overwrite'.format(fullpath, container, name)
+                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --auth-mode login'.format(fullpath, container, name)
+                os.system(cmd)
+                cmd = 'az storage blob upload -f {} -c "$web" -n {} --account-name clitestresultstac --auth-mode login --overwrite'.format(fullpath, name)
                 os.system(cmd)
 
     logger.info('Exit upload_files()')
