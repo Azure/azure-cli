@@ -1979,7 +1979,6 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     import sys
     from azure.cli.core.profiles import get_sdk
     from azure.core.exceptions import HttpResponseError
-    BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -2019,18 +2018,13 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Get account key
     keys = storage_mgmt_client.storage_accounts.list_keys(rg, storage_account.name)
 
-    # Extract container and blob name from url...
-    container, blob = urlparse(blob_uri).path.split('/')[-2:]
-
-    storage_client = get_data_service_client(
-        cmd.cli_ctx,
-        BlockBlobService,
-        storage_account.name,
-        keys.keys[0].value,
-        endpoint_suffix=cmd.cli_ctx.cloud.suffixes.storage_endpoint)  # pylint: disable=no-member
+    BlobClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                '_blob_client#BlobClient')
+    blob_client = BlobClient.from_blob_url(blob_url=blob_uri, credential=keys.keys[0].value)
 
     # our streamwriter not seekable, so no parallel.
-    storage_client.get_blob_to_stream(container, blob, BootLogStreamWriter(sys.stdout), max_connections=1)
+    downloader = blob_client.download_blob(max_concurrency=1)
+    downloader.readinto(BootLogStreamWriter(sys.stdout))
 # endregion
 
 
