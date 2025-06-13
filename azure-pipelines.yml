@@ -56,7 +56,7 @@ jobs:
       azdev extension add "*"
       pip install msrestazure markupsafe==2.0.1
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
-      azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
+      azdev setup -c ./s -r ./azure-cli-extensions
       
       mkdir -p /tmp/module_stats
       
@@ -76,7 +76,8 @@ jobs:
         azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json || true
       done
       
-      python $CLI_REPO_PATH/scripts/ci/analyze_module_stats.py
+      python /mnt/vss/_work/1/s/scripts/ci/analyze_module_stats.py
+      azdev statistics list-command-table --statistics-only
     env:
       BUILD_ID: $(Build.BuildId)
       BUILD_BRANCH: $(Build.SourceBranchName)

@@ -6,10 +6,10 @@ def load_module_stats():
     stats_dir = "/tmp/module_stats"
     all_stats = {}
     
-    with open("core_modules.txt", "r") as f:
+    with open("/mnt/vss/_work/1/s/scripts/ci/core_modules.txt", "r") as f:
         core_modules = [line.strip() for line in f.readlines()]
     
-    with open("extension_modules.txt", "r") as f:
+    with open("/mnt/vss/_work/1/s/scripts/ci/extension_modules.txt", "r") as f:
         extension_modules = [line.strip() for line in f.readlines()]
     
     for module in core_modules + extension_modules:
@@ -22,7 +22,6 @@ def load_module_stats():
                     codegenV2 = stats.get("codegenV2", 0)
                     total = stats.get("total", 0)
                     
-                    # 计算manual数量
                     manual = total - codegenV1 - codegenV2
                     
                     all_stats[module] = {
