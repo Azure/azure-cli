@@ -75,9 +75,8 @@ jobs:
       for module in $(cat /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt); do
         azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json || true
       done
-      
-      python /mnt/vss/_work/1/s/scripts/ci/analyze_module_stats.py
-      azdev statistics list-command-table --statistics-only
+      azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json || true
+      python /mnt/vss/_work/1/s/scripts/ci/codegen_report.py
     env:
       BUILD_ID: $(Build.BuildId)
       BUILD_BRANCH: $(Build.SourceBranchName)
