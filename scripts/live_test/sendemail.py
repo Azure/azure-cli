@@ -527,8 +527,7 @@ def send_to_kusto(data):
         writer = csv.writer(file)
         writer.writerows(data)
     logger.info('Finish generate csv file for live test.')
-
-    kcsb = KustoConnectionStringBuilder.with_aad_application_token_authentication(KUSTO_CLUSTER, token_provider)
+    kcsb = KustoConnectionStringBuilder.with_token_provider(KUSTO_CLUSTER, token_provider)
     # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
     client = QueuedIngestClient(kcsb)
 
