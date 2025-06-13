@@ -467,7 +467,7 @@ def summary_data(testdata):
     if USER_TARGET.lower() in ['all', ''] \
             and USER_REPO == 'https://github.com/Azure/azure-cli.git' \
             and USER_REPO_EXT == 'https://github.com/Azure/azure-cli-extensions.git' \
-            and USER_BRANCH == 'dev' and USER_BRANCH_EXT == 'main' \
+            and USER_BRANCH in ['dev', 'live-test'] and USER_BRANCH_EXT in ['main', 'live-test'] \
             and USER_LIVE == '--live' and data:
         send_to_kusto(data)
 
