@@ -50,20 +50,17 @@ def stream_logs(cmd, client,
         raise CLIError(error_msg)
 
     if not artifact:
-        account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
+        _, _, container_name, blob_name, _ = get_blob_info(
             log_file_sas)
-        AppendBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#AppendBlobService')
+        BlobClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                    '_blob_client#BlobClient')
+        blob_client = BlobClient.from_blob_url(log_file_sas)
         if not timeout:
             timeout = ACR_RUN_DEFAULT_TIMEOUT_IN_SEC
         _stream_logs(no_format,
                      DEFAULT_CHUNK_SIZE,
                      timeout,
-                     AppendBlobService(
-                         account_name=account_name,
-                         sas_token=sas_token,
-                         endpoint_suffix=endpoint_suffix),
-                     container_name,
-                     blob_name,
+                     blob_client,
                      raise_error_on_failure)
     else:
         _stream_artifact_logs(log_file_sas,
@@ -74,8 +71,6 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
                  byte_size,
                  timeout_in_seconds,
                  blob_service,
-                 container_name,
-                 blob_name,
                  raise_error_on_failure):
 
     if not no_format:
@@ -97,14 +92,12 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
     # If the storage call fails, we'll just sleep and try again after.
     try:
         # Need to call "exists" API to prevent storage SDK logging BlobNotFound error
-        log_exist = blob_service.exists(
-            container_name=container_name, blob_name=blob_name)
+        log_exist = blob_service.exists()
 
         if log_exist:
-            props = blob_service.get_blob_properties(
-                container_name=container_name, blob_name=blob_name)
+            props = blob_service.get_blob_properties()
             metadata = props.metadata
-            available = props.properties.content_length
+            available = props.size
         else:
             # Wait a little bit before checking the existence again
             time.sleep(1)
@@ -120,12 +113,8 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
 
             try:
                 old_byte_size = len(stream.getvalue())
-                blob_service.get_blob_to_stream(
-                    container_name=container_name,
-                    blob_name=blob_name,
-                    start_range=start,
-                    end_range=end,
-                    stream=stream)
+                downloader = blob_service.download_blob(offset=start, length=byte_size, max_concurrency = 1)
+                downloader.readinto(stream)
 
                 curr_bytes = stream.getvalue()
                 new_byte_size = len(curr_bytes)
@@ -153,13 +142,11 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
 
         try:
             if log_exist:
-                props = blob_service.get_blob_properties(
-                    container_name=container_name, blob_name=blob_name)
+                props = blob_service.get_blob_properties()
                 metadata = props.metadata
-                available = props.properties.content_length
+                available = props.size
             else:
-                log_exist = blob_service.exists(
-                    container_name=container_name, blob_name=blob_name)
+                log_exist = blob_service.exists()
         except AzureHttpError as ae:
             if ae.status_code != 404:
                 raise CLIError(ae)
