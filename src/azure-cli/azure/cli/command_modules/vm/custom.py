@@ -17,7 +17,6 @@ import os
 
 import requests
 
-from urllib.parse import urlparse
 # the urlopen is imported for automation purpose
 from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
@@ -35,7 +34,7 @@ from azure.cli.command_modules.vm._validators import _get_resource_group_from_va
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
-from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 
@@ -1979,7 +1978,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     import sys
     from azure.cli.core.profiles import get_sdk
     from azure.core.exceptions import HttpResponseError
-
+    BlobClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
     client = _compute_client_factory(cmd.cli_ctx)
 
     virtual_machine = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
@@ -2018,8 +2017,6 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Get account key
     keys = storage_mgmt_client.storage_accounts.list_keys(rg, storage_account.name)
 
-    BlobClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
-                                '_blob_client#BlobClient')
     blob_client = BlobClient.from_blob_url(blob_url=blob_uri, credential=keys.keys[0].value)
 
     # our streamwriter not seekable, so no parallel.

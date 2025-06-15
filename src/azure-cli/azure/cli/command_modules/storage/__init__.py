@@ -282,7 +282,7 @@ Authentication failure. This may be caused by either invalid account key, connec
     def _register_data_plane_account_arguments(self, command_name):
         """ Add parameters required to create a storage client """
         from azure.cli.core.commands.parameters import get_resource_name_completion_list
-        from azure.cli.command_modules.storage._validators import is_storagev2, validate_client_parameters
+        from azure.cli.command_modules.storage._validators import validate_client_parameters
         command = self.command_loader.command_table.get(command_name, None)
         if not command:
             return

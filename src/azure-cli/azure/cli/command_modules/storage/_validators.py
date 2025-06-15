@@ -13,12 +13,10 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.core.azclierror import UnrecognizedArgumentError
 
-from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
-                                                               storage_client_factory,
+from azure.cli.command_modules.storage._client_factory import (storage_client_factory,
                                                                cf_adls_file_system)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
-from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -115,10 +113,6 @@ def validate_hns_migration_type(namespace):
 def get_config_value(cmd, section, key, default):
     logger.info("Try to get %s %s value from environment variables or config file.", section, key)
     return cmd.cli_ctx.config.get(section, key, default)
-
-
-def is_storagev2(import_prefix):
-    return import_prefix.startswith('azure.multiapi.storagev2.') or import_prefix.startswith('azure.data.tables')
 
 
 # pylint: disable=too-many-branches, too-many-statements
@@ -559,10 +553,6 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
 
     # pylint: disable=too-many-locals
     def validator(cmd, namespace):
-        t_base_blob_service, t_file_service = cmd.get_models(
-            'blob.baseblobservice#BaseBlobService',
-            'file#FileService')
-
         t_blob_content_settings = cmd.get_models('_models#ContentSettings',
                                                  resource_type=ResourceType.DATA_STORAGE_BLOB)
         t_file_content_settings = cmd.get_models('_models#ContentSettings',
@@ -1008,7 +998,7 @@ def get_source_file_or_blob_service_client_track2(cmd, namespace):
     ns['source_container'] = source_container
     ns['source_share'] = source_share
     # get sas token for source
-    if not source_sas and not is_oauth and source_key!='fake_key':
+    if not source_sas and not is_oauth and source_key != 'fake_key':
         from .util import create_short_lived_container_sas_track2, create_short_lived_share_sas_track2
         if source_container:
             source_sas = create_short_lived_container_sas_track2(cmd, account_name=source_account,
