@@ -77,5 +77,5 @@ class VMListSizes(_VMListSizes):
 class VMCapture(_VMCapture):
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        result = result.get('output', None) or result.get('resources', [])[0]
+        result = result.get('output', None) or result.get('resources', [None])[0]
         return result
