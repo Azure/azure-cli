@@ -1004,7 +1004,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
     sas_client = BlobSharedAccessSignature(blob_service_client.account_name,
                                            account_key=blob_service_client.credential.account_key)
     blob_token = sas_client.generate_blob(container_name, blob_name, permission=BlobSasPermissions(read=True),
-                                   expiry=blob_end, start=blob_start)
+                                          expiry=blob_end, start=blob_start)
 
     blob_uri = blob_client.url
     if '?' not in blob_uri:
