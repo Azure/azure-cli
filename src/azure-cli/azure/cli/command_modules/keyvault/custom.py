@@ -1460,10 +1460,13 @@ def update_key_rotation_policy(cmd, client, value, key_name=None):
 
 
 # region KeyVault Secret
-def download_secret(client, file_path, name=None, encoding=None, version='', overwrite: bool = False):  # pylint: disable=unused-argument
+def download_secret(client, file_path, name=None, encoding=None, version='', overwrite=False):  # pylint: disable=unused-argument
     """ Download a secret from a KeyVault. """
     if not overwrite and (os.path.isfile(file_path) or os.path.isdir(file_path)):
-        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+        raise CLIError(
+            "File or directory named '{}' already exists. "
+            "Use --overwrite to overwrite the existing file.".format(file_path)
+        )
 
     secret = client.get_secret(name, version)
 
