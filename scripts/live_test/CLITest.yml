@@ -26,7 +26,7 @@ parameters:
 - name: staticWebUrl
   displayName: Static Web URL
   type: string
-  default: 'https://clitestresultstac.z13.web.core.windows.net/'
+  default: 'https://clilivetestsa.z13.web.core.windows.net/'
 - name: userBranch
   displayName: User Branch
   type: string
@@ -1823,7 +1823,7 @@ stages:
       - task: AzureCLI@2
         displayName: 'Send live test email'
         inputs:
-          connectedServiceNameARM: $(azure-cli-live-test-sdk-connected-service)
+          connectedServiceNameARM: $(azure-cli-live-test-msft-connected-service)
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
@@ -1841,7 +1841,7 @@ stages:
             # Send notification
             az -v
             echo "login to user azureclilivetest"
-            az account set -s $(azure-cli-sdk-test-sub-id)
+            az account set -s $(azure-cli-msft-test-sub-id)
             echo "set account"
             echo "send email to grid"
             python $workDir/scripts/live_test/sendemail.py "$commit_id"
@@ -1850,6 +1850,7 @@ stages:
           BUILD_ID: $(Build.BuildId)
           EMAIL_KEY: $(email-key)
           EMAIL_ADDRESS: $(Build.RequestedForEmail)
+          ACCOUNT_NAME: $(account-name)
           KUSTO_CLUSTER: $(kusto-cluster)
           KUSTO_DATABASE: $(kusto-database)
           KUSTO_TABLE: $(kusto-table)

@@ -38,6 +38,7 @@ EMAIL_KEY = os.environ.get('EMAIL_KEY')
 # authenticate with AAD application.
 # KUSTO_CLIENT_ID = os.environ.get('KUSTO_CLIENT_ID')
 # KUSTO_CLIENT_SECRET = os.environ.get('KUSTO_CLIENT_SECRET')
+ACCOUNT_NAME = os.environ.get('ACCOUNT_NAME')
 KUSTO_CLUSTER = os.environ.get('KUSTO_CLUSTER')
 KUSTO_DATABASE = os.environ.get('KUSTO_DATABASE')
 KUSTO_TABLE = os.environ.get('KUSTO_TABLE')
@@ -373,7 +374,7 @@ def get_remaining_tests():
         with open('resource.html', 'w') as f:
             f.write(str(soup))
             logger.info('resource.html: ' + str(soup))
-        cmd = 'az storage blob upload -f resource.html -c {} -n resource.html --account-name clitestresultstac --auth-mode login --overwrite'.format(BUILD_ID)
+        cmd = f'az storage blob upload -f resource.html -c {BUILD_ID} -n resource.html --account-name {ACCOUNT_NAME} --auth-mode login --overwrite'
         logger.info('Running: ' + cmd)
         os.system(cmd)
 
@@ -566,8 +567,7 @@ def upload_files(container):
     logger.info('Enter upload_files()')
 
     # Create container
-    cmd = 'az storage container create -n {} --account-name clitestresultstac --public-access container --auth-mode login'.format(
-        container)
+    cmd = f'az storage container create -n {container} --account-name {ACCOUNT_NAME} --public-access container --auth-mode login'
     os.system(cmd)
 
     # Upload files
@@ -575,9 +575,9 @@ def upload_files(container):
         for name in files:
             if name.endswith('html') or name.endswith('json'):
                 fullpath = os.path.join(root, name)
-                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --auth-mode login'.format(fullpath, container, name)
+                cmd = f'az storage blob upload -f {fullpath} -c {container} -n {name} --account-name {ACCOUNT_NAME} --auth-mode login'
                 os.system(cmd)
-                cmd = 'az storage blob upload -f {} -c "$web" -n {} --account-name clitestresultstac --auth-mode login --overwrite'.format(fullpath, name)
+                cmd = f'az storage blob upload -f {fullpath} -c "$web" -n {name} --account-name {ACCOUNT_NAME} --auth-mode login --overwrite'
                 os.system(cmd)
 
     logger.info('Exit upload_files()')
