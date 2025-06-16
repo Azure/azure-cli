@@ -1212,7 +1212,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 _show_missing_access_warning(resource_group_name, vm_name2, 'vm')
             vm['identity'] = _construct_identity_info(identity_scope, identity_role,
                                                       vm.get('identity', {}).get('principalId', None),
-                                                      vm.get('identity').get('userAssignedIdentities', None))
+                                                      vm.get('identity', {}).get('userAssignedIdentities', None))
         vms.append(vm)
 
     if workspace is not None:
