@@ -16,6 +16,7 @@ from ._deallocate import *
 from ._delete import *
 from ._generalize import *
 from ._list import *
+from ._list_all import *
 from ._list_sizes import *
 from ._list_skus import *
 from ._list_vm_resize_options import *
