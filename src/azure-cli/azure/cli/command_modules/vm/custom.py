@@ -1309,7 +1309,7 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
     private_ips = []
     mac_addresses = []
     # pylint: disable=line-too-long,no-member
-    for nic_ref in result.get('networkProfile', {}).get('networkInterfaces', []):  # result.network_profile.network_interfaces
+    for nic_ref in result.get('networkProfile', {}).get('networkInterfaces', []):
         nic_parts = parse_resource_id(nic_ref['id'])
         nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": nic_parts['name'],
