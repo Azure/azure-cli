@@ -47,7 +47,7 @@ def load_module_stats():
                         "type": "core" if module in core_modules else "extension"
                     }
                 except json.JSONDecodeError:
-                    print(f"Warning: Could not parse {stats_file}")
+                    logger.info(f"Warning: Could not parse {stats_file}")
     return all_stats
 
 def analyze_stats(all_stats):
