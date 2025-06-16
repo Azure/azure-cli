@@ -1159,21 +1159,21 @@ jobs:
       pip install msrestazure markupsafe==2.0.1
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
       azdev setup -c ./s -r ./azure-cli-extensions
-      
+
       mkdir -p /tmp/module_stats
-      
+
       find /mnt/vss/_work/1/s/src/azure-cli/azure/cli/command_modules/ -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | grep -v '^__pycache__$' > /mnt/vss/_work/1/s/scripts/ci/core_modules.txt
       echo "=== Core Modules ==="
       cat /mnt/vss/_work/1/s/scripts/ci/core_modules.txt
-      
+
       find /mnt/vss/_work/1/azure-cli-extensions/src/ -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | grep -v '^__pycache__$' > /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt
       echo "=== Extension Modules ==="
       cat /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt
-      
+
       for module in $(cat /mnt/vss/_work/1/s/scripts/ci/core_modules.txt); do
         azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json || true
       done
-      
+
       for module in $(cat /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt); do
         azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json || true
       done
