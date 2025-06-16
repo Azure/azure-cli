@@ -1210,7 +1210,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if assign_identity is not None:
             if enable_local_identity and not identity_scope:
                 _show_missing_access_warning(resource_group_name, vm_name2, 'vm')
-            vm['identity'] = _construct_identity_info(identity_scope, identity_role, vm.get('identity', {}).get('principalId', None),
+            vm['identity'] = _construct_identity_info(identity_scope, identity_role,
+                                                      vm.get('identity', {}).get('principalId', None),
                                                       vm.get('identity').get('userAssignedIdentities', None))
         vms.append(vm)
 
@@ -1365,7 +1366,6 @@ def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     from .aaz.latest.vm import List as VMList
-    ccf = _compute_client_factory(cmd.cli_ctx)
     if vmss is not None:
         if is_valid_resource_id(vmss):
             filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss)
