@@ -18,7 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, USER_REPO_EXT, USER_BRANCH_EXT):
+def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT):
     """
     Generate index.html. Upload it to storage account
     :param container:
@@ -55,14 +55,10 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     logger.warning('Running: ' + cmd)
     os.system(cmd)
 
-    # Upload to latest container if it is a full live test of official repo dev branch
-    if USER_TARGET.lower() in ['all', ''] \
-            and USER_REPO == 'https://github.com/Azure/azure-cli.git' \
-            and USER_REPO_EXT == 'https://github.com/Azure/azure-cli-extensions.git' \
-            and USER_BRANCH == 'dev' and USER_BRANCH_EXT == 'main' and USER_LIVE == '--live':
-        cmd = 'az storage blob upload -f index.html -c latest -n index.html --account-name clitestresultstac --auth-mode login --overwrite'
-        logger.warning('Running: ' + cmd)
-        os.system(cmd)
+    # Upload to $web container
+    cmd = 'az storage blob upload -f index.html -c "$web" -n index.html --account-name clitestresultstac --auth-mode login --overwrite'
+    logger.warning('Running: ' + cmd)
+    os.system(cmd)
 
     logger.warning('Exit generate()')
     return html

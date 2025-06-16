@@ -328,7 +328,7 @@ def main():
     try:
         # Generate index.html
         container_url = '{}/'.format(STATIC_WEB_URL) + container
-        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, USER_REPO_EXT, USER_BRANCH_EXT)
+        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT)
         # Send email
         send_email(html_content)
     except Exception:
