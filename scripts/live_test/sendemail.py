@@ -35,16 +35,13 @@ ARTIFACT_DIR = os.environ.get('ARTIFACTS_DIR')
 BUILD_ID = os.environ.get('BUILD_ID')
 EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS')
 EMAIL_KEY = os.environ.get('EMAIL_KEY')
-# authenticate with AAD application.
-# KUSTO_CLIENT_ID = os.environ.get('KUSTO_CLIENT_ID')
-# KUSTO_CLIENT_SECRET = os.environ.get('KUSTO_CLIENT_SECRET')
 ACCOUNT_NAME = os.environ.get('ACCOUNT_NAME')
+# authenticate with AAD token.
 KUSTO_CLUSTER = os.environ.get('KUSTO_CLUSTER')
 KUSTO_DATABASE = os.environ.get('KUSTO_DATABASE')
 KUSTO_TABLE = os.environ.get('KUSTO_TABLE')
 IDENTITY_CLIENT_ID = os.environ.get('IDENTITY_CLIENT_ID')
 # get tenant id from https://learn.microsoft.com/en-us/onedrive/find-your-office-365-tenant-id
-# KUSTO_TENANT_ID = os.environ.get('KUSTO_TENANT_ID')
 PYTHON_VERSION = os.environ.get('PYTHON_VERSION')
 USER_BRANCH = os.environ.get('USER_BRANCH')
 USER_BRANCH_EXT = os.environ.get('USER_BRANCH_EXT')
@@ -329,7 +326,7 @@ def main():
     try:
         # Generate index.html
         container_url = '{}/'.format(STATIC_WEB_URL) + container
-        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT)
+        html_content = generate_index.generate(ACCOUNT_NAME, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT)
         # Send email
         send_email(html_content)
     except Exception:

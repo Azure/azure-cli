@@ -18,7 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT):
+def generate(ACCOUNT_NAME, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT):
     """
     Generate index.html. Upload it to storage account
     :param container:
@@ -51,12 +51,12 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
         f.write(html)
 
     # Upload to storage account
-    cmd = 'az storage blob upload -f index.html -c {} -n index.html --account-name clitestresultstac --auth-mode login --overwrite'.format(container)
+    cmd = f'az storage blob upload -f index.html -c {container} -n index.html --account-name {ACCOUNT_NAME} --auth-mode login --overwrite'
     logger.warning('Running: ' + cmd)
     os.system(cmd)
 
     # Upload to $web container
-    cmd = 'az storage blob upload -f index.html -c "$web" -n index.html --account-name clitestresultstac --auth-mode login --overwrite'
+    cmd = f'az storage blob upload -f index.html -c "$web" -n index.html --account-name {ACCOUNT_NAME} --auth-mode login --overwrite'
     logger.warning('Running: ' + cmd)
     os.system(cmd)
 
