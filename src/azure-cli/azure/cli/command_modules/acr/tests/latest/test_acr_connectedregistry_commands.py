@@ -5,7 +5,6 @@
 
 from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from unittest import mock
 
 
 class AcrConnectedRegistryCommandsTests(ScenarioTest):
