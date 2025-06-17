@@ -166,6 +166,10 @@ def _prepare_client_kwargs_track2(cli_ctx):
     from azure.cli.core.sdk.policies import RecordTelemetryUserAgentPolicy
     client_kwargs['user_agent_policy'] = RecordTelemetryUserAgentPolicy(**client_kwargs)
 
+    if cli_ctx.data.get('_change_reference', None):
+        from azure.cli.core.sdk.policies import ChangeReferenceCustomHookPolicy
+        client_kwargs['custom_hook_policy'] = ChangeReferenceCustomHookPolicy(cli_ctx.data['_change_reference'])
+
     # Replace NetworkTraceLoggingPolicy to redact 'Authorization' and 'x-ms-authorization-auxiliary' headers.
     #   NetworkTraceLoggingPolicy: log raw network trace, with all headers.
     from azure.cli.core.sdk.policies import SafeNetworkTraceLoggingPolicy
