@@ -190,7 +190,7 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
             <td>{}</td>
             <td>{}</td>
           </tr>
-        """.format('<a href="{}">{}</a> '.format(STATIC_WEB_URL+module+'.html', module),
+        """.format('<a href="{}">{}</a> '.format(STATIC_WEB_URL+module+'.report.html', module),
                    passed, failed, rate, reports)
 
     table += """
