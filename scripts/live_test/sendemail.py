@@ -324,7 +324,7 @@ def main():
     # Generate index.html, send email
     try:
         # Generate index.html
-        container_url = 'https://clilivetestsa.blob.core.windows.net/' + container
+        container_url = f'https://{ACCOUNT_NAME}.blob.core.windows.net/' + container
         html_content = generate_index.generate(ACCOUNT_NAME, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT)
         # Send email
         send_email(html_content)
