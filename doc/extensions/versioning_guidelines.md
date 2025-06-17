@@ -147,3 +147,17 @@ Current extension module has a combination of semantic scheme and extra metadata
 ## Extension Installation Upgrade
 
 To distinguish `stable-only` extension installations from `preview-included` installations, the `--allow-preview` flag has been added to `az extension add/update` and `az upgrade`. The `stable/preview` justification follows this versioning specification from CLI version `2.56.0`. The default value for `--allow-preview` is `True` for compatibility and has been reset to `False` as of CLI version `2.67.0`.
+
+## Extension Module Version Upgrade
+
+To better guide CLI extension module version upgrades, the CLI team has introduced [a version validation task](https://github.com/Azure/azure-cli-extensions/blob/main/.github/workflows/VersionCalPRComment.yml) in the pull request (PR) pipeline, known as the `versioning-bot`. This bot attempts to deduce the appropriate next version for changed modules based on their previously released versions and the defined transition rules. If a PR does not comply with these versioning rules, it will be labeled with `release-version-block` and will require attention before it can be merged. The version change type — breaking, feature, or bugfix — is currently determined by the breaking change detection tool. If no breaking changes or interface changes are detected between the latest release and the current PR, the change will be classified as a bugfix.
+
+### Notes
+#### `Stable` vs. `Preview`
+Whether the next version is `stable` or `preview` is determined by the status of the module's most recent release. If an adjustment is needed, PR authors or reviewers with write permissions can add the `preview` or `stable` label to indicate the desired release type. 
+
+#### Custom Version Bumps
+If there is a business justification, PR authors or reviewers can specify the version bump level by adding one of the following labels: `major`, `minor`, `patch`, or `pre` — this overrides the default rules and informs the bot which version segment to increment.
+
+#### Skipping Version Validation
+If unsure how to interact with the bot or if version validation should be bypassed for any reason, reviewers can add the `skip-cal-version` label to skip the version validation task in the pipeline.
