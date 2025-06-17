@@ -1059,11 +1059,28 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     for identity in identities:
         identities_map[identity] = None
 
+    system_assigned_identity = instance.identity and 'principalId' in instance.identity.additional_properties and instance.identity.additional_properties['principalId'] is not None
+
+    # if there are no user-assigned identities or all user-assigned identities are already removed
     if not (instance.identity and instance.identity.user_assigned_identities) or \
        all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
+        if system_assigned_identity:
+            # if there is system assigned identity, then set identity type to SystemAssigned
+            parameters = {
+                'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                    type="SystemAssigned")}
+        else:
+            # no system assigned identity, set identity type to None
+            parameters = {
+                'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                    type="None")}
+    # if there are user-assigned identities and system assigned identity, then set identity type to SystemAssigned,UserAssigned
+    elif system_assigned_identity:
         parameters = {
             'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
-                type="None")}
+                user_assigned_identities=identities_map,
+                type="SystemAssigned,UserAssigned")}
+    # there is no system assigned identity, but there are user-assigned identities, then set identity type to UserAssigned
     else:
         parameters = {
             'identity': postgresql_flexibleservers.models.UserAssignedIdentity(

@@ -141,11 +141,12 @@ class AFDProfileCreate(_AFDProfileCreate):
         )
         args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
+        args_schema.location._required = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.location = 'global'
+        args.location = 'global'  # AFD profile location is always global
         user_assigned_identities = {}
         for identity in args.user_assigned_identities:
             user_assigned_identities[identity.to_serialized_data()] = {}
@@ -409,32 +410,27 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
                 enable_health_probe = False
             else:
                 enable_health_probe = True
-                if has_value(args.probe_path):
-                    probe_path = args.probe_path.to_serialized_data()
-                elif 'probePath' in existing['healthProbeSettings']:
-                    probe_path = existing['healthProbeSettings']['probePath']
 
-                if has_value(args.probe_protocol):
-                    probe_protocol = args.probe_protocol.to_serialized_data()
-                elif 'probeProtocol' in existing['healthProbeSettings']:
-                    probe_protocol = existing['healthProbeSettings']['probeProtocol']
+        if has_value(args.probe_path):
+            probe_path = args.probe_path.to_serialized_data()
+        elif 'probePath' in existing['healthProbeSettings']:
+            probe_path = existing['healthProbeSettings']['probePath']
 
-                if has_value(args.probe_interval_in_seconds):
-                    probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
-                elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
-                    probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
+        if has_value(args.probe_protocol):
+            probe_protocol = args.probe_protocol.to_serialized_data()
+        elif 'probeProtocol' in existing['healthProbeSettings']:
+            probe_protocol = existing['healthProbeSettings']['probeProtocol']
 
-                if has_value(args.probe_request_type):
-                    probe_request_type = args.probe_request_type.to_serialized_data()
-                elif 'probeRequestType' in existing['healthProbeSettings']:
-                    probe_request_type = existing['healthProbeSettings']['probeRequestType']
+        if has_value(args.probe_interval_in_seconds):
+            probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
+        elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
+            probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
 
-                args.health_probe_settings = {
-                    'probeIntervalInSeconds': probe_interval_in_seconds,
-                    'probePath': probe_path,
-                    'probeProtocol': probe_protocol,
-                    'probeRequestType': probe_request_type
-                }
+        if has_value(args.probe_request_type):
+            probe_request_type = args.probe_request_type.to_serialized_data()
+        elif 'probeRequestType' in existing['healthProbeSettings']:
+            probe_request_type = existing['healthProbeSettings']['probeRequestType']
+
         args.health_probe_settings = get_health_probe_settings(
             enable_health_probe,
             probe_interval_in_seconds,

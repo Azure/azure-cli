@@ -3737,7 +3737,7 @@ class _UpdateHelper:
             serialized_name="instanceView",
         )
         cls._build_schema_virtual_machine_extension_instance_view_read(properties.instance_view)
-        properties.protected_settings = AAZFreeFormDictType(
+        properties.protected_settings = AAZDictType(
             serialized_name="protectedSettings",
         )
         properties.protected_settings_from_key_vault = AAZObjectType(
@@ -3752,7 +3752,7 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         properties.publisher = AAZStrType()
-        properties.settings = AAZFreeFormDictType()
+        properties.settings = AAZDictType()
         properties.suppress_failures = AAZBoolType(
             serialized_name="suppressFailures",
         )
@@ -3761,8 +3761,14 @@ class _UpdateHelper:
             serialized_name="typeHandlerVersion",
         )
 
+        protected_settings = _schema_virtual_machine_read.resources.Element.properties.protected_settings
+        protected_settings.Element = AAZAnyType()
+
         provision_after_extensions = _schema_virtual_machine_read.resources.Element.properties.provision_after_extensions
         provision_after_extensions.Element = AAZStrType()
+
+        settings = _schema_virtual_machine_read.resources.Element.properties.settings
+        settings.Element = AAZAnyType()
 
         tags = _schema_virtual_machine_read.resources.Element.tags
         tags.Element = AAZStrType()

@@ -226,6 +226,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: 'build_scripts/windows/out/'
 
@@ -270,6 +271,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
+      continueOnError: true
       inputs:
         BuildDropPath: 'build_scripts/windows/out/'
 
@@ -344,12 +346,6 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Mariner 2.0 ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-mariner2.0-${{ arch.value }}
-          dockerfile: azure-linux.dockerfile
-          packageArtifactName: rpm-mariner2.0-${{ arch.value }}
-          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
         Azure Linux 3.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-azurelinux3.0-${{ arch.value }}
@@ -376,6 +372,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
+      continueOnError: true
       inputs:
         BuildDropPath: $(Build.ArtifactStagingDirectory)
         DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
@@ -393,9 +390,6 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Mariner 2.0 ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-mariner2.0-${{ arch.value }}
         Azure Linux 3.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-azurelinux3.0-${{ arch.value }}
@@ -460,6 +454,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -630,6 +625,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -717,10 +713,6 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Mariner 2.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-          artifact: rpm-mariner2.0-${{ arch.value }}
-          pool: ${{ arch.pool }}
         Azure Linux 3.0 ${{ arch.name }}:
           image: mcr.microsoft.com/azurelinux/base/core:3.0
           artifact: rpm-azurelinux3.0-${{ arch.value }}
@@ -745,6 +737,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -766,10 +759,6 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Mariner 2.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-          artifact: rpm-mariner2.0-${{ arch.value }}
-          pool: ${{ arch.pool }}
         Azure Linux 3.0 ${{ arch.name }}:
           image: mcr.microsoft.com/azurelinux/base/core:3.0
           artifact: rpm-azurelinux3.0-${{ arch.value }}
@@ -839,6 +828,7 @@ jobs:
       filePath: scripts/release/rpm/pipeline.sh
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
   - task: PublishPipelineArtifact@0
@@ -958,6 +948,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
