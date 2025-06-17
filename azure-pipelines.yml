@@ -226,6 +226,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: 'build_scripts/windows/out/'
 
@@ -270,6 +271,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
+      continueOnError: true
       inputs:
         BuildDropPath: 'build_scripts/windows/out/'
 
@@ -370,6 +372,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
+      continueOnError: true
       inputs:
         BuildDropPath: $(Build.ArtifactStagingDirectory)
         DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
@@ -451,6 +454,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -621,6 +625,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -732,6 +737,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -822,6 +828,7 @@ jobs:
       filePath: scripts/release/rpm/pipeline.sh
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
   - task: PublishPipelineArtifact@0
@@ -941,6 +948,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
