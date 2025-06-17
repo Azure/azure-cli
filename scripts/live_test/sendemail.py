@@ -49,7 +49,6 @@ USER_LIVE = os.environ.get('USER_LIVE')
 USER_REPO = os.environ.get('USER_REPO')
 USER_REPO_EXT = os.environ.get('USER_REPO_EXT')
 USER_TARGET = os.environ.get('USER_TARGET')
-STATIC_WEB_URL = os.environ.get('STATIC_WEB_URL')
 
 resource_html = """
 <!DOCTYPE html>
@@ -325,7 +324,7 @@ def main():
     # Generate index.html, send email
     try:
         # Generate index.html
-        container_url = '{}/'.format(STATIC_WEB_URL) + container
+        container_url = 'https://clilivetestsa.blob.core.windows.net/' + container
         html_content = generate_index.generate(ACCOUNT_NAME, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT)
         # Send email
         send_email(html_content)

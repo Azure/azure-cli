@@ -13,7 +13,7 @@ import re
 import requests
 import xml.etree.ElementTree as ET
 import logging
-
+STATIC_WEB_URL = os.environ.get('STATIC_WEB_URL')
 
 logger = logging.getLogger(__name__)
 
@@ -190,7 +190,8 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
             <td>{}</td>
             <td>{}</td>
           </tr>
-        """.format(module, passed, failed, rate, reports)
+        """.format('<a href="{}">{}</a> '.format(STATIC_WEB_URL+module+'.html', module),
+                   passed, failed, rate, reports)
 
     table += """
     </table>
