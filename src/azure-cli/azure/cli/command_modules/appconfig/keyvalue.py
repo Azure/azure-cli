@@ -157,7 +157,7 @@ def import_config(cmd,
             if src_snapshot:
                 all_features = [kv for kv in src_kvs if kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX)]
             else:
-                # Get all Feature flags with matching label
+                # Get all Feature flags with matching label and tags
                 all_features = __read_kv_from_config_store(src_azconfig_client,
                                                            key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
                                                            label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
@@ -180,7 +180,6 @@ def import_config(cmd,
         dest_kvs = __read_kv_from_config_store(azconfig_client,
                                                key=prefix + SearchFilterOptions.ANY_KEY if prefix else SearchFilterOptions.ANY_KEY,
                                                label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                               tags=src_tags,
                                                correlation_request_id=correlation_request_id)
         __discard_features_from_retrieved_kv(dest_kvs)
 
@@ -205,7 +204,6 @@ def import_config(cmd,
         all_features = __read_kv_from_config_store(azconfig_client,
                                                    key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY,
                                                    label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                                   tags=src_tags,
                                                    correlation_request_id=correlation_request_id)
 
         # Append all features to dest_features list
@@ -377,7 +375,6 @@ def export_config(cmd,
         dest_kvs = __read_kv_from_config_store(dest_azconfig_client,
                                                key=SearchFilterOptions.ANY_KEY,
                                                label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
-                                               tags=tags,
                                                correlation_request_id=correlation_request_id)
         __discard_features_from_retrieved_kv(dest_kvs)
 
@@ -387,7 +384,6 @@ def export_config(cmd,
                 cmd,
                 feature="*",
                 label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
-                tags=tags,
                 name=dest_name,
                 connection_string=dest_connection_string,
                 all_=True,
@@ -647,7 +643,7 @@ def delete_key(cmd,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
                                           tags=tags,
                                           correlation_request_id=correlation_request_id)
-    confirmation_message = "Found '{}' key-values matching the specified key and label. Are you sure you want to delete these key-values?".format(len(entries))
+    confirmation_message = "Found '{}' key-values matching the specified key, label and tags. Are you sure you want to delete these key-values?".format(len(entries))
     user_confirmation(confirmation_message, yes)
 
     deleted_entries = []

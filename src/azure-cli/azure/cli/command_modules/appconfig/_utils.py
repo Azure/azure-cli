@@ -240,16 +240,17 @@ def validate_feature_flag_key(key):
         raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
 
 
-# format tags to dictionary
-def format_tags(tags):
-    """ Extracts multiple space-separated tags in key[=value] format """
+# Converts a list of tags in the format key[=value] into a dictionary.
+# Ensures tags are properly parsed and formatted before adding to a key-value pair.
+def parse_tags_to_dict(tags):
+    """Converts a list of tags in key[=value] format to a dictionary."""
     if isinstance(tags, list):
         tags_dict = {}
         for item in tags:
-            result = {}
             if item:
                 comps = item.split('=', 1)
-                result = {comps[0]: comps[1]} if len(comps) > 1 else {item: ''}
-                tags_dict.update(result)
+                tag_key = comps[0]
+                tag_value = comps[1] if len(comps) > 1 else ''
+                tags_dict[tag_key] = tag_value
         return tags_dict
     return tags
