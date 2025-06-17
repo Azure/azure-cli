@@ -564,7 +564,7 @@ def upload_files(container):
     logger.info('Enter upload_files()')
 
     # Create container
-    cmd = f'az storage container create -n {container} --account-name {ACCOUNT_NAME} --public-access container --auth-mode login'
+    cmd = f'az storage container create -n {container} --account-name {ACCOUNT_NAME} --public-access off --auth-mode login'
     os.system(cmd)
 
     # Upload files
