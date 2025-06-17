@@ -9,13 +9,6 @@ from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 from azure.cli.core.profiles._shared import APIVersionException
 
 
-def cosmosdb_table_exists(cli_ctx):
-    try:
-        return supported_api_version(cli_ctx, ResourceType.DATA_COSMOS_TABLE, min_api='2017-04-17')
-    except APIVersionException:
-        return False
-
-
 def get_blob_types():
     return 'block', 'page', 'append'
 
