@@ -1249,6 +1249,7 @@ def __list_all_keyvalues(azconfig_client,
             azconfig_client - AppConfig client making calls to the service
             key_filter - Filter for the key of the feature flag
             label - Feature label or pattern
+            tags - Tags to filter the feature flags
 
         Return:
             List of KeyValue objects
@@ -1263,9 +1264,10 @@ def __list_all_keyvalues(azconfig_client,
         raise CLIError("Comma separated feature names are not supported. Please provide escaped string if your feature name contains comma. \nSee \"az appconfig feature list -h\" for correct usage.")
 
     label = prep_filter_for_url_encoding(label)
+    prepped_tags = prep_filter_for_url_encoding(tags)
 
     try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, tags_filter=tags, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, tags_filter=prepped_tags, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError('Failed to read feature flag(s) that match the specified feature and label. ' + str(exception))
 

@@ -171,13 +171,15 @@ def __write_kv_and_features_to_config_store(
     if features:
         key_values.extend(__convert_featureflag_list_to_keyvalue_list(features))
 
-    parsed_tags = parse_tags_to_dict(tags)
     for kv in key_values:
         set_kv = convert_keyvalue_to_configurationsetting(kv)
         if not preserve_labels:
             set_kv.label = label
-        if tags is not None:  # Empty tags can be used to clear existing tags
-            set_kv.tags = parsed_tags
+        if tags is not None:
+            if tags == "":  # Empty string explicitly clears existing tags
+                set_kv.tags = {}
+            else:
+                set_kv.tags = parse_tags_to_dict(tags)
 
         # Don't overwrite the content type of feature flags or key vault references
         if (
