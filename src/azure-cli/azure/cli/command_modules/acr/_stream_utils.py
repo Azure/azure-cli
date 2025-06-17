@@ -50,7 +50,6 @@ def stream_logs(cmd, client,
         raise CLIError(error_msg)
 
     if not artifact:
-        _, _, container_name, blob_name, _ = get_blob_info(log_file_sas)
         BlobClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
         blob_client = BlobClient.from_blob_url(log_file_sas)
         if not timeout:
