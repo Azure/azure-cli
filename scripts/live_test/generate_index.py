@@ -56,7 +56,7 @@ def generate(ACCOUNT_NAME, container, container_url, testdata, USER_REPO, USER_B
     os.system(cmd)
 
     # Upload to $web container
-    cmd = f'az storage blob upload -f index.html -c "$web" -n index.html --account-name {ACCOUNT_NAME} --auth-mode login --overwrite'
+    cmd = f"az storage blob upload -f index.html -c '$web' -n index.html --account-name {ACCOUNT_NAME} --auth-mode login --overwrite"
     logger.warning('Running: ' + cmd)
     os.system(cmd)
 

@@ -573,7 +573,7 @@ def upload_files(container):
                 fullpath = os.path.join(root, name)
                 cmd = f'az storage blob upload -f {fullpath} -c {container} -n {name} --account-name {ACCOUNT_NAME} --auth-mode login'
                 os.system(cmd)
-                cmd = f'az storage blob upload -f {fullpath} -c "$web" -n {name} --account-name {ACCOUNT_NAME} --auth-mode login --overwrite'
+                cmd = f"az storage blob upload -f {fullpath} -c '$web' -n {name} --account-name {ACCOUNT_NAME} --auth-mode login --overwrite"
                 os.system(cmd)
 
     logger.info('Exit upload_files()')
