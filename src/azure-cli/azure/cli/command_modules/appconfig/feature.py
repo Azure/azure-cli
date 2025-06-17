@@ -1264,7 +1264,7 @@ def __list_all_keyvalues(azconfig_client,
         raise CLIError("Comma separated feature names are not supported. Please provide escaped string if your feature name contains comma. \nSee \"az appconfig feature list -h\" for correct usage.")
 
     label = prep_filter_for_url_encoding(label)
-    prepped_tags = prep_filter_for_url_encoding(tags)
+    prepped_tags = [prep_filter_for_url_encoding(tag) for tag in tags] if tags else []
 
     try:
         configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, tags_filter=prepped_tags, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
