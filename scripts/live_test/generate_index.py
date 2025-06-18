@@ -121,7 +121,6 @@ def render(testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT
         <th>Pass</th>
         <th>Fail</th>
         <th>Pass rate</th>
-        <th>Reports</th>
       </tr>
     """
 
@@ -131,7 +130,6 @@ def render(testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT
         <td>{}</td>
         <td>{}</td>
         <td>{}</td>
-        <td>N/A</td>
       </tr>
     """.format(testdata.total[1], testdata.total[2], testdata.total[3])
 
