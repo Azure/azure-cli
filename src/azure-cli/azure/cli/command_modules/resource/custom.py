@@ -1688,29 +1688,27 @@ def export_group_as_template(
 
     if output_format is None or output_format.lower() == "json" or output_format.lower() == "arm":
         export_template_request = ExportTemplateRequest(resources=resources, options=options, output_format="Json")
-    
     elif output_format.lower() == "bicep":
         export_template_request = ExportTemplateRequest(resources=resources, options=options, output_format="Bicep")
-
     else:
         raise CLIError('az resource: error: argument --output-format: invalid OutputFormat value: \'%s\'' % output_format)
-    
+
     # Exporting a resource group as a template is async since API version 2019-08-01.
     if cmd.supported_api_version(min_api='2019-08-01'):
         if cmd.supported_api_version(min_api='2024-11-01'):
             result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
-                                                                parameters=export_template_request,
-                                                                api_version='2024-11-01')
+                                                                      parameters=export_template_request,
+                                                                      api_version='2024-11-01')
         else:
             if output_format.lower() == "bicep":
                 raise CLIError("Bicep export is not supported in API version < 2024-11-01")
-            else:
-                result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
-                                                                parameters=export_template_request)
+
+            result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
+                                                                      parameters=export_template_request)
         result = LongRunningOperation(cmd.cli_ctx)(result_poller)
     else:
         result = rcf.resource_groups.begin_export_template(resource_group_name,
-                                                        parameters=export_template_request)
+                                                           parameters=export_template_request)
 
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
@@ -1722,11 +1720,11 @@ def export_group_as_template(
             logger.warning(str(error))
         for detail in getattr(error, 'details', None) or []:
             logger.error(detail.message)
-    
-    if output_format is None or output_format.lower() == "json" or output_format.lower() == "arm":
-        return result.template
-    elif output_format.lower() == "bicep":
+
+    if output_format.lower() == "bicep":
         return result.output
+    else:
+        return result.template
 
 
 def create_application(cmd, resource_group_name,
