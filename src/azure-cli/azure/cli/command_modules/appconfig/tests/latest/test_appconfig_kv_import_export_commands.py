@@ -1179,3 +1179,54 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         })
         with self.assertRaisesRegex(CLIError, "Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'."):
             self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --dest-label {label} --preserve-labels -y')
+
+        # Tag filtering test
+        key_tag_test = "TagTestKey"
+        tags = {
+            "tag1": "value1",
+            "tag2": "value2"
+        }
+        tags_str = ' '.join([f"{k}={v}" for k, v in tags.items()])
+        self.kwargs.update({
+            'key': key_tag_test,
+            'tags': tags_str
+        })
+
+        # add a new key-value entry with tags
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --tags {tags} -y',
+                 checks=[self.check('key', key_tag_test),
+                         self.check('tags', tags)])
+        
+        # create entry without tags
+        label_without_tags = "LabelWithoutTags"
+        self.kwargs.update({
+            'label': label_without_tags
+        })
+
+        # add a new key-value entry without tags
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --label {label} --value {value} -y',
+                 checks=[self.check('label', label_without_tags),
+                         self.check('tags', {})])
+        
+        # export only key-value with tags and add new tags
+        dest_tags = {
+            "tag3": "value3"
+        }
+        dest_tags_str = ' '.join([f"{k}={v}" for k, v in dest_tags.items()])
+        self.kwargs.update({
+            'dest_tags': dest_tags_str
+        })
+
+        self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --key {key} --tags {tags} --dest-tags {dest_tags} -y')
+        deleted_kv_with_tags = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --tags {dest_tags} -y',
+                                        checks=[self.check('[0].key', key_tag_test),
+                                                self.check('[0].tags', dest_tags)]).get_output_in_json()
+        assert(len(deleted_kv_with_tags) == 1)
+
+        # import only key-value with tags and add new tags
+        self.cmd('appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-key {key} --src-tags {tags} --tags {dest_tags} -y')
+        deleted_kv_with_tags = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --tags {dest_tags} -y',
+                                        checks=[self.check('[0].key', key_tag_test),
+                                                self.check('[0].tags', dest_tags)]).get_output_in_json()
+        assert(len(deleted_kv_with_tags) == 1)
+

@@ -29,7 +29,7 @@ from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import (get_appconfig_data_client,
-                     prep_label_filter_for_url_encoding,
+                     prep_filter_for_url_encoding,
                      validate_feature_flag_name)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
@@ -1039,6 +1039,7 @@ def __list_features(
     key=None,
     name=None,
     label=None,
+    tags=None,
     fields=None,
     connection_string=None,
     top=None,
@@ -1069,6 +1070,7 @@ def __list_features(
             azconfig_client,
             key_filter=key_filter,
             label=label if label else SearchFilterOptions.ANY_LABEL,
+            tags=tags,
             correlation_request_id=correlation_request_id,
         )
         retrieved_featureflags = []
@@ -1238,6 +1240,7 @@ def __update_existing_key_value(azconfig_client,
 def __list_all_keyvalues(azconfig_client,
                          key_filter,
                          label=None,
+                         tags=None,
                          correlation_request_id=None):
     '''
         To get all keys by name or pattern
@@ -1246,6 +1249,7 @@ def __list_all_keyvalues(azconfig_client,
             azconfig_client - AppConfig client making calls to the service
             key_filter - Filter for the key of the feature flag
             label - Feature label or pattern
+            tags - Tags to filter the feature flags
 
         Return:
             List of KeyValue objects
@@ -1259,10 +1263,11 @@ def __list_all_keyvalues(azconfig_client,
     if unescaped_comma_regex.search(key_filter):
         raise CLIError("Comma separated feature names are not supported. Please provide escaped string if your feature name contains comma. \nSee \"az appconfig feature list -h\" for correct usage.")
 
-    label = prep_label_filter_for_url_encoding(label)
+    label = prep_filter_for_url_encoding(label)
+    prepped_tags = [prep_filter_for_url_encoding(tag) for tag in tags] if tags else []
 
     try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, tags_filter=prepped_tags, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError('Failed to read feature flag(s) that match the specified feature and label. ' + str(exception))
 
