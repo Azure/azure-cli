@@ -1693,12 +1693,11 @@ def export_group_as_template(
         export_template_request = ExportTemplateRequest(resources=resources, options=options, output_format="Bicep")
 
     else:
-        raise CLIError('az resource: error: argument --output_format: invalid OutputFormat value: \'%s\'' % output_format)
+        raise CLIError('az resource: error: argument --output-format: invalid OutputFormat value: \'%s\'' % output_format)
     
     # Exporting a resource group as a template is async since API version 2019-08-01.
     if cmd.supported_api_version(min_api='2019-08-01'):
         if cmd.supported_api_version(min_api='2024-11-01'):
-            print("api version is 2024-11-01")
             result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
                                                                 parameters=export_template_request,
                                                                 api_version='2024-11-01')
