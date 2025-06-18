@@ -6,7 +6,7 @@
 from azure.cli.core import _debug
 from azure.cli.core.auth.util import resource_to_scopes
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
-from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
+from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.util import get_az_user_agent, is_track2
 from knack.log import get_logger
@@ -275,8 +275,8 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
         if location_mode:
             client.location_mode = location_mode
     except ValueError as exc:
-        _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
-                                              'common._error#_ERROR_STORAGE_MISSING_INFO')
+        _ERROR_STORAGE_MISSING_INFO = ('You need to provide an account name and either an account_key or sas_token '
+                                       'when creating a storage service.')
         if _ERROR_STORAGE_MISSING_INFO in str(exc):
             raise ValueError(exc)
         raise CLIError('Unable to obtain data client. Check your connection parameters.')
