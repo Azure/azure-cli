@@ -12,7 +12,6 @@ from knack.log import get_logger
 from azure.core.exceptions import HttpResponseError
 from azure.common import AzureHttpError
 from azure.cli.core.profiles import ResourceType, get_sdk
-from ._azure_utils import get_blob_info
 from ._constants import ACR_RUN_DEFAULT_TIMEOUT_IN_SEC
 
 logger = get_logger(__name__)

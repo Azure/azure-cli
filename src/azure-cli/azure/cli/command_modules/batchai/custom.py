@@ -524,7 +524,7 @@ def _configure_auto_storage(cli_ctx, location):
     BlobServiceClient = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                 '_blob_service_client#BlobServiceClient')
     ShareServiceClient = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
-                                '_share_service_client#ShareServiceClient')
+                                 '_share_service_client#ShareServiceClient')
 
     resource_group = _get_auto_storage_resource_group()
     resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -820,7 +820,7 @@ def _get_files_from_afs(cli_ctx, afs, path, expiry):
     :param int expiry: SAS expiration time in minutes.
     """
     ShareClient = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
-                                 '_share_client#ShareClient')
+                          '_share_client#ShareClient')
     FileSasPermissions = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE, '_models#FileSasPermissions')
     FileSharedAccessSignature = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
                                         '_shared_access_signature#FileSharedAccessSignature')
