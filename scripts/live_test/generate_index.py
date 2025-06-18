@@ -18,35 +18,14 @@ STATIC_WEB_URL = os.environ.get('STATIC_WEB_URL')
 logger = logging.getLogger(__name__)
 
 
-def generate(ACCOUNT_NAME, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT):
+def generate(ACCOUNT_NAME, container, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT):
     """
     Generate index.html. Upload it to storage account
     :param container:
-    :param container_url:
     :return: a HTML string
     """
     logger.warning('Enter generate()')
-    # [{'name': name, 'url': url}]
-    data = []
-    url = container_url + '?restype=container&comp=list'
-    content = requests.get(url).content
-    logger.warning(content)
-    root = ET.fromstring(content)
-    for blobs in root:
-        for blob in blobs:
-            name = url = ''
-            for e in blob:
-                if e.tag == 'Name':
-                    name = e.text
-                if e.tag == 'Url':
-                    url = e.text
-            if name == '' or url == '':
-                logger.warning('[Warning] Blob\'s name or url is empty, name: {}, url: {}'.format(name, url))
-            if name.endswith('.html'):
-                data.append({'name': name, 'url': url})
-        break
-    logger.warning(data)
-    html = render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT)
+    html = render(testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT)
     with open('index.html', 'w') as f:
         f.write(html)
 
@@ -73,12 +52,9 @@ def sort_by_module_name(item):
         return 0, item[0]  # sort with lower priority
 
 
-def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT):
+def render(testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT):
     """
     Return a HTML string
-    :param data:
-    :param container:
-    :param container_url:
     :param testdata:
     :param USER_REPO:
     :param USER_BRANCH:
@@ -162,36 +138,15 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     sorted_modules = sorted(testdata.modules, key=sort_by_module_name)
 
     for module, passed, failed, rate in sorted_modules:
-        reports = ''
-        for x in data:
-            name = x['name']
-            url = x['url']
-            if name.startswith(module + '.'):
-                display_name = 'report'
-                # if 'parallel' in name:
-                #     display_name = 'parallel'
-                # elif 'sequential' in name:
-                #     display_name = 'sequential'
-                try:
-                    html = requests.get(url).text
-                    pattern = re.compile('\\d+ tests ran in')
-                    match = pattern.search(html)
-                    number = match.group().split()[0]
-                    if number.isdigit():
-                        display_name += '(' + number + ')'
-                except:
-                    logger.exception(traceback.print_exc())
-                reports += '<a href="{}">{}</a> '.format(url, display_name)
         table += """
           <tr>
             <td>{}</td>
             <td>{}</td>
             <td>{}</td>
             <td>{}</td>
-            <td>{}</td>
           </tr>
         """.format('<a href="{}">{}</a> '.format(STATIC_WEB_URL+module+'.report.html', module),
-                   passed, failed, rate, reports)
+                   passed, failed, rate)
 
     table += """
     </table>
