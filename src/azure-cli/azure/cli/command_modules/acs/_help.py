@@ -234,13 +234,13 @@ parameters:
   - name: --network-plugin
     type: string
     short-summary: The Kubernetes network plugin to use.
-    long-summary: Specify "azure" for routable pod IPs from VNET, "kubenet" for non-routable pod IPs with an overlay network, or "none" for no networking configured. Defaults to "kubenet".
+    long-summary: Specify "azure" for highly scalable networking, "kubenet" for IP assignment from subnet NAT-based routing, or "none" for no networking configured. Defaults to "azure".
   - name: --network-plugin-mode
     type: string
     short-summary: The network plugin mode to use.
     long-summary: |
-        Used to control the mode the network plugin should operate in. For example, "overlay" used with
-        --network-plugin=azure will use an overlay network (non-VNET IPs) for pods in the cluster.
+        Used to control the mode the network plugin should operate in. Defaults to "overlay". If not specified with "azure" as
+        network plugin, pods are given routable IPs from VNET.
   - name: --network-policy
     type: string
     short-summary: Network Policy Engine to use.
@@ -1629,12 +1629,18 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --enable-encryption-at-host
     type: bool
     short-summary: Enable EncryptionAtHost, default value is false.
@@ -1787,12 +1793,18 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how many minutes to wait for all pods to be evicted
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
@@ -1859,12 +1871,18 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
+  - name: --max-unavailable
+    type: string
+    short-summary: The maximum number or percentage of nodes that can be simultaneously unavailable during upgrade. When specified, it represents the number or percent used, eg. 1 or 5%
   - name: --drain-timeout
     type: int
     short-summary: When nodes are drain how long to wait for all pods to be evicted
   - name: --node-soak-duration
     type: int
     short-summary: The amount of time (in minutes) to wait after draining a node and before reimaging it and moving on to next node.
+  - name: --undrainable-node-behavior
+    type: string
+    short-summary: Define the behavior for undrainable nodes during upgrade. The value should be "Cordon" or "Schedule". The default value is "Schedule".
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to upgrade this nodepool.

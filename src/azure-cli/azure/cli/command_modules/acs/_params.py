@@ -92,7 +92,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_linux_host_name, validate_load_balancer_idle_timeout,
     validate_load_balancer_outbound_ip_prefixes,
     validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
-    validate_load_balancer_sku, validate_max_surge,
+    validate_load_balancer_sku, validate_max_surge, validate_max_unavailable,
     validate_nat_gateway_idle_timeout,
     validate_nat_gateway_managed_outbound_ip_count, validate_network_policy,
     validate_nodepool_id, validate_nodepool_labels, validate_nodepool_name,
@@ -418,7 +418,7 @@ def load_arguments(self, _):
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
-        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
         c.argument('aci_subnet_name')
         c.argument('appgw_name', arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', arg_group='Application Gateway')
@@ -714,7 +714,7 @@ def load_arguments(self, _):
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
-        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag(), is_preview=True)
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
 
     with self.argument_context('aks get-credentials', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
@@ -831,8 +831,10 @@ def load_arguments(self, _):
         c.argument('node_osdisk_type', arg_type=get_enum_type(node_os_disk_types))
         c.argument('node_osdisk_size', type=int)
         c.argument('max_surge', validator=validate_max_surge)
+        c.argument("max_unavailable", validator=validate_max_unavailable)
         c.argument('drain_timeout', type=int)
         c.argument('node_soak_duration', type=int)
+        c.argument("undrainable_node_behavior", default='Schedule')
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
@@ -871,8 +873,10 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('node_taints', validator=validate_nodepool_taints)
         c.argument('max_surge', validator=validate_max_surge)
+        c.argument("max_unavailable", validator=validate_max_unavailable)
         c.argument('drain_timeout', type=int)
         c.argument('node_soak_duration', type=int)
+        c.argument("undrainable_node_behavior")
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
@@ -889,8 +893,10 @@ def load_arguments(self, _):
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
+        c.argument("max_unavailable", validator=validate_max_unavailable)
         c.argument('drain_timeout', type=int)
         c.argument('node_soak_duration', type=int)
+        c.argument("undrainable_node_behavior")
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 

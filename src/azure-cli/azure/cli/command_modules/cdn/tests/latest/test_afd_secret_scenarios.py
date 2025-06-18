@@ -72,7 +72,7 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
         secret_source = "/subscriptions/3c0124f9-e564-4c42-86f7-fa79457aedc3/resourceGroups/byoc/providers/Microsoft.KeyVault/vaults/Azure-CDN-BYOC/secrets/afde2e-root-azfdtest-xyz"
-        latest_version = "341da32dcfec4b4cb3f3f3a410ca7a13"
+        latest_version = "210a1096aa804ed78484daca6f58e71f"
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
                                    profile_name,

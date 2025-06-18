@@ -12,7 +12,6 @@ from azure.cli.testsdk.decorators import serial_test
 from ..storage_test_util import StorageScenarioMixin
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadLiveTests(LiveScenarioTest):
     @serial_test()
     @ResourceGroupPreparer()

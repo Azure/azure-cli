@@ -38,19 +38,19 @@ def transform_vm_create_output(result):
     from azure.mgmt.core.tools import parse_resource_id
     from collections import OrderedDict
     try:
-        resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
-        output = OrderedDict([('id', result.id),
+        resource_group = result.get('resource_group', None) or parse_resource_id(result['id'])['resource_group']
+        output = OrderedDict([('id', result['id']),
                               ('resourceGroup', resource_group),
-                              ('powerState', result.power_state),
-                              ('publicIpAddress', result.public_ips),
-                              ('fqdns', result.fqdns),
-                              ('privateIpAddress', result.private_ips),
-                              ('macAddress', result.mac_addresses),
-                              ('location', result.location)])
-        if getattr(result, 'identity', None):
-            output['identity'] = result.identity
-        if hasattr(result, 'zones'):  # output 'zones' column even the property value is None
-            output['zones'] = result.zones[0] if result.zones else ''
+                              ('powerState', result.get('powerState', '')),
+                              ('publicIpAddress', result.get('publicIps', '')),
+                              ('fqdns', result.get('fqdns', '')),
+                              ('privateIpAddress', result.get('privateIps', '')),
+                              ('macAddress', result.get('macAddresses', '')),
+                              ('location', result.get('location', ''))])
+        if result.get('identity', None):
+            output['identity'] = result['identity']
+        if 'zones' in result:  # output 'zones' column even the property value is None
+            output['zones'] = result['zones'][0] if result['zones'] else ''
         return output
     except AttributeError:
         from msrest.pipeline import ClientRawResponse

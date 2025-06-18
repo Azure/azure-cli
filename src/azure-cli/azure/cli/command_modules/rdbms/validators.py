@@ -514,10 +514,18 @@ def _pg_version_validator(version, versions):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
+        if version == '11':
+            raise CLIError("Support for PostgreSQL 11 has officially ended. "
+                           "We recommend selecting PostgreSQL 14 or a later version for "
+                           "all future operations.")
         if version == '12':
             raise CLIError("Support for PostgreSQL 12 has officially ended. "
-                           "We recommend selecting PostgreSQL 13 or a later version for "
+                           "We recommend selecting PostgreSQL 14 or a later version for "
                            "all future operations.")
+        if version == '13':
+            logger.warning("PostgreSQL version 13 will reach end-of-life (EOL) soon. "
+                           "Upgrade to PostgreSQL 14 or later as soon as possible to "
+                           "maintain security, performance, and supportability.")
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
@@ -986,7 +994,7 @@ def validate_backup_name(backup_name):
 
 
 def validate_database_name(database_name):
-    if database_name is not None and not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]{0,30}$', database_name):
+    if database_name is not None and not re.match(r'^[a-zA-Z_][\w\-]{0,62}$', database_name):
         raise ValidationError("Database name must begin with a letter (a-z) or underscore (_). "
-                              "Subsequent characters in a name can be letters, digits (0-9), or underscores. "
-                              "Database name length must be less than 32 characters.")
+                              "Subsequent characters in a name can be letters, digits (0-9), hyphens (-), "
+                              "or underscores. Database name length must be less than 64 characters.")

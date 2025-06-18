@@ -476,6 +476,21 @@ def validate_max_surge(namespace):
         raise CLIError("--max-surge should be an int or percentage")
 
 
+def validate_max_unavailable(namespace):
+    """validates parameters max unavailable are positive integers or percents."""
+    if namespace.max_unavailable is None:
+        return
+    int_or_percent = namespace.max_unavailable
+    if int_or_percent.endswith('%'):
+        int_or_percent = int_or_percent.rstrip('%')
+
+    try:
+        if int(int_or_percent) < 0:
+            raise InvalidArgumentValueError("--max-unavailable must be positive")
+    except ValueError:
+        raise InvalidArgumentValueError("--max-unavailable should be an int or percentage")
+
+
 def validate_assign_identity(namespace):
     if namespace.assign_identity is not None:
         if namespace.assign_identity == '':
@@ -845,7 +860,7 @@ def validate_bootstrap_container_registry_resource_id(namespace):
     container_registry_resource_id = namespace.bootstrap_container_registry_resource_id
     if container_registry_resource_id is None or container_registry_resource_id == '':
         return
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if not is_valid_resource_id(container_registry_resource_id):
         raise InvalidArgumentValueError("--bootstrap-container-registry-resource-id is not a valid Azure resource ID.")
 

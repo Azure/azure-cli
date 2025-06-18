@@ -3,6 +3,77 @@
 Release History
 ===============
 
+2.74.0
+++++++
+
+**ACR**
+
+* `az acr login`: Add `refreshToken` and `username` fields to the output after using `--expose-token` parameter (#31091)
+* `az acr create`: Fix logs for domain name label (#31423)
+* `az acr connected-registry`: Remove private preview message (#31475)
+
+**AKS**
+
+* `az aks nodepool add/update/upgrade`: Add new parameter `--undrainable-node-behavior` to specify whether nodes can be cordoned during upgrade (#31495)
+* `az aks create/enable-addons`: Remove preview flag for `--enable-high-log-scale-mode` parameter (#31531)
+* `az aks nodepool add/update/upgrade`: Add `--max-unavailable` to specify he maximum number or percentage of nodes that can be simultaneously unavailable during upgrade (#31510)
+
+**App Config**
+
+* Fix #30619: `az appconfig feature set`: Fix invalid value for `--requirement-type` (#31471)
+* Fix #30619: `az appconfig kv import`: Fix invalid value for `--requirement-type` (#31471)
+
+**App Service**
+
+* `az appservice plan create`: Update the description of `--zone-redundant` parameter (#31437)
+* `az webapp config set`: Remove number of workers validation (#31443)
+
+**ARM**
+
+* `az policy`: Add breaking change pre-announcement (#31458)
+
+**Backup**
+
+* `az backup container/item/policy/protection`: Add support for ASE backup operations (#31413)
+* `az backup`: Add support for HANA Snapshot (#27932)
+
+**Compute**
+
+* `az vm/vmss create`: Add warning log for changing the default value of VM size (#31409)
+
+**Cosmos DB**
+
+* `az cosmosdb sql container`: Add Full Text Policy support (#31425)
+
+**Identity**
+
+* `az identity federated-credential create/update`: Add support for claims matching expressions (#31436)
+
+**Monitor**
+
+* `az monitor action-group`: Support `--incident-receivers`,  `--mi-user-assigned` and `--mi-system-assigned`(#31205)
+
+**MySQL**
+
+* `az mysql flexible-server create`: Change default storage redundancy for BC SKU to local redundancy (#31537)
+
+**NetAppFiles**
+
+* `az netappfiles volume-group create`: Add support for Oracle in ANF Volume Groups (#31528)
+
+**Network**
+
+* `az network vnet-gateway create`: Add `--enable-high-bandwith-vpn-gateway` parameter (#31100)
+* `az network vpn-connection show`: Support new properties output with virtual network gateway (#31100)
+* `az network vnet-gateway migration`: Support vpn gateway migration feature (#31429)
+* `az network private-endpoint-connection`: Add provider `Microsoft.FluidRelay/fluidRelayServers` (#31472)
+* `az network network-watcher packet-capture`: Support for packet capture includes a ring buffer (#30784)
+* `az network private-endpoint-connection`: Add provider `Microsoft.VideoIndexer/accounts` (#31549)
+
+**RDBMS**
+
+* `az postgres flexible-server create/db`: Fix for `--database-name` validation (#31542)
+
 2.73.0
 ++++++
 

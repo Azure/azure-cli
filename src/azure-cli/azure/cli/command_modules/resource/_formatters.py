@@ -5,7 +5,7 @@
 
 from itertools import groupby
 
-from azure.mgmt.resource.resources.models import ChangeType, PropertyChangeType
+from azure.mgmt.resource.resources.models import ChangeType, PropertyChangeType, Level
 
 from ._symbol import Symbol
 from ._color import Color, ColoredStringBuilder
@@ -28,6 +28,12 @@ _property_change_type_to_color = {
     PropertyChangeType.modify: Color.PURPLE,
     PropertyChangeType.array: Color.PURPLE,
     PropertyChangeType.no_effect: Color.GRAY,
+}
+
+_diagnostic_level_to_color = {
+    Level.ERROR: Color.RED,
+    Level.WARNING: Color.DARK_YELLOW,
+    Level.INFO: Color.RESET,
 }
 
 _change_type_to_symbol = {
@@ -73,8 +79,22 @@ def format_what_if_operation_result(what_if_operation_result, enable_color=True)
     builder = ColoredStringBuilder(enable_color)
     _format_noise_notice(builder)
     _format_change_type_legend(builder, what_if_operation_result.changes)
-    _format_resource_changes(builder, what_if_operation_result.changes)
-    _format_resource_changes_stats(builder, what_if_operation_result.changes)
+    _format_resource_changes(builder,
+                             what_if_operation_result.changes,
+                             definite_changes=True)
+    _format_resource_changes_stats(builder,
+                                   what_if_operation_result.changes,
+                                   definite_changes=True)
+    _format_resource_changes(builder,
+                             what_if_operation_result.potential_changes,
+                             definite_changes=False)
+    _format_resource_changes_stats(builder,
+                                   what_if_operation_result.potential_changes,
+                                   definite_changes=False)
+    _format_diagnostics(builder,
+                        what_if_operation_result.changes,
+                        what_if_operation_result.potential_changes,
+                        what_if_operation_result.diagnostics)
     return builder.build()
 
 
@@ -120,20 +140,24 @@ def _format_change_type_legend(builder, resource_changes):
         builder.append_line(change_type.title())
 
 
-def _format_resource_changes_stats(builder, resource_changes):
-    builder.append_line().append("Resource changes: ")
+def _format_resource_changes_stats(builder, resource_changes, definite_changes=True):
+    if definite_changes:
+        builder.append_line().append("Resource changes: ")
 
-    if not resource_changes:
-        builder.append("no change.")
-        return
+        if not resource_changes:
+            builder.append("no change.")
+            return
+    elif resource_changes:
+        builder.append_line().append("Potential changes: ")
 
-    sorted_resource_changes = sorted(resource_changes, key=lambda x: _change_type_to_weight[x.change_type])
-    resource_changes_by_change_type = groupby(sorted_resource_changes, lambda x: x.change_type)
-    count_by_change_type = map(lambda x: (x[0], len(list(x[1]))), resource_changes_by_change_type)
-    count_by_change_type = filter(lambda x: x[1] > 0, count_by_change_type)
-    change_type_stats = map(lambda x: _format_change_type_count(x[0], x[1]), count_by_change_type)
+    if resource_changes:
+        sorted_resource_changes = sorted(resource_changes, key=lambda x: _change_type_to_weight[x.change_type])
+        resource_changes_by_change_type = groupby(sorted_resource_changes, lambda x: x.change_type)
+        count_by_change_type = map(lambda x: (x[0], len(list(x[1]))), resource_changes_by_change_type)
+        count_by_change_type = filter(lambda x: x[1] > 0, count_by_change_type)
+        change_type_stats = map(lambda x: _format_change_type_count(x[0], x[1]), count_by_change_type)
 
-    builder.append(", ".join(change_type_stats)).append(".")
+        builder.append(", ".join(change_type_stats)).append(".")
 
 
 def _format_change_type_count(change_type, count):  # pylint: disable=too-many-return-statements
@@ -155,7 +179,36 @@ def _format_change_type_count(change_type, count):  # pylint: disable=too-many-r
     raise ValueError(f"Invalid ChangeType: {change_type}")
 
 
-def _format_resource_changes(builder, resource_changes):
+def _format_diagnostics(builder, resource_changes, potential_changes, diagnostics):
+    short_circuited_resources = [r for r in (resource_changes or []) + (potential_changes or [])
+                                 if r.change_type == ChangeType.UNSUPPORTED]
+
+    diags = diagnostics or []
+
+    if len(short_circuited_resources) + len(diags) > 0:
+        builder.append_line()
+        builder.append_line()
+        builder.append(f"Diagnostics ({len(short_circuited_resources) + len(diags)}): ")
+        builder.append_line()
+
+        for change in short_circuited_resources:
+            with builder.new_color_scope(_diagnostic_level_to_color[Level.WARNING]):
+                builder.append(change.resource_id)
+                builder.append(" (Unsupported) ")
+                builder.append(change.unsupported_reason)
+                builder.append_line()
+
+        for diag in diags:
+            with builder.new_color_scope(_diagnostic_level_to_color[diag.level]):
+                builder.append(diag.target)
+                builder.append(" (")
+                builder.append(diag.code)
+                builder.append(") ")
+                builder.append(diag.message)
+                builder.append_line()
+
+
+def _format_resource_changes(builder, resource_changes, definite_changes=True):
     if not resource_changes:
         return
 
@@ -163,7 +216,12 @@ def _format_resource_changes(builder, resource_changes):
     resource_changes_by_scope = groupby(sorted(resource_changes, key=_get_scope_uppercase), _get_scope_uppercase)
 
     builder.append_line()
-    builder.append_line(f"The deployment will update the following {'scope:' if num_scopes == 1 else 'scopes'}")
+    if definite_changes:
+        builder.append("The deployment will update the following ")
+    else:
+        builder.append("The following change MAY OR MAY NOT be deployed to the following ")
+
+    builder.append_line('scope:' if num_scopes == 1 else 'scopes:')
 
     for _, resource_changes_in_scope in resource_changes_by_scope:
         resource_changes_in_scope_list = list(resource_changes_in_scope)

@@ -2192,6 +2192,21 @@ def list_waf_managed_rules(cmd, resource_group_name, policy_name):
 # endregion
 
 
+# region ApplicationGatewayWAFPolicy ManagedRule Exception
+def remove_waf_managed_rule_exception(cmd, resource_group_name, policy_name):
+    from .aaz.latest.network.application_gateway.waf_policy import Update
+
+    class WAFExceptionRemove(Update):
+        def pre_instance_update(self, instance):
+            instance.properties.managed_rules.exceptions = []
+
+    return WAFExceptionRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": policy_name,
+        "resource_group": resource_group_name,
+    })
+# endregion
+
+
 # region ApplicationGatewayWAFPolicy ManagedRule OwaspCrsExclusionEntry
 # pylint: disable=too-many-nested-blocks
 def remove_waf_managed_rule_exclusion(cmd, resource_group_name, policy_name):
@@ -5970,6 +5985,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         args_schema.active._registered = False
@@ -6081,6 +6097,8 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.enable_high_bandwidth_vpn_gateway._registered = False
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.active._registered = False
         args_schema.vpn_client_root_certificates._registered = False
