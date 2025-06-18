@@ -535,7 +535,7 @@ def load_arguments(self, _):
         c.argument('skip_resource_name_params', action='store_true')
         c.argument('skip_all_params', action='store_true')
         c.argument('resource_ids', nargs='+', options_list='--resource-ids')
-        c.argument('output_format', options_list='--output-format')
+        c.argument('output_format', options_list=['--output-format'])
 
     with self.argument_context('group create') as c:
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
