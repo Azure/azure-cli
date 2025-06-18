@@ -18,7 +18,7 @@ parameters:
 - name: maxParallel
   displayName: Max Parallel Count
   type: number
-  default: 5
+  default: 30
 - name: pythonVersion
   displayName: Python Version
   type: string
@@ -42,7 +42,7 @@ parameters:
 - name: userParallelism
   displayName: User Parallelism
   type: number
-  default: 8
+  default: 4
 - name: userRepo
   displayName: User Repo
   type: string
@@ -86,6 +86,8 @@ stages:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
       maxParallel: ${{ parameters.maxParallel }}
       matrix:
+        network:
+          Target: network
         acr:
           Target: acr
         acs:
@@ -174,8 +176,6 @@ stages:
         #  Target: natgateway
         netappfiles:
           Target: netappfiles
-        network:
-          Target: network
         policyinsights:
           Target: policyinsights
         privatedns:
@@ -569,8 +569,9 @@ stages:
               azdev extension add ${FinalTarget}
             fi
             echo ${FinalTarget}
-            
-            serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+
+            # remove network from serial_modules as it is too slow
+            serial_modules="appservice botservice cloud azure-cli-core azure-cli-telemetry"
     
             # This helps detect issues in CI if a used SDK API version is deleted by the below script.
             python $workDir/s/scripts/trim_sdk.py
@@ -662,6 +663,8 @@ stages:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
       maxParallel: ${{ parameters.maxParallel }}
       matrix:
+        network:
+          Target: network
         acr:
           Target: acr
         acs:
@@ -750,8 +753,6 @@ stages:
         #  Target: natgateway
         netappfiles:
           Target: netappfiles
-        network:
-          Target: network
         policyinsights:
           Target: policyinsights
         privatedns:
@@ -1145,8 +1146,9 @@ stages:
               azdev extension add ${FinalTarget}
             fi
             echo ${FinalTarget}
-            
-            serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+
+            # remove network from serial_modules as it is too slow
+            serial_modules="appservice botservice cloud azure-cli-core azure-cli-telemetry"
     
             # This helps detect issues in CI if a used SDK API version is deleted by the below script.
             python $workDir/s/scripts/trim_sdk.py
@@ -1237,6 +1239,8 @@ stages:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
       maxParallel: ${{ parameters.maxParallel }}
       matrix:
+        network:
+          Target: network
         acr:
           Target: acr
         acs:
@@ -1325,8 +1329,6 @@ stages:
         #  Target: natgateway
         netappfiles:
           Target: netappfiles
-        network:
-          Target: network
         policyinsights:
           Target: policyinsights
         privatedns:
@@ -1720,7 +1722,8 @@ stages:
             fi
             echo ${FinalTarget}
             
-            serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+            # remove network from serial_modules as it is too slow
+            serial_modules="appservice botservice cloud azure-cli-core azure-cli-telemetry"
             
             # This helps detect issues in CI if a used SDK API version is deleted by the below script.
             python $workDir/s/scripts/trim_sdk.py
