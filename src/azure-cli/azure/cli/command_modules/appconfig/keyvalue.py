@@ -223,8 +223,7 @@ def import_config(cmd,
     if not need_kv_change and not need_feature_change:
         return
 
-    # If yes is provided, it should take precedence over dry-run
-    if dry_run and not yes:
+    if dry_run:
         return
 
     if not yes:
@@ -428,8 +427,7 @@ def export_config(cmd,
     if not need_feature_change and not need_kv_change:
         return
 
-    # If yes is provided, it takes precedence over dry-run
-    if dry_run and not yes:
+    if dry_run:
         return
 
     # if customer needs preview & confirmation
@@ -861,7 +859,7 @@ def restore_key(cmd,
 
         need_change = __print_restore_preview(restore_diff, yes=yes)
 
-        if dry_run and not yes:
+        if dry_run:
             return
 
         if not yes:
