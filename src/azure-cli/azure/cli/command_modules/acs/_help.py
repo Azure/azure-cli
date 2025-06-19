@@ -2583,7 +2583,7 @@ helps['aks machine list'] = """
        - name: --nodepool-name
          type: string
          short-summary: Name of the agentpool of a managed cluster
-   exmaples:
+   examples:
        - name: Get information about IP Addresses, Hostname, Availability Zones for all machines in an agentpool
          text: az aks machine list --cluster-name <clusterName> --nodepool-name <apName>
 """
