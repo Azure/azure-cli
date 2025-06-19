@@ -1723,8 +1723,8 @@ def export_group_as_template(
 
     if output_format.lower() == "bicep":
         return result.output
-    else:
-        return result.template
+    
+    return result.template
 
 
 def create_application(cmd, resource_group_name,
