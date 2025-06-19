@@ -187,9 +187,9 @@ def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type
     return existing
 
 
-def register_change_reference_argument(cli_ctx):
+def register_global_policy_argument(cli_ctx):
     from knack import events
-    def add_change_reference_argument(_, **kwargs):
+    def add_global_policy_argument(_, **kwargs):
         command_table = kwargs.get('commands_loader').command_table
 
         if not command_table:
@@ -202,18 +202,32 @@ def register_change_reference_argument(cli_ctx):
                 cmd = getattr(namespace, 'cmd', None) or getattr(namespace, '_cmd', None)
                 cmd.cli_ctx.data['_change_reference'] = value
 
+        class AcquirePolicyTokenAction(argparse.Action):  # pylint:disable=too-few-public-methods
+
+            def __call__(self, parser, namespace, value, option_string=None):
+                # save change reference to CLI context
+                cmd = getattr(namespace, 'cmd', None) or getattr(namespace, '_cmd', None)
+                cmd.cli_ctx.data['_acquire_policy_token'] = True
+
         for command in command_table.values():
             if command.name.split()[-1] in ['show', 'list', 'wait']:
                 continue
 
             change_reference_kwargs = {
-                'help': 'The related change reference ID for modifying this resource',
-                'arg_group': 'Global',
+                'help': 'The related change reference ID for this resource operation',
+                'arg_group': 'Global Policy',
                 'action': ChangeReferenceAction,
             }
+            acquire_policy_token_kwargs = {
+                'help': 'Acquiring policy token automatically for this resource operation',
+                'arg_group': 'Global Policy',
+                'nargs': 0,
+                'action': AcquirePolicyTokenAction,
+            }
             command.add_argument('_change_reference', '--change-reference', **change_reference_kwargs)
+            command.add_argument('_acquire_policy_token', '--acquire-policy-token', **acquire_policy_token_kwargs)
 
-    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_change_reference_argument)
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_global_policy_argument)
 
 
 # pylint: disable=too-many-statements
