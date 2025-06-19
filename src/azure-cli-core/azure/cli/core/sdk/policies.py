@@ -7,7 +7,7 @@ import logging
 import re
 import types
 
-from azure.core.pipeline.policies import SansIOHTTPPolicy, UserAgentPolicy, CustomHookPolicy
+from azure.core.pipeline.policies import SansIOHTTPPolicy, UserAgentPolicy
 from knack.log import get_logger
 
 _LOGGER = get_logger(__name__)
@@ -103,24 +103,3 @@ class RecordTelemetryUserAgentPolicy(UserAgentPolicy):
         super().on_request(request)
         from azure.cli.core.telemetry import set_user_agent
         set_user_agent(request.http_request.headers[self._USERAGENT])
-
-
-class ChangeReferenceCustomHookPolicy(CustomHookPolicy):
-    """The Custom Hook policy that acquires policy tokens before sending request.
-    Add the change reference and acquired token in request headers
-    """
-
-    def __init__(self, change_reference=None, **kwargs):
-        self.change_reference = change_reference
-        super(ChangeReferenceCustomHookPolicy, self).__init__(**kwargs)
-
-    def _acquire_policy_token(self, method, uri):
-        _LOGGER.warning(f"Acquiring policy token for {method}: {uri} with change reference {self.change_reference}")
-        return "FakeToken written by Yishi"
-
-    def on_request(self, request):
-        if self.change_reference:
-            http_request = request.http_request
-            policy_token = self._acquire_policy_token(http_request.method, http_request.url)
-            request.http_request.headers['x-ms-policy-external-evaluations'] = policy_token
-        super().on_request(request)
