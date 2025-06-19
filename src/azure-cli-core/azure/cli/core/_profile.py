@@ -225,9 +225,9 @@ class Profile:
         import jwt
         from .auth.constants import ACCESS_TOKEN
 
-        identity_id_type, identity_id_value = MsiAccountTypes.parse_ids(
+        identity_id_type, identity_id_value = ManagedIdentityAuth.parse_ids(
             client_id=client_id, object_id=object_id, resource_id=resource_id)
-        cred = MsiAccountTypes.msal_credential_factory(identity_id_type, identity_id_value)
+        cred = ManagedIdentityAuth.credential_factory(identity_id_type, identity_id_value)
         token = cred.acquire_token(self._arm_scope)[ACCESS_TOKEN]
         logger.info('Managed identity: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
@@ -245,7 +245,7 @@ class Profile:
                                "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
-                                                  user_assigned_identity_id=base_name)
+                                                  assigned_identity_info=base_name)
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
@@ -317,7 +317,7 @@ class Profile:
         elif managed_identity_type:
             # managed identity
             # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
-            cred = MsiAccountTypes.msal_credential_factory(managed_identity_type, managed_identity_id)
+            cred = ManagedIdentityAuth.credential_factory(managed_identity_type, managed_identity_id)
             sdk_cred = CredentialAdaptor(cred)
 
         else:
@@ -371,7 +371,7 @@ class Profile:
             # managed identity
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
-            cred = MsiAccountTypes.msal_credential_factory(managed_identity_type, managed_identity_id)
+            cred = ManagedIdentityAuth.credential_factory(managed_identity_type, managed_identity_id)
             if credential_out:
                 credential_out['credential'] = cred
             sdk_cred = CredentialAdaptor(cred)
@@ -400,7 +400,7 @@ class Profile:
                 str(tenant if tenant else account[_TENANT_ID]))
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
-                              user_assigned_identity_id=None):
+                              assigned_identity_info=None):
         consolidated = []
         for s in subscriptions:
             subscription_dict = {
@@ -423,8 +423,8 @@ class Profile:
 
             if cert_sn_issuer_auth:
                 consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
-            if user_assigned_identity_id:
-                consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
+            if assigned_identity_info:
+                consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = assigned_identity_info
 
         return consolidated
 
@@ -562,16 +562,18 @@ class Profile:
 
     @staticmethod
     def _parse_managed_identity_account(account):
+        # user.name will always exist, so we check it first.
+        # user.userAssignedIdentity will only exist if user.name is systemAssignedIdentity or userAssignedIdentity
         user_name = account[_USER_ENTITY][_USER_NAME]
         if user_name == _SYSTEM_ASSIGNED_IDENTITY:
             # The account contains:
-            #   "assignedIdentityInfo": "MSI",
-            #   "name": "systemAssignedIdentity",
-            return MsiAccountTypes.system_assigned, None
+            #   "name": "systemAssignedIdentity"
+            #   "assignedIdentityInfo": "MSI"
+            return ManagedIdentityAuth.system_assigned, None
         if user_name == _USER_ASSIGNED_IDENTITY:
             # The account contains:
-            #   "assignedIdentityInfo": "MSIClient-xxx"/"MSIObject-xxx"/"MSIResource-xxx",
-            #   "name": "userAssignedIdentity",
+            #   "name": "userAssignedIdentity"
+            #   "assignedIdentityInfo": "MSIClient-xxx"/"MSIObject-xxx"/"MSIResource-xxx"
             return tuple(account[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO].split('-', maxsplit=1))
         return None, None
 
@@ -693,7 +695,7 @@ class Profile:
         return installation_id
 
 
-class MsiAccountTypes:
+class ManagedIdentityAuth:
     # pylint: disable=no-method-argument,no-self-argument
     system_assigned = 'MSI'
     user_assigned_client_id = 'MSIClient'
@@ -701,12 +703,13 @@ class MsiAccountTypes:
     user_assigned_resource_id = 'MSIResource'
 
     @staticmethod
-    def valid_msi_account_types():
-        return [MsiAccountTypes.system_assigned, MsiAccountTypes.user_assigned_client_id,
-                MsiAccountTypes.user_assigned_object_id, MsiAccountTypes.user_assigned_resource_id]
-
-    @staticmethod
     def parse_ids(client_id=None, object_id=None, resource_id=None):
+        """Parse IDs into ID type and ID value:
+        - system-assigned: MSI, None
+        - user-assigned client ID: MSIClient, <GUID>
+        - user-assigned object ID: MSIObject, <GUID>
+        - user-assigned resource ID: MSIResource, <Resource ID>
+        """
         id_arg_count = len([arg for arg in (client_id, object_id, resource_id) if arg])
         if id_arg_count > 1:
             raise CLIError('Usage error: Provide only one of --client-id, --object-id, --resource-id.')
@@ -714,29 +717,29 @@ class MsiAccountTypes:
         id_type = None
         id_value = None
         if id_arg_count == 0:
-            id_type = MsiAccountTypes.system_assigned
+            id_type = ManagedIdentityAuth.system_assigned
             id_value = None
         elif client_id:
-            id_type = MsiAccountTypes.user_assigned_client_id
+            id_type = ManagedIdentityAuth.user_assigned_client_id
             id_value = client_id
         elif object_id:
-            id_type = MsiAccountTypes.user_assigned_object_id
+            id_type = ManagedIdentityAuth.user_assigned_object_id
             id_value = object_id
         elif resource_id:
-            id_type = MsiAccountTypes.user_assigned_resource_id
+            id_type = ManagedIdentityAuth.user_assigned_resource_id
             id_value = resource_id
         return id_type, id_value
 
     @staticmethod
-    def msal_credential_factory(id_type, id_value):
+    def credential_factory(id_type, id_value):
         from azure.cli.core.auth.msal_credentials import ManagedIdentityCredential
-        if id_type == MsiAccountTypes.system_assigned:
+        if id_type == ManagedIdentityAuth.system_assigned:
             return ManagedIdentityCredential()
-        if id_type == MsiAccountTypes.user_assigned_client_id:
+        if id_type == ManagedIdentityAuth.user_assigned_client_id:
             return ManagedIdentityCredential(client_id=id_value)
-        if id_type == MsiAccountTypes.user_assigned_object_id:
+        if id_type == ManagedIdentityAuth.user_assigned_object_id:
             return ManagedIdentityCredential(object_id=id_value)
-        if id_type == MsiAccountTypes.user_assigned_resource_id:
+        if id_type == ManagedIdentityAuth.user_assigned_resource_id:
             return ManagedIdentityCredential(resource_id=id_value)
         raise ValueError("Unrecognized managed identity ID type '{}'".format(id_type))
 
