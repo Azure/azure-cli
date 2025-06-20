@@ -2165,7 +2165,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'ssh_key_value': self.generate_ssh_keys()
+            'ssh_key_value': self.generate_ssh_keys(),
             'zones': "1 2 3"
         })
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
