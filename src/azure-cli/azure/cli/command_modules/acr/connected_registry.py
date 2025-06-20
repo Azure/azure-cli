@@ -11,7 +11,7 @@ from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueEr
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import user_confirmation
-from ._client_factory import cf_acr_tokens, cf_acr_scope_maps
+from ._client_factory import cf_acr_tokens, cf_acr_scope_maps, cf_acr_registries
 from ._utils import (
     build_token_id,
     create_default_scope_map,
@@ -21,7 +21,7 @@ from ._utils import (
     parse_scope_map_actions,
     validate_managed_registry
 )
-from .custom import acr_update_custom
+from .custom import acr_update_custom, acr_update_set
 
 
 class ConnectedRegistryModes(Enum):
@@ -76,7 +76,9 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
         user_confirmation("Dedicated data endpoints must be enabled to use connected-registry. Enabling might " +
                           "impact your firewall rules. Are you sure you want to enable it for '{}' registry?".format(
                               registry_name), yes)
-        acr_update_custom(cmd, registry, resource_group_name, data_endpoint_enabled=True)
+        acr_update_custom(cmd, registry, data_endpoint_enabled=True)
+        registry_client = cf_acr_registries(cmd.cli_ctx)
+        acr_update_set(cmd, registry_client, registry_name, resource_group_name, registry)
 
     from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None
