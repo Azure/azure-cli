@@ -199,7 +199,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Expiration period of the SAS Policy assigned to the storage account, DD.HH:MM:SS.'
     )
 
-    t_expiration_action_type  = self.get_models('ExpirationAction', resource_type=ResourceType.MGMT_STORAGE)
+    t_expiration_action_type = self.get_models('ExpirationAction', resource_type=ResourceType.MGMT_STORAGE)
     sas_expiration_action_type = CLIArgumentType(
         arg_type=get_enum_type(t_expiration_action_type),
         options_list=['--sas-expiration-action', '--sas-exp-action'],
