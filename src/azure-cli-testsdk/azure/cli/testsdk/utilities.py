@@ -50,7 +50,12 @@ def force_progress_logging():
 
 
 def _byte_to_str(byte_or_str):
-    return str(byte_or_str, 'utf-8') if isinstance(byte_or_str, bytes) else byte_or_str
+    if isinstance(byte_or_str, bytes):
+        try:
+            return byte_or_str.decode('utf-8')
+        except UnicodeDecodeError:
+            pass
+    return byte_or_str
 
 
 class StorageAccountKeyReplacer(RecordingProcessor):
@@ -230,7 +235,8 @@ class EmailAddressReplacer(RecordingProcessor):
     def process_response(self, response):
         if response['body']['string']:
             body = _byte_to_str(response['body']['string'])
-            response['body']['string'] = self._replace_email_address(body)
+            if isinstance(body, str):
+                response['body']['string'] = self._replace_email_address(body)
         return response
 
 
