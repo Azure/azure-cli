@@ -5,6 +5,7 @@
 
 import re
 import json
+from azure.core.exceptions import HttpResponseError
 
 _management_group_pattern = (
     r"^\/?providers\/Microsoft.Management\/managementGroups\/(?P<management_group_id>[\w\d_\.\(\)-]+)"
@@ -87,9 +88,10 @@ def _build_preflight_error_message(preflight_error):
 
 
 def _build_http_response_error_message(http_error):
-    error_txt = http_error.response.internal_response.text
+    if not isinstance(http_error, HttpResponseError):
+        raise TypeError("http_error must be an instance of HttpResponseError")
 
-    error_info = json.loads(error_txt)['error']
+    error_info = http_error.response.json()['error']
     error_details = error_info.pop('details') if 'details' in error_info else []
     err_messages = [f'{json.dumps(error_info)}']
 

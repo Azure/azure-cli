@@ -880,11 +880,23 @@ class TemplateSpecsTest(ScenarioTest):
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --description {description} --version-description {version_description}', checks=[
             self.check('mainTemplate.variables.provider', "[split(parameters('resource'), '/')[0]]"),
             self.check('mainTemplate.variables.resourceType', "[replace(parameters('resource'), concat(variables('provider'), '/'), '')]"),
-            self.check('mainTemplate.variables.hyphenedName', ("[format('[0]-[1]-[2]-[3]-[4]-[5]', parameters('customer'), variables('environments')[parameters('environment')], variables('locations')[parameters('location')], parameters('group'), parameters('service'), if(equals(parameters('kind'), ''), variables('resources')[variables('provider')][variables('resourceType')], variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]")),
+            self.check('mainTemplate.variables.hyphenedName', """[format('[0]-[1]-[2]-[3]-[4]-[5]',
+                               parameters('customer'),
+                               variables('environments')[parameters('environment')],
+                               variables('locations')[parameters('location')],
+                               parameters('group'),
+                               parameters('service'),
+                               if(equals(parameters('kind'), ''), 
+                                  variables('resources')[variables('provider')][variables('resourceType')],
+                                  variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]"""),
             self.check('mainTemplate.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
             self.check('mainTemplate.variables.isInstanceCount', "[greater(parameters('instance'), -1)]"),
-            self.check('mainTemplate.variables.hyphenedNameAfterInstanceCount', "[if(variables('isInstanceCount'), format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))), variables('removeOptionalsFromHyphenedName'))]"),
-            self.check('mainTemplate.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
+            self.check('mainTemplate.variables.hyphenedNameAfterInstanceCount', """[if(variables('isInstanceCount'),
+                                             format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))),
+                                             variables('removeOptionalsFromHyphenedName'))]"""),
+            self.check('mainTemplate.variables.name', """[if(parameters('useHyphen'),
+                   variables('hyphenedNameAfterInstanceCount'),
+                   replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]""")
         ]).get_output_in_json()
 
         with self.assertRaises(IncorrectUsageError) as err:
@@ -1295,11 +1307,11 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         ])
 
         self.cmd('deployment sub list', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment sub list --filter "provisioningState eq \'Succeeded\'"', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment sub show -n {dn}', checks=[
@@ -1364,7 +1376,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         ])
 
         self.cmd('deployment list --query "[?name == \'{}\']"'.format(deployment_name), checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
         self.cmd('deployment list --filter "provisioningState eq \'Succeeded\'" --query "[?name == \'{}\']"'.format(deployment_name), checks=[
             self.check('[0].name', '{dn}')
@@ -1470,11 +1482,11 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         self.cmd('deployment group list --resource-group {rg}', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment group list --resource-group {rg} --filter "provisioningState eq \'Succeeded\'"', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment group show --resource-group {rg} -n {dn}', checks=[
@@ -1512,6 +1524,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
     def test_management_group_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
+            'subscription': self.get_subscription_id(),
             'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
@@ -1524,21 +1537,21 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         self.cmd('account management-group create --name {mg}', checks=[])
 
         self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file "{tf}" '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" nestedSubId="{subscription}" --parameters nestedRG="{sub-rg}" '
                  '--parameters storageAccountName="{storage-account-name}"',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file "{tf}" '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" nestedSubId="{subscription}" --parameters nestedRG="{sub-rg}" '
                  '--parameters storageAccountName="{storage-account-name}"',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
         self.cmd('deployment mg list --management-group-id {mg}', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment mg list --management-group-id {mg} --filter "provisioningState eq \'Succeeded\'"', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment mg show --management-group-id {mg} -n {dn}', checks=[
@@ -1564,7 +1577,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         self.cmd('deployment mg delete --management-group-id {mg} -n {dn}')
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" nestedSubId="{subscription}" --parameters nestedRG="{sub-rg}" '
                  '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment mg cancel -n {dn2} --management-group-id {mg}')
@@ -1582,6 +1595,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
     def test_management_group_deployment_create_mode(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
+            'subscription': self.get_subscription_id(),
             'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
             'mg': self.create_random_name('mg', 10),
@@ -1592,7 +1606,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
 
         self.cmd('account management-group create --name {mg}')
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file "{tf}" '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" nestedSubId="{subscription}" --parameters nestedRG="{sub-rg}" '
                  '--parameters storageAccountName="{storage-account-name}" --mode Incremental', checks=[
             self.check('name', '{dn}'),
             self.check('properties.mode', 'Incremental')
@@ -1606,6 +1620,7 @@ class DeploymentTestAtTenantScope(ScenarioTest):
     def test_tenant_level_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
+            'subscription': self.get_subscription_id(),
             'tf': os.path.join(curr_dir, 'tenant_level_template.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60),
             'mg': self.create_random_name('azure-cli-management-group', 40),
@@ -1614,20 +1629,20 @@ class DeploymentTestAtTenantScope(ScenarioTest):
 
         self.cmd('account management-group create --name {mg}', checks=[])
 
-        self.cmd('deployment tenant validate --location WestUS --template-file "{tf}" --parameters targetMG="{mg}"', checks=[
+        self.cmd('deployment tenant validate --location WestUS --template-file "{tf}" --parameters targetMG="{mg}" nestedSubId="{subscription}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment tenant create --location WestUS -n {dn} --template-file "{tf}" --parameters targetMG="{mg}"', checks=[
+        self.cmd('deployment tenant create --location WestUS -n {dn} --template-file "{tf}" --parameters targetMG="{mg}" nestedSubId="{subscription}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
         self.cmd('deployment tenant list', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment tenant list --filter "provisioningState eq \'Succeeded\'"', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment tenant show -n {dn}', checks=[
@@ -1653,7 +1668,7 @@ class DeploymentTestAtTenantScope(ScenarioTest):
         ])
         self.cmd('deployment tenant delete -n {dn}')
 
-        self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file "{tf}" --parameters targetMG="{mg}" --no-wait')
+        self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file "{tf}" --parameters targetMG="{mg}" nestedSubId="{subscription}" --no-wait')
 
         self.cmd('deployment tenant cancel -n {dn2}')
 
@@ -1720,11 +1735,11 @@ class DeploymentTest(ScenarioTest):
                  checks=self.check('tags', {'key': 'super=value'}))
 
         self.cmd('group deployment list -g {rg}', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
             self.check('[0].resourceGroup', '{rg}')
         ])
         self.cmd('group deployment list -g {rg} --filter "provisioningState eq \'Succeeded\'"', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
             self.check('[0].resourceGroup', '{rg}')
         ])
         self.cmd('group deployment show -g {rg} -n {dn}', checks=[
@@ -2007,6 +2022,7 @@ class DeploymentWhatIfAtManagementGroupTest(ScenarioTest):
     def test_management_group_level_what_if(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
+            'subscription': self.get_subscription_id(),
             'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
@@ -2018,7 +2034,7 @@ class DeploymentWhatIfAtManagementGroupTest(ScenarioTest):
         self.cmd('account management-group create --name {mg}', checks=[])
 
         self.cmd('deployment mg what-if --management-group-id {mg} --location WestUS --template-file "{tf}" --no-pretty-print '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" nestedSubId="{subscription}" --parameters nestedRG="{sub-rg}" '
                  '--parameters storageAccountName="{storage-account-name}"',
                  checks=[
                      self.check('status', 'Succeeded'),
@@ -2034,6 +2050,7 @@ class DeploymentWhatIfAtTenantScopeTest(ScenarioTest):
     def test_tenant_level_what_if(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
+            'subscription': self.get_subscription_id(),
             'tf': os.path.join(curr_dir, 'tenant_level_template.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60),
             'mg': self.create_random_name('azure-cli-management-group', 40),
@@ -2041,10 +2058,10 @@ class DeploymentWhatIfAtTenantScopeTest(ScenarioTest):
 
         self.cmd('account management-group create --name {mg}', checks=[])
 
-        self.cmd('deployment tenant what-if --location WestUS --template-file "{tf}" --parameters targetMG="{mg}" --no-pretty-print', checks=[
+        self.cmd('deployment tenant what-if --location WestUS --template-file "{tf}" --parameters targetMG="{mg}" nestedSubId="{subscription}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("length(changes)", 3),
-            self.check("changes[0].changeType", "Modify"),
+            self.check("changes[0].changeType", "Create"),
             self.check("changes[1].changeType", "Create"),
             self.check("changes[2].changeType", "Create"),
         ])
@@ -3372,11 +3389,11 @@ class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
         ])
 
         self.cmd('deployment group list --resource-group {rg}', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment group list --resource-group {rg} --filter "provisioningState eq \'Succeeded\'"', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
         ])
 
         self.cmd('deployment group show --resource-group {rg} -n {dn}', checks=[
@@ -4857,12 +4874,12 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         with self.assertRaises(CLIError):
             self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg=SomeRandomRG StorageAccountName1={sa1} StorageAccountName2={sa2}')
 
-        self.cmd('group deployment create -g {rg1} -n {dn} --template-file "{tf}" --parameters CrossRg={rg2}', checks=[
+        self.cmd('group deployment create -g {rg1} -n {dn} --template-file "{tf}" --parameters CrossRg={rg2} StorageAccountName1={sa1} StorageAccountName2={sa2}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg1}'),
         ])
         self.cmd('group deployment list -g {rg1}', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
             self.check('[0].resourceGroup', '{rg1}')
         ])
         self.cmd('group deployment show -g {rg1} -n {dn}', checks=[
@@ -4951,7 +4968,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             self.check('resourceGroup', '{vm_rg}')
         ])
         self.cmd('group deployment list -g {vm_rg}', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
             self.check('[0].resourceGroup', '{vm_rg}')
         ])
         self.cmd('group deployment show -g {vm_rg} -n {dn}', checks=[
@@ -5075,7 +5092,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             self.check('resourceGroup', '{vm_rg}')
         ])
         self.cmd('deployment group list -g {vm_rg}', checks=[
-            self.check('[0].name', '{dn}'),
+            self.check("length([?name=='{dn}'])", 1),
             self.check('[0].resourceGroup', '{vm_rg}')
         ])
         self.cmd('deployment group show -g {vm_rg} -n {dn}', checks=[
