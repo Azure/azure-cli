@@ -48,7 +48,15 @@ def aks_machine_list_table_format(results):
 def aks_machine_show_table_format(result):
     def parser(entry):
         ip_addresses = ""
-        zones = ', '.join(part.strip() for part in entry["zones"] if part.strip())
+        if isinstance(entry["zones"], list):
+            zones = ', '.join(part.strip() for part in entry["zones"] if part and part.strip())
+        elif isinstance(entry["zones"], str):
+            # If it's a single string, just use it directly
+            zones = entry["zones"].strip()
+        else:
+            # Handle empty or None case
+            zones = ""
+        
         for k in entry["properties"]["network"]["ipAddresses"]:
             ip_addresses += "ip:" + k["ip"] + "," + "family:" + k["family"] + ";"
         entry["ip"] = ip_addresses
