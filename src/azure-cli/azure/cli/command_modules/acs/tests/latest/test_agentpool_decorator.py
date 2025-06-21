@@ -2630,7 +2630,6 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
             host_group_id=None,
             capacity_reservation_group_id=None,
-            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -2783,7 +2782,6 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             host_group_id=None,
             capacity_reservation_group_id=None,
-            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
