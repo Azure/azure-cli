@@ -12762,10 +12762,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
-        random_name_length=17,
-        name_prefix="clitest",
-        location="centraluseuap",
-        preserve_default_location=True,
+        random_name_length=17, name_prefix="clitest", location="westus2"
     )
     def test_aks_and_agentpool_with_static_egress_gateway(
             self, resource_group, resource_group_location
@@ -12787,8 +12784,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "aks create --resource-group={resource_group} --name={name} --location={location} "
             "--ssh-key-value={ssh_key_value} "
             "--kubernetes-version={k8s_version} "
-            "--enable-static-egress-gateway "
-            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/StaticEgressGatewayPreview"
+            "--enable-static-egress-gateway"
         )
         self.cmd(
             create_cmd,
@@ -12804,7 +12800,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         update_cmd = (
             "aks update --resource-group {resource_group} --name {name} "
             "--disable-static-egress-gateway "
-            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/StaticEgressGatewayPreview "
             "-o json"
         )
         self.cmd(update_cmd, checks=[
@@ -12818,7 +12813,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         update_cmd = (
             "aks update --resource-group {resource_group} --name {name} "
             "--enable-static-egress-gateway "
-            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/StaticEgressGatewayPreview "
             "-o json"
         )
         self.cmd(update_cmd, checks=[
@@ -12836,8 +12830,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "--name=gwnp "
             "--mode=Gateway "
             "--node-count=2 "
-            "--gateway-prefix-size=31 "
-            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/StaticEgressGatewayPreview",
+            "--gateway-prefix-size=31",
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("gatewayProfile.publicIpPrefixSize", 31),
