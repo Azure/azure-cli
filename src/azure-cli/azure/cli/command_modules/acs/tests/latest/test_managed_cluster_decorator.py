@@ -6578,7 +6578,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             return_value=registry,
         ), patch("azure.cli.command_modules.acs._roleassignments.ensure_aks_acr_role_assignment") as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
-        ensure_assignment.assert_called_once_with(self.cmd, "test_service_principal", "test_registry_id", False, True)
+        ensure_assignment.assert_called_once_with(self.cmd, "test_service_principal", "test_registry_id", False, True, None)
 
     def test_set_up_network_profile(self):
         # default value in `aks_create`
@@ -8222,6 +8222,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             acr_name_or_id="test_attach_acr",
             subscription_id="1234-5678-9012",
             is_service_principal=False,
+            assignee_principal_type=None,
         )
 
     def test_put_mc(self):
@@ -8946,6 +8947,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                         acr_name_or_id="test_attach_acr",
                         subscription_id="test_subscription_id",
                         is_service_principal=False,
+                        assignee_principal_type=None,
                     ),
                     call(
                         self.cmd,
@@ -8954,6 +8956,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                         subscription_id="test_subscription_id",
                         detach=True,
                         is_service_principal=False,
+                        assignee_principal_type=None,
                     ),
                 ]
             )
@@ -11929,6 +11932,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             acr_name_or_id="test_attach_acr",
             subscription_id="1234-5678-9012",
             is_service_principal=False,
+            assignee_principal_type=None,
         )
 
     def test_put_mc(self):
