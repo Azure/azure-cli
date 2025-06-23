@@ -10783,6 +10783,35 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
                      self.check('automaticRepairsPolicy.gracePeriod', 'PT30M')
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disbale_automatic_repairs_of_zone_balancing', location='eastus2')
+    def test_vmss_create_disbale_automatic_repairs_of_zone_balancing(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'nsg': self.create_random_name('nsg', 10),
+            'lb1': self.create_random_name('lb', 10),
+            'probe1': self.create_random_name('probe', 10),
+            'rule1': self.create_random_name('rule', 10)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network lb create -g {rg} -n {lb1}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb1} -n {probe1} --protocol http --port 80 --path /')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb1} -n {rule1} --probe-name {probe1} --protocol tcp --frontend-port 80 --backend-port 80')
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --enable-automatic-repairs false --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 '
+            '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', True),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate'),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceBehavior', 'CreateBeforeDelete')
+        ])
+        message = 'usage error: --enable-automatic-repairs cannot be false when --automatic-repairs-action or --automatic-repairs-grace-period are used'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss create -g {rg} -n {vmss2} --image {image} --enable-automatic-repairs false --automatic-repairs-grace-period 30 --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 '
+            '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
+
+
 class SkuProfileTest(ScenarioTest):
         
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile', location='eastus2')
