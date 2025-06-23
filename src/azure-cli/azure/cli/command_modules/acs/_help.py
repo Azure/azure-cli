@@ -584,7 +584,9 @@ parameters:
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
-
+  - name: --enable-static-egress-gateway
+    type: bool
+    short-summary: Enable Static Egress Gateway addon to the cluster.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -1036,6 +1038,12 @@ parameters:
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
+  - name: --enable-static-egress-gateway
+    type: bool
+    short-summary: Enable Static Egress Gateway addon to the cluster.
+  - name: --disable-static-egress-gateway
+    type: bool
+    short-summary: Disable Static Egress Gateway addon to the cluster.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
@@ -1701,7 +1709,9 @@ parameters:
   - name: --gpu-driver
     type: string
     short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None". Default is "Install".
-
+  - name: --gateway-prefix-size
+    type: int
+    short-summary: The size of Public IPPrefix attached to the Gateway-mode node pool. The node pool must be in Gateway mode.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
