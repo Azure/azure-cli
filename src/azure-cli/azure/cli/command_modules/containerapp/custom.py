@@ -34,7 +34,8 @@ from .containerapp_job_decorator import ContainerAppJobDecorator, ContainerAppJo
 from .containerapp_env_decorator import ContainerAppEnvDecorator, ContainerAppEnvCreateDecorator, ContainerAppEnvUpdateDecorator
 from .containerapp_auth_decorator import ContainerAppAuthDecorator
 from .containerapp_decorator import ContainerAppCreateDecorator, BaseContainerAppDecorator
-from ._client_factory import handle_raw_exception, handle_non_resource_not_found_exception
+from ._client_factory import handle_raw_exception, handle_non_resource_not_found_exception, \
+    handle_non_404_status_code_exception
 from ._clients import (
     ManagedEnvironmentClient,
     ContainerAppClient,
@@ -369,8 +370,8 @@ def update_containerapp_logic(cmd,
     containerapp_def = None
     try:
         containerapp_def = ContainerAppClient.show(cmd=cmd, resource_group_name=resource_group_name, name=name)
-    except:
-        pass
+    except Exception as e:
+        handle_non_404_status_code_exception(e)
 
     if not containerapp_def:
         raise ResourceNotFoundError("The containerapp '{}' does not exist".format(name))
