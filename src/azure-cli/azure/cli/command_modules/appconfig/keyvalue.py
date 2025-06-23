@@ -73,6 +73,7 @@ def import_config(cmd,
                   auth_mode="key",
                   endpoint=None,
                   import_mode=ImportMode.IGNORE_MATCH,
+                  dry_run=False,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -108,7 +109,7 @@ def import_config(cmd,
     # fetch key values from source
     if source == 'file':
         if profile == ImportExportProfiles.KVSET:
-            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, import_mode=import_mode, correlation_request_id=correlation_request_id)
+            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, dry_run=dry_run, import_mode=import_mode, correlation_request_id=correlation_request_id)
             return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
@@ -219,7 +220,7 @@ def import_config(cmd,
         ff_diff = ff_comparer.compare(dest_kvs=dest_features, strict=strict, ignore_matching_kvs=import_mode == ImportMode.IGNORE_MATCH)
         need_feature_change = print_preview(ff_diff, source, yes=yes, strict=strict, title="Feature Flags")
 
-    if not need_kv_change and not need_feature_change:
+    if (not need_kv_change and not need_feature_change) or dry_run:
         return
 
     if not yes:
@@ -273,6 +274,7 @@ def export_config(cmd,
                   auth_mode="key",
                   endpoint=None,
                   snapshot=None,
+                  dry_run=False,
                   # to-file parameters
                   path=None,
                   format_=None,
@@ -360,7 +362,7 @@ def export_config(cmd,
         __discard_features_from_retrieved_kv(src_kvs)
 
     if profile == ImportExportProfiles.KVSET:
-        __export_kvset_to_file(file_path=path, keyvalues=src_kvs, yes=yes)
+        __export_kvset_to_file(file_path=path, keyvalues=src_kvs, yes=yes, dry_run=dry_run)
         return
 
     if destination == 'appservice' and export_as_reference:
@@ -419,8 +421,9 @@ def export_config(cmd,
         ff_diff = ff_comparer.compare(dest_kvs=__convert_featureflag_list_to_keyvalue_list(dest_features))
         need_feature_change = print_preview(ff_diff, destination, yes=yes, title="Feature Flags")
 
-    if not need_feature_change and not need_kv_change:
+    if (not need_feature_change and not need_kv_change) or dry_run:
         return
+
     # if customer needs preview & confirmation
     if not yes:
         user_confirmation("Do you want to continue? \n")
@@ -824,6 +827,7 @@ def restore_key(cmd,
                 connection_string=None,
                 yes=False,
                 auth_mode="key",
+                dry_run=False,
                 endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -849,11 +853,10 @@ def restore_key(cmd,
 
         need_change = __print_restore_preview(restore_diff, yes=yes)
 
-        if not yes:
-            if need_change is False:
-                logger.debug('Canceling the restore operation based on user selection.')
-                return
+        if dry_run or not need_change:
+            return
 
+        if not yes:
             user_confirmation("Do you want to continue? \n")
 
         kvs_to_restore = restore_diff.get(JsonDiff.ADD, [])

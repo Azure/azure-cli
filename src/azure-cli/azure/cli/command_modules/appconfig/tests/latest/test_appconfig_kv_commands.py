@@ -11,7 +11,7 @@ import time
 
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only)
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
@@ -302,6 +302,10 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         with self.assertRaisesRegex(InvalidArgumentValueError, "Too many tag filters provided. Maximum allowed is 5."):
             self.cmd('appconfig kv list --connection-string {connection_string} --tags {too_many_tags}')
+
+        # Dry run and yes argument should not be used together
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
+            self.cmd('appconfig kv restore --datetime "2019-05-01T11:24:12Z" --connection-string {connection_string} --key {key} --label {label} --dry-run -y')
 
 
     @AllowLargeResponse()

@@ -177,6 +177,8 @@ examples:
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --tags tag1=value1 tag2=value2 --dest-name AnotherAppConfiguration
   - name: Export all keys and feature flags to another App Configuration store and apply new tags.
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --dest-tags newtag1=newvalue1
+  - name: Preview the export result without making any changes to the App Configuration store.
+    text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --dry-run
 """
 
 helps['appconfig kv import'] = """
@@ -203,8 +205,10 @@ examples:
     text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --profile appconfig/kvset
   - name: Import all keys and feature flags with specific tags from an App Configuration store and apply new tags.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-tags tag1=value1 tag2=value2 --tags newtag1=newvalue1
-  - name: Import allkeys and feature flags from a file and apply new tags.
+  - name: Import all keys and feature flags from a file and apply new tags.
     text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --tags tag1=value1
+  - name: Preview the import result without making any changes to the App Configuration store.
+    text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --dry-run
 
 """
 
@@ -254,6 +258,8 @@ examples:
     text: az appconfig kv restore --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.* --datetime "2019-05-01T11:24:12Z"
   - name: Restore all key-values with specific tags to a specific point in time.
     text: az appconfig kv restore -n MyAppConfiguration --tags tag1=value1 tag2=value2 --datetime "2019-05-01T11:24:12Z"
+  - name: Preview the restore result without making any changes to the App Configuration store.
+    text: az appconfig kv restore -n MyAppConfiguration --datetime "2019-05-01T11:24:12Z" --dry-run
 """
 
 helps['appconfig kv set'] = """
