@@ -60,7 +60,7 @@ def aks_machine_show_table_format(result):
         parsed = compile_jmes("""{
                 name: name,
                 ip: ip,
-                zones: zones 
+                zones: zones
             }""")
         return parsed.search(entry, Options(dict_cls=OrderedDict))
     return parser(result)
