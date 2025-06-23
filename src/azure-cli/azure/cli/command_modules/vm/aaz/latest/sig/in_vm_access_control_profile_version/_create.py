@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "sig in-vm-access-control-profile-version create",
-)
 class Create(AAZCommand):
     """Create a gallery in VM access control profile version.
 
@@ -87,6 +84,20 @@ class Create(AAZCommand):
         )
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.default_access = AAZStrArg(
+            options=["--default-access"],
+            arg_group="Properties",
+            help="This property allows you to specify if the requests will be allowed to access the host endpoints. Possible values are: 'Allow', 'Deny'.",
+            enum={"Allow": "Allow", "Deny": "Deny"},
+        )
+        _args_schema.mode = AAZStrArg(
+            options=["--mode"],
+            arg_group="Properties",
+            help="This property allows you to specify whether the access control rules are in Audit mode, in Enforce mode or Disabled. Possible values are: 'Audit', 'Enforce' or 'Disabled'.",
+            enum={"Audit": "Audit", "Disabled": "Disabled", "Enforce": "Enforce"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -205,6 +216,11 @@ class Create(AAZCommand):
             )
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("defaultAccess", AAZStrType, ".default_access", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("mode", AAZStrType, ".mode", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
 

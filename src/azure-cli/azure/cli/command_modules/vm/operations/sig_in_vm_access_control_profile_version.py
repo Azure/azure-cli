@@ -6,15 +6,49 @@
 from knack.log import get_logger
 
 from azure.cli.core.aaz import AAZListArg, AAZStrArg, register_command
-from ..aaz.latest.sig.in_vm_access_control_profile_version import Update as _SigInVMAccessControlProfileVersionUpdate
+from ..aaz.latest.sig.in_vm_access_control_profile_version import (Create as _SigInVMAccessControlProfileVersionCreate,
+                                                                   Update as _SigInVMAccessControlProfileVersionUpdate)
 
 logger = get_logger(__name__)
+
+
+@register_command(
+    "sig in-vm-access-control-profile-version create",
+)
+class SigInVMAccessControlProfileVersionCreate(_SigInVMAccessControlProfileVersionCreate):
+    """Create a gallery in VM access control profile version.
+
+        :example: Create or update a Gallery in VM access control profile version.
+            az sig in-vm-access-control-profile-version create --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS
+        """
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.default_access._required = True
+        args_schema.mode._required = True
+
+        return args_schema
+
+    # class GalleryInVMAccessControlProfileVersionsCreateOrUpdate(_SigInVMAccessControlProfileVersionCreate.GalleryInVMAccessControlProfileVersionsCreateOrUpdate):
+    #     @property
+    #     def content(self):
+    #         content = super().content
+    #
+    #         # if "properties" not in content:
+    #         #     content["properties"] = {}
+    #
+    #         return content
 
 
 @register_command(
     "sig in-vm-access-control-profile-version update",
 )
 class SigInVMAccessControlProfileVersionUpdate(_SigInVMAccessControlProfileVersionUpdate):
+    """Update a gallery in VM access control profile version.
+    """
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
