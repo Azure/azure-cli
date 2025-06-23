@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-def get_sql_management_client(cli_ctx):
+def get_sql_management_client(cli_ctx, subscription_id=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.sql import SqlManagementClient
     from msrest.authentication import Authentication
@@ -20,6 +20,10 @@ def get_sql_management_client(cli_ctx):
             base_url=sql_rm_override,
             credentials=Authentication())  # No authentication
 
+    # Cross-subscription scenario.
+    if subscription_id is not None:
+        return get_mgmt_service_client(cli_ctx, SqlManagementClient, subscription_id=subscription_id)
+
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, SqlManagementClient)
 
@@ -28,8 +32,8 @@ def get_sql_capabilities_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).capabilities
 
 
-def get_sql_databases_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).databases
+def get_sql_databases_operations(cli_ctx, _, subscription_id=None):
+    return get_sql_management_client(cli_ctx, subscription_id).databases
 
 
 def get_sql_database_operations_operations(cli_ctx, _):
@@ -148,8 +152,8 @@ def get_sql_managed_instance_keys_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_instance_keys
 
 
-def get_sql_servers_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).servers
+def get_sql_servers_operations(cli_ctx, _, subscription_id=None):
+    return get_sql_management_client(cli_ctx, subscription_id).servers
 
 
 def get_sql_server_usages_operations(cli_ctx, _):

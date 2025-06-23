@@ -149,6 +149,8 @@ examples:
     text: az appconfig kv delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label MyLabel
   - name: Delete a key using your 'az login' credentials and App Configuration store endpoint.
     text: az appconfig kv delete --endpoint https://myappconfiguration.azconfig.io --key color --auth-mode login --yes
+  - name: Delete a key with key name "color" and has tags "tag1=value1" and "tag2=value2".
+    text: az appconfig kv delete -n MyAppConfiguration --key color --tags tag1=value1 tag2=value2 --yes
 """
 
 helps['appconfig kv export'] = """
@@ -171,6 +173,12 @@ examples:
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --profile appconfig/kvset
   - name: Export all keys to another App Configuration store from a snapshot of the source configuration
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --snapshot MySnapshot
+  - name: Export all keys and feature flags with specific tags to another App Configuration store.
+    text: az appconfig kv export -n MyAppConfiguration -d appconfig --tags tag1=value1 tag2=value2 --dest-name AnotherAppConfiguration
+  - name: Export all keys and feature flags to another App Configuration store and apply new tags.
+    text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --dest-tags newtag1=newvalue1
+  - name: Preview the export result without making any changes to the App Configuration store.
+    text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --dry-run
 """
 
 helps['appconfig kv import'] = """
@@ -195,6 +203,13 @@ examples:
     text: az appconfig kv import -s appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --src-endpoint https://anotherappconfiguration.azconfig.io --src-auth-mode login --src-key * --src-label * --preserve-labels
   - name: Import all keys and feature flags from a file using the appconfig/kvset format.
     text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --profile appconfig/kvset
+  - name: Import all keys and feature flags with specific tags from an App Configuration store and apply new tags.
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-tags tag1=value1 tag2=value2 --tags newtag1=newvalue1
+  - name: Import all keys and feature flags from a file and apply new tags.
+    text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --tags tag1=value1
+  - name: Preview the import result without making any changes to the App Configuration store.
+    text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --dry-run
+
 """
 
 helps['appconfig kv list'] = """
@@ -215,6 +230,12 @@ examples:
     text: az appconfig kv list --endpoint https://myappconfiguration.azconfig.io --auth-mode login
   - name: List all key-values in a given snapshot of the app configuration store.
     text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --snapshot MySnapshot
+  - name: List all key-values with specific tags
+    text: az appconfig kv list -n MyAppConfiguration --tags tag1=value1 tag2=value2
+  - name: List all key-values with tag name "tag1" with empty value
+    text: az appconfig kv list -n MyAppConfiguration --tags tag1=
+  - name: List all key-values with tag name "tag1" with null value
+    text: az appconfig kv list -n MyAppConfiguration --tags tag1=\\0
 """
 
 helps['appconfig kv lock'] = """
@@ -235,6 +256,10 @@ examples:
     text: az appconfig kv restore -n MyAppConfiguration --datetime "2019-05-01T11:24:12Z"
   - name: Restore a specific key for any label start with v1. using connection string to a specific point in time.
     text: az appconfig kv restore --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.* --datetime "2019-05-01T11:24:12Z"
+  - name: Restore all key-values with specific tags to a specific point in time.
+    text: az appconfig kv restore -n MyAppConfiguration --tags tag1=value1 tag2=value2 --datetime "2019-05-01T11:24:12Z"
+  - name: Preview the restore result without making any changes to the App Configuration store.
+    text: az appconfig kv restore -n MyAppConfiguration --datetime "2019-05-01T11:24:12Z" --dry-run
 """
 
 helps['appconfig kv set'] = """
@@ -312,6 +337,12 @@ examples:
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --datetime "2019-05-01T11:24:12Z"
   - name: List revision history for all items and query only key, value and last_modified.
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value last_modified
+  - name: List revision history for all items with specific tags.
+    text: az appconfig revision list -n MyAppConfiguration --tags tag1=value1 tag2=value2
+  - name: List revision history for all items with tag name "tag1" with empty value.
+    text: az appconfig revision list -n MyAppConfiguration --tags tag1=
+  - name : List revision history for all items with tag name "tag1" with null value
+    text: az appconfig revision list -n MyAppConfiguration --tags tag1=\\0
 """
 
 helps['appconfig replica'] = """
@@ -632,6 +663,9 @@ helps['appconfig snapshot create'] = """
         - name: Create a snapshot of all keys starting with 'app/' and no label as default, then override the key-values with keys with the label 'prod' if they exist.
           text:
             az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"app/*\\"}' '{\\"key\\":\\"app/*\\", \\"label\\":\\"prod\\"}' --composition-type 'key'
+        - name: Create a snapshot of all keys starting with 'Test' and have tags 'tag1=value1' and 'tag2=value2'.
+          text:
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"Test*\\", \\"tags\\":[\\"tag1=value1\\", \\"tag2=value2\\"]}'
     """
 
 helps['appconfig snapshot show'] = """

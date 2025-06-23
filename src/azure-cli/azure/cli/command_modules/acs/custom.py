@@ -757,6 +757,7 @@ def aks_update(
     disable_windows_gmsa=False,
     attach_acr=None,
     detach_acr=None,
+    assignee_principal_type=None,
     nrg_lockdown_restriction_level=None,
     enable_defender=False,
     disable_defender=False,

@@ -31,9 +31,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-01-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2024-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2024-07-01"],
         ]
     }
 
@@ -89,6 +89,11 @@ class Update(AAZCommand):
         _args_schema.delegated_services = AAZListArg(
             options=["--delegated-services"],
             help="Space-separated list of services to whom the subnet should be delegated, e.g., `Microsoft.Sql/servers`.",
+            nullable=True,
+        )
+        _args_schema.ipam_pool_prefix_allocations = AAZListArg(
+            options=["--ipam-allocations", "--ipam-pool-prefix-allocations"],
+            help="A list of IPAM Pools for allocating IP address prefixes. A list of IPAM Pools allocating IP address prefixes. If a non-empty value is provided, --address-prefixes would be ignored by CLI.",
             nullable=True,
         )
         _args_schema.nat_gateway = AAZStrArg(
@@ -170,6 +175,23 @@ class Update(AAZCommand):
         _element.type = AAZStrArg(
             options=["type"],
             help="Resource type.",
+            nullable=True,
+        )
+
+        ipam_pool_prefix_allocations = cls._args_schema.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ipam_pool_prefix_allocations.Element
+        _element.number_of_ip_addresses = AAZStrArg(
+            options=["number-of-ip-addresses"],
+            help="Number of IP addresses to allocate.",
+            nullable=True,
+        )
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource id of the associated Azure IpamPool resource.",
             nullable=True,
         )
 
@@ -440,7 +462,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-01-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -543,7 +565,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-01-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -610,6 +632,7 @@ class Update(AAZCommand):
                 properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
                 properties.set_prop("defaultOutboundAccess", AAZBoolType, ".default_outbound_access")
                 properties.set_prop("delegations", AAZListType, ".delegated_services")
+                properties.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
                 properties.set_prop("natGateway", AAZObjectType)
                 properties.set_prop("networkSecurityGroup", AAZObjectType)
                 properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policies")
@@ -637,6 +660,19 @@ class Update(AAZCommand):
             properties = _builder.get(".properties.delegations[].properties")
             if properties is not None:
                 properties.set_prop("serviceName", AAZStrType, ".service_name")
+
+            ipam_pool_prefix_allocations = _builder.get(".properties.ipamPoolPrefixAllocations")
+            if ipam_pool_prefix_allocations is not None:
+                ipam_pool_prefix_allocations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipamPoolPrefixAllocations[]")
+            if _elements is not None:
+                _elements.set_prop("numberOfIpAddresses", AAZStrType, ".number_of_ip_addresses")
+                _elements.set_prop("pool", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            pool = _builder.get(".properties.ipamPoolPrefixAllocations[].pool")
+            if pool is not None:
+                pool.set_prop("id", AAZStrType, ".id")
 
             nat_gateway = _builder.get(".properties.natGateway")
             if nat_gateway is not None:
@@ -1393,6 +1429,10 @@ class _UpdateHelper:
         properties.auxiliary_sku = AAZStrType(
             serialized_name="auxiliarySku",
         )
+        properties.default_outbound_connectivity_enabled = AAZBoolType(
+            serialized_name="defaultOutboundConnectivityEnabled",
+            flags={"read_only": True},
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -1527,6 +1567,9 @@ class _UpdateHelper:
         )
         properties.auto_approval = AAZObjectType(
             serialized_name="autoApproval",
+        )
+        properties.destination_ip_address = AAZStrType(
+            serialized_name="destinationIPAddress",
         )
         properties.enable_proxy_protocol = AAZBoolType(
             serialized_name="enableProxyProtocol",
@@ -1785,6 +1828,9 @@ class _UpdateHelper:
 
         properties = _schema_network_security_group_read.properties.flow_logs.Element.properties
         properties.enabled = AAZBoolType()
+        properties.enabled_filtering_criteria = AAZStrType(
+            serialized_name="enabledFilteringCriteria",
+        )
         properties.flow_analytics_configuration = AAZObjectType(
             serialized_name="flowAnalyticsConfiguration",
         )
@@ -2236,13 +2282,23 @@ class _UpdateHelper:
         properties.public_ip_addresses = AAZListType(
             serialized_name="publicIpAddresses",
         )
+        properties.public_ip_addresses_v6 = AAZListType(
+            serialized_name="publicIpAddressesV6",
+        )
         properties.public_ip_prefixes = AAZListType(
             serialized_name="publicIpPrefixes",
+        )
+        properties.public_ip_prefixes_v6 = AAZListType(
+            serialized_name="publicIpPrefixesV6",
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
+        properties.source_virtual_network = AAZObjectType(
+            serialized_name="sourceVirtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.source_virtual_network)
         properties.subnets = AAZListType(
             flags={"read_only": True},
         )
@@ -2251,9 +2307,17 @@ class _UpdateHelper:
         public_ip_addresses.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_addresses.Element)
 
+        public_ip_addresses_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_addresses_v6
+        public_ip_addresses_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+
         public_ip_prefixes = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes
         public_ip_prefixes.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
+
+        public_ip_prefixes_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes_v6
+        public_ip_prefixes_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
 
         subnets = _schema_public_ip_address_read.properties.nat_gateway.properties.subnets
         subnets.Element = AAZObjectType()
@@ -2456,6 +2520,9 @@ class _UpdateHelper:
             serialized_name="ipConfigurations",
             flags={"read_only": True},
         )
+        properties.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
         properties.nat_gateway = AAZObjectType(
             serialized_name="natGateway",
         )
@@ -2589,6 +2656,27 @@ class _UpdateHelper:
         ip_configurations = _schema_subnet_read.properties.ip_configurations
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
+
+        ipam_pool_prefix_allocations = _schema_subnet_read.properties.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
         private_endpoints.Element = AAZObjectType()

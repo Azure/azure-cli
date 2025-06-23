@@ -1772,19 +1772,33 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         with open(secret_path, 'r') as f:
             expected = f.read().replace('\r\n', '\n')
 
-        def _test_set_and_download(encoding):
+        def _test_set_and_download(encoding, dest_path):
             self.kwargs['enc'] = encoding
             self.cmd('keyvault secret set --vault-name {kv} -n download-{enc} --file "{src_path}" --encoding {enc}')
-            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
             self.kwargs['dest_path'] = dest_path
             self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}"')
             with open(dest_path, 'r') as f:
                 actual = f.read().replace('\r\n', '\n')
             self.assertEqual(actual, expected)
-            os.remove(dest_path)
+
+        def _test_download_with_overwrite(encoding, dest_path):
+            self.kwargs['dest_path'] = dest_path
+            with open(dest_path, 'w') as f:
+                f.write('This file will be overwritten.')
+            # test without and with overwrite
+            with self.assertRaises(CLIError):
+                self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}"')
+            self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}" --overwrite')
+            with open(dest_path, 'r') as f:
+                actual = f.read().replace('\r\n', '\n')
+            self.assertEqual(actual, expected)
 
         for encoding in secret_encoding_values:
-            _test_set_and_download(encoding)
+            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
+            _test_set_and_download(encoding, dest_path)
+            _test_download_with_overwrite(encoding, dest_path)
+            if os.path.exists(dest_path):
+                os.remove(dest_path)
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     @KeyVaultPreparer(name_prefix='cli-test-kv-se-', additional_params='--enable-rbac-authorization false')

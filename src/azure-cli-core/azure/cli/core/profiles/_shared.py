@@ -218,6 +218,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILESHARE: '2025-05-05',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.DATA_STORAGE_TABLE: None,
         ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: None,
@@ -229,7 +230,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-03-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-04-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     }
 }

@@ -1058,33 +1058,6 @@ examples:
         az vm boot-diagnostics get-boot-log-uris -g MyResourceGroup -n MyVirtualMachine
 """
 
-helps['vm capture'] = """
-type: command
-short-summary: Capture information for a stopped VM.
-long-summary: 'For an end-to-end tutorial, see https://learn.microsoft.com/azure/virtual-machines/linux/capture-image'
-parameters:
-  - name: --vhd-name-prefix
-    type: string
-    short-summary: The VHD name prefix specify for the VM disks.
-  - name: --storage-container
-    short-summary: The storage account container name in which to save the disks.
-  - name: --overwrite
-    short-summary: Overwrite the existing disk file.
-examples:
-  - name: Deallocate, generalize, and capture a stopped virtual machine.
-    text: |
-        az vm deallocate -g MyResourceGroup -n MyVm
-        az vm generalize -g MyResourceGroup -n MyVm
-        az vm capture -g MyResourceGroup -n MyVm --vhd-name-prefix MyPrefix
-  - name: Deallocate, generalize, and capture multiple stopped virtual machines.
-    text: |
-        vms_ids=$(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-        az vm deallocate --ids {vms_ids}
-        az vm generalize --ids {vms_ids}
-        az vm capture --ids {vms_ids} --vhd-name-prefix MyPrefix
-
-"""
-
 helps['vm create'] = """
 type: command
 short-summary: Create an Azure Virtual Machine.
@@ -1186,22 +1159,6 @@ examples:
   - name: Create a VM from community gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
-"""
-
-helps['vm delete'] = """
-type: command
-short-summary: Delete a VM.
-parameters:
-  - name: --force-deletion
-    short-summary: Optional parameter to force delete virtual machines. Default value is None.
-examples:
-  - name: Delete a VM without a prompt for confirmation.
-    text: >
-        az vm delete -g MyResourceGroup -n MyVm --yes
-  - name: Delete all VMs in a resource group.
-    text: >
-        az vm delete --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-
 """
 
 helps['vm diagnostics'] = """

@@ -343,6 +343,17 @@ def validate_spot_max_price(namespace):
 def validate_acr(namespace):
     if namespace.attach_acr and namespace.detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+    if namespace.assignee_principal_type and not namespace.attach_acr:
+        raise CLIError('The "--assignee-principal-type" argument can only be used with "--attach-acr".')
+    if namespace.attach_acr:
+        # Validate assignee_principal_type if specified
+        if namespace.assignee_principal_type:
+            valid_types = ['User', 'ServicePrincipal', 'Group']
+            if namespace.assignee_principal_type not in valid_types:
+                raise CLIError(
+                    f"Invalid value for --assignee_principal_type. "
+                    f"Allowed values are: {', '.join(valid_types)}"
+                )
 
 
 def validate_nodepool_tags(ns):

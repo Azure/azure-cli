@@ -58,18 +58,21 @@ def _populate_from_metadata_endpoint(arm_endpoint, session=None):
         raise CLIError(error_msg_fmt.format(msg))
 
 
-def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
+def _build_cloud(cli_ctx, cloud_name, skip_endpoint_discovery=False, cloud_config=None, cloud_args=None):
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         cloud_args = {to_snake_case(k): v for k, v in cloud_config.items()}
-    arm_endpoint = None
-    if 'endpoints' in cloud_args:
-        arm_endpoint = (cloud_args['endpoints'].get('resource_manager', None) or
-                        cloud_args['endpoints'].get('resourceManager', None))
-    if 'endpoint_resource_manager' in cloud_args:
-        arm_endpoint = cloud_args['endpoint_resource_manager']
-    c = _populate_from_metadata_endpoint(arm_endpoint)
-    c.name = cloud_name
+    if skip_endpoint_discovery:
+        c = Cloud(cloud_name)
+    else:
+        arm_endpoint = None
+        if 'endpoints' in cloud_args:
+            arm_endpoint = (cloud_args['endpoints'].get('resource_manager', None) or
+                            cloud_args['endpoints'].get('resourceManager', None))
+        if 'endpoint_resource_manager' in cloud_args:
+            arm_endpoint = cloud_args['endpoint_resource_manager']
+        c = _populate_from_metadata_endpoint(arm_endpoint)
+        c.name = cloud_name
     c.profile = cloud_args.get('profile', None)
     try:
         endpoints = cloud_args['endpoints']
@@ -92,8 +95,7 @@ def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
 
     required_endpoints = {'resource_manager': '--endpoint-resource-manager',
                           'active_directory': '--endpoint-active-directory',
-                          'active_directory_resource_id': '--endpoint-active-directory-resource-id',
-                          'active_directory_graph_resource_id': '--endpoint-active-directory-graph-resource-id'}
+                          'active_directory_resource_id': '--endpoint-active-directory-resource-id'}
     missing_endpoints = [e_param for e_name, e_param in required_endpoints.items()
                          if not c.endpoints.has_endpoint_set(e_name)]
     if missing_endpoints and not cloud_is_registered(cli_ctx, cloud_name):
@@ -108,6 +110,7 @@ def register_cloud(cmd,
                    cloud_name,
                    cloud_config=None,
                    profile=None,
+                   skip_endpoint_discovery=False,
                    endpoint_management=None,
                    endpoint_resource_manager=None,
                    endpoint_sql_management=None,
@@ -115,6 +118,7 @@ def register_cloud(cmd,
                    endpoint_active_directory=None,
                    endpoint_active_directory_resource_id=None,
                    endpoint_active_directory_graph_resource_id=None,
+                   endpoint_microsoft_graph_resource_id=None,
                    endpoint_active_directory_data_lake_resource_id=None,
                    endpoint_vm_image_alias_doc=None,
                    suffix_sql_server_hostname=None,
@@ -123,8 +127,8 @@ def register_cloud(cmd,
                    suffix_azure_datalake_store_file_system_endpoint=None,
                    suffix_azure_datalake_analytics_catalog_and_job_endpoint=None,
                    suffix_acr_login_server_endpoint=None):
-    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,
-                     cloud_args=locals())
+    c = _build_cloud(cmd.cli_ctx, cloud_name, skip_endpoint_discovery=skip_endpoint_discovery,
+                     cloud_config=cloud_config, cloud_args=locals())
     try:
         add_cloud(cmd.cli_ctx, c)
     except CloudAlreadyRegisteredException as e:
@@ -135,6 +139,7 @@ def modify_cloud(cmd,
                  cloud_name=None,
                  cloud_config=None,
                  profile=None,
+                 skip_endpoint_discovery=False,
                  endpoint_management=None,
                  endpoint_resource_manager=None,
                  endpoint_sql_management=None,
@@ -142,6 +147,7 @@ def modify_cloud(cmd,
                  endpoint_active_directory=None,
                  endpoint_active_directory_resource_id=None,
                  endpoint_active_directory_graph_resource_id=None,
+                 endpoint_microsoft_graph_resource_id=None,
                  endpoint_active_directory_data_lake_resource_id=None,
                  endpoint_vm_image_alias_doc=None,
                  suffix_sql_server_hostname=None,
@@ -152,8 +158,8 @@ def modify_cloud(cmd,
                  suffix_acr_login_server_endpoint=None):
     if not cloud_name:
         cloud_name = cmd.cli_ctx.cloud.name
-    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,
-                     cloud_args=locals())
+    c = _build_cloud(cmd.cli_ctx, cloud_name, skip_endpoint_discovery=skip_endpoint_discovery,
+                     cloud_config=cloud_config, cloud_args=locals())
     try:
         update_cloud(cmd.cli_ctx, c)
     except CloudNotRegisteredException as e:
