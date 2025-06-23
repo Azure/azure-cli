@@ -168,6 +168,9 @@ def _prepare_client_kwargs_track2(cli_ctx):
 
     if cli_ctx.data.get('_change_reference', None) or cli_ctx.data.get('_acquire_policy_token', False):
         def _acquire_policy_token_request_hook(request):
+            http_request = request.http_request
+            if getattr(http_request, 'method', '') not in ['PUT', 'PATCH', 'DELETE']:
+                return
             ACQUIRE_POLICY_TOKEN_URL = '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-03-01'
             policy_token = None
             try:
@@ -176,9 +179,9 @@ def _prepare_client_kwargs_track2(cli_ctx):
 
                 acquire_policy_token_body = {
                     "operation": {
-                        "uri": getattr(request.http_request, 'url'),
-                        "httpMethod": getattr(request.http_request, 'method'),
-                        "content": getattr(request.http_request, 'content')
+                        "uri": getattr(http_request, 'url'),
+                        "httpMethod": getattr(http_request, 'method'),
+                        "content": getattr(http_request, 'content')
                     },
                     "changeReference": cli_ctx.data.get('_change_reference', None)
                 }
