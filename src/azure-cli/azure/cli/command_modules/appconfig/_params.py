@@ -26,7 +26,8 @@ from ._validators import (validate_appservice_name_or_id, validate_sku, validate
                           validate_identity, validate_auth_mode,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
                           validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
-                          validate_snapshot_export, validate_snapshot_import)
+                          validate_snapshot_export, validate_snapshot_import, validate_tag_filters,
+                          validate_import_tag_filters, validate_dry_run)
 
 
 def load_arguments(self, _):
@@ -110,7 +111,7 @@ def load_arguments(self, _):
         options_list=['--filters'],
         validator=validate_snapshot_filters,
         nargs='+',
-        help='Space-separated list of escaped JSON objects that represent the key and label filters used to build an App Configuration snapshot.'
+        help='Space-separated list of escaped JSON objects that represent the key, label and tag filters used to build an App Configuration snapshot.'
     )
     snapshot_status_arg_type = CLIArgumentType(
         options_list=['--status'],
@@ -129,7 +130,11 @@ def load_arguments(self, _):
         option_list=['--enable-arm-private-network-access'],
         arg_type=get_three_state_flag(),
         help="Enable access to the App Configuration store via ARM Private Link if resource is restricted to private network access. Requires Pass-through ARM authentication mode."
+    )
 
+    tags_arg_type = CLIArgumentType(
+        nargs='*',
+        validator=validate_tag_filters
     )
 
     # Used with data plane commands. These take either a store name or connection string argument.
@@ -216,12 +221,14 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv import') as c:
         c.argument('label', help="Imported KVs and feature flags will be assigned with this label. If no label specified, will assign null label.")
+        c.argument('tags', nargs="*", help="Imported KVs and feature flags will be assigned with these tags. If no tags are specified, imported KVs and feature flags will retain existing tags. Support space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.")
         c.argument('prefix', help="This prefix will be appended to the front of imported keys. Prefix will be ignored for feature flags.")
         c.argument('source', options_list=['--source', '-s'], arg_type=get_enum_type(['file', 'appconfig', 'appservice']), validator=validate_import, help="The source of importing. Note that importing feature flags from appservice is not supported.")
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all feature flags will be imported from file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('content_type', help='Content type of all imported items.')
         c.argument('import_mode', arg_type=get_enum_type([ImportMode.ALL, ImportMode.IGNORE_MATCH]), help='If import mode is "ignore-match", only source key-values that do not already exist or whose value, content-type or tags are different from that of an existing key-value with the same key and label, will be written. Import mode "all" writes all key-values to the destination regardless of whether they exist or not.')
+        c.argument('dry_run', validator=validate_dry_run, help="Preview the result of import operation without making any changes to the App Configuration store.")
 
     with self.argument_context('appconfig kv import', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -229,7 +236,7 @@ def load_arguments(self, _):
         c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default if --separator is provided. Not applicable for property files or feature flags.")
         # bypass cli allowed values limitation
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
-        c.argument('profile', validator=validate_import_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Import profile to be used for importing the key-values. Options 'depth', 'separator', 'content-type', 'label', 'skip-features' and, 'prefix' are not supported when using '{}' profile.".format(ImportExportProfiles.KVSET))
+        c.argument('profile', validator=validate_import_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Import profile to be used for importing the key-values. Options 'depth', 'separator', 'content-type', 'label', 'skip-features', 'tags' and, 'prefix' are not supported when using '{}' profile.".format(ImportExportProfiles.KVSET))
         c.argument('strict', validator=validate_strict_import, arg_type=get_three_state_flag(), help="Delete all other key-values in the store with specified prefix and label")
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
@@ -243,6 +250,7 @@ def load_arguments(self, _):
                    help='Auth mode for connecting to source App Configuration store. For details, refer to "--auth-mode" argument.')
         c.argument('src_snapshot', validator=validate_snapshot_import,
                    help='Import all keys in a given snapshot of the source App Configuration store. If no snapshot is specified, the keys currently in the store are imported based on the specified key and label filters.')
+        c.argument('src_tags', nargs="*", validator=validate_import_tag_filters, help="Key-values which contain the specified tags in source AppConfig will be imported. If no tags are specified, all key-values with any tags can be imported. Support space-separated tag filters: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
@@ -257,6 +265,8 @@ def load_arguments(self, _):
         c.argument('skip_keyvault', help="Export items excluding all key vault references. By default, all key vault references with the specified label will be exported.", arg_type=get_three_state_flag())
         c.argument('snapshot', validator=validate_snapshot_export,
                    help="Export all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are exported based on the specified key and label filters.")
+        c.argument('tags', arg_type=tags_arg_type, help="Key-values which contain the specified tags in source AppConfig will be exported. If no tags are specified, all key-values with any tags can be exported. Support space-separated tag filters: key[=value] [key[=value] ...].")
+        c.argument('dry_run', validator=validate_dry_run, help="Preview the result of export operation without making any changes to the App Configuration store.")
 
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -266,7 +276,7 @@ def load_arguments(self, _):
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the key-value pairs to json or yaml file. Required for exporting hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('naming_convention', arg_type=get_enum_type(['pascal', 'camel', 'underscore', 'hyphen']), help='Naming convention to be used for "Feature Management" section of file. Example: pascal = FeatureManagement, camel = featureManagement, underscore = feature_management, hyphen = feature-management.')
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), validator=validate_resolve_keyvault, help="Resolve the content of key vault reference.")
-        c.argument('profile', validator=validate_export_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Export profile to be used for exporting the key-values. Options 'depth', 'separator', 'naming-convention', 'prefix', 'dest-label' and, 'resolve-keyvault' are not supported when using '{}' profile".format(ImportExportProfiles.KVSET))
+        c.argument('profile', validator=validate_export_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Export profile to be used for exporting the key-values. Options 'depth', 'separator', 'naming-convention', 'prefix', 'dest-label' , 'dest-tags' and, 'resolve-keyvault' are not supported when using '{}' profile".format(ImportExportProfiles.KVSET))
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
         c.argument('dest_name', help='The name of the destination App Configuration store.')
@@ -276,6 +286,7 @@ def load_arguments(self, _):
         c.argument('dest_endpoint', help='If --dest-auth-mode is "login", provide endpoint URL of the destination App Configuration store.')
         c.argument('dest_auth_mode', arg_type=get_enum_type(['login', 'key']),
                    help='Auth mode for connecting to the destination App Configuration store. For details, refer to "--auth-mode" argument.')
+        c.argument('dest_tags', nargs="*", help="Exported KVs and feature flags will be assigned with these tags. If no tags are specified, exported KVs and features will retain existing tags. Support space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.")
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
@@ -298,6 +309,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv delete') as c:
         c.argument('key', validator=validate_key, help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, delete entry with null label. Support star sign as filters, for instance * means all label and abc* means labels with abc as prefix.")
+        c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, delete all key-values with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig kv show') as c:
         c.argument('key', help='Key to be showed.')
@@ -306,12 +318,15 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
+        c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, return all key-values with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
         c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.")
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
 
     with self.argument_context('appconfig kv restore') as c:
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, restore all key-value pairs with all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
+        c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, restore all key-values with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
+        c.argument('dry_run', validator=validate_dry_run, help="Preview the result of restore operation without making any changes to the App Configuration store.")
 
     with self.argument_context('appconfig kv lock') as c:
         c.argument('key', help='Key to be locked.')
@@ -325,6 +340,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=data_plane_name_arg_type)
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
+        c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, return all key-values with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig feature') as c:
         c.argument('name', arg_type=data_plane_name_arg_type)

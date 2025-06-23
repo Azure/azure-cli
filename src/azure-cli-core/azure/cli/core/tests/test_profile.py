@@ -950,7 +950,7 @@ class TestProfile(unittest.TestCase):
         consolidated = profile._normalize_properties('systemAssignedIdentity',
                                                      [deepcopy(self.test_mi_subscription)],
                                                      True,
-                                                     user_assigned_identity_id="MSI")
+                                                     assigned_identity_info="MSI")
         profile._set_subscriptions(consolidated)
         cred, subscription_id, _ = profile.get_login_credentials()
 
@@ -967,7 +967,7 @@ class TestProfile(unittest.TestCase):
             'userAssignedIdentity',
             [deepcopy(self.test_mi_subscription)],
             True,
-            user_assigned_identity_id='MSIClient-{}'.format(self.test_mi_client_id)
+            assigned_identity_info='MSIClient-{}'.format(self.test_mi_client_id)
         )
         profile._set_subscriptions(consolidated, secondary_key_name='name')
         cred, subscription_id, _ = profile.get_login_credentials()
@@ -985,7 +985,7 @@ class TestProfile(unittest.TestCase):
             'userAssignedIdentity',
             [deepcopy(self.test_mi_subscription)],
             True,
-            user_assigned_identity_id='MSIObject-{}'.format(self.test_mi_object_id)
+            assigned_identity_info='MSIObject-{}'.format(self.test_mi_object_id)
         )
         profile._set_subscriptions(consolidated, secondary_key_name='name')
         cred, subscription_id, _ = profile.get_login_credentials()
@@ -1003,7 +1003,7 @@ class TestProfile(unittest.TestCase):
             'userAssignedIdentity',
             [deepcopy(self.test_mi_subscription)],
             True,
-            user_assigned_identity_id='MSIResource-{}'.format(self.test_mi_resource_id))
+            assigned_identity_info='MSIResource-{}'.format(self.test_mi_resource_id))
         profile._set_subscriptions(consolidated, secondary_key_name='name')
         cred, subscription_id, _ = profile.get_login_credentials()
 
@@ -1109,7 +1109,7 @@ class TestProfile(unittest.TestCase):
         consolidated = profile._normalize_properties('systemAssignedIdentity',
                                                      [deepcopy(self.test_mi_subscription)],
                                                      True,
-                                                     user_assigned_identity_id='MSI')
+                                                     assigned_identity_info='MSI')
         profile._set_subscriptions(consolidated)
 
         credential_out = {'credential': None}
@@ -1144,7 +1144,7 @@ class TestProfile(unittest.TestCase):
             'userAssignedIdentity',
             [deepcopy(self.test_mi_subscription)],
             True,
-            user_assigned_identity_id='MSIClient-{}'.format(self.test_mi_client_id)
+            assigned_identity_info='MSIClient-{}'.format(self.test_mi_client_id)
         )
         profile._set_subscriptions(consolidated)
 
@@ -1175,7 +1175,7 @@ class TestProfile(unittest.TestCase):
             'userAssignedIdentity',
             [deepcopy(self.test_mi_subscription)],
             True,
-            user_assigned_identity_id='MSIObject-{}'.format(self.test_mi_object_id)
+            assigned_identity_info='MSIObject-{}'.format(self.test_mi_object_id)
         )
         profile._set_subscriptions(consolidated)
 
@@ -1206,7 +1206,7 @@ class TestProfile(unittest.TestCase):
             'userAssignedIdentity',
             [deepcopy(self.test_mi_subscription)],
             True,
-            user_assigned_identity_id='MSIResource-{}'.format(self.test_mi_resource_id)
+            assigned_identity_info='MSIResource-{}'.format(self.test_mi_resource_id)
         )
         profile._set_subscriptions(consolidated)
 

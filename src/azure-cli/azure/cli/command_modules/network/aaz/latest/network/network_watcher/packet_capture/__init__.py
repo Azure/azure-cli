@@ -15,4 +15,3 @@ from ._list import *
 from ._query_status import *
 from ._show import *
 from ._stop import *
-from ._wait import *

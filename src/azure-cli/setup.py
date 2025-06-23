@@ -51,7 +51,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
-    'azure-appconfiguration~=1.7.0',
+    'azure-appconfiguration~=1.7.1',
     'azure-batch~=15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
@@ -124,7 +124,7 @@ DEPENDENCIES = [
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.3.1',
     'azure-monitor-query==1.2.0',
-    'azure-multiapi-storage==1.4.0',
+    'azure-multiapi-storage==1.4.1',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.20.0',

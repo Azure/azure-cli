@@ -12,8 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network virtual-appliance sku list",
-    is_preview=True,
+    "network virtual-appliance sku list"
 )
 class List(AAZCommand):
     """List all Azure network virtual appliance sku.

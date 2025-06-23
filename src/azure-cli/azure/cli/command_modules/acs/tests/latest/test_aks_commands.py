@@ -248,7 +248,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
             self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
             self.check('agentPoolProfiles[0].tags.tag2', 'tv2'),
-            self.check('agentPoolProfiles[0].maxPods', 110),
+            self.check('agentPoolProfiles[0].maxPods', 250),  # default maxPods is 250 now as default network plugin has been changed to azure
             self.check('agentPoolProfiles[0].osDiskSizeGb', 128),
         ])
 
@@ -851,16 +851,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-upgrades -g {resource_group} -n {name} --output table', checks=[
             StringContainCheck('Upgrades'),
             StringContainCheck(upgrade_version)
-        ])
-
-        # enable http application routing addon
-        self.cmd('aks enable-addons -g {resource_group} -n {name} --addons http_application_routing', checks=[
-            self.check('name', '{name}'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('addonProfiles.httpApplicationRouting.enabled', True)
         ])
 
         # delete
@@ -2445,10 +2435,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_azure_service_mesh_get_revisions(self):
+    def test_aks_azure_service_mesh_get_revisions(self, resource_group, resource_group_location):
         """ This test case exercises getting all the available revisions for the location. """
 
-        revisions_cmd = 'aks mesh get-revisions -l westus2'
+        revisions_cmd = f'aks mesh get-revisions -l {resource_group_location}'
         revisions = self.cmd(revisions_cmd).get_output_in_json()
         assert len(revisions['meshRevisions']) > 0
 
@@ -3625,6 +3615,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--vnet-subnet-id {vnet_id}/subnets/aks-subnet -a ingress-appgw ' \
                      '--appgw-name gateway --appgw-subnet-id {vnet_id}/subnets/appgw-subnet ' \
                      '--appgw-watch-namespace=kube-system --yes ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AppGatewayWithOverlayPreview ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         aks_cluster = self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -3715,6 +3706,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create -n {aks_name} -g {resource_group} --enable-managed-identity ' \
                      '--vnet-subnet-id {vnet_id}/subnets/aks-subnet ' \
                      '-a ingress-appgw --appgw-id {appgw_id} --yes ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AppGatewayWithOverlayPreview ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         aks_cluster = self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -3881,16 +3873,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-upgrades -g {resource_group} -n {name} --output table', checks=[
             StringContainCheck('Upgrades'),
             StringContainCheck(upgrade_version)
-        ])
-
-        # enable http application routing addon
-        self.cmd('aks enable-addons -g {resource_group} -n {name} --addons http_application_routing', checks=[
-            self.check('name', '{name}'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('dnsPrefix', '{dns_name_prefix}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('addonProfiles.httpApplicationRouting.enabled', True)
         ])
 
         # delete
@@ -5164,7 +5146,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
 
         # nodepool create nodepool2 with Deallocate mode
-            self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --scale-down-mode Deallocate --node-count=3', checks=[
+            self.cmd(
+                'aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} '
+                '--node-osdisk-type Managed --scale-down-mode Deallocate --node-count=3', checks=[  # explicitly set osdisk type to managed as ephemeral is not supported in deallocate mode
             self.check('provisioningState', 'Succeeded')
         ])
 
