@@ -1769,7 +1769,7 @@ def _set_parameters_for_customize_template(cmd,
     parameters = get_file_json(parameter_file)['parameters']
     if parameters is None:
         raise CLIError('Invalid parameters file')
-    
+
     location = parameters['clusterLocation']['value']
 
     if SOURCE_VAULT_VALUE in parameters and CERTIFICATE_THUMBPRINT in parameters and CERTIFICATE_URL_VALUE in parameters:
