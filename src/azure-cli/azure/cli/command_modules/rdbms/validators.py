@@ -514,7 +514,7 @@ def _pg_version_validator(version, versions):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
-        if version == '11' or version == '12':
+        if version in ('11', '12'):
             logger.warning("Support for PostgreSQL {} has officially ended. "
                            "We recommend selecting PostgreSQL 14 or a later version for "
                            "all future operations.".format(version))
