@@ -96,9 +96,6 @@ from ._util import (
 
 logger = get_logger(__name__)
 
-BACKUP_STORAGE_ACCESS_TIERS = ["hot",
-                               "archive"]
-
 ###############################################
 #                Common funcs                 #
 ###############################################
@@ -3106,8 +3103,6 @@ def update_long_term_retention(
     kwargs['week_of_year'] = week_of_year
 
     kwargs['make_backups_immutable'] = make_backups_immutable
-
-    kwargs['backup_storage_access_tier'] = backup_storage_access_tier
 
     policy = client.begin_create_or_update(
         database_name=database_name,
