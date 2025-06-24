@@ -2729,6 +2729,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             checks=[self.is_empty()],
         )
 
+    # TODO(mheberling): Add kata tests
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
