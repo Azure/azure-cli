@@ -17,13 +17,13 @@ from azure.cli.core.aaz import *
 class Update(AAZCommand):
     """Update an autoscale setting.
 
-    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings.
+    For more information on autoscaling, visit: https://learn.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings.
 
     :example: Update autoscale settings to use a fixed 3 instances by default.
         az monitor autoscale update -g myrg -n autoscale-name --count 3
 
     :example: Update autoscale settings to remove an email notification.
-        az monitor autoscale update -g myrg -n autoscale-name \ --remove-action email bob@contoso.com
+        az monitor autoscale update -g myrg -n autoscale-name --remove-action email bob@contoso.com
 
     :example: Update autoscale settings.
         az monitor autoscale update --count 3 --email-administrator true --enabled true --max-count 5 --min-count 2 --name MyAutoscaleSettings --resource-group MyResourceGroup --tags key[=value]

@@ -106,14 +106,28 @@ def validate_retention_days(namespace):
 def validate_registry_name(cmd, namespace):
     """Omit login server endpoint suffix."""
     registry = namespace.registry_name
+    if registry is None:
+        return
     suffixes = cmd.cli_ctx.cloud.suffixes
+    dnl_hash = registry.find("-")
+
+    if dnl_hash > 0:
+        logger.warning(
+            "Registry name is %s. The following suffix '%s' is automatically omitted.",
+            registry[:dnl_hash],
+            registry[dnl_hash:])
+        namespace.registry_name = registry[:dnl_hash]
     # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
-    if registry and hasattr(suffixes, 'acr_login_server_endpoint'):
+    elif hasattr(suffixes, 'acr_login_server_endpoint'):
         acr_suffix = suffixes.acr_login_server_endpoint
         pos = registry.find(acr_suffix)
         if pos > 0:
-            logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
+            logger.warning("Registry name is %s. The following suffix '%s' is automatically omitted.",
+                           registry[:pos],
+                           acr_suffix)
             namespace.registry_name = registry[:pos]
+            registry = registry[:pos]
+
     registry = namespace.registry_name
     if not re.match(ACR_NAME_VALIDATION_REGEX, registry):
         raise InvalidArgumentValueError(BAD_REGISTRY_NAME)

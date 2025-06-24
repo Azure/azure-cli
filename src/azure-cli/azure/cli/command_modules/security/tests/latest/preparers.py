@@ -21,7 +21,7 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_name_prefix, location='eastus2euap',
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='sqlvm',
                  resource_group_parameter_name='resource_group', skip_delete=False):
-        super(SqlVirtualMachinePreparer, self).__init__(name_prefix, sqlvm_max_length)
+        super().__init__(name_prefix, sqlvm_max_length)
         self.location = location
         self.parameter_name = parameter_name
         self.vm_user = vm_user

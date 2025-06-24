@@ -16,9 +16,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-02-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2023-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2023-11-01"],
         ]
     }
 
@@ -102,7 +102,7 @@ class Create(AAZCommand):
         _args_schema.authentication_certificates = AAZListArg(
             options=["--authentication-certificates"],
             arg_group="Properties",
-            help="Authentication certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Authentication certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.autoscale_configuration = AAZObjectArg(
             options=["--autoscale-configuration"],
@@ -112,17 +112,17 @@ class Create(AAZCommand):
         _args_schema.backend_address_pools = AAZListArg(
             options=["--backend-address-pools"],
             arg_group="Properties",
-            help="Backend address pool of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Backend address pool of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.backend_http_settings_collection = AAZListArg(
             options=["--backend-http-settings-collection"],
             arg_group="Properties",
-            help="Backend http settings of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Backend http settings of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.backend_settings_collection = AAZListArg(
             options=["--backend-settings-collection"],
             arg_group="Properties",
-            help="Backend settings of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Backend settings of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.custom_error_configurations = AAZListArg(
             options=["--custom-error-configurations"],
@@ -153,17 +153,17 @@ class Create(AAZCommand):
         _args_schema.frontend_ip_configurations = AAZListArg(
             options=["--frontend-ip-configurations"],
             arg_group="Properties",
-            help="Frontend IP addresses of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Frontend IP addresses of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.frontend_ports = AAZListArg(
             options=["--frontend-ports"],
             arg_group="Properties",
-            help="Frontend ports of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Frontend ports of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.gateway_ip_configurations = AAZListArg(
             options=["--gateway-ip-configurations"],
             arg_group="Properties",
-            help="Subnets of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Subnets of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.global_configuration = AAZObjectArg(
             options=["--global-configuration"],
@@ -173,12 +173,12 @@ class Create(AAZCommand):
         _args_schema.http_listeners = AAZListArg(
             options=["--http-listeners"],
             arg_group="Properties",
-            help="Http listeners of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Http listeners of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.listeners = AAZListArg(
             options=["--listeners"],
             arg_group="Properties",
-            help="Listeners of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Listeners of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.load_distribution_policies = AAZListArg(
             options=["--load-distribution-policies"],
@@ -198,7 +198,7 @@ class Create(AAZCommand):
         _args_schema.redirect_configurations = AAZListArg(
             options=["--redirect-configurations"],
             arg_group="Properties",
-            help="Redirect configurations of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Redirect configurations of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.request_routing_rules = AAZListArg(
             options=["--request-routing-rules"],
@@ -223,7 +223,7 @@ class Create(AAZCommand):
         _args_schema.ssl_certificates = AAZListArg(
             options=["--ssl-certificates"],
             arg_group="Properties",
-            help="SSL certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="SSL certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.ssl_policy = AAZObjectArg(
             options=["--ssl-policy"],
@@ -234,22 +234,22 @@ class Create(AAZCommand):
         _args_schema.ssl_profiles = AAZListArg(
             options=["--ssl-profiles"],
             arg_group="Properties",
-            help="SSL profiles of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="SSL profiles of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.trusted_client_certificates = AAZListArg(
             options=["--trusted-client-certificates"],
             arg_group="Properties",
-            help="Trusted client certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Trusted client certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.trusted_root_certificates = AAZListArg(
             options=["--trusted-root-certificates"],
             arg_group="Properties",
-            help="Trusted Root certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="Trusted Root certificates of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.url_path_maps = AAZListArg(
             options=["--url-path-maps"],
             arg_group="Properties",
-            help="URL path map of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="URL path map of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
         _args_schema.web_application_firewall_configuration = AAZObjectArg(
             options=["--web-application-firewall-configuration"],
@@ -634,6 +634,10 @@ class Create(AAZCommand):
             help="Frontend port resource of an application gateway.",
         )
         cls._build_args_sub_resource_create(_element.frontend_port)
+        _element.host_names = AAZListArg(
+            options=["host-names"],
+            help="List of Server Name Indications(SNI) for TLS Multi-site Listener that allows special wildcard characters as well.",
+        )
         _element.protocol = AAZStrArg(
             options=["protocol"],
             help="Protocol of the listener.",
@@ -649,6 +653,9 @@ class Create(AAZCommand):
             help="SSL profile resource of the application gateway.",
         )
         cls._build_args_sub_resource_create(_element.ssl_profile)
+
+        host_names = cls._args_schema.listeners.Element.host_names
+        host_names.Element = AAZStrArg()
 
         load_distribution_policies = cls._args_schema.load_distribution_policies
         load_distribution_policies.Element = AAZObjectArg()
@@ -776,7 +783,7 @@ class Create(AAZCommand):
         )
         _element.path = AAZStrArg(
             options=["path"],
-            help="Relative path of probe. Valid path starts from '/'. Probe is sent to <Protocol>://<host>:<port><path>.",
+            help="Relative path of probe. Valid path starts from '/'. Probe is sent to `<Protocol>://<host>:<port><path>`.",
         )
         _element.pick_host_name_from_backend_http_settings = AAZBoolArg(
             options=["pick-host-name-from-backend-http-settings"],
@@ -1082,15 +1089,20 @@ class Create(AAZCommand):
             options=["capacity"],
             help="Capacity (instance count) of an application gateway.",
         )
+        sku.family = AAZStrArg(
+            options=["family"],
+            help="Family of an application gateway SKU.",
+            enum={"Generation_1": "Generation_1", "Generation_2": "Generation_2"},
+        )
         sku.name = AAZStrArg(
             options=["name"],
             help="Name of an application gateway SKU.",
-            enum={"Standard_Large": "Standard_Large", "Standard_Medium": "Standard_Medium", "Standard_Small": "Standard_Small", "Standard_v2": "Standard_v2", "WAF_Large": "WAF_Large", "WAF_Medium": "WAF_Medium", "WAF_v2": "WAF_v2"},
+            enum={"Basic": "Basic", "Standard_Large": "Standard_Large", "Standard_Medium": "Standard_Medium", "Standard_Small": "Standard_Small", "Standard_v2": "Standard_v2", "WAF_Large": "WAF_Large", "WAF_Medium": "WAF_Medium", "WAF_v2": "WAF_v2"},
         )
         sku.tier = AAZStrArg(
             options=["tier"],
             help="Tier of an application gateway.",
-            enum={"Standard": "Standard", "Standard_v2": "Standard_v2", "WAF": "WAF", "WAF_v2": "WAF_v2"},
+            enum={"Basic": "Basic", "Standard": "Standard", "Standard_v2": "Standard_v2", "WAF": "WAF", "WAF_v2": "WAF_v2"},
         )
 
         ssl_certificates = cls._args_schema.ssl_certificates
@@ -1417,6 +1429,7 @@ class Create(AAZCommand):
         if cls._args_application_gateway_header_configuration_create is not None:
             _schema.header_name = cls._args_application_gateway_header_configuration_create.header_name
             _schema.header_value = cls._args_application_gateway_header_configuration_create.header_value
+            _schema.header_value_matcher = cls._args_application_gateway_header_configuration_create.header_value_matcher
             return
 
         cls._args_application_gateway_header_configuration_create = AAZObjectArg()
@@ -1430,9 +1443,28 @@ class Create(AAZCommand):
             options=["header-value"],
             help="Header value of the header configuration.",
         )
+        application_gateway_header_configuration_create.header_value_matcher = AAZObjectArg(
+            options=["header-value-matcher"],
+            help="An optional field under \"Rewrite Action\". It lets you capture and modify the value(s) of a specific header when multiple headers with the same name exist. Currently supported for Set-Cookie Response header only. For more details, visit https://aka.ms/appgwheadercrud",
+        )
+
+        header_value_matcher = cls._args_application_gateway_header_configuration_create.header_value_matcher
+        header_value_matcher.ignore_case = AAZBoolArg(
+            options=["ignore-case"],
+            help="Setting this parameter to truth value with force the pattern to do a case in-sensitive comparison.",
+        )
+        header_value_matcher.negate = AAZBoolArg(
+            options=["negate"],
+            help="Setting this value as truth will force to check the negation of the condition given by the user in the pattern field.",
+        )
+        header_value_matcher.pattern = AAZStrArg(
+            options=["pattern"],
+            help="The pattern, either fixed string or regular expression, that evaluates if a header value should be selected for rewrite.",
+        )
 
         _schema.header_name = cls._args_application_gateway_header_configuration_create.header_name
         _schema.header_value = cls._args_application_gateway_header_configuration_create.header_value
+        _schema.header_value_matcher = cls._args_application_gateway_header_configuration_create.header_value_matcher
 
     _args_application_gateway_ssl_policy_create = None
 
@@ -1588,7 +1620,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-02-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -1867,9 +1899,14 @@ class Create(AAZCommand):
             if properties is not None:
                 _CreateHelper._build_schema_sub_resource_create(properties.set_prop("frontendIPConfiguration", AAZObjectType, ".frontend_ip_configuration"))
                 _CreateHelper._build_schema_sub_resource_create(properties.set_prop("frontendPort", AAZObjectType, ".frontend_port"))
+                properties.set_prop("hostNames", AAZListType, ".host_names")
                 properties.set_prop("protocol", AAZStrType, ".protocol")
                 _CreateHelper._build_schema_sub_resource_create(properties.set_prop("sslCertificate", AAZObjectType, ".ssl_certificate"))
                 _CreateHelper._build_schema_sub_resource_create(properties.set_prop("sslProfile", AAZObjectType, ".ssl_profile"))
+
+            host_names = _builder.get(".properties.listeners[].properties.hostNames")
+            if host_names is not None:
+                host_names.set_elements(AAZStrType, ".")
 
             load_distribution_policies = _builder.get(".properties.loadDistributionPolicies")
             if load_distribution_policies is not None:
@@ -2097,6 +2134,7 @@ class Create(AAZCommand):
             sku = _builder.get(".properties.sku")
             if sku is not None:
                 sku.set_prop("capacity", AAZIntType, ".capacity")
+                sku.set_prop("family", AAZStrType, ".family")
                 sku.set_prop("name", AAZStrType, ".name")
                 sku.set_prop("tier", AAZStrType, ".tier")
 
@@ -2343,6 +2381,7 @@ class Create(AAZCommand):
             )
             properties.default_predefined_ssl_policy = AAZStrType(
                 serialized_name="defaultPredefinedSslPolicy",
+                flags={"read_only": True},
             )
             properties.enable_fips = AAZBoolType(
                 serialized_name="enableFips",
@@ -2743,6 +2782,9 @@ class Create(AAZCommand):
                 serialized_name="frontendPort",
             )
             _CreateHelper._build_schema_sub_resource_read(properties.frontend_port)
+            properties.host_names = AAZListType(
+                serialized_name="hostNames",
+            )
             properties.protocol = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -2756,6 +2798,9 @@ class Create(AAZCommand):
                 serialized_name="sslProfile",
             )
             _CreateHelper._build_schema_sub_resource_read(properties.ssl_profile)
+
+            host_names = cls._schema_on_200_201.properties.listeners.Element.properties.host_names
+            host_names.Element = AAZStrType()
 
             load_distribution_policies = cls._schema_on_200_201.properties.load_distribution_policies
             load_distribution_policies.Element = AAZObjectType()
@@ -2833,6 +2878,7 @@ class Create(AAZCommand):
             )
             properties.private_endpoint = AAZObjectType(
                 serialized_name="privateEndpoint",
+                flags={"read_only": True},
             )
             _CreateHelper._build_schema_private_endpoint_read(properties.private_endpoint)
             properties.private_link_service_connection_state = AAZObjectType(
@@ -3173,6 +3219,7 @@ class Create(AAZCommand):
 
             sku = cls._schema_on_200_201.properties.sku
             sku.capacity = AAZIntType()
+            sku.family = AAZStrType()
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
 
@@ -3490,6 +3537,13 @@ class _CreateHelper:
             return
         _builder.set_prop("headerName", AAZStrType, ".header_name")
         _builder.set_prop("headerValue", AAZStrType, ".header_value")
+        _builder.set_prop("headerValueMatcher", AAZObjectType, ".header_value_matcher")
+
+        header_value_matcher = _builder.get(".headerValueMatcher")
+        if header_value_matcher is not None:
+            header_value_matcher.set_prop("ignoreCase", AAZBoolType, ".ignore_case")
+            header_value_matcher.set_prop("negate", AAZBoolType, ".negate")
+            header_value_matcher.set_prop("pattern", AAZStrType, ".pattern")
 
     @classmethod
     def _build_schema_application_gateway_ssl_policy_create(cls, _builder):
@@ -3603,6 +3657,7 @@ class _CreateHelper:
         if cls._schema_application_gateway_header_configuration_read is not None:
             _schema.header_name = cls._schema_application_gateway_header_configuration_read.header_name
             _schema.header_value = cls._schema_application_gateway_header_configuration_read.header_value
+            _schema.header_value_matcher = cls._schema_application_gateway_header_configuration_read.header_value_matcher
             return
 
         cls._schema_application_gateway_header_configuration_read = _schema_application_gateway_header_configuration_read = AAZObjectType()
@@ -3614,9 +3669,20 @@ class _CreateHelper:
         application_gateway_header_configuration_read.header_value = AAZStrType(
             serialized_name="headerValue",
         )
+        application_gateway_header_configuration_read.header_value_matcher = AAZObjectType(
+            serialized_name="headerValueMatcher",
+        )
+
+        header_value_matcher = _schema_application_gateway_header_configuration_read.header_value_matcher
+        header_value_matcher.ignore_case = AAZBoolType(
+            serialized_name="ignoreCase",
+        )
+        header_value_matcher.negate = AAZBoolType()
+        header_value_matcher.pattern = AAZStrType()
 
         _schema.header_name = cls._schema_application_gateway_header_configuration_read.header_name
         _schema.header_value = cls._schema_application_gateway_header_configuration_read.header_value
+        _schema.header_value_matcher = cls._schema_application_gateway_header_configuration_read.header_value_matcher
 
     _schema_application_gateway_ip_configuration_read = None
 
@@ -3966,6 +4032,10 @@ class _CreateHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
+        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -3974,6 +4044,7 @@ class _CreateHelper:
         )
         properties.private_link_connection_properties = AAZObjectType(
             serialized_name="privateLinkConnectionProperties",
+            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -4044,6 +4115,9 @@ class _CreateHelper:
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
+        )
+        properties.sync_mode = AAZStrType(
+            serialized_name="syncMode",
         )
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
@@ -4339,6 +4413,7 @@ class _CreateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service = AAZObjectType(
@@ -4527,6 +4602,7 @@ class _CreateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_endpoint_location = AAZStrType(
@@ -4750,7 +4826,9 @@ class _CreateHelper:
             _schema.type = cls._schema_private_endpoint_read.type
             return
 
-        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType()
+        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         private_endpoint_read = _schema_private_endpoint_read
         private_endpoint_read.etag = AAZStrType(
@@ -5308,6 +5386,9 @@ class _CreateHelper:
         properties.application_gateway_ip_configurations = AAZListType(
             serialized_name="applicationGatewayIPConfigurations",
         )
+        properties.default_outbound_access = AAZBoolType(
+            serialized_name="defaultOutboundAccess",
+        )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(
             serialized_name="ipAllocations",
@@ -5361,6 +5442,9 @@ class _CreateHelper:
         )
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
+        )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
         )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes
@@ -5432,7 +5516,9 @@ class _CreateHelper:
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType()
+        private_endpoints.Element = AAZObjectType(
+            flags={"read_only": True},
+        )
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links

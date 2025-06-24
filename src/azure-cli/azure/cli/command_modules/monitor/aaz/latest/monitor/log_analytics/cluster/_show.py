@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-06-01",
+        "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2021-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2025-02-01"],
         ]
     }
 
@@ -60,11 +60,11 @@ class Show(AAZCommand):
         self.ClustersGet(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -120,7 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-06-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -156,7 +156,7 @@ class Show(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -189,7 +189,9 @@ class Show(AAZCommand):
             )
 
             user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
 
             _element = cls._schema_on_200.identity.user_assigned_identities.Element
             _element.client_id = AAZStrType(
@@ -223,6 +225,9 @@ class Show(AAZCommand):
             properties.is_availability_zones_enabled = AAZBoolType(
                 serialized_name="isAvailabilityZonesEnabled",
             )
+            properties.is_double_encryption_enabled = AAZBoolType(
+                serialized_name="isDoubleEncryptionEnabled",
+            )
             properties.key_vault_properties = AAZObjectType(
                 serialized_name="keyVaultProperties",
             )
@@ -234,11 +239,10 @@ class Show(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.replication = AAZObjectType()
 
             associated_workspaces = cls._schema_on_200.properties.associated_workspaces
-            associated_workspaces.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            associated_workspaces.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.associated_workspaces.Element
             _element.associate_date = AAZStrType(
@@ -282,6 +286,25 @@ class Show(AAZCommand):
                 serialized_name="keyVersion",
             )
 
+            replication = cls._schema_on_200.properties.replication
+            replication.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            replication.enabled = AAZBoolType()
+            replication.is_availability_zones_enabled = AAZBoolType(
+                serialized_name="isAvailabilityZonesEnabled",
+            )
+            replication.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            replication.location = AAZStrType()
+            replication.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
             sku = cls._schema_on_200.sku
             sku.capacity = AAZIntType()
             sku.name = AAZStrType()
@@ -290,6 +313,10 @@ class Show(AAZCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _ShowHelper:
+    """Helper class for Show"""
 
 
 __all__ = ["Show"]

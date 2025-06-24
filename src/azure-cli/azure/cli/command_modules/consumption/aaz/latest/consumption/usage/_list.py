@@ -20,10 +20,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-01-31",
+        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.billing/billingperiods/{}/providers/microsoft.consumption/usagedetails", "2018-01-31"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.consumption/usagedetails", "2018-01-31"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.billing/billingperiods/{}/providers/microsoft.consumption/usagedetails", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.consumption/usagedetails", "2023-05-01"],
         ]
     }
 
@@ -145,7 +145,7 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2018-01-31",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -383,7 +383,7 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2018-01-31",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }

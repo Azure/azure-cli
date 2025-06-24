@@ -360,16 +360,7 @@ def load_command_table(self, _):
         g.show_command('show', 'acr_config_authentication_as_arm_show')
         g.command('update', 'acr_config_authentication_as_arm_update')
 
-    def _helm_deprecate_message(self):
-        msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
-        msg += " Use '{}' instead.".format(self.redirect)
-        msg += " For more information go to"
-        msg += " https://aka.ms/acr/helm"
-        return msg
-
-    with self.command_group('acr helm', acr_helm_util,
-                            deprecate_info=self.deprecate(redirect="helm v3",
-                                                          message_func=_helm_deprecate_message)) as g:
+    with self.command_group('acr helm', acr_helm_util) as g:
         g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format)
         g.show_command('show', 'acr_helm_show', table_transformer=helm_show_output_format)
         g.command('delete', 'acr_helm_delete')
@@ -429,7 +420,7 @@ def load_command_table(self, _):
         g.show_command('show', 'show_encryption')
         g.command('rotate-key', "rotate_key")
 
-    with self.command_group('acr connected-registry', acr_connected_registry_util, is_preview=True) as g:
+    with self.command_group('acr connected-registry', acr_connected_registry_util) as g:
         g.command('create', 'acr_connected_registry_create')
         g.command('delete', 'acr_connected_registry_delete')
         g.show_command('show', 'acr_connected_registry_show')

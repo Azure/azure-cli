@@ -111,7 +111,7 @@ def get_postgresql_management_client(cli_ctx, **_):
 
 def get_postgresql_flexible_management_client(cli_ctx, subscription_id=None, **_):
     from os import getenv
-    from azure.mgmt.rdbms.postgresql_flexibleservers import PostgreSQLManagementClient
+    from azure.mgmt.postgresqlflexibleservers import PostgreSQLManagementClient
     # Allow overriding resource manager URI using environment variable
     # for testing purposes. Subscription id is also determined by environment
     # variable.
@@ -338,6 +338,10 @@ def cf_postgres_flexible_firewall_rules(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).firewall_rules
 
 
+def cf_postgres_flexible_virtual_endpoints(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).virtual_endpoints
+
+
 def cf_postgres_flexible_config(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).configurations
 
@@ -358,12 +362,28 @@ def cf_postgres_flexible_backups(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).backups
 
 
-def cf_postgres_flexible_adadmin(cli_ctx, _):
+def cf_postgres_flexible_ltr_backups(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).ltr_backup_operations
+
+
+def cf_postgres_flexible_operations(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).flexible_server
+
+
+def cf_postgres_flexible_admin(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).administrators
 
 
 def cf_postgres_flexible_migrations(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).migrations
+
+
+def cf_postgres_flexible_server_threat_protection_settings(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).server_threat_protection_settings
+
+
+def cf_postgres_flexible_server_log_files(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).log_files
 
 
 def cf_postgres_check_resource_availability(cli_ctx, _):
@@ -380,6 +400,22 @@ def cf_postgres_check_resource_availability_with_location(cli_ctx, _):
 
 def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
+
+
+def cf_postgres_flexible_private_endpoint_connections(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).private_endpoint_connections
+
+
+def cf_postgres_flexible_private_endpoint_connection(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).private_endpoint_connection
+
+
+def cf_postgres_flexible_private_link_resources(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).private_link_resources
+
+
+def cf_postgres_flexible_tuning_options(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).tuning_options
 
 
 def resource_client_factory(cli_ctx, subscription_id=None):

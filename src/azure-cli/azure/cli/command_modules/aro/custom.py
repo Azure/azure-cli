@@ -8,6 +8,9 @@ import random
 from base64 import b64decode
 import textwrap
 
+from azure.core.exceptions import HttpResponseError, \
+    ResourceNotFoundError as CoreResourceNotFoundError
+from azure.mgmt.core.tools import resource_id, parse_resource_id
 import azure.mgmt.redhatopenshift.models as openshiftcluster
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -27,8 +30,6 @@ from azure.cli.command_modules.role import GraphError
 
 from knack.log import get_logger
 
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, parse_resource_id
 from msrest.exceptions import HttpOperationError
 
 from tabulate import tabulate
@@ -59,13 +60,14 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                outbound_type='Loadbalancer',
                disk_encryption_set=None,
                master_encryption_at_host=False,
-               master_vm_size='Standard_D8s_v3',
+               master_vm_size='Standard_D8s_v5',
                worker_encryption_at_host=False,
-               worker_vm_size='Standard_D4s_v3',
+               worker_vm_size='Standard_D4s_v5',
                worker_vm_disk_size_gb='128',
                worker_count='3',
                apiserver_visibility='Public',
                ingress_visibility='Public',
+               load_balancer_managed_outbound_ip_count=None,
                tags=None,
                version=None,
                no_wait=False):
@@ -114,13 +116,19 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
     if not rp_client_sp_id:
         raise ResourceNotFoundError("RP service principal not found.")
 
-    worker_vm_size = worker_vm_size or 'Standard_D4s_v3'
+    worker_vm_size = worker_vm_size or 'Standard_D4s_v5'
 
     if apiserver_visibility is not None:
         apiserver_visibility = apiserver_visibility.capitalize()
 
     if ingress_visibility is not None:
         ingress_visibility = ingress_visibility.capitalize()
+
+    load_balancer_profile = None
+    if load_balancer_managed_outbound_ip_count is not None:
+        load_balancer_profile = openshiftcluster.LoadBalancerProfile()
+        load_balancer_profile.managed_outbound_ips = openshiftcluster.ManagedOutboundIPs()
+        load_balancer_profile.managed_outbound_ips.count = load_balancer_managed_outbound_ip_count  # pylint: disable=line-too-long
 
     oc = openshiftcluster.OpenShiftCluster(
         location=location,
@@ -141,10 +149,11 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
             pod_cidr=pod_cidr or '10.128.0.0/14',
             service_cidr=service_cidr or '172.30.0.0/16',
             outbound_type=outbound_type or '',
+            load_balancer_profile=load_balancer_profile,
             preconfigured_nsg='Enabled' if enable_preconfigured_nsg else 'Disabled',
         ),
         master_profile=openshiftcluster.MasterProfile(
-            vm_size=master_vm_size or 'Standard_D8s_v3',
+            vm_size=master_vm_size or 'Standard_D8s_v5',
             subnet_id=master_subnet,
             encryption_at_host='Enabled' if master_encryption_at_host else 'Disabled',
             disk_encryption_set_id=disk_encryption_set,
@@ -229,7 +238,7 @@ def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
         # Get cluster resources we need to assign permissions on, sort to ensure the same order of operations
         resources = {ROLE_NETWORK_CONTRIBUTOR: sorted(get_cluster_network_resources(cmd.cli_ctx, cluster, True)),
                      ROLE_READER: sorted(get_disk_encryption_resources(cluster))}
-    except (CloudError, HttpOperationError) as e:
+    except (HttpResponseError, HttpOperationError) as e:
         logger.error(e.message)
         raise
 
@@ -335,7 +344,7 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
 
     try:
         oc = client.open_shift_clusters.get(resource_group_name, resource_name)
-    except CloudError as e:
+    except HttpResponseError as e:
         if e.status_code == 404:
             raise ResourceNotFoundError(e.message) from e
         logger.info(e.message)
@@ -403,6 +412,7 @@ def aro_update(cmd,
                refresh_cluster_credentials=False,
                client_id=None,
                client_secret=None,
+               load_balancer_managed_outbound_ip_count=None,
                no_wait=False):
     # if we can't read cluster spec, we will not be able to do much. Fail.
     oc = client.open_shift_clusters.get(resource_group_name, resource_name)
@@ -420,6 +430,12 @@ def aro_update(cmd,
 
         if client_id is not None:
             ocUpdate.service_principal_profile.client_id = client_id
+
+    if load_balancer_managed_outbound_ip_count is not None:
+        ocUpdate.network_profile = openshiftcluster.NetworkProfile()
+        ocUpdate.network_profile.load_balancer_profile = openshiftcluster.LoadBalancerProfile()
+        ocUpdate.network_profile.load_balancer_profile.managed_outbound_ips = openshiftcluster.ManagedOutboundIPs()
+        ocUpdate.network_profile.load_balancer_profile.managed_outbound_ips.count = load_balancer_managed_outbound_ip_count  # pylint: disable=line-too-long
 
     return sdk_no_wait(no_wait, client.open_shift_clusters.begin_update,
                        resource_group_name=resource_group_name,
@@ -447,11 +463,14 @@ def get_network_resources_from_subnets(cli_ctx, subnets, fail, oc):
                     Please retry, if issue persists: raise azure support ticket""")
             logger.info("Failed to validate subnet '%s'", sn)
 
-        subnet = subnet_show(cli_ctx=cli_ctx)(command_args={
-            "name": sid['resource_name'],
-            "vnet_name": sid['name'],
-            "resource_group": sid['resource_group']
-        })
+        try:
+            subnet = subnet_show(cli_ctx=cli_ctx)(command_args={
+                "name": sid['resource_name'],
+                "vnet_name": sid['name'],
+                "resource_group": sid['resource_group']}
+            )
+        except CoreResourceNotFoundError:
+            continue
 
         if subnet.get("routeTable", None):
             subnet_resources.add(subnet["routeTable"]["id"])
@@ -488,8 +507,11 @@ def get_cluster_network_resources(cli_ctx, oc, fail):
 
     # Ensure that worker_profiles_status exists
     # it will not be returned if the cluster resources do not exist
+
+    # We filter nonexistent subnets here as we only propagate subnet values for
+    # worker profiles/machinesets considered valid.
     if oc.worker_profiles_status is not None:
-        worker_subnets |= {w.subnet_id for w in oc.worker_profiles_status}
+        worker_subnets |= {w.subnet_id for w in oc.worker_profiles_status if w.subnet_id is not None}
 
     master_parts = parse_resource_id(master_subnet)
     vnet = resource_id(
@@ -604,7 +626,7 @@ def ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids):
         # Get cluster resources we need to assign permissions on, sort to ensure the same order of operations
         resources = {ROLE_NETWORK_CONTRIBUTOR: sorted(get_cluster_network_resources(cli_ctx, oc, fail)),
                      ROLE_READER: sorted(get_disk_encryption_resources(oc))}
-    except (CloudError, HttpOperationError) as e:
+    except (HttpResponseError, HttpOperationError) as e:
         if fail:
             logger.error(e.message)
             raise
@@ -619,7 +641,7 @@ def ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids):
                 resource_contributor_exists = True
                 try:
                     resource_contributor_exists = has_role_assignment_on_resource(cli_ctx, resource, sp_id, role)
-                except CloudError as e:
+                except HttpResponseError as e:
                     if fail:
                         logger.error(e.message)
                         raise

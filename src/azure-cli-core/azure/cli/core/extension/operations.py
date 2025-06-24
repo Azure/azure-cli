@@ -20,8 +20,7 @@ from packaging.version import parse
 from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module, rmtree_with_retry
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
-                                      get_extension, ext_compat_with_cli,
-                                      EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
+                                      get_extension, ext_compat_with_cli, is_preview_from_extension_meta,
                                       WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
 from azure.cli.core.telemetry import set_extension_management_detail
 
@@ -47,7 +46,7 @@ LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
 def _run_pip(pip_exec_args, extension_path=None):
-    cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
+    cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['--disable-pip-version-check', '--no-cache-dir']
     logger.debug('Running: %s', cmd)
     try:
         log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
@@ -66,7 +65,7 @@ def _whl_download_from_url(url_parse_result, ext_file):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
     url = url_parse_result.geturl()
-    r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
+    r = requests.get(url, stream=True, verify=not should_disable_connection_verify())
     if r.status_code != 200:
         raise CLIError("Request to {} failed with {}".format(url, r.status_code))
     with open(ext_file, 'wb') as f:
@@ -306,7 +305,7 @@ def check_version_compatibility(azext_metadata):
 
 def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument, too-many-statements
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
-                  version=None, cli_ctx=None, upgrade=None):
+                  version=None, cli_ctx=None, upgrade=None, allow_preview=None):
     ext_sha256 = None
     update_to_latest = version == 'latest' and not source
 
@@ -315,7 +314,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
     if extension_name:
         cmd_cli_ctx.get_progress_controller().add(message='Searching')
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, allow_preview=allow_preview)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             err = "{}\n\nUse --debug for more information".format(err.args[0])
@@ -399,7 +398,7 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None, version=None, download_url=None, ext_sha256=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, allow_preview=None, cli_ctx=None, version=None, download_url=None, ext_sha256=None):
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
@@ -409,7 +408,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         cur_version = ext.get_version()
         try:
             if not download_url:
-                download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
+                download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, allow_preview=allow_preview)
             _, ext_version = _get_extension_info_from_source(download_url)
             set_extension_management_detail(extension_name, ext_version)
         except NoExtensionCandidatesError as err:
@@ -465,8 +464,8 @@ def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
             'name': name,
             'version': latest['metadata']['version'],
             'summary': latest['metadata']['summary'],
-            'preview': latest['metadata'].get(EXT_METADATA_ISPREVIEW, False),
-            'experimental': latest['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'preview': is_preview_from_extension_meta(latest['metadata']),
+            'experimental': False,
             'installed': installed
         })
     return results
@@ -502,8 +501,8 @@ def list_versions(extension_name, index_url=None, cli_ctx=None):
         results.append({
             'name': extension_name,
             'version': version,
-            'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False),
-            'experimental': ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'preview': is_preview_from_extension_meta(ext['metadata']),
+            'experimental': False,
             'installed': installed,
             'compatible': compatible
         })

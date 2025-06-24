@@ -173,7 +173,7 @@ def get_all_mod_names():
 
 def _get_new_yaml_dict(help_dict):
 
-    result = dict(version=1, content=[])
+    result = {"version": 1, "content": []}
     content = result['content']
 
     for command_or_group, yaml_text in help_dict.items():
@@ -181,7 +181,7 @@ def _get_new_yaml_dict(help_dict):
 
         type = help_dict["type"]
 
-        elem = {type: dict(name=command_or_group)}
+        elem = {type: {"name": command_or_group}}
         elem_content = elem[type]
 
         _convert_summaries(old_dict=help_dict, new_dict=elem_content)
@@ -189,7 +189,7 @@ def _get_new_yaml_dict(help_dict):
         if "parameters" in help_dict:
             parameters = []
             for param in help_dict["parameters"]:
-                new_param = dict()
+                new_param = {}
                 if "name" in param:
                     options = param["name"].split()
                     new_param["name"] = max(options, key=lambda x: len(x))
@@ -205,7 +205,7 @@ def _get_new_yaml_dict(help_dict):
         if "examples" in help_dict:
             elem_examples = []
             for ex in help_dict["examples"]:
-                new_ex = dict()
+                new_ex = {}
                 if "name" in ex:
                     new_ex["summary"] = ex["name"]
                 if "text" in ex:

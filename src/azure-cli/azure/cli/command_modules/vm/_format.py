@@ -35,22 +35,22 @@ def transform_vm(vm):
 
 
 def transform_vm_create_output(result):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from collections import OrderedDict
     try:
-        resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
-        output = OrderedDict([('id', result.id),
+        resource_group = result.get('resource_group', None) or parse_resource_id(result['id'])['resource_group']
+        output = OrderedDict([('id', result['id']),
                               ('resourceGroup', resource_group),
-                              ('powerState', result.power_state),
-                              ('publicIpAddress', result.public_ips),
-                              ('fqdns', result.fqdns),
-                              ('privateIpAddress', result.private_ips),
-                              ('macAddress', result.mac_addresses),
-                              ('location', result.location)])
-        if getattr(result, 'identity', None):
-            output['identity'] = result.identity
-        if hasattr(result, 'zones'):  # output 'zones' column even the property value is None
-            output['zones'] = result.zones[0] if result.zones else ''
+                              ('powerState', result.get('powerState', '')),
+                              ('publicIpAddress', result.get('publicIps', '')),
+                              ('fqdns', result.get('fqdns', '')),
+                              ('privateIpAddress', result.get('privateIps', '')),
+                              ('macAddress', result.get('macAddresses', '')),
+                              ('location', result.get('location', ''))])
+        if result.get('identity', None):
+            output['identity'] = result['identity']
+        if 'zones' in result:  # output 'zones' column even the property value is None
+            output['zones'] = result['zones'][0] if result['zones'] else ''
         return output
     except AttributeError:
         from msrest.pipeline import ClientRawResponse
@@ -91,7 +91,7 @@ def transform_sku_for_table_output(skus):
                     reason += ', type: ' + x['type']
                 if x['restrictionInfo']['locations']:
                     reason += ', locations: ' + ','.join(x['restrictionInfo']['locations'])
-                if x['restrictionInfo']['zones']:
+                if x['restrictionInfo'].get('zones', None):
                     reason += ', zones: ' + ','.join(x['restrictionInfo']['zones'])
                 reasons.append(reason)
             order_dict['restrictions'] = str(reasons) if len(reasons) > 1 else reasons[0]
@@ -149,14 +149,10 @@ def transform_log_analytics_query_output(result):
     tables_output = []
 
     def _transform_query_output(table):
-        columns = table.columns
         name = table.name
         rows = table.rows
-
-        column_names = []
+        column_names = table.columns
         table_output = []
-        for column in columns:
-            column_names.append(column.name)
         for row in rows:
             item = OrderedDict()
             item['TableName'] = name

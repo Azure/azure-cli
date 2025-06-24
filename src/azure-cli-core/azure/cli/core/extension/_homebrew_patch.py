@@ -14,7 +14,7 @@ HOMEBREW_CELLAR_PATH = '/usr/local/Cellar/azure-cli/'
 
 
 def is_homebrew():
-    return any((p.startswith(HOMEBREW_CELLAR_PATH) for p in sys.path))
+    return any(p.startswith(HOMEBREW_CELLAR_PATH) for p in sys.path)
 
 
 # A workaround for https://github.com/Azure/azure-cli/issues/4428

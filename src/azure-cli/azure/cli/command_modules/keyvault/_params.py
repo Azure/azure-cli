@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type, tags_type, file_type, get_three_state_flag,
     get_enum_type)
 from azure.cli.core.util import get_json_object
-from azure.cli.core.profiles import ResourceType, get_api_version
+from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
@@ -125,7 +125,7 @@ def load_arguments(self, _):
                         'Role Based Access Control (RBAC) for authorization of data actions, and the access policies '
                         'specified in vault properties will be ignored. When false, the key vault will use the access '
                         'policies specified in vault properties, and any policy stored on Azure Resource Manager will '
-                        'be ignored. If null or not specified, the vault is created with the default value of false. '
+                        'be ignored. If null or not specified, the vault is created with the default value of true. '
                         'Note that management actions are always authorized with RBAC.')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(),
                    help='Property specifying whether protection against purge is enabled for this vault/managed HSM '
@@ -159,16 +159,16 @@ def load_arguments(self, _):
                    help='[HSM Only] Administrator role for data plane operations for Managed HSM. '
                         'It accepts a space separated list of OIDs that will be assigned.')
         c.argument('sku', help='Required. SKU details. Allowed values for Vault: premium, standard. Default: standard.'
-                               ' Allowed values for HSM: Standard_B1, Custom_B32. Default: Standard_B1')
+                               ' Allowed values for HSM: Standard_B1, Custom_B32, Custom_B6, Custom_C42, Custom_C10. Default: Standard_B1')
         c.argument('no_self_perms', arg_type=get_three_state_flag(),
                    help='[Vault Only] Don\'t add permissions for the current user/service principal in the new vault.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('retention_days', validator=validate_retention_days_on_creation,
                    help='Soft delete data retention days. It accepts >=7 and <=90. '
                         'Defaults to 90 for keyvault creation. Required for MHSM creation')
-        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*', is_preview=True,
+        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*',
                    min_api='2023-07-01', resource_type=ResourceType.MGMT_KEYVAULT, operation_group="managed_hsms",
-                   help="[HSM Only]Enable user-assigned managed identities for managed HSM. "
+                   help="[HSM Only] Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
@@ -190,7 +190,7 @@ def load_arguments(self, _):
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
         c.argument('user_identities', options_list=['--mi-user-assigned'],
-                   nargs='*', min_api='2023-07-01', is_preview=True,
+                   nargs='*', min_api='2023-07-01',
                    help="Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
@@ -287,7 +287,7 @@ def load_arguments(self, _):
     # keys track2
     for scope in ['create', 'import', 'set-attributes', 'show', 'show-deleted', 'delete', 'list', 'list-deleted',
                   'list-versions', 'encrypt', 'decrypt', 'sign', 'verify', 'recover', 'purge', 'download',
-                  'backup', 'restore', 'rotate', 'rotation-policy show', 'rotation-policy update']:
+                  'backup', 'restore', 'rotate', 'get-attestation', 'rotation-policy show', 'rotation-policy update']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
                        required=False, completer=get_keyvault_name_completion_list('key'),
@@ -313,6 +313,13 @@ def load_arguments(self, _):
             c.extra('identifier', options_list=['--id'], arg_group='Id',
                     help='The recovery id of the key. If specified all other \'Id\' arguments should be omitted.',
                     validator=validate_keyvault_resource_id('key'))
+
+    with self.argument_context('keyvault key get-attestation') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help="File to receive the key's attestation if you want to save it.")
+        c.extra('hsm_name', data_plane_hsm_name_type, required=False, arg_group='Id',
+                help='Name of the HSM. Required if --id is not specified.')
+        c.ignore('vault_base_url')
 
     with self.argument_context('keyvault key list') as c:
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
@@ -350,9 +357,9 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
-                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
+                   help='The type of key to create. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
-                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
+                   help='Elliptic curve name. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import') as c:
         c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,
@@ -551,6 +558,7 @@ def load_arguments(self, _):
         c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'],
                    help="Encoding of the secret. By default, will look for the 'file-encoding' tag on the secret. "
                         "Otherwise will assume 'utf-8'.", default=None)
+        c.argument('overwrite', action='store_true', options_list=['--overwrite'], help="Overwrite the file if it exists.")
 
     for scope in ['download', 'backup', 'restore']:
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
@@ -563,10 +571,10 @@ def load_arguments(self, _):
     # endregion
 
     # region keyvault security-domain
-    for scope in ['init-recovery', 'download', 'upload']:
+    for scope in ['init-recovery', 'download', 'upload', 'wait']:
         with self.argument_context('keyvault security-domain {}'.format(scope), arg_group='HSM Id') as c:
-            c.argument('hsm_name', hsm_url_type, required=False,
-                       help='Name of the HSM. Can be omitted if --id is specified.')
+            c.extra('hsm_name', hsm_url_type, required=False,
+                    help='Name of the HSM. Can be omitted if --id is specified.')
             c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
             c.ignore('vault_base_url')
 
@@ -604,14 +612,8 @@ def load_arguments(self, _):
                                                'for recovery.')
 
     with self.argument_context('keyvault security-domain wait') as c:
-        c.argument('hsm_name', hsm_url_type, help='Name of the HSM. Can be omitted if --id is specified.',
-                   required=False)
-        c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
-        c.argument('resource_group_name', options_list=['--resource-group', '-g'],
-                   help='Proceed only if HSM belongs to the specified resource group.')
         c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
                    help='Target operation that needs waiting.')
-        c.ignore('vault_base_url')
     # endregion
 
     # region keyvault backup/restore
@@ -634,7 +636,7 @@ def load_arguments(self, _):
         with self.argument_context('keyvault {} start'.format(command_group)) as c:
             c.argument('token', options_list=['--storage-container-SAS-token', '-t'],
                        help='The SAS token pointing to an Azure Blob storage container')
-            c.argument('use_managed_identity', arg_type=get_three_state_flag(), is_preview=True,
+            c.argument('use_managed_identity', arg_type=get_three_state_flag(),
                        help='If True, Managed HSM will use the configured user-assigned managed identity to '
                             'authenticate with Azure Storage. Otherwise, a `sas_token` has to be specified.')
 
@@ -682,14 +684,10 @@ def load_arguments(self, _):
                 type=get_json_object, validator=process_certificate_policy)
         c.extra('tags', tags_type)
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)). \
-        replace('.', '_').replace('-', '_')
-
-    if data_api_version != "2016_10_01":
-        for cmd in ['list', 'list-deleted']:
-            with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
-                c.extra('include_pending', arg_type=get_three_state_flag(),
-                        help='Specifies whether to include certificates which are not completely provisioned.')
+    for cmd in ['list', 'list-deleted']:
+        with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
+            c.extra('include_pending', arg_type=get_three_state_flag(),
+                    help='Specifies whether to include certificates which are not completely provisioned.')
 
     with self.argument_context('keyvault certificate import') as c:
         c.argument('certificate_name', options_list=['--name', '-n'], required=True, arg_group='Id',

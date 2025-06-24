@@ -329,6 +329,29 @@ examples:
     crafted: true
 """
 
+helps['servicebus namespace replica'] = """
+type: group
+short-summary: Manage servicebus namespace replicas.
+"""
+
+helps['servicebus namespace replica add'] = """
+type: command
+short-summary: Add one or more Replica properties to a namespace.
+examples:
+  - name: Add one or more Replica properties to a namespace.
+    text: |
+        az servicebus namespace replica add --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation
+"""
+
+helps['servicebus namespace replica remove'] = """
+type: command
+short-summary: Remove one or more Replica properties to a namespace.
+examples:
+  - name: Remove one or more Replica properties to a namespace.
+    text: |
+        az servicebus namespace replica remove --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation
+"""
+
 helps['servicebus queue'] = """
 type: group
 short-summary: Manage Azure Service Bus Queue and Authorization Rule

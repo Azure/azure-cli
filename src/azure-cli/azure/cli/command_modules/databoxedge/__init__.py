@@ -23,12 +23,22 @@ class DataBoxEdgeManagementClientCommandsLoader(AzCommandsLoader):
         from azure.cli.core.profiles import ResourceType
         databoxedge_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.databoxedge.custom#{}')
-        parent = super(DataBoxEdgeManagementClientCommandsLoader, self)
-        parent.__init__(cli_ctx=cli_ctx, custom_command_type=databoxedge_custom,
-                        resource_type=ResourceType.MGMT_DATABOXEDGE)
+        super().__init__(cli_ctx=cli_ctx, custom_command_type=databoxedge_custom,
+                         resource_type=ResourceType.MGMT_DATABOXEDGE)
 
     def load_command_table(self, args):
         from .generated.commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         try:
             from .manual.commands import load_command_table as load_command_table_manual

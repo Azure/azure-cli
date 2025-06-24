@@ -1,0 +1,359 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/workspace-test/providers/Microsoft.OperationalInsights/workspaces/clitestfailoverfailback?api-version=2025-02-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"b345d359-97f1-47af-a7d3-48db65114326","provisioningState":"Succeeded","sku":{"name":"PerGB2018","lastSkuUpdate":"2025-05-08T03:26:01.143531Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2025-05-08T05:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T03:26:01.143531Z","modifiedDate":"2025-05-08T03:26:56.5595122Z","replication":{"enabled":true,"location":"eastus","provisioningState":"Succeeded","createdDate":"2025-05-08T03:26:01.1435815Z","lastModifiedDate":"2025-05-08T03:26:01.1435815Z"}},"location":"westus","tags":{"clitest":"liwa"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/workspace-test/providers/Microsoft.OperationalInsights/workspaces/clitestfailoverfailback","name":"clitestfailoverfailback","type":"Microsoft.OperationalInsights/workspaces","etag":"\"20007ecd-0000-0700-0000-681c24800000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1104'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 03:33:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: B954A98EF596427F85AF414531FB2C23 Ref B: TYO201151004052 Ref C: 2025-05-08T03:33:26Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace failover
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --workspace-name --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/workspace-test/providers/Microsoft.OperationalInsights/locations/eastus/workspaces/clitestfailoverfailback/failover?api-version=2025-02-01
+  response:
+    body:
+      string: '{"error":{"code":"InvalidParameter","message":"Workspace failover can''t
+        be triggered at this time because replication was enabled less than 24 hours
+        ago. Please try again 24 hours after replication was enabled. Operation Id:
+        ''e514a0711ff1d39a0cf8d760fc29fe69''"}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '262'
+      content-type:
+      - application/json
+      date:
+      - Thu, 08 May 2025 03:33:27 GMT
+      diagnostic-context:
+      - e514a0711ff1d39a0cf8d760fc29fe69
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/f59e8cf9-9ef2-43ac-b303-184de5d1a200
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 7EB6B2296BFB4FA08677B76A33D12ACA Ref B: TYO201151003040 Ref C: 2025-05-08T03:33:27Z'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace failback
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --workspace-name
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/workspace-test/providers/Microsoft.OperationalInsights/workspaces/clitestfailoverfailback/failback?api-version=2025-02-01
+  response:
+    body:
+      string: '{"error":{"code":"Conflict","message":"Failover is not active for this
+        workspace. Operation Id: ''268ecec0a9e30a655dd567b4e39c596a''"}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '133'
+      content-type:
+      - application/json
+      date:
+      - Thu, 08 May 2025 03:33:28 GMT
+      diagnostic-context:
+      - 268ecec0a9e30a655dd567b4e39c596a
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/7d75df7d-9d58-4349-b1ee-3fb22b32e365
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 85A4DB4DF19A48C5BAACA8E98084F6E0 Ref B: TYO201151002031 Ref C: 2025-05-08T03:33:28Z'
+    status:
+      code: 409
+      message: Conflict
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --replication-enabled
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/workspace-test/providers/Microsoft.OperationalInsights/workspaces/clitestfailoverfailback?api-version=2025-02-01
+  response:
+    body:
+      string: '{"properties":{"customerId":"b345d359-97f1-47af-a7d3-48db65114326","provisioningState":"Succeeded","sku":{"name":"PerGB2018","lastSkuUpdate":"2025-05-08T03:26:01.143531Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":-1.0,"quotaNextResetTime":"2025-05-08T05:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2025-05-08T03:26:01.143531Z","modifiedDate":"2025-05-08T03:26:56.5595122Z","replication":{"enabled":true,"location":"eastus","provisioningState":"Succeeded","createdDate":"2025-05-08T03:26:01.1435815Z","lastModifiedDate":"2025-05-08T03:26:01.1435815Z"}},"location":"westus","tags":{"clitest":"liwa"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/workspace-test/providers/Microsoft.OperationalInsights/workspaces/clitestfailoverfailback","name":"clitestfailoverfailback","type":"Microsoft.OperationalInsights/workspaces","etag":"\"20007ecd-0000-0700-0000-681c24800000\""}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1104'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 08 May 2025 03:33:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 5A1375FA2F964BE390612881CE75B55A Ref B: TYO201100113021 Ref C: 2025-05-08T03:33:30Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "\"20007ecd-0000-0700-0000-681c24800000\"", "location": "westus",
+      "properties": {"features": {"legacy": 0, "searchVersion": 1, "enableLogAccessUsingOnlyResourcePermissions":
+      true}, "publicNetworkAccessForIngestion": "Enabled", "publicNetworkAccessForQuery":
+      "Enabled", "replication": {"enabled": false, "location": "eastus"}, "retentionInDays":
+      30, "sku": {"name": "PerGB2018"}, "workspaceCapping": {"dailyQuotaGb": -1.0}},
+      "tags": {"clitest": "liwa"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '461'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --replication-enabled
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/workspace-test/providers/Microsoft.OperationalInsights/workspaces/clitestfailoverfailback?api-version=2025-02-01
+  response:
+    body:
+      string: '{"error":{"code":"InvalidParameter","message":"Workspace replication
+        cannot be disabled at this time because it was enabled in the last hour. Operation
+        Id: ''7d51120a4fe45872835926d7f2d7c399''","target":"properties.replication"}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Thu, 08 May 2025 03:33:31 GMT
+      diagnostic-context:
+      - 7d51120a4fe45872835926d7f2d7c399
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japaneast/00a41e3d-160e-4b89-b6f7-8d1fa1b904fd
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 8BC468AE1E664375A49A38387AB6F8E9 Ref B: TYO201100113021 Ref C: 2025-05-08T03:33:30Z'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/workspace-test/providers/Microsoft.OperationalInsights/workspaces/clitestfailoverfailback?api-version=2025-02-01
+  response:
+    body:
+      string: '{"error":{"code":"Conflict","message":"Workspace ''clitestfailoverfailback''
+        cannot be deleted because it is linked to DataCollectionEndpoint. Delete the
+        linked-service first. Operation Id: ''8de4ae24e0f0c05098e733f499f14cb0''"}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01, 2025-02-01,
+        2025-04-01
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '225'
+      content-type:
+      - application/json
+      date:
+      - Thu, 08 May 2025 03:33:33 GMT
+      diagnostic-context:
+      - 8de4ae24e0f0c05098e733f499f14cb0
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=ad3a183c-55cb-4f8c-a7d4-94aca0191fc3/japanwest/6ac62803-8048-4ec7-8014-39de51cb8fa6
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
+      x-msedge-ref:
+      - 'Ref A: 295C0E4EE46B4DBA89857148ABC3900F Ref B: TYO201151005054 Ref C: 2025-05-08T03:33:31Z'
+    status:
+      code: 409
+      message: Conflict
+version: 1

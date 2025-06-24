@@ -21,7 +21,7 @@ class StaticAppBasicE2ETest(ScenarioTest):
         function_app_name = self.create_random_name(prefix='swabackends', length=24)
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, function_app_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
-        function_app = self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 3 --runtime node'.format(
+        function_app = self.cmd('functionapp create -g {} -n {} -s {} --plan {} --functions-version 4 --runtime node'.format(
             resource_group, function_app_name, storage_account, plan_name)).get_output_in_json()
         function_app_id = function_app['id']
 

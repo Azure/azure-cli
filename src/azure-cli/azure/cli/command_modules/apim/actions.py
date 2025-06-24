@@ -21,4 +21,4 @@ class TemplateParameter(argparse._AppendAction):
             except ValueError:
                 raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
 
-        super(TemplateParameter, self).__call__(parser, namespace, ParameterContract(**kwargs), option_string)
+        super().__call__(parser, namespace, ParameterContract(**kwargs), option_string)

@@ -21,9 +21,9 @@ class ListInstances(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-03-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/virtualmachines", "2023-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/virtualmachines", "2023-09-01"],
         ]
     }
 
@@ -141,7 +141,7 @@ class ListInstances(AAZCommand):
                     "$select", self.ctx.args.select,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-03-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -185,6 +185,9 @@ class ListInstances(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
@@ -299,6 +302,10 @@ class ListInstances(AAZCommand):
             )
             properties.storage_profile = AAZObjectType(
                 serialized_name="storageProfile",
+            )
+            properties.time_created = AAZStrType(
+                serialized_name="timeCreated",
+                flags={"read_only": True},
             )
             properties.user_data = AAZStrType(
                 serialized_name="userData",
@@ -500,6 +507,12 @@ class ListInstances(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties.network_profile.network_interface_configurations.Element.properties
+            properties.auxiliary_mode = AAZStrType(
+                serialized_name="auxiliaryMode",
+            )
+            properties.auxiliary_sku = AAZStrType(
+                serialized_name="auxiliarySku",
+            )
             properties.delete_option = AAZStrType(
                 serialized_name="deleteOption",
             )
@@ -622,6 +635,9 @@ class ListInstances(AAZCommand):
                 serialized_name="domainNameLabel",
                 flags={"required": True},
             )
+            dns_settings.domain_name_label_scope = AAZStrType(
+                serialized_name="domainNameLabelScope",
+            )
 
             ip_tags = cls._schema_on_200.value.Element.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.ip_tags
             ip_tags.Element = AAZObjectType()
@@ -664,6 +680,12 @@ class ListInstances(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties.network_profile_configuration.network_interface_configurations.Element.properties
+            properties.auxiliary_mode = AAZStrType(
+                serialized_name="auxiliaryMode",
+            )
+            properties.auxiliary_sku = AAZStrType(
+                serialized_name="auxiliarySku",
+            )
             properties.delete_option = AAZStrType(
                 serialized_name="deleteOption",
             )
@@ -784,6 +806,9 @@ class ListInstances(AAZCommand):
             dns_settings.domain_name_label = AAZStrType(
                 serialized_name="domainNameLabel",
                 flags={"required": True},
+            )
+            dns_settings.domain_name_label_scope = AAZStrType(
+                serialized_name="domainNameLabelScope",
             )
 
             ip_tags = cls._schema_on_200.value.Element.properties.network_profile_configuration.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.ip_tags
@@ -981,12 +1006,30 @@ class ListInstances(AAZCommand):
             security_profile.encryption_at_host = AAZBoolType(
                 serialized_name="encryptionAtHost",
             )
+            security_profile.encryption_identity = AAZObjectType(
+                serialized_name="encryptionIdentity",
+            )
+            security_profile.proxy_agent_settings = AAZObjectType(
+                serialized_name="proxyAgentSettings",
+            )
             security_profile.security_type = AAZStrType(
                 serialized_name="securityType",
             )
             security_profile.uefi_settings = AAZObjectType(
                 serialized_name="uefiSettings",
             )
+
+            encryption_identity = cls._schema_on_200.value.Element.properties.security_profile.encryption_identity
+            encryption_identity.user_assigned_identity_resource_id = AAZStrType(
+                serialized_name="userAssignedIdentityResourceId",
+            )
+
+            proxy_agent_settings = cls._schema_on_200.value.Element.properties.security_profile.proxy_agent_settings
+            proxy_agent_settings.enabled = AAZBoolType()
+            proxy_agent_settings.key_incarnation_id = AAZIntType(
+                serialized_name="keyIncarnationId",
+            )
+            proxy_agent_settings.mode = AAZStrType()
 
             uefi_settings = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -1144,6 +1187,9 @@ class ListInstances(AAZCommand):
                 serialized_name="instanceView",
             )
             _ListInstancesHelper._build_schema_virtual_machine_extension_instance_view_read(properties.instance_view)
+            properties.protected_settings = AAZObjectType(
+                serialized_name="protectedSettings",
+            )
             properties.protected_settings_from_key_vault = AAZObjectType(
                 serialized_name="protectedSettingsFromKeyVault",
             )
@@ -1156,6 +1202,7 @@ class ListInstances(AAZCommand):
                 flags={"read_only": True},
             )
             properties.publisher = AAZStrType()
+            properties.settings = AAZObjectType()
             properties.suppress_failures = AAZBoolType(
                 serialized_name="suppressFailures",
             )

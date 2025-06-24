@@ -2,13 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import base64
-import json
-import random
+
 import unittest
 
-from azure.cli.core import azclierror
-from azure.cli.core.aaz import exceptions as aazerror
 from azure.cli.core.aaz._command_ctx import AAZCommandCtx
 from azure.cli.core.aaz import AAZArgumentsSchema
 from azure.cli.core.mock import DummyCli

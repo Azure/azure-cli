@@ -147,13 +147,13 @@ def get_store_endpoint_from_connection_string(connection_string):
     return None
 
 
-def prep_label_filter_for_url_encoding(label=None):
-    if label is not None:
+def prep_filter_for_url_encoding(filter_value=None):
+    if filter_value is not None:
         import ast
         # ast library requires quotes around string
-        label = '"{0}"'.format(label)
-        label = ast.literal_eval(label)
-    return label
+        filter_value = '"{0}"'.format(filter_value)
+        filter_value = ast.literal_eval(filter_value)
+    return filter_value
 
 
 def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint):
@@ -177,10 +177,18 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
                 raise CLIError(str(ex) + "\nYou may be able to resolve this issue by providing App Configuration endpoint instead of name.")
 
         from azure.cli.core._profile import Profile
+        from azure.cli.core.cloud import get_active_cloud
+        from ._credential import AppConfigurationCliCredential
         profile = Profile(cli_ctx=cmd.cli_ctx)
         cred, _, _ = profile.get_login_credentials()
+
+        current_cloud = get_active_cloud(cmd.cli_ctx)
+        token_audience = None
+        if hasattr(current_cloud.endpoints, "appconfig_auth_token_audience"):
+            token_audience = current_cloud.endpoints.appconfig_auth_token_audience
+
         try:
-            azconfig_client = AzureAppConfigurationClient(credential=cred,
+            azconfig_client = AzureAppConfigurationClient(credential=AppConfigurationCliCredential(cred, token_audience),
                                                           base_url=endpoint,
                                                           user_agent=HttpHeaders.USER_AGENT)
         except (ValueError, TypeError) as ex:
@@ -230,3 +238,19 @@ def validate_feature_flag_key(key):
         raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
     if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
         raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+
+
+# Converts a list of tags in the format key[=value] into a dictionary.
+# Ensures tags are properly parsed and formatted before adding to a key-value pair.
+def parse_tags_to_dict(tags):
+    """Converts a list of tags in key[=value] format to a dictionary."""
+    if isinstance(tags, list):
+        tags_dict = {}
+        for item in tags:
+            if item:
+                comps = item.split('=', 1)
+                tag_key = comps[0]
+                tag_value = comps[1] if len(comps) > 1 else ''
+                tags_dict[tag_key] = tag_value
+        return tags_dict
+    return tags

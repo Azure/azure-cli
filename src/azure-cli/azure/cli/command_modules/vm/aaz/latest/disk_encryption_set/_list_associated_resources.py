@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class ListAssociatedResources(AAZCommand):
     """List all resources that are encrypted with this disk encryption set.
+
+    :example: List all resources that are encrypted with a disk encryption set.
+        az disk-encryption-set list-associated-resources --resource-group myResourceGroup --disk-encryption-set-name myDiskEncryptionSet
     """
 
     _aaz_info = {
-        "version": "2022-03-02",
+        "version": "2023-04-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets/{}/associatedresources", "2022-03-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets/{}/associatedresources", "2023-04-02"],
         ]
     }
 
@@ -118,7 +121,7 @@ class ListAssociatedResources(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-03-02",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }

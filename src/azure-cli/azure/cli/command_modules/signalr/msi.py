@@ -15,13 +15,13 @@ def signalr_msi_assign(client, resource_group_name, signalr_name, identity):
     msiType, user_identity = _analyze_identity(identity)
 
     identity = ManagedIdentity(type=msiType, user_assigned_identities={user_identity: {}} if user_identity else None)
-    parameter = SignalRResource(location="", identity=identity)
+    parameter = SignalRResource(location=None, identity=identity)
     return client.begin_update(resource_group_name, signalr_name, parameter)
 
 
 def signalr_msi_remove(client, resource_group_name, signalr_name):
     identity = ManagedIdentity(type="None")
-    parameter = SignalRResource(location="", identity=identity)
+    parameter = SignalRResource(location=None, identity=identity)
     return client.begin_update(resource_group_name, signalr_name, parameter)
 
 

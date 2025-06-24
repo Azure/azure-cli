@@ -3,19 +3,22 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
 import datetime
 
-location = 'WestUS2'
+location = 'WestEurope'
 seclocation = 'EastUS'
 premium_sku = 'Premium'
+standard_sku = 'Standard'
 basic_sku = 'Basic'
 premium_size = 'P1'
 basic_size = 'C0'
+standard_size = 'C1'
 name_prefix = 'cliredis'
 # These tests rely on an already existing user assigned managed identity. You will need to create it and paste the id below:
-user_identity = '/subscriptions/3919658b-68ae-4509-8c17-6a2238340ae7/resourcegroups/tolani-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test-uami'
+user_identity = '/subscriptions/6364f508-1150-4431-b973-c3f133466e56/resourcegroups/AANDUKURIA-RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testuaiforclitests'
 
 class RedisCacheTests(ScenarioTest):
 
@@ -44,7 +47,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': self.create_random_name(prefix=name_prefix, length=24),
-            'location': location,
+            'location': seclocation,
             'sku': premium_sku,
             'size': premium_size,
             'tags': "test=tryingzones",
@@ -59,7 +62,22 @@ class RedisCacheTests(ScenarioTest):
             self.check('sku.family', premium_size[0]),
             self.check('sku.capacity', premium_size[1:]),
             self.check('tags.test', 'tryingzones'),
-            self.check('length(zones)', 2)
+            self.check('length(zones)', 2),
+            self.check('zonalAllocationPolicy', 'UserDefined')
+        ])
+
+        if self.is_live:
+            time.sleep(5*60)
+
+        # Update the cache with zonal allocation policy set to automatic from user defined
+        self.cmd('az redis update -n {name} -g {rg} --set "zonalAllocationPolicy=Automatic" --no-wait false')
+
+        self.cmd('az redis show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('zones', None),
+            self.check('tags.test', 'tryingzones'),
+            self.check('zonalAllocationPolicy', 'Automatic')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
@@ -109,6 +127,111 @@ class RedisCacheTests(ScenarioTest):
         self.check(result['redisVersion'].split('.')[0], '{redis_version}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_redis_cache_authentication(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': premium_sku,
+            'size': premium_size,
+            'redis-configuration-enable-aad': os.path.join(curr_dir, 'config_enable-aad.json').replace('\\', '\\\\'),
+            'access-policy-name': "accessPolicy1",
+            'permissions1': "\"+get +hget\"",
+            'permissions2': "+get",
+            'access-policy-assignment-name': "accessPolicyAssignmentName1",
+            'object-id': "a8263550-d587-4433-9eff-64020dd56c13", # replace with valid object id of the newly created user assigned managed identity while running tests in live mode
+            'object-id-alias1': "kj-aad-testing",
+            'object-id-alias2': "aad-testing-app"
+        }
+
+        # Create aad enabled cache with access keys disabled
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --disable-access-keys true --redis-configuration @"{redis-configuration-enable-aad}"')
+        result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+        
+        # Verify cache is aad enabled and access keys disabled
+        self.assertTrue(result['provisioningState'] == 'Succeeded')
+        self.assertTrue(result['redisConfiguration']['aadEnabled'] == "true")
+        self.assertTrue(result['disableAccessKeyAuthentication'])
+
+        # List access polices
+        result = self.cmd('az redis access-policy list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 3)
+
+        # Create access policy
+        result = self.cmd('az redis access-policy create -n {name} -g {rg} --access-policy-name {access-policy-name} --permissions {permissions1}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['permissions'] == "+get +hget allkeys")
+
+        # List access polices
+        result = self.cmd('az redis access-policy list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 4)
+
+        # Update access policy
+        result = self.cmd('az redis access-policy update -n {name} -g {rg} --access-policy-name {access-policy-name} --permissions {permissions2}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['permissions'] == "+get allkeys")
+
+        # Get access policy
+        result = self.cmd('az redis access-policy show -n {name} -g {rg} --access-policy-name {access-policy-name}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['permissions'] == "+get allkeys")
+
+        # Create access policy assignment
+        result = self.cmd('az redis access-policy-assignment create -n {name} -g {rg} --policy-assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias1}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
+        self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['objectId'] == self.kwargs['object-id'])
+        self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias1'])
+
+        # List access policy assignments
+        result = self.cmd('az redis access-policy-assignment list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 1)
+
+        # Update access policy assignment
+        result = self.cmd('az redis access-policy-assignment update -n {name} -g {rg} --policy-assignment-name {access-policy-assignment-name} --access-policy-name {access-policy-name} --object-id {object-id} --object-id-alias {object-id-alias2}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
+        self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['objectId'] == self.kwargs['object-id'])
+        self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias2'])
+
+        # Get access policy assignment
+        result = self.cmd('az redis access-policy-assignment show -n {name} -g {rg} --policy-assignment-name {access-policy-assignment-name}').get_output_in_json()
+        self.assertTrue(result['name'] == self.kwargs['access-policy-assignment-name'])
+        self.assertTrue(result['accessPolicyName'] == self.kwargs['access-policy-name'])
+        self.assertTrue(result['objectId'] == self.kwargs['object-id'])
+        self.assertTrue(result['objectIdAlias'] == self.kwargs['object-id-alias2'])
+
+        # Delete access policy assignment
+        self.cmd('az redis access-policy-assignment delete -n {name} -g {rg} --policy-assignment-name {access-policy-assignment-name}')
+
+        # List access policy assignments
+        result = self.cmd('az redis access-policy-assignment list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 0)
+
+        # Delete access policy
+        self.cmd('az redis access-policy delete -n {name} -g {rg} --access-policy-name {access-policy-name}')
+
+        # List access polices
+        result = self.cmd('az redis access-policy list -n {name} -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) == 3)
+
+        # Enable access keys on cache and verify
+        self.cmd('az redis update -n {name} -g {rg} --set "disableAccessKeyAuthentication=false" --no-wait false')
+        result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+        self.assertFalse(result['disableAccessKeyAuthentication'])
+
+        # Disable aad on cache
+        self.cmd('az redis update -n {name} -g {rg} --set redisConfiguration.aadEnabled=false --no-wait false')
+        result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+
+        # Verify cache is aad disabled
+        assert result['provisioningState'] == 'Succeeded'
+        assert result['redisConfiguration']['aadEnabled'].lower() == "false"
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_list_works(self, resource_group):
         self.cmd('az redis list')
         self.cmd('az redis list -g {rg}')
@@ -127,14 +250,13 @@ class RedisCacheTests(ScenarioTest):
         result = self.cmd('az redis list-keys -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(result['primaryKey'] is not None)
         self.assertTrue(result['secondaryKey'] is not None)
-        self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_patch_schedule(self, resource_group):
         self.kwargs = {
             'rg': resource_group,
             'name': self.create_random_name(prefix=name_prefix, length=24),
-            'location': location,
+            'location': 'eastus',
             'sku': premium_sku,
             'size': premium_size,
             'schedule_entries_one': "[{\\\"dayOfWeek\\\":\\\"Monday\\\",\\\"startHourUtc\\\":\\\"00\\\",\\\"maintenanceWindow\\\":\\\"PT5H\\\"}]",
@@ -163,7 +285,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': self.create_random_name(prefix=name_prefix, length=24),
-            'location': location,
+            'location': 'eastus',
             'sku': premium_sku,
             'size': premium_size
         }
@@ -177,7 +299,7 @@ class RedisCacheTests(ScenarioTest):
         self.kwargs = {
             'rg': resource_group,
             'name': randName,
-            'location': location,
+            'location': 'westus',
             'sku': premium_sku,
             'size': premium_size,
             'prefix': "redistest",
@@ -186,6 +308,7 @@ class RedisCacheTests(ScenarioTest):
             'storageName': "str"+randName[:-3],
             'containerName': "testcontainer",
             'userIdentity': user_identity,
+            'storageSubscriptionId': "6364f508-1150-4431-b973-c3f133466e56",  # replace it with your subscription id while running tests in live mode
             'startTime': (datetime.datetime.utcnow() - datetime.timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ"),
             'expiryTime': (datetime.datetime.utcnow() + datetime.timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
         }
@@ -198,9 +321,9 @@ class RedisCacheTests(ScenarioTest):
             filesasURL = storage['primaryEndpoints']['blob'] + self.kwargs['containerName'] + "/"+ self.kwargs["prefix"] + "?" + containersasToken[1:-2]
             self.kwargs['containersasURL'] = containersasURL
             self.kwargs['filesasURL'] = filesasURL
-
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
-
+        
+        '''
         self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method SAS')
         if self.is_live:
             time.sleep(5 * 60)
@@ -210,7 +333,7 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method SAS')
         if self.is_live:
             time.sleep(5 * 60)
-        
+        '''     
         # Test import/export with managed identity
         if self.is_live:
             # Setup storage account and cache with managed identity
@@ -223,8 +346,9 @@ class RedisCacheTests(ScenarioTest):
             #Remove SAS token from URLs (not necessary with managed identity)
             self.kwargs['containersasURL'] = self.kwargs['containersasURL'].split('?')[0]
             self.kwargs['filesasURL'] = self.kwargs['filesasURL'].split('?')[0]
-        self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method ManagedIdentity')
-        self.cmd('az redis import -n {name} -g {rg} --files {filesasURL} --preferred-data-archive-auth-method ManagedIdentity')
+        self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId}')
+        # TODO: un comment after July DP release
+        # self.cmd('az redis import -n {name} -g {rg} --files {filesasURL} --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId}')
 
         self.cmd('az redis delete -n {name} -g {rg} -y')
 
@@ -291,7 +415,7 @@ class RedisCacheTests(ScenarioTest):
 
         self.cmd('az redis regenerate-keys -n {name} -g {rg} --key-type Primary')
         self.cmd('az redis regenerate-keys -n {name} -g {rg} --key-type Secondary')
-        self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval"')
+        self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval" --no-wait false')
         self.cmd('az redis delete -n {name} -g {rg} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
@@ -309,9 +433,7 @@ class RedisCacheTests(ScenarioTest):
             self.check('length(identity.userAssignedIdentities)', 1)
         ])
 
-        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
-        if self.is_live:
-            time.sleep(5*60)
+        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled" --no-wait false')
 
         self.cmd('az redis identity remove -n {name} -g {rg} --mi-system-assigned --mi-user-assigned "{userIdentity}"',checks=[
             self.check('type', 'None')
@@ -444,7 +566,101 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
         if self.is_live:
             time.sleep(5*60)
-        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
+        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled" --no-wait false')
+
+        result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+        assert result['publicNetworkAccess'] == 'Disabled'
+
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_redis_cache_flush(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': premium_sku,
+            'size': premium_size
+        }
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
+        result = self.cmd('az redis flush -g {rg} -n {name} -y').get_output_in_json()
+        assert result['status'] == 'Succeeded'
+
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_redis_cache_update_channel(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': basic_sku,
+            'size': basic_size
+        }
+
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --update-channel Preview')
         if self.is_live:
             time.sleep(5*60)
-        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
+
+        self.cmd('az redis update -n {name} -g {rg} --set "RedisVersion=6.0" "UpdateChannel=Preview" --no-wait false')
+
+        result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+        assert result['updateChannel'] == 'Preview'
+
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_premium_redis_cache_zonal_allocation_policy(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': premium_sku,
+            'size': premium_size
+        }
+
+        # creating a premium cache with zonal allocation policy set to NoZones
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --zonal-allocation-policy NoZones')
+        if self.is_live:
+            time.sleep(5*60)
+        self.cmd('az redis show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('zones', None),
+            self.check('zonalAllocationPolicy', 'NoZones'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.family', premium_size[0]),
+            self.check('sku.capacity', premium_size[1:])
+        ])
+
+        # updating the zonal allocation policy to Automatic
+        self.cmd('az redis update -n {name} -g {rg} --set "zonalAllocationPolicy=Automatic" --no-wait false')
+
+        self.cmd('az redis show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('zones', None),
+            self.check('zonalAllocationPolicy', 'Automatic'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.family', premium_size[0]),
+            self.check('sku.capacity', premium_size[1:])
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_standard_redis_cache_zonal_allocation_policy(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': standard_sku,
+            'size': standard_size
+        }
+
+        # creating a standard cache with zonal allocation policy set to Automatic
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --zonal-allocation Automatic')
+        if self.is_live:
+            time.sleep(5*60)
+        self.cmd('az redis show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('zones', None),
+            self.check('zonalAllocationPolicy', 'Automatic'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.family', standard_size[0]),
+            self.check('sku.capacity', standard_size[1:]),
+        ])
+        

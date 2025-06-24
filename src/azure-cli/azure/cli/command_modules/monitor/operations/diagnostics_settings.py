@@ -36,8 +36,7 @@ def create_resource_parameters(arg_schema, arg_group=None):
 
 def update_resource_parameters(ctx, alias="resource"):
     args = ctx.args
-    from msrestazure.tools import is_valid_resource_id
-    from azure.mgmt.core.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
     from azure.cli.core.aaz import has_value
     name_or_id = args.resource.to_serialized_data()
     usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
@@ -91,7 +90,7 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
     def pre_operations(self):
         ctx = self.ctx
         from azure.cli.core.aaz import has_value
-        from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
         update_resource_parameters(ctx)
         args = ctx.args
         rg = args.resource_group_name.to_serialized_data()

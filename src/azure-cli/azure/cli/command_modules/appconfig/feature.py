@@ -9,9 +9,11 @@ import json
 import time
 import re
 import copy
+import uuid
 
 from knack.log import get_logger
 from knack.util import CLIError
+from ._constants import HttpHeaders
 import azure.cli.core.azclierror as CLIErrors
 
 from azure.appconfiguration import (ConfigurationSetting,
@@ -27,7 +29,7 @@ from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import (get_appconfig_data_client,
-                     prep_label_filter_for_url_encoding,
+                     prep_filter_for_url_encoding,
                      validate_feature_flag_name)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
@@ -45,6 +47,7 @@ def set_feature(cmd,
                 name=None,
                 label=None,
                 description=None,
+                requirement_type=None,
                 yes=False,
                 connection_string=None,
                 auth_mode="key",
@@ -65,13 +68,20 @@ def set_feature(cmd,
 
     # when creating a new Feature flag, these defaults will be used
     tags = {}
-    default_conditions = {'client_filters': []}
+    default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
+
+    if requirement_type:
+        default_conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = (
+            FeatureFlagConstants.REQUIREMENT_TYPE_ALL
+            if requirement_type.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ALL.lower()
+            else FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+        )
 
     default_value = {
-        "id": feature,
-        "description": "" if description is None else description,
-        "enabled": False,
-        "conditions": default_conditions
+        FeatureFlagConstants.ID: feature,
+        FeatureFlagConstants.DESCRIPTION: "" if description is None else description,
+        FeatureFlagConstants.ENABLED: False,
+        FeatureFlagConstants.CONDITIONS: default_conditions
     }
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -80,6 +90,10 @@ def set_feature(cmd,
     retry_interval = 1
 
     label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
+
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
     for i in range(0, retry_times):
         retrieved_kv = None
         set_kv = None
@@ -87,7 +101,7 @@ def set_feature(cmd,
         new_kv = None
 
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             logger.debug("Feature flag '%s' with label '%s' not found. A new feature flag will be created.", feature, label)
         except HttpResponseError as exception:
@@ -114,9 +128,16 @@ def set_feature(cmd,
                 if description is not None:
                     feature_flag_value.description = description
 
+                if requirement_type is not None:
+                    feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = (
+                        FeatureFlagConstants.REQUIREMENT_TYPE_ALL
+                        if requirement_type.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ALL.lower()
+                        else FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+                    )
+
                 set_kv = KeyValue(key=key,
                                   label=label,
-                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                  value=json.dumps(feature_flag_value, default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None}, ensure_ascii=False),
                                   content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE,
                                   tags=retrieved_kv.tags if tags is None else tags,
                                   etag=retrieved_kv.etag,
@@ -124,7 +145,7 @@ def set_feature(cmd,
 
             # Convert KeyValue object to required FeatureFlag format for
             # display
-            feature_flag = map_keyvalue_to_featureflag(set_kv, show_conditions=True)
+            feature_flag = map_keyvalue_to_featureflag(set_kv, show_all_details=True)
             entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True, ensure_ascii=False)
 
         except Exception as exception:
@@ -138,9 +159,9 @@ def set_feature(cmd,
 
         try:
             if set_configsetting.etag is None:
-                new_kv = azconfig_client.add_configuration_setting(set_configsetting)
+                new_kv = azconfig_client.add_configuration_setting(set_configsetting, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             else:
-                new_kv = azconfig_client.set_configuration_setting(set_configsetting, match_condition=MatchConditions.IfNotModified)
+                new_kv = azconfig_client.set_configuration_setting(set_configsetting, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv))
 
         except ResourceReadOnlyError:
@@ -177,9 +198,13 @@ def delete_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
     retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
                                                key_filter=key_filter,
-                                               label=SearchFilterOptions.EMPTY_LABEL if label is None else label)
+                                               label=SearchFilterOptions.EMPTY_LABEL if label is None else label,
+                                               correlation_request_id=correlation_request_id)
 
     confirmation_message = "Found '{}' feature flags matching the specified feature and label. Are you sure you want to delete these feature flags?".format(len(retrieved_keyvalues))
     user_confirmation(confirmation_message, yes)
@@ -192,7 +217,8 @@ def delete_feature(cmd,
             deleted_kv = azconfig_client.delete_configuration_setting(key=entry.key,
                                                                       label=entry.label,
                                                                       etag=entry.etag,
-                                                                      match_condition=MatchConditions.IfNotModified)
+                                                                      match_condition=MatchConditions.IfNotModified,
+                                                                      headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             deleted_kvs.append(convert_configurationsetting_to_keyvalue(deleted_kv))
         except ResourceReadOnlyError:
             exception = "Failed to delete read-only feature '{}' with label '{}'. Unlock the feature flag before deleting it.".format(feature_name, entry.label)
@@ -215,7 +241,7 @@ def delete_feature(cmd,
     # Convert result list of KeyValue to list of FeatureFlag
     deleted_ff = []
     for success_kv in deleted_kvs:
-        success_ff = map_keyvalue_to_featureflag(success_kv, show_conditions=False)
+        success_ff = map_keyvalue_to_featureflag(success_kv, show_all_details=False)
         deleted_ff.append(success_ff)
 
     return deleted_ff
@@ -247,7 +273,7 @@ def show_feature(cmd,
             raise CLIErrors.ResourceNotFoundError("The feature flag does not exist.")
 
         retrieved_kv = convert_configurationsetting_to_keyvalue(config_setting)
-        feature_flag = map_keyvalue_to_featureflag(keyvalue=retrieved_kv, show_conditions=True)
+        feature_flag = map_keyvalue_to_featureflag(keyvalue=retrieved_kv, show_all_details=True)
 
         # If user has specified fields, we still get all the fields and then
         # filter what we need from the response.
@@ -279,64 +305,19 @@ def list_feature(cmd,
                  all_=False,
                  auth_mode="key",
                  endpoint=None):
-    if key and feature:
-        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
-
-    if key is not None:
-        key_filter = key
-    elif feature is not None:
-        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    else:
-        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY
-
-    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
-    try:
-        retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
-                                                   key_filter=key_filter,
-                                                   label=label if label else SearchFilterOptions.ANY_LABEL)
-        retrieved_featureflags = []
-
-        invalid_ffs = 0
-        for kv in retrieved_keyvalues:
-            try:
-                retrieved_featureflags.append(
-                    map_keyvalue_to_featureflag(
-                        keyvalue=kv, show_conditions=True))
-            except (ValueError) as exception:
-                logger.warning("%s\n", exception)
-                invalid_ffs += 1
-                continue
-
-        if invalid_ffs > 0:
-            logger.warning("Found %s invalid feature flags. These feature flags will be skipped.", invalid_ffs)
-
-        filtered_featureflags = []
-        count = 0
-
-        if all_:
-            top = len(retrieved_featureflags)
-        elif top is None:
-            top = 100
-
-        for featureflag in retrieved_featureflags:
-            if fields:
-                partial_featureflags = {}
-                for field in fields:
-                    # featureflag is guaranteed to have all the fields because
-                    # we validate this in map_keyvalue_to_featureflag()
-                    # So this line will never throw AttributeError
-                    partial_featureflags[field.name.lower()] = getattr(
-                        featureflag, field.name.lower())
-                filtered_featureflags.append(partial_featureflags)
-            else:
-                filtered_featureflags.append(featureflag)
-            count += 1
-            if count >= top:
-                break
-        return filtered_featureflags
-
-    except Exception as exception:
-        raise CLIError(str(exception))
+    return __list_features(
+        cmd=cmd,
+        feature=feature,
+        key=key,
+        name=name,
+        label=label,
+        fields=fields,
+        connection_string=connection_string,
+        top=top,
+        all_=all_,
+        auth_mode=auth_mode,
+        endpoint=endpoint
+    )
 
 
 def lock_feature(cmd,
@@ -359,11 +340,14 @@ def lock_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature '{}' with label '{}' does not exist.".format(feature, label))
         except HttpResponseError as exception:
@@ -376,9 +360,9 @@ def lock_feature(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
-                                               show_conditions=False)
+                                               show_all_details=False)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
                 logger.debug('Retrying lock operation %s times with exception: concurrent setting operations', i + 1)
@@ -410,11 +394,14 @@ def unlock_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature '{}' with label '{}' does not exist.".format(feature, label))
         except HttpResponseError as exception:
@@ -427,9 +414,9 @@ def unlock_feature(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
-                                               show_conditions=False)
+                                               show_all_details=False)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
                 logger.debug('Retrying unlock operation %s times with exception: concurrent setting operations', i + 1)
@@ -461,11 +448,14 @@ def enable_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature flag '{}' with label '{}' not found.".format(feature, label))
         except HttpResponseError as exception:
@@ -487,10 +477,11 @@ def enable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__,
-                                                                                     ensure_ascii=False))
+                                                                                     default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
+                                                                                     ensure_ascii=False),
+                                                            correlation_request_id=correlation_request_id)
 
-            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
+            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_all_details=False)
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -523,11 +514,14 @@ def disable_feature(cmd,
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature flag '{}' with label '{}' not found.".format(feature, label))
         except HttpResponseError as exception:
@@ -549,10 +543,11 @@ def disable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__,
-                                                                                     ensure_ascii=False))
+                                                                                     default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
+                                                                                     ensure_ascii=False),
+                                                            correlation_request_id=correlation_request_id)
 
-            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
+            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_all_details=False)
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -599,11 +594,14 @@ def add_filter(cmd,
         filter_parameters = {}
     new_filter = FeatureFilter(filter_name, filter_parameters)
 
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature flag '{}' with label '{}' not found.".format(feature, label))
         except HttpResponseError as exception:
@@ -618,7 +616,7 @@ def add_filter(cmd,
             # if it's invalid, we catch appropriate exception that contains
             # detailed message
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-            feature_filters = feature_flag_value.conditions['client_filters']
+            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
             entry = json.dumps(new_filter.__dict__, indent=2, ensure_ascii=False)
             confirmation_message = "Are you sure you want to add this filter?\n" + entry
@@ -638,8 +636,9 @@ def add_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__,
-                                                                 ensure_ascii=False))
+                                                                 default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
+                                                                 ensure_ascii=False),
+                                        correlation_request_id=correlation_request_id)
 
             return new_filter
 
@@ -691,12 +690,16 @@ def update_filter(cmd,
         filter_parameters = {}
     new_filter = FeatureFilter(filter_name, filter_parameters)
 
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
             retrieved_kv = azconfig_client.get_configuration_setting(
-                key=key, label=label)
+                key=key, label=label,
+                headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError(
                 "Feature flag '{}' with label '{}' not found.".format(feature, label))
@@ -713,7 +716,7 @@ def update_filter(cmd,
             # if it's invalid, we catch appropriate exception that contains
             # detailed message
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-            feature_filters = feature_flag_value.conditions['client_filters']
+            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
             entry = json.dumps(new_filter.__dict__,
                                indent=2, ensure_ascii=False)
@@ -769,8 +772,9 @@ def update_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__,
-                                                                 ensure_ascii=False))
+                                                                 default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
+                                                                 ensure_ascii=False),
+                                        correlation_request_id=correlation_request_id)
 
             return new_filter
 
@@ -808,6 +812,9 @@ def delete_filter(cmd,
     # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
     feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
 
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
@@ -823,7 +830,7 @@ def delete_filter(cmd,
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         except ResourceNotFoundError:
             raise CLIErrors.ResourceNotFoundError("Feature flag '{}' with label '{}' not found.".format(feature, label))
         except HttpResponseError as exception:
@@ -838,7 +845,7 @@ def delete_filter(cmd,
             # if it's invalid, we catch appropriate exception that contains
             # detailed message
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-            feature_filters = feature_flag_value.conditions['client_filters']
+            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
             display_filter = {}
             match_index = []
@@ -888,8 +895,9 @@ def delete_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__,
-                                                                 ensure_ascii=False))
+                                                                 default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
+                                                                 ensure_ascii=False),
+                                        correlation_request_id=correlation_request_id)
 
             return display_filter
 
@@ -947,8 +955,7 @@ def show_filter(cmd,
         # if it's invalid, we catch appropriate exception that contains
         # detailed message
         feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-        feature_filters = feature_flag_value.conditions['client_filters']
-
+        feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
         display_filters = []
 
         # If user has specified index, we use it as secondary check to display
@@ -1010,7 +1017,7 @@ def list_filter(cmd,
         # if it's invalid, we catch appropriate exception that contains
         # detailed message
         feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-        feature_filters = feature_flag_value.conditions['client_filters']
+        feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
         if all_:
             top = len(feature_filters)
@@ -1026,26 +1033,125 @@ def list_filter(cmd,
 # Helper functions #
 
 
-def __clear_filter(azconfig_client,
-                   feature,
-                   label=None,
-                   yes=False):
+def __list_features(
+    cmd,
+    feature=None,
+    key=None,
+    name=None,
+    label=None,
+    tags=None,
+    fields=None,
+    connection_string=None,
+    top=None,
+    all_=False,
+    auth_mode="key",
+    endpoint=None,
+    correlation_request_id=None,
+):
+    if key and feature:
+        logger.warning(
+            "Since both `--key` and `--feature` are provided, `--feature` argument will be ignored."
+        )
+
+    if key is not None:
+        key_filter = key
+    elif feature is not None:
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    else:
+        key_filter = (
+            FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY
+        )
+
+    azconfig_client = get_appconfig_data_client(
+        cmd, name, connection_string, auth_mode, endpoint
+    )
+    try:
+        retrieved_keyvalues = __list_all_keyvalues(
+            azconfig_client,
+            key_filter=key_filter,
+            label=label if label else SearchFilterOptions.ANY_LABEL,
+            tags=tags,
+            correlation_request_id=correlation_request_id,
+        )
+        retrieved_featureflags = []
+
+        invalid_ffs = 0
+        for kv in retrieved_keyvalues:
+            try:
+                retrieved_featureflags.append(
+                    map_keyvalue_to_featureflag(keyvalue=kv, show_all_details=True)
+                )
+            except ValueError as exception:
+                logger.warning("%s\n", exception)
+                invalid_ffs += 1
+                continue
+
+        if invalid_ffs > 0:
+            logger.warning(
+                "Found %s invalid feature flags. These feature flags will be skipped.",
+                invalid_ffs,
+            )
+
+        filtered_featureflags = []
+        count = 0
+
+        if all_:
+            top = len(retrieved_featureflags)
+        elif top is None:
+            top = 100
+
+        for featureflag in retrieved_featureflags:
+            if fields:
+                partial_featureflags = {}
+                for field in fields:
+                    # featureflag is guaranteed to have all the fields because
+                    # we validate this in map_keyvalue_to_featureflag()
+                    # So this line will never throw AttributeError
+                    partial_featureflags[field.name.lower()] = getattr(
+                        featureflag, field.name.lower()
+                    )
+                filtered_featureflags.append(partial_featureflags)
+            else:
+                filtered_featureflags.append(featureflag)
+            count += 1
+            if count >= top:
+                break
+        return filtered_featureflags
+
+    except Exception as exception:
+        raise CLIError(str(exception))
+
+
+def __clear_filter(azconfig_client, feature, label=None, yes=False):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+            retrieved_kv = azconfig_client.get_configuration_setting(
+                key=key, label=label,
+                headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id}
+            )
         except ResourceNotFoundError:
-            raise CLIErrors.ResourceNotFoundError("Feature flag '{}' with label '{}' not found.".format(feature, label))
+            raise CLIErrors.ResourceNotFoundError(
+                "Feature flag '{}' with label '{}' not found.".format(feature, label)
+            )
         except HttpResponseError as exception:
-            raise CLIErrors.AzureResponseError("Failed to retrieve feature flags from config store. " + str(exception))
+            raise CLIErrors.AzureResponseError(
+                "Failed to retrieve feature flags from config store. " + str(exception)
+            )
 
         try:
-            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+            if (
+                retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
+            ):
                 raise CLIErrors.ResourceNotFoundError(
-                    "The feature flag {} does not exist.".format(feature))
+                    "The feature flag {} does not exist.".format(feature)
+                )
 
             # we make sure that value retrieved is a valid json and only has the fields supported by backend.
             # if it's invalid, we catch appropriate exception that contains
@@ -1054,42 +1160,55 @@ def __clear_filter(azconfig_client,
 
             # These fields will never be missing because we validate that
             # in map_keyvalue_to_featureflagvalue
-            feature_filters = feature_flag_value.conditions['client_filters']
+            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
             # create a deep copy of the filters to display to the user
             # after deletion
             display_filters = []
             if feature_filters:
-                confirmation_message = "Are you sure you want to delete all filters for feature '{0}'?\n".format(feature)
+                confirmation_message = "Are you sure you want to delete all filters for feature '{0}'?\n".format(
+                    feature
+                )
                 user_confirmation(confirmation_message, yes)
 
                 display_filters = copy.deepcopy(feature_filters)
                 # clearing feature_filters list for python 2.7 compatibility
                 del feature_filters[:]
 
-                __update_existing_key_value(azconfig_client=azconfig_client,
-                                            retrieved_kv=retrieved_kv,
-                                            updated_value=json.dumps(feature_flag_value,
-                                                                     default=lambda o: o.__dict__,
-                                                                     ensure_ascii=False))
+                __update_existing_key_value(
+                    azconfig_client=azconfig_client,
+                    retrieved_kv=retrieved_kv,
+                    updated_value=json.dumps(
+                        feature_flag_value,
+                        default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
+                        ensure_ascii=False,
+                    ),
+                )
 
             return display_filters
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
-                logger.debug('Retrying feature enable operation %s times with exception: concurrent setting operations', i + 1)
+                logger.debug(
+                    "Retrying feature enable operation %s times with exception: concurrent setting operations",
+                    i + 1,
+                )
                 time.sleep(retry_interval)
             else:
                 raise CLIErrors.AzureResponseError(str(exception))
         except Exception as exception:
             raise CLIError(str(exception))
     raise CLIError(
-        "Failed to delete filters for the feature flag '{}' due to a conflicting operation.".format(feature))
+        "Failed to delete filters for the feature flag '{}' due to a conflicting operation.".format(
+            feature
+        )
+    )
 
 
 def __update_existing_key_value(azconfig_client,
                                 retrieved_kv,
-                                updated_value):
+                                updated_value,
+                                correlation_request_id=None):
     '''
         To update the value of a pre-existing KeyValue
 
@@ -1111,7 +1230,7 @@ def __update_existing_key_value(azconfig_client,
                                   last_modified=retrieved_kv.last_modified)
 
     try:
-        new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified)
+        new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
         return convert_configurationsetting_to_keyvalue(new_kv)
     except ResourceReadOnlyError:
         raise CLIError("Failed to update read only feature flag. Unlock the feature flag before updating it.")
@@ -1120,7 +1239,9 @@ def __update_existing_key_value(azconfig_client,
 
 def __list_all_keyvalues(azconfig_client,
                          key_filter,
-                         label=None):
+                         label=None,
+                         tags=None,
+                         correlation_request_id=None):
     '''
         To get all keys by name or pattern
 
@@ -1128,6 +1249,7 @@ def __list_all_keyvalues(azconfig_client,
             azconfig_client - AppConfig client making calls to the service
             key_filter - Filter for the key of the feature flag
             label - Feature label or pattern
+            tags - Tags to filter the feature flags
 
         Return:
             List of KeyValue objects
@@ -1141,10 +1263,11 @@ def __list_all_keyvalues(azconfig_client,
     if unescaped_comma_regex.search(key_filter):
         raise CLIError("Comma separated feature names are not supported. Please provide escaped string if your feature name contains comma. \nSee \"az appconfig feature list -h\" for correct usage.")
 
-    label = prep_label_filter_for_url_encoding(label)
+    label = prep_filter_for_url_encoding(label)
+    prepped_tags = [prep_filter_for_url_encoding(tag) for tag in tags] if tags else []
 
     try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label)
+        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, tags_filter=prepped_tags, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError('Failed to read feature flag(s) that match the specified feature and label. ' + str(exception))
 

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+import base64
 import codecs
 import hashlib
 import json
@@ -15,7 +16,7 @@ import time
 import uuid
 from ipaddress import ip_network
 
-from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients, is_azure_stack_profile
+from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients
 from azure.cli.command_modules.keyvault._validators import _construct_vnet, secret_text_encoding_values
 from azure.cli.command_modules.keyvault.security_domain.jwe import JWE
 from azure.cli.command_modules.keyvault.security_domain.security_domain import Datum, SecurityDomainRestoreData
@@ -34,7 +35,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
 
 from knack.log import get_logger
-from knack.util import CLIError
+from knack.util import CLIError, todict
 
 
 logger = get_logger(__name__)
@@ -65,18 +66,6 @@ def _not_less_than(current_profile, resource_type, min_api_version, sub_resource
     return api_version >= min_api_version
 
 
-def _azure_stack_wrapper(cmd, client, function_name, resource_type, min_api_version, sub_resource_name=None, **kwargs):
-    no_wait = False
-    if 'no_wait' in kwargs:
-        no_wait = kwargs.pop('no_wait')
-
-    if _not_less_than(cmd.cli_ctx.cloud.profile, resource_type, min_api_version, sub_resource_name):
-        function_name = 'begin_' + function_name
-        return sdk_no_wait(no_wait, getattr(client, function_name), **kwargs)
-
-    return getattr(client, function_name)(**kwargs)
-
-
 def _default_certificate_profile(cmd):
     def get_model(x):
         return cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
@@ -96,12 +85,12 @@ def _default_certificate_profile(cmd):
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
-            key_type=u'RSA',
+            key_type='RSA',
             key_size=2048,
             reuse_key=True
         ),
         secret_properties=SecretProperties(
-            content_type=u'application/x-pkcs12'
+            content_type='application/x-pkcs12'
         ),
         x509_certificate_properties=X509CertificateProperties(
             key_usage=[
@@ -112,7 +101,7 @@ def _default_certificate_profile(cmd):
                 KeyUsageType.key_agreement,
                 KeyUsageType.key_cert_sign
             ],
-            subject=u'CN=CLIGetDefaultPolicy',
+            subject='CN=CLIGetDefaultPolicy',
             validity_in_months=12
         ),
         lifetime_actions=[LifetimeAction(
@@ -124,7 +113,7 @@ def _default_certificate_profile(cmd):
             )
         )],
         issuer_parameters=IssuerParameters(
-            name=u'Self',
+            name='Self',
         ),
         attributes=CertificateAttributes(
             enabled=True
@@ -159,12 +148,12 @@ def _scaffold_certificate_profile(cmd):
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
-            key_type=u'(optional) RSA or RSA-HSM (default RSA)',
+            key_type='(optional) RSA or RSA-HSM (default RSA)',
             key_size=2048,
             reuse_key=True
         ),
         secret_properties=SecretProperties(
-            content_type=u'application/x-pkcs12 or application/x-pem-file'
+            content_type='application/x-pkcs12 or application/x-pem-file'
         ),
         x509_certificate_properties=X509CertificateProperties(
             key_usage=[
@@ -176,12 +165,12 @@ def _scaffold_certificate_profile(cmd):
                 KeyUsageType.key_cert_sign
             ],
             subject_alternative_names=SubjectAlternativeNames(
-                emails=[u'hello@contoso.com'],
-                dns_names=[u'hr.contoso.com', u'm.contoso.com'],
+                emails=['hello@contoso.com'],
+                dns_names=['hr.contoso.com', 'm.contoso.com'],
                 upns=[]
             ),
-            subject=u'C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
-            ekus=[u'1.3.6.1.5.5.7.3.1'],
+            subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
+            ekus=['1.3.6.1.5.5.7.3.1'],
             validity_in_months=24
         ),
         lifetime_actions=[LifetimeAction(
@@ -193,8 +182,8 @@ def _scaffold_certificate_profile(cmd):
             )
         )],
         issuer_parameters=IssuerParameters(
-            name=u'Unknown, Self, or {IssuerName}',
-            certificate_type=u'(optional) DigiCert, GlobalSign or WoSign'
+            name='Unknown, Self, or {IssuerName}',
+            certificate_type='(optional) DigiCert, GlobalSign or WoSign'
         ),
         attributes=CertificateAttributes(
             enabled=True
@@ -206,7 +195,7 @@ def _scaffold_certificate_profile(cmd):
 
 
 def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, hsm_name=None, no_wait=False):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client.delete(resource_group_name=resource_group_name, vault_name=vault_name)
 
     assert hsm_name
@@ -221,7 +210,7 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
 
 
 def get_deleted_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client.get_deleted(vault_name=vault_name, location=location)
 
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -230,7 +219,7 @@ def get_deleted_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_na
 
 def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None,  # pylint: disable=unused-argument
                        no_wait=False):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return sdk_no_wait(
             no_wait,
             client.begin_purge_deleted,
@@ -248,9 +237,6 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
 
 
 def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
-    if is_azure_stack_profile(cmd):
-        return client.list_deleted()
-
     if resource_type is None:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         resources = []
@@ -269,9 +255,6 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
 
 
 def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None):
-    if is_azure_stack_profile(cmd):
-        return list_vault(client, resource_group_name)
-
     if resource_type is None:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         resources = []
@@ -305,67 +288,17 @@ def list_vault(client, resource_group_name=None):
     return list(vault_list)
 
 
-def _get_current_user_object_id(graph_client):
-    current_user = graph_client.signed_in_user_get()
-    return current_user['id']
-
-
-def _get_object_id_by_spn(graph_client, spn):
-    accounts = list(graph_client.service_principal_list(
-        filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
-    if not accounts:
-        logger.warning("Unable to find user with spn '%s'", spn)
-        return None
-    if len(accounts) > 1:
-        logger.warning("Multiple service principals found with spn '%s'. "
-                       "You can avoid this by specifying object id.", spn)
-        return None
-    return accounts[0]['id']
-
-
-def _get_object_id_by_upn(graph_client, upn):
-    accounts = list(graph_client.user_list(filter="userPrincipalName eq '{}'".format(upn)))
-    if not accounts:
-        logger.warning("Unable to find user with upn '%s'", upn)
-        return None
-    if len(accounts) > 1:
-        logger.warning("Multiple users principals found with upn '%s'. "
-                       "You can avoid this by specifying object id.", upn)
-        return None
-    return accounts[0]['id']
-
-
-def _get_object_id_from_subscription(graph_client, subscription):
-    if not subscription:
-        return None
-
-    if subscription['user']:
-        if subscription['user']['type'] == 'user':
-            return _get_object_id_by_upn(graph_client, subscription['user']['name'])
-        if subscription['user']['type'] == 'servicePrincipal':
-            return _get_object_id_by_spn(graph_client, subscription['user']['name'])
-        logger.warning("Unknown user type '%s'", subscription['user']['type'])
-    else:
-        logger.warning('Current credentials are not from a user or service principal. '
-                       'Azure Key Vault does not work with certificate credentials.')
-    return None
-
-
-def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
-    if spn:
-        return _get_object_id_by_spn(graph_client, spn)
-    if upn:
-        return _get_object_id_by_upn(graph_client, upn)
-    return _get_object_id_from_subscription(graph_client, subscription)
-
-
 def _create_network_rule_set(cmd, bypass=None, default_action=None):
     NetworkRuleSet = cmd.get_models('NetworkRuleSet', resource_type=ResourceType.MGMT_KEYVAULT)
     NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions', resource_type=ResourceType.MGMT_KEYVAULT)
     NetworkRuleAction = cmd.get_models('NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
-    return NetworkRuleSet(bypass=bypass or NetworkRuleBypassOptions.azure_services.value,
-                          default_action=default_action or NetworkRuleAction.allow.value)
+    # We actually should not set any default value from client side
+    # Keep this 'if' section to avoid breaking change
+    if not bypass and not default_action:
+        return NetworkRuleSet(bypass=NetworkRuleBypassOptions.azure_services.value,
+                              default_action=NetworkRuleAction.allow.value)
+    return NetworkRuleSet(bypass=bypass, default_action=default_action)
 
 
 # region KeyVault Vault
@@ -381,7 +314,7 @@ def get_default_policy(cmd, scaffold=False):  # pylint: disable=unused-argument
 
 def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, vault_name=None, hsm_name=None,
                          no_wait=False):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return recover_vault(cmd=cmd,
                              client=client,
                              resource_group_name=resource_group_name,
@@ -443,13 +376,10 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
                                                        'sku': Sku(name=SkuName.standard.value, family='A'),
                                                        'create_mode': CreateMode.recover.value})
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=params,
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=params)
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets,
@@ -477,7 +407,7 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
 
     network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
 
     network_acls.virtual_network_rules = []
     for vnet_rule in network_acls_json.get('vnet', []):
@@ -503,7 +433,7 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
 
 
 def get_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
 
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -518,7 +448,7 @@ def create_vault_or_hsm(cmd, client,
                         enabled_for_deployment=None,
                         enabled_for_disk_encryption=None,
                         enabled_for_template_deployment=None,
-                        enable_rbac_authorization=None,
+                        enable_rbac_authorization=True,
                         enable_purge_protection=None,
                         retention_days=None,
                         network_acls=None,
@@ -532,7 +462,7 @@ def create_vault_or_hsm(cmd, client,
                         public_network_access=None,
                         user_identities=None,
                         ):
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return create_vault(cmd=cmd,
                             client=client,
                             resource_group_name=resource_group_name,
@@ -604,6 +534,7 @@ def create_hsm(cmd, client,
 
     if not sku:
         sku = 'Standard_B1'
+    sku_family = sku.split('_')[1][0]
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT,
                                 operation_group='managed_hsms')
@@ -623,7 +554,7 @@ def create_hsm(cmd, client,
                                       public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
-                            sku=ManagedHsmSku(name=sku, family='B'),
+                            sku=ManagedHsmSku(name=sku, family=sku_family),
                             properties=properties)
 
     if user_identities:
@@ -671,8 +602,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         # if client.get raise exception, we can take it as no existing vault found
         # just continue the normal creation process
         pass
-    from azure.cli.core._profile import Profile, _TENANT_ID
-    from azure.cli.command_modules.role import graph_client_factory, GraphError
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -685,8 +614,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
 
+    from azure.cli.core._profile import Profile, _TENANT_ID
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    graph_client = graph_client_factory(cmd.cli_ctx)
     subscription = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))
     tenant_id = subscription[_TENANT_ID]
 
@@ -751,10 +680,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                           StoragePermissions.getsas,
                                           StoragePermissions.deletesas])
 
-        try:
-            object_id = _get_current_user_object_id(graph_client)
-        except GraphError:
-            object_id = _get_object_id(graph_client, subscription=subscription)
+        from azure.cli.command_modules.role.util import get_current_identity_object_id
+        object_id = get_current_identity_object_id(cmd.cli_ctx)
         if not object_id:
             raise CLIError('Cannot create vault.\nUnable to query active directory for information '
                            'about the current user.\nYou may try the --no-self-perms flag to '
@@ -783,28 +710,22 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                                tags=tags,
                                                properties=properties)
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=parameters,
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=parameters)
 
 
 def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name, no_wait=False):
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=parameters.location,
-                                    tags=parameters.tags,
-                                    properties=parameters.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=parameters.location,
+                           tags=parameters.tags,
+                           properties=parameters.properties))
 
 
 def update_hsm_setter(cmd, client, parameters, resource_group_name, name, no_wait=False):
@@ -901,10 +822,8 @@ def update_hsm(cmd, instance,
 
 def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     if not object_id:
-        from azure.cli.command_modules.role import graph_client_factory
-
-        graph_client = graph_client_factory(cli_ctx)
-        object_id = _get_object_id(graph_client, spn=spn, upn=upn)
+        from azure.cli.command_modules.role.util import get_object_id
+        object_id = get_object_id(cli_ctx, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
     return object_id
@@ -967,16 +886,13 @@ def set_policy(cmd, client, resource_group_name, vault_name,
         storage = policy.permissions.storage if storage_permissions is None else storage_permissions
         policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=vault.location,
-                                    tags=vault.tags,
-                                    properties=vault.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=vault.location,
+                           tags=vault.tags,
+                           properties=vault.properties))
 
 
 def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
@@ -1029,16 +945,13 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
     if not to_update:
         return vault
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=vault.location,
-                                    tags=vault.tags,
-                                    properties=vault.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=vault.location,
+                           tags=vault.tags,
+                           properties=vault.properties))
 
 
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
@@ -1075,16 +988,13 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
         return vault
 
     # otherwise update
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=vault.location,
-                                    tags=vault.tags,
-                                    properties=vault.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=vault.location,
+                           tags=vault.tags,
+                           properties=vault.properties))
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
@@ -1118,16 +1028,13 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=VaultCreateOrUpdateParameters(
-                                    location=vault.location,
-                                    tags=vault.tags,
-                                    properties=vault.properties),
-                                no_wait=no_wait)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vault_name=vault_name,
+                       parameters=VaultCreateOrUpdateParameters(
+                           location=vault.location,
+                           tags=vault.tags,
+                           properties=vault.properties))
 # endregion
 
 
@@ -1154,6 +1061,25 @@ def list_keys(client, maxresults=None, include_managed=False):
     if not include_managed:
         return [_ for _ in result if not getattr(_, 'managed')] if result else result
     return result
+
+
+def get_key_attestation(client, name, version=None, file_path=None):
+    key = client.get_key_attestation(name=name, version=version)
+    key_attestation = key.properties.attestation
+    if not file_path:
+        return key_attestation
+
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
+    try:
+        from ._command_type import _encode_hex
+        with open(file_path, 'w') as outfile:
+            json.dump(todict(_encode_hex(key_attestation)), outfile)
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
 
 
 def delete_key(client, name):
@@ -1190,16 +1116,15 @@ def sign_key(cmd, client, algorithm, digest, name=None, version=None):
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
-    return crypto_client.sign(SignatureAlgorithm(algorithm), digest.encode('utf-8'))
+    return crypto_client.sign(SignatureAlgorithm(algorithm), base64.b64decode(digest.encode('utf-8')))
 
 
 def verify_key(cmd, client, algorithm, digest, signature, name=None, version=None):
-    import base64
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.verify(SignatureAlgorithm(algorithm),
-                                digest.encode('utf-8'),
+                                base64.b64decode(digest.encode('utf-8')),
                                 base64.b64decode(signature.encode('utf-8')))
 
 
@@ -1264,12 +1189,12 @@ def _int_to_bytes(i):
 
 def _public_rsa_key_to_jwk(rsa_key, jwk, encoding=None):
     pubv = rsa_key.public_numbers()
-    jwk.n = _int_to_bytes(pubv.n)
+    jwk['n'] = _int_to_bytes(pubv.n)
     if encoding:
-        jwk.n = encoding(jwk.n)
-    jwk.e = _int_to_bytes(pubv.e)
+        jwk['n'] = encoding(jwk['n'])
+    jwk['e'] = _int_to_bytes(pubv.e)
     if encoding:
-        jwk.e = encoding(jwk.e)
+        jwk['e'] = encoding(jwk['e'])
 
 
 def _private_rsa_key_to_jwk(rsa_key, jwk):
@@ -1535,10 +1460,13 @@ def update_key_rotation_policy(cmd, client, value, key_name=None):
 
 
 # region KeyVault Secret
-def download_secret(client, file_path, name=None, encoding=None, version=''):  # pylint: disable=unused-argument
+def download_secret(client, file_path, name=None, encoding=None, version='', overwrite=False):  # pylint: disable=unused-argument
     """ Download a secret from a KeyVault. """
-    if os.path.isfile(file_path) or os.path.isdir(file_path):
-        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+    if os.path.isdir(file_path):
+        raise CLIError("Cannot write to '{}': it is a directory.".format(file_path))
+
+    if not overwrite and os.path.isfile(file_path):
+        raise CLIError("File '{}' already exists. Use --overwrite to overwrite the existing file.".format(file_path))
 
     secret = client.get_secret(name, version)
 
@@ -1553,7 +1481,6 @@ def download_secret(client, file_path, name=None, encoding=None, version=''):  #
                 f.write(secret_value)
         else:
             if encoding == 'base64':
-                import base64
                 decoded = base64.b64decode(secret_value)
             elif encoding == 'hex':
                 import binascii
@@ -1618,7 +1545,6 @@ def download_certificate(client, file_path, certificate_name=None, encoding='PEM
             if encoding == 'DER':
                 f.write(cert)
             else:
-                import base64
                 encoded = base64.encodebytes(cert)
                 if isinstance(encoded, bytes):
                     encoded = encoded.decode("utf-8")
@@ -1652,7 +1578,7 @@ def add_certificate_contact(cmd, client, email, name=None, phone=None):
     except ResourceNotFoundError:
         contacts = []
     contact = CertificateContact(email=email, name=name, phone=phone)
-    if any((x for x in contacts if x.email == email)):
+    if any(x for x in contacts if x.email == email):
         raise CLIError("contact '{}' already exists".format(email))
     contacts.append(contact)
     return client.set_contacts(contacts)
@@ -1706,7 +1632,7 @@ def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=Non
                                               mod='_models')
     issuer = client.get_issuer(issuer_name)
     admins = issuer.admin_contacts
-    if any((x for x in admins if x.email == email)):
+    if any(x for x in admins if x.email == email):
         raise CLIError("admin '{}' already exists".format(email))
     new_admin = AdministratorContact(first_name=first_name, last_name=last_name, email=email, phone=phone)
     admins.append(new_admin)
@@ -1743,7 +1669,7 @@ def _verify_vault_or_hsm_name(vault_name, hsm_name):
 def list_private_link_resource(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
     _verify_vault_or_hsm_name(vault_name, hsm_name)
 
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client.list_by_vault(resource_group_name=resource_group_name, vault_name=vault_name)
 
     hsm_plr_client = get_client_factory(ResourceType.MGMT_KEYVAULT,
@@ -1796,7 +1722,7 @@ def _wait_private_link_operation(client, resource_group_name, name, private_endp
 
 def _get_vault_or_hsm_pec_client(cmd, client, vault_name, hsm_name):
     _verify_vault_or_hsm_name(vault_name, hsm_name)
-    if is_azure_stack_profile(cmd) or vault_name:
+    if vault_name:
         return client
     return get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.mhsm_private_endpoint_connections)(cmd.cli_ctx, None)
 
@@ -2173,7 +2099,6 @@ def full_backup(cmd, client, storage_resource_uri=None, storage_account_name=Non
         storage_resource_uri = construct_storage_uri(
             cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     poller = client.begin_backup(storage_resource_uri, sas_token=token, use_managed_identity=use_managed_identity)
-    from knack.util import todict
     result = todict(poller.result())
     result['status'] = poller.status()
     return result
@@ -2193,13 +2118,12 @@ def full_restore(cmd, client, folder_to_restore,
 
 
 # region security domain
-def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
-                                  identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
+def security_domain_init_recovery(client, sd_exchange_key):
     if os.path.exists(sd_exchange_key):
         raise CLIError("File named '{}' already exists.".format(sd_exchange_key))
 
-    ret = client.transfer_key(vault_base_url=hsm_name or vault_base_url)
-    exchange_key = json.loads(json.loads(ret)['transfer_key'])
+    ret = client.get_transfer_key()
+    exchange_key = json.loads(ret['transfer_key'])
 
     def get_x5c_as_pem():
         x5c = exchange_key.get('x5c', [])
@@ -2225,8 +2149,7 @@ def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
         raise ex
 
 
-def _wait_security_domain_operation(client, hsm_name, target_operation='upload',
-                                    identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
+def _wait_security_domain_operation(client, target_operation='upload'):
     retries = 0
     max_retries = 30
     wait_second = 5
@@ -2234,9 +2157,9 @@ def _wait_security_domain_operation(client, hsm_name, target_operation='upload',
         try:
             ret = None
             if target_operation == 'upload':
-                ret = client.upload_pending(vault_base_url=hsm_name or vault_base_url)
+                ret = client.get_upload_status()
             elif target_operation == 'download':
-                ret = client.download_pending(vault_base_url=hsm_name or vault_base_url)
+                ret = client.get_download_status()
 
             # v7.2-preview and v7.2 will change the upload operation from Sync to Async
             # due to service defects, it returns 'Succeeded' before the change and 'Success' after the change
@@ -2388,25 +2311,15 @@ def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, pa
     return restore_blob_value
 
 
-def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, identifier=None,
-                                 vault_base_url=None, no_wait=False):
-    from .vendored_sdks.azure_keyvault_t1.v7_2.models import SecurityDomainObject
-    security_domain = SecurityDomainObject(value=restore_blob_value)
-    retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
-    if no_wait:
-        return retval
-
-    wait_second = 5
-    time.sleep(wait_second)
-    new_retval = _wait_security_domain_operation(client, hsm_name, 'upload', vault_base_url=vault_base_url)
-    if new_retval:
-        return new_retval
-    return retval
+def _security_domain_upload_blob(client, restore_blob_value, no_wait=False):
+    security_domain = {'value': restore_blob_value}
+    poller = client.begin_upload(security_domain=security_domain, skip_activation_polling=no_wait)
+    poller.result()
+    return client.get_upload_status()
 
 
-def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, sd_exchange_key=None,
-                           sd_wrapping_keys=None, passwords=None, identifier=None, vault_base_url=None,
-                           no_wait=False):  # pylint: disable=unused-argument
+def security_domain_upload(client, sd_file, restore_blob=False, sd_exchange_key=None,
+                           sd_wrapping_keys=None, passwords=None, no_wait=False):
     if not restore_blob:
         restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, passwords)
     else:
@@ -2414,8 +2327,7 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, s
             restore_blob_value = f.read()
             if not restore_blob_value:
                 raise CLIError('Empty restore_blob_value.')
-    retval = _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value,
-                                          identifier, vault_base_url, no_wait)
+    retval = _security_domain_upload_blob(client, restore_blob_value, no_wait)
     return retval
 
 
@@ -2432,12 +2344,9 @@ def security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, sd_
         raise ex
 
 
-def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,
-                             identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+def security_domain_download(client, sd_wrapping_keys, security_domain_file, sd_quorum, no_wait=False):
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
-
-    from .vendored_sdks.azure_keyvault_t1.v7_2.models import CertificateSet, SecurityDomainJsonWebKey
 
     for path in sd_wrapping_keys:
         if os.path.isdir(path):
@@ -2452,22 +2361,22 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
 
     certificates = []
     for path in sd_wrapping_keys:
-        sd_jwk = SecurityDomainJsonWebKey()
+        sd_jwk = {}
         with open(path, 'rb') as f:
             pem_data = f.read()
 
         cert = load_pem_x509_certificate(pem_data, backend=default_backend())
         public_key = cert.public_key()
         public_bytes = cert.public_bytes(Encoding.DER)
-        sd_jwk.x5c = [Utils.security_domain_b64_url_encode_for_x5c(public_bytes)]  # only one cert, not a chain
-        sd_jwk.x5t = Utils.security_domain_b64_url_encode(hashlib.sha1(public_bytes).digest())
-        sd_jwk.x5tS256 = Utils.security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
-        sd_jwk.key_ops = ['verify', 'encrypt', 'wrapKey']
+        sd_jwk['x5c'] = [Utils.security_domain_b64_url_encode_for_x5c(public_bytes)]  # only one cert, not a chain
+        sd_jwk['x5t'] = Utils.security_domain_b64_url_encode(hashlib.sha1(public_bytes).digest())
+        sd_jwk['x5t#S256'] = Utils.security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
+        sd_jwk['key_ops'] = ['verify', 'encrypt', 'wrapKey']
 
         # populate key into jwk
         if isinstance(public_key, rsa.RSAPublicKey) and public_key.key_size >= 2048:
-            sd_jwk.kty = 'RSA'
-            sd_jwk.alg = 'RSA-OAEP-256'
+            sd_jwk['kty'] = 'RSA'
+            sd_jwk['alg'] = 'RSA-OAEP-256'
             _public_rsa_key_to_jwk(public_key, sd_jwk, encoding=Utils.security_domain_b64_url_encode)
         else:
             raise CLIError('Only RSA >= 2048 is supported.')
@@ -2485,21 +2394,13 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
             from azure.cli.core.azclierror import FileOperationError
             raise FileOperationError(str(ex))
 
-    ret = client.download(
-        vault_base_url=hsm_name or vault_base_url,
-        certificates=CertificateSet(certificates=certificates, required=sd_quorum)
-    )
-
+    certificate_info = {'certificates': certificates, 'required': sd_quorum}
+    poller = client.begin_download(certificate_info=certificate_info, skip_activation_polling=no_wait)
+    security_domain = poller.result()
+    if poller.status() != 'Failed':
+        _save_to_local_file(security_domain_file, security_domain)
     if not no_wait:
-        wait_second = 5
-        time.sleep(wait_second)
-        polling_ret = _wait_security_domain_operation(client, hsm_name, 'download', vault_base_url=vault_base_url)
-        # Due to service defect, status could be 'Success' or 'Succeeded' when it succeeded
-        if polling_ret and getattr(polling_ret, 'status', None) != 'Failed':
-            _save_to_local_file(security_domain_file, ret)
-        return polling_ret
-
-    _save_to_local_file(security_domain_file, ret)
+        return client.get_download_status()
 
 
 def check_name_availability(cmd, client, name, resource_type='hsm'):

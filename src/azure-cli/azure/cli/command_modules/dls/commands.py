@@ -8,36 +8,27 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.dls._client_factory import (
     cf_dls_account,
     cf_dls_account_firewall,
-    cf_dls_account_virtual_network,
     cf_dls_account_trusted_provider)
 
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
-    from ._validators import (
-        validate_subnet
-    )
-    adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{{}}'
+    adls_format_path = 'azure.mgmt.datalake.store.operations#{}.{{}}'
 
     dls_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dls.custom#{}')
 
     dls_account_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('accounts_operations', 'AccountsOperations'),
+        operations_tmpl=adls_format_path.format('AccountsOperations'),
         client_factory=cf_dls_account
     )
 
     dls_firewall_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('firewall_rules_operations', 'FirewallRulesOperations'),
-        client_factory=cf_dls_account
-    )
-
-    dls_virtual_network_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('virtual_network_rules_operations', 'VirtualNetworkRulesOperations'),
+        operations_tmpl=adls_format_path.format('FirewallRulesOperations'),
         client_factory=cf_dls_account
     )
 
     dls_provider_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations'),
+        operations_tmpl=adls_format_path.format('TrustedIdProvidersOperations'),
         client_factory=cf_dls_account_trusted_provider
     )
 
@@ -46,32 +37,22 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_adls_account')
         g.custom_command('update', 'update_adls_account')
         g.custom_command('list', 'list_adls_account')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('enable-key-vault', 'enable_key_vault')
 
     # account firewall operations
     with self.command_group('dls account firewall', dls_firewall_sdk, client_factory=cf_dls_account_firewall) as g:
         g.custom_command('create', 'add_adls_firewall_rule')
-        g.command('update', 'update')
-        g.command('list', 'list_by_account')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-
-    # account virtual network rule operations
-    with self.command_group('dls account network-rule',
-                            dls_virtual_network_sdk,
-                            client_factory=cf_dls_account_virtual_network) as g:
-        g.custom_command('create', 'add_adls_virtual_network_rule', validator=validate_subnet)
-        g.generic_update_command('update')
+        g.custom_command('update', 'update_adls_firewall_rule')
         g.command('list', 'list_by_account')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
 
     # account trusted id provider operations
-    with self.command_group('dls account trusted-provider', dls_provider_sdk) as g:
-        g.command('create', 'create_or_update')
-        g.command('update', 'update')
+    with self.command_group('dls account trusted-provider', dls_provider_sdk, client_factory=cf_dls_account_trusted_provider) as g:
+        g.custom_command('create', 'add_trusted_provider_rule')
+        g.custom_command('update', 'update_trusted_provider_rule')
         g.command('list', 'list_by_account')
         g.show_command('show', 'get')
         g.command('delete', 'delete')

@@ -25,7 +25,7 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         # Test create with fail-on-exist
         from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegexp(ResourceExistsError, 'The specified share already exists.'):
+        with self.assertRaisesRegex(ResourceExistsError, 'The specified share already exists.'):
             self.cmd(
                 'storage share create -n {} --fail-on-exist --connection-string {} --quota 3'
                 .format(share_name, connection_string))
@@ -51,8 +51,8 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
                                account_info, share_name, start, expiry).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
         # Test generate-sas with ip and https-only
-        sas2 = self.cmd('storage share generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r '
-                        '--https-only --connection-string {}'.format(share_name, connection_string)).output
+        sas2 = self.cmd('storage share generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r --expiry {} '
+                        '--https-only --connection-string {}'.format(share_name, expiry, connection_string)).output
         self.assertIn('sig', sas2, 'The sig segment is not in the sas {}'.format(sas2))
 
         # Test delete
@@ -66,12 +66,28 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         # Test delete with fail-not-exist
         share_not_exist = self.create_random_name('share', 24)
         from azure.core.exceptions import ResourceNotFoundError
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'The specified share does not exist.'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'The specified share does not exist.'):
             self.storage_cmd('storage share delete -n {} --fail-not-exist', account_info, share_not_exist)
 
         self.storage_cmd('storage share update --name {} --quota 3', account_info, share)
         self.storage_cmd('storage share show --name {}', account_info, share) \
             .assert_with_checks(JMESPathCheck('properties.quota', 3))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='share', kind='FileStorage', location='eastus2', sku='Premium_LRS')
+    def test_storage_file_share_premium_scenario(self, resource_group, storage_account):
+
+        account_info = self.get_account_info(resource_group, storage_account)
+        share_name = self.create_random_name('share', 24)
+
+        self.storage_cmd('storage share create -n {} --fail-on-exist --metadata foo=bar cat=hat '
+                         '--enable-snapshot-virtual-directory-access false --protocol nfs',
+                         account_info, share_name) \
+            .assert_with_checks(JMESPathCheck('created', True))
+
+        self.storage_cmd('storage share show -n {}', account_info, share_name) \
+            .assert_with_checks(JMESPathCheck('enableSnapshotVirtualDirectoryAccess', False),
+                                JMESPathCheck('protocols', ['NFS']))
 
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='share', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')

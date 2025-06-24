@@ -17,7 +17,6 @@ from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='source_account')
@@ -274,6 +273,20 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage container show-permission -n {}', account_info, c) \
             .assert_with_checks(JMESPathCheck('publicAccess', 'off'))
 
+        # test case with access policy set
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        policy = self.create_random_name('policy', 16)
+        self.storage_cmd('storage container policy create -c {} -n {} --expiry {} --permissions racwdxyltfmei',
+                         account_info, c, policy, expiry)
+        self.storage_cmd('storage container set-permission -n {} --public-access blob',
+                         account_info, c)
+        self.storage_cmd('storage container show-permission -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('publicAccess', 'blob'))
+        self.storage_cmd('storage container policy list -c {} ', account_info, c) \
+            .assert_with_checks(JMESPathCheckExists('{}.expiry'.format(policy)),
+                                JMESPathCheck('{}.permission'.format(policy), 'racwdxyltfmei'))
+
         self.storage_cmd('storage container show -n {}', account_info, c) \
             .assert_with_checks(JMESPathCheck('name', c))
 
@@ -459,6 +472,18 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('minuteMetrics.enabled', True),
                                 JMESPathCheck('minuteMetrics.includeApis', True),
                                 JMESPathCheck('logging.delete', True))
+
+        self.storage_cmd('storage blob service-properties update --index-document index1.html '
+                         '--404-document error2.html', account_info) \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index1.html'),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error2.html'))
+
+        self.storage_cmd('storage blob service-properties update --static-website false', account_info) \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False),
+                                JMESPathCheck('staticWebsite.indexDocument', None),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', None))
+
         self.storage_cmd('storage blob service-properties delete-policy update --days 2', account_info)
         self.storage_cmd('storage blob service-properties delete-policy show', account_info) \
             .assert_with_checks(JMESPathCheck('days', 2))
@@ -906,7 +931,6 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 2))
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
 class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="storage_blob_restore", location="centraluseuap")

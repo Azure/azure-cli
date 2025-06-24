@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=logging-fstring-interpolation
 
-import os
 import sys
 import time
 import threading
@@ -151,7 +150,8 @@ def _send_stdin(connection: WebSocketConnection, getch_fn):
 
 
 def _resize_terminal(connection: WebSocketConnection):
-    size = os.get_terminal_size()
+    from shutil import get_terminal_size
+    size = get_terminal_size()
     if connection.is_connected:
         connection.send(b"".join([SSH_TERM_RESIZE_PREFIX,
                                   f'{{"Width": {size.columns}, '

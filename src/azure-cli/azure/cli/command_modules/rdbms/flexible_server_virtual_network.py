@@ -5,8 +5,8 @@
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel
 from requests import get
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
 from knack.log import get_logger
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, user_confirmation
@@ -15,6 +15,7 @@ from azure.mgmt.privatedns.models import PrivateZone
 from azure.mgmt.privatedns.models import SubResource
 from azure.mgmt.privatedns.models import VirtualNetworkLink
 from ._client_factory import resource_client_factory, private_dns_client_factory, private_dns_link_client_factory
+from ._config_reader import get_cloud_cluster
 from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation, _check_resource_group_existence
 from .validators import validate_private_dns_zone, validate_vnet_location
 
@@ -223,9 +224,11 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
             "subscription": nw_subscription,
             "resource_group": resource_group
         })
-        vnet_subnet_prefixes = [subnet["addressPrefix"] for subnet in vnet.get("subnets", [])]
-        if subnet_address_pref in vnet_subnet_prefixes:
-            raise ValidationError(f"The Subnet (default) prefix {subnet_address_pref} is already taken by another Subnet in the Vnet. Please provide a different prefix for --subnet-prefix parameter")
+        subnets = vnet.get("subnets", [])
+        for subnet in subnets:
+            vnet_subnet_prefixes = subnet.get("addressPrefix", "") if 'addressPrefix' in subnet else subnet.get("addressPrefixes", "")
+            if subnet_address_pref in vnet_subnet_prefixes:
+                raise ValidationError(f"The Subnet (default) prefix {subnet_address_pref} is already taken by another Subnet in the Vnet. Please provide a different prefix for --subnet-prefix parameter")
 
         user_confirmation("Do you want to create a new Subnet {0} in resource group {1}".format(subnet_name, resource_group), yes=yes)
         logger.warning('Creating new Subnet "%s" in resource group "%s"', subnet_name, resource_group)
@@ -247,8 +250,9 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
             "resource_group": resource_group
         })
         logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
-        if subnet_address_pref not in (DEFAULT_SUBNET_ADDRESS_PREFIX, subnet["addressPrefix"]):
-            logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet["addressPrefix"])
+        subnet_address_prefix = subnet["addressPrefix"] if 'addressPrefix' in subnet else subnet["addressPrefixes"]
+        if subnet_address_pref not in (DEFAULT_SUBNET_ADDRESS_PREFIX, subnet_address_prefix):
+            logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet_address_prefix)
 
         # Add Delegation if not delegated already
         if not subnet.get("delegations", None):
@@ -338,14 +342,6 @@ def prepare_mysql_exist_private_dns_zone(cmd, resource_group, private_dns_zone, 
 
 def prepare_private_dns_zone(db_context, resource_group, server_name, private_dns_zone, subnet_id, location, yes):
     cmd = db_context.cmd
-    dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
-    private_dns_zone_suffix = dns_suffix_client.execute()
-    if db_context.command_group == 'mysql':
-        private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
-
-    # suffix should start with .
-    if private_dns_zone_suffix[0] != '.':
-        private_dns_zone_suffix = '.' + private_dns_zone_suffix
 
     # Get Vnet Components
     vnet_subscription, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
@@ -359,6 +355,20 @@ def prepare_private_dns_zone(db_context, resource_group, server_name, private_dn
         "subscription": vnet_subscription,
         "resource_group": vnet_rg
     })
+
+    cluster = get_cloud_cluster(cmd, location.replace('/ +/g', '').lower(), vnet_subscription)
+
+    if cluster is not None:
+        private_dns_zone_suffix = cluster["privateDnsZoneDomain"]
+    else:
+        dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
+        private_dns_zone_suffix = dns_suffix_client.execute()
+        if db_context.command_group == 'mysql':
+            private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
+
+    # suffix should start with .
+    if private_dns_zone_suffix[0] != '.':
+        private_dns_zone_suffix = '.' + private_dns_zone_suffix
 
     # Process private dns zone (no input or Id input)
     dns_rg = None
@@ -449,10 +459,10 @@ def prepare_public_network(public_access, yes):
         if yes:
             return ip_address, ip_address
 
-        if get_user_confirmation("Do you want to enable access to client {0} (y/n)".format(ip_address), yes=yes):
+        if get_user_confirmation("Do you want to enable access to client {0}".format(ip_address), yes=yes):
             return ip_address, ip_address
 
-        if get_user_confirmation("Do you want to enable access for all IPs ", yes=yes):
+        if get_user_confirmation("Do you want to enable access for all IPs", yes=yes):
             return '0.0.0.0', '255.255.255.255'
         return -1, -1
 

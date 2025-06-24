@@ -19,10 +19,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-01-31",
+        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.capacity/reservationorders/{}/providers/microsoft.consumption/reservationdetails", "2018-01-31"],
-            ["mgmt-plane", "/providers/microsoft.capacity/reservationorders/{}/reservations/{}/providers/microsoft.consumption/reservationdetails", "2018-01-31"],
+            ["mgmt-plane", "/providers/microsoft.capacity/reservationorders/{}/providers/microsoft.consumption/reservationdetails", "2023-05-01"],
+            ["mgmt-plane", "/providers/microsoft.capacity/reservationorders/{}/reservations/{}/providers/microsoft.consumption/reservationdetails", "2023-05-01"],
         ]
     }
 
@@ -130,7 +130,7 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2018-01-31",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -274,7 +274,7 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2018-01-31",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }

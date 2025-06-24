@@ -4,11 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
+from enum import Enum
+import json
+import math
 import os
 import random
-import subprocess
 import secrets
 import string
+import subprocess
 import yaml
 from time import sleep
 import datetime as dt
@@ -16,20 +19,21 @@ from datetime import datetime
 from knack.log import get_logger
 from knack.arguments import ignore_type
 from knack.prompting import prompt_pass, prompt_y_n, NoTTYException
-from msrestazure.tools import parse_resource_id
-from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.core.tools import parse_resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.util import CLIError
+from azure.cli.core.commands.progress import IndeterminateProgressBar
+from azure.cli.core.util import CLIError, run_cmd
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
+from azure.core.rest import HttpRequest
 from azure.cli.core.commands import LongRunningOperation, AzArgumentContext, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, AuthenticationError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
-from azure.mgmt.rdbms import mysql_flexibleservers, postgresql_flexibleservers
+from azure.mgmt.mysqlflexibleservers import models
 from azure.mgmt.resource.resources.models import ResourceGroup
-from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities
+from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, get_mysql_flexible_management_client
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
-
+from urllib.parse import urlencode, urlparse, parse_qsl
 
 logger = get_logger(__name__)
 
@@ -105,9 +109,9 @@ def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condit
     return decorate
 
 
-def resolve_poller(result, cli_ctx, name):
+def resolve_poller(result, cli_ctx, name, progress_bar=None):
     if _is_poller(result):
-        return LongRunningOperation(cli_ctx, 'Starting {}'.format(name))(result)
+        return LongRunningOperation(cli_ctx, 'Starting {}'.format(name), progress_bar=progress_bar)(result)
     return result
 
 
@@ -370,19 +374,12 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
 
 def run_subprocess(command, stdout_show=None):
     if stdout_show:
-        process = subprocess.Popen(command, shell=True)
+        process = subprocess.Popen(command)
     else:
-        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process.wait()
     if process.returncode:
         logger.warning(process.stderr.read().strip().decode('UTF-8'))
-
-
-def run_subprocess_get_output(command):
-    commands = command.split()
-    process = subprocess.Popen(commands, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
-    return process
 
 
 def register_credential_secrets(cmd, database_engine, server, repository):
@@ -409,7 +406,7 @@ def register_credential_secrets(cmd, database_engine, server, repository):
     credential_file = "./temp_app_credential.txt"
     with open(credential_file, "w") as f:
         f.write(app_json)
-    run_subprocess('gh secret set {} --repo {} < {}'.format(AZURE_CREDENTIALS, repository, credential_file))
+    run_subprocess(["gh", "secret", "set", AZURE_CREDENTIALS, "--repo", repository, "<", credential_file])
     os.remove(credential_file)
 
 
@@ -418,7 +415,7 @@ def register_connection_secrets(server, database_name, administrator_login,
     logger.warning("Added secret %s to github repository", connection_string_name)
     connection_string = "Server={}; Port=3306; Database={}; Uid={}; Pwd={}; SslMode=Preferred;".format(
         server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-    run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
+    run_subprocess(['gh', 'secret', 'set', connection_string_name, '--repo', repository, '-b', connection_string])
 
 
 def fill_action_template(cmd, database_engine, server, database_name, administrator_login,
@@ -428,8 +425,8 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
     if not os.path.exists(action_dir):
         os.makedirs(action_dir)
 
-    process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
-    github_secrets = process.stdout.read().strip().decode('UTF-8')
+    process = run_cmd(["gh", "secret", "list", "--repo", repository], capture_output=True)
+    github_secrets = process.stdout.strip().decode('UTF-8')
 
     if AZURE_CREDENTIALS not in github_secrets:
         try:
@@ -437,7 +434,7 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
                                         database_engine=database_engine,
                                         server=server,
                                         repository=repository)
-        except CloudError:
+        except HttpResponseError:
             raise AuthenticationError('You do not have authorization to create a service principal to run azure service in github actions. \n'
                                       'Please create a service principal that has access to the database server and add "AZURE_CREDENTIALS" secret to your github repository. \n'
                                       'Follow the instruction here "aka.ms/github-actions-azure-credentials".')
@@ -464,8 +461,8 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
 
 
 def get_git_root_dir():
-    process = run_subprocess_get_output("git rev-parse --show-toplevel")
-    return process.stdout.read().strip().decode('UTF-8')
+    process = run_cmd(["git", "rev-parse", "--show-toplevel"], capture_output=True)
+    return process.stdout.strip().decode('UTF-8')
 
 
 def get_user_confirmation(message, yes=False):
@@ -507,23 +504,16 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
             identities[backup_byok_identity] = {}
 
         if db_engine == 'mysql':
-            identity = mysql_flexibleservers.models.MySQLServerIdentity(user_assigned_identities=identities,
-                                                                        type="UserAssigned")
+            identity = models.MySQLServerIdentity(user_assigned_identities=identities, type="UserAssigned")
 
-            data_encryption = mysql_flexibleservers.models.DataEncryption(
+            data_encryption = models.DataEncryption(
                 primary_user_assigned_identity_id=byok_identity,
                 primary_key_uri=byok_key,
                 geo_backup_user_assigned_identity_id=backup_byok_identity,
                 geo_backup_key_uri=backup_byok_key,
                 type="AzureKeyVault")
         else:
-            identity = postgresql_flexibleservers.models.UserAssignedIdentity(user_assigned_identities=identities,
-                                                                              type="UserAssigned")
-
-            data_encryption = postgresql_flexibleservers.models.DataEncryption(
-                primary_user_assigned_identity_id=byok_identity,
-                primary_key_uri=byok_key,
-                type="AzureKeyVault")
+            raise CLIError('Unsupported db engine.')
 
     return identity, data_encryption
 
@@ -570,3 +560,113 @@ def get_single_to_flex_sku_mapping(source_single_server_sku, tier, sku_name):
 
 def get_firewall_rules_from_paged_response(firewall_rules):
     return list(firewall_rules) if isinstance(firewall_rules, ItemPaged) else firewall_rules
+
+
+def get_current_utc_time():
+    return datetime.utcnow().replace(tzinfo=dt.timezone.utc)
+
+
+class ImportFromStorageState(Enum):
+    PROVISIONING = "Provisioning Server"
+    IMPORTING = "Importing"
+    DEFAULT = "Running"
+
+
+class ImportFromStorageProgressHook:
+
+    def __init__(self):
+        self._import_started = False
+        self._import_state = ImportFromStorageState.DEFAULT
+        self._import_estimated_completion_time = None
+
+    def update_progress(self, operation_progress_response):
+        if operation_progress_response is not None:
+            try:
+                jsonresp = json.loads(operation_progress_response.text())
+                self._update_import_from_storage_progress_status(jsonresp)
+            except Exception:  # pylint: disable=broad-except
+                pass
+
+    def get_progress_message(self):
+        msg = self._import_state.value
+        if self._import_estimated_completion_time is not None:
+            msg = msg + " " + self._get_eta_time_duration_in_user_readable_string()
+        elif self._import_state == ImportFromStorageState.IMPORTING:
+            msg = msg + " " + "Preparing (This might take few minutes)"
+        return msg
+
+    def _get_eta_time_duration_in_user_readable_string(self):
+        time_remaining = datetime.fromisoformat(self._import_estimated_completion_time) - get_current_utc_time()
+        msg = " ETA : "
+        if time_remaining.total_seconds() < 60:
+            return msg + "Few seconds remaining"
+        days = time_remaining.days
+        hours, remainder = divmod(time_remaining.seconds, 3600)
+        minutes = math.ceil(remainder / 60.0)
+        if days > 0:
+            msg = msg + str(days) + " days "
+        if hours > 0:
+            msg = msg + str(hours) + " hours "
+        if minutes > 0:
+            msg = msg + str(minutes) + " minutes "
+        return msg + " remaining"
+
+    def _update_import_from_storage_progress_status(self, progress_resp_json):
+        if "status" in progress_resp_json:
+            progress_status = progress_resp_json["status"]
+            previous_import_state = self._import_state
+
+            # Updating the import state
+            if progress_status == "Importing":
+                self._import_started = True
+                self._import_state = ImportFromStorageState.IMPORTING
+            elif progress_status == "InProgress" and self._import_started is False:
+                self._import_state = ImportFromStorageState.PROVISIONING
+            else:
+                self._import_state = ImportFromStorageState.DEFAULT
+
+            # Updating the estimated completion time
+            is_state_same = self._import_state == previous_import_state
+            if is_state_same is False:
+                self._import_estimated_completion_time = None
+            if "properties" in progress_resp_json and "estimatedCompletionTime" in progress_resp_json["properties"]:
+                self._import_estimated_completion_time = str(progress_resp_json["properties"]["estimatedCompletionTime"])
+
+
+class OperationProgressBar(IndeterminateProgressBar):
+
+    """ Define progress bar update view for operation progress """
+    def __init__(self, cli_ctx, poller, operation_progress_hook, progress_message_update_interval_in_sec=60.0):
+        self._poller = poller
+        self._operation_progress_hook = operation_progress_hook
+        self._operation_progress_request = self._get_operation_progress_request()
+        self._client = get_mysql_flexible_management_client(cli_ctx)
+        self._progress_message_update_interval_in_sec = progress_message_update_interval_in_sec
+        self._progress_message_last_updated = None
+        super().__init__(cli_ctx)
+
+    def update_progress(self):
+        self._safe_update_progress_message()
+        super().update_progress()
+
+    def _safe_update_progress_message(self):
+        try:
+            if self._should_update_progress_message():
+                operation_progress_resp = self._client._send_request(self._operation_progress_request)
+                self._operation_progress_hook.update_progress(operation_progress_resp)
+                self.message = self._operation_progress_hook.get_progress_message()
+                self._progress_message_last_updated = get_current_utc_time()
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    def _should_update_progress_message(self):
+        return (self._progress_message_last_updated is None) or ((get_current_utc_time() - self._progress_message_last_updated).total_seconds() > self._progress_message_update_interval_in_sec)
+
+    def _get_operation_progress_request(self):
+        location_url = self._poller._polling_method._initial_response.http_response.headers["Location"]
+        operation_progress_url = location_url.replace('operationResults', 'operationProgress')
+        operation_progress_url_parsed = urlparse(operation_progress_url)
+        query_params = dict(parse_qsl(operation_progress_url_parsed.query))
+        query_params['api-version'] = "2023-12-01-preview"
+        updated_operation_progress_url = operation_progress_url_parsed._replace(query=urlencode(query_params)).geturl()
+        return HttpRequest('GET', updated_operation_progress_url)

@@ -6,7 +6,7 @@
 # pylint: disable=protected-access
 
 import unittest
-from azure.cli.core.auth.util import scopes_to_resource, resource_to_scopes, _normalize_scopes, _generate_login_command
+from azure.cli.core.auth.util import scopes_to_resource, resource_to_scopes, _generate_login_command
 
 
 class TestUtil(unittest.TestCase):
@@ -49,21 +49,6 @@ class TestUtil(unittest.TestCase):
         # resource without trailing slash
         self.assertEqual(resource_to_scopes('https://managedhsm.azure.com'),
                          ['https://managedhsm.azure.com/.default'])
-
-    def test_normalize_scopes(self):
-        # Test no scopes
-        self.assertIsNone(_normalize_scopes(()))
-        self.assertIsNone(_normalize_scopes([]))
-        self.assertIsNone(_normalize_scopes(None))
-
-        # Test multiple scopes, with the first one discarded
-        scopes = _normalize_scopes(("https://management.core.windows.net//.default",
-                                    "https://management.core.chinacloudapi.cn//.default"))
-        self.assertEqual(list(scopes), ["https://management.core.chinacloudapi.cn//.default"])
-
-        # Test single scopes (the correct usage)
-        scopes = _normalize_scopes(("https://management.core.chinacloudapi.cn//.default",))
-        self.assertEqual(list(scopes), ["https://management.core.chinacloudapi.cn//.default"])
 
     def test_generate_login_command(self):
         # No parameter is given

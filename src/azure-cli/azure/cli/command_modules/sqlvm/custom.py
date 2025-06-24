@@ -2,8 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-from msrestazure.tools import is_valid_resource_id, resource_id
 from knack.prompting import prompt_pass
 from azure.cli.core.azclierror import (
     RequiredArgumentMissingError,
@@ -14,7 +12,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import (
     sdk_no_wait
 )
-
+from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 from azure.mgmt.sqlvirtualmachine.models import (
     WsfcDomainProfile,
     SqlVirtualMachineGroup,
@@ -126,7 +124,6 @@ def sqlvm_group_create(
         sql_image_sku=sql_image_sku,
         wsfc_domain_profile=wsfc_domain_profile_object,
         location=location,
-        cluster_subnet_type=cluster_subnet_type,
         tags=tags)
 
     # Since it's a running operation, we will do the put and then the get to

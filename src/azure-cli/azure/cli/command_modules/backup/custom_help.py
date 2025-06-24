@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
@@ -45,7 +46,14 @@ operation_name_map = {"deleteProtection": rsc_type + "/backupFabrics/protectionC
                       "updatePolicy": rsc_type + "/backupPolicies/write",
                       "deleteRGMapping": rsc_type + "/backupResourceGuardProxies/delete",
                       "getSecurityPIN": rsc_type + "/backupSecurityPIN/action",
-                      "disableSoftDelete": rsc_type + "/backupconfig/write"}
+                      "disableSoftDelete": rsc_type + "/backupconfig/write",
+                      "RecoveryServicesDisableImmutability": rsc_type + "/write#reduceImmutabilityState",
+                      "RecoveryServicesStopProtection": rsc_type +
+                      "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData",
+                      "RecoveryServicesRestore": rsc_type +
+                      "/backupFabrics/protectionContainers/protectedItems/recoveryPoints/restore/action",
+                      "RecoveryServicesModifyEncryptionSettings": rsc_type +
+                      "/write#modifyEncryptionSettings"}
 
 # Client Utilities
 
@@ -63,7 +71,11 @@ def is_sql(resource_type):
 
 
 def is_hana(resource_type):
-    return resource_type.lower() == 'saphanadatabase'
+    return resource_type.lower() == 'saphanadatabase' or resource_type.lower() == "saphanadbinstance"
+
+
+def is_sapase(resource_type):
+    return resource_type.lower() == 'sapasedatabase'
 
 
 def is_wl_container(name):
@@ -139,7 +151,107 @@ def get_resource_guard_operation_request(cli_ctx, resource_group_name, vault_nam
     return operation_request
 
 
+def is_immutability_weakened(existing_vault, patchvault):
+    if existing_vault.properties.security_settings.immutability_settings is not None:
+        if existing_vault.properties.security_settings.immutability_settings.state == "Unlocked":
+            if (patchvault.properties.security_settings is not None and
+               patchvault.properties.security_settings.immutability_settings is not None and
+               patchvault.properties.security_settings.immutability_settings.state == "Disabled"):
+                return True
+    return False
+
+
+def is_rpo_increased(old_policy, new_policy, backup_management_type):
+    return calculate_rpo(new_policy, backup_management_type) > calculate_rpo(old_policy, backup_management_type)
+
+
+def calculate_rpo(policy, backup_management_type):
+    rpo_time = 0
+
+    if backup_management_type == "AzureIaasVM":
+        schedule_policy = policy.properties.schedule_policy
+        if schedule_policy.schedule_run_frequency == 'Hourly':
+            if schedule_policy.hourly_schedule.schedule_window_duration == 24:
+                rpo_time = schedule_policy.hourly_schedule.interval
+            else:
+                rpo_time = 24 - schedule_policy.hourly_schedule.schedule_window_duration
+
+        if schedule_policy.schedule_run_frequency == "Daily":
+            rpo_time = 24
+
+        if schedule_policy.schedule_run_frequency == "Weekly":
+            rpo_time = calculate_weekly_rpo(schedule_policy.weekly_schedule.schedule_run_days)
+
+    if backup_management_type == "AzureStorage":
+        schedule_policy = policy.properties.schedule_policy
+        if schedule_policy.schedule_run_frequency == 'Hourly':
+            if schedule_policy.hourly_schedule.schedule_window_duration <= schedule_policy.hourly_schedule.interval:
+                rpo_time = 24
+            else:
+                number_of_rps = (schedule_policy.hourly_schedule.schedule_window_duration //
+                                 schedule_policy.hourly_schedule.interval) + 1
+                rpo_time = 24 - (schedule_policy.hourly_schedule.interval * (number_of_rps - 1))
+
+        if schedule_policy.schedule_run_frequency == "Daily":
+            rpo_time = 24
+
+    if backup_management_type == "AzureWorkload":
+        log_policy = get_sub_protection_policy(policy, "Log")
+        full_policy = get_sub_protection_policy(policy, "Full")
+        differential_policy = get_sub_protection_policy(policy, "Differential")
+        incremental_policy = get_sub_protection_policy(policy, "Incremental")
+
+        if log_policy is not None:
+            rpo_time = log_policy.schedule_policy.schedule_frequency_in_mins / 60
+
+        elif full_policy.schedule_policy.schedule_run_frequency == "Daily":
+            rpo_time = 24
+
+        else:  # weekly policy
+            combined_schedule = []
+            if full_policy.retention_policy.weekly_schedule is not None:
+                combined_schedule.append(full_policy.retention_policy.weekly_schedule.days_of_the_week)
+            if differential_policy is not None:
+                combined_schedule.append(differential_policy.schedule_policy.schedule_run_days)
+            if incremental_policy is not None:
+                combined_schedule.append(incremental_policy.schedule_policy.schedule_run_days)
+            rpo_time = calculate_weekly_rpo(combined_schedule)
+
+    return rpo_time
+
+
+def calculate_weekly_rpo(schedule_run_days):
+    week_map = {
+        'sunday': 0,
+        'monday': 1,
+        'tuesday': 2,
+        'wednesday': 3,
+        'thursday': 4,
+        'friday': 5,
+        'saturday': 6
+    }
+    week_mask = [False] * 7
+    for day in schedule_run_days:
+        if day.lower() in week_map:
+            week_mask[int(week_map[day.lower()])] = True
+    week_circular_mask = week_mask * 2
+
+    last_active_index = None
+    largest_gap = 0
+    gap = 0
+    for index, backup_scheduled in enumerate(week_circular_mask):
+        if backup_scheduled:
+            if last_active_index is not None:
+                gap = index - last_active_index
+                largest_gap = max(largest_gap, gap)
+            last_active_index = index
+
+    return largest_gap * 24
+
+
 def is_retention_duration_decreased(old_policy, new_policy, backup_management_type):
+    if is_rpo_increased(old_policy, new_policy, backup_management_type):
+        return True
     if backup_management_type == "AzureIaasVM":
         if old_policy.properties.instant_rp_retention_range_in_days is not None:
             if (new_policy.properties.instant_rp_retention_range_in_days is None or
@@ -564,11 +676,45 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     return None
 
 
-def validate_update_policy_request(existing_policy, new_policy):
+def validate_update_policy_request(existing_policy, new_policy, yes=False):
     existing_backup_management_type = existing_policy.properties.backup_management_type
     new_backup_management_type = new_policy.properties.backup_management_type
     if existing_backup_management_type != new_backup_management_type:
         raise CLIError("BackupManagementType cannot be different than the existing type.")
+    vault_to_snapshot = (
+        new_backup_management_type.lower() == 'azurestorage' and
+        hasattr(existing_policy.properties, 'vault_retention_policy') and
+        existing_policy.properties.vault_retention_policy is not None and
+        hasattr(new_policy.properties, 'retention_policy') and
+        new_policy.properties.retention_policy is not None
+    )
+
+    snapshot_to_vault = (
+        new_backup_management_type.lower() == 'azurestorage' and
+        hasattr(existing_policy.properties, 'retention_policy') and
+        existing_policy.properties.retention_policy is not None and
+        hasattr(new_policy.properties, 'vault_retention_policy') and
+        new_policy.properties.vault_retention_policy is not None
+    )
+
+    # vault -> snapshot
+    if vault_to_snapshot:
+        raise CLIError(
+            """
+            Switching the backup tier from vaulted backup to snapshot is not possible.
+            Please create a new policy for snapshot-only backups.
+            """)
+    # snapshot -> vault
+    if snapshot_to_vault:
+        warning_prompt = ('Changing the backup tier keeps current snapshots as-is under the existing policy.'
+                          'Future backups will be stored in the vault with new retention settings. '
+                          'This action is irreversible and incurs additional costs.'
+                          'Switching from vault to snapshot requires reconfiguration.'
+                          'Learn more at'
+                          'https://learn.microsoft.com/en-us/azure/backup/azure-file-share-backup-overview.'
+                          'Do you want to continue?')
+        if not yes and not prompt_y_n(warning_prompt):
+            raise CLIError('Cancelling policy update operation')
 
 
 def transform_softdelete_parameters(parameter):

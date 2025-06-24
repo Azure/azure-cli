@@ -459,12 +459,12 @@ class TestMonitorAutoscaleTimezones(LiveScenarioTest):
 class TestMonitorAutoscaleComplexRules(LiveScenarioTest):
 
     def setUp(self):
-        super(TestMonitorAutoscaleComplexRules, self).setUp()
+        super().setUp()
         self.cmd('extension add -n spring-cloud')
 
     def tearDown(self):
         self.cmd('extension remove -n spring-cloud')
-        super(TestMonitorAutoscaleComplexRules, self).tearDown()
+        super().tearDown()
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rule_for_spring_cloud', location='westus2')

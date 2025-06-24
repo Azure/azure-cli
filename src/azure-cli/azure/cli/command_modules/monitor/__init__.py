@@ -35,10 +35,10 @@ class MonitorCommandsLoader(AzCommandsLoader):
         from azure.cli.core.profiles import ResourceType
         monitor_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.monitor.custom#{}')
-        super(MonitorCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                    resource_type=ResourceType.MGMT_MONITOR,
-                                                    argument_context_cls=MonitorArgumentContext,
-                                                    custom_command_type=monitor_custom)
+        super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_MONITOR,
+                         argument_context_cls=MonitorArgumentContext,
+                         custom_command_type=monitor_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.monitor.commands import load_command_table

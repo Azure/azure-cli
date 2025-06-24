@@ -7,6 +7,7 @@
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.core.paging import ItemPaged
 from ._client_factory import cf_postgres_flexible_location_capabilities, cf_postgres_flexible_server_capabilities
+from collections import defaultdict
 
 
 def get_postgres_location_capability_info(cmd, location):
@@ -46,14 +47,22 @@ def _postgres_parse_list_capability(result):
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
 
-    if result[0].restricted == "Enabled":
+    supported_features = result[0].supported_features if result[0].supported_features is not None else []
+    offer_restricted = [feature for feature in supported_features if feature.name == "OfferRestricted"]
+    restricted = offer_restricted[0].status if offer_restricted else None
+    zone_redundant = [feature for feature in supported_features if feature.name == "ZoneRedundantHa"]
+    geo_backup = [feature for feature in supported_features if feature.name == "GeoBackup"]
+    index_tuning = [feature for feature in supported_features if feature.name == "IndexTuning"]
+
+    if restricted == "Enabled":
         raise InvalidArgumentValueError("The location is restricted for provisioning of flexible servers. Please try using another region.")
 
-    if result[0].restricted != "Disabled":
+    if restricted != "Disabled":
         raise InvalidArgumentValueError("No available SKUs in this location.")
 
-    single_az = result[0].zone_redundant_ha_supported != "Enabled"
-    geo_backup_supported = result[0].geo_backup_supported == "Enabled"
+    single_az = zone_redundant[0].status != "Enabled" if zone_redundant else True
+    geo_backup_supported = geo_backup[0].status == "Enabled" if geo_backup else False
+    index_tuning_supported = index_tuning[0].status == "Enabled" if index_tuning else False
 
     tiers = result[0].supported_server_editions
     tiers_dict = {}
@@ -75,7 +84,7 @@ def _postgres_parse_list_capability(result):
                 for storage_info in storage_edition.supported_storage_mb:
                     storage_sizes.add(int(storage_info.storage_size_mb // 1024))
                 tier_dict["storage_edition"] = storage_edition
-            else:
+            elif storage_edition.name == "ManagedDiskV2" and len(storage_edition.supported_storage_mb) > 0:
                 tier_dict["supported_storageV2_size"] = int(storage_edition.supported_storage_mb[0].storage_size_mb // 1024)
                 tier_dict["supported_storageV2_size_max"] = int(storage_edition.supported_storage_mb[0].maximum_storage_size_mb // 1024)
                 tier_dict["supported_storageV2_iops"] = storage_edition.supported_storage_mb[0].supported_iops
@@ -91,12 +100,18 @@ def _postgres_parse_list_capability(result):
     for version in result[0].supported_server_versions:
         versions.add(version.name)
 
+    supported_server_versions = defaultdict(list)
+    for version in result[0].supported_server_versions:
+        supported_server_versions[version.name] = version.supported_versions_to_upgrade
+
     return {
         'sku_info': tiers_dict,
         'single_az': single_az,
         'geo_backup_supported': geo_backup_supported,
         'zones': zones,
-        'server_versions': versions
+        'server_versions': versions,
+        'supported_server_versions': supported_server_versions,
+        'index_tuning_supported': index_tuning_supported
     }
 
 

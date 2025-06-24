@@ -83,6 +83,22 @@ network application-gateway rewrite-rule set:
 network application-gateway rewrite-rule:
     rule_exclusions:
     - require_wait_command_if_no_wait
+network application-gateway rewrite-rule create:
+    parameters:
+        request_header_configurations:
+            rule_exclusions:
+            - option_length_too_long
+        response_header_configurations:
+            rule_exclusions:
+            - option_length_too_long
+network application-gateway rewrite-rule update:
+    parameters:
+        request_header_configurations:
+            rule_exclusions:
+            - option_length_too_long
+        response_header_configurations:
+            rule_exclusions:
+            - option_length_too_long
 network application-gateway root-cert:
     rule_exclusions:
     - require_wait_command_if_no_wait
@@ -115,6 +131,16 @@ network express-route port identity:
 network express-route port link:
     rule_exclusions:
     - require_wait_command_if_no_wait
+network vnet-gateway create:
+    parameters:
+        allow_remote_vnet_traffic:
+            rule_exclusions:
+            - option_length_too_long
+network vnet-gateway update:
+    parameters:
+        allow_remote_vnet_traffic:
+            rule_exclusions:
+            - option_length_too_long
 network vnet-gateway aad:
     rule_exclusions:
     - require_wait_command_if_no_wait

@@ -196,78 +196,6 @@ acs kubernetes install-cli:
     kubelogin_install_location:
       rule_exclusions:
       - option_length_too_long
-ad app create:
-  parameters:
-    available_to_other_tenants:
-      rule_exclusions:
-      - option_length_too_long
-    credential_description:
-      rule_exclusions:
-      - option_length_too_long
-    oauth2_allow_implicit_flow:
-      rule_exclusions:
-      - option_length_too_long
-    required_resource_accesses:
-      rule_exclusions:
-      - option_length_too_long
-ad app credential reset:
-  parameters:
-    credential_description:
-      rule_exclusions:
-      - option_length_too_long
-ad app update:
-  parameters:
-    available_to_other_tenants:
-      rule_exclusions:
-      - option_length_too_long
-    credential_description:
-      rule_exclusions:
-      - option_length_too_long
-    key_type:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
-    key_usage:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
-    oauth2_allow_implicit_flow:
-      rule_exclusions:
-      - option_length_too_long
-    required_resource_accesses:
-      rule_exclusions:
-      - option_length_too_long
-ad group get-member-groups:
-  parameters:
-    additional_properties:
-      rule_exclusions:
-      - option_length_too_long
-    security_enabled_only:
-      rule_exclusions:
-      - option_length_too_long
-ad group member add:
-  parameters:
-    additional_properties:
-      rule_exclusions:
-      - option_length_too_long
-ad sp credential reset:
-  parameters:
-    credential_description:
-      rule_exclusions:
-      - option_length_too_long
-ad user create:
-  parameters:
-    force_change_password_next_login:
-      rule_exclusions:
-      - option_length_too_long
-ad user get-member-groups:
-  parameters:
-    security_enabled_only:
-      rule_exclusions:
-      - option_length_too_long
-ad user update:
-  parameters:
-    force_change_password_next_login:
-      rule_exclusions:
-      - option_length_too_long
 aks create:
   parameters:
     aad_admin_group_object_ids:
@@ -312,6 +240,12 @@ aks create:
     load_balancer_outbound_ports:
       rule_exclusions:
       - option_length_too_long
+    load_balancer_backend_pool_type:
+      rule_exclusions:
+      - option_length_too_long
+    node_public_ip_tags:
+      rule_exclusions:
+        - option_length_too_long
     skip_subnet_role_assignment:
       rule_exclusions:
       - option_length_too_long
@@ -407,6 +341,12 @@ aks update:
     load_balancer_outbound_ports:
       rule_exclusions:
       - option_length_too_long
+    load_balancer_backend_pool_type:
+      rule_exclusions:
+      - option_length_too_long
+    node_public_ip_tags:
+      rule_exclusions:
+        - option_length_too_long
     enable_managed_identity:
       rule_exclusions:
       - option_length_too_long
@@ -716,6 +656,14 @@ appconfig update:
     encryption_key_version:
       rule_exclusions:
       - option_length_too_long
+    enable_arm_private_network_access:
+      rule_exclusions:
+      - option_length_too_long
+appconfig create:
+  parameters:
+    enable_arm_private_network_access:
+      rule_exclusions:
+      - option_length_too_long
 appservice ase create:
   parameters:
     force_network_security_group:
@@ -945,6 +893,12 @@ backup restore restore-disks:
 backup vault update:
   parameters:
     cross_subscription_restore_state:
+      rule_exclusions:
+      - option_length_too_long
+    backup_storage_redundancy:
+      rule_exclusions:
+      - option_length_too_long
+    cross_region_restore_flag:
       rule_exclusions:
       - option_length_too_long
 backup vault create:
@@ -1294,6 +1248,9 @@ cloud register:
     endpoint_active_directory_resource_id:
       rule_exclusions:
       - option_length_too_long
+    endpoint_microsoft_graph_resource_id:
+      rule_exclusions:
+      - option_length_too_long
     endpoint_resource_manager:
       rule_exclusions:
       - option_length_too_long
@@ -1301,6 +1258,9 @@ cloud register:
       rule_exclusions:
       - option_length_too_long
     endpoint_vm_image_alias_doc:
+      rule_exclusions:
+      - option_length_too_long
+    skip_endpoint_discovery:
       rule_exclusions:
       - option_length_too_long
     suffix_acr_login_server_endpoint:
@@ -1335,6 +1295,9 @@ cloud update:
     endpoint_active_directory_resource_id:
       rule_exclusions:
       - option_length_too_long
+    endpoint_microsoft_graph_resource_id:
+      rule_exclusions:
+        - option_length_too_long
     endpoint_resource_manager:
       rule_exclusions:
       - option_length_too_long
@@ -1344,6 +1307,9 @@ cloud update:
     endpoint_vm_image_alias_doc:
       rule_exclusions:
       - option_length_too_long
+    skip_endpoint_discovery:
+      rule_exclusions:
+        - option_length_too_long
     suffix_acr_login_server_endpoint:
       rule_exclusions:
       - option_length_too_long
@@ -1395,6 +1361,47 @@ consumption pricesheet show:
       rule_exclusions:
       - option_length_too_long
 container create:
+  parameters:
+    azure_file_volume_account_key:
+      rule_exclusions:
+      - option_length_too_long
+    azure_file_volume_account_name:
+      rule_exclusions:
+      - option_length_too_long
+    azure_file_volume_mount_path:
+      rule_exclusions:
+      - option_length_too_long
+    azure_file_volume_share_name:
+      rule_exclusions:
+      - option_length_too_long
+    log_analytics_workspace:
+      rule_exclusions:
+      - option_length_too_long
+    log_analytics_workspace_key:
+      rule_exclusions:
+      - option_length_too_long
+    registry_login_server:
+      rule_exclusions:
+      - option_length_too_long
+    secure_environment_variables:
+      rule_exclusions:
+      - option_length_too_long
+    subnet_address_prefix:
+      rule_exclusions:
+      - option_length_too_long
+    container_group_profile_id:
+      rule_exclusions:
+      - option_length_too_long
+    fail_container_group_create_on_reuse_failure:
+      rule_exclusions:
+      - option_length_too_long
+    standby_pool_profile_id:
+      rule_exclusions:
+      - option_length_too_long
+    container_group_profile_revision:
+      rule_exclusions:
+      - option_length_too_long
+container container-group-profile create:
   parameters:
     azure_file_volume_account_key:
       rule_exclusions:
@@ -2736,6 +2743,14 @@ network vnet peering create:
     allow_gateway_transit:
       rule_exclusions:
       - option_length_too_long
+network vnet peering update:
+  parameters:
+    allow_forwarded_traffic:
+      rule_exclusions:
+      - option_length_too_long
+    allow_gateway_transit:
+      rule_exclusions:
+      - option_length_too_long
 network vnet subnet create:
   parameters:
     service_endpoint_policy:
@@ -3031,16 +3046,6 @@ resource wait:
 rest:
   parameters:
     skip_authorization_header:
-      rule_exclusions:
-      - option_length_too_long
-role assignment create:
-  parameters:
-    assignee_principal_type:
-      rule_exclusions:
-      - option_length_too_long
-role assignment list:
-  parameters:
-    include_classic_administrators:
       rule_exclusions:
       - option_length_too_long
 security adaptive_network_hardenings show:

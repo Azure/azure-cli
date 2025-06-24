@@ -6,12 +6,8 @@
 # encoding: utf-8
 # pylint: disable=all
 from antlr4 import *
-from io import StringIO
 import sys
-if sys.version_info[1] > 5:
-	from typing import TextIO
-else:
-	from typing.io import TextIO
+from typing import TextIO
 
 def serializedATN():
     return [
@@ -448,7 +444,7 @@ class MetricAlertConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 94
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 1140850702) != 0)):
+                    if not(((_la) & ~0x3f) == 0 and ((1 << _la) & 1140850702) != 0):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
@@ -521,7 +517,7 @@ class MetricAlertConditionParser ( Parser ):
             while True:
                 self.state = 99
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 1409290238) != 0)):
+                if not(((_la) & ~0x3f) == 0 and ((1 << _la) & 1409290238) != 0):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -529,7 +525,7 @@ class MetricAlertConditionParser ( Parser ):
                 self.state = 102 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 1409290238) != 0)):
+                if not (((_la) & ~0x3f) == 0 and ((1 << _la) & 1409290238) != 0):
                     break
 
         except RecognitionException as re:
@@ -1046,7 +1042,7 @@ class MetricAlertConditionParser ( Parser ):
             while True:
                 self.state = 140
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 1140854858) != 0)):
+                if not(((_la) & ~0x3f) == 0 and ((1 << _la) & 1140854858) != 0):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -1054,7 +1050,7 @@ class MetricAlertConditionParser ( Parser ):
                 self.state = 143 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 1140854858) != 0)):
+                if not (((_la) & ~0x3f) == 0 and ((1 << _la) & 1140854858) != 0):
                     break
 
         except RecognitionException as re:
@@ -1560,7 +1556,7 @@ class MetricAlertConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 183
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 1409311706) != 0)):
+                    if not(((_la) & ~0x3f) == 0 and ((1 << _la) & 1409311706) != 0):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)

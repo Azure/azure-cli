@@ -8,10 +8,7 @@
 from antlr4 import *
 from io import StringIO
 import sys
-if sys.version_info[1] > 5:
-	from typing import TextIO
-else:
-	from typing.io import TextIO
+from typing import TextIO
 
 def serializedATN():
     return [
@@ -368,7 +365,7 @@ class AutoscaleConditionParser ( Parser ):
             while True:
                 self.state = 65
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 83887102) != 0)):
+                if not(((_la) & ~0x3f) == 0 and ((1 << _la) & 83887102) != 0):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -376,7 +373,7 @@ class AutoscaleConditionParser ( Parser ):
                 self.state = 68 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 83887102) != 0)):
+                if not (((_la) & ~0x3f) == 0 and ((1 << _la) & 83887102) != 0):
                     break
 
         except RecognitionException as re:
@@ -435,7 +432,7 @@ class AutoscaleConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 70
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 83893494) != 0)):
+                    if not(((_la) & ~0x3f) == 0 and ((1 << _la) & 83893494) != 0):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
@@ -1077,7 +1074,7 @@ class AutoscaleConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 121
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 88113244) != 0)):
+                    if not(((_la) & ~0x3f) == 0 and ((1 << _la) & 88113244) != 0):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
@@ -1096,8 +1093,3 @@ class AutoscaleConditionParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
-
-
-
-

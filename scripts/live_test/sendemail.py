@@ -31,19 +31,17 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 COMMIT_ID = sys.argv[1]
-ACCOUNT_KEY = os.environ.get('ACCOUNT_KEY')
 ARTIFACT_DIR = os.environ.get('ARTIFACTS_DIR')
 BUILD_ID = os.environ.get('BUILD_ID')
 EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS')
 EMAIL_KEY = os.environ.get('EMAIL_KEY')
-# authenticate with AAD application.
-KUSTO_CLIENT_ID = os.environ.get('KUSTO_CLIENT_ID')
-KUSTO_CLIENT_SECRET = os.environ.get('KUSTO_CLIENT_SECRET')
+ACCOUNT_NAME = os.environ.get('ACCOUNT_NAME')
+# authenticate with AAD token.
 KUSTO_CLUSTER = os.environ.get('KUSTO_CLUSTER')
 KUSTO_DATABASE = os.environ.get('KUSTO_DATABASE')
 KUSTO_TABLE = os.environ.get('KUSTO_TABLE')
-# get tenant id from https://docs.microsoft.com/en-us/onedrive/find-your-office-365-tenant-id
-KUSTO_TENANT_ID = os.environ.get('KUSTO_TENANT_ID')
+IDENTITY_CLIENT_ID = os.environ.get('IDENTITY_CLIENT_ID')
+# get tenant id from https://learn.microsoft.com/en-us/onedrive/find-your-office-365-tenant-id
 PYTHON_VERSION = os.environ.get('PYTHON_VERSION')
 USER_BRANCH = os.environ.get('USER_BRANCH')
 USER_BRANCH_EXT = os.environ.get('USER_BRANCH_EXT')
@@ -326,8 +324,7 @@ def main():
     # Generate index.html, send email
     try:
         # Generate index.html
-        container_url = 'https://clitestresultstac.blob.core.windows.net/' + container
-        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, ACCOUNT_KEY, USER_REPO_EXT, USER_BRANCH_EXT)
+        html_content = generate_index.generate(ACCOUNT_NAME, container, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_REPO_EXT, USER_BRANCH_EXT)
         # Send email
         send_email(html_content)
     except Exception:
@@ -372,7 +369,7 @@ def get_remaining_tests():
         with open('resource.html', 'w') as f:
             f.write(str(soup))
             logger.info('resource.html: ' + str(soup))
-        cmd = 'az storage blob upload -f resource.html -c {} -n resource.html --account-name clitestresultstac --account-key {}'.format(BUILD_ID, ACCOUNT_KEY)
+        cmd = f'az storage blob upload -f resource.html -c {BUILD_ID} -n resource.html --account-name {ACCOUNT_NAME} --auth-mode login --overwrite'
         logger.info('Running: ' + cmd)
         os.system(cmd)
 
@@ -466,7 +463,7 @@ def summary_data(testdata):
     if USER_TARGET.lower() in ['all', ''] \
             and USER_REPO == 'https://github.com/Azure/azure-cli.git' \
             and USER_REPO_EXT == 'https://github.com/Azure/azure-cli-extensions.git' \
-            and USER_BRANCH == 'dev' and USER_BRANCH_EXT == 'main' \
+            and USER_BRANCH in ['dev', 'live-test'] and USER_BRANCH_EXT in ['main', 'live-test'] \
             and USER_LIVE == '--live' and data:
         send_to_kusto(data)
 
@@ -516,13 +513,17 @@ def html_to_csv(html_file, module, platform):
 
 def send_to_kusto(data):
     logger.info('Start send csv data to kusto db')
-
+    try:
+        from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "azure-identity"])
+        from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://kusto.kusto.windows.net/.default")
     with open(f'{ARTIFACT_DIR}/livetest.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(data)
     logger.info('Finish generate csv file for live test.')
-
-    kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(KUSTO_CLUSTER, KUSTO_CLIENT_ID, KUSTO_CLIENT_SECRET, KUSTO_TENANT_ID)
+    kcsb = KustoConnectionStringBuilder.with_token_provider(KUSTO_CLUSTER, token_provider)
     # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
     client = QueuedIngestClient(kcsb)
 
@@ -561,7 +562,7 @@ def upload_files(container):
     logger.info('Enter upload_files()')
 
     # Create container
-    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {} --public-access container'.format(container, ACCOUNT_KEY)
+    cmd = f'az storage container create -n {container} --account-name {ACCOUNT_NAME} --public-access off --auth-mode login'
     os.system(cmd)
 
     # Upload files
@@ -569,7 +570,9 @@ def upload_files(container):
         for name in files:
             if name.endswith('html') or name.endswith('json'):
                 fullpath = os.path.join(root, name)
-                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --account-key {}'.format(fullpath, container, name, ACCOUNT_KEY)
+                cmd = f'az storage blob upload -f {fullpath} -c {container} -n {name} --account-name {ACCOUNT_NAME} --auth-mode login'
+                os.system(cmd)
+                cmd = f"az storage blob upload -f {fullpath} -c '$web' -n {name} --account-name {ACCOUNT_NAME} --auth-mode login --overwrite"
                 os.system(cmd)
 
     logger.info('Exit upload_files()')
@@ -598,7 +601,7 @@ def send_email(html_content):
     elif USER_TARGET.lower() in ['all', ''] \
             and USER_REPO == 'https://github.com/Azure/azure-cli.git' \
             and USER_REPO_EXT == 'https://github.com/Azure/azure-cli-extensions.git' \
-            and USER_BRANCH == 'dev' and USER_BRANCH_EXT == 'main' \
+            and USER_BRANCH in ['dev', 'live-test'] and USER_BRANCH_EXT in ['main', 'live-test'] \
             and USER_LIVE == '--live' and EMAIL_ADDRESS == '':
         recipients = {
             "to": [

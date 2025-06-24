@@ -9,13 +9,13 @@ def export_artifacts(formula):
         artifact model as they do not play important part for users in create or read context.
     """
     artifacts = []
-    if formula and formula.formula_content and formula.formula_content.artifacts:
-        artifacts = formula.formula_content.artifacts
-        for artifact in formula.formula_content.artifacts:
-            del artifact.status
-            del artifact.deployment_status_message
-            del artifact.vm_extension_status_message
-            del artifact.install_time
+    if formula and formula.get('formulaContent') and formula['formulaContent'].get('artifacts'):
+        artifacts = formula['formulaContent']['artifacts']
+        for artifact in formula['formulaContent']['artifacts']:
+            artifact.pop('status', None)
+            artifact.pop('deploymentStatusMessage', None)
+            artifact.pop('vmExtensionStatusMessage', None)
+            artifact.pop('installTime', None)
     return artifacts
 
 

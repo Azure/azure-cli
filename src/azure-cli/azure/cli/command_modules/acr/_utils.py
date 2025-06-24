@@ -32,6 +32,9 @@ from ._validators import validate_docker_file_path
 
 from ._archive_utils import upload_source_code, check_remote_source_code
 
+CALLER_IDENTITY_ALIAS = '[caller]'
+SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
+
 logger = get_logger(__name__)
 
 
@@ -248,8 +251,11 @@ def get_yaml_template(cmd_value, timeout, file):
     :param str timeout: The timeout for each step
     :param str file: The task definition
     """
-    yaml_template = "version: v1.1.0\n"
+    yaml_template = ""
+    # The default version is required to be added to cmd source Task.
+    # The version is expeced to be included in the file for file source Task.
     if cmd_value:
+        yaml_template += "version: v1.1.0\n"
         yaml_template += "steps: \n  - cmd: {0}\n    disableWorkingDirectoryOverride: true\n".format(cmd_value)
         if timeout:
             yaml_template += "    timeout: {0}\n".format(timeout)
@@ -275,19 +281,25 @@ def get_yaml_template(cmd_value, timeout, file):
     return yaml_template
 
 
-def get_custom_registry_credentials(cmd,
-                                    auth_mode=None,
-                                    login_server=None,
-                                    username=None,
-                                    password=None,
-                                    identity=None,
-                                    is_remove=False):
+def get_source_and_custom_registry_credentials(cmd,
+                                               auth_mode=None,
+                                               login_server=None,
+                                               username=None,
+                                               password=None,
+                                               identity=None,
+                                               is_remove=False,
+                                               source_acr_auth_id=None,
+                                               registry_abac_enabled=False,
+                                               deprecate_auth_mode=False):
     """Get the credential object from the input
     :param str auth_mode: The login mode for the source registry
     :param str login_server: The login server of custom registry
     :param str username: The username for custom registry (plain text or a key vault secret URI)
     :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
+    :param str source_acr_auth_id: the managed identity used for the source registry authentication
+    :param bool registry_abac_enabled: whether the registry is ABAC-enabled
+    :param bool deprecate_auth_mode: whether to print the auth mode deprecation warning
     """
     Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, \
         SecretObjectType = cmd.get_models(
@@ -295,10 +307,33 @@ def get_custom_registry_credentials(cmd,
             'SecretObjectType',
             operation_group='tasks')
 
+    if deprecate_auth_mode:
+        check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
+
+    source_registry_identity = None
+    if source_acr_auth_id:
+        # "Default" and "None" are the allowed values for source registry auth mode.
+        # For a non-ABAC-enabled registry, "--source-acr-auth-id" will not take effect, and authentication
+        # will fail if the auth mode is "None". Therefore, we need to throw an error here.
+        if not registry_abac_enabled and auth_mode and auth_mode.lower() == "none":
+            raise CLIError('Error: Conflicting Authentication Parameters for Task Access to Source Registry. Task '
+                           'authentication mode for source registry access is set to "None", but an identity was '
+                           'provided for authentication. Remove the identity or update the authentication mode to '
+                           'resolve this conflict.')
+
+        if source_acr_auth_id.lower() == "none":
+            source_registry_identity = None
+        elif source_acr_auth_id.startswith('/subscriptions/'):  # user-assigned MI resource ID
+            source_registry_identity = resolve_identity_client_id(cmd.cli_ctx, source_acr_auth_id)
+        elif source_acr_auth_id == CALLER_IDENTITY_ALIAS or source_acr_auth_id == SYSTEM_ASSIGNED_IDENTITY_ALIAS:
+            source_registry_identity = source_acr_auth_id
+        else:
+            raise CLIError('Error: Invalid value for --source-acr-auth-id.')
+
     source_registry_credentials = None
-    if auth_mode:
+    if auth_mode or source_registry_identity:
         source_registry_credentials = SourceRegistryCredentials(
-            login_mode=auth_mode)
+            login_mode=auth_mode, identity=source_registry_identity)
 
     custom_registries = None
     if login_server:
@@ -587,7 +622,7 @@ def get_scope_map_from_id(cmd, scope_map_id):
 def resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
     from azure.mgmt.msi import ManagedServiceIdentityClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     res = parse_resource_id(managed_identity_resource_id)
     client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
@@ -603,3 +638,10 @@ def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_n
     from ._client_factory import cf_acr_tasks
     client = cf_acr_tasks(cli_ctx)
     return client.get_details(resource_group_name, registry_name, task_name)
+
+
+def check_auth_mode_for_abac(registry_abac_enabled, auth_mode):
+    if registry_abac_enabled and auth_mode is not None:
+        logger.warning("The --auth-mode flag is deprecated for specifying access to an ABAC-enabled source registry. "
+                       "Please use --source-acr-auth-id to specify an Entra identity for use in accessing an "
+                       "ABAC-enabled source registry.")

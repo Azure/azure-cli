@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01",
+        "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2022-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2025-02-01"],
         ]
     }
 
@@ -69,7 +69,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.identity_type = AAZStrArg(
-            options=["--identity-type"],
+            options=["--type", "--identity-type"],
             arg_group="Identity",
             help="Type of managed service identity.",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
@@ -138,6 +138,16 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "Replication"
+
+        _args_schema = cls._args_schema
+        _args_schema.replication_enabled = AAZBoolArg(
+            options=["--replication-enabled"],
+            arg_group="Replication",
+            help="Specifies whether the replication is enabled or not. When true, workspace configuration and data is replicated to the specified location. If replication is been enabled, location must be provided.",
+            nullable=True,
+        )
+
         # define Arg Group "Sku"
 
         _args_schema = cls._args_schema
@@ -146,7 +156,13 @@ class Update(AAZCommand):
             arg_group="Sku",
             help="The capacity reservation level for this workspace, when CapacityReservation sku is selected. The maximum value is 1000 and must be in multiples of 100. If you want to increase the limit, please contact LAIngestionRate@microsoft.com.",
             nullable=True,
-            enum={"100": 100, "1000": 1000, "200": 200, "2000": 2000, "300": 300, "400": 400, "500": 500, "5000": 5000},
+            enum={"100": 100, "1000": 1000, "10000": 10000, "200": 200, "2000": 2000, "25000": 25000, "300": 300, "400": 400, "500": 500, "5000": 5000, "50000": 50000},
+        )
+        _args_schema.sku_name = AAZStrArg(
+            options=["--sku", "--sku-name"],
+            arg_group="Sku",
+            help="The name of the SKU.",
+            enum={"CapacityReservation": "CapacityReservation", "Free": "Free", "LACluster": "LACluster", "PerGB2018": "PerGB2018", "PerNode": "PerNode", "Premium": "Premium", "Standalone": "Standalone", "Standard": "Standard"},
         )
         return cls._args_schema
 
@@ -228,7 +244,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -327,7 +343,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -385,7 +401,7 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("identity", AAZObjectType)
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
@@ -403,13 +419,19 @@ class Update(AAZCommand):
                 properties.set_prop("defaultDataCollectionRuleResourceId", AAZStrType, ".data_collection_rule")
                 properties.set_prop("publicNetworkAccessForIngestion", AAZStrType, ".ingestion_access")
                 properties.set_prop("publicNetworkAccessForQuery", AAZStrType, ".query_access")
+                properties.set_prop("replication", AAZObjectType)
                 properties.set_prop("retentionInDays", AAZIntType, ".retention_time", typ_kwargs={"nullable": True})
                 properties.set_prop("sku", AAZObjectType)
                 properties.set_prop("workspaceCapping", AAZObjectType)
 
+            replication = _builder.get(".properties.replication")
+            if replication is not None:
+                replication.set_prop("enabled", AAZBoolType, ".replication_enabled")
+
             sku = _builder.get(".properties.sku")
             if sku is not None:
                 sku.set_prop("capacityReservationLevel", AAZIntType, ".capacity_reservation_level")
+                sku.set_prop("name", AAZStrType, ".sku_name", typ_kwargs={"flags": {"required": True}})
 
             workspace_capping = _builder.get(".properties.workspaceCapping")
             if workspace_capping is not None:
@@ -456,7 +478,7 @@ class _UpdateHelper:
         workspace_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        workspace_read.identity = AAZObjectType()
+        workspace_read.identity = AAZIdentityObjectType()
         workspace_read.location = AAZStrType(
             flags={"required": True},
         )
@@ -516,7 +538,8 @@ class _UpdateHelper:
         properties.default_data_collection_rule_resource_id = AAZStrType(
             serialized_name="defaultDataCollectionRuleResourceId",
         )
-        properties.features = AAZObjectType()
+        properties.failover = AAZObjectType()
+        properties.features = AAZFreeFormDictType()
         properties.force_cmk_for_query = AAZBoolType(
             serialized_name="forceCmkForQuery",
         )
@@ -538,6 +561,7 @@ class _UpdateHelper:
         properties.public_network_access_for_query = AAZStrType(
             serialized_name="publicNetworkAccessForQuery",
         )
+        properties.replication = AAZObjectType()
         properties.retention_in_days = AAZIntType(
             serialized_name="retentionInDays",
             nullable=True,
@@ -547,26 +571,13 @@ class _UpdateHelper:
             serialized_name="workspaceCapping",
         )
 
-        features = _schema_workspace_read.properties.features
-        features.cluster_resource_id = AAZStrType(
-            serialized_name="clusterResourceId",
-            nullable=True,
+        failover = _schema_workspace_read.properties.failover
+        failover.last_modified_date = AAZStrType(
+            serialized_name="lastModifiedDate",
+            flags={"read_only": True},
         )
-        features.disable_local_auth = AAZBoolType(
-            serialized_name="disableLocalAuth",
-            nullable=True,
-        )
-        features.enable_data_export = AAZBoolType(
-            serialized_name="enableDataExport",
-            nullable=True,
-        )
-        features.enable_log_access_using_only_resource_permissions = AAZBoolType(
-            serialized_name="enableLogAccessUsingOnlyResourcePermissions",
-            nullable=True,
-        )
-        features.immediate_purge_data_on30_days = AAZBoolType(
-            serialized_name="immediatePurgeDataOn30Days",
-            nullable=True,
+        failover.state = AAZStrType(
+            flags={"read_only": True},
         )
 
         private_link_scoped_resources = _schema_workspace_read.properties.private_link_scoped_resources
@@ -578,6 +589,22 @@ class _UpdateHelper:
         )
         _element.scope_id = AAZStrType(
             serialized_name="scopeId",
+        )
+
+        replication = _schema_workspace_read.properties.replication
+        replication.created_date = AAZStrType(
+            serialized_name="createdDate",
+            flags={"read_only": True},
+        )
+        replication.enabled = AAZBoolType()
+        replication.last_modified_date = AAZStrType(
+            serialized_name="lastModifiedDate",
+            flags={"read_only": True},
+        )
+        replication.location = AAZStrType()
+        replication.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
         )
 
         sku = _schema_workspace_read.properties.sku

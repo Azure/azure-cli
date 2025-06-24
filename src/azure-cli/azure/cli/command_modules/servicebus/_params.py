@@ -18,6 +18,7 @@ def load_arguments_sb(self, _):
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \
         _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity
+    from azure.cli.command_modules.servicebus.action import AlertAddlocation
 
     (SkuName, FilterType, TlsVersion) = self.get_models('SkuName', 'FilterType', 'TlsVersion', resource_type=ResourceType.MGMT_SERVICEBUS)
 
@@ -48,6 +49,10 @@ def load_arguments_sb(self, _):
                    help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
         c.argument('premium_messaging_partitions', options_list=['--premium-messaging-partitions', '--premium-partitions'], is_preview=True, type=int, help='The number of partitions of a Service Bus namespace. This property is only applicable to Premium SKU namespaces. The default value is 1 and possible values are 1, 2 and 4')
         c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
+        c.argument('geo_data_replication_config', action=AlertAddlocation, nargs='+', options_list=['--geo-data-replication-config', '--replica-config'],
+                   help='A list of regions where replicas of the namespace are maintained Object')
+        c.argument('max_replication_lag_duration_in_seconds', type=int, options_list=['--max-replication-lag-duration-in-seconds', '--max-lag'],
+                   help='The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas')
 
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -151,3 +156,12 @@ def load_arguments_sb(self, _):
             c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'],
                        arg_type=get_three_state_flag(),
                        help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption)')
+
+# Location
+    with self.argument_context('servicebus namespace replica', resource_type=ResourceType.MGMT_SERVICEBUS) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['servicebus namespace replica add', 'servicebus namespace replica remove']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_SERVICEBUS) as c:
+            c.argument('geo_data_replication_config', action=AlertAddlocation, nargs='+',
+                       help='A list of regions where replicas of the namespace are maintained Object')

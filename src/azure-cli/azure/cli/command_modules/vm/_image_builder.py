@@ -13,15 +13,12 @@ from enum import Enum
 
 import requests
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
 from knack.util import CLIError
 from knack.log import get_logger
 
-from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
 
 from azure.core.exceptions import HttpResponseError
 
@@ -311,7 +308,7 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
     for script in scripts:
         if script["type"] is None:
             try:
-                script["type"] = ScriptType.SHELL if likely_linux else ScriptType.POWERSHELL
+                script["type"] = ScriptType.SHELL if likely_linux else ScriptType.POWERSHELL  # pylint: disable=used-before-assignment
                 logger.info("For script %s, likely linux is %s.", script["script"], likely_linux)
             except NameError:
                 raise CLIError("Unable to infer the type of script {}.".format(script["script"]))
@@ -967,4 +964,50 @@ def show_template_optimizer(cmd, client, resource_group_name, image_template_nam
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
     return existing_image_template.optimize
+
+
+def add_template_error_handler(cmd, client, resource_group_name, image_template_name,
+                               on_customizer_error=None, on_validation_error=None):
+    _require_defer(cmd)
+    from azure.mgmt.imagebuilder.models import ImageTemplatePropertiesErrorHandling
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    if not existing_image_template.error_handling:
+        existing_image_template.error_handling = ImageTemplatePropertiesErrorHandling(
+            on_customizer_error=on_customizer_error, on_validation_error=on_validation_error
+        )
+    else:
+        existing_image_template.error_handling.on_customizer_error = on_customizer_error
+        existing_image_template.error_handling.on_validation_error = on_validation_error
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
+                      parameters=existing_image_template, resource_group_name=resource_group_name,
+                      image_template_name=image_template_name)
+
+
+def remove_template_error_handler(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    if not existing_image_template.error_handling:
+        raise ResourceNotFoundError("No error handler existing in this image template, no need to clear.")
+
+    existing_image_template.error_handling = None
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
+                      parameters=existing_image_template, resource_group_name=resource_group_name,
+                      image_template_name=image_template_name)
+
+
+def show_template_error_handler(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    return existing_image_template.error_handling
 # endregion

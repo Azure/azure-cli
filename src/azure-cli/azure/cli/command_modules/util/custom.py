@@ -39,7 +39,7 @@ def show_version(cmd):  # pylint: disable=unused-argument
     return versions
 
 
-def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
+def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
     import platform
     import sys
     import subprocess
@@ -73,7 +73,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         logger.warning("Your current Azure CLI version is %s. %s", local_version, latest_version_msg)
         from knack.prompting import prompt_y_n, NoTTYException
         if not yes:
-            logger.warning("Please check the release notes first: https://docs.microsoft.com/"
+            logger.warning("Please check the release notes first: https://learn.microsoft.com/"
                            "cli/azure/release-notes-azure-cli")
             try:
                 confirmation = prompt_y_n("Do you want to continue?", default='y')
@@ -140,6 +140,10 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                            "or run 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
             _upgrade_on_windows()
+        elif installer == 'ZIP':
+            zip_url = 'https://aka.ms/installazurecliwindowszipx64'
+            logger.warning("Please download the latest ZIP from %s, delete the old installation folder and extract the "
+                           "new version to the same location", zip_url)
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
@@ -171,15 +175,14 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     for ext_name in exts:
         try:
             logger.warning("Checking update for %s", ext_name)
-            subprocess.call(['az', 'extension', 'update', '-n', ext_name],
-                            shell=platform.system() == 'Windows')
+            cmds = ['az', 'extension', 'update', '-n', ext_name]
+            if allow_preview is not None:
+                cmds += ["--allow-preview", str(allow_preview)]
+            subprocess.call(cmds, shell=platform.system() == 'Windows')
         except Exception as ex:  # pylint: disable=broad-except
             msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
             raise CLIError(msg)
-    auto_upgrade_msg = "You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. " \
-        "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update"
-    logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False)
-                   else auto_upgrade_msg)
+    logger.warning("Upgrade finished.")
 
 
 def _upgrade_on_windows():
@@ -216,7 +219,7 @@ def _upgrade_on_windows():
 def _download_from_url(url, target_dir):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
+    r = requests.get(url, stream=True, verify=not should_disable_connection_verify())
     if r.status_code != 200:
         raise CLIError("Request to {} failed with {}".format(url, r.status_code))
 
@@ -253,6 +256,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     styled_text = [
         (Style.PRIMARY, placeholder.format("White", "Primary text color")),
         (Style.SECONDARY, placeholder.format("Grey", "Secondary text color")),
+        (Style.HIGHLIGHT, placeholder.format("Cyan", "Highlight text color")),
         (Style.IMPORTANT, placeholder.format("Magenta", "Important text color")),
         (Style.ACTION, placeholder.format(
             "Blue", "Commands, parameters, and system inputs (White in legacy powershell terminal)")),
@@ -304,7 +308,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
         (Style.ACTION, "--resource-group"),
         (Style.PRIMARY, " MyResourceGroup\n"),
         (Style.SECONDARY, "Create a storage account. For more detail, see "),
-        (Style.HYPERLINK, "https://docs.microsoft.com/azure/storage/common/storage-account-create?"
+        (Style.HYPERLINK, "https://learn.microsoft.com/azure/storage/common/storage-account-create?"
                           "tabs=azure-cli#create-a-storage-account-1"),
         (Style.SECONDARY, "\n"),
     ]

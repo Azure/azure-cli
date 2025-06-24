@@ -37,9 +37,9 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.servicelinker import ServiceLinkerManagementClient
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._clients import ContainerAppClient, ManagedEnvironmentClient, WorkloadProfileClient, ContainerAppsJobClient
 from ._client_factory import handle_raw_exception, providers_client_factory, cf_resource_groups, log_analytics_client_factory, log_analytics_shared_key_client_factory
@@ -102,7 +102,7 @@ def _create_application(client, display_name):
         result = client.application_create(body)
     except GraphError as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://learn.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise ValidationError("Directory permission is needed for the current user to register the application. "
                                   "For how to configure, please refer '{}'. Original error: {}".format(link, ex)) from ex
         raise
@@ -412,12 +412,8 @@ def parse_secret_flags(secret_list):
 
 
 def get_linker_client(cmd):
-    resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    credential, subscription_id, _ = profile.get_login_credentials(
-        subscription_id=get_subscription_id(cmd.cli_ctx), resource=resource)
-    linker_client = ServiceLinkerManagementClient(credential)
-    return linker_client
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cmd.cli_ctx, ServiceLinkerManagementClient)
 
 
 def validate_binding_name(binding_name):
@@ -509,12 +505,21 @@ def _update_revision_env_secretrefs(containers, name):
 
 
 def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_server, registry_pass, update_existing_secret=False, disable_warnings=False):
+    def make_dns1123_compliant(name):
+        logger.debug(f"To construct the registry secret name, format the username '{name}' to DNS1123-compliant format.")
+
+        # Replace invalid characters with a hyphen and ensure lowercase
+        compliant_name = re.sub(r'[^a-z0-9\-]', '-', name.lower())
+
+        logger.debug(f"DNS1123-compliant name: '{compliant_name}' (original: '{name}')")
+
+        return compliant_name
+
     if registry_pass.startswith("secretref:"):
         # If user passed in registry password using a secret
-
         registry_pass = registry_pass.split("secretref:")
         if len(registry_pass) <= 1:
-            raise ValidationError("Invalid registry password secret. Value must be a non-empty value starting with \'secretref:\'.")
+            raise ValidationError("Invalid registry password secret. Value must be a non-empty value starting with 'secretref:'.")
         registry_pass = registry_pass[1:]
         registry_pass = ''.join(registry_pass)
 
@@ -526,9 +531,15 @@ def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_
         # If user passed in registry password
         registry_server = registry_server.replace(':', '-')
         if urlparse(registry_server).hostname is not None:
-            registry_secret_name = "{server}-{user}".format(server=urlparse(registry_server).hostname.replace('.', ''), user=registry_user.lower())
+            registry_secret_name = "{server}-{user}".format(
+                server=urlparse(registry_server).hostname.replace('.', ''),
+                user=make_dns1123_compliant(registry_user)
+            )
         else:
-            registry_secret_name = "{server}-{user}".format(server=registry_server.replace('.', ''), user=registry_user.lower())
+            registry_secret_name = "{server}-{user}".format(
+                server=registry_server.replace('.', ''),
+                user=make_dns1123_compliant(registry_user)
+            )
 
         for secret in secrets_list:
             if secret['name'].lower() == registry_secret_name.lower():
@@ -938,7 +949,8 @@ def _remove_readonly_attributes(containerapp_def):
         "latestRevisionFqdn",
         "customDomainVerificationId",
         "outboundIpAddresses",
-        "fqdn"
+        "fqdn",
+        "runningStatus"
     ]
 
     for unneeded_property in unneeded_properties:
@@ -948,13 +960,13 @@ def _remove_readonly_attributes(containerapp_def):
             del containerapp_def['properties'][unneeded_property]
 
 
-# Remove null/None properties in a model since the PATCH API will delete those. Not needed once we move to the SDK
+# Remove null/None/empty properties in a model since the PATCH API will delete those. Not needed once we move to the SDK
 def clean_null_values(d):
     if isinstance(d, dict):
         return {
             k: v
             for k, v in ((k, clean_null_values(v)) for k, v in d.items())
-            if v or isinstance(v, list)
+            if (isinstance(v, dict) and len(v.items()) > 0) or (not isinstance(v, dict) and v is not None)
         }
     if isinstance(d, list):
         return [v for v in map(clean_null_values, d) if v]
@@ -1331,10 +1343,10 @@ def queue_acr_build(cmd, registry_rg, registry_name, img_name, src_dir, dockerfi
         timeout=None,
         arguments=[])
 
-    queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.begin_schedule_run(
+    queued_build = client_registries.schedule_run(
         resource_group_name=registry_rg,
         registry_name=registry_name,
-        run_request=docker_build_request))
+        run_request=docker_build_request)
 
     run_id = queued_build.run_id
     logger.info("Queued a build with ID: %s", run_id)
@@ -1395,7 +1407,7 @@ def create_new_acr(cmd, registry_name, resource_group_name, location=None, sku="
 
 def set_field_in_auth_settings(auth_settings, set_string):
     if set_string is not None:
-        split1 = set_string.split("=")
+        split1 = set_string.split("=", 1)
         fieldName = split1[0]
         fieldValue = split1[1]
         split2 = fieldName.split(".")
@@ -1461,6 +1473,8 @@ def get_oidc_client_setting_app_setting_name(provider_name):
 def load_cert_file(file_path, cert_password=None):
     from base64 import b64encode
     from OpenSSL import crypto
+    from cryptography.hazmat.primitives.serialization import pkcs12
+    from cryptography.hazmat.primitives import hashes
     import os
 
     cert_data = None
@@ -1477,12 +1491,15 @@ def load_cert_file(file_path, cert_password=None):
             elif os.path.splitext(file_path)[1] in ['.pfx']:
                 cert_data = f.read()
                 try:
-                    p12 = crypto.load_pkcs12(cert_data, cert_password)
+                    # The password to use to decrypt the data. None if the PKCS12 is not encrypted.
+                    cert_password_bytes = cert_password.encode('utf-8') if cert_password else None
+                    p12 = pkcs12.load_pkcs12(cert_data, cert_password_bytes)
                 except Exception as e:
                     raise FileOperationError('Failed to load the certificate file. This may be due to an incorrect or missing password. Please double check and try again.\nError: {}'.format(e)) from e
-                x509 = p12.get_certificate()
-                digest_algorithm = 'sha256'
-                thumbprint = x509.digest(digest_algorithm).decode("utf-8").replace(':', '')
+                if p12.cert is None:
+                    raise ValidationError("Failed to load the certificate file. The loading result is None.")
+                x509 = p12.cert.certificate
+                thumbprint = x509.fingerprint(hashes.SHA256()).hex().upper()
                 blob = b64encode(cert_data).decode("utf-8")
             else:
                 raise FileOperationError('Not a valid file type. Only .PFX and .PEM files are supported.')
@@ -1579,7 +1596,7 @@ def set_managed_identity(cmd, resource_group_name, containerapp_def, system_assi
         containerapp_def["identity"] = {}
         containerapp_def["identity"]["type"] = "None"
 
-    if assign_system_identity and containerapp_def["identity"]["type"].__contains__("SystemAssigned"):
+    if assign_system_identity and "SystemAssigned" in containerapp_def["identity"]["type"]:
         logger.warning("System identity is already assigned to containerapp")
 
     # Assign correct type
@@ -1737,7 +1754,7 @@ def ensure_workload_profile_supported(cmd, env_name, env_rg, workload_profile_na
 def set_ip_restrictions(ip_restrictions, ip_restriction_name, ip_address_range, description, action):
     updated = False
     for e in ip_restrictions:
-        if ip_restriction_name.lower() == e["name"].lower():
+        if e.get("name") and ip_restriction_name.lower() == e["name"].lower():
             e["description"] = description
             e["ipAddressRange"] = ip_address_range
             e["action"] = action
@@ -1969,7 +1986,14 @@ def parse_oryx_mariner_tag(tag: str) -> OryxMarinerRunImgTagProperty:
         if len(re_matches) == 0:
             tag_obj = None
         else:
-            tag_obj = dict(fullTag=tag, version=SemVer.parse(re_matches[0][0]), framework=tag_split[2], marinerVersion=re_matches[0][2], architectures=None, support="lts")
+            tag_obj = {
+                "fullTag": tag,
+                "version": SemVer.parse(re_matches[0][0]),
+                "framework": tag_split[2],
+                "marinerVersion": re_matches[0][2],
+                "architectures": None,
+                "support": "lts",
+            }
     else:
         tag_obj = None
     return tag_obj

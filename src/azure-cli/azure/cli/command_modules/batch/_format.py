@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-
 from collections import OrderedDict
-
 from urllib.parse import unquote
 
 HEAD_PROPERTIES = {  # Convert response headers to properties.
@@ -25,13 +23,13 @@ def _file_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Name'] = item['name']
-        table_row['URL'] = item['url']
-        table_row['Is Directory'] = str(item['isDirectory'])
-        table_row['Content Length'] = str(item['properties']['contentLength']) \
-            if item['properties'] else ""
-        table_row['Creation Time'] = item['properties']['creationTime'] \
-            if item['properties'] else ""
+        table_row['Name'] = item.get('name', None)
+        table_row['URL'] = item.get('url', None)
+        table_row['Is Directory'] = str(item.get('isDirectory', None))
+        table_row['Content Length'] = str(item.get('properties').get('contentLength', None)) \
+            if item.get('properties', None) else ""
+        table_row['Creation Time'] = item.get('properties').get('creationTime', None) \
+            if item.get('properties', None) else ""
         table_output.append(table_row)
     return table_output
 
@@ -41,11 +39,11 @@ def _account_key_table_format(result):
     table_output = []
     table_row = OrderedDict()
     table_row['Number'] = 'Primary'
-    table_row['Key'] = result['primary']
+    table_row['Key'] = result.get('primary', None)
     table_output.append(table_row)
     table_row = OrderedDict()
     table_row['Number'] = 'Secondary'
-    table_row['Key'] = result['secondary']
+    table_row['Key'] = result.get('secondary', None)
     table_output.append(table_row)
     return table_output
 
@@ -74,10 +72,10 @@ def application_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Id'] = item['id']
-        table_row['Default Version'] = item['defaultVersion']
-        table_row['Allow Updates'] = item['allowUpdates']
-        table_row['Version Count'] = str(len(item['packages'])) if item['packages'] else '0'
+        table_row['Id'] = item.get('id', None)
+        table_row['Default Version'] = item.get('defaultVersion', None)
+        table_row['Allow Updates'] = item.get('allowUpdates', None)
+        table_row['Version Count'] = str(len(item['packages'])) if item.get('packages', None) else '0'
         table_output.append(table_row)
     return table_output
 
@@ -87,9 +85,9 @@ def application_summary_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Application Id'] = item['id']
-        table_row['Display Name'] = item['displayName']
-        table_row['Versions'] = json.dumps(item['versions'])
+        table_row['Application Id'] = item.get('id', None)
+        table_row['Display Name'] = item.get('displayName', None)
+        table_row['Versions'] = json.dumps(item.get('versions', None))
         table_output.append(table_row)
     return table_output
 
@@ -99,9 +97,9 @@ def account_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Name'] = item['name']
-        table_row['Location'] = item['location']
-        table_row['Resource Group'] = item['resourceGroup']
+        table_row['Name'] = item.get('name', None)
+        table_row['Location'] = item.get('location', None)
+        table_row['Resource Group'] = item.get('resourceGroup', None)
         table_output.append(table_row)
     return table_output
 
@@ -116,29 +114,16 @@ def account_keys_renew_table_format(result):
     return _account_key_table_format(result)
 
 
-def certificate_list_table_format(result):
-    """Format certificate list as a table."""
-    table_output = []
-    for item in result:
-        table_row = OrderedDict()
-        table_row['Thumbprint'] = item['thumbprint']
-        table_row['State'] = item['state']
-        table_row['Previous State'] = item['previousState']
-        table_row['Deletion Error'] = 'True' if item['deleteCertificateError'] else 'False'
-        table_output.append(table_row)
-    return table_output
-
-
 def job_list_table_format(result):
     """Format job list as a table."""
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Job Id'] = item['id']
-        table_row['State'] = item['state']
-        table_row['Previous State'] = item['previousState']
-        table_row['Execution Pool'] = item['executionInfo']['poolId'] \
-            if item['executionInfo'] else ""
+        table_row['Job Id'] = item.get('id', None)
+        table_row['State'] = item.get('state', None)
+        table_row['Previous State'] = item.get('previousState', None)
+        table_row['Execution Pool'] = item.get('executionInfo').get('poolId', None) \
+            if item.get('executionInfo', None) else ""
         table_output.append(table_row)
     return table_output
 
@@ -148,12 +133,12 @@ def job_prep_release_status_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Pool Id'] = item['poolId']
-        table_row['Node Id'] = item['nodeId']
-        table_row['Job Prep State'] = item['jobPreparationTaskExecutionInfo']['state'] \
-            if item['jobPreparationTaskExecutionInfo'] else ""
-        table_row['Job Release State'] = item['jobReleaseTaskExecutionInfo']['state'] \
-            if item['jobReleaseTaskExecutionInfo'] else ""
+        table_row['Pool Id'] = item.get('poolId', None)
+        table_row['Node Id'] = item.get('nodeId', None)
+        table_row['Job Prep State'] = item.get('jobPreparationTaskExecutionInfo').get('state', None) \
+            if item.get('jobPreparationTaskExecutionInfo', None) else ""
+        table_row['Job Release State'] = item.get('jobReleaseTaskExecutionInfo').get('state', None) \
+            if item.get('jobReleaseTaskExecutionInfo', None) else ""
         table_output.append(table_row)
     return table_output
 
@@ -163,9 +148,9 @@ def job_schedule_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Job Schedule Id'] = item['id']
-        table_row['State'] = item['state']
-        table_row['Previous State'] = item['previousState']
+        table_row['Job Schedule Id'] = item.get('id', None)
+        table_row['State'] = item.get('state', None)
+        table_row['Previous State'] = item.get('previousState', None)
         table_output.append(table_row)
     return table_output
 
@@ -175,10 +160,10 @@ def node_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Node Id'] = item['id']
-        table_row['State'] = item['state']
-        table_row['VM Size'] = item['vmSize']
-        table_row['IP Address'] = item['ipAddress']
+        table_row['Node Id'] = item.get('id', None)
+        table_row['State'] = item.get('state', None)
+        table_row['VM Size'] = item.get('vmSize', None)
+        table_row['IP Address'] = item.get('ipAddress', None)
         table_output.append(table_row)
     return table_output
 
@@ -188,10 +173,10 @@ def pool_node_agent_skus_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Agent Id'] = item['id']
-        table_row['Publisher'] = item['publisher']
-        table_row['Offer'] = item['offer']
-        table_row['Sku'] = item['sku']
+        table_row['Agent Id'] = item.get('id', None)
+        table_row['Publisher'] = item.get('publisher', None)
+        table_row['Offer'] = item.get('offer', None)
+        table_row['Sku'] = item.get('sku', None)
         table_output.append(table_row)
     return table_output
 
@@ -201,13 +186,13 @@ def pool_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Pool Id'] = item['id']
-        table_row['State'] = item['state']
-        table_row['Allocation State'] = item['allocationState']
-        table_row['VM Size'] = item['vmSize']
-        table_row['Dedicated VM Count'] = item['currentDedicatedNodes']
-        table_row['Low Priority VM Count'] = item['currentLowPriorityNodes']
-        table_row['Type'] = 'IaaS' if item['virtualMachineConfiguration'] else 'PaaS'
+        table_row['Pool Id'] = item.get('id', None)
+        table_row['State'] = item.get('state', None)
+        table_row['Allocation State'] = item.get('allocationState', None)
+        table_row['VM Size'] = item.get('vmSize', None)
+        table_row['Dedicated VM Count'] = item.get('currentDedicatedNodes', None)
+        table_row['Low Priority VM Count'] = item.get('currentLowPriorityNodes', None)
+        table_row['Type'] = 'IaaS' if item.get('virtualMachineConfiguration', None) else 'PaaS'
         table_output.append(table_row)
     return table_output
 
@@ -217,11 +202,11 @@ def pool_usage_metrics_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Pool Id'] = item['poolId']
-        table_row['Start Time'] = item['startTime'] if item['startTime'] else ""
-        table_row['End Time'] = item['endTime'] if item['endTime'] else ""
-        table_row['VM Size'] = item['vmSize']
-        table_row['Total Core Hours'] = str(item['totalCoreHours'])
+        table_row['Pool Id'] = item.get('poolId', None)
+        table_row['Start Time'] = item.get('startTime') if item.get('startTime', None) else ""
+        table_row['End Time'] = item.get('endTime') if item.get('endTime', None) else ""
+        table_row['VM Size'] = item.get('vmSize', None)
+        table_row['Total Core Hours'] = str(item.get('totalCoreHours', None))
         table_output.append(table_row)
     return table_output
 
@@ -231,12 +216,12 @@ def task_list_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Task Id'] = item['id']
-        table_row['State'] = item['state']
-        table_row['Exit Code'] = str(item['executionInfo']['exitCode']) \
-            if item['executionInfo'] else ""
-        table_row['Node Id'] = item['nodeInfo']['nodeId'] if item['nodeInfo'] else ""
-        table_row['Command Line'] = item['commandLine']
+        table_row['Task Id'] = item.get('id', None)
+        table_row['State'] = item.get('state', None)
+        table_row['Exit Code'] = str(item.get('executionInfo').get('exitCode', None)) \
+            if item.get('executionInfo', None) else ""
+        table_row['Node Id'] = item.get('nodeInfo').get('nodeId', None) if item.get('nodeInfo', None) else ""
+        table_row['Command Line'] = item.get('commandLine', None)
         table_output.append(table_row)
     return table_output
 
@@ -246,15 +231,15 @@ def task_create_table_format(result):
     table_output = []
     if not isinstance(result, list):
         table_row = OrderedDict()
-        table_row['Task Id'] = result['id']
+        table_row['Task Id'] = result.get('id', None)
         table_row['Submission Status'] = "success"
         table_output.append(table_row)
     else:
         for item in result:
             table_row = OrderedDict()
-            table_row['Task Id'] = item['taskId']
-            table_row['Submission Status'] = item['status']
-            table_row['Error'] = item['error']['code'] if item['error'] else ""
+            table_row['Task Id'] = item.get('taskId', None)
+            table_row['Submission Status'] = item.get('status', None)
+            table_row['Error'] = item.get('error').get('code', None) if item.get('error', None) else ""
             table_output.append(table_row)
     return table_output
 
@@ -264,15 +249,23 @@ def list_pool_node_counts_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['Pool Id'] = item['poolId']
-        table_row['Dedicated Starting'] = str(item['dedicated']['starting'])
-        table_row['Dedicated Idle'] = str(item['dedicated']['idle'])
-        table_row['Dedicated Running'] = str(item['dedicated']['running'])
-        table_row['Dedicated Total'] = str(item['dedicated']['total'])
-        table_row['LowPri Starting'] = str(item['lowPriority']['starting'])
-        table_row['LowPri Idle'] = str(item['lowPriority']['idle'])
-        table_row['LowPri Running'] = str(item['lowPriority']['running'])
-        table_row['LowPri Total'] = str(item['lowPriority']['total'])
+        table_row['Pool Id'] = item.get('poolId', None)
+        table_row['Dedicated Starting'] = str(item.get('dedicated').get('starting', None)) \
+            if item.get('dedicated', None) else ""
+        table_row['Dedicated Idle'] = str(item.get('dedicated').get('idle', None)) \
+            if item.get('dedicated', None) else ""
+        table_row['Dedicated Running'] = str(item.get('dedicated').get('running', None)) \
+            if item.get('dedicated', None) else ""
+        table_row['Dedicated Total'] = str(item.get('dedicated').get('total', None)) \
+            if item.get('dedicated', None) else ""
+        table_row['LowPri Starting'] = str(item.get('lowPriority').get('starting', None)) \
+            if item.get('lowPriority', None) else ""
+        table_row['LowPri Idle'] = str(item.get('lowPriority').get('idle', None)) \
+            if item.get('lowPriority', None) else ""
+        table_row['LowPri Running'] = str(item.get('lowPriority').get('running', None)) \
+            if item.get('lowPriority', None) else ""
+        table_row['LowPri Total'] = str(item.get('lowPriority').get('total', None)) \
+            if item.get('lowPriority', None) else ""
         table_output.append(table_row)
     return table_output
 
@@ -282,12 +275,16 @@ def list_supported_images_table_format(result):
     table_output = []
     for item in result:
         table_row = OrderedDict()
-        table_row['OS Type'] = item['osType']
-        table_row['Node Agent Sku'] = item['nodeAgentSkuId']
-        table_row['Publisher'] = item['imageReference']['publisher']
-        table_row['Offer'] = item['imageReference']['offer']
-        table_row['Sku'] = item['imageReference']['sku']
-        table_row['Version'] = item['imageReference']['version']
-        table_row['VerificationType'] = item['verificationType']
+        table_row['OS Type'] = item.get('osType', None)
+        table_row['Node Agent Sku'] = item.get('nodeAgentSkuId', None)
+        table_row['Publisher'] = item.get('imageReference').get('publisher', None) \
+            if item.get('imageReference', None) else ""
+        table_row['Offer'] = item.get('imageReference').get('offer', None) \
+            if item.get('imageReference', None) else ""
+        table_row['Sku'] = item.get('imageReference').get('sku', None) \
+            if item.get('imageReference', None) else ""
+        table_row['Version'] = item.get('imageReference').get('version', None) \
+            if item.get('imageReference', None) else ""
+        table_row['VerificationType'] = item.get('verificationType', None)
         table_output.append(table_row)
     return table_output

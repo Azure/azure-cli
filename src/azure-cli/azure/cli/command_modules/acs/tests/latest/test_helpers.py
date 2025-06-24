@@ -7,9 +7,11 @@ import unittest
 from unittest.mock import Mock, patch
 
 from azure.cli.command_modules.acs._helpers import (
+    check_is_apiserver_vnet_integration_cluster,
     check_is_managed_aad_cluster,
     check_is_msi_cluster,
     check_is_private_cluster,
+    check_is_private_link_cluster,
     format_parameter_name_to_option_name,
     get_property_from_dict_or_object,
     get_snapshot,
@@ -36,7 +38,6 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestError, ServiceResponseError
-from msrestazure.azure_exceptions import CloudError
 
 
 class DecoratorFunctionsTestCase(unittest.TestCase):
@@ -118,6 +119,73 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
             location="test_location",
         )
         self.assertEqual(check_is_private_cluster(mc_4), False)
+
+    def test_check_is_apiserver_vnet_integration_cluster(self):
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(None), False)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+        )
+        mc_1.api_server_access_profile.additional_properties={'enableVnetIntegration': True}
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_1), True)
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+        )
+        mc_2.api_server_access_profile.additional_properties={'enableVnetIntegration': False}
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_2), False)
+
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+        )
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_3), False)
+
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_4), False)
+
+    def test_check_is_private_link_cluster(self):
+        self.assertEqual(check_is_private_link_cluster(None), False)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+            ),
+        )
+        self.assertEqual(check_is_private_link_cluster(mc_1), True)
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=False,
+            ),
+        )
+        self.assertEqual(check_is_private_link_cluster(mc_2), False)
+
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+            ),
+        )
+        mc_3.api_server_access_profile.additional_properties={'enableVnetIntegration': True}
+        self.assertEqual(check_is_private_link_cluster(mc_3), False)
+
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+        )
+        self.assertEqual(check_is_private_link_cluster(mc_4), False)
+
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(check_is_private_link_cluster(mc_5), False)
 
     def test_check_is_managed_aad_cluster(self):
         self.assertEqual(check_is_managed_aad_cluster(None), False)
@@ -256,7 +324,7 @@ class GetUserAssignedIdentityTestCase(unittest.TestCase):
             )
             self.assertEqual(user_assigned_identity, mock_user_assigned_identity)
 
-        cloud_error_2 = CloudError(Mock(status_code="xxx"), "mock user assigned identity was not found")
+        cloud_error_2 = HttpResponseError(response=Mock(status_code="xxx", reason="mock user assigned identity was not found"))
         mock_user_assigned_identity_operations_2 = Mock(
             user_assigned_identities=Mock(get=Mock(side_effect=cloud_error_2))
         )
@@ -266,7 +334,7 @@ class GetUserAssignedIdentityTestCase(unittest.TestCase):
         ), self.assertRaises(ResourceNotFoundError):
             get_user_assigned_identity("mock_cli_ctx", "mock_sub_id", "mock_rg", "mock_identity_name")
 
-        cloud_error_3 = CloudError(Mock(status_code="xxx"), "test_error_msg")
+        cloud_error_3 = HttpResponseError(response=Mock(status_code="xxx", reason="test_error_msg"))
         mock_user_assigned_identity_operations_3 = Mock(
             user_assigned_identities=Mock(get=Mock(side_effect=cloud_error_3))
         )

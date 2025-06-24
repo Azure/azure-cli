@@ -48,7 +48,7 @@ class SearchServiceCreate(_SearchServiceCreate):
 
         if args.hosting_mode == "highDensity" and args.sku != "standard3":
             raise UnrecognizedArgumentError(
-                "SearchService.HostingMode: ""highDensity"" is only allowed when sku is ""standard3""")
+                "SearchService.HostingMode: highDensity is only allowed when sku is standard3")
 
         if has_value(args.ip_rules):
             ip_rules = re.split(';|,', args.ip_rules.to_serialized_data())
@@ -173,7 +173,7 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
     if public_network_access:
         if (public_network_access.lower() not in ["enabled", "disabled"]):
             raise UnrecognizedArgumentError(
-                "SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+                "SearchService.PublicNetworkAccess: only [enabled, disabled] are allowed")
         instance.public_network_access = public_network_access
     if ip_rules:
         _ip_rules = []
@@ -318,12 +318,12 @@ def setup_search_auth(instance, disable_local_auth, auth_options, aad_auth_failu
     # Done by argument define
     if (auth_options is not None and auth_options not in ["aadOrApiKey", "apiKeyOnly"]):
         raise UnrecognizedArgumentError(
-            "SearchService.AuthOptions: only [""aadOrApiKey"", ""apiKeyOnly""] are allowed")
+            "SearchService.AuthOptions: only [aadOrApiKey, apiKeyOnly] are allowed")
     # Done in aaz by default
     if (aad_auth_failure_mode is not None and aad_auth_failure_mode not in ["http401WithBearerChallenge", "http403"]):
         raise UnrecognizedArgumentError(
             "SearchService.AuthOptions.AadAuthFailureMode: only "
-            "[""http401WithBearerChallenge"", ""http403""] are allowed")
+            "[http401WithBearerChallenge, http403] are allowed")
 
     # Done in pre_operations
     if disable_local_auth and auth_options:

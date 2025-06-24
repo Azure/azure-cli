@@ -26,8 +26,8 @@ def _check_zero(result, _, args):
 
 
 # See:
-# - https://docs.microsoft.com/windows/console/getconsolemode
-# - https://docs.microsoft.com/windows/console/setconsolemode
+# - https://learn.microsoft.com/windows/console/getconsolemode
+# - https://learn.microsoft.com/windows/console/setconsolemode
 kernel32 = WinDLL("kernel32", use_last_error=True)
 kernel32.GetConsoleMode.errcheck = _check_zero
 kernel32.GetConsoleMode.argtypes = (HANDLE, LPDWORD)

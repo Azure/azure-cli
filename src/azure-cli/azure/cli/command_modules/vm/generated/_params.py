@@ -13,7 +13,8 @@
 from azure.cli.core.commands.parameters import (
     tags_type,
     resource_group_name_type,
-    get_location_type
+    get_location_type,
+    get_enum_type
 )
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
@@ -39,6 +40,8 @@ def load_arguments(self, _):
                    'If this property is not initially provided when the resource is created, the publicKey property '
                    'will be populated when generateKeyPair is called. If the public key is provided upon resource '
                    'creation, the provided public key needs to be at least 2048-bit and in ssh-rsa format.')
+        c.argument('encryption_type', arg_type=get_enum_type(['RSA', 'Ed25519']), default='RSA', min_api='2023-09-01',
+                   help='The encryption type of the SSH keys to be generated. ')
 
     with self.argument_context('sshkey update') as c:
         c.argument('resource_group_name', resource_group_name_type)

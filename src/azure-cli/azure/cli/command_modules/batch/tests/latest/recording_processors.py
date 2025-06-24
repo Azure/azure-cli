@@ -79,7 +79,8 @@ class BatchAccountKeyReplacer(RecordingProcessor):
         if body_string:
             for replacement in self._replacements.values():
                 for key in replacement.seen_keys:
-                    request.body = body_string.replace(key, replacement.key_value)
+                    body_string = body_string.replace(key, replacement.key_value)
+                    request.body = body_string
 
         return request
 
@@ -95,7 +96,8 @@ class BatchAccountKeyReplacer(RecordingProcessor):
 
             for replacement in self._replacements.values():
                 for key in replacement.seen_keys:
-                    response['body']['string'] = body_string.replace(key, replacement.key_value)
+                    body_string = body_string.replace(key, replacement.key_value)
+                    response['body']['string'] = body_string
 
         return response
 

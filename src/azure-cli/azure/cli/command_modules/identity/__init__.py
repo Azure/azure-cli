@@ -13,12 +13,23 @@ class IdentityCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         identity_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.identity.custom#{}')
-        super(IdentityCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                     resource_type=ResourceType.MGMT_MSI,
-                                                     custom_command_type=identity_custom)
+        super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_MSI,
+                         custom_command_type=identity_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.identity.commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         return self.command_table
 

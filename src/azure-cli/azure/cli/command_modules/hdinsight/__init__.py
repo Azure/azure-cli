@@ -15,7 +15,7 @@ class HDInsightCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.hdinsight.custom#{}',
             operation_group='hdinsight')
 
-        super(HDInsightCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx,
             operation_group='hdinsight',
             custom_command_type=hdinsight_custom)

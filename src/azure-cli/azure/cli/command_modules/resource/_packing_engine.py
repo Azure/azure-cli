@@ -12,13 +12,13 @@ from azure.cli.command_modules.resource.custom import _remove_comments_from_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 
-class PackagedTemplate():  # pylint: disable=too-few-public-methods
+class PackagedTemplate:  # pylint: disable=too-few-public-methods
     def __init__(self, template, artifacts):
         self.RootTemplate = template
         self.Artifacts = artifacts
 
 
-class PackingContext():  # pylint: disable=too-few-public-methods
+class PackingContext:  # pylint: disable=too-few-public-methods
     def __init__(self, root_template_directory):
         self.RootTemplateDirectory = os.path.abspath(root_template_directory)
         self.CurrentDirectory = os.path.abspath(root_template_directory)
@@ -37,8 +37,8 @@ def process_template(template, preserve_order=True, file_path=None):
     # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
     minified = json_min(template)
 
-    # Remove extra spaces, compress multiline string(s)
-    result = re.sub(r'\s\s+', ' ', minified, flags=re.DOTALL)
+    # Compress multiline string(s) to adhere to the official JSON format
+    result = minified.replace('\r', '\\r').replace('\n', '\\n')
 
     try:
         return shell_safe_json_parse(result, preserve_order)
