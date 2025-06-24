@@ -27,7 +27,7 @@ Release History
 * `az appconfig kv export/import/list/delete`: Support filtering by tags (#30694)
 * `az appconfig restore`: Support filtering by tags (#30694)
 * `az appconfig revision list`: Support filtering by tags (#30694)
-* `az appconfig kv import/export/restore`: Add  new parameter `--dry-run` to support dry-run feature (#30842)
+* `az appconfig kv import/export/restore`: Add new parameter `--dry-run` to support dry-run feature (#30842)
 
 **ARM**
 
