@@ -669,7 +669,7 @@ examples:
   - name: Create a kubernetes cluster with Azure Service Mesh enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-service-mesh
   - name: Create a kubernetes cluster with a nodepool having ip allocation mode set to "StaticBlock"
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu --max-pods MaxPodsPerNode --network-plugin azure --vnet-subnet-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/NodeSubnet --pod-subnet-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/PodSubnet --pod-ip-allocation-mode StaticBlock
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu --max-pods MaxPodsPerNode --network-plugin azure --vnet-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/NodeSubnet --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/PodSubnet --pod-ip-allocation-mode StaticBlock
 """
 
 helps['aks update'] = """
