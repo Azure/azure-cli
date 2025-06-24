@@ -12865,6 +12865,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         )
 
               
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2', preserve_default_location=True)
     def test_aks_create_with_pod_ip_allocation_mode_static_block( self, resource_group, resource_group_location):
