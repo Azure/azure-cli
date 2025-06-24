@@ -290,6 +290,12 @@ parameters:
   - name: --pod-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
+  - name: --pod-ip-allocation-mode
+    type: string
+    short-summary: Set the ip allocation mode for how Pod IPs from the Azure Pod Subnet are allocated to the nodes in the AKS cluster. The choice is between dynamic batches of individual IPs or static allocation of a set of CIDR blocks. Accepted Values are "DynamicIndividual" or "StaticBlock".
+    long-summary: |
+        Used together with the "azure" network plugin.
+        Requires --pod-subnet-id.
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
@@ -584,7 +590,9 @@ parameters:
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
-
+  - name: --enable-static-egress-gateway
+    type: bool
+    short-summary: Enable Static Egress Gateway addon to the cluster.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -660,6 +668,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.9 --node-vm-size VMSize --assign-identity "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID" --enable-managed-identity --crg-id "subscriptions/SubID/resourceGroups/RGName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
   - name: Create a kubernetes cluster with Azure Service Mesh enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-service-mesh
+  - name: Create a kubernetes cluster with a nodepool having ip allocation mode set to "StaticBlock"
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu --max-pods MaxPodsPerNode --network-plugin azure --vnet-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/NodeSubnet --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/PodSubnet --pod-ip-allocation-mode StaticBlock
 """
 
 helps['aks update'] = """
@@ -1036,6 +1046,12 @@ parameters:
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
+  - name: --enable-static-egress-gateway
+    type: bool
+    short-summary: Enable Static Egress Gateway addon to the cluster.
+  - name: --disable-static-egress-gateway
+    type: bool
+    short-summary: Disable Static Egress Gateway addon to the cluster.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
@@ -1587,6 +1603,12 @@ parameters:
   - name: --pod-subnet-id
     type: string
     short-summary: The Resource Id of a subnet in an existing VNet into which to assign pods in the cluster (requires azure network-plugin).
+  - name: --pod-ip-allocation-mode
+    type: string
+    short-summary: Set the ip allocation mode for how Pod IPs from the Azure Pod Subnet are allocated to the nodes in the AKS cluster. The choice is between dynamic batches of individual IPs or static allocation of a set of CIDR blocks. Accepted Values are "DynamicIndividual" or "StaticBlock".
+    long-summary: |
+        Used together with the "azure" network plugin.
+        Requires --pod-subnet-id.
   - name: --ppg
     type: string
     short-summary: The ID of a PPG.
@@ -1701,7 +1723,9 @@ parameters:
   - name: --gpu-driver
     type: string
     short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None". Default is "Install".
-
+  - name: --gateway-prefix-size
+    type: int
+    short-summary: The size of Public IPPrefix attached to the Gateway-mode node pool. The node pool must be in Gateway mode.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1719,6 +1743,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize
   - name: create a nodepool with a Capacity Reservation Group(CRG) ID.
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --node-vm-size VMSize --crg-id "/subscriptions/SubID/resourceGroups/ResourceGroupName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
+  - name: Create a nodepool with ip allocation mode set to "StaticBlock" and using a pod subnet ID
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster  --os-sku Ubuntu --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet --pod-ip-allocation-mode StaticBlock
 """
 
 helps['aks nodepool delete'] = """

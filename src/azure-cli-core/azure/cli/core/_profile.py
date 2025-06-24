@@ -365,7 +365,7 @@ class Profile:
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
             from .auth.msal_credentials import CloudShellCredential
-            sdk_cred = CredentialAdaptor(CloudShellCredential())
+            cred = CloudShellCredential()
 
         elif managed_identity_type:
             # managed identity
@@ -374,25 +374,27 @@ class Profile:
             cred = ManagedIdentityAuth.credential_factory(managed_identity_type, managed_identity_id)
             if credential_out:
                 credential_out['credential'] = cred
-            sdk_cred = CredentialAdaptor(cred)
 
         else:
-            sdk_cred = CredentialAdaptor(self._create_credential(account, tenant_id=tenant))
+            cred = self._create_credential(account, tenant_id=tenant)
 
-        sdk_token = sdk_cred.get_token(*scopes)
+        msal_token = cred.acquire_token(scopes)
         # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
         # WARNING: expiresOn is deprecated and will be removed in future release.
         import datetime
-        expiresOn = datetime.datetime.fromtimestamp(sdk_token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+        from .auth.util import now_timestamp
+        from .auth.constants import EXPIRES_IN, ACCESS_TOKEN
+        expires_on = now_timestamp() + msal_token[EXPIRES_IN]
+        expiresOn = datetime.datetime.fromtimestamp(expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
 
         token_entry = {
-            'accessToken': sdk_token.token,
-            'expires_on': sdk_token.expires_on,  # epoch int, like 1605238724
+            'accessToken': msal_token[ACCESS_TOKEN],
+            'expires_on': expires_on,  # epoch int, like 1605238724
             'expiresOn': expiresOn  # datetime string, like "2020-11-12 13:50:47.114324"
         }
 
         # Build a tuple of (token_type, token, token_entry)
-        token_tuple = 'Bearer', sdk_token.token, token_entry
+        token_tuple = 'Bearer', msal_token[ACCESS_TOKEN], token_entry
 
         # Return a tuple of (token_tuple, subscription, tenant)
         return (token_tuple,

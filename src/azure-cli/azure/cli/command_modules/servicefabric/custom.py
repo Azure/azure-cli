@@ -333,13 +333,20 @@ def add_client_cert(cmd,
             ClientCertificateThumbprint(is_admin, thumbprint))
 
     def _add_common_name(cluster, is_admin, certificate_common_name, certificate_issuer_thumbprint):
+        remove = False
         for t in cluster.client_certificate_common_names:
             if t.certificate_common_name.lower() == certificate_common_name.lower() and t.certificate_issuer_thumbprint.lower() == certificate_issuer_thumbprint.lower():
                 remove = t
+
         if remove:
             cluster.client_certificate_common_names.remove(remove)
-        cluster.client_certificate_common_names.add(ClientCertificateCommonName(
-            is_admin, certificate_common_name, certificate_issuer_thumbprint))
+
+        client_certificate_common_name = ClientCertificateCommonName(
+            is_admin=is_admin,
+            certificate_common_name=certificate_common_name,
+            certificate_issuer_thumbprint=certificate_issuer_thumbprint,
+        )
+        cluster.client_certificate_common_names.append(client_certificate_common_name)
         return cluster.client_certificate_common_names
 
     if thumbprint:
