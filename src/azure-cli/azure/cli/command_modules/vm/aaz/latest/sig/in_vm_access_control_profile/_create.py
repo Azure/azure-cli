@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Create a gallery in VM access control profile.
 
-    :example: Create or update a gallery in VM access control profile.
+    :example: Create a gallery in VM access control profile.
         az sig in-vm-access-control-profile create --resource-group myResourceGroup --gallery-name myGalleryName --name myInVMAccessControlProfileName --location WestUS --os-type Linux --applicable-host-endpoint WireServer
     """
 
@@ -47,7 +47,7 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
             options=["--gallery-name"],
-            help="The name of the Shared Image Gallery in which the InVMAccessControlProfile is to be created.",
+            help="The name of the Shared Image Gallery in which the in VM access control profile is to be created.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9]+([_]?[a-zA-Z0-9]+)*$",
@@ -55,7 +55,7 @@ class Create(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the gallery inVMAccessControlProfile to be created or updated. The allowed characters are alphabets and numbers with dots, dashes, and periods allowed in the middle. The maximum length is 80 characters.",
+            help="The name of the gallery in VM access control profile to be created or updated. The allowed characters are alphabets and numbers with dots, dashes, and periods allowed in the middle. The maximum length is 80 characters.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9]+([-._]?[a-zA-Z0-9]+)*$",
@@ -90,7 +90,7 @@ class Create(AAZCommand):
         _args_schema.description = AAZStrArg(
             options=["--description"],
             arg_group="Properties",
-            help="The description of this gallery inVMAccessControlProfile resources. This property is updatable.",
+            help="The description of this gallery in VM access control profile resources. This property is updatable.",
         )
         _args_schema.os_type = AAZStrArg(
             options=["--os-type"],

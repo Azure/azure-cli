@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a gallery in VM access control profile.
+
+    :example: Update a gallery in VM access control profile.
+        az sig in-vm-access-control-profile update --resource-group myResourceGroup --gallery-name myGalleryName --name myInVMAccessControlProfileName --description test
     """
 
     _aaz_info = {
@@ -46,13 +49,13 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
             options=["--gallery-name"],
-            help="The name of the Shared Image Gallery from which the InVMAccessControlProfiles are to be retrieved.",
+            help="The name of the Shared Image Gallery from which the in VM access control profiles are to be retrieved.",
             required=True,
             id_part="name",
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the gallery inVMAccessControlProfile to be deleted.",
+            help="The name of the gallery in VM access control profile to be deleted.",
             required=True,
             id_part="child_name_1",
         )
@@ -74,7 +77,7 @@ class Update(AAZCommand):
         _args_schema.description = AAZStrArg(
             options=["--description"],
             arg_group="Properties",
-            help="The description of this gallery inVMAccessControlProfile resources. This property is updatable.",
+            help="The description of this gallery in VM access control profile resources. This property is updatable.",
             nullable=True,
         )
         return cls._args_schema

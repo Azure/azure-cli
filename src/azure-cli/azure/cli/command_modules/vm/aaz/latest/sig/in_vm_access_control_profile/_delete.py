@@ -48,13 +48,13 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
             options=["--gallery-name"],
-            help="he name of the Shared Image Gallery in which the InVMAccessControlProfile resides.",
+            help="The name of the Shared Image Gallery in which the in VM access control profile resides.",
             required=True,
             id_part="name",
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the gallery inVMAccessControlProfile to be deleted.",
+            help="The name of the gallery in VM access control profile to be deleted.",
             required=True,
             id_part="child_name_1",
         )

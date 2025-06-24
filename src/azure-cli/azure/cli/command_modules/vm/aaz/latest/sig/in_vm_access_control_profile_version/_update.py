@@ -13,6 +13,9 @@ from azure.cli.core.aaz import *
 
 class Update(AAZCommand):
     """Update a gallery in VM access control profile version.
+
+    :example: Update a Gallery in VM access control profile version.
+        az sig in-vm-access-control-profile-version update --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --exclude-from-latest true
     """
 
     _aaz_info = {
@@ -43,19 +46,19 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
             options=["--gallery-name"],
-            help="The name of the Shared Image Gallery in which the inVMAccessControlProfile resides.",
+            help="The name of the Shared Image Gallery in which the in VM access control profile resides.",
             required=True,
             id_part="name",
         )
         _args_schema.profile_name = AAZStrArg(
             options=["--profile-name"],
-            help="The name of the gallery inVMAccessControlProfile in which the inVMAccessControlProfile version is to be created.",
+            help="The name of the gallery in VM access control profile in which the in VM access control profile version is to be created.",
             required=True,
             id_part="child_name_1",
         )
         _args_schema.profile_version = AAZStrArg(
             options=["--version-name", "--profile-version"],
-            help="The name of the gallery inVMAccessControlProfile version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>",
+            help="The name of the gallery in VM access control profile version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: MajorVersion.MinorVersion.Patch",
             required=True,
             id_part="child_name_2",
         )
@@ -89,7 +92,7 @@ class Update(AAZCommand):
         _args_schema.rules = AAZObjectArg(
             options=["--rules"],
             arg_group="Properties",
-            help="This is the Access Control Rules specification for an inVMAccessControlProfile version.",
+            help="This is the Access Control Rules specification for an in VM access control profile version.",
             nullable=True,
         )
         _args_schema.target_locations = AAZListArg(

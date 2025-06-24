@@ -14,7 +14,7 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Create a gallery in VM access control profile version.
 
-    :example: Create or update a Gallery in VM access control profile version.
+    :example: Create a Gallery in VM access control profile version.
         az sig in-vm-access-control-profile-version create --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS
     """
 
@@ -44,7 +44,7 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
             options=["--gallery-name"],
-            help="The name of the Shared Image Gallery in which the inVMAccessControlProfile resides.",
+            help="The name of the Shared Image Gallery in which the in VM access control profile resides.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9]+([_]?[a-zA-Z0-9]+)*$",
@@ -52,7 +52,7 @@ class Create(AAZCommand):
         )
         _args_schema.profile_name = AAZStrArg(
             options=["--profile-name"],
-            help="The name of the gallery inVMAccessControlProfile in which the inVMAccessControlProfile version is to be created.",
+            help="The name of the gallery in VM access control profile in which the in VM access control profile version is to be created.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9]+([-._]?[a-zA-Z0-9]+)*$",
@@ -61,7 +61,7 @@ class Create(AAZCommand):
         )
         _args_schema.profile_version = AAZStrArg(
             options=["--version-name", "--profile-version"],
-            help="The name of the gallery inVMAccessControlProfile version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>",
+            help="The name of the gallery in VM access control profile version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: MajorVersion.MinorVersion.Patch",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[0-9]+\\.[0-9]+\\.[0-9]+$",
