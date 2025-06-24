@@ -61,10 +61,11 @@ def aks_machine_show_table_format(result: dict):
             if isinstance(zones_data, list):
                 zones = ', '.join(part.strip() for part in zones_data if part and part.strip())
             elif isinstance(zones_data, str):
-                zones = zones_data.strip()     
+                zones = zones_data.strip()
         if "properties" in entry and isinstance(entry["properties"], dict):
             if "network" in entry["properties"] and isinstance(entry["properties"]["network"], dict):
-                if "ipAddresses" in entry["properties"]["network"] and isinstance(entry["properties"]["network"]["ipAddresses"], list):
+                if ("ipAddresses" in entry["properties"]["network"] and
+                    isinstance(entry["properties"]["network"]["ipAddresses"], list)):                    
                     for k in entry["properties"]["network"]["ipAddresses"]:
                         if isinstance(k, dict) and "ip" in k and "family" in k:
                             ip_addresses += f"ip:{k['ip']},family:{k['family']};"

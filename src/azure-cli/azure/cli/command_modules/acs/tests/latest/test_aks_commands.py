@@ -2201,6 +2201,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         for machine in formatted_machines:
             self.assertIsNotNone(machine['zones'], "Zones should not be None in the formatted output")
             self.assertNotEqual(machine['zones'], "", "Zones should not be empty in the formatted output")
+        machine_name =  formatted_machines[0]['name']   
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -2213,12 +2214,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--nodepool-name={node_pool_name} --machine-name={machine_name} -o json'
         machine_show = self.cmd(show_cmd).get_output_in_json()
         formatted_machines = aks_machine_show_table_format(machine_show)
-        assert len(formatted_machines) == 1
         # Assert that zones are not None in the output
-        for machine in formatted_machines:
-            self.assertIsNotNone(machine['zones'], "Zones should not be None in the formatted output")
-            self.assertNotEqual(machine['zones'], "", "Zones should not be empty in the formatted output")
-        assert formatted_machines[0]["name"] == machine_name
+        self.assertIsNotNone(formatted_machines['zones'], "Zones should not be None in the formatted output")
+        self.assertNotEqual(formatted_machines['zones'], "", "Zones should not be empty in the formatted output")
+        assert formatted_machines["name"] == machine_name
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
