@@ -763,6 +763,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return pod_subnet_id
 
+    def get_pod_ip_allocation_mode(self: bool = False) -> Union[str, None]:
+        """Get the value of pod_ip_allocation_mode.
+
+        :return: str or None
+        """
+
+        # Get the value of pod_ip_allocation_mode from the raw parameters provided by the user
+        pod_ip_allocation_mode = self.raw_param.get("pod_ip_allocation_mode")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        # if it exists and user has not provided any value in raw parameters
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                pod_ip_allocation_mode and
+                self.agentpool and
+                self.agentpool.pod_ip_allocation_mode is not None
+            ):
+                pod_ip_allocation_mode = self.agentpool.pod_ip_allocation_mode
+
+        return pod_ip_allocation_mode
+
     def get_enable_node_public_ip(self) -> bool:
         """Obtain the value of enable_node_public_ip, default value is False.
 
@@ -1785,6 +1805,7 @@ class AKSAgentPoolAddDecorator:
 
         agentpool.vnet_subnet_id = self.context.get_vnet_subnet_id()
         agentpool.pod_subnet_id = self.context.get_pod_subnet_id()
+        agentpool.pod_ip_allocation_mode = self.context.get_pod_ip_allocation_mode()
         agentpool.enable_node_public_ip = self.context.get_enable_node_public_ip()
         agentpool.node_public_ip_prefix_id = self.context.get_node_public_ip_prefix_id()
         return agentpool
@@ -2030,6 +2051,19 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_pod_ip_allocation_mode(self, agentpool: AgentPool) -> AgentPool:
+        """Set up pod ip allocation mode for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        pod_ip_allocation_mode = self.context.get_pod_ip_allocation_mode()
+        if pod_ip_allocation_mode is not None:
+            agentpool.pod_ip_allocation_mode = pod_ip_allocation_mode
+
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -2066,6 +2100,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_gpu_properties(agentpool)
         # set up agentpool network profile
         agentpool = self.set_up_agentpool_network_profile(agentpool)
+        # set up agentpool pod ip allocation mode
+        agentpool = self.set_up_pod_ip_allocation_mode(agentpool)
         # set up agentpool windows profile
         agentpool = self.set_up_agentpool_windows_profile(agentpool)
         # set up crg id

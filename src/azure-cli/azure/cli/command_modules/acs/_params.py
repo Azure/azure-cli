@@ -23,6 +23,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NETWORK_POLICY_AZURE, CONST_NETWORK_POLICY_CALICO, CONST_NETWORK_POLICY_CILIUM, CONST_NETWORK_POLICY_NONE,
     CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET,
     CONST_NETWORK_PLUGIN_MODE_OVERLAY, CONST_NETWORK_PLUGIN_NONE,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NONE_UPGRADE_CHANNEL,
     CONST_NODE_OS_CHANNEL_NODE_IMAGE,
     CONST_NODE_OS_CHANNEL_NONE,
@@ -165,6 +167,7 @@ node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SK
 node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022]
 node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
+pod_ip_allocation_modes = [CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL, CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK]
 
 # consts for ManagedCluster
 load_balancer_skus = [CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD]
@@ -446,6 +449,7 @@ def load_arguments(self, _):
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('vnet_subnet_id', validator=validate_vnet_subnet_id)
         c.argument('pod_subnet_id', validator=validate_pod_subnet_id)
+        c.argument('pod_ip_allocation_mode', arg_type=get_enum_type(pod_ip_allocation_modes))
         c.argument('enable_node_public_ip', action='store_true')
         c.argument('node_public_ip_prefix_id')
         c.argument('enable_cluster_autoscaler', action='store_true')
@@ -824,6 +828,7 @@ def load_arguments(self, _):
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('vnet_subnet_id', validator=validate_vnet_subnet_id)
         c.argument('pod_subnet_id', validator=validate_pod_subnet_id)
+        c.argument('pod_ip_allocation_mode', arg_type=get_enum_type(pod_ip_allocation_modes))
         c.argument('enable_node_public_ip', action='store_true')
         c.argument('node_public_ip_prefix_id')
         c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')

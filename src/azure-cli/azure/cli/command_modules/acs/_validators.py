@@ -16,6 +16,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_AZURELINUX,
     CONST_OS_SKU_CBLMARINER,
     CONST_OS_SKU_MARINER,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
     CONST_NODEPOOL_MODE_GATEWAY,
 )
 from azure.cli.core import keys
@@ -370,6 +372,16 @@ def validate_vnet_subnet_id(namespace):
 
 def validate_pod_subnet_id(namespace):
     _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
+
+
+def validate_pod_ip_allocation_mode(namespace):
+    """Validates the pod ip allocation mode string."""
+    if namespace.pod_ip_allocation_mode is not None:
+        if namespace.pod_ip_allocation_mode not in (
+            CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+            CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+        ):
+            raise InvalidArgumentValueError("--pod-ip-allocation-mode can only be DynamicIndividual or StaticBlock")
 
 
 def validate_apiserver_subnet_id(namespace):
