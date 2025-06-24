@@ -99,7 +99,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_nat_gateway_managed_outbound_ip_count, validate_network_policy,
     validate_nodepool_id, validate_nodepool_labels, validate_nodepool_name,
     validate_nodepool_tags, validate_nodes_count, validate_os_sku,
-    validate_pod_subnet_id, validate_pod_ip_allocation_mode, validate_ppg, validate_priority,
+    validate_pod_subnet_id, validate_ppg, validate_priority,
     validate_registry_name, validate_sku_tier, validate_snapshot_id,
     validate_snapshot_name, validate_spot_max_price, validate_ssh_key,
     validate_nodepool_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan,
