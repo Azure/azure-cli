@@ -82,7 +82,7 @@ Release History
 
 **Service Fabric**
 
-* Fix #18358: Fix the bug that `az sf client-certificate add` fails with `remove` not defined (#31632)
+* Fix #18358: `az sf client-certificate add`: Fix the bug that command fails with `remove` not defined (#31632)
 
 **SQL**
 
