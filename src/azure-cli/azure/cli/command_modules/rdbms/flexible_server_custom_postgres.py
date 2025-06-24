@@ -827,7 +827,6 @@ def flexible_replica_promote(cmd, client, resource_group_name, server_name, prom
             raise ValidationError("Standalone replica promotion on elastic cluster isn't currently supported. Please use 'switchover' instead.")
         if promote_option.lower() == 'planned':
             raise ValidationError("Planned replica promotion on elastic cluster isn't currently supported. Please use 'forced' instead.")
-        
 
     try:
         server_object = client.get(resource_group_name, server_name)
