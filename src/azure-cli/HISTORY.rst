@@ -53,7 +53,7 @@ Release History
 
 **Container app**
 
-* `az containerapp update` Modify `--yaml` template handling to fix `runningStatus` error (#31508)
+* `az containerapp update`: Modify `--yaml` template handling to fix `runningStatus` error (#31508)
 * Fix #31480: `az containerapp revision copy`: Only return `containerapp does not exist` when got 404 (#31689)
 
 **Identity**
