@@ -2037,11 +2037,11 @@ class AKSAgentPoolAddDecorator:
 
     def set_up_agentpool_gateway_profile(self, agentpool: AgentPool) -> AgentPool:
         """Set up agentpool gateway profile for the AgentPool object.
-        
+
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
-        
+
         gateway_prefix_size = self.context.get_gateway_prefix_size()
         if gateway_prefix_size is not None:
             if agentpool.gateway_profile is None:
