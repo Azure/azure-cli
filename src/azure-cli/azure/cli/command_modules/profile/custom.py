@@ -82,6 +82,7 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
         logger.warning('Please run "az login" to access your accounts.')
     return []
 
+
 def show_subscription(cmd, subscription=None):
     profile = Profile(cli_ctx=cmd.cli_ctx)
     return profile.get_subscription(subscription, allow_null_subscription=True)

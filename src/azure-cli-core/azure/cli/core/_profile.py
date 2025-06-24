@@ -9,7 +9,6 @@ from copy import deepcopy
 from enum import Enum
 
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.auth.msal_authentication import _TENANT, _CLIENT_ID, _CLIENT_SECRET
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 from azure.cli.core.util import in_cloud_console, can_launch_browser, assert_guid, is_github_codespaces
@@ -62,6 +61,10 @@ _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
+
+_TENANT = 'tenant'
+_CLIENT_ID = 'client_id'
+_CLIENT_SECRET = 'client_secret'
 
 _AZURE_CLIENT_ID = 'AZURE_CLIENT_ID'
 _AZURE_CLIENT_SECRET = 'AZURE_CLIENT_SECRET'
