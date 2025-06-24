@@ -8797,6 +8797,72 @@ class VMGalleryImage(ScenarioTest):
         #          ])
 
 
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_in_vm_access_', location='eastus2')
+    def test_gallery_in_vm_access_control_profile(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'gallery': self.create_random_name('gellery', 16),
+            'profile1': 'profile1',
+            'profile2': 'profile2',
+            'profile_version': '1.0.0',
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+
+        self.cmd('sig in-vm-access-control-profile create --resource-group {rg} --gallery-name {gallery} --name {profile1} '
+                 '--os-type Linux --applicable-host-endpoint WireServer', checks=[
+            self.check('name', '{profile1}'),
+            self.check('properties.osType', 'Linux'),
+            self.check('properties.applicableHostEndpoint', 'WireServer'),
+        ])
+
+        self.cmd(
+            'sig in-vm-access-control-profile show --resource-group {rg} --gallery-name {gallery} --name {profile1}',
+            checks=[
+                self.check('name', '{profile1}'),
+                self.check('properties.osType', 'Linux'),
+                self.check('properties.applicableHostEndpoint', 'WireServer'),
+            ])
+
+        self.cmd('sig in-vm-access-control-profile update --resource-group {rg} --gallery-name {gallery} --name {profile1} '
+                 '--description test', checks=[
+            self.check('name', '{profile1}'),
+            self.check('properties.description', 'test'),
+        ])
+
+        self.cmd(
+            'sig in-vm-access-control-profile delete --resource-group {rg} --gallery-name {gallery} --name {profile1} --yes')
+
+        self.cmd(
+            'sig in-vm-access-control-profile create --resource-group {rg} --gallery-name {gallery} --name {profile2} '
+            '--os-type Linux --applicable-host-endpoint WireServer', checks=[
+                self.check('name', '{profile2}'),
+            ])
+
+        self.cmd('sig in-vm-access-control-profile-version create --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version} --default-access Allow --mode Audit', checks=[
+            self.check('name', '{profile_version}'),
+            self.check('mode', 'Audit'),
+            self.check('defaultAccess', 'Allow'),
+        ])
+
+        self.cmd('sig in-vm-access-control-profile-version update --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version} --exclude-from-latest true --target-regions eastus westus', checks=[
+            self.check('name', '{profile_version}'),
+            self.check('excludeFromLatest', True),
+            self.check('length(targetLocations)', '2'),
+        ])
+
+        self.cmd('sig in-vm-access-control-profile-version show --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version}', checks=[
+            self.check('name', '{profile_version}'),
+            self.check('excludeFromLatest', True),
+            self.check('length(targetLocations)', '2'),
+        ])
+
+        self.cmd('sig in-vm-access-control-profile-version delete --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version} --yes')
+
+
 class VMGalleryApplication(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     def test_gallery_application(self, resource_group, resource_group_location):

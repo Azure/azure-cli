@@ -31,16 +31,6 @@ class SigInVMAccessControlProfileVersionCreate(_SigInVMAccessControlProfileVersi
 
         return args_schema
 
-    # class GalleryInVMAccessControlProfileVersionsCreateOrUpdate(_SigInVMAccessControlProfileVersionCreate.GalleryInVMAccessControlProfileVersionsCreateOrUpdate):
-    #     @property
-    #     def content(self):
-    #         content = super().content
-    #
-    #         # if "properties" not in content:
-    #         #     content["properties"] = {}
-    #
-    #         return content
-
 
 @register_command(
     "sig in-vm-access-control-profile-version update",
