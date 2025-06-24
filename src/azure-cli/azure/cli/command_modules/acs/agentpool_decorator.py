@@ -2035,18 +2035,6 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
-    def set_up_pod_ip_allocation_mode(self, agentpool: AgentPool) -> AgentPool:
-        """Set up pod ip allocation mode for the AgentPool object.
-
-        :return: the AgentPool object
-        """
-        self._ensure_agentpool(agentpool)
-
-        pod_ip_allocation_mode = self.context.get_pod_ip_allocation_mode()
-        if pod_ip_allocation_mode is not None:
-            agentpool.pod_ip_allocation_mode = pod_ip_allocation_mode
-        return agentpool
-
     def set_up_agentpool_gateway_profile(self, agentpool: AgentPool) -> AgentPool:
         """Set up agentpool gateway profile for the AgentPool object.
         
@@ -2060,6 +2048,20 @@ class AKSAgentPoolAddDecorator:
                 agentpool.gateway_profile = self.models.AgentPoolGatewayProfile()  # pylint: disable=no-member
 
             agentpool.gateway_profile.public_ip_prefix_size = gateway_prefix_size
+
+        return agentpool
+
+    def set_up_pod_ip_allocation_mode(self, agentpool: AgentPool) -> AgentPool:
+        """Set up pod ip allocation mode for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        pod_ip_allocation_mode = self.context.get_pod_ip_allocation_mode()
+        if pod_ip_allocation_mode is not None:
+            agentpool.pod_ip_allocation_mode = pod_ip_allocation_mode
+
         return agentpool
 
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
