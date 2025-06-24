@@ -594,6 +594,23 @@ class Profile:
         return active_account[_USER_ENTITY][_USER_NAME]
 
     def get_subscription(self, subscription=None, allow_null_subscription=False):  # take id or name
+        # Attempt to use env vars
+        if env_var_auth_configured():
+            logger.debug("Using subscription configured in environment variables.")
+            env_var_sub = load_env_var_subscription()
+            if subscription:
+                # Subscription ID must be a GUID
+                assert_guid(subscription, _AZURE_SUBSCRIPTION_ID)
+                # Overwrite env var subscription if given as argument to get_subscription()
+                env_var_sub[_SUBSCRIPTION_ID] = subscription
+
+            if not env_var_sub[_SUBSCRIPTION_ID] and not allow_null_subscription:
+                error = """Subscription is undefined.
+                        Please specific the subscription ID with either {} or --subscription."""
+                raise CLIError(error.format(_AZURE_SUBSCRIPTION_ID))
+            return env_var_sub
+        
+        # Attempt to use cached subscriptions
         subscriptions = self.load_cached_subscriptions()
 
         if subscriptions:
@@ -611,21 +628,6 @@ class Profile:
                                "Specify the subscription ID.".format(subscription))
             return result[0]
 
-        # Attempt to use env vars
-        if env_var_auth_configured():
-            logger.debug("Using subscription configured in environment variables.")
-            env_var_sub = load_env_var_subscription()
-            if subscription:
-                # Subscription ID must be a GUID
-                assert_guid(subscription, _AZURE_SUBSCRIPTION_ID)
-                # Overwrite env var subscription if given as argument to get_subscription()
-                env_var_sub[_SUBSCRIPTION_ID] = subscription
-
-            if not env_var_sub[_SUBSCRIPTION_ID] and not allow_null_subscription:
-                error = """Subscription is undefined.
-                        Please specific the subscription ID with either {} or --subscription."""
-                raise CLIError(error.format(_AZURE_SUBSCRIPTION_ID))
-            return env_var_sub
         raise CLIError(_AZ_LOGIN_MESSAGE)
 
     def get_subscription_id(self, subscription=None):  # take id or name

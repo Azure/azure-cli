@@ -35,6 +35,12 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
     from azure.cli.core.api import load_subscriptions
     from azure.cli.core._profile import load_env_var_subscription, env_var_auth_configured
 
+    # Attempt to fetch subscription configured in environment variables
+    if env_var_auth_configured():
+        logger.warning("Fetching subscription configured in environment variables.")
+        subscriptions = [load_env_var_subscription()]
+        return subscriptions
+
     subscriptions = load_subscriptions(cmd.cli_ctx, all_clouds=all, refresh=refresh)
 
     if subscriptions:
@@ -48,11 +54,6 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
                 subscriptions = enabled_ones
         return subscriptions
 
-    # If logged out, fetch subscription configured in environment variables
-    if env_var_auth_configured():
-        logger.warning("Fetching subscription configured in environment variables.")
-        subscriptions = [load_env_var_subscription()]
-        return subscriptions
 
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
