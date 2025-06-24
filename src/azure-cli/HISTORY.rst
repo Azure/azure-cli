@@ -53,7 +53,6 @@ Release History
 
 **Container app**
 
-* `az containerapp job create`: Fix issues for help message (#31682)
 * `az containerapp update` Modify `--yaml` template handling to fix `runningStatus` error (#31508)
 * Fix #31480: `az containerapp revision copy`: Only return `containerapp does not exist` when got 404 (#31689)
 
