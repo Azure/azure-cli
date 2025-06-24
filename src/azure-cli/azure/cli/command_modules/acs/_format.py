@@ -45,18 +45,31 @@ def aks_machine_list_table_format(results):
     return [aks_machine_show_table_format(r) for r in results]
 
 
-def aks_machine_show_table_format(result):
-    def parser(entry):
+def aks_machine_show_table_format(result: dict):
+    def parser(entry: dict):
         ip_addresses = ""
         zones = ""
-        if isinstance(entry["zones"], list):
-            zones = ', '.join(part.strip() for part in entry["zones"] if part and part.strip())
-        elif isinstance(entry["zones"], str):
-            # If it's a single string, just use it directly
-            zones = entry["zones"].strip()
-        for k in entry["properties"]["network"]["ipAddresses"]:
-            ip_addresses += "ip:" + k["ip"] + "," + "family:" + k["family"] + ";"
+        if "zones" in entry and entry["zones"]:
+            zones_data = entry["zones"]
+            if isinstance(zones_data, list):
+                zones = ', '.join(part.strip() for part in zones_data if part and part.strip())
+            elif isinstance(zones_data, str):
+                zones = zones_data.strip()
+        # If no zones at top-level, check in properties
+        elif "properties" in entry and "zones" in entry["properties"] and entry["properties"]["zones"]:
+            zones_data = entry["properties"]["zones"]
+            if isinstance(zones_data, list):
+                zones = ', '.join(part.strip() for part in zones_data if part and part.strip())
+            elif isinstance(zones_data, str):
+                zones = zones_data.strip()     
+        if "properties" in entry and isinstance(entry["properties"], dict):
+            if "network" in entry["properties"] and isinstance(entry["properties"]["network"], dict):
+                if "ipAddresses" in entry["properties"]["network"] and isinstance(entry["properties"]["network"]["ipAddresses"], list):
+                    for k in entry["properties"]["network"]["ipAddresses"]:
+                        if isinstance(k, dict) and "ip" in k and "family" in k:
+                            ip_addresses += f"ip:{k['ip']},family:{k['family']};"
         entry["ip"] = ip_addresses
+        entry["zones"] = zones
         parsed = compile_jmes("""{
                 name: name,
                 ip: ip,
