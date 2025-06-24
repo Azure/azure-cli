@@ -49,7 +49,7 @@ Release History
 
 **Consumption**
 
-* `az consumption usage list`: Fix usage list returns data correctly (#31601)
+* `az consumption usage list`: Fix usage list returns data with replace `None` string to null value (#31601)
 
 **Container app**
 
