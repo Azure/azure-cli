@@ -65,7 +65,7 @@ def aks_machine_show_table_format(result: dict):
         if "properties" in entry and isinstance(entry["properties"], dict):
             if "network" in entry["properties"] and isinstance(entry["properties"]["network"], dict):
                 if ("ipAddresses" in entry["properties"]["network"] and
-                    isinstance(entry["properties"]["network"]["ipAddresses"], list)):                    
+                        isinstance(entry["properties"]["network"]["ipAddresses"], list)):
                     for k in entry["properties"]["network"]["ipAddresses"]:
                         if isinstance(k, dict) and "ip" in k and "family" in k:
                             ip_addresses += f"ip:{k['ip']},family:{k['family']};"
