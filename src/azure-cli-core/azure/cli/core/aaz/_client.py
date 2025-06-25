@@ -73,6 +73,9 @@ class AAZBaseClient(PipelineClient):
         base_url = self._build_base_url(ctx, **kwargs)
         if not base_url:
             raise CloudEndpointNotSetException()
+        if not kwargs.get('custom_hook_policy'):
+            from azure.cli.core.sdk.policies import get_custom_hook_policy
+            kwargs['custom_hook_policy'] = get_custom_hook_policy(ctx.cli_ctx)
         super().__init__(
             base_url=base_url,
             config=self._build_configuration(ctx, credential, **kwargs),

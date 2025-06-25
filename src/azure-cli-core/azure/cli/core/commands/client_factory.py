@@ -166,39 +166,8 @@ def _prepare_client_kwargs_track2(cli_ctx):
     from azure.cli.core.sdk.policies import RecordTelemetryUserAgentPolicy
     client_kwargs['user_agent_policy'] = RecordTelemetryUserAgentPolicy(**client_kwargs)
 
-    if cli_ctx.data.get('_change_reference', None) or cli_ctx.data.get('_acquire_policy_token', False):
-        def _acquire_policy_token_request_hook(request):
-            http_request = request.http_request
-            if getattr(http_request, 'method', '') not in ['PUT', 'PATCH', 'DELETE']:
-                return
-            ACQUIRE_POLICY_TOKEN_URL = '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-03-01'
-            policy_token = None
-            try:
-                import json
-                from azure.cli.core.util import send_raw_request
-
-                acquire_policy_token_body = {
-                    "operation": {
-                        "uri": getattr(http_request, 'url'),
-                        "httpMethod": getattr(http_request, 'method'),
-                        "content": getattr(http_request, 'content')
-                    },
-                    "changeReference": cli_ctx.data.get('_change_reference', None)
-                }
-                acquire_policy_token_response = send_raw_request(cli_ctx,'POST',
-                                                                 ACQUIRE_POLICY_TOKEN_URL,
-                                                                 headers=['Content-Type=application/json'],
-                                                                 body=json.dumps(acquire_policy_token_body))
-                if acquire_policy_token_response.status_code == 200 and acquire_policy_token_response.content:
-                    response_content = json.loads(acquire_policy_token_response.content)
-                    policy_token = response_content.get('token', None)
-            except Exception as ex:
-                raise CLIError(f"Failed to acquire policy token, exception: {ex}")
-            if policy_token:
-                request.http_request.headers['x-ms-policy-external-evaluations'] = policy_token
-
-        from azure.core.pipeline.policies import CustomHookPolicy
-        client_kwargs['custom_hook_policy'] = CustomHookPolicy(raw_request_hook=_acquire_policy_token_request_hook)
+    from azure.cli.core.sdk.policies import get_custom_hook_policy
+    client_kwargs['custom_hook_policy'] = get_custom_hook_policy(cli_ctx)
 
     # Replace NetworkTraceLoggingPolicy to redact 'Authorization' and 'x-ms-authorization-auxiliary' headers.
     #   NetworkTraceLoggingPolicy: log raw network trace, with all headers.

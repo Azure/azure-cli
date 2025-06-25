@@ -103,3 +103,42 @@ class RecordTelemetryUserAgentPolicy(UserAgentPolicy):
         super().on_request(request)
         from azure.cli.core.telemetry import set_user_agent
         set_user_agent(request.http_request.headers[self._USERAGENT])
+
+
+def get_custom_hook_policy(cli_ctx):
+    def _acquire_policy_token_request_hook(request):
+        http_request = request.http_request
+        if getattr(http_request, 'method', '') not in ['PUT', 'PATCH', 'DELETE']:
+            return
+        ACQUIRE_POLICY_TOKEN_URL = '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-03-01'
+        policy_token = None
+        try:
+            import json
+            from azure.cli.core.util import send_raw_request
+
+            acquire_policy_token_body = {
+                "operation": {
+                    "uri": getattr(http_request, 'url'),
+                    "httpMethod": getattr(http_request, 'method'),
+                    "content": getattr(http_request, 'content') if hasattr(http_request, 'content') else getattr(http_request, 'body')
+                },
+                "changeReference": cli_ctx.data.get('_change_reference', None)
+            }
+            acquire_policy_token_response = send_raw_request(cli_ctx, 'POST',
+                                                             ACQUIRE_POLICY_TOKEN_URL,
+                                                             headers=['Content-Type=application/json'],
+                                                             body=json.dumps(acquire_policy_token_body))
+            if acquire_policy_token_response.status_code == 200 and acquire_policy_token_response.content:
+                response_content = json.loads(acquire_policy_token_response.content)
+                policy_token = response_content.get('token', None)
+        except Exception as ex:
+            raise CLIError(f"Failed to acquire policy token, exception: {ex}")
+        if policy_token:
+            request.http_request.headers['x-ms-policy-external-evaluations'] = policy_token
+
+    acquire_policy_token = ctx.cli_ctx.data.get('_acquire_policy_token', False)
+    change_reference = ctx.cli_ctx.data.get('_change_reference', None)
+    if change_reference or acquire_policy_token:
+        from azure.core.pipeline.policies import CustomHookPolicy
+        return CustomHookPolicy(raw_request_hook=_acquire_policy_token_request_hook)
+    return None
