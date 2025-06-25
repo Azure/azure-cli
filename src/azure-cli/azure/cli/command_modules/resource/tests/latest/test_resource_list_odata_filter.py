@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from azure.cli.command_modules.resource.custom import (_list_resources_odata_filter_builder,
-                                                       _find_missing_parameters)
+from azure.cli.command_modules.resource.custom import _list_resources_odata_filter_builder
+from azure.cli.command_modules.resource.custom_deployments import _find_missing_parameters
 from azure.cli.core.parser import IncorrectUsageError
 
 

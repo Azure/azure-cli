@@ -2,4 +2,23 @@ account list-locations:
   parameters:
     include_extended_locations:
       rule_exclusions:
-      - option_length_too_long
+        - option_length_too_long
+stack group:
+  rule_exclusions:
+    - require_wait_command_if_no_wait
+stack mg:
+  rule_exclusions:
+    - require_wait_command_if_no_wait
+stack sub:
+  rule_exclusions:
+    - require_wait_command_if_no_wait
+stack sub create:
+  parameters:
+    deployment_resource_group:
+      rule_exclusions:
+        - parameter_should_not_end_in_resource_group
+stack sub validate:
+  parameters:
+    deployment_resource_group:
+      rule_exclusions:
+        - parameter_should_not_end_in_resource_group
