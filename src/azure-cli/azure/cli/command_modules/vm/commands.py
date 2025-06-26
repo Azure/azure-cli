@@ -532,6 +532,20 @@ def load_command_table(self, _):
         self.command_table['sig in-vm-access-control-profile-version create'] = SigInVMAccessControlProfileVersionCreate(loader=self)
         self.command_table['sig in-vm-access-control-profile-version update'] = SigInVMAccessControlProfileVersionUpdate(loader=self)
 
+    with self.command_group('sig in-vm-access-control-profile-version config'):
+        from .operations.sig_in_vm_access_control_profile_version_config import (SigInVMAccessControlProfileVersionConfigPrivilegeAdd, SigInVMAccessControlProfileVersionConfigPrivilegeRemove,
+                                                                                 SigInVMAccessControlProfileVersionConfigRoleAdd, SigInVMAccessControlProfileVersionConfigRoleRemove,
+                                                                                 SigInVMAccessControlProfileVersionConfigIdentityAdd, SigInVMAccessControlProfileVersionConfigIdentityRemove,
+                                                                                 SigInVMAccessControlProfileVersionConfigRoleAssignmentAdd, SigInVMAccessControlProfileVersionConfigRoleAssignmentRemove)
+        self.command_table['sig in-vm-access-control-profile-version config privilege add'] = SigInVMAccessControlProfileVersionConfigPrivilegeAdd(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version config privilege remove'] = SigInVMAccessControlProfileVersionConfigPrivilegeRemove(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version config role add'] = SigInVMAccessControlProfileVersionConfigRoleAdd(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version config role remove'] = SigInVMAccessControlProfileVersionConfigRoleRemove(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version config identity add'] = SigInVMAccessControlProfileVersionConfigIdentityAdd(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version config identity remove'] = SigInVMAccessControlProfileVersionConfigIdentityRemove(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version config role-assignment add'] = SigInVMAccessControlProfileVersionConfigRoleAssignmentAdd(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version config role-assignment remove'] = SigInVMAccessControlProfileVersionConfigRoleAssignmentRemove(loader=self)
+
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         from .operations.ppg import PPGCreate, PPGUpdate
         self.command_table['ppg create'] = PPGCreate(loader=self)
