@@ -10802,6 +10802,7 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --enable-automatic-repairs false --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 '
             '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('automaticRepairsPolicy.enabled', False),
             self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', True),
             self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate'),
             self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceBehavior', 'CreateBeforeDelete')
