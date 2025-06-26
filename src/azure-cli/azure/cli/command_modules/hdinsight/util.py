@@ -339,3 +339,51 @@ def map_cluster_type(cluster_type):
     if cluster_type.lower() == 'mlservices' or cluster_type.lower() == 'rserver':
         cluster_type = 'mlservice'
     return cluster_type
+
+def get_entraUser_info(cmd,EntraUserIdentity,entra_user_full_info,toJson=True):
+    import json
+    from ._client_factory import cf_graph
+    from azure.cli.core.azclierror import AzCLIError
+    def is_email(value):
+        return "@" in value and "." in value
+    def normalize_keys(d):
+        return {k.lower(): v for k, v in d.items()}
+
+    graph_client = cf_graph(cmd.cli_ctx)
+    rest_auth_entra_users = []
+    if EntraUserIdentity:
+        user_data = []
+        for item in EntraUserIdentity:
+            if item:
+                user_data.extend([s.strip() for s in item.split(',') if s.strip()])
+        for data in user_data:
+            try:
+                user = graph_client.user_get(data)
+                if user is None:
+                    filter_expr = f"id eq '{data}'"
+                    if(is_email(data)):
+                        filter_expr = f"userPrincipalName eq '{data}' or mail eq '{data}'"
+                    user = graph_client.user_list(filter=filter_expr)
+                    user = user[0]
+                if user is None:
+                    raise ValueError(f'The Entra user retrieved for input "{data}" is null. Please confirm that the user exists in Microsoft Entra ID.')
+                rest_auth_entra_users.append({'ObjectId': user['id'],'DisplayName': user['displayName'],'Upn': user['userPrincipalName']})
+            except ValueError:
+                raise
+            except Exception as ex: 
+                error_message = (
+                    f'Failed to retrieve Entra user info from input: "{data}". '
+                    'Please check the EntraUserIdentity parameter, or consider using the EntraUserFullInfo approach to specify user details. \n'
+                    f'Exception: {str(ex)}'
+                    )
+                raise AzCLIError(error_message) 
+    else:
+        for user in entra_user_full_info:
+            user_normalized = normalize_keys(user)
+            allowed_keys = {'objectid','displayname','upn'}
+            if set(user_normalized.keys()) - allowed_keys:
+                raise AzCLIError(f"Invalid keys in user object: {user}. Only ObjectId, DisplayName, and Upn are allowed.")
+            rest_auth_entra_users.append({'ObjectId':user_normalized.get('objectid'),'DisplayName': user_normalized.get('displayname'),'Upn':user_normalized.get('upn')})
+    if toJson:
+        return json.dumps(rest_auth_entra_users)
+    return rest_auth_entra_users

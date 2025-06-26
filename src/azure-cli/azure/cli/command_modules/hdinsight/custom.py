@@ -20,7 +20,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    kafka_client_group_id=None, kafka_client_group_name=None,
                    workernode_count=3, workernode_data_disks_per_node=None,
                    workernode_data_disk_storage_account_type=None, workernode_data_disk_size=None,
-                   http_username=None, http_password=None,
+                   http_username=None, http_password=None, entra_user_identity=None, entra_user_full_info=None,
                    ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
                    storage_account=None, storage_account_key=None,
                    storage_default_container=None, storage_default_filesystem=None,
@@ -84,17 +84,24 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     if not http_username:
         http_username = 'admin'  # Implement default logic here, in case a user specifies the username in configurations
 
-    if not http_password:
+    if not http_password and not entra_user_identity and not entra_user_full_info:
         try:
             http_password = prompt_pass('HTTP password for the cluster:', confirm=True)
         except NoTTYException:
             raise CLIError('Please specify --http-password in non-interactive mode.')
 
     # Update the cluster config with the HTTP credentials
-    gateway_config['restAuthCredential.isEnabled'] = 'true'  # HTTP credentials are required
-    http_username = http_username or gateway_config['restAuthCredential.username']
-    gateway_config['restAuthCredential.username'] = http_username
-    gateway_config['restAuthCredential.password'] = http_password
+    if not entra_user_identity and not entra_user_full_info:
+        gateway_config['restAuthCredential.isEnabled'] = 'true'  # HTTP credentials are required
+        http_username = http_username or gateway_config['restAuthCredential.username']
+        gateway_config['restAuthCredential.username'] = http_username
+        gateway_config['restAuthCredential.password'] = http_password
+    else:
+        if entra_user_identity and entra_user_full_info:
+            raise CLIError('Cannot provide both entra_user_identity and entra_user_full_info parameters.')
+        from .util import get_entraUser_info
+        gateway_config['restAuthCredential.isEnabled'] = 'false'
+        gateway_config['restAuthEntraUsers'] = get_entraUser_info(cmd,entra_user_identity,entra_user_full_info)
     cluster_configurations['gateway'] = gateway_config
 
     # Validate whether SSH credentials were provided
@@ -107,13 +114,14 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
     # Retrieve primary blob service endpoint
-    is_wasb = not storage_account_managed_identity
+    # is_wasb = not storage_account_managed_identity
+    is_wasb = not storage_default_filesystem
     storage_account_endpoint = None
     if storage_account:
         storage_account_endpoint = get_storage_account_endpoint(cmd, storage_account, is_wasb)
 
     # Attempt to infer the storage account key from the endpoint
-    if not storage_account_key and storage_account and is_wasb:
+    if not storage_account_key and storage_account and not storage_account_managed_identity and is_wasb:
         from .util import get_key_for_storage_account
         logger.info('Storage account key not specified. Attempting to retrieve key...')
         key = get_key_for_storage_account(cmd, storage_account)
@@ -130,8 +138,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         logger.warning('Default ADLS file system not specified, using "%s".', storage_default_filesystem)
 
     # Validate storage info parameters
-    if is_wasb and not _all_or_none(storage_account, storage_account_key, storage_default_container):
-        raise CLIError('If storage details are specified, the storage account, storage account key, '
+    if is_wasb and not _all_or_none(storage_account, storage_default_container):
+        raise CLIError('If storage details are specified, the storage account, '
                        'and the default container must be specified.')
     if not is_wasb and not _all_or_none(storage_account, storage_default_filesystem):
         raise CLIError('If storage details are specified, the storage account, '
@@ -903,3 +911,27 @@ def _extract_and_validate_autoscale_configuration(cluster):
 def _validate_schedule_configuration(autoscale_configuration):
     if not autoscale_configuration.recurrence:
         raise CLIError('The cluster has not enabled Schedule-based autoscale.')
+
+def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http_username ='admin', http_password=None , entra_user_identity=None, entra_user_full_info=None, no_wait=False):
+    from azure.mgmt.hdinsight.models import UpdateGatewaySettingsParameters
+    from .util import get_entraUser_info
+    if not http_password and not entra_user_identity and not entra_user_full_info:
+        try:
+            http_password = prompt_pass('HTTP password for the cluster:', confirm=True)
+        except NoTTYException:
+            raise CLIError('Please specify --http-password in non-interactive mode.')
+    if entra_user_identity and entra_user_full_info:
+        raise CLIError('Cannot provide both entra_user_identity and entra_user_full_info parameters.')
+    if http_password:
+        update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
+        is_credential_enabled = True,
+        user_name = http_username,
+        password = http_password
+    )
+    else :
+        update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
+            is_credential_enabled = False,
+            rest_auth_entra_users = get_entraUser_info(cmd,entra_user_identity,entra_user_full_info,False)
+        )
+
+    return sdk_no_wait(no_wait, client.begin_update_gateway_settings, resource_group_name, cluster_name, update_gateway_settings_parameters)
