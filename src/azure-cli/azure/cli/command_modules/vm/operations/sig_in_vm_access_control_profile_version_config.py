@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-branches
+# pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-branches, unnecessary-pass
 from knack.log import get_logger
 
-from azure.cli.core.aaz import (has_value, register_command_group, register_command, AAZCommandGroup,
-                                AAZCommand, AAZDictArg, AAZListArg, AAZStrArg, AAZResourceGroupNameArg)
+from azure.cli.core.aaz import (has_value, register_command_group, register_command,
+                                AAZCommandGroup, AAZDictArg, AAZListArg, AAZStrArg, AAZResourceGroupNameArg)
 from ..aaz.latest.sig.in_vm_access_control_profile_version import Update as _Update
 
 logger = get_logger(__name__)
@@ -30,37 +30,16 @@ class __ConfigPrivilegeCMDGroup(AAZCommandGroup):
     pass
 
 
-@register_command_group(
-    "sig in-vm-access-control-profile-version config role",
-)
-class __ConfigRoleCMDGroup(AAZCommandGroup):
-    """Manage roles for an in VM access control profile version.
-    """
-    pass
-
-
-@register_command_group(
-    "sig in-vm-access-control-profile-version config identity",
-)
-class __ConfigIdentityCMDGroup(AAZCommandGroup):
-    """Manage identities for an in VM access control profile version.
-    """
-    pass
-
-
-@register_command_group(
-    "sig in-vm-access-control-profile-version config role-assignment",
-)
-class __ConfigRoleAssignmentCMDGroup(AAZCommandGroup):
-    """Manage role assignments for an in VM access control profile version.
-    """
-    pass
-
-
 @register_command(
     "sig in-vm-access-control-profile-version config privilege add",
 )
 class SigInVMAccessControlProfileVersionConfigPrivilegeAdd(_Update):
+    """Add privileges for an in VM access control profile version.
+
+    :example: Add a privilege for an in VM access control profile version.
+        az sig in-vm-access-control-profile-version config privilege add --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS --name GoalState --path /machine --query-parameters comp=goalstate
+    """
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         if cls._args_schema is not None:
@@ -112,6 +91,11 @@ class SigInVMAccessControlProfileVersionConfigPrivilegeAdd(_Update):
             help="The query parameters to match in the path.",
         )
 
+        query_parameters = cls._args_schema.query_parameters
+        query_parameters.Element = AAZStrArg(
+            nullable=True,
+        )
+
         return cls._args_schema
 
     def pre_instance_update(self, instance):
@@ -134,6 +118,12 @@ class SigInVMAccessControlProfileVersionConfigPrivilegeAdd(_Update):
     "sig in-vm-access-control-profile-version config privilege remove",
 )
 class SigInVMAccessControlProfileVersionConfigPrivilegeRemove(_Update):
+    """Remove privileges for an in VM access control profile version.
+
+    :example: Remove a privilege for an in VM access control profile version.
+        az sig in-vm-access-control-profile-version config privilege remove --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS --name GoalState
+    """
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         if cls._args_schema is not None:
@@ -184,10 +174,25 @@ class SigInVMAccessControlProfileVersionConfigPrivilegeRemove(_Update):
             instance.properties.rules.privileges = privileges
 
 
+@register_command_group(
+    "sig in-vm-access-control-profile-version config role",
+)
+class __ConfigRoleCMDGroup(AAZCommandGroup):
+    """Manage roles for an in VM access control profile version.
+    """
+    pass
+
+
 @register_command(
     "sig in-vm-access-control-profile-version config role add",
 )
 class SigInVMAccessControlProfileVersionConfigRoleAdd(_Update):
+    """Add roles for an in VM access control profile version.
+
+    :example: Add a role for an in VM access control profile version.
+        az sig in-vm-access-control-profile-version config role add --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS --name Provisioning --privileges GoalState
+    """
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         if cls._args_schema is not None:
@@ -233,7 +238,7 @@ class SigInVMAccessControlProfileVersionConfigRoleAdd(_Update):
             required=True,
             help="A list of privileges needed by this role.",
         )
-        privileges = args_schema.privileges
+        privileges = cls._args_schema.privileges
         privileges.Element = AAZStrArg()
 
         return cls._args_schema
@@ -256,6 +261,12 @@ class SigInVMAccessControlProfileVersionConfigRoleAdd(_Update):
     "sig in-vm-access-control-profile-version config role remove",
 )
 class SigInVMAccessControlProfileVersionConfigRoleRemove(_Update):
+    """Remove roles for an in VM access control profile version.
+
+    :example: Remove a role for an in VM access control profile version.
+        az sig in-vm-access-control-profile-version config role remove --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS --name Provisioning
+    """
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         if cls._args_schema is not None:
@@ -307,10 +318,25 @@ class SigInVMAccessControlProfileVersionConfigRoleRemove(_Update):
             instance.properties.rules.roles = roles
 
 
+@register_command_group(
+    "sig in-vm-access-control-profile-version config identity",
+)
+class __ConfigIdentityCMDGroup(AAZCommandGroup):
+    """Manage identities for an in VM access control profile version.
+    """
+    pass
+
+
 @register_command(
     "sig in-vm-access-control-profile-version config identity add",
 )
 class SigInVMAccessControlProfileVersionConfigIdentityAdd(_Update):
+    """Add identities for an in VM access control profile version.
+
+    :example: Add a identity for an in VM access control profile version.
+        az sig in-vm-access-control-profile-version config identity add --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS --name WinPA --user-name SYSTEM --group-name Administrators --exe-path "C:\\Windows\\System32\\cscript.exe" --process-name cscript
+    """
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         if cls._args_schema is not None:
@@ -398,6 +424,12 @@ class SigInVMAccessControlProfileVersionConfigIdentityAdd(_Update):
     "sig in-vm-access-control-profile-version config identity remove",
 )
 class SigInVMAccessControlProfileVersionConfigIdentityRemove(_Update):
+    """Remove identities for an in VM access control profile version.
+
+    :example: Remove a identity for an in VM access control profile version.
+        az sig in-vm-access-control-profile-version config identity remove --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS --name WinPA
+    """
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         if cls._args_schema is not None:
@@ -438,6 +470,8 @@ class SigInVMAccessControlProfileVersionConfigIdentityRemove(_Update):
             help="The name of the identity.",
         )
 
+        return cls._args_schema
+
     def pre_instance_update(self, instance):
         args = self.ctx.args
 
@@ -447,10 +481,25 @@ class SigInVMAccessControlProfileVersionConfigIdentityRemove(_Update):
             instance.properties.rules.identities = identities
 
 
+@register_command_group(
+    "sig in-vm-access-control-profile-version config role-assignment",
+)
+class __ConfigRoleAssignmentCMDGroup(AAZCommandGroup):
+    """Manage role assignments for an in VM access control profile version.
+    """
+    pass
+
+
 @register_command(
     "sig in-vm-access-control-profile-version config role-assignment add",
 )
 class SigInVMAccessControlProfileVersionConfigRoleAssignmentAdd(_Update):
+    """Add role assignments for an in VM access control profile version.
+
+    :example: Add a role assignment for an in VM access control profile version.
+        az sig in-vm-access-control-profile-version config role-assignment add --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS --role Provisioning --identities WinPA
+    """
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         if cls._args_schema is not None:
@@ -496,7 +545,7 @@ class SigInVMAccessControlProfileVersionConfigRoleAssignmentAdd(_Update):
             required=True,
             help="A list of identities that can access the privileges defined by the role.",
         )
-        identities = args_schema.identities
+        identities = cls._args_schema.identities
         identities.Element = AAZStrArg()
 
         return cls._args_schema
@@ -519,6 +568,12 @@ class SigInVMAccessControlProfileVersionConfigRoleAssignmentAdd(_Update):
     "sig in-vm-access-control-profile-version config role-assignment remove",
 )
 class SigInVMAccessControlProfileVersionConfigRoleAssignmentRemove(_Update):
+    """Remove role assignments for an in VM access control profile version.
+
+    :example: Remove a role assignment for an in VM access control profile version.
+        az sig in-vm-access-control-profile-version config role-assignment remove --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS --role Provisioning
+    """
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         if cls._args_schema is not None:
@@ -566,5 +621,5 @@ class SigInVMAccessControlProfileVersionConfigRoleAssignmentRemove(_Update):
 
         if instance.properties.rules.role_assignments:
             role_assignments = [role_assignment for role_assignment in instance.properties.rules.role_assignments if
-                          role_assignment.role != args.role]
+                                role_assignment.role != args.role]
             instance.properties.rules.role_assignments = role_assignments

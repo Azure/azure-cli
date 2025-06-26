@@ -18,9 +18,9 @@ logger = get_logger(__name__)
 class SigInVMAccessControlProfileVersionCreate(_SigInVMAccessControlProfileVersionCreate):
     """Create a gallery in VM access control profile version.
 
-        :example: Create or update a Gallery in VM access control profile version.
-            az sig in-vm-access-control-profile-version create --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS
-        """
+    :example: Create or update a Gallery in VM access control profile version.
+        az sig in-vm-access-control-profile-version create --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --location WestUS
+    """
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
