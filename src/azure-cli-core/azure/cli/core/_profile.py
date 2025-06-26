@@ -347,6 +347,46 @@ class Profile:
                 str(account[_TENANT_ID]))
 
     def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None):
+        # Check if AZ_USE_AZD_AUTH environment variable is set
+        if os.environ.get('AZ_USE_AZD_AUTH'):
+            try:
+                from azure.identity import AzureDeveloperCliCredential
+                
+                # Convert resource to scopes if needed
+                if resource and not scopes:
+                    from .auth.util import resource_to_scopes
+                    scopes = resource_to_scopes(resource)
+                
+                # Use ARM as the default scopes
+                if not scopes:
+                    scopes = self._arm_scope
+                
+                # Create Azure Developer CLI credential
+                azd_credential = AzureDeveloperCliCredential()
+                sdk_token = azd_credential.get_token(*scopes)
+                
+                # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
+                # WARNING: expiresOn is deprecated and will be removed in future release.
+                import datetime
+                expiresOn = datetime.datetime.fromtimestamp(sdk_token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+
+                token_entry = {
+                    'accessToken': sdk_token.token,
+                    'expires_on': sdk_token.expires_on,  # epoch int, like 1605238724
+                    'expiresOn': expiresOn  # datetime string, like "2020-11-12 13:50:47.114324"
+                }
+
+                # (tokenType, accessToken, tokenEntry)
+                creds = 'Bearer', sdk_token.token, token_entry
+
+                # For AZD authentication, we don't have subscription/tenant info from the current account
+                # So we return None for these values to let the caller handle them appropriately
+                return (creds, None, None)
+                
+            except Exception as ex:
+                logger.warning("Failed to use Azure Developer CLI credential: %s. Falling back to standard authentication.", str(ex))
+                # Fall through to standard authentication flow
+
         # Convert resource to scopes
         if resource and not scopes:
             from .auth.util import resource_to_scopes
