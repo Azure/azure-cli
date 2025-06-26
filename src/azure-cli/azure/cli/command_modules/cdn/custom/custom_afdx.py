@@ -447,8 +447,6 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             probe_request_type
         )
 
-        print('health_probe_settings: {}'.format(args.health_probe_settings))
-
 
 class AFDOriginCreate(_AFDOriginCreate):
     @classmethod
