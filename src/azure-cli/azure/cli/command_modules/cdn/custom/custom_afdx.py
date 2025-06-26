@@ -261,7 +261,7 @@ def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds,
     params = [probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type]
     if enable_health_probe is False:
         return None
-    elif enable_health_probe is True:
+    if enable_health_probe is True:
         if any(param is None for param in params):
             raise InvalidArgumentValueError(
                 'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
