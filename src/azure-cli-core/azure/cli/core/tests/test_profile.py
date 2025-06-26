@@ -50,10 +50,12 @@ class MsalCredentialStub:
         # If acquire_token_scopes is checked, make sure to create a new instance of MsalCredentialStub
         # to avoid interference from other tests.
         self.acquire_token_scopes = None
+        self.acquire_token_data=None
         super().__init__()
 
     def acquire_token(self, scopes, **kwargs):
         self.acquire_token_scopes = scopes
+        self.acquire_token_data = kwargs.get('data')
         return {
             'access_token': MOCK_ACCESS_TOKEN,
             'token_type': 'Bearer',
@@ -1286,6 +1288,31 @@ class TestProfile(unittest.TestCase):
         # Verify tenant shouldn't be specified for Cloud Shell account
         with self.assertRaisesRegex(CLIError, 'Cloud Shell'):
             profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
+
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential')
+    def test_get_msal_token(self, get_user_credential_mock):
+        credential_mock_temp = MsalCredentialStub()
+        get_user_credential_mock.return_value = credential_mock_temp
+        cli = DummyCli()
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        consolidated = profile._normalize_properties(self.user1,
+                                                     [self.subscription1],
+                                                     False, None, None)
+        profile._set_subscriptions(consolidated)
+
+        MOCK_DATA = {
+            'key_id': 'test',
+            'req_cnf': 'test',
+            'token_type': 'ssh-cert'
+        }
+        result = profile.get_msal_token(['https://pas.windows.net/CheckMyAccess/Linux/.default'],
+                                        MOCK_DATA)
+
+        assert result == (None, MOCK_ACCESS_TOKEN)
+        assert credential_mock_temp.acquire_token_scopes == ['https://pas.windows.net/CheckMyAccess/Linux/.default']
+        assert credential_mock_temp.acquire_token_data == MOCK_DATA
 
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_service_principal')
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_user')
