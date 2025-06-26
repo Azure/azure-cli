@@ -644,7 +644,9 @@ def todict(obj, post_processor=None):
         return obj.isoformat()
     if isinstance(obj, timedelta):
         return str(obj)
-    # This is the only difference with knack.util.todict because for typespec generated SDKs
+    if azure.core.serialization.is_generated_model(obj):
+        result = {to_camel_case(k): todict(getattr(obj, k), post_processor) for k in azure.core.serialization.as_attribute_list(obj)}
+        return post_processor(obj, result) if post_processor else result    # This is the only difference with knack.util.todict because for typespec generated SDKs
     # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
     # We need to call obj.as_dict() to extract data for this kind of model
     if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
