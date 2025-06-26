@@ -558,6 +558,7 @@ def load_arguments(self, _):
         c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'],
                    help="Encoding of the secret. By default, will look for the 'file-encoding' tag on the secret. "
                         "Otherwise will assume 'utf-8'.", default=None)
+        c.argument('overwrite', action='store_true', options_list=['--overwrite'], help="Overwrite the file if it exists.")
 
     for scope in ['download', 'backup', 'restore']:
         with self.argument_context('keyvault secret {}'.format(scope)) as c:

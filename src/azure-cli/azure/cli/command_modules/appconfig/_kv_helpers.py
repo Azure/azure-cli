@@ -24,7 +24,7 @@ from azure.cli.core.azclierror import (
 
 from ._constants import KeyVaultConstants, StatusCodes
 from ._diff_utils import __print_diff
-from ._utils import prep_label_filter_for_url_encoding
+from ._utils import prep_filter_for_url_encoding, parse_tags_to_dict
 from ._models import (
     convert_configurationsetting_to_keyvalue,
     convert_keyvalue_to_configurationsetting,
@@ -40,6 +40,7 @@ def __read_kv_from_config_store(
     azconfig_client,
     key=None,
     label=None,
+    tags=None,
     snapshot=None,
     datetime=None,
     fields=None,
@@ -57,7 +58,9 @@ def __read_kv_from_config_store(
     # In delete, import & export commands, we treat missing --label as null label
     # In list, restore & list_revision commands, we treat missing --label as all labels
 
-    label = prep_label_filter_for_url_encoding(label)
+    label = prep_filter_for_url_encoding(label)
+
+    prepped_tags = [prep_filter_for_url_encoding(tag) for tag in tags] if tags else []
 
     query_fields = []
     if fields:
@@ -87,6 +90,7 @@ def __read_kv_from_config_store(
             configsetting_iterable = azconfig_client.list_configuration_settings(
                 key_filter=key,
                 label_filter=label,
+                tags_filter=prepped_tags,
                 accept_datetime=datetime,
                 fields=query_fields,
                 headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id},
@@ -153,6 +157,7 @@ def __write_kv_and_features_to_config_store(
     azconfig_client,
     key_values,
     features=None,
+    tags=None,
     label=None,
     preserve_labels=False,
     content_type=None,
@@ -170,6 +175,11 @@ def __write_kv_and_features_to_config_store(
         set_kv = convert_keyvalue_to_configurationsetting(kv)
         if not preserve_labels:
             set_kv.label = label
+        if tags is not None:
+            if tags == "":  # Empty string explicitly clears existing tags
+                set_kv.tags = {}
+            else:
+                set_kv.tags = parse_tags_to_dict(tags)
 
         # Don't overwrite the content type of feature flags or key vault references
         if (

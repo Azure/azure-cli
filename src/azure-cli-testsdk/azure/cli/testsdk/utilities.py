@@ -229,8 +229,12 @@ class EmailAddressReplacer(RecordingProcessor):
 
     def process_response(self, response):
         if response['body']['string']:
-            body = _byte_to_str(response['body']['string'])
-            response['body']['string'] = self._replace_email_address(body)
+            try:
+                body = _byte_to_str(response['body']['string'])
+                response['body']['string'] = self._replace_email_address(body)
+            except UnicodeDecodeError:
+                # If the body is not a string, we cannot decode it, so we skip the replacement
+                pass
         return response
 
 

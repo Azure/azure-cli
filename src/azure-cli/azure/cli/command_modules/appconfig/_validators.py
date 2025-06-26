@@ -294,6 +294,8 @@ def validate_import_profile(namespace):
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='prefix')
         if namespace.skip_features:
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='skip-features')
+        if namespace.tags:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='tags')
 
 
 def validate_export_profile(namespace):
@@ -310,6 +312,8 @@ def validate_export_profile(namespace):
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='resolve-keyvault')
         if namespace.separator is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='separator')
+        if namespace.dest_tags:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='dest-tags')
 
 
 def validate_strict_import(namespace):
@@ -363,6 +367,10 @@ def validate_snapshot_filters(namespace):
 
                 if parsed_filter.get("label", None) and not isinstance(parsed_filter["label"], str):
                     raise InvalidArgumentValueError("Label filter must be a string if specified.")
+
+                if parsed_filter.get("tags", None):
+                    if not isinstance(parsed_filter["tags"], list) or not all(isinstance(tag, str) for tag in parsed_filter["tags"]):
+                        raise InvalidArgumentValueError("Tags filter must be a list of strings if specified.")
 
                 filter_parameters.append(parsed_filter)
 
@@ -421,3 +429,32 @@ def validate_sku(namespace):
     else:
         if namespace.replica_location is not None:
             raise RequiredArgumentMissingError("To create a replica, '--replica-name' is required.")
+
+
+def _validate_tag_filter_list(tag_list):
+    if not tag_list or not isinstance(tag_list, list):
+        return
+
+    if len(tag_list) > 5:
+        raise InvalidArgumentValueError("Too many tag filters provided. Maximum allowed is 5.")
+
+    for tag in tag_list:
+        if tag:
+            comps = tag.split('=', 1)
+            if comps[0] == "":
+                raise InvalidArgumentValueError("Tag filter name cannot be empty.")
+
+
+def validate_tag_filters(namespace):
+    """Validates tag filters in the 'tags' attribute."""
+    _validate_tag_filter_list(getattr(namespace, 'tags', None))
+
+
+def validate_import_tag_filters(namespace):
+    """Validates tag filters in the 'src_tags' attribute."""
+    _validate_tag_filter_list(getattr(namespace, 'src_tags', None))
+
+
+def validate_dry_run(namespace):
+    if namespace.dry_run and namespace.yes:
+        raise MutuallyExclusiveArgumentError("The '--dry-run' and '--yes' options cannot be specified together.")

@@ -1460,10 +1460,13 @@ def update_key_rotation_policy(cmd, client, value, key_name=None):
 
 
 # region KeyVault Secret
-def download_secret(client, file_path, name=None, encoding=None, version=''):  # pylint: disable=unused-argument
+def download_secret(client, file_path, name=None, encoding=None, version='', overwrite=False):  # pylint: disable=unused-argument
     """ Download a secret from a KeyVault. """
-    if os.path.isfile(file_path) or os.path.isdir(file_path):
-        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+    if os.path.isdir(file_path):
+        raise CLIError("Cannot write to '{}': it is a directory.".format(file_path))
+
+    if not overwrite and os.path.isfile(file_path):
+        raise CLIError("File '{}' already exists. Use --overwrite to overwrite the existing file.".format(file_path))
 
     secret = client.get_secret(name, version)
 
@@ -2310,9 +2313,9 @@ def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, pa
 
 def _security_domain_upload_blob(client, restore_blob_value, no_wait=False):
     security_domain = {'value': restore_blob_value}
-    poller = client.begin_upload(security_domain=security_domain, polling=not no_wait)
-    if not no_wait:
-        return poller.result()
+    poller = client.begin_upload(security_domain=security_domain, skip_activation_polling=no_wait)
+    poller.result()
+    return client.get_upload_status()
 
 
 def security_domain_upload(client, sd_file, restore_blob=False, sd_exchange_key=None,
@@ -2392,12 +2395,12 @@ def security_domain_download(client, sd_wrapping_keys, security_domain_file, sd_
             raise FileOperationError(str(ex))
 
     certificate_info = {'certificates': certificates, 'required': sd_quorum}
-    poller = client.begin_download(certificate_info_object=certificate_info, polling=not no_wait)
+    poller = client.begin_download(certificate_info=certificate_info, skip_activation_polling=no_wait)
     security_domain = poller.result()
     if poller.status() != 'Failed':
         _save_to_local_file(security_domain_file, security_domain)
     if not no_wait:
-        return _wait_security_domain_operation(client, 'download')
+        return client.get_download_status()
 
 
 def check_name_availability(cmd, client, name, resource_type='hsm'):

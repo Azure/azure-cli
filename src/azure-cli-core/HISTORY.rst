@@ -3,6 +3,16 @@
 Release History
 ===============
 
+2.75.0
+++++++
+* Resolve CVE-2025-50181 (#31669)
+* Resolve CVE-2025-50182 (#31669)
+
+2.74.0
+++++++
+* Resolve CVE-2024-13176 (#31503)
+* Resolve CVE-2024-9143 (#31503)
+
 2.73.0
 ++++++
 * [BREAKING CHANGE] Remove azure stack profiles `2020-09-01-hybrid`, `2019-03-01-hybrid`, `2018-03-01-hybrid` and `2017-03-09-profile` (#31307)

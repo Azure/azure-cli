@@ -303,6 +303,11 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     list_server_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name)
     eligible_versions = list_server_capability_info['supported_server_versions'][str(current_version)]
 
+    if version == '13':
+        logger.warning("PostgreSQL version 13 will reach end-of-life (EOL) soon. "
+                       "Upgrade to PostgreSQL 14 or later as soon as possible to "
+                       "maintain security, performance, and supportability.")
+
     if version not in eligible_versions:
         # version not supported
         error_message = ""

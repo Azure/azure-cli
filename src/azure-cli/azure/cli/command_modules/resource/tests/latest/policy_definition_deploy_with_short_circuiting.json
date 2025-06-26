@@ -1,0 +1,71 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "random": {
+      "type": "bool",
+      "defaultValue": "[greater(int(utcNow('%f')), 4)]"
+    },
+    "denyLocation": {
+      "type": "string",
+      "defaultValue": "northeurope"
+    }
+  },
+  "variables": {
+      "policyDefinitionName": "policy-for-what-if-test"
+  },
+  "resources": [
+    {
+      "name": "[variables('policyDefinitionName')]",
+      "type": "Microsoft.Authorization/policyDefinitions",
+      "apiVersion": "2018-05-01",
+      "condition": "[parameters('random')]",
+      "properties": {
+        "policyType": "Custom",
+        "policyRule": {
+          "if": {
+            "field": "location",
+            "equals": "[parameters('denyLocation')]"
+          },
+          "then": {
+            "effect": "deny"
+          }
+        }
+      }
+    },
+    {
+      "name": "[format('{0}_{1}', variables('policyDefinitionName'), if(parameters('random'), '2', '3'))]",
+      "type": "Microsoft.Authorization/policyDefinitions",
+      "apiVersion": "2018-05-01",
+      "properties": {
+        "policyType": "Custom",
+        "policyRule": {
+          "if": {
+            "field": "location",
+            "equals": "[parameters('denyLocation')]"
+          },
+          "then": {
+            "effect": "deny"
+          }
+        }
+      }
+    },
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2024-11-01",
+        "name": "nestedDeployment",
+        "location": "[deployment().location]",
+        "properties": {
+          "mode": "Incremental",
+          "template": {
+            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "resources": [],
+            "variables": {
+              "undecidable": "[parameters('random')]"
+            }
+          }
+        }
+      }
+  ]
+}

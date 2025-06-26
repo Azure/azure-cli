@@ -1210,8 +1210,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if assign_identity is not None:
             if enable_local_identity and not identity_scope:
                 _show_missing_access_warning(resource_group_name, vm_name2, 'vm')
-            setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
-                                                             vm.identity.user_assigned_identities))
+            vm['identity'] = _construct_identity_info(identity_scope, identity_role,
+                                                      vm.get('identity', {}).get('principalId', None),
+                                                      vm.get('identity', {}).get('userAssignedIdentities', None))
         vms.append(vm)
 
     if workspace is not None:
@@ -1270,10 +1271,17 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
 
 
 def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False):
+    from .operations.vm import VMShow
     expand = 'instanceView'
     if include_user_data:
         expand = expand + ',userData'
-    return get_vm(cmd, resource_group_name, vm_name, expand)
+
+    result = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "vm_name": vm_name,
+        "expand": expand,
+    })
+    return result
 
 
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
@@ -1301,8 +1309,8 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
     private_ips = []
     mac_addresses = []
     # pylint: disable=line-too-long,no-member
-    for nic_ref in result.network_profile.network_interfaces:
-        nic_parts = parse_resource_id(nic_ref.id)
+    for nic_ref in result.get('networkProfile', {}).get('networkInterfaces', []):
+        nic_parts = parse_resource_id(nic_ref['id'])
         nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": nic_parts['name'],
             'resource_group': nic_parts['resource_group']
@@ -1323,13 +1331,14 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
                 if 'dnsSettings' in public_ip_info:
                     fqdns.append(public_ip_info['dnsSettings']['fqdn'])
 
-    setattr(result, 'power_state',
-            ','.join([s.display_status for s in result.instance_view.statuses if s.code.startswith('PowerState/')]))
-    setattr(result, 'public_ips', ','.join(public_ips))
-    setattr(result, 'fqdns', ','.join(fqdns))
-    setattr(result, 'private_ips', ','.join(private_ips))
-    setattr(result, 'mac_addresses', ','.join(mac_addresses))
-    del result.instance_view  # we don't need other instance_view info as people won't care
+    result['powerState'] = ','.join([s['displayStatus'] for s in result.get('instanceView', {}).get('statuses', [])
+                                     if s['code'].startswith('PowerState/')])
+    result['publicIps'] = ','.join(public_ips)
+    result['fqdns'] = ','.join(fqdns)
+    result['privateIps'] = ','.join(private_ips)
+    result['macAddresses'] = ','.join(mac_addresses)
+
+    del result['instanceView']  # we don't need other instanceView info as people won't care
     return result
 
 
@@ -1356,7 +1365,7 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
 def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    ccf = _compute_client_factory(cmd.cli_ctx)
+    from .aaz.latest.vm import List as VMList
     if vmss is not None:
         if is_valid_resource_id(vmss):
             filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss)
@@ -1369,12 +1378,19 @@ def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
             vmss_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                   namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss)
             filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss_id)
-        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name, filter=filter)
+
+        vm_list = VMList(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            "filter": filter
+        })
     else:
-        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
-            if resource_group_name else ccf.virtual_machines.list_all()
+        from .aaz.latest.vm import ListAll as VMListAll
+        vm_list = VMList(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name
+        }) if resource_group_name else VMListAll(cli_ctx=cmd.cli_ctx)(command_args={})
+
     if show_details:
-        return [get_vm_details(cmd, _parse_rg_name(v.id)[0], v.name) for v in vm_list]
+        return [get_vm_details(cmd, _parse_rg_name(v['id'])[0], v['name']) for v in vm_list]
 
     return list(vm_list)
 
