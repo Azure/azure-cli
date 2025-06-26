@@ -458,3 +458,29 @@ def validate_import_tag_filters(namespace):
 def validate_dry_run(namespace):
     if namespace.dry_run and namespace.yes:
         raise MutuallyExclusiveArgumentError("The '--dry-run' and '--yes' options cannot be specified together.")
+
+
+def validate_key_value_revision_retention_days(namespace):
+    if namespace.key_value_revision_retention_days is None:
+        return
+
+    retention_days = int(namespace.key_value_revision_retention_days)
+
+    DEVELOPER_TIER_MAX_DAYS = 7
+    PREMIUM_STANDARD_MAX_DAYS = 30
+
+    if retention_days < 0:
+        raise InvalidArgumentValueError("The key value revision retention days cannot be negative.")
+
+    if namespace.sku is None:
+        return
+
+    sku = namespace.sku.lower()
+    if sku == 'free':
+        raise InvalidArgumentValueError("The option '--key-value-revision-retention-days' cannot be set for free tier stores.")
+    if sku == 'developer':
+        if retention_days > DEVELOPER_TIER_MAX_DAYS:
+            raise InvalidArgumentValueError(f"The key value revision retention days for developer tier store cannot exceed {DEVELOPER_TIER_MAX_DAYS} days.")
+    if sku == 'premium' or sku == 'standard':
+        if retention_days > PREMIUM_STANDARD_MAX_DAYS:
+            raise InvalidArgumentValueError(f"The key value revision retention days for premium and standard tier stores cannot exceed {PREMIUM_STANDARD_MAX_DAYS} days.")

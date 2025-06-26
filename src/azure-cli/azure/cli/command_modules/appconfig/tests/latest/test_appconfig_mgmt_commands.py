@@ -12,8 +12,11 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer, get_resource_name_prefix
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
+
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
 
@@ -440,6 +443,83 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
+
+
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @AllowLargeResponse()
+    def test_appconfig_key_value_revision_retention_days(self, resource_group, location):
+        """Test key_value_revision_retention_days for different SKUs and validation scenarios."""
+        mgmt_prefix = get_resource_name_prefix('RevisionRetention')
+
+        SECONDS_PER_DAY = 86400  # 24 hours * 60 minutes * 60 seconds
+        
+        # Test store names
+        standard_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
+        test_validation_store = self.create_random_name(prefix=mgmt_prefix, length=24)
+        
+        # SKUs and retention days
+        standard_sku = 'standard'
+        dev_sku = 'developer'
+        free_sku = 'free'
+        
+        standard_retention_days = 30  # Max for standard/premium
+        dev_retention_days = 7       # Max for developer
+        
+        self.kwargs.update({
+            'store_name': standard_store_name,
+            'test_store': test_validation_store,
+            'location': location,
+            'rg': resource_group,
+            'standard_sku': standard_sku,
+            'dev_sku': dev_sku,
+            'free_sku': free_sku
+        })
+        
+        # Create standard store with key_value_revision_retention_days and verify
+        self.kwargs.update({
+            'retention_days': standard_retention_days
+        })
+        self.cmd('appconfig create -n {store_name} -g {rg} -l {location} --sku {standard_sku} --key-value-revision-retention-days {retention_days}',
+                 checks=[self.check('name', '{store_name}'),
+                         self.check('sku.name', standard_sku),
+                         self.check('defaultKeyValueRevisionRetentionPeriodInSeconds', standard_retention_days * SECONDS_PER_DAY)])
+        
+        # Update retention days
+        updated_retention_days = 15
+        self.kwargs['retention_days'] = updated_retention_days
+        self.cmd('appconfig update -n {store_name} -g {rg} --key-value-revision-retention-days {retention_days}',
+                 checks=[self.check('name', '{store_name}'),
+                         self.check('defaultKeyValueRevisionRetentionPeriodInSeconds', updated_retention_days * SECONDS_PER_DAY)])
+
+        # Validation scenarios - test invalid values
+        # Negative value
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'The key value revision retention days cannot be negative'):
+            self.kwargs['retention_days'] = -1
+            self.cmd('appconfig create -n {test_store} -g {rg} -l {location} --sku {standard_sku} --key-value-revision-retention-days {retention_days}')
+            
+        # Exceeding maximum for standard tier
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'The key value revision retention days for premium and standard tier stores cannot exceed 30 days'):
+            self.kwargs['retention_days'] = 31
+            self.cmd('appconfig create -n {test_store} -g {rg} -l {location} --sku {standard_sku} --key-value-revision-retention-days {retention_days}')
+            
+        # Free tier validation
+        with self.assertRaisesRegex(InvalidArgumentValueError, "The option '--key-value-revision-retention-days' cannot be set for free tier stores."):
+            self.kwargs.update({
+                'retention_days': 5,
+                'sku': free_sku
+            })
+            self.cmd('appconfig create -n {test_store} -g {rg} -l {location} --sku {sku} --key-value-revision-retention-days {retention_days}')
+        
+        # Test with developer SKU
+        self.kwargs.update({
+            'sku': dev_sku,
+            'retention_days': dev_retention_days,
+            'store_name': self.create_random_name(prefix=mgmt_prefix, length=24)
+        })
+        self.cmd('appconfig create -n {store_name} -g {rg} -l {location} --sku {sku} --key-value-revision-retention-days {retention_days}',
+                 checks=[self.check('sku.name', dev_sku),
+                         self.check('defaultKeyValueRevisionRetentionPeriodInSeconds', dev_retention_days * SECONDS_PER_DAY)])
+                        
 
 def _setup_key_vault(test, kwargs):
     key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-rbac-authorization false --enable-purge-protection --retention-days 7').get_output_in_json()

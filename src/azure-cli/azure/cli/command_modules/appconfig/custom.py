@@ -35,9 +35,10 @@ SYSTEM_ASSIGNED = 'SystemAssigned'
 USER_ASSIGNED = 'UserAssigned'
 SYSTEM_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
 SYSTEM_ASSIGNED_IDENTITY = '[system]'
+DAYS_IN_SECONDS = 86400  # 24 * 60 * 60
 
 
-def create_configstore(cmd,
+def create_configstore(cmd,  # pylint: disable=too-many-locals
                        client,
                        resource_group_name,
                        name,
@@ -53,7 +54,8 @@ def create_configstore(cmd,
                        replica_location=None,
                        no_replica=None,  # pylint: disable=unused-argument
                        arm_auth_mode=None,
-                       enable_arm_private_network_access=None):
+                       enable_arm_private_network_access=None,
+                       key_value_revision_retention_days=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
@@ -78,6 +80,7 @@ def create_configstore(cmd,
                                             soft_delete_retention_in_days=retention_days,
                                             enable_purge_protection=enable_purge_protection,
                                             create_mode=CreateMode.DEFAULT,
+                                            default_key_value_revision_retention_period_in_seconds=key_value_revision_retention_days * DAYS_IN_SECONDS if key_value_revision_retention_days else None,
                                             data_plane_proxy=DataPlaneProxyProperties(
                                                 authentication_mode=arm_authentication_mode,
                                                 private_link_delegation=arm_private_link_delegation))
@@ -180,7 +183,8 @@ def update_configstore(cmd,
                        disable_local_auth=None,
                        enable_purge_protection=None,
                        arm_auth_mode=None,
-                       enable_arm_private_network_access=None):
+                       enable_arm_private_network_access=None,
+                       key_value_revision_retention_days=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
@@ -202,6 +206,7 @@ def update_configstore(cmd,
                                                        public_network_access=public_network_access,
                                                        disable_local_auth=disable_local_auth,
                                                        enable_purge_protection=enable_purge_protection,
+                                                       default_key_value_revision_retention_period_in_seconds=key_value_revision_retention_days * DAYS_IN_SECONDS if key_value_revision_retention_days else None,
                                                        data_plane_proxy=DataPlaneProxyProperties(
                                                            authentication_mode=arm_authentication_mode,
                                                            private_link_delegation=arm_private_link_delegation))
