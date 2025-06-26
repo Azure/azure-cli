@@ -169,7 +169,7 @@ def show_deleted_configstore(cmd, client, name, location=None):
     return client.get_deleted(config_store_name=name, location=location)
 
 
-def update_configstore(cmd,
+def update_configstore(cmd, # pylint: disable=too-many-locals
                        client,
                        name,
                        resource_group_name=None,
