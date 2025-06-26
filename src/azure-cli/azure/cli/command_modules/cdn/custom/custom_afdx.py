@@ -259,7 +259,9 @@ class AFDEndpointUpdate(_AFDEndpointUpdate):
 def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds,
                               probe_path, probe_protocol, probe_request_type):
     params = [probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type]
-    if enable_health_probe is True:
+    if enable_health_probe is False:
+        return None
+    elif enable_health_probe is True:
         if any(param is None for param in params):
             raise InvalidArgumentValueError(
                 'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
@@ -410,23 +412,29 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
                 enable_health_probe = False
             else:
                 enable_health_probe = True
+        else:
+            enable_health_probe = args.enable_health_probe.to_serialized_data()
 
         if has_value(args.probe_path):
+            enable_health_probe = True
             probe_path = args.probe_path.to_serialized_data()
         elif 'probePath' in existing['healthProbeSettings']:
             probe_path = existing['healthProbeSettings']['probePath']
 
         if has_value(args.probe_protocol):
+            enable_health_probe = True
             probe_protocol = args.probe_protocol.to_serialized_data()
         elif 'probeProtocol' in existing['healthProbeSettings']:
             probe_protocol = existing['healthProbeSettings']['probeProtocol']
 
         if has_value(args.probe_interval_in_seconds):
+            enable_health_probe = True
             probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
         elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
             probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
 
         if has_value(args.probe_request_type):
+            enable_health_probe = True
             probe_request_type = args.probe_request_type.to_serialized_data()
         elif 'probeRequestType' in existing['healthProbeSettings']:
             probe_request_type = existing['healthProbeSettings']['probeRequestType']
@@ -438,6 +446,8 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             probe_protocol,
             probe_request_type
         )
+
+        print('health_probe_settings: {}'.format(args.health_probe_settings))
 
 
 class AFDOriginCreate(_AFDOriginCreate):
