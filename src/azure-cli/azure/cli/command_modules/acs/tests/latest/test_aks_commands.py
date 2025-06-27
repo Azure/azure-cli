@@ -113,14 +113,26 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         sorted_lts_versions = sorted(lts_versions, key=version_to_tuple, reverse=False)
         return sorted_lts_versions
 
-    def _get_newer_non_lts_version(self, location, version):
-        """Return the nearest newer non-lts version of the specified version."""
+    def _get_latest_non_lts_version(self, location):
+        """Return the latest non-lts version."""
         supported_versions = self.cmd(
             '''az aks get-versions -l {} --query "values[?!(contains(capabilities.supportPlan, 'AKSLongTermSupport'))].patchVersions.keys(@)[]"'''.format(location)
         ).get_output_in_json()
-        newer_versions = [x for x in supported_versions if version_to_tuple(x) > version_to_tuple(version)]
-        sorted_newer_versions = sorted(newer_versions, key=version_to_tuple, reverse=False)
-        return sorted_newer_versions[0] if newer_versions else None
+        sorted_supported_versions = sorted(supported_versions, key=version_to_tuple, reverse=True)
+        return sorted_supported_versions[0] if sorted_supported_versions else None
+
+    def _get_lower_lts_version(self, location, version):
+        """Return the highest LTS version that is lower than the given version."""
+        lts_versions = self._get_lts_versions(location)
+        if not lts_versions:
+            return None
+        for lts_version in reversed(lts_versions):
+            if version_to_tuple(lts_version) < version_to_tuple(version):
+                return lts_version
+
+    def _get_minor_version(self, version):
+        """Return the minor version of the given version as an integer."""
+        return int(version.split('.')[1])
 
     def _get_user_assigned_identity(
         self,
@@ -3566,13 +3578,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
-                     '-a ingress-appgw --appgw-subnet-cidr 10.232.0.0/16 ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AppGatewayWithOverlayPreview ' \
+                     '-a ingress-appgw --appgw-subnet-cidr 10.232.0.0/26 ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.ingressApplicationGateway.enabled', True),
             self.check(
-                'addonProfiles.ingressApplicationGateway.config.subnetCIDR', "10.232.0.0/16")
+                'addonProfiles.ingressApplicationGateway.config.subnetCIDR', "10.232.0.0/26")
         ])
 
     # live only due to role assignment is not mocked
@@ -10858,20 +10871,28 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
-        lts_versions = self._get_lts_versions(resource_group_location)
-        if len(lts_versions) == 0:
-            self.skipTest('No LTS versions found in the location')
-        create_version = lts_versions[0]
-        upgrade_version = self._get_newer_non_lts_version(resource_group_location, create_version)
-        if upgrade_version is None:
-            self.skipTest('No newer non-LTS versions found in the location')
+        # The test will create a cluster with LTS version and then upgrade it to a non-LTS version with tier switch.
+        # find the latest non-LTS version in the location
+        non_lts_version = self._get_latest_non_lts_version(resource_group_location)
+        if non_lts_version is None:
+            self.skipTest('No non-LTS versions found in the location')
+
+        # find the closest LTS version in the location that is lower than the non_lts_version
+        lts_version = self._get_lower_lts_version(resource_group_location, non_lts_version)
+        if lts_version is None:
+            self.skipTest('No lower LTS versions found in the location')
+
+        # ensure non_lts_version and lts_version has less than 3 minor version difference,
+        # otherwise the upgrade will not be allowed
+        if self._get_minor_version(non_lts_version) - self._get_minor_version(lts_version) > 3:
+            self.skipTest('Non-LTS version and LTS version has more than 3 minor version difference')
 
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
-            'k8s_version': create_version,
-            'upgrade_k8s_version': upgrade_version,
+            'k8s_version': lts_version,
+            'upgrade_k8s_version': non_lts_version,
             'ssh_key_value': self.generate_ssh_keys(),
         })
 
