@@ -923,14 +923,13 @@ def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http
         raise CLIError('Cannot provide both entra_user_identity and entra_user_full_info parameters.')
     if http_password:
         update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
-        is_credential_enabled = True,
-        user_name = http_username,
-        password = http_password
-    )
+            is_credential_enabled = True,
+            user_name = http_username,
+            password = http_password
+        )
     else :
         update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
             is_credential_enabled = False,
             rest_auth_entra_users = get_entraUser_info(cmd,entra_user_identity,entra_user_full_info,False)
         )
-
     return sdk_no_wait(no_wait, client.begin_update_gateway_settings, resource_group_name, cluster_name, update_gateway_settings_parameters)
