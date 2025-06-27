@@ -8846,7 +8846,7 @@ class VMGalleryImage(ScenarioTest):
         ])
 
         self.cmd('sig in-vm-access-control-profile-version update --resource-group {rg} --gallery-name {gallery} '
-                 '--profile-name {profile2} --profile-version {profile_version} --exclude-from-latest true --target-regions eastus westus', checks=[
+                 '--profile-name {profile2} --profile-version {profile_version} --exclude-from-latest true --target-regions eastus2 westus', checks=[
             self.check('name', '{profile_version}'),
             self.check('excludeFromLatest', True),
             self.check('length(targetLocations)', '2'),
