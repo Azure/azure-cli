@@ -58,10 +58,14 @@ def _generate_login_command(scopes=None, claims_challenge=None):
 
     # Rejected by Conditional Access policy, like MFA
     if scopes:
-        login_command.append('--scope {}'.format(' '.join(scopes)))
+        # *scopes unpacks the list: https://peps.python.org/pep-0448/:
+        login_command.extend(['--scope', *scopes])
 
     # Rejected by CAE
     if claims_challenge:
+        from azure.cli.core.util import b64encode
+        claims_challenge_encoded = b64encode(claims_challenge)
+        login_command.extend(['--claims', claims_challenge_encoded])
         # Explicit logout is needed: https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
         return 'az logout\n' + ' '.join(login_command)
 
