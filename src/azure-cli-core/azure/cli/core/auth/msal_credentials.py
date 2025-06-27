@@ -43,16 +43,23 @@ class UserCredential:  # pylint: disable=too-few-public-methods
 
         self._account = accounts[0]
 
-    def acquire_token(self, scopes, claims_challenge=None, **kwargs):
+    def acquire_token(self, scopes, claims_challenge=None, data=None, **kwargs):
         # scopes must be a list.
         # For acquiring SSH certificate, scopes is ['https://pas.windows.net/CheckMyAccess/Linux/.default']
+        # data is only used for acquiring VM SSH certificate. DO NOT use it for other purposes.
         # kwargs is already sanitized by CredentialAdaptor, so it can be safely passed to MSAL
-        logger.debug("UserCredential.acquire_token: scopes=%r, claims_challenge=%r, kwargs=%r",
-                     scopes, claims_challenge, kwargs)
+        logger.debug("UserCredential.acquire_token: scopes=%r, claims_challenge=%r, data=%r, kwargs=%r",
+                     scopes, claims_challenge, data, kwargs)
 
         if claims_challenge:
             logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
                            self._msal_app.authority.tenant, claims_challenge)
+
+        # Only pass data to MSAL if it is set. Passing data=None will cause failure in MSAL:
+        #   AttributeError: 'NoneType' object has no attribute 'get'
+        if data is not None:
+            kwargs['data'] = data
+
         result = self._msal_app.acquire_token_silent_with_error(
             scopes, self._account, claims_challenge=claims_challenge, **kwargs)
 
@@ -105,8 +112,13 @@ class ServicePrincipalCredential:  # pylint: disable=too-few-public-methods
         """
         self._msal_app = ConfidentialClientApplication(client_id, client_credential=client_credential, **kwargs)
 
-    def acquire_token(self, scopes, **kwargs):
-        logger.debug("ServicePrincipalCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)
+    def acquire_token(self, scopes, data=None, **kwargs):
+        logger.debug("ServicePrincipalCredential.acquire_token: scopes=%r, data=%r, kwargs=%r",
+                     scopes, data, kwargs)
+
+        if data is not None:
+            kwargs['data'] = data
+
         result = self._msal_app.acquire_token_for_client(scopes, **kwargs)
         check_result(result)
         return result
@@ -126,8 +138,13 @@ class CloudShellCredential:  # pylint: disable=too-few-public-methods
             #   token_cache=...
         )
 
-    def acquire_token(self, scopes, **kwargs):
-        logger.debug("CloudShellCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)
+    def acquire_token(self, scopes, data=None, **kwargs):
+        logger.debug("CloudShellCredential.acquire_token: scopes=%r, data=%r, kwargs=%r",
+                     scopes, data, kwargs)
+
+        if data is not None:
+            kwargs['data'] = data
+
         result = self._msal_app.acquire_token_interactive(scopes, prompt="none", **kwargs)
         check_result(result, scopes=scopes)
         return result
@@ -147,8 +164,13 @@ class ManagedIdentityCredential:  # pylint: disable=too-few-public-methods
             managed_identity = SystemAssignedManagedIdentity()
         self._msal_client = ManagedIdentityClient(managed_identity, http_client=requests.Session())
 
-    def acquire_token(self, scopes, **kwargs):
-        logger.debug("ManagedIdentityCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)
+    def acquire_token(self, scopes, data=None, **kwargs):
+        logger.debug("ManagedIdentityCredential.acquire_token: scopes=%r, data=%r, kwargs=%r",
+                     scopes, data, kwargs)
+
+        if data is not None:
+            from azure.cli.core.azclierror import AuthenticationError
+            raise AuthenticationError("VM SSH currently doesn't support managed identity.")
 
         from .util import scopes_to_resource
         result = self._msal_client.acquire_token_for_client(resource=scopes_to_resource(scopes))
