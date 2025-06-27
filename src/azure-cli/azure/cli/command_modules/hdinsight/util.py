@@ -340,7 +340,7 @@ def map_cluster_type(cluster_type):
         cluster_type = 'mlservice'
     return cluster_type
 
-def get_entraUser_info(cmd,EntraUserIdentity,entra_user_full_info,toJson=True):
+def get_entraUser_info(cmd,entra_user_identity,entra_user_full_info,toJson=True):
     import json
     from ._client_factory import cf_graph
     from azure.cli.core.azclierror import AzCLIError
@@ -351,9 +351,9 @@ def get_entraUser_info(cmd,EntraUserIdentity,entra_user_full_info,toJson=True):
 
     graph_client = cf_graph(cmd.cli_ctx)
     rest_auth_entra_users = []
-    if EntraUserIdentity:
+    if entra_user_identity:
         user_data = []
-        for item in EntraUserIdentity:
+        for item in entra_user_identity:
             if item:
                 user_data.extend([s.strip() for s in item.split(',') if s.strip()])
         for data in user_data:
@@ -373,7 +373,7 @@ def get_entraUser_info(cmd,EntraUserIdentity,entra_user_full_info,toJson=True):
             except Exception as ex: 
                 error_message = (
                     f'Failed to retrieve Entra user info from input: "{data}". '
-                    'Please check the EntraUserIdentity parameter, or consider using the EntraUserFullInfo approach to specify user details. \n'
+                    'Please check the entra_user_identity parameter, or consider using the entra_user_full_info approach to specify user details. \n'
                     f'Exception: {str(ex)}'
                     )
                 raise AzCLIError(error_message) 
