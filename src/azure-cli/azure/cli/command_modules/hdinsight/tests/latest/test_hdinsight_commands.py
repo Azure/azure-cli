@@ -23,14 +23,17 @@ class HDInsightClusterTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='hdi-cli', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='cli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_min_args(self, storage_account_info):
-        self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info), self._vnet_arguments())
+        self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info,
+                                                            specify_key=False, specify_container=False), self._vnet_arguments())
 
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_resize(self, storage_account_info):
         self._create_hdinsight_cluster(
-            self._wasb_arguments(storage_account_info),self._vnet_arguments(),self._version_arguments())
+            self._wasb_arguments(storage_account_info),
+            self._vnet_arguments(),
+            self._version_arguments())
 
         resize_cluster_format = 'az hdinsight resize -n {cluster} -g {rg} --workernode-count 2'
         self.cmd(resize_cluster_format)
@@ -514,7 +517,7 @@ class HDInsightClusterTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
-    def test_hdinsight_autoscale_operation(self,storage_account_info):
+    def test_hdinsight_autoscale_operation(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._vnet_arguments(),

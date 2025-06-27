@@ -114,7 +114,6 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
     # Retrieve primary blob service endpoint
-    # is_wasb = not storage_account_managed_identity
     is_wasb = not storage_default_filesystem
     storage_account_endpoint = None
     if storage_account:

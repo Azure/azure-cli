@@ -87,7 +87,8 @@ def load_arguments(self, _):
         c.argument('entra_user_identity', options_list=['--entra-user-identity','-e'], arg_group='HTTP',nargs='+',
                     help='The Entra user identity (object ID or user principal name) to associate with the cluster for authentication and access control')
         c.argument('entra_user_full_info', options_list=['--entra-user-full-info','-E'], arg_group='HTTP',completer=FilesCompleter(),type=shell_safe_json_parse,
-                   help='A JSON string or a file (using `@{path}` syntax) containing a list of Entra user objects, each with "ObjectId", "Upn", and "DisplayName" fields.')
+                   help='A JSON string or a file (using `@{path}` syntax) containing a list of Entra user objects, each with "ObjectId", "Upn", and "DisplayName" fields.'
+                   'Please see: https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure/cli/command_modules/hdinsight/tests/latest/EntraUserFullInfoConfig.json')
 
         # SSH
         c.argument('ssh_username', options_list=['--ssh-user', '-U'], arg_group='SSH',
@@ -425,4 +426,5 @@ def load_arguments(self, _):
             c.argument('entra_user_identity', options_list=['--entra-user-identity','-e'], arg_group='HTTP',nargs='+',
                         help='The Entra user identity (object ID or user principal name) to associate with the cluster for authentication and access control')
             c.argument('entra_user_full_info', options_list=['--entra-user-full-info','-E'], arg_group='HTTP',completer=FilesCompleter(),type=shell_safe_json_parse,
-                        help='A JSON string or a file (using `@{path}` syntax) containing a list of Entra user objects, each with "ObjectId", "Upn", and "DisplayName" fields.')
+                   help='A JSON string or a file (using `@{path}` syntax) containing a list of Entra user objects, each with "ObjectId", "Upn", and "DisplayName" fields.'
+                   'Please see: https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure/cli/command_modules/hdinsight/tests/latest/EntraUserFullInfoConfig.json')
