@@ -23,6 +23,7 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_STORAGE_POOL_TYPE_AZURE_DISK,
     CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
+    CONST_ACSTOR_V2_EXT_INSTALLATION_NAME
 )
 from azure.cli.command_modules.acs._roleassignments import (
     add_role_assignment,
@@ -245,6 +246,30 @@ def get_extension_installed_and_cluster_configs(
     )
 
 
+def get_container_storage_v2_extension_installed(cmd,
+    resource_group,
+    cluster_name):
+    """Check if the Azure Container Storage V2 extension is installed."""
+    client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
+    client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
+    k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
+    is_extension_installed = False
+
+    try:
+        extension = k8s_extension_custom_mod.show_k8s_extension(
+            client,
+            resource_group,
+            cluster_name,
+            CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
+            "managedClusters",
+        )
+        is_extension_installed = True
+    except:  # pylint: disable=bare-except
+        is_extension_installed = False
+
+    return is_extension_installed
+
+    
 def get_initial_resource_value_args(
     storage_pool_type,
     storage_pool_option,
