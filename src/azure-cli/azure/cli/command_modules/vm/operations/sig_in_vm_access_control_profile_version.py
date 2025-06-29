@@ -37,6 +37,9 @@ class SigInVMAccessControlProfileVersionCreate(_SigInVMAccessControlProfileVersi
 )
 class SigInVMAccessControlProfileVersionUpdate(_SigInVMAccessControlProfileVersionUpdate):
     """Update a gallery in VM access control profile version.
+
+    :example: Update a Gallery in VM access control profile version.
+        az sig in-vm-access-control-profile-version update --resource-group myResourceGroup --gallery-name myGalleryName --profile-name myInVMAccessControlProfileName --profile-version 1.0.0 --exclude-from-latest true
     """
 
     @classmethod

@@ -533,16 +533,25 @@ def load_command_table(self, _):
         self.command_table['sig in-vm-access-control-profile-version update'] = SigInVMAccessControlProfileVersionUpdate(loader=self)
 
     with self.command_group('sig in-vm-access-control-profile-version config'):
-        from .operations.sig_in_vm_access_control_profile_version_config import (SigInVMAccessControlProfileVersionConfigPrivilegeAdd, SigInVMAccessControlProfileVersionConfigPrivilegeRemove,
-                                                                                 SigInVMAccessControlProfileVersionConfigRoleAdd, SigInVMAccessControlProfileVersionConfigRoleRemove,
-                                                                                 SigInVMAccessControlProfileVersionConfigIdentityAdd, SigInVMAccessControlProfileVersionConfigIdentityRemove,
-                                                                                 SigInVMAccessControlProfileVersionConfigRoleAssignmentAdd, SigInVMAccessControlProfileVersionConfigRoleAssignmentRemove)
+        pass
+
+    with self.command_group('sig in-vm-access-control-profile-version config privilege'):
+        from .operations.sig_in_vm_access_control_profile_version_config import SigInVMAccessControlProfileVersionConfigPrivilegeAdd, SigInVMAccessControlProfileVersionConfigPrivilegeRemove
         self.command_table['sig in-vm-access-control-profile-version config privilege add'] = SigInVMAccessControlProfileVersionConfigPrivilegeAdd(loader=self)
         self.command_table['sig in-vm-access-control-profile-version config privilege remove'] = SigInVMAccessControlProfileVersionConfigPrivilegeRemove(loader=self)
+
+    with self.command_group('sig in-vm-access-control-profile-version config role'):
+        from .operations.sig_in_vm_access_control_profile_version_config import SigInVMAccessControlProfileVersionConfigRoleAdd, SigInVMAccessControlProfileVersionConfigRoleRemove
         self.command_table['sig in-vm-access-control-profile-version config role add'] = SigInVMAccessControlProfileVersionConfigRoleAdd(loader=self)
         self.command_table['sig in-vm-access-control-profile-version config role remove'] = SigInVMAccessControlProfileVersionConfigRoleRemove(loader=self)
+
+    with self.command_group('sig in-vm-access-control-profile-version config identity'):
+        from .operations.sig_in_vm_access_control_profile_version_config import SigInVMAccessControlProfileVersionConfigIdentityAdd, SigInVMAccessControlProfileVersionConfigIdentityRemove
         self.command_table['sig in-vm-access-control-profile-version config identity add'] = SigInVMAccessControlProfileVersionConfigIdentityAdd(loader=self)
         self.command_table['sig in-vm-access-control-profile-version config identity remove'] = SigInVMAccessControlProfileVersionConfigIdentityRemove(loader=self)
+
+    with self.command_group('sig in-vm-access-control-profile-version config role-assignment'):
+        from .operations.sig_in_vm_access_control_profile_version_config import SigInVMAccessControlProfileVersionConfigRoleAssignmentAdd, SigInVMAccessControlProfileVersionConfigRoleAssignmentRemove
         self.command_table['sig in-vm-access-control-profile-version config role-assignment add'] = SigInVMAccessControlProfileVersionConfigRoleAssignmentAdd(loader=self)
         self.command_table['sig in-vm-access-control-profile-version config role-assignment remove'] = SigInVMAccessControlProfileVersionConfigRoleAssignmentRemove(loader=self)
 

@@ -12,24 +12,6 @@ from ..aaz.latest.sig.in_vm_access_control_profile_version import Update as _Upd
 logger = get_logger(__name__)
 
 
-@register_command_group(
-    "sig in-vm-access-control-profile-version config",
-)
-class __ConfigCMDGroup(AAZCommandGroup):
-    """Manage the access control rules specification for an in VM access control profile version.
-    """
-    pass
-
-
-@register_command_group(
-    "sig in-vm-access-control-profile-version config privilege",
-)
-class __ConfigPrivilegeCMDGroup(AAZCommandGroup):
-    """Manage privileges for an in VM access control profile version.
-    """
-    pass
-
-
 @register_command(
     "sig in-vm-access-control-profile-version config privilege add",
 )
@@ -174,15 +156,6 @@ class SigInVMAccessControlProfileVersionConfigPrivilegeRemove(_Update):
             instance.properties.rules.privileges = privileges
 
 
-@register_command_group(
-    "sig in-vm-access-control-profile-version config role",
-)
-class __ConfigRoleCMDGroup(AAZCommandGroup):
-    """Manage roles for an in VM access control profile version.
-    """
-    pass
-
-
 @register_command(
     "sig in-vm-access-control-profile-version config role add",
 )
@@ -316,15 +289,6 @@ class SigInVMAccessControlProfileVersionConfigRoleRemove(_Update):
             roles = [role for role in instance.properties.rules.roles if
                      role.name != args.name]
             instance.properties.rules.roles = roles
-
-
-@register_command_group(
-    "sig in-vm-access-control-profile-version config identity",
-)
-class __ConfigIdentityCMDGroup(AAZCommandGroup):
-    """Manage identities for an in VM access control profile version.
-    """
-    pass
 
 
 @register_command(
@@ -479,15 +443,6 @@ class SigInVMAccessControlProfileVersionConfigIdentityRemove(_Update):
             identities = [identity for identity in instance.properties.rules.identities if
                           identity.name != args.name]
             instance.properties.rules.identities = identities
-
-
-@register_command_group(
-    "sig in-vm-access-control-profile-version config role-assignment",
-)
-class __ConfigRoleAssignmentCMDGroup(AAZCommandGroup):
-    """Manage role assignments for an in VM access control profile version.
-    """
-    pass
 
 
 @register_command(

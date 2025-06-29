@@ -938,6 +938,31 @@ type: group
 short-summary: Manage gallery sharing profile
 """
 
+helps['sig in-vm-access-control-profile-version config'] = """
+type: group
+short-summary: Manage the access control rules specification for an in VM access control profile version.
+"""
+
+helps['sig in-vm-access-control-profile-version config privilege'] = """
+type: group
+short-summary: Manage privileges for an in VM access control profile version.
+"""
+
+helps['sig in-vm-access-control-profile-version config role'] = """
+type: group
+short-summary: Manage roles for an in VM access control profile version.
+"""
+
+helps['sig in-vm-access-control-profile-version config identity'] = """
+type: group
+short-summary: Manage identities for an in VM access control profile version.
+"""
+
+helps['sig in-vm-access-control-profile-version config role-assignment'] = """
+type: group
+short-summary: Manage role assignments for an in VM access control profile version.
+"""
+
 helps['snapshot create'] = """
 type: command
 short-summary: Create a snapshot.
