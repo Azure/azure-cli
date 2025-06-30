@@ -746,7 +746,7 @@ class HDInsightClusterTests(ScenarioTest):
         msi_args = ' --storage-account-managed-identity "{}"'.format(msi) if msi else ""
         return '--storage-account {}{}{}{}' \
             .format(storage_account_name, key_args, container_args, msi_args)
-    
+
     @staticmethod
     def _adlsgen2_arguments(storage_account_info,  specify_filesystem=True, msi = None):
         storage_account_name = storage_account_info
