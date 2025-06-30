@@ -5,8 +5,7 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-branches, unnecessary-pass
 from knack.log import get_logger
 
-from azure.cli.core.aaz import (has_value, register_command_group, register_command,
-                                AAZCommandGroup, AAZDictArg, AAZListArg, AAZStrArg, AAZResourceGroupNameArg)
+from azure.cli.core.aaz import has_value, register_command, AAZDictArg, AAZListArg, AAZStrArg, AAZResourceGroupNameArg
 from ..aaz.latest.sig.in_vm_access_control_profile_version import Update as _Update
 
 logger = get_logger(__name__)
