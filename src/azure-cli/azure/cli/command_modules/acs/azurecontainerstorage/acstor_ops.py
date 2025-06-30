@@ -708,7 +708,7 @@ def perform_enable_azure_container_storage_v2(
                     release_namespace="storage-system",
                     configuration_settings=config_settings,
                 )
-        op_text = "Azure Container Storage successfully installed"
+        op_text = "Azure Container Storage v2 successfully installed"
         long_op_result = LongRunningOperation(cmd.cli_ctx)(result)
         if long_op_result.provisioning_state == "Succeeded":
                 logger.warning(op_text)
@@ -735,11 +735,10 @@ def perform_enable_azure_container_storage_v2(
             ) 
             
             LongRunningOperation(cmd.cli_ctx)(delete_op_result)
-            if delete_op_result.provisioning_state == "Succeeded":
-                logger.warning("Azure Container Storage has been disabled.")
+            logger.warning("Azure Container Storage v2 has been disabled.")
         except Exception as delete_ex:
             raise UnknownError(
-                "Failure observed while disabling Azure Container Storage."
+                "Failed to disable Azure Container Storage v2 with error: %s" % delete_ex
             ) from delete_ex
 
 
@@ -767,9 +766,8 @@ def perform_disable_azure_container_storage_v2(
 
         if not no_wait_delete_op:
             LongRunningOperation(cmd.cli_ctx)(delete_op_result)
-            if delete_op_result.provisioning_state == "Succeeded":
-                logger.warning("Azure Container Storage has been disabled.")
+            logger.warning("Azure Container Storage v2 has been disabled.")
     except Exception as delete_ex:
         raise UnknownError(
-            "Failure observed while disabling Azure Container Storage."
+            "Failed to disable Azure Container Storage v2 with error: %s" % delete_ex
         ) from delete_ex

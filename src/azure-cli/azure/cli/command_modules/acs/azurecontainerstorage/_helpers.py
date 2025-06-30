@@ -30,6 +30,7 @@ from azure.cli.command_modules.acs._roleassignments import (
     build_role_scope,
     delete_role_assignments,
 )
+from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import UnknownError
 from knack.log import get_logger
 
@@ -246,6 +247,30 @@ def get_extension_installed_and_cluster_configs(
     )
 
 
+def get_container_storage_v1_extension_installed(cmd,
+    resource_group,
+    cluster_name):
+    
+    client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
+    client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
+    k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
+    is_extension_installed = False
+
+    try:
+        extension = k8s_extension_custom_mod.show_k8s_extension(
+            client,
+            resource_group,
+            cluster_name,
+            CONST_EXT_INSTALLATION_NAME,
+            "managedClusters",
+        )
+        is_extension_installed = True
+    except Exception as ex:  # pylint: disable=broad-except
+        # TODO: Figure out a way to handle the ReosurceNotFoundError exception instead of catching all exceptions.
+        is_extension_installed = False
+    return is_extension_installed
+
+
 def get_container_storage_v2_extension_installed(cmd,
     resource_group,
     cluster_name):
@@ -264,9 +289,9 @@ def get_container_storage_v2_extension_installed(cmd,
             "managedClusters",
         )
         is_extension_installed = True
-    except:  # pylint: disable=bare-except
+    except Exception as ex:  # pylint: disable=broad-except
+        # TODO: Figure out a way to handle the ReosurceNotFoundError exception instead of catching all exceptions.
         is_extension_installed = False
-
     return is_extension_installed
 
     
