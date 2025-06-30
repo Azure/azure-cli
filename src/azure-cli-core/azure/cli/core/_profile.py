@@ -175,7 +175,8 @@ class Profile:
             if use_device_code:
                 user_identity = identity.login_with_device_code(scopes=scopes, **kwargs)
             else:
-                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge, **kwargs)
+                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge,
+                                                              **kwargs)
         else:
             if not is_service_principal:
                 user_identity = identity.login_with_username_password(username, password, scopes=scopes, **kwargs)
