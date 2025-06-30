@@ -27,7 +27,7 @@ from ._validators import (validate_appservice_name_or_id, validate_sku, validate
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
                           validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
                           validate_snapshot_export, validate_snapshot_import, validate_tag_filters,
-                          validate_import_tag_filters, validate_dry_run, validate_key_value_revision_retention_days)
+                          validate_import_tag_filters, validate_dry_run, validate_kv_revision_retention_days)
 
 
 def load_arguments(self, _):
@@ -137,11 +137,11 @@ def load_arguments(self, _):
         validator=validate_tag_filters
     )
 
-    key_value_revision_retention_days_arg_type = CLIArgumentType(
-        options_list=['--key-value-revision-retention-days'],
+    kv_revision_retention_days_arg_type = CLIArgumentType(
+        options_list=['--kv-revision-retention-days'],
         type=int,
         help='Number of days to retain revisions of key-values in the App Configuration store. Defaults to 7 days for Free and Developer SKU stores and 30 days for Standard and Premium SKU stores',
-        validator=validate_key_value_revision_retention_days
+        validator=validate_kv_revision_retention_days
     )
 
     # Used with data plane commands. These take either a store name or connection string argument.
@@ -187,7 +187,7 @@ def load_arguments(self, _):
         c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
-        c.argument('key_value_revision_retention_days', arg_type=key_value_revision_retention_days_arg_type)
+        c.argument('kv_revision_retention_days', arg_type=kv_revision_retention_days_arg_type)
 
     with self.argument_context('appconfig update') as c:
         c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Developer', 'Premium', 'Standard']))
@@ -198,7 +198,7 @@ def load_arguments(self, _):
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
-        c.argument('key_value_revision_retention_days', arg_type=key_value_revision_retention_days_arg_type)
+        c.argument('kv_revision_retention_days', arg_type=kv_revision_retention_days_arg_type)
 
     with self.argument_context('appconfig recover') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration store. Can be viewed using command `az appconfig show-deleted`.')

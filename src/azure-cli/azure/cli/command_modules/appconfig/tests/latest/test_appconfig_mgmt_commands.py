@@ -447,8 +447,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    def test_appconfig_key_value_revision_retention_days(self, resource_group, location):
-        """Test key_value_revision_retention_days for different SKUs and validation scenarios."""
+    def test_appconfig_kv_revision_retention_days(self, resource_group, location):
+        """Test kv_revision_retention_days for different SKUs and validation scenarios."""
         mgmt_prefix = get_resource_name_prefix('RevisionRetention')
 
         SECONDS_PER_DAY = 86400  # 24 hours * 60 minutes * 60 seconds
@@ -475,11 +475,11 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'free_sku': free_sku
         })
         
-        # Create standard store with key_value_revision_retention_days and verify
+        # Create standard store with kv_revision_retention_days and verify
         self.kwargs.update({
             'retention_days': standard_retention_days
         })
-        self.cmd('appconfig create -n {store_name} -g {rg} -l {location} --sku {standard_sku} --key-value-revision-retention-days {retention_days}',
+        self.cmd('appconfig create -n {store_name} -g {rg} -l {location} --sku {standard_sku} --kv-revision-retention-days {retention_days}',
                  checks=[self.check('name', '{store_name}'),
                          self.check('sku.name', standard_sku),
                          self.check('defaultKeyValueRevisionRetentionPeriodInSeconds', standard_retention_days * SECONDS_PER_DAY)])
@@ -487,7 +487,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         # Update retention days
         updated_retention_days = 15
         self.kwargs['retention_days'] = updated_retention_days
-        self.cmd('appconfig update -n {store_name} -g {rg} --key-value-revision-retention-days {retention_days}',
+        self.cmd('appconfig update -n {store_name} -g {rg} --kv-revision-retention-days {retention_days}',
                  checks=[self.check('name', '{store_name}'),
                          self.check('defaultKeyValueRevisionRetentionPeriodInSeconds', updated_retention_days * SECONDS_PER_DAY)])
 
@@ -495,20 +495,20 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         # Negative value
         with self.assertRaisesRegex(InvalidArgumentValueError, 'The key value revision retention days cannot be negative'):
             self.kwargs['retention_days'] = -1
-            self.cmd('appconfig create -n {test_store} -g {rg} -l {location} --sku {standard_sku} --key-value-revision-retention-days {retention_days}')
+            self.cmd('appconfig create -n {test_store} -g {rg} -l {location} --sku {standard_sku} --kv-revision-retention-days {retention_days}')
             
         # Exceeding maximum for standard tier
         with self.assertRaisesRegex(InvalidArgumentValueError, 'The key value revision retention days for premium and standard tier stores cannot exceed 30 days'):
             self.kwargs['retention_days'] = 31
-            self.cmd('appconfig create -n {test_store} -g {rg} -l {location} --sku {standard_sku} --key-value-revision-retention-days {retention_days}')
+            self.cmd('appconfig create -n {test_store} -g {rg} -l {location} --sku {standard_sku} --kv-revision-retention-days {retention_days}')
             
         # Free tier validation
-        with self.assertRaisesRegex(InvalidArgumentValueError, "The option '--key-value-revision-retention-days' cannot be set for free tier stores."):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "The option '--kv-revision-retention-days' cannot be set for free tier stores."):
             self.kwargs.update({
                 'retention_days': 5,
                 'sku': free_sku
             })
-            self.cmd('appconfig create -n {test_store} -g {rg} -l {location} --sku {sku} --key-value-revision-retention-days {retention_days}')
+            self.cmd('appconfig create -n {test_store} -g {rg} -l {location} --sku {sku} --kv-revision-retention-days {retention_days}')
         
         # Test with developer SKU
         self.kwargs.update({
@@ -516,7 +516,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'retention_days': dev_retention_days,
             'store_name': self.create_random_name(prefix=mgmt_prefix, length=24)
         })
-        self.cmd('appconfig create -n {store_name} -g {rg} -l {location} --sku {sku} --key-value-revision-retention-days {retention_days}',
+        self.cmd('appconfig create -n {store_name} -g {rg} -l {location} --sku {sku} --kv-revision-retention-days {retention_days}',
                  checks=[self.check('sku.name', dev_sku),
                          self.check('defaultKeyValueRevisionRetentionPeriodInSeconds', dev_retention_days * SECONDS_PER_DAY)])
                         

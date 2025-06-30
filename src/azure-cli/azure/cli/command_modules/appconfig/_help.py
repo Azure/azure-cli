@@ -35,7 +35,7 @@ examples:
   - name: Create an App Configuration store with name, location and resource group with ARM authentication mode set to Pass-through and private network access via ARM Private Link enabled.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through --enable-arm-private-network-access true
   - name: Create an App Configuration store with a specific key-value revision retention period (in days).
-    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --key-value-revision-retention-days 20
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --kv-revision-retention-days 20
 """
 
 helps['appconfig list-deleted'] = """
@@ -413,7 +413,7 @@ examples:
   - name: Update an App Configuration store to set ARM authentication mode set to Pass-through and enable private network access via ARM Private Link.
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through --enable-arm-private-network-access true
   - name: Update an App Configuration store to set a specific key-value revision retention period (in days).
-    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --key-value-revision-retention-days 7
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --kv-revision-retention-days 7
 """
 
 helps['appconfig feature'] = """

@@ -55,7 +55,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                        no_replica=None,  # pylint: disable=unused-argument
                        arm_auth_mode=None,
                        enable_arm_private_network_access=None,
-                       key_value_revision_retention_days=None):
+                       kv_revision_retention_days=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
@@ -80,7 +80,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                                             soft_delete_retention_in_days=retention_days,
                                             enable_purge_protection=enable_purge_protection,
                                             create_mode=CreateMode.DEFAULT,
-                                            default_key_value_revision_retention_period_in_seconds=key_value_revision_retention_days * DAYS_IN_SECONDS if key_value_revision_retention_days is not None else None,
+                                            default_key_value_revision_retention_period_in_seconds=kv_revision_retention_days * DAYS_IN_SECONDS if kv_revision_retention_days is not None else None,
                                             data_plane_proxy=DataPlaneProxyProperties(
                                                 authentication_mode=arm_authentication_mode,
                                                 private_link_delegation=arm_private_link_delegation))
@@ -184,7 +184,7 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
                        enable_purge_protection=None,
                        arm_auth_mode=None,
                        enable_arm_private_network_access=None,
-                       key_value_revision_retention_days=None):
+                       kv_revision_retention_days=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
@@ -206,7 +206,7 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
                                                        public_network_access=public_network_access,
                                                        disable_local_auth=disable_local_auth,
                                                        enable_purge_protection=enable_purge_protection,
-                                                       default_key_value_revision_retention_period_in_seconds=key_value_revision_retention_days * DAYS_IN_SECONDS if key_value_revision_retention_days else None,
+                                                       default_key_value_revision_retention_period_in_seconds=kv_revision_retention_days * DAYS_IN_SECONDS if kv_revision_retention_days else None,
                                                        data_plane_proxy=DataPlaneProxyProperties(
                                                            authentication_mode=arm_authentication_mode,
                                                            private_link_delegation=arm_private_link_delegation))

@@ -460,11 +460,11 @@ def validate_dry_run(namespace):
         raise MutuallyExclusiveArgumentError("The '--dry-run' and '--yes' options cannot be specified together.")
 
 
-def validate_key_value_revision_retention_days(namespace):
-    if namespace.key_value_revision_retention_days is None:
+def validate_kv_revision_retention_days(namespace):
+    if namespace.kv_revision_retention_days is None:
         return
 
-    retention_days = int(namespace.key_value_revision_retention_days)
+    retention_days = int(namespace.kv_revision_retention_days)
 
     DEVELOPER_TIER_MAX_DAYS = 7
     PREMIUM_STANDARD_MAX_DAYS = 30
@@ -477,7 +477,7 @@ def validate_key_value_revision_retention_days(namespace):
 
     sku = namespace.sku.lower()
     if sku == 'free':
-        raise InvalidArgumentValueError("The option '--key-value-revision-retention-days' cannot be set for free tier stores.")
+        raise InvalidArgumentValueError("The option '--kv-revision-retention-days' cannot be set for free tier stores.")
     if sku == 'developer':
         if retention_days > DEVELOPER_TIER_MAX_DAYS:
             raise InvalidArgumentValueError(f"The key value revision retention days for developer tier store cannot exceed {DEVELOPER_TIER_MAX_DAYS} days.")
