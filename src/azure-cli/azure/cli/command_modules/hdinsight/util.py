@@ -168,6 +168,18 @@ def get_storage_account_endpoint(cmd, storage_account, is_wasb):
         host = extract_host(extract_endpoint(storage_account, is_wasb))
     return host
 
+def is_wasb_storage_account(cmd, storage_account):
+    from ._client_factory import cf_storage
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
+    is_wasb = True
+    if is_valid_resource_id(storage_account):
+        parsed_storage_account = parse_resource_id(storage_account)
+        resource_group_name = parsed_storage_account['resource_group']
+        storage_account_name = parsed_storage_account['resource_name']
+        storage_client = cf_storage(cmd.cli_ctx)
+        properties = storage_client.storage_accounts.get_properties(resource_group_name, storage_account_name)
+        is_wasb = not properties.is_hns_enabled
+    return is_wasb
 
 def build_identities_info(identities):
     from azure.mgmt.hdinsight.models import ClusterIdentity, ResourceIdentityType

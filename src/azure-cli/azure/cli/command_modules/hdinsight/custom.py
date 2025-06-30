@@ -41,7 +41,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    enable_compute_isolation=None, host_sku=None, zones=None, private_link_configurations=None,
                    no_validation_timeout=False, outbound_dependencies_managed_type=None):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
-        get_storage_account_endpoint, validate_esp_cluster_create_params, set_vm_size
+        get_storage_account_endpoint, validate_esp_cluster_create_params, set_vm_size, is_wasb_storage_account, get_entraUser_info
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
@@ -99,7 +99,6 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     else:
         if entra_user_identity and entra_user_full_info:
             raise CLIError('Cannot provide both entra_user_identity and entra_user_full_info parameters.')
-        from .util import get_entraUser_info
         gateway_config['restAuthCredential.isEnabled'] = 'false'
         gateway_config['restAuthEntraUsers'] = get_entraUser_info(cmd,entra_user_identity,entra_user_full_info)
     cluster_configurations['gateway'] = gateway_config
@@ -114,7 +113,13 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
     # Retrieve primary blob service endpoint
-    is_wasb = not storage_default_filesystem
+    is_wasb = None
+    if storage_default_container:
+        is_wasb = True
+    elif storage_default_filesystem:
+        is_wasb = False
+    else:
+        is_wasb = is_wasb_storage_account(cmd, storage_account)
     storage_account_endpoint = None
     if storage_account:
         storage_account_endpoint = get_storage_account_endpoint(cmd, storage_account, is_wasb)

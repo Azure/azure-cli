@@ -670,10 +670,21 @@ class HDInsightClusterTests(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     def test_hdinsight_create_with_wasb_and_msi(self):
-        storage_account_info = ("hdicli000002","")
+        storage_account_info = ("hdi-storage-wasb","")
         msi = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi"
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info,msi = msi),
+            HDInsightClusterTests._vnet_arguments(),
+            HDInsightClusterTests._version_arguments()
+        )
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    def test_hdinsight_create_with_ADLSGen2_and_msi(self):
+        storage_account_info = "hdi-storage-adlsgen2"
+        msi = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi"
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._adlsgen2_arguments(storage_account_info,specify_filesystem=False,msi = msi),
             HDInsightClusterTests._vnet_arguments(),
             HDInsightClusterTests._version_arguments()
         )
@@ -734,8 +745,16 @@ class HDInsightClusterTests(ScenarioTest):
         container_args = ' --storage-container {}'.format('default') if specify_container else ""
         msi_args = ' --storage-account-managed-identity "{}"'.format(msi) if msi else ""
         return '--storage-account {}{}{}{}' \
-            .format(storage_account_name, key_args, container_args,msi_args)
-
+            .format(storage_account_name, key_args, container_args, msi_args)
+    
+    @staticmethod
+    def _adlsgen2_arguments(storage_account_info,  specify_filesystem=True, msi = None):
+        storage_account_name = storage_account_info
+        filesystem_args = ' --storage-filesystem {}'.format('default') if specify_filesystem else ""
+        msi_args = ' --storage-account-managed-identity "{}"'.format(msi) if msi else ""
+        return '--storage-account {}{}{}' \
+            .format(storage_account_name, filesystem_args, msi_args)
+    
     @staticmethod
     def _kafka_arguments():
         return '-t {} --workernode-data-disks-per-node {}'.format('kafka', '4')
