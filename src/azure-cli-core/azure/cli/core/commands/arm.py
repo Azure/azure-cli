@@ -366,7 +366,7 @@ def register_global_subscription_argument(cli_ctx):
                         sub_id = sub['id']
                         break
                 if not sub_id:
-                    logger.warning("Subscription '%s' not recognized.", value)
+                    # logger.warning("Subscription '%s' not recognized.", value)
                     sub_id = value
                 namespace._subscription = sub_id  # pylint: disable=protected-access
 
