@@ -355,7 +355,7 @@ def map_cluster_type(cluster_type):
 def get_entraUser_info(cmd,entra_user_identity,entra_user_full_info,toJson=True):
     import json
     from ._client_factory import cf_graph
-    from azure.cli.core.azclierror import AzCLIError
+    from azure.cli.core.azclierror import ResourceNotFoundError,InvalidArgumentValueError,AzureResponseError
     def is_email(value):
         return "@" in value and "." in value
     def normalize_keys(d):
@@ -378,24 +378,39 @@ def get_entraUser_info(cmd,entra_user_identity,entra_user_full_info,toJson=True)
                     user = graph_client.user_list(filter=filter_expr)
                     user = user[0]
                 if user is None:
-                    raise ValueError(f'The Entra user retrieved for input "{data}" is null. Please confirm that the user exists in Microsoft Entra ID.')
+                    raise ResourceNotFoundError(
+                            error_msg=f'No Entra user found for input: "{data}"',
+                            recommendation=[
+                                'Verify the user exists in Microsoft Entra ID',
+                                'Confirm the identifier (email, UPN, or object ID) is correct',
+                                'Try querying manually: az ad user show --id <identifier>'
+                            ]
+                        )
                 rest_auth_entra_users.append({'ObjectId': user['id'],'DisplayName': user['displayName'],'Upn': user['userPrincipalName']})
-            except ValueError:
+            except ResourceNotFoundError:
                 raise
-            except Exception as ex: 
-                error_message = (
-                    f'Failed to retrieve Entra user info from input: "{data}". '
-                    'Please check the entra_user_identity parameter, or consider using the entra_user_full_info approach to specify user details. \n'
-                    f'Exception: {str(ex)}'
-                    )
-                raise AzCLIError(error_message) 
+            except Exception as ex:                 
+                raise AzureResponseError(
+                    error_msg=f'Failed to retrieve Entra user info for input: "{data}"',
+                    recommendation=[
+                        'Check network connectivity to Microsoft Graph API',
+                        'Validate authentication permissions for directory queries',
+                        'Retry operation with --debug to inspect detailed error',
+                        'Alternatively, consider using --entra-user-full-info to provide user details directly',
+                    ]
+                )
     else:
         for user in entra_user_full_info:
             user_normalized = normalize_keys(user)
             allowed_keys = {'objectid','displayname','upn'}
-            if set(user_normalized.keys()) - allowed_keys:
-                raise AzCLIError(f"Invalid keys in user object: {user}. Only ObjectId, DisplayName, and Upn are allowed.")
+            if invalid_keys := set(user_normalized.keys()) - allowed_keys:
+                raise InvalidArgumentValueError(
+                    error_msg=f'Invalid keys detected in user object: {", ".join(invalid_keys)}',
+                    recommendation=[
+                        'User objects must only contain: ObjectId, DisplayName, and Upn',
+                        f'Remove invalid keys: {", ".join(invalid_keys)}',
+                        'Example valid format: [{"ObjectId": "...", "DisplayName": "...", "Upn": "..."}]'
+                    ]
+                )
             rest_auth_entra_users.append({'ObjectId':user_normalized.get('objectid'),'DisplayName': user_normalized.get('displayname'),'Upn':user_normalized.get('upn')})
-    if toJson:
-        return json.dumps(rest_auth_entra_users)
-    return rest_auth_entra_users
+    return json.dumps(rest_auth_entra_users) if toJson else rest_auth_entra_users

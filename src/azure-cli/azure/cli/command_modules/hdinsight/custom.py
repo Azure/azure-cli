@@ -6,7 +6,7 @@ from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait, user_confirmation
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError,MutuallyExclusiveArgumentError
 
 logger = get_logger(__name__)
 
@@ -98,7 +98,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         gateway_config['restAuthCredential.password'] = http_password
     else:
         if entra_user_identity and entra_user_full_info:
-            raise CLIError('Cannot provide both entra_user_identity and entra_user_full_info parameters.')
+            raise MutuallyExclusiveArgumentError('Cannot provide both --entra-user-identity and --entra-user-full-info parameters.')
         gateway_config['restAuthCredential.isEnabled'] = 'false'
         gateway_config['restAuthEntraUsers'] = get_entraUser_info(cmd,entra_user_identity,entra_user_full_info)
     cluster_configurations['gateway'] = gateway_config
@@ -925,7 +925,7 @@ def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http
         except NoTTYException:
             raise CLIError('Please specify --http-password in non-interactive mode.')
     if entra_user_identity and entra_user_full_info:
-        raise CLIError('Cannot provide both entra_user_identity and entra_user_full_info parameters.')
+        raise MutuallyExclusiveArgumentError('Cannot provide both --entra-user-identity and --entra-user-full-info parameters.')
     if http_password:
         update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
             is_credential_enabled = True,
