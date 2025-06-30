@@ -754,7 +754,7 @@ class HDInsightClusterTests(ScenarioTest):
         msi_args = ' --storage-account-managed-identity "{}"'.format(msi) if msi else ""
         return '--storage-account {}{}{}' \
             .format(storage_account_name, filesystem_args, msi_args)
-    
+
     @staticmethod
     def _kafka_arguments():
         return '-t {} --workernode-data-disks-per-node {}'.format('kafka', '4')
