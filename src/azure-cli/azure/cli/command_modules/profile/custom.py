@@ -42,7 +42,7 @@ LOGIN_OUTPUT_WARNING = (
     "available subscriptions by default.\n")
 
 USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD = (
-    "Starting July 01, 2025, MFA will be gradually enforced for Azure public cloud. "
+    "Starting September 1, 2025, MFA will be gradually enforced for Azure public cloud. "
     "The authentication with username and password in the command line is not supported with MFA. "
     "Consider using one of the compatible authentication methods. "
     "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")

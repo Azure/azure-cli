@@ -106,10 +106,10 @@ class MergedStatusTag(StatusTag):
         self.tags = list(tags)
 
         def _get_merged_tag(self):
-            return ''.join({tag._get_tag(self) for tag in self.tags})  # pylint: disable=protected-access
+            return ''.join({tag._get_tag(tag) for tag in self.tags})  # pylint: disable=protected-access
 
         def _get_merged_msg(self):
-            return '\n'.join({tag._get_message(self) for tag in self.tags})  # pylint: disable=protected-access
+            return '\n'.join({tag._get_message(tag) for tag in self.tags})  # pylint: disable=protected-access
 
         super().__init__(cli_ctx, tag.object_type, tag.target, tag_func=_get_merged_tag,
                          message_func=_get_merged_msg, color=tag._color)

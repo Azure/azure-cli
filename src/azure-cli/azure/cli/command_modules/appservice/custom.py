@@ -2180,8 +2180,6 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                 get_current_stack_from_runtime(runtime_version) != "tomcat" else "java"
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
-    if number_of_workers is not None:
-        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
             if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
@@ -2270,7 +2268,18 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    try:
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        error_message = str(ex)
+        if "Conflict" in error_message:
+            logger.error("Operation returned an invalid status 'Conflict'. "
+                         "For more details, run the command with the --debug parameter.")
+        elif "Bad Request" in error_message:
+            logger.error("Operation returned an invalid status 'Bad Request'. "
+                         "For more details, run the command with the --debug parameter.")
+        else:
+            raise
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):

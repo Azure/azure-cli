@@ -2946,19 +2946,19 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='westeurope')
+                           location='westus3')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2",
-                           location='westeurope')
+                           location='westus3')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='westus3')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='westus3')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2",
-                       location='westeurope')
+                       location='westus3')
     @AllowLargeResponse()
     def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,
@@ -2969,7 +2969,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         target_database_name = "cliautomationdb02"
         hs_database_name = "cliautomationhs03"
         hs_target_database_name = "cliautomationnr04"
-        service_objective = 'GP_Gen5_8'
+        service_objective = 'S7'
         hs_service_objective = 'HS_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
@@ -3142,6 +3142,90 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('role', 'Primary'),
                      JMESPathCheck('partnerRole', 'Secondary')])
+
+    @ResourceGroupPreparer(parameter_name="resource_group_1",
+                           parameter_name_for_location="resource_group_location_1",
+                           location='westus2')
+    @SqlServerPreparer(parameter_name="server_name_1",
+                       resource_group_parameter_name="resource_group_1",
+                       location='westus2')
+    @AllowLargeResponse()
+    def test_sql_db_replica_mgmt_cross_subscription(self,
+                                 resource_group_1, resource_group_location_1,
+                                 server_name_1):
+                
+        database_name = "cliautomationdb011"
+        target_database_name = "cliautomationdb02"
+        service_objective = 'GP_Gen5_8'
+
+        self.kwargs.update({
+            "server_name_2" : "cli-automated-tests1",
+            "server_name_3" : "cli-automated-tests2",
+            "resource_group_2" : "CLI-Automated-Tests",
+            "resource_group_location_2" : "southcentralus",
+            "resource_group_location_3" : "westus3",
+            "partner_subscription" : "00000000-0000-0000-0000-000000000000"
+            })
+
+        # helper class so that it's clear which servers are in which groups
+        class ServerInfo:  # pylint: disable=too-few-public-methods
+            def __init__(self, name, group, location, subscription=None):
+                self.name = name
+                self.group = group
+                self.location = location
+                self.subscription = subscription
+
+        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
+        s2 = ServerInfo(self.kwargs["server_name_2"], self.kwargs["resource_group_2"], self.kwargs["resource_group_location_2"], self.kwargs["partner_subscription"])
+        s3 = ServerInfo(self.kwargs["server_name_3"], self.kwargs["resource_group_2"], self.kwargs["resource_group_location_3"], self.kwargs["partner_subscription"])
+
+        # create db in first server
+        self.cmd('sql db create -g {} -s {} -n {} --yes'
+                 .format(s1.group, s1.name, database_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s1.group)])
+
+        # create replica in second server with min params
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, s2.group, s2.subscription),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group)])
+
+        # create replica in second server with backup storage redundancy
+        backup_storage_redundancy = "zone"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {} --backup-storage-redundancy {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, s2.group, s2.subscription, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
+
+        secondary_type = "Geo"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}  --partner-resource-group {} --partner-sub-id {}'
+                 ' --service-objective {} --partner-database {} --secondary-type {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, s2.group, s2.subscription, service_objective, target_database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('name', target_database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                     JMESPathCheck('secondaryType', secondary_type)])
+
+        # Create replica in pool in third server with max params (except service objective)
+        pool_name = 'cli-automated-tests-pool'
+
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
+                 ' --partner-resource-group {} --partner-sub-id {} --elastic-pool {}'
+                 .format(s1.group, s1.name, database_name,
+                         s3.name, s3.group, s3.subscription, pool_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s3.group),
+                     JMESPathCheck('elasticPoolName', pool_name)])
 
 class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):

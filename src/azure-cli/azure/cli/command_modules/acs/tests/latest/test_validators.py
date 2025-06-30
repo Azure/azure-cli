@@ -146,6 +146,10 @@ class MaxSurgeNamespace:
     def __init__(self, max_surge):
         self.max_surge = max_surge
 
+class MaxUnavailableNamespace:
+    def __init__(self, max_unavailable):
+        self.max_unavailable = max_unavailable
+
 
 class TestMaxSurge(unittest.TestCase):
     def test_valid_cases(self):
@@ -163,6 +167,21 @@ class TestMaxSurge(unittest.TestCase):
             validators.validate_max_surge(MaxSurgeNamespace("-3"))
         self.assertTrue('positive' in str(cm.exception), msg=str(cm.exception))
 
+class TestMaxUnavailable(unittest.TestCase):
+    def test_valid_cases(self):
+        valid = ["5", "33%", "1", "100%", "0"]
+        for v in valid:
+            validators.validate_max_unavailable(MaxUnavailableNamespace(v))
+
+    def test_throws_on_string(self):
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_max_unavailable(MaxUnavailableNamespace("foobar"))
+        self.assertTrue("int or percentage" in str(cm.exception), msg=str(cm.exception))
+
+    def test_throws_on_negative(self):
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_max_unavailable(MaxUnavailableNamespace("-3"))
+        self.assertTrue("positive" in str(cm.exception), msg=str(cm.exception))
 
 class MessageOfTheDayNamespace:
     def __init__(self, message_of_the_day, os_type):
@@ -712,6 +731,43 @@ class TestValidateNodepoolName(unittest.TestCase):
         validators.validate_agent_pool_name(
             namespace
         )
+
+
+class GatewayPrefixSizeSpace:
+    def __init__(self, gateway_prefix_size=None, mode=None):
+        self.gateway_prefix_size = gateway_prefix_size
+        self.mode = mode
+
+
+class TestValidateGatewayPrefixSize(unittest.TestCase):
+    def test_none_gateway_prefix_size(self):
+        namespace = GatewayPrefixSizeSpace()
+        validators.validate_gateway_prefix_size(namespace)
+
+    def test_invalid_gateway_prefix_size_1(self):
+        namespace = GatewayPrefixSizeSpace(gateway_prefix_size=27, mode="Gateway")
+        err = '--gateway-prefix-size must be in the range [28, 31]'
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_gateway_prefix_size(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_gateway_prefix_size_2(self):
+        namespace = GatewayPrefixSizeSpace(gateway_prefix_size=32, mode="Gateway")
+        err = '--gateway-prefix-size must be in the range [28, 31]'
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_gateway_prefix_size(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_mode(self):
+        namespace = GatewayPrefixSizeSpace(gateway_prefix_size=31, mode="System")
+        err = '--gateway-prefix-size can only be set for Gateway-mode nodepools'
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_gateway_prefix_size(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_gateway_prefix_size(self):
+        namespace = GatewayPrefixSizeSpace(gateway_prefix_size=30, mode="Gateway")
+        validators.validate_gateway_prefix_size(namespace)
 
 
 class TestValidateRegistryName(unittest.TestCase):

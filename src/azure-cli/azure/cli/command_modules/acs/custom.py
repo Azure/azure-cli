@@ -602,6 +602,7 @@ def aks_create(
     rotation_poll_interval=None,
     enable_app_routing=False,
     app_routing_default_nginx_controller=None,
+    enable_static_egress_gateway=False,
     # nodepool paramerters
     nodepool_name="nodepool1",
     node_vm_size=None,
@@ -609,6 +610,7 @@ def aks_create(
     snapshot_id=None,
     vnet_subnet_id=None,
     pod_subnet_id=None,
+    pod_ip_allocation_mode=None,
     enable_node_public_ip=False,
     node_public_ip_prefix_id=None,
     enable_cluster_autoscaler=False,
@@ -756,6 +758,7 @@ def aks_update(
     disable_windows_gmsa=False,
     attach_acr=None,
     detach_acr=None,
+    assignee_principal_type=None,
     nrg_lockdown_restriction_level=None,
     enable_defender=False,
     disable_defender=False,
@@ -799,6 +802,8 @@ def aks_update(
     enable_secret_rotation=False,
     disable_secret_rotation=False,
     rotation_poll_interval=None,
+    enable_static_egress_gateway=False,
+    disable_static_egress_gateway=False,
     # nodepool paramerters
     enable_cluster_autoscaler=False,
     disable_cluster_autoscaler=False,
@@ -2392,6 +2397,7 @@ def aks_agentpool_add(
     snapshot_id=None,
     vnet_subnet_id=None,
     pod_subnet_id=None,
+    pod_ip_allocation_mode=None,
     enable_node_public_ip=False,
     node_public_ip_prefix_id=None,
     enable_cluster_autoscaler=False,
@@ -2408,8 +2414,10 @@ def aks_agentpool_add(
     node_osdisk_type=None,
     node_osdisk_size=None,
     max_surge=None,
+    max_unavailable=None,
     drain_timeout=None,
     node_soak_duration=None,
+    undrainable_node_behavior=None,
     mode=CONST_NODEPOOL_MODE_USER,
     scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
     max_pods=None,
@@ -2437,6 +2445,8 @@ def aks_agentpool_add(
     if_none_match=None,
     # gpu driver
     gpu_driver=None,
+    # static egress gateway - gateway-mode pool
+    gateway_prefix_size=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2476,8 +2486,10 @@ def aks_agentpool_update(
     tags=None,
     node_taints=None,
     max_surge=None,
+    max_unavailable=None,
     drain_timeout=None,
     node_soak_duration=None,
+    undrainable_node_behavior=None,
     mode=None,
     scale_down_mode=None,
     no_wait=False,
@@ -2528,8 +2540,10 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           max_surge=None,
+                          max_unavailable=None,
                           drain_timeout=None,
                           node_soak_duration=None,
+                          undrainable_node_behavior=None,
                           snapshot_id=None,
                           no_wait=False,
                           aks_custom_headers=None,
@@ -2549,11 +2563,12 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         )
 
     # Note: we exclude this option because node image upgrade can't accept nodepool put fields like max surge
-    if (max_surge or drain_timeout or node_soak_duration) and node_image_only:
+    hasUpgradeSetting = max_surge or drain_timeout or node_soak_duration or undrainable_node_behavior or max_unavailable
+    if hasUpgradeSetting and node_image_only:
         raise MutuallyExclusiveArgumentError(
-            'Conflicting flags. Unable to specify max-surge/drain-timeout/node-soak-duration with node-image-only.'
+            'Conflicting flags. Unable to specify max-surge/drain-timeout/node-soak-duration/max-unavailable with node-image-only.'
             'If you want to use max-surge/drain-timeout/node-soak-duration with a node image upgrade, please first '
-            'update max-surge/drain-timeout/node-soak-duration using "az aks nodepool update --max-surge/--drain-timeout/--node-soak-duration".'
+            'update max-surge/drain-timeout/node-soak-duration/max-unavailable using "az aks nodepool update --max-surge/--drain-timeout/--node-soak-duration/--max-unavailable".'
         )
 
     if node_image_only:
@@ -2604,6 +2619,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         instance.upgrade_settings.drain_timeout_in_minutes = drain_timeout
     if isinstance(node_soak_duration, int) and node_soak_duration >= 0:
         instance.upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
+    if undrainable_node_behavior:
+        instance.upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(

@@ -3,6 +3,167 @@
 Release History
 ===============
 
+2.75.0
+++++++
+
+**ACR**
+
+* `az acr connected-registry create`: Fix for enabling dedicated endpoint on container registry resource when user confirms during creation (#31661)
+* `az acr login`: Fix login status code when command fails (#31692)
+
+**AKS**
+
+* `az aks create`: Simplify logic and enable correct recording rule groups for managed prom (#31460)
+* `az aks`: Allow `LongRunningOperation` to show poller status (#30903)
+* `az aks update`: Add option `--assignee-principal-type` to specify the principal type when using `--attach-acr` (#31464)
+* `az aks create`: Add `--enable-static-egress-gateway` parameter to support static egress gateway feature (#31285)
+* `az aks update`: Add `--enable-static-egress-gateway` parameter to support static egress gateway feature (#31285)
+* `az aks nodepool add`: Add option `Gateway` to `--mode` parameter and `--gateway-prefix-size` parameter to support static egress gateway feature (#31285)
+* `az aks create`: Add `--pod-ip-allocation-mode` parameter to support Azure CNI Static Block Allocation (#31544)
+* `az aks nodepool add`: Add `--pod-ip-allocation-mode` parameter to support Azure CNI Static Block Allocation (#31544)
+
+**App Config**
+
+* `az appconfig kv export/import/list/delete`: Support filtering by tags (#30694)
+* `az appconfig restore`: Support filtering by tags (#30694)
+* `az appconfig revision list`: Support filtering by tags (#30694)
+* `az appconfig kv import/export/restore`: Add new parameter `--dry-run` to support dry-run feature (#30842)
+
+**ARM**
+
+* `az deployment what-if`: Show potential changes in pretty-printed what-if result (#30930)
+* `az deployment what-if`: Display warnings and diagnostic messages in pretty-printed what-if result (#30930)
+
+**ARO**
+
+* `az aro update`: Fix credential refresh to handle clusters with invalid machinesets (#31593)
+
+**Cloud**
+
+* `az cloud register/update`: Add `--endpoint-microsoft-graph-resource-id` to support configuring Microsoft Graph endpoint (#31651)
+* `az cloud register/update`: Add `--skip-endpoint-discovery` to allow skipping cloud endpoints' auto discovery (#31651)
+
+**Compute**
+
+* [BREAKING CHANGE] `az vmss create/update`: Remove too long argument option `--scheduled-event-additional-publishing-target-event-grid-and-resource-graph` to fix help message issue (#31687)
+
+**Consumption**
+
+* `az consumption usage list`: Fix usage list returns data with replace `None` string to null value (#31601)
+
+**Container app**
+
+* `az containerapp update`: Modify `--yaml` template handling to fix `runningStatus` error (#31508)
+* Fix #31480: `az containerapp revision copy`: Only return `containerapp does not exist` when got 404 (#31689)
+
+**Identity**
+
+* Fix #31598: Fix regression in `az identity federated-credential create` by defaulting audience (#31609)
+
+**Key Vault**
+
+* `az keyvault secret download`: Add `--overwrite` flag (#31659)
+
+**Network**
+
+* `az network nat gateway`: Support Standard V2 SKU (#31532)
+* `az network public-ip`: Support Standard V2 SKU (#31532)
+* `az network public-ip prefix`: Support Standard V2 SKU (#31532)
+* `az network application-gateway waf-policy managed-rule exception`: Support exception feature in application gateway (#31610)
+* `az network vnet subnet create/update`: Support IPAM pool allocation (#31643)
+
+**Packaging**
+
+* Drop Azure Linux (Mariner) 2.0 support (#31533)
+
+**RDBMS**
+
+* `az postgres flexible-server create`: Extend EOL to PG 11 and 12 (#31693)
+
+**Service Fabric**
+
+* Fix #18358: `az sf client-certificate add`: Fix the bug that command fails with `remove` not defined (#31632)
+
+**SQL**
+
+* `az sql db replica create`: Add partner subscription id for cross-subscription GeoDr (#31594)
+
+**Storage**
+
+* `az storage account create/update`: Add `--sas-expiration-action` to sas policy (#31674)
+* `az storage file upload-batch/download-batch`: Add OAuth login support (#31567)
+
+2.74.0
+++++++
+
+**ACR**
+
+* `az acr login`: Add `refreshToken` and `username` fields to the output after using `--expose-token` parameter (#31091)
+* `az acr create`: Fix logs for domain name label (#31423)
+* `az acr connected-registry`: Remove private preview message (#31475)
+
+**AKS**
+
+* `az aks nodepool add/update/upgrade`: Add new parameter `--undrainable-node-behavior` to specify whether nodes can be cordoned during upgrade (#31495)
+* `az aks create/enable-addons`: Remove preview flag for `--enable-high-log-scale-mode` parameter (#31531)
+* `az aks nodepool add/update/upgrade`: Add `--max-unavailable` to specify he maximum number or percentage of nodes that can be simultaneously unavailable during upgrade (#31510)
+
+**App Config**
+
+* Fix #30619: `az appconfig feature set`: Fix invalid value for `--requirement-type` (#31471)
+* Fix #30619: `az appconfig kv import`: Fix invalid value for `--requirement-type` (#31471)
+
+**App Service**
+
+* `az appservice plan create`: Update the description of `--zone-redundant` parameter (#31437)
+* `az webapp config set`: Remove number of workers validation (#31443)
+
+**ARM**
+
+* `az policy`: Add breaking change pre-announcement (#31458)
+
+**Backup**
+
+* `az backup container/item/policy/protection`: Add support for ASE backup operations (#31413)
+* `az backup`: Add support for HANA Snapshot (#27932)
+
+**Compute**
+
+* `az vm/vmss create`: Add warning log for changing the default value of VM size (#31409)
+
+**Cosmos DB**
+
+* `az cosmosdb sql container`: Add Full Text Policy support (#31425)
+
+**Identity**
+
+* `az identity federated-credential create/update`: Add support for claims matching expressions (#31436)
+
+**Monitor**
+
+* `az monitor action-group`: Support `--incident-receivers`,  `--mi-user-assigned` and `--mi-system-assigned`(#31205)
+
+**MySQL**
+
+* `az mysql flexible-server create`: Change default storage redundancy for BC SKU to local redundancy (#31537)
+
+**NetAppFiles**
+
+* `az netappfiles volume-group create`: Add support for Oracle in ANF Volume Groups (#31528)
+
+**Network**
+
+* `az network vnet-gateway create`: Add `--enable-high-bandwith-vpn-gateway` parameter (#31100)
+* `az network vpn-connection show`: Support new properties output with virtual network gateway (#31100)
+* `az network vnet-gateway migration`: Support vpn gateway migration feature (#31429)
+* `az network private-endpoint-connection`: Add provider `Microsoft.FluidRelay/fluidRelayServers` (#31472)
+* `az network network-watcher packet-capture`: Support for packet capture includes a ring buffer (#30784)
+* `az network private-endpoint-connection`: Add provider `Microsoft.VideoIndexer/accounts` (#31549)
+
+**RDBMS**
+
+* `az postgres flexible-server create/db`: Fix for `--database-name` validation (#31542)
+
 2.73.0
 ++++++
 

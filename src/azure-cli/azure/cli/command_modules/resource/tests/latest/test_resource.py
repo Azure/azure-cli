@@ -1968,6 +1968,41 @@ class DeploymentWhatIfAtSubscriptionScopeTest(ScenarioTest):
         ])
 
 
+    def test_subscription_level_what_if_with_short_circuiting(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'subscription': self.get_subscription_id(),
+            'tf': os.path.join(curr_dir, 'policy_definition_deploy.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'policy_definition_deploy_parameters.json').replace('\\', '\\\\'),
+        })
+
+        deployment_output = self.cmd('deployment sub create --location westus --template-file "{tf}"').get_output_in_json()
+        self.kwargs['policy_definition_id'] = deployment_output['properties']['outputs']['policyDefinitionId']['value']
+
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'policy_definition_deploy_with_short_circuiting.json').replace('\\', '\\\\'),
+        })
+
+        # Make sure the formatter works without exception
+        self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}"')
+
+        self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+
+            self.check("changes[0].changeType", 'Unsupported'),
+            self.check("changes[0].unsupportedReason", "Changes to the resource declared at 'properties.template.resources[1]' on line 1 and column 698 cannot be analyzed because its resource ID or API version cannot be calculated until the deployment is under way. Please see https://aka.ms/WhatIfUnidentifiableResource for more guidance."),
+
+            self.check("potentialChanges[?resourceId == '{policy_definition_id}'].changeType | [0]", 'Modify'),
+            self.check("potentialChanges[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].propertyChangeType", 'Modify'),
+            self.check("potentialChanges[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].before", 'northeurope'),
+            self.check("potentialChanges[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].after", 'westeurope'),
+
+            self.check("diagnostics[0].code", "NestedDeploymentShortCircuited"),
+            self.check("diagnostics[0].level", "Warning"),
+            self.check("diagnostics[0].target", "/subscriptions/{subscription}/providers/Microsoft.Resources/deployments/nestedDeployment"),
+        ])
+
+
 class DeploymentWhatIfAtManagementGroupTest(ScenarioTest):
     def test_management_group_level_what_if(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))

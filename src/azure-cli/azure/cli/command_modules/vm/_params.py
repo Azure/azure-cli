@@ -409,8 +409,6 @@ def load_arguments(self, _):
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network')
         c.argument('workspace', is_preview=True, arg_group='Monitor', help='Name or ID of Log Analytics Workspace. If you specify the workspace through its name, the workspace should be in the same resource group with the vm, otherwise a new workspace will be created.')
-    with self.argument_context('vm capture') as c:
-        c.argument('overwrite', action='store_true')
 
     with self.argument_context('vm update') as c:
         c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to")
@@ -849,7 +847,7 @@ def load_arguments(self, _):
             c.argument('enable_osimage_notification', arg_type=get_three_state_flag(), min_api='2022-11-01', help='Specify whether the OS Image Scheduled event is enabled or disabled.')
             c.argument('enable_resilient_creation', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Automatically recover customers from OS Provisioning Timeout and VM Start Timeout errors experienced during a VM Create operation by deleting and recreating the affected VM.')
             c.argument('enable_resilient_deletion', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Retry VM Delete requests asynchronously in the event of a failed delete operation.')
-            c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--scheduled-event-additional-publishing-target-event-grid-and-resource-graph', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
+            c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
             c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
             c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
             c.argument('enable_auto_os_upgrade', enable_auto_os_upgrade_type)

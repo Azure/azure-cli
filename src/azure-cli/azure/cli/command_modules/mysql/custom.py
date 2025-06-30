@@ -1696,11 +1696,7 @@ def _determine_acceleratedLogs(accelerated_logs, tier):
 
 
 def _determine_storage_redundancy(storage_redundancy, tier):
-    if storage_redundancy is None:
-        if tier == "MemoryOptimized":
-            storage_redundancy = "ZoneRedundancy"
-        else:
-            storage_redundancy = "LocalRedundancy"
+    storage_redundancy = "LocalRedundancy"
     return storage_redundancy
 
 

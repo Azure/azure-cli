@@ -2989,6 +2989,30 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             ]
         )
 
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_exception_', location='eastus2')
+    def test_network_app_gateway_waf_policy_exception(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group
+        })
+
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        self.cmd('network application-gateway waf-policy managed-rule exception add -g {rg} --policy-name {waf} '
+                 '--match-variable "RequestURI" --value-match-operator "Contains" --values "health" "account/images" "default.aspx" '
+                 '--rule-sets [0].rule-set-type=OWASP [0].rule-set-version=3.2')
+        self.cmd('network application-gateway waf-policy managed-rule exception list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('exceptions | length(@)', 1)
+                 ])
+        self.cmd('network application-gateway waf-policy managed-rule exception remove -g {rg} --policy-name {waf}')
+        self.cmd('network application-gateway waf-policy managed-rule exception list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.not_exists('exceptions')
+                 ])
+
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
@@ -4983,14 +5007,15 @@ class NetworkVNetScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_ipam_pool_test', location='westus')
     @AllowLargeResponse(size_kb=99999)
-    def test_network_vnet_with_ipam_pool(self, resource_group, resource_group_location):
+    def test_network_vnet_subnet_with_ipam_pool(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'rg': resource_group,
             'location': resource_group_location,
             'manager': 'manager1',
             'pool': 'pool1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'subnet': 'subnet1'
         })
         self.cmd('extension add -n virtual-network-manager')
         self.kwargs['sub_id'] = self.get_subscription_id()
@@ -5001,6 +5026,12 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].id', '{pool_id}'),
             self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].numberOfIpAddresses', 10),
             self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].resourceGroup', '{rg}')
+        ])
+
+        self.cmd('network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet} --ipam-allocations [0].id={pool_id} [0].number-of-ip-addresses=5', checks=[
+            self.check('ipamPoolPrefixAllocations[0].id', '{pool_id}'),
+            self.check('ipamPoolPrefixAllocations[0].numberOfIpAddresses', 5),
+            self.check('ipamPoolPrefixAllocations[0].resourceGroup', '{rg}')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_subnet_nsg_test')
@@ -5505,6 +5536,47 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
                  checks=[self.check('length(@)', 0)])
         self.cmd('network vnet-gateway vpn-client show-health -g {rg} -n {gw}')
         self.cmd('network vnet-gateway show-supported-devices -g {rg} -n {gw} -o tsv')
+
+
+class NetworkVnetGatewayMigration(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_gateway_migration', location='westus')
+    def test_network_vnet_gateway_migration(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'pub_ip': 'public_ip1',
+            'gw': 'gateway1',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --subnet-name GatewaySubnet --subnet-prefix 10.0.0.0/24')
+        self.cmd('network public-ip create -g {rg} -n {pub_ip} --sku Basic')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --sku VpnGw1 --vpn-gateway-generation Generation1 '
+                 '--vnet {vnet} --public-ip-address {pub_ip} --vpn-type RouteBased', 
+                 checks=[
+                    self.check('virtualNetworkGatewayMigrationStatus.state', None),
+                    self.check('virtualNetworkGatewayMigrationStatus.phase', None)
+        ])
+
+        # prepare migration
+        self.cmd('network vnet-gateway migration prepare -g {rg} -n {gw} --migration-type UpgradeDeploymentToStandardIP')
+        self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
+            self.check('virtualNetworkGatewayMigrationStatus.state', 'InProgress'),
+            self.check('virtualNetworkGatewayMigrationStatus.phase', 'PrepareSucceeded')
+        ])
+
+        # execute migration
+        self.cmd('network vnet-gateway migration execute -g {rg} -n {gw}')
+        self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
+            self.check('virtualNetworkGatewayMigrationStatus.state', 'InProgress'),
+            self.check('virtualNetworkGatewayMigrationStatus.phase', 'ExecuteSucceeded')
+        ])
+
+        # commit migration
+        self.cmd('network vnet-gateway migration commit -g {rg} -n {gw}')
+        self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
+            self.check('virtualNetworkGatewayMigrationStatus.state', 'Succeeded'),
+            self.check('virtualNetworkGatewayMigrationStatus.phase', 'CommitSucceeded')
+        ])
 
 
 class NetworkVnetGatewayMultiAuth(ScenarioTest):
@@ -6124,9 +6196,9 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.cmd(
                 'network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --gateway-type ExpressRoute --vpn-gateway-generation Generation1')
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --sku Standard --no-wait')
-        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
-        self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --sku VpnGw1 --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --sku VpnGw1 --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku VpnGw1 --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
 
         self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
         self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
@@ -6135,7 +6207,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway show -g {rg} -n {gw1}', checks=[
             self.check('gatewayType', 'Vpn'),
             self.check('sku.capacity', 2),
-            self.check('sku.name', 'Standard'),
+            self.check('sku.name', 'VpnGw1'),
             self.check('vpnType', 'RouteBased'),
             self.check('vpnGatewayGeneration', 'Generation1'),
             self.check('enableBgp', False),
@@ -6149,16 +6221,17 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway show -g {rg} -n {gw2}', checks=[
             self.check('gatewayType', 'Vpn'),
             self.check('sku.capacity', 2),
-            self.check('sku.name', 'Basic'),
+            self.check('sku.name', 'VpnGw1'),
             self.check('vpnType', 'RouteBased'),
             self.check('enableBgp', False)
         ])
         self.cmd('network vnet-gateway show -g {rg} -n {gw3}', checks=[
-            self.check('sku.name', 'Standard'),
+            self.check('sku.name', 'VpnGw1'),
             self.check('enableBgp', True),
             self.check('bgpSettings.asn', 12345),
             self.check('bgpSettings.bgpPeeringAddress', '10.2.250.250'),
-            self.check('bgpSettings.peerWeight', 50)
+            self.check('bgpSettings.peerWeight', 50),
+            self.check('enableHighBandwidthVpnGateway', False)
         ])
 
         self.kwargs.update({

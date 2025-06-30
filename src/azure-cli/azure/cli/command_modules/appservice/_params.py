@@ -123,7 +123,7 @@ subscription than the app service environment, please use the resource ID for --
                                                                                  'App Service plan level to allow for '
                                                                                  'scaling an app independently from '
                                                                                  'the App Service plan that hosts it.')
-        c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Cannot be changed after plan creation. Minimum instance count is 3.')
+        c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Minimum instance count is 2.')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('appservice plan update') as c:
