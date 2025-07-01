@@ -109,7 +109,7 @@ class AzureNetAppFilesVolumeGroupServiceScenarioTest(ScenarioTest):
         })
         self.cmd("az netappfiles volume-group create -g {rg} -a {acc} -p {pool} --group-name {vg_name} --vnet {vnet} "
                  "--zones {zones} --application-identifier {application_identifier} --application-type {application_type} -l {loc} --add-snapshot-capacity {add_snap_cap} "
-                 "--database-size {size} --database-throughput 120 --number-of-volumes 3",
+                 "--database-size {size} --database-throughput 120 --number-of-volumes 2",
                  checks=[
                      self.check('name', '{acc}/{vg_name}'),
                      self.check('groupMetaData.volumesCount', 6),
