@@ -29,6 +29,9 @@ def aad_error_handler(error, **kwargs):
     # To trigger this function for testing, simply provide an invalid scope:
     # az account get-access-token --scope https://my-invalid-scope
 
+    import json
+    logger.debug('MSAL error: %s', json.dumps(error))
+
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
         import socket
