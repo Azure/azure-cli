@@ -21,9 +21,9 @@ class ListInstances(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/virtualmachines", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/virtualmachines", "2024-11-01"],
         ]
     }
 
@@ -141,7 +141,7 @@ class ListInstances(AAZCommand):
                     "$select", self.ctx.args.select,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -191,7 +191,7 @@ class ListInstances(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.instance_id = AAZStrType(
                 serialized_name="instanceId",
                 flags={"read_only": True},
@@ -209,7 +209,9 @@ class ListInstances(AAZCommand):
             _element.resources = AAZListType(
                 flags={"read_only": True},
             )
-            _element.sku = AAZObjectType()
+            _element.sku = AAZObjectType(
+                flags={"read_only": True},
+            )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -269,6 +271,7 @@ class ListInstances(AAZCommand):
             )
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
+                flags={"read_only": True},
             )
             properties.latest_model_applied = AAZBoolType(
                 serialized_name="latestModelApplied",
@@ -296,6 +299,9 @@ class ListInstances(AAZCommand):
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
+            )
+            properties.resilient_vm_deletion_status = AAZStrType(
+                serialized_name="resilientVMDeletionStatus",
             )
             properties.security_profile = AAZObjectType(
                 serialized_name="securityProfile",
@@ -393,6 +399,7 @@ class ListInstances(AAZCommand):
             )
             instance_view.vm_health = AAZObjectType(
                 serialized_name="vmHealth",
+                flags={"read_only": True},
             )
 
             boot_diagnostics = cls._schema_on_200.value.Element.properties.instance_view.boot_diagnostics
@@ -404,7 +411,9 @@ class ListInstances(AAZCommand):
                 serialized_name="serialConsoleLogBlobUri",
                 flags={"read_only": True},
             )
-            boot_diagnostics.status = AAZObjectType()
+            boot_diagnostics.status = AAZObjectType(
+                flags={"read_only": True},
+            )
             _ListInstancesHelper._build_schema_instance_view_status_read(boot_diagnostics.status)
 
             disks = cls._schema_on_200.value.Element.properties.instance_view.disks
@@ -481,7 +490,9 @@ class ListInstances(AAZCommand):
             _ListInstancesHelper._build_schema_instance_view_status_read(statuses.Element)
 
             vm_health = cls._schema_on_200.value.Element.properties.instance_view.vm_health
-            vm_health.status = AAZObjectType()
+            vm_health.status = AAZObjectType(
+                flags={"read_only": True},
+            )
             _ListInstancesHelper._build_schema_instance_view_status_read(vm_health.status)
 
             network_profile = cls._schema_on_200.value.Element.properties.network_profile
@@ -754,6 +765,7 @@ class ListInstances(AAZCommand):
                 serialized_name="publicIPAddressConfiguration",
             )
             properties.subnet = AAZObjectType()
+            _ListInstancesHelper._build_schema_api_entity_reference_read(properties.subnet)
 
             application_gateway_backend_address_pools = cls._schema_on_200.value.Element.properties.network_profile_configuration.network_interface_configurations.Element.properties.ip_configurations.Element.properties.application_gateway_backend_address_pools
             application_gateway_backend_address_pools.Element = AAZObjectType()
@@ -819,9 +831,6 @@ class ListInstances(AAZCommand):
                 serialized_name="ipTagType",
             )
             _element.tag = AAZStrType()
-
-            subnet = cls._schema_on_200.value.Element.properties.network_profile_configuration.network_interface_configurations.Element.properties.ip_configurations.Element.properties.subnet
-            subnet.id = AAZStrType()
 
             os_profile = cls._schema_on_200.value.Element.properties.os_profile
             os_profile.admin_password = AAZStrType(
@@ -931,6 +940,7 @@ class ListInstances(AAZCommand):
             )
             windows_configuration.enable_vm_agent_platform_updates = AAZBoolType(
                 serialized_name="enableVMAgentPlatformUpdates",
+                flags={"read_only": True},
             )
             windows_configuration.patch_settings = AAZObjectType(
                 serialized_name="patchSettings",
@@ -1026,10 +1036,16 @@ class ListInstances(AAZCommand):
 
             proxy_agent_settings = cls._schema_on_200.value.Element.properties.security_profile.proxy_agent_settings
             proxy_agent_settings.enabled = AAZBoolType()
+            proxy_agent_settings.imds = AAZObjectType()
+            _ListInstancesHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
             proxy_agent_settings.key_incarnation_id = AAZIntType(
                 serialized_name="keyIncarnationId",
             )
             proxy_agent_settings.mode = AAZStrType()
+            proxy_agent_settings.wire_server = AAZObjectType(
+                serialized_name="wireServer",
+            )
+            _ListInstancesHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
             uefi_settings = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -1040,6 +1056,9 @@ class ListInstances(AAZCommand):
             )
 
             storage_profile = cls._schema_on_200.value.Element.properties.storage_profile
+            storage_profile.align_regional_disks_to_vm_zone = AAZBoolType(
+                serialized_name="alignRegionalDisksToVMZone",
+            )
             storage_profile.data_disks = AAZListType(
                 serialized_name="dataDisks",
             )
@@ -1089,6 +1108,10 @@ class ListInstances(AAZCommand):
             )
             _ListInstancesHelper._build_schema_managed_disk_parameters_read(_element.managed_disk)
             _element.name = AAZStrType()
+            _element.source_resource = AAZObjectType(
+                serialized_name="sourceResource",
+            )
+            _ListInstancesHelper._build_schema_api_entity_reference_read(_element.source_resource)
             _element.to_be_detached = AAZBoolType(
                 serialized_name="toBeDetached",
             )
@@ -1187,7 +1210,7 @@ class ListInstances(AAZCommand):
                 serialized_name="instanceView",
             )
             _ListInstancesHelper._build_schema_virtual_machine_extension_instance_view_read(properties.instance_view)
-            properties.protected_settings = AAZObjectType(
+            properties.protected_settings = AAZFreeFormDictType(
                 serialized_name="protectedSettings",
             )
             properties.protected_settings_from_key_vault = AAZObjectType(
@@ -1202,7 +1225,7 @@ class ListInstances(AAZCommand):
                 flags={"read_only": True},
             )
             properties.publisher = AAZStrType()
-            properties.settings = AAZObjectType()
+            properties.settings = AAZFreeFormDictType()
             properties.suppress_failures = AAZBoolType(
                 serialized_name="suppressFailures",
             )
@@ -1233,6 +1256,21 @@ class ListInstances(AAZCommand):
 
 class _ListInstancesHelper:
     """Helper class for ListInstances"""
+
+    _schema_api_entity_reference_read = None
+
+    @classmethod
+    def _build_schema_api_entity_reference_read(cls, _schema):
+        if cls._schema_api_entity_reference_read is not None:
+            _schema.id = cls._schema_api_entity_reference_read.id
+            return
+
+        cls._schema_api_entity_reference_read = _schema_api_entity_reference_read = AAZObjectType()
+
+        api_entity_reference_read = _schema_api_entity_reference_read
+        api_entity_reference_read.id = AAZStrType()
+
+        _schema.id = cls._schema_api_entity_reference_read.id
 
     _schema_disk_encryption_set_parameters_read = None
 
@@ -1285,6 +1323,26 @@ class _ListInstancesHelper:
         _schema.disk_encryption_key = cls._schema_disk_encryption_settings_read.disk_encryption_key
         _schema.enabled = cls._schema_disk_encryption_settings_read.enabled
         _schema.key_encryption_key = cls._schema_disk_encryption_settings_read.key_encryption_key
+
+    _schema_host_endpoint_settings_read = None
+
+    @classmethod
+    def _build_schema_host_endpoint_settings_read(cls, _schema):
+        if cls._schema_host_endpoint_settings_read is not None:
+            _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+            _schema.mode = cls._schema_host_endpoint_settings_read.mode
+            return
+
+        cls._schema_host_endpoint_settings_read = _schema_host_endpoint_settings_read = AAZObjectType()
+
+        host_endpoint_settings_read = _schema_host_endpoint_settings_read
+        host_endpoint_settings_read.in_vm_access_control_profile_reference_id = AAZStrType(
+            serialized_name="inVMAccessControlProfileReferenceId",
+        )
+        host_endpoint_settings_read.mode = AAZStrType()
+
+        _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+        _schema.mode = cls._schema_host_endpoint_settings_read.mode
 
     _schema_instance_view_status_read = None
 
