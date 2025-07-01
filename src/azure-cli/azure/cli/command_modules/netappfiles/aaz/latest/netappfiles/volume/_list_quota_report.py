@@ -12,20 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "netappfiles volume list-quota-report",
+    is_preview=True,
 )
-class Delete(AAZCommand):
-    """Delete the specified volume
+class ListQuotaReport(AAZCommand):
+    """Returns report of quotas for the volume
 
-    :example: Delete an ANF volume
-        az netappfiles volume delete -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+    :example: ListQuotaReport
+        az netappfiles volume list-quota-report --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1
     """
 
     _aaz_info = {
-        "version": "2025-03-01",
+        "version": "2024-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/listquotareport", "2024-03-01-preview"],
         ]
     }
 
@@ -33,7 +33,7 @@ class Delete(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -70,7 +70,7 @@ class Delete(AAZCommand):
             required=True,
         )
         _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--name", "--volume-name"],
+            options=["-v", "--volume-name"],
             help="The name of the volume",
             required=True,
             id_part="child_name_2",
@@ -80,15 +80,11 @@ class Delete(AAZCommand):
                 min_length=1,
             ),
         )
-        _args_schema.force_delete = AAZBoolArg(
-            options=["--force", "--force-delete"],
-            help="An option to force delete the volume. Will cleanup resources connected to the particular volume",
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.VolumesDelete(ctx=self.ctx)()
+        yield self.VolumesListQuotaReport(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -99,7 +95,11 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class VolumesDelete(AAZHttpOperation):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class VolumesListQuotaReport(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -109,25 +109,16 @@ class Delete(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [204]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_204,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -138,13 +129,13 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/listQuotaReport",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -180,24 +171,72 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "forceDelete", self.ctx.args.force_delete,
-                ),
-                **self.serialize_query_param(
-                    "api-version", "2025-03-01",
+                    "api-version", "2024-03-01-preview",
                     required=True,
                 ),
             }
             return parameters
 
-        def on_204(self, session):
-            pass
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
 
-        def on_200_201(self, session):
-            pass
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.is_derived_quota = AAZBoolType(
+                serialized_name="isDerivedQuota",
+            )
+            _element.percentage_used = AAZFloatType(
+                serialized_name="percentageUsed",
+            )
+            _element.quota_limit_total_in_ki_bs = AAZIntType(
+                serialized_name="quotaLimitTotalInKiBs",
+            )
+            _element.quota_limit_used_in_ki_bs = AAZIntType(
+                serialized_name="quotaLimitUsedInKiBs",
+            )
+            _element.quota_target = AAZStrType(
+                serialized_name="quotaTarget",
+            )
+            _element.quota_type = AAZStrType(
+                serialized_name="quotaType",
+            )
+
+            return cls._schema_on_200
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _ListQuotaReportHelper:
+    """Helper class for ListQuotaReport"""
 
 
-__all__ = ["Delete"]
+__all__ = ["ListQuotaReport"]

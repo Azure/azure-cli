@@ -590,7 +590,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         })
 
         networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id='{networkSiblingSetStateId}' --network-features {networkFeatures}").get_output_in_json()
-    
+
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_volume_size_8Tib(self):
@@ -629,8 +629,8 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
     def test_exernal_migration_volume_fails(self):
         # create source volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        pool_name = self.create_random_name(prefix='cli-pool-', length=24)        
-        volume_name = self.create_random_name(prefix='cli-vol-', length=24)        
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         rg = '{rg}'
         external_host_name = "externalHostName"
         external_server_name = "externalServerName"
@@ -639,15 +639,16 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
         file_path = volume_name  # creation_token
         subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
-        # rg_r = self.create_random_name(prefix='cli-rg-', length=24)        
+        # rg_r = self.create_random_name(prefix='cli-rg-', length=24)
         subs_id = self.current_subscription()
         volumeType = "Migration"
+        network_features = "Standard"
         self.setup_vnet(rg, vnet_name, subnet_name, '10.1.0.0', DP_RG_LOCATION)
         self.cmd("az netappfiles account create -g %s -a %s -l %s" % (rg, account_name, DP_RG_LOCATION)).get_output_in_json()
         self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s" % (rg, account_name, pool_name, DP_RG_LOCATION, POOL_DEFAULT)).get_output_in_json()
 
-        subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, rg, vnet_name, subnet_name)        
-        dst_volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --volume-type %s --file-path %s --vnet %s --subnet %s --external-host-name %s --external-server-name %s --external-volume-name %s" % (rg, account_name, pool_name, volume_name, DP_RG_LOCATION, VOLUME_DEFAULT, volumeType, file_path, vnet_name, subnet_id, external_host_name, external_server_name, external_volume_name)).get_output_in_json()
+        subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, rg, vnet_name, subnet_name)
+        dst_volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --volume-type %s --file-path %s --vnet %s --subnet %s --external-host-name %s --external-server-name %s --external-volume-name %s --network-features %s" % (rg, account_name, pool_name, volume_name, DP_RG_LOCATION, VOLUME_DEFAULT, volumeType, file_path, vnet_name, subnet_id, external_host_name, external_server_name, external_volume_name, network_features)).get_output_in_json()
         assert dst_volume['dataProtection'] is not None
         assert dst_volume['id'] is not None
 
@@ -657,29 +658,28 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # Peer external cluster
         peerIpAddresses = ["0.0.0.1","0.0.0.2","0.0.0.3","0.0.0.4","0.0.0.5","0.0.0.6"]
         with self.assertRaises(HttpResponseError) as cm:
-            self.cmd("az netappfiles volume replication peer-external-cluster -g %s -a %s -p %s -v %s --peer-ip-addresses %s" % (rg, account_name, pool_name, volume_name, peerIpAddresses))  
+            self.cmd("az netappfiles volume replication peer-external-cluster -g %s -a %s -p %s -v %s --peer-ip-addresses %s" % (rg, account_name, pool_name, volume_name, peerIpAddresses))
         # self.assertIn('GroupIdListForLDAPUserNotSupportedVolumes', str(
         #     cm.exception))
 
         # Authorize external cluster
         with self.assertRaises(HttpResponseError) as cm:
-            self.cmd("az netappfiles volume replication authorize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+            self.cmd("az netappfiles volume replication authorize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))
         self.assertIn('peer targeting', str(
            cm.exception))
 
         # Perform external cluster transfer
         with self.assertRaises(HttpResponseError) as cm:
-            self.cmd("az netappfiles volume replication perform-replication-transfer -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+            self.cmd("az netappfiles volume replication perform-replication-transfer -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))
         self.assertIn('VolumeReplicationHasNotBeenCreated', str(
             cm.exception))
 
         # Finalize external cluster transfer
         with self.assertRaises(HttpResponseError) as cm:
-            self.cmd("az netappfiles volume replication finalize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+            self.cmd("az netappfiles volume replication finalize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))
         self.assertIn('VolumeReplicationMissingFor', str(
             cm.exception))
 
 
         self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s --yes" % (account_name, pool_name, volume_name))
-        
-        
+
