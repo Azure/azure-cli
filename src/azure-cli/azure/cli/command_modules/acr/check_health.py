@@ -345,7 +345,7 @@ def _check_registry_health(cmd, registry_name, repository, ignore_errors):
     status_validated = _get_registry_status(login_server, registry_name, ignore_errors)
     if status_validated:
         RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
-        registry_abac_enabled = 
+        registry_abac_enabled = \
             registry and registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
         _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, repository, ignore_errors)
 
