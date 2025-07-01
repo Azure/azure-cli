@@ -139,8 +139,8 @@ def get_custom_hook_policy(cli_ctx):
         if policy_token:
             request.http_request.headers['x-ms-policy-external-evaluations'] = policy_token
 
-    acquire_policy_token = ctx.cli_ctx.data.get('_acquire_policy_token', False)
-    change_reference = ctx.cli_ctx.data.get('_change_reference', None)
+    acquire_policy_token = cli_ctx.data.get('_acquire_policy_token', False)
+    change_reference = cli_ctx.data.get('_change_reference', None)
     if change_reference or acquire_policy_token:
         from azure.core.pipeline.policies import CustomHookPolicy
         return CustomHookPolicy(raw_request_hook=_acquire_policy_token_request_hook)
