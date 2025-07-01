@@ -1263,6 +1263,43 @@ class DeploymentTestsWithQueryString(LiveScenarioTest):
         ])
 
 
+class DeploymentTestsWithValidationLevel(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_validation_level_rg', location='eastus')
+    def test_rg_deployment_with_validation_level(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'simple_template.json')
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'tf': tf,
+        })
+
+        self.cmd('deployment group validate -g {resource_group} --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if -g {resource_group} --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+
+    def test_sub_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'template_sub_validate.json')
+
+        self.kwargs.update({
+            'tf': tf,
+        })
+
+        self.cmd('deployment sub validate -l eastus --template-file "{tf}" --validation-level template --parameters name="cli_test_validation_level_sub"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment sub what-if -l eastus --template-file "{tf}" --validation-level providerNoRbac --parameters name="cli_test_validation_level_sub" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
     def tearDown(self):
         self.cmd('policy assignment delete -n location-lock')
