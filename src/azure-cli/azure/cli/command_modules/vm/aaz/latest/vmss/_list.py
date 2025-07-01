@@ -169,7 +169,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -1262,7 +1262,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
