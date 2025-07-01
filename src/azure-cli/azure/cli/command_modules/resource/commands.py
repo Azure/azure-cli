@@ -307,16 +307,14 @@ def load_command_table(self, _):
         g.custom_show_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
-    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,
-                            min_api='2019-03-02-hybrid') as g:
+    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features) as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('register', 'register_feature')
         g.custom_command('unregister', 'unregister_feature')
 
-    with self.command_group('feature registration', resource_feature_registration_sdk, client_factory=cf_feature_registrations, resource_type=PROFILE_TYPE,
-                            min_api='2021-07-01') as g:
+    with self.command_group('feature registration', resource_feature_registration_sdk, client_factory=cf_feature_registrations) as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_feature_registrations', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
@@ -328,7 +326,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'get_tag_at_scope')
         g.custom_command('create', 'create_or_update_tag_at_scope')
         g.custom_command('delete', 'delete_tag_at_scope', confirmation=True)
-        g.custom_command('update', 'update_tag_at_scope', min_api='2019-10-01')
+        g.custom_command('update', 'update_tag_at_scope')
         g.command('add-value', 'create_or_update_value')
         g.command('remove-value', 'delete_value')
 
@@ -509,13 +507,13 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_policy_assignment')
 
     with self.command_group('policy assignment identity',
-                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
-        g.custom_command('assign', 'set_identity', validator=process_assign_identity_namespace, min_api='2021-06-01')
+                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
+        g.custom_command('assign', 'set_identity', validator=process_assign_identity_namespace)
         g.custom_show_command('show', 'show_identity')
         g.custom_command('remove', 'remove_identity')
 
     with self.command_group('policy assignment non-compliance-message',
-                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
+                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_non_compliance_message')
         g.custom_command('list', 'list_policy_non_compliance_message')
         g.custom_command('delete', 'delete_policy_non_compliance_message')
@@ -529,7 +527,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_policy_definition')
 
     with self.command_group('policy set-definition', resource_policy_set_definitions_sdk,
-                            operation_group='policy_set_definitions', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
+                            operation_group='policy_set_definitions', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_setdefinition')
         g.custom_command('delete', 'delete_policy_setdefinition')
         g.custom_command('list', 'list_policy_setdefinition')
@@ -537,7 +535,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_policy_setdefinition')
 
     with self.command_group('policy exemption', resource_policy_exemptions_sdk, is_preview=True,
-                            operation_group='policy_exemptions', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-07-01-preview') as g:
+                            operation_group='policy_exemptions', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_exemption')
         g.custom_command('delete', 'delete_policy_exemption')
         g.custom_command('list', 'list_policy_exemption')
@@ -558,13 +556,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resource_links')
         g.custom_command('update', 'update_resource_link')
 
-    with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
+    with self.command_group('managedapp', resource_managedapp_sdk, resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
         g.custom_command('create', 'create_application')
         g.command('delete', 'begin_delete')
         g.custom_show_command('show', 'show_application')
         g.custom_command('list', 'list_applications')
 
-    with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
+    with self.command_group('managedapp definition', resource_managedapp_def_sdk, resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
         g.custom_command('create', 'create_or_update_applicationdefinition')
         g.custom_command('update', 'create_or_update_applicationdefinition')
         g.command('delete', 'begin_delete')

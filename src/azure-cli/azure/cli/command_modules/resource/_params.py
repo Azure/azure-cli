@@ -55,7 +55,7 @@ def load_arguments(self, _):
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
                                                     help="a path to a template file or Bicep file in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
-    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], min_api='2019-06-01', help="The template spec resource id.")
+    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], help="The template spec resource id.")
     deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
@@ -65,28 +65,22 @@ def load_arguments(self, _):
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
     deployment_what_if_type = CLIArgumentType(options_list=['--what-if', '-w'], action='store_true',
-                                              help='Instruct the command to run deployment What-If.',
-                                              min_api='2019-07-01')
+                                              help='Instruct the command to run deployment What-If.')
     deployment_what_if_proceed_if_no_change_type = CLIArgumentType(options_list=['--proceed-if-no-change'], action='store_true',
-                                                                   help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.',
-                                                                   min_api='2019-07-01')
+                                                                   help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.')
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
-                                                            arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
-                                                            min_api='2019-07-01')
+                                                            arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"))
     deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
                                                               help='Disable pretty-print for What-If results. When set, the output format type will be used.')
     deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
-                                                           help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.',
-                                                           min_api='2019-07-01')
+                                                           help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.')
     deployment_what_if_exclude_change_types_type = CLIArgumentType(nargs="+", options_list=['--exclude-change-types', '-x'],
                                                                    arg_type=get_enum_type(ChangeType),
-                                                                   help='Space-separated list of resource change types to be excluded from What-If results.',
-                                                                   min_api='2019-07-01')
+                                                                   help='Space-separated list of resource change types to be excluded from What-If results.')
     tag_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The tag name.')
     tag_value_type = CLIArgumentType(options_list='--value', help='The tag value.')
     tag_resource_id_type = CLIArgumentType(options_list='--resource-id',
-                                           help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.',
-                                           min_api='2019-10-01')
+                                           help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.')
 
     latest_include_preview_type = CLIArgumentType(options_list=['--latest-include-preview', '-v'], is_preview=True,
                                                   action='store_true', arg_group='Resource Id',
@@ -221,10 +215,10 @@ def load_arguments(self, _):
         c.argument('rules', help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
         c.argument('display_name', help='Display name of policy definition.')
         c.argument('description', help='Description of policy definition.')
-        c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
-        c.argument('metadata', min_api='2017-06-01-preview', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
+        c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter())
+        c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
         c.argument('management_group', arg_type=management_group_name_type)
-        c.argument('mode', options_list=['--mode', '-m'], help='Mode of the policy definition, e.g. All, Indexed. Please visit https://aka.ms/azure-policy-mode for more information.', min_api='2016-12-01')
+        c.argument('mode', options_list=['--mode', '-m'], help='Mode of the policy definition, e.g. All, Indexed. Please visit https://aka.ms/azure-policy-mode for more information.')
         c.argument('subscription', arg_type=subscription_type)
         c.ignore('_subscription')  # disable global subscription
 
@@ -236,57 +230,57 @@ def load_arguments(self, _):
         c.argument('scope', help='Scope at which this policy assignment subcommand applies. Defaults to current context subscription.')
         c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
         c.argument('display_name', help='Display name of the policy assignment.')
-        c.argument('description', help='Description of the policy assignment.', min_api='2016-12-01')
+        c.argument('description', help='Description of the policy assignment.')
         c.argument('policy', help='Name or id of the policy definition. If not provided, a policy set definition parameter must be provided.', completer=get_policy_completion_list)
-        c.argument('params', options_list=['--params', '-p'], help='JSON formatted string or a path to a file or uri with parameter values of the policy rule.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
+        c.argument('params', options_list=['--params', '-p'], help='JSON formatted string or a path to a file or uri with parameter values of the policy rule.', type=file_type, completer=FilesCompleter())
 
-    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition. If not provided, a policy definition parameter must be provided.')
         c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']), deprecate_info=c.deprecate(hide=True))
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
-    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity') as c:
         c.argument('assign_identity', nargs='*', help="Assigns a system assigned identity to the policy assignment. This argument will be deprecated, please use --mi-system-assigned instead", deprecate_info=c.deprecate(hide=True))
         c.argument('mi_system_assigned', action='store_true', help='Provide this flag to use system assigned identity for policy assignment. Check out help for more examples')
-        c.argument('mi_user_assigned', min_api='2021-06-01', help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
+        c.argument('mi_user_assigned', help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
 
-    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
+    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(EnforcementMode))
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment.')
 
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
+    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
 
-    with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
+    with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('mi_system_assigned', action='store_true', options_list=['--system-assigned'], help='Provide this flag to use system assigned identity for policy assignment. Check out help for more examples')
-        c.argument('mi_user_assigned', options_list=['--user-assigned'], min_api='2021-06-01', help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
+        c.argument('mi_user_assigned', options_list=['--user-assigned'], help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
 
-    with self.argument_context('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as c:
+    with self.argument_context('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('message', options_list=['--message', '-m'], help='Message that will be shown when a resource is denied by policy or evaluation details are inspected.')
         c.argument('policy_definition_reference_id', options_list=['--policy-definition-reference-id', '-r'], help='Policy definition reference ID within the assigned initiative (policy set) that the message applies to.')
 
-    with self.argument_context('policy set-definition', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+    with self.argument_context('policy set-definition', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
         c.argument('display_name', help='Display name of policy set definition.')
         c.argument('description', help='Description of policy set definition.')
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter())
         c.argument('definitions', help='JSON formatted string or a path to a file or uri containing definitions.', type=file_type, completer=FilesCompleter())
-        c.argument('definition_groups', min_api='2019-09-01', help='JSON formatted string or a path to a file or uri containing policy definition groups. Groups are used to organize policy definitions within a policy set.', type=file_type, completer=FilesCompleter())
+        c.argument('definition_groups', help='JSON formatted string or a path to a file or uri containing policy definition groups. Groups are used to organize policy definitions within a policy set.', type=file_type, completer=FilesCompleter())
         c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
         c.argument('management_group', arg_type=management_group_name_type)
         c.argument('subscription', arg_type=subscription_type)
         c.ignore('_subscription')  # disable global subscription
 
-    with self.argument_context('policy set-definition create', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+    with self.argument_context('policy set-definition create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy set definition.')
 
-    with self.argument_context('policy exemption', min_api='2020-09-01', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+    with self.argument_context('policy exemption', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.ignore('_subscription')
         c.argument('name', options_list=['--name', '-n'], completer=get_policy_exemption_completion_list, help='Name of the policy exemption.')
         c.argument('scope', help='Scope to which this policy exemption applies.')
@@ -298,7 +292,7 @@ def load_arguments(self, _):
         c.argument('expires_on', help='The expiration date and time (in UTC ISO 8601 format yyyy-MM-ddTHH:mm:ssZ) of the policy exemption.')
         c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
 
-    with self.argument_context('policy exemption create', min_api='2020-09-01', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+    with self.argument_context('policy exemption create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy exemption.')
         c.argument('policy_assignment', options_list=['--policy-assignment', '-a'], help='The referenced policy assignment Id for the policy exemption.')
 
@@ -465,13 +459,12 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
-                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+                   arg_type=deployment_what_if_result_format_type)
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
-                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
-                   min_api="2019-10-01")
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='The mode that is used to deploy resources. This value can be either Incremental or Complete. In Incremental mode, resources are deployed without deleting existing resources that are not included in the template. In Complete mode, resources are deployed and existing resources in the resource group that are not included in the template are deleted. Be careful when using Complete mode as you may unintentionally delete resources.')
@@ -503,13 +496,12 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
-                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+                   arg_type=deployment_what_if_result_format_type)
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
-                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
-                   min_api="2019-10-01")
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
 
@@ -541,12 +533,12 @@ def load_arguments(self, _):
                    help='name of the new resource group', completer=None,
                    local_context_attribute=LocalContextAttribute(
                        name='resource_group_name', actions=[LocalContextAction.SET], scopes=[ALL]))
-        c.argument('managed_by', min_api='2016-09-01', help='The ID of the resource that manages this resource group.')
+        c.argument('managed_by', help='The ID of the resource that manages this resource group.')
 
     with self.argument_context('group delete') as c:
         c.argument('resource_group_name', resource_group_name_type,
                    options_list=['--name', '-n', '--resource-group', '-g'], local_context_attribute=None)
-        c.argument('force_deletion_types', options_list=['--force-deletion-types', '-f'], min_api='2021-04-01',
+        c.argument('force_deletion_types', options_list=['--force-deletion-types', '-f'],
                    arg_type=get_enum_type(['Microsoft.Compute/virtualMachines', 'Microsoft.Compute/virtualMachineScaleSets', 'Microsoft.Databricks/workspaces']),
                    help='The resource types you want to force delete.')
 

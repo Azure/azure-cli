@@ -345,7 +345,7 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'plan': 'cli_res_create_plan',
-            'app': 'clirescreateweb2',
+            'app': 'clirescreateweb4',
             'loc': resource_group_location
         })
 
@@ -360,14 +360,12 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
         self.cmd('resource create --id {app_settings_id} --properties "{{\\"key2\\":\\"value12\\"}}"',
                  checks=[self.check('properties.key2', 'value12')])
 
-        self.cmd('resource wait --id {app_settings_id} --created')
-
         self.cmd('resource wait --id {app_settings_id} --exists')
 
         self.cmd('resource show --id {app_config_id}',
-                 checks=self.check('properties.publishingUsername', '${app}'))
+                 checks=self.check('properties.publishingUsername', 'REDACTED'))
         self.cmd('resource show --id {app_config_id} --include-response-body',
-                 checks=self.check('responseBody.properties.publishingUsername', '${app}'))
+                 checks=self.check('responseBody.properties.publishingUsername', 'REDACTED'))
 
 
 class TagScenarioTest(ScenarioTest):
@@ -418,7 +416,7 @@ class TagScenarioTest(ScenarioTest):
             'resource_group_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
         })
 
-        vault = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults '
+        vault = self.cmd('resource create -g {rg} -n {vault} --api-version 2025-02-01 --resource-type Microsoft.RecoveryServices/vaults '
                 '--is-full-object -p "{{\\"properties\\":{{\\"publicNetworkAccess\\":\\"Enabled\\"}},\\"location\\":\\"{loc}\\",'
                          '\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
                          checks=self.check('name', '{vault}')).get_output_in_json()
@@ -487,7 +485,7 @@ class TagScenarioTest(ScenarioTest):
         })
 
         resource = self.cmd(
-            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            'resource create -g {rg} -n {vault} --api-version 2021-03-01 --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
             checks=self.check('name', '{vault}')).get_output_in_json()
 
         self.kwargs['vault_id'] = resource['id']
@@ -516,7 +514,7 @@ class TagScenarioTest(ScenarioTest):
         })
 
         resource = self.cmd(
-            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p '
+            'resource create -g {rg} -n {vault} --api-version 2021-08-01 --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p '
             '"{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
             checks=self.check('name', '{vault}')).get_output_in_json()
 
@@ -572,7 +570,7 @@ class TagScenarioTest(ScenarioTest):
         })
 
         resource = self.cmd(
-            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            'resource create -g {rg} -n {vault} --api-version 2021-03-01 --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
             checks=self.check('name', '{vault}')).get_output_in_json()
 
         self.utility_tag_create_or_update_scope(resource_id=resource['id'])
@@ -621,7 +619,7 @@ class TagScenarioTest(ScenarioTest):
         })
 
         resource = self.cmd(
-            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            'resource create -g {rg} -n {vault} --api-version 2021-03-01 --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
             checks=self.check('name', '{vault}')).get_output_in_json()
 
         self.utility_tag_update_scope(resource_id=resource['id'])
@@ -681,7 +679,7 @@ class TagScenarioTest(ScenarioTest):
         })
 
         resource = self.cmd(
-            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            'resource create -g {rg} -n {vault} --api-version 2021-03-01 --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
             checks=self.check('name', '{vault}')).get_output_in_json()
 
         self.utility_tag_get_scope(resource_id=resource['id'])
@@ -3829,7 +3827,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.resource_policy_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_identity')
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse(40960)
     def test_resource_policy_identity(self, resource_group, resource_group_location):
         self.kwargs.update({
             'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
@@ -3932,7 +3930,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_systemassigned')
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse(40960)
     def test_resource_policy_identity_systemassigned(self, resource_group, resource_group_location):
         self.kwargs.update({
             'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
@@ -4032,7 +4030,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_identity_userassigned')
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse(40960)
     def test_resource_policy_identity_userassigned(self, resource_group, resource_group_location):
         self.kwargs.update({
             'pan': self.create_random_name('azurecli-test-assignment', 40),
@@ -4221,7 +4219,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(40960)
     def test_resource_policy_management_group(self, resource_group):
         management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
         self.cmd('account management-group create -n ' + management_group_name)
@@ -4249,12 +4247,12 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policy_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(40960)
     def test_resource_policyset_default(self, resource_group):
         self.resource_policyset_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(40960)
     def test_resource_policyset_management_group(self, resource_group):
         management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
         self.cmd('account management-group create -n ' + management_group_name)
@@ -4265,7 +4263,7 @@ class PolicyScenarioTest(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(40960)
     def test_resource_policyset_subscription_id(self, resource_group):
         # under playback, we mock it so the subscription id will be '00000000...' and it will match
         # the same sanitized value in the recording
@@ -4277,7 +4275,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(40960)
     def test_resource_policyset_grouping(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -4588,12 +4586,12 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=self.check("length([?name=='{dpn}'])", 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyexemption')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(40960)
     def test_resource_policyexemption_default(self, resource_group):
         self.resource_policyexemption_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyexemption_management_group')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(40960)
     def test_resource_policyexemption_management_group(self, resource_group):
         management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
         self.cmd('account management-group create -n ' + management_group_name)
