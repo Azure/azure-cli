@@ -8552,6 +8552,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 mc.agent_pool_profiles,
             )
 
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v2_extension_installed
+            is_container_storage_v2_extension_installed, version_v2 = get_container_storage_v2_extension_installed(self.cmd, self.context.get_resource_group_name(), self.context.get_name())
+
             from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
             generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
 
@@ -8604,6 +8607,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     nodepool_list,
                     agentpool_details,
                     is_extension_installed,
+                    is_container_storage_v2_extension_installed,
+                    version_v2,
                     is_azureDisk_enabled,
                     is_elasticSan_enabled,
                     is_ephemeralDisk_localssd_enabled,
@@ -8749,27 +8754,23 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         # TODO: waiting on Francis response on my comment on the doc. Version names should not be mentioned ideally.
         # If he still requires me to use version names, I would get the current_version from the extension an dprint here.
         from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v1_extension_installed
-        is_containerstorage_v1_installed = get_container_storage_v1_extension_installed(
+        is_containerstorage_v1_installed, v1_extension_version = get_container_storage_v1_extension_installed(
             self.cmd,
             self.context.get_resource_group_name(),
             self.context.get_name()
         )
 
-        if enable_azure_container_storage_v2 and is_extension_installed:
-            raise BadRequestError(
-                "Azure Container Storage V2 is already installed. "
+        if enable_azure_container_storage_v2:
+            from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                validate_enable_azure_container_storage_v2_params
             )
+            validate_enable_azure_container_storage_v2_params(is_extension_installed, is_containerstorage_v1_installed, v1_extension_version)
 
-        if disable_azure_container_storage_v2 and not is_extension_installed:
-            raise BadRequestError(
-                "Cannot disable Azure Container Storage V2 as it is not enabled."
+        if disable_azure_container_storage_v2:
+            from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                validate_disable_azure_container_storage_v2_params
             )
-
-        if is_containerstorage_v1_installed and enable_azure_container_storage_v2:
-            raise CLIError(
-                "Azure Container Storage 1.2.0 has been installed in the cluster. Azure Container Storage 2.0.0 can’t be installed in this case. "
-                "Try installing Azure Container Storage 2.0.0 in another cluster."
-            )
+            validate_disable_azure_container_storage_v2_params(is_extension_installed)
 
         if enable_azure_container_storage_v2:
             self.context.set_intermediate("enable_azure_container_storage_v2", True)
