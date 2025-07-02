@@ -1651,7 +1651,7 @@ def update_resource_group(instance, tags=None):
 
 
 def export_group_as_template(
-        cmd, resource_group_name, include_comments=False, include_parameter_default_value=False, resource_ids=None, skip_resource_name_params=False, skip_all_params=False, output_format=None):
+        cmd, resource_group_name, include_comments=False, include_parameter_default_value=False, resource_ids=None, skip_resource_name_params=False, skip_all_params=False, export_format=None):
     """Captures a resource group as a template.
     :param str resource_group_name: the name of the resource group.
     :param resource_ids: space-separated resource ids to filter the export by. To export all resources, do not specify this argument or supply "*".
@@ -1686,12 +1686,12 @@ def export_group_as_template(
 
     ExportTemplateRequest = cmd.get_models('ExportTemplateRequest')
 
-    if output_format is None or output_format.lower() == "json" or output_format.lower() == "arm":
+    if export_format is None or export_format.lower() == "json" or export_format.lower() == "arm":
         export_template_request = ExportTemplateRequest(resources=resources, options=options, output_format="Json")
-    elif output_format.lower() == "bicep":
+    elif export_format.lower() == "bicep":
         export_template_request = ExportTemplateRequest(resources=resources, options=options, output_format="Bicep")
     else:
-        raise CLIError('az resource: error: argument --output-format: invalid OutputFormat value: \'%s\'' % output_format)
+        raise CLIError('az resource: error: argument --export-format: invalid ExportFormat value: \'%s\'' % export_format)
 
     # Exporting a resource group as a template is async since API version 2019-08-01.
     if cmd.supported_api_version(min_api='2019-08-01'):
@@ -1700,7 +1700,7 @@ def export_group_as_template(
                                                                       parameters=export_template_request,
                                                                       api_version='2024-11-01')
         else:
-            if output_format.lower() == "bicep":
+            if export_format.lower() == "bicep":
                 raise CLIError("Bicep export is not supported in API version < 2024-11-01")
 
             result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
@@ -1721,9 +1721,9 @@ def export_group_as_template(
         for detail in getattr(error, 'details', None) or []:
             logger.error(detail.message)
 
-    if output_format.lower() == "bicep":
+    if export_format.lower() == "bicep":
         return result.output
-    
+
     return result.template
 
 

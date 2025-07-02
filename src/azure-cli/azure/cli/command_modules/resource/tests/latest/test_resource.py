@@ -100,7 +100,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
-        result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --output-format bicep').get_output_in_json()
+        result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --export-format bicep').get_output_in_json()
         
         # Check for Bicep-specific syntax
         bicep_text = str(result)
