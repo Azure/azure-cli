@@ -263,8 +263,8 @@ parameters:
     long-summary: To access nodes after creating a cluster with this option, use the Azure Portal.
   - name: --pod-cidr
     type: string
-    short-summary: A CIDR notation IP range from which to assign pod IPs when kubenet is used.
-    long-summary: This range must not overlap with any Subnet IP ranges. For example, 172.244.0.0/16.
+    short-summary: A CIDR notation IP range from which to assign pod IPs when Azure CNI Overlay or Kubenet is used (On 31 March 2028, Kubenet will be retired).
+    long-summary: This range must not overlap with any Subnet IP ranges. For example, 172.244.0.0/16. See https://aka.ms/aks/azure-cni-overlay
   - name: --message-of-the-day
     type: string
     short-summary: Path to a file containing the desired message of the day. Only valid for linux nodes. Will be written to /etc/motd.
@@ -278,8 +278,8 @@ parameters:
     long-summary: Each range must not overlap with any Subnet IP ranges. For example, "10.0.0.0/16,2001:abcd::/108".
   - name: --pod-cidrs
     type: string
-    short-summary: A comma-separated list of CIDR notation IP ranges from which to assign pod IPs when kubenet is used.
-    long-summary: Each range must not overlap with any Subnet IP ranges. For example, "172.244.0.0/16,fd0:abcd::/64".
+    short-summary: A comma-separated list of CIDR notation IP ranges from which to assign pod IPs when Azure CNI Overlay or Kubenet is used (On 31 March 2028, Kubenet will be retired).
+    long-summary: Each range must not overlap with any Subnet IP ranges. For example, "172.244.0.0/16,fd0:abcd::/64". See https://aka.ms/aks/azure-cni-overlay
   - name: --ip-families
     type: string
     short-summary: A comma-separated list of IP versions to use for cluster networking.
