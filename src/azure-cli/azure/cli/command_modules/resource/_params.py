@@ -59,10 +59,12 @@ def load_arguments(self, _):
     deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     deployment_validation_level_type = CLIArgumentType(options_list=['--validation-level'], required=False, arg_type=get_enum_type(ValidationLevel, None),
-                                                       help='The deployment validation level. May be set to "Provider" (the default), "Template", or "ProviderNoRbac". With a ' \
-        'validation level of "provider", ARM will perform full validation and check that you have sufficient permission to deploy all resources in the template. ' \
-        'With a validation level of "providerNoRbac", ARM will perform full validation but only check for read permissions on each resource. With a validation ' \
-        'level of "template", only static validation will be performed: preflight and permissions checks will be skipped.')
+                                                       help='The deployment validation level. May be set to "Provider" (the default), "Template", or '
+                                                       '"ProviderNoRbac". With a validation level of "provider", ARM will perform full validation and check that'
+                                                       ' you have sufficient permission to deploy all resources in the template. With a validation level of '
+                                                       '"providerNoRbac", ARM will perform full validation but only check for read permissions on each resource.'
+                                                       ' With a validation level of "template", only static validation will be performed: preflight and '
+                                                       'permissions checks will be skipped.')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
                                        'To get more information, please visit https://learn.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
