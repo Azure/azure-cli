@@ -11910,7 +11910,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # update: enable-azure-container-storage-v2
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
-                     '--enable-azure-container-storage-V2'
+                     '--enable-azure-container-storage-v2'
         
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -11932,12 +11932,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         
         assert acs_extension_found, "Azure Container Storage v2 not found"
 
+        # Sleep for 5 mins before next operation,
+        # since azure container storage operations take
+        # some time to post process.
+        time.sleep(10 * 60)
+
         # update: disable-azure-container-storage
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
                      '--disable-azure-container-storage-v2'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-        ])
+        ])        
+
+        # Verify that the azure-container-storage-v2 extension doesn't exist anymore
+        extension_list_cmd = "k8s-extension list --resource-group={resource_group} --cluster-name={name} --cluster-type managedClusters"
+        extensions = self.cmd(extension_list_cmd).get_output_in_json()
 
         # Check if azure-container-storage extension sill exists
         acs_extension_found = False

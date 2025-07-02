@@ -6659,8 +6659,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     
     def set_up_azure_container_storage_v2(self, mc: ManagedCluster) -> ManagedCluster:  # pylint: disable=too-many-locals
         self._ensure_mc(mc)
-        print("Setting up Azure Container Storage v2")
-        self.context.set_intermediate("enable_azure_container_storage_v2", True, overwrite_exists=True)
+        if self.context.raw_param.get("enable_azure_container_storage_v2"):
+            print("Setting up Azure Container Storage v2")
+            self.context.set_intermediate("enable_azure_container_storage_v2", True, overwrite_exists=True)
         return mc
 
     def set_up_sku(self, mc: ManagedCluster) -> ManagedCluster:
@@ -8745,7 +8746,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             )
 
         from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v2_extension_installed
-        is_extension_installed = get_container_storage_v2_extension_installed(
+        is_extension_installed, _ = get_container_storage_v2_extension_installed(
             self.cmd,
             self.context.get_resource_group_name(),
             self.context.get_name()
