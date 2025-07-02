@@ -86,22 +86,22 @@ stages:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
       maxParallel: ${{ parameters.maxParallel }}
       matrix:
-        network:
-          Target: network
+        # network:
+        #   Target: network
         acr:
           Target: acr
         acs:
           Target: acs
         advisor:
           Target: advisor
-        ams:
-          Target: ams
-        apim:
-          Target: apim
+        # ams: # 78/78
+        #   Target: ams
+        # apim: # 2/3
+        #   Target: apim
         appconfig:
           Target: appconfig
-        appservice:
-          Target: appservice
+        # appservice: # 259/429
+        #   Target: appservice
         aro:
           Target: aro
         backup:
@@ -136,12 +136,12 @@ stages:
         #  Target: deploymentmanager
         dla:
           Target: dla
-        dls:
-          Target: dls
-        dms:
-          Target: dms
-        eventgrid:
-          Target: eventgrid
+        # dls: # 3/3
+        #   Target: dls
+        # dms: # 3/3
+        #   Target: dms
+        # eventgrid: # 14/17
+        #   Target: eventgrid
         eventhubs:
           Target: eventhubs
         extension:
@@ -150,22 +150,22 @@ stages:
           Target: feedback
         find:
           Target: find
-        hdinsight:
-          Target: hdinsight
+        # hdinsight: # 23/26
+        #   Target: hdinsight
         identity:
           Target: identity
         iot:
           Target: iot
-        keyvault:
-          Target: keyvault
+        # keyvault: # 21/38
+        #   Target: keyvault
         kusto:
           Target: kusto
         lab:
           Target: lab
         managedservices:
           Target: managedservices
-        maps:
-          Target: maps
+        # maps: # 2/3
+        #   Target: maps
         marketplaceordering:
           Target: marketplaceordering
         monitor:
@@ -174,7 +174,7 @@ stages:
           Target: mysql
         #natgateway:
         #  Target: natgateway
-        netappfiles:
+        netappfiles: # 41/95
           Target: netappfiles
         policyinsights:
           Target: policyinsights
@@ -188,13 +188,13 @@ stages:
           Target: redis
         relay:
           Target: relay
-        resource:
+        resource: # 96/288
           Target: resource
         role:
           Target: role
         search:
           Target: search
-        security:
+        security: # 13/32
           Target: security
         servicebus:
           Target: servicebus
@@ -204,52 +204,52 @@ stages:
           Target: servicefabric
         signalr:
           Target: signalr
-        sql:
-          Target: sql
-        sqlvm:
-          Target: sqlvm
+        # sql: # 57/102
+        #   Target: sql
+        # sqlvm: # 6/7
+        #   Target: sqlvm
         storage:
           Target: storage
-        synapse:
-          Target: synapse
+        # synapse: # 22/39
+        #   Target: synapse
         util:
           Target: util
-        vm:
-          Target: vm
-        ext-account:
-          Target: ext-account
+        # vm: # 180/406
+        #   Target: vm
+        # ext-account: # 1/1
+        #   Target: ext-account
         ext-acrquery:
           Target: ext-acrquery
         ext-acrtransfer:
           Target: ext-acrtransfer
-        ext-ad:
-          Target: ext-ad
+        # ext-ad: # 1/1
+        #   Target: ext-ad
         ext-adp:
           Target: ext-adp
         ext-aem:
           Target: ext-aem
         ext-ai-examples:
           Target: ext-ai-examples
-        ext-aks-preview:
+        ext-aks-preview: # 245/674
           Target: ext-aks-preview
-        ext-alertsmanagement:
-          Target: ext-alertsmanagement
+        # ext-alertsmanagement: # 2/2
+        #   Target: ext-alertsmanagement
         #ext-alias:
         #  Target: ext-alias
-        ext-amg:
-          Target: ext-amg
+        # ext-amg: # 11/11
+        #   Target: ext-amg
         ext-application-insights:
           Target: ext-application-insights
-        ext-appservice-kube:
-          Target: ext-appservice-kube
+        # ext-appservice-kube: # 4/4
+        #   Target: ext-appservice-kube
         #ext-attestation:
         #  Target: ext-attestation
-        ext-authV2:
-          Target: ext-authV2
+        # ext-authV2: # 3/3
+        #   Target: ext-authV2
         ext-automanage:
           Target: ext-automanage
-        ext-automation:
-          Target: ext-automation
+        # ext-automation: # 7/7
+        #   Target: ext-automation
         ext-azure-firewall:
           Target: ext-azure-firewall
         ext-bastion:
@@ -258,28 +258,28 @@ stages:
           Target: ext-billing-benefits
         ext-blockchain:
           Target: ext-blockchain
-        ext-blueprint:
-          Target: ext-blueprint
-        ext-change-analysis:
-          Target: ext-change-analysis
-        ext-cli-translator:
-          Target: ext-cli-translator
+        # ext-blueprint: # 4/4
+        #   Target: ext-blueprint
+        # ext-change-analysis: # 1/1
+        #   Target: ext-change-analysis
+        # ext-cli-translator: # 1/1
+        #   Target: ext-cli-translator
         #ext-cloudservice:
         #  Target: ext-cloudservice
         ext-communication:
           Target: ext-communication
         ext-confcom:
           Target: ext-confcom
-        ext-confidentialledger:
-          Target: ext-confidentialledger
-        ext-confluent:
-          Target: ext-confluent
-        ext-connectedk8s:
-          Target: ext-connectedk8s
-        ext-connectedmachine:
-          Target: ext-connectedmachine
-        ext-connectedvmware:
-          Target: ext-connectedvmware
+        # ext-confidentialledger: # 5/7
+        #   Target: ext-confidentialledger
+        # ext-confluent: # 2/2
+        #   Target: ext-confluent
+        # ext-connectedk8s: # 10/10
+        #   Target: ext-connectedk8s
+        # ext-connectedmachine: # 5/5
+        #   Target: ext-connectedmachine
+        # ext-connectedvmware: # 1/1
+        #   Target: ext-connectedvmware
         ext-connection-monitor-preview:
           Target: ext-connection-monitor-preview
         ext-containerapp:
@@ -288,46 +288,46 @@ stages:
         #  Target: ext-containerapp-preview
         ext-cosmosdb-preview:
           Target: ext-cosmosdb-preview
-        ext-costmanagement:
-          Target: ext-costmanagement
-        ext-custom-providers:
-          Target: ext-custom-providers
-        ext-databox:
-          Target: ext-databox
+        # ext-costmanagement: # 3/4
+        #   Target: ext-costmanagement
+        # ext-custom-providers: # 1/1
+        #   Target: ext-custom-providers
+        # ext-databox: # 2/3
+        #   Target: ext-databox
         ext-databricks:
           Target: ext-databricks
         ext-datadog:
           Target: ext-datadog
         ext-datafactory:
           Target: ext-datafactory
-        ext-datamigration:
-          Target: ext-datamigration
-        ext-dataprotection:
-          Target: ext-dataprotection
-        ext-datashare:
-          Target: ext-datashare
+        # ext-datamigration: # 1/1
+        #   Target: ext-datamigration
+        # ext-dataprotection: # 27/40
+        #   Target: ext-dataprotection
+        # ext-datashare: # 1/1
+        #   Target: ext-datashare
         ext-db-up:
           Target: ext-db-up
-        ext-desktopvirtualization:
-          Target: ext-desktopvirtualization
+        # ext-desktopvirtualization: # 2/3
+        #   Target: ext-desktopvirtualization
         #ext-dev-spaces:
         #  Target: ext-dev-spaces
         ext-devcenter:
           Target: ext-devcenter
-        ext-diskpool:
-          Target: ext-diskpool
-        ext-dms-preview:
-          Target: ext-dms-preview
-        ext-dnc:
-          Target: ext-dnc
+        # ext-diskpool: # 2/2
+        #   Target: ext-diskpool
+        # ext-dms-preview: # 2/2
+        #   Target: ext-dms-preview
+        # ext-dnc: # 7/10
+        #   Target: ext-dnc
         ext-dns-resolver:
           Target: ext-dns-resolver
-        ext-dynatrace:
-          Target: ext-dynatrace
+        # ext-dynatrace: # 3/4
+        #   Target: ext-dynatrace
         ext-edgeorder:
           Target: ext-edgeorder
-        ext-elastic:
-          Target: ext-elastic
+        # ext-elastic: # 4/4
+        #   Target: ext-elastic
         ext-elastic-san:
           Target: ext-elastic-san
         #ext-eventgrid:
@@ -336,16 +336,16 @@ stages:
         #  Target: ext-express-route-cross-connection
         ext-fleet:
           Target: ext-fleet
-        ext-fluid-relay:
-          Target: ext-fluid-relay
-        ext-footprint:
-          Target: ext-footprint
-        ext-front-door:
-          Target: ext-front-door
+        # ext-fluid-relay: # 1/1
+        #   Target: ext-fluid-relay
+        # ext-footprint: # 1/1
+        #   Target: ext-footprint
+        # ext-front-door: # 16/20
+        #   Target: ext-front-door
         #ext-functionapp:
         #  Target: ext-functionapp
-        ext-guestconfig:
-          Target: ext-guestconfig
+        # ext-guestconfig: # 1/1
+        #   Target: ext-guestconfig
         #ext-hack:
         #  Target: ext-hack
         ext-hardware-security-modules:
@@ -354,50 +354,50 @@ stages:
           Target: ext-healthbot
         ext-healthcareapis:
           Target: ext-healthcareapis
-        ext-hpc-cache:
-          Target: ext-hpc-cache
+        # ext-hpc-cache: # 2/2
+        #   Target: ext-hpc-cache
         #ext-image-copy-extension:
         #  Target: ext-image-copy-extension
         ext-image-gallery:
           Target: ext-image-gallery
-        ext-import-export:
-          Target: ext-import-export
+        # ext-import-export: # 1/1
+        #   Target: ext-import-export
         ext-init:
           Target: ext-init
         ext-interactive:
           Target: ext-interactive
-        ext-internet-analyzer:
-          Target: ext-internet-analyzer
-        ext-ip-group:
-          Target: ext-ip-group
+        # ext-internet-analyzer: # 1/1
+        #   Target: ext-internet-analyzer
+        # ext-ip-group: # 1/1
+        #   Target: ext-ip-group
         ext-k8s-configuration:
           Target: ext-k8s-configuration
         ext-k8s-extension:
           Target: ext-k8s-extension
         #ext-kusto:
         #  Target: ext-kusto
-        ext-load:
-          Target: ext-load
+        # ext-load: # 34/52
+        #   Target: ext-load
         ext-log-analytics:
           Target: ext-log-analytics
         ext-log-analytics-solution:
           Target: ext-log-analytics-solution
         ext-logic:
           Target: ext-logic
-        ext-logz:
-          Target: ext-logz
-        ext-maintenance:
-          Target: ext-maintenance
-        ext-managedccfs:
-          Target: ext-managedccfs
+        # ext-logz: # 7/7
+        #   Target: ext-logz
+        # ext-maintenance: # 1/1
+        #   Target: ext-maintenance
+        # ext-managedccfs: # 5/5
+        #   Target: ext-managedccfs
         ext-managementpartner:
           Target: ext-managementpartner
         ext-mesh:
           Target: ext-mesh
-        ext-mixed-reality:
-          Target: ext-mixed-reality
-        ext-mobile-network:
-          Target: ext-mobile-network
+        # ext-mixed-reality: # 1/1
+        #   Target: ext-mixed-reality
+        # ext-mobile-network: # 10/10
+        #   Target: ext-mobile-network
         ext-monitor-control-service:
           Target: ext-monitor-control-service
         ext-netappfiles-preview:
@@ -406,30 +406,30 @@ stages:
           Target: ext-network-manager
         ext-next:
           Target: ext-next
-        ext-nginx:
-          Target: ext-nginx
+        # ext-nginx: # 1/1
+        #   Target: ext-nginx
         ext-notification-hub:
           Target: ext-notification-hub
-        ext-nsp:
+        ext-nsp: # 3/7
           Target: ext-nsp
         ext-offazure:
           Target: ext-offazure
-        ext-orbital:
-          Target: ext-orbital
+        # ext-orbital: # 4/4
+        #   Target: ext-orbital
         ext-peering:
           Target: ext-peering
         ext-portal:
           Target: ext-portal
         ext-powerbidedicated:
           Target: ext-powerbidedicated
-        ext-providerhub:
-          Target: ext-providerhub
-        ext-purview:
-          Target: ext-purview
+        # ext-providerhub: # 36/52
+        #   Target: ext-providerhub
+        # ext-purview: # 2/2
+        #   Target: ext-purview
         ext-quantum:
           Target: ext-quantum
-        ext-quota:
-          Target: ext-quota
+        # ext-quota: # 2/2
+        #   Target: ext-quota
         #ext-rdbms-connect:
         #  Target: ext-rdbms-connect
         ext-redisenterprise:
@@ -438,62 +438,62 @@ stages:
           Target: ext-reservation
         ext-resource-graph:
           Target: ext-resource-graph
-        ext-resource-mover:
-          Target: ext-resource-mover
+        # ext-resource-mover: # 3/3
+        #   Target: ext-resource-mover
         ext-scenario-guide:
           Target: ext-scenario-guide
         ext-scheduled-query:
           Target: ext-scheduled-query
-        ext-scvmm:
-          Target: ext-scvmm
-        ext-securityinsight:
-          Target: ext-securityinsight
+        # ext-scvmm: # 1/1
+        #   Target: ext-scvmm
+        # ext-securityinsight: # 11/12
+        #   Target: ext-securityinsight
         ext-self-help:
           Target: ext-self-help
-        ext-serial-console:
-          Target: ext-serial-console
+        # ext-serial-console: # 5/9
+        #   Target: ext-serial-console
         ext-serviceconnector-passwordless:
           Target: ext-serviceconnector-passwordless
         ext-spring:
           Target: ext-spring
-        ext-spring-cloud:
-          Target: ext-spring-cloud
+        # ext-spring-cloud: # 46/46
+        #   Target: ext-spring-cloud
         ext-ssh:
           Target: ext-ssh
-        ext-stack-hci:
-          Target: ext-stack-hci
+        # ext-stack-hci: # 4/4
+        #   Target: ext-stack-hci
         ext-staticwebapp:
           Target: ext-staticwebapp
         ext-storage-blob-preview:
           Target: ext-storage-blob-preview
-        ext-storage-mover:
-          Target: ext-storage-mover
+        # ext-storage-mover: # 4/6
+        #   Target: ext-storage-mover
         ext-storage-preview:
           Target: ext-storage-preview
         ext-storagesync:
           Target: ext-storagesync
         ext-stream-analytics:
           Target: ext-stream-analytics
-        ext-subscription:
-          Target: ext-subscription
+        # ext-subscription: # 1/1
+        #   Target: ext-subscription
         ext-support:
           Target: ext-support
-        ext-swiftlet:
-          Target: ext-swiftlet
-        ext-timeseriesinsights:
-          Target: ext-timeseriesinsights
-        ext-traffic-collector:
-          Target: ext-traffic-collector
+        # ext-swiftlet: # 2/2
+        #   Target: ext-swiftlet
+        # ext-timeseriesinsights: # 6/6
+        #   Target: ext-timeseriesinsights
+        # ext-traffic-collector: # 1/1
+        #   Target: ext-traffic-collector
         #ext-virtual-network-tap:
         #  Target: ext-virtual-network-tap
         ext-virtual-wan:
           Target: ext-virtual-wan
-        ext-vm-repair:
-          Target: ext-vm-repair
-        ext-vmware:
-          Target: ext-vmware
-        ext-voice-service:
-          Target: ext-voice-service
+        # ext-vm-repair: # 28/32
+        #   Target: ext-vm-repair
+        # ext-vmware: # 14/18
+        #   Target: ext-vmware
+        # ext-voice-service: # 2/3
+        #   Target: ext-voice-service
         #ext-webapp:
         #  Target: ext-webapp
         ext-webpubsub:
@@ -663,22 +663,22 @@ stages:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
       maxParallel: ${{ parameters.maxParallel }}
       matrix:
-        network:
-          Target: network
+        # network:
+        #   Target: network
         acr:
           Target: acr
         acs:
           Target: acs
         advisor:
           Target: advisor
-        ams:
-          Target: ams
-        apim:
-          Target: apim
+        # ams: # 78/78
+        #   Target: ams
+        # apim: # 2/3
+        #   Target: apim
         appconfig:
           Target: appconfig
-        appservice:
-          Target: appservice
+        # appservice: # 259/429
+        #   Target: appservice
         aro:
           Target: aro
         backup:
@@ -713,12 +713,12 @@ stages:
         #  Target: deploymentmanager
         dla:
           Target: dla
-        dls:
-          Target: dls
-        dms:
-          Target: dms
-        eventgrid:
-          Target: eventgrid
+        # dls: # 3/3
+        #   Target: dls
+        # dms: # 3/3
+        #   Target: dms
+        # eventgrid: # 14/17
+        #   Target: eventgrid
         eventhubs:
           Target: eventhubs
         extension:
@@ -727,22 +727,22 @@ stages:
           Target: feedback
         find:
           Target: find
-        hdinsight:
-          Target: hdinsight
+        # hdinsight: # 23/26
+        #   Target: hdinsight
         identity:
           Target: identity
         iot:
           Target: iot
-        keyvault:
-          Target: keyvault
+        # keyvault: # 21/38
+        #   Target: keyvault
         kusto:
           Target: kusto
         lab:
           Target: lab
         managedservices:
           Target: managedservices
-        maps:
-          Target: maps
+        # maps: # 2/3
+        #   Target: maps
         marketplaceordering:
           Target: marketplaceordering
         monitor:
@@ -751,7 +751,7 @@ stages:
           Target: mysql
         #natgateway:
         #  Target: natgateway
-        netappfiles:
+        netappfiles: # 41/95
           Target: netappfiles
         policyinsights:
           Target: policyinsights
@@ -765,13 +765,13 @@ stages:
           Target: redis
         relay:
           Target: relay
-        resource:
+        resource: # 96/288
           Target: resource
         role:
           Target: role
         search:
           Target: search
-        security:
+        security: # 13/32
           Target: security
         servicebus:
           Target: servicebus
@@ -781,52 +781,52 @@ stages:
           Target: servicefabric
         signalr:
           Target: signalr
-        sql:
-          Target: sql
-        sqlvm:
-          Target: sqlvm
+        # sql: # 57/102
+        #   Target: sql
+        # sqlvm: # 6/7
+        #   Target: sqlvm
         storage:
           Target: storage
-        synapse:
-          Target: synapse
+        # synapse: # 22/39
+        #   Target: synapse
         util:
           Target: util
-        vm:
-          Target: vm
-        ext-account:
-          Target: ext-account
+        # vm: # 180/406
+        #   Target: vm
+        # ext-account: # 1/1
+        #   Target: ext-account
         ext-acrquery:
           Target: ext-acrquery
         ext-acrtransfer:
           Target: ext-acrtransfer
-        ext-ad:
-          Target: ext-ad
+        # ext-ad: # 1/1
+        #   Target: ext-ad
         ext-adp:
           Target: ext-adp
         ext-aem:
           Target: ext-aem
         ext-ai-examples:
           Target: ext-ai-examples
-        ext-aks-preview:
+        ext-aks-preview: # 245/674
           Target: ext-aks-preview
-        ext-alertsmanagement:
-          Target: ext-alertsmanagement
+        # ext-alertsmanagement: # 2/2
+        #   Target: ext-alertsmanagement
         #ext-alias:
         #  Target: ext-alias
-        ext-amg:
-          Target: ext-amg
+        # ext-amg: # 11/11
+        #   Target: ext-amg
         ext-application-insights:
           Target: ext-application-insights
-        ext-appservice-kube:
-          Target: ext-appservice-kube
+        # ext-appservice-kube: # 4/4
+        #   Target: ext-appservice-kube
         #ext-attestation:
         #  Target: ext-attestation
-        ext-authV2:
-          Target: ext-authV2
+        # ext-authV2: # 3/3
+        #   Target: ext-authV2
         ext-automanage:
           Target: ext-automanage
-        ext-automation:
-          Target: ext-automation
+        # ext-automation: # 7/7
+        #   Target: ext-automation
         ext-azure-firewall:
           Target: ext-azure-firewall
         ext-bastion:
@@ -835,28 +835,28 @@ stages:
           Target: ext-billing-benefits
         ext-blockchain:
           Target: ext-blockchain
-        ext-blueprint:
-          Target: ext-blueprint
-        ext-change-analysis:
-          Target: ext-change-analysis
-        ext-cli-translator:
-          Target: ext-cli-translator
+        # ext-blueprint: # 4/4
+        #   Target: ext-blueprint
+        # ext-change-analysis: # 1/1
+        #   Target: ext-change-analysis
+        # ext-cli-translator: # 1/1
+        #   Target: ext-cli-translator
         #ext-cloudservice:
         #  Target: ext-cloudservice
         ext-communication:
           Target: ext-communication
         ext-confcom:
           Target: ext-confcom
-        ext-confidentialledger:
-          Target: ext-confidentialledger
-        ext-confluent:
-          Target: ext-confluent
-        ext-connectedk8s:
-          Target: ext-connectedk8s
-        ext-connectedmachine:
-          Target: ext-connectedmachine
-        ext-connectedvmware:
-          Target: ext-connectedvmware
+        # ext-confidentialledger: # 5/7
+        #   Target: ext-confidentialledger
+        # ext-confluent: # 2/2
+        #   Target: ext-confluent
+        # ext-connectedk8s: # 10/10
+        #   Target: ext-connectedk8s
+        # ext-connectedmachine: # 5/5
+        #   Target: ext-connectedmachine
+        # ext-connectedvmware: # 1/1
+        #   Target: ext-connectedvmware
         ext-connection-monitor-preview:
           Target: ext-connection-monitor-preview
         ext-containerapp:
@@ -865,46 +865,46 @@ stages:
         #  Target: ext-containerapp-preview
         ext-cosmosdb-preview:
           Target: ext-cosmosdb-preview
-        ext-costmanagement:
-          Target: ext-costmanagement
-        ext-custom-providers:
-          Target: ext-custom-providers
-        ext-databox:
-          Target: ext-databox
+        # ext-costmanagement: # 3/4
+        #   Target: ext-costmanagement
+        # ext-custom-providers: # 1/1
+        #   Target: ext-custom-providers
+        # ext-databox: # 2/3
+        #   Target: ext-databox
         ext-databricks:
           Target: ext-databricks
         ext-datadog:
           Target: ext-datadog
         ext-datafactory:
           Target: ext-datafactory
-        ext-datamigration:
-          Target: ext-datamigration
-        ext-dataprotection:
-          Target: ext-dataprotection
-        ext-datashare:
-          Target: ext-datashare
+        # ext-datamigration: # 1/1
+        #   Target: ext-datamigration
+        # ext-dataprotection: # 27/40
+        #   Target: ext-dataprotection
+        # ext-datashare: # 1/1
+        #   Target: ext-datashare
         ext-db-up:
           Target: ext-db-up
-        ext-desktopvirtualization:
-          Target: ext-desktopvirtualization
+        # ext-desktopvirtualization: # 2/3
+        #   Target: ext-desktopvirtualization
         #ext-dev-spaces:
         #  Target: ext-dev-spaces
         ext-devcenter:
           Target: ext-devcenter
-        ext-diskpool:
-          Target: ext-diskpool
-        ext-dms-preview:
-          Target: ext-dms-preview
-        ext-dnc:
-          Target: ext-dnc
+        # ext-diskpool: # 2/2
+        #   Target: ext-diskpool
+        # ext-dms-preview: # 2/2
+        #   Target: ext-dms-preview
+        # ext-dnc: # 7/10
+        #   Target: ext-dnc
         ext-dns-resolver:
           Target: ext-dns-resolver
-        ext-dynatrace:
-          Target: ext-dynatrace
+        # ext-dynatrace: # 3/4
+        #   Target: ext-dynatrace
         ext-edgeorder:
           Target: ext-edgeorder
-        ext-elastic:
-          Target: ext-elastic
+        # ext-elastic: # 4/4
+        #   Target: ext-elastic
         ext-elastic-san:
           Target: ext-elastic-san
         #ext-eventgrid:
@@ -913,16 +913,16 @@ stages:
         #  Target: ext-express-route-cross-connection
         ext-fleet:
           Target: ext-fleet
-        ext-fluid-relay:
-          Target: ext-fluid-relay
-        ext-footprint:
-          Target: ext-footprint
-        ext-front-door:
-          Target: ext-front-door
+        # ext-fluid-relay: # 1/1
+        #   Target: ext-fluid-relay
+        # ext-footprint: # 1/1
+        #   Target: ext-footprint
+        # ext-front-door: # 16/20
+        #   Target: ext-front-door
         #ext-functionapp:
         #  Target: ext-functionapp
-        ext-guestconfig:
-          Target: ext-guestconfig
+        # ext-guestconfig: # 1/1
+        #   Target: ext-guestconfig
         #ext-hack:
         #  Target: ext-hack
         ext-hardware-security-modules:
@@ -931,50 +931,50 @@ stages:
           Target: ext-healthbot
         ext-healthcareapis:
           Target: ext-healthcareapis
-        ext-hpc-cache:
-          Target: ext-hpc-cache
+        # ext-hpc-cache: # 2/2
+        #   Target: ext-hpc-cache
         #ext-image-copy-extension:
         #  Target: ext-image-copy-extension
         ext-image-gallery:
           Target: ext-image-gallery
-        ext-import-export:
-          Target: ext-import-export
+        # ext-import-export: # 1/1
+        #   Target: ext-import-export
         ext-init:
           Target: ext-init
         ext-interactive:
           Target: ext-interactive
-        ext-internet-analyzer:
-          Target: ext-internet-analyzer
-        ext-ip-group:
-          Target: ext-ip-group
+        # ext-internet-analyzer: # 1/1
+        #   Target: ext-internet-analyzer
+        # ext-ip-group: # 1/1
+        #   Target: ext-ip-group
         ext-k8s-configuration:
           Target: ext-k8s-configuration
         ext-k8s-extension:
           Target: ext-k8s-extension
         #ext-kusto:
         #  Target: ext-kusto
-        ext-load:
-          Target: ext-load
+        # ext-load: # 34/52
+        #   Target: ext-load
         ext-log-analytics:
           Target: ext-log-analytics
         ext-log-analytics-solution:
           Target: ext-log-analytics-solution
         ext-logic:
           Target: ext-logic
-        ext-logz:
-          Target: ext-logz
-        ext-maintenance:
-          Target: ext-maintenance
-        ext-managedccfs:
-          Target: ext-managedccfs
+        # ext-logz: # 7/7
+        #   Target: ext-logz
+        # ext-maintenance: # 1/1
+        #   Target: ext-maintenance
+        # ext-managedccfs: # 5/5
+        #   Target: ext-managedccfs
         ext-managementpartner:
           Target: ext-managementpartner
         ext-mesh:
           Target: ext-mesh
-        ext-mixed-reality:
-          Target: ext-mixed-reality
-        ext-mobile-network:
-          Target: ext-mobile-network
+        # ext-mixed-reality: # 1/1
+        #   Target: ext-mixed-reality
+        # ext-mobile-network: # 10/10
+        #   Target: ext-mobile-network
         ext-monitor-control-service:
           Target: ext-monitor-control-service
         ext-netappfiles-preview:
@@ -983,30 +983,30 @@ stages:
           Target: ext-network-manager
         ext-next:
           Target: ext-next
-        ext-nginx:
-          Target: ext-nginx
+        # ext-nginx: # 1/1
+        #   Target: ext-nginx
         ext-notification-hub:
           Target: ext-notification-hub
-        ext-nsp:
+        ext-nsp: # 3/7
           Target: ext-nsp
         ext-offazure:
           Target: ext-offazure
-        ext-orbital:
-          Target: ext-orbital
+        # ext-orbital: # 4/4
+        #   Target: ext-orbital
         ext-peering:
           Target: ext-peering
         ext-portal:
           Target: ext-portal
         ext-powerbidedicated:
           Target: ext-powerbidedicated
-        ext-providerhub:
-          Target: ext-providerhub
-        ext-purview:
-          Target: ext-purview
+        # ext-providerhub: # 36/52
+        #   Target: ext-providerhub
+        # ext-purview: # 2/2
+        #   Target: ext-purview
         ext-quantum:
           Target: ext-quantum
-        ext-quota:
-          Target: ext-quota
+        # ext-quota: # 2/2
+        #   Target: ext-quota
         #ext-rdbms-connect:
         #  Target: ext-rdbms-connect
         ext-redisenterprise:
@@ -1015,62 +1015,62 @@ stages:
           Target: ext-reservation
         ext-resource-graph:
           Target: ext-resource-graph
-        ext-resource-mover:
-          Target: ext-resource-mover
+        # ext-resource-mover: # 3/3
+        #   Target: ext-resource-mover
         ext-scenario-guide:
           Target: ext-scenario-guide
         ext-scheduled-query:
           Target: ext-scheduled-query
-        ext-scvmm:
-          Target: ext-scvmm
-        ext-securityinsight:
-          Target: ext-securityinsight
+        # ext-scvmm: # 1/1
+        #   Target: ext-scvmm
+        # ext-securityinsight: # 11/12
+        #   Target: ext-securityinsight
         ext-self-help:
           Target: ext-self-help
-        ext-serial-console:
-          Target: ext-serial-console
+        # ext-serial-console: # 5/9
+        #   Target: ext-serial-console
         ext-serviceconnector-passwordless:
           Target: ext-serviceconnector-passwordless
         ext-spring:
           Target: ext-spring
-        ext-spring-cloud:
-          Target: ext-spring-cloud
+        # ext-spring-cloud: # 46/46
+        #   Target: ext-spring-cloud
         ext-ssh:
           Target: ext-ssh
-        ext-stack-hci:
-          Target: ext-stack-hci
+        # ext-stack-hci: # 4/4
+        #   Target: ext-stack-hci
         ext-staticwebapp:
           Target: ext-staticwebapp
         ext-storage-blob-preview:
           Target: ext-storage-blob-preview
-        ext-storage-mover:
-          Target: ext-storage-mover
+        # ext-storage-mover: # 4/6
+        #   Target: ext-storage-mover
         ext-storage-preview:
           Target: ext-storage-preview
         ext-storagesync:
           Target: ext-storagesync
         ext-stream-analytics:
           Target: ext-stream-analytics
-        ext-subscription:
-          Target: ext-subscription
+        # ext-subscription: # 1/1
+        #   Target: ext-subscription
         ext-support:
           Target: ext-support
-        ext-swiftlet:
-          Target: ext-swiftlet
-        ext-timeseriesinsights:
-          Target: ext-timeseriesinsights
-        ext-traffic-collector:
-          Target: ext-traffic-collector
+        # ext-swiftlet: # 2/2
+        #   Target: ext-swiftlet
+        # ext-timeseriesinsights: # 6/6
+        #   Target: ext-timeseriesinsights
+        # ext-traffic-collector: # 1/1
+        #   Target: ext-traffic-collector
         #ext-virtual-network-tap:
         #  Target: ext-virtual-network-tap
         ext-virtual-wan:
           Target: ext-virtual-wan
-        ext-vm-repair:
-          Target: ext-vm-repair
-        ext-vmware:
-          Target: ext-vmware
-        ext-voice-service:
-          Target: ext-voice-service
+        # ext-vm-repair: # 28/32
+        #   Target: ext-vm-repair
+        # ext-vmware: # 14/18
+        #   Target: ext-vmware
+        # ext-voice-service: # 2/3
+        #   Target: ext-voice-service
         #ext-webapp:
         #  Target: ext-webapp
         ext-webpubsub:
@@ -1239,22 +1239,22 @@ stages:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
       maxParallel: ${{ parameters.maxParallel }}
       matrix:
-        network:
-          Target: network
+        # network:
+        #   Target: network
         acr:
           Target: acr
         acs:
           Target: acs
         advisor:
           Target: advisor
-        ams:
-          Target: ams
-        apim:
-          Target: apim
+        # ams: # 78/78
+        #   Target: ams
+        # apim: # 2/3
+        #   Target: apim
         appconfig:
           Target: appconfig
-        appservice:
-          Target: appservice
+        # appservice: # 259/429
+        #   Target: appservice
         aro:
           Target: aro
         backup:
@@ -1289,12 +1289,12 @@ stages:
         #  Target: deploymentmanager
         dla:
           Target: dla
-        dls:
-          Target: dls
-        dms:
-          Target: dms
-        eventgrid:
-          Target: eventgrid
+        # dls: # 3/3
+        #   Target: dls
+        # dms: # 3/3
+        #   Target: dms
+        # eventgrid: # 14/17
+        #   Target: eventgrid
         eventhubs:
           Target: eventhubs
         extension:
@@ -1303,22 +1303,22 @@ stages:
           Target: feedback
         find:
           Target: find
-        hdinsight:
-          Target: hdinsight
+        # hdinsight: # 23/26
+        #   Target: hdinsight
         identity:
           Target: identity
         iot:
           Target: iot
-        keyvault:
-          Target: keyvault
+        # keyvault: # 21/38
+        #   Target: keyvault
         kusto:
           Target: kusto
         lab:
           Target: lab
         managedservices:
           Target: managedservices
-        maps:
-          Target: maps
+        # maps: # 2/3
+        #   Target: maps
         marketplaceordering:
           Target: marketplaceordering
         monitor:
@@ -1327,7 +1327,7 @@ stages:
           Target: mysql
         #natgateway:
         #  Target: natgateway
-        netappfiles:
+        netappfiles: # 41/95
           Target: netappfiles
         policyinsights:
           Target: policyinsights
@@ -1341,13 +1341,13 @@ stages:
           Target: redis
         relay:
           Target: relay
-        resource:
+        resource: # 96/288
           Target: resource
         role:
           Target: role
         search:
           Target: search
-        security:
+        security: # 13/32
           Target: security
         servicebus:
           Target: servicebus
@@ -1357,52 +1357,52 @@ stages:
           Target: servicefabric
         signalr:
           Target: signalr
-        sql:
-          Target: sql
-        sqlvm:
-          Target: sqlvm
+        # sql: # 57/102
+        #   Target: sql
+        # sqlvm: # 6/7
+        #   Target: sqlvm
         storage:
           Target: storage
-        synapse:
-          Target: synapse
+        # synapse: # 22/39
+        #   Target: synapse
         util:
           Target: util
-        vm:
-          Target: vm
-        ext-account:
-          Target: ext-account
+        # vm: # 180/406
+        #   Target: vm
+        # ext-account: # 1/1
+        #   Target: ext-account
         ext-acrquery:
           Target: ext-acrquery
         ext-acrtransfer:
           Target: ext-acrtransfer
-        ext-ad:
-          Target: ext-ad
+        # ext-ad: # 1/1
+        #   Target: ext-ad
         ext-adp:
           Target: ext-adp
         ext-aem:
           Target: ext-aem
         ext-ai-examples:
           Target: ext-ai-examples
-        ext-aks-preview:
+        ext-aks-preview: # 245/674
           Target: ext-aks-preview
-        ext-alertsmanagement:
-          Target: ext-alertsmanagement
+        # ext-alertsmanagement: # 2/2
+        #   Target: ext-alertsmanagement
         #ext-alias:
         #  Target: ext-alias
-        ext-amg:
-          Target: ext-amg
+        # ext-amg: # 11/11
+        #   Target: ext-amg
         ext-application-insights:
           Target: ext-application-insights
-        ext-appservice-kube:
-          Target: ext-appservice-kube
+        # ext-appservice-kube: # 4/4
+        #   Target: ext-appservice-kube
         #ext-attestation:
         #  Target: ext-attestation
-        ext-authV2:
-          Target: ext-authV2
+        # ext-authV2: # 3/3
+        #   Target: ext-authV2
         ext-automanage:
           Target: ext-automanage
-        ext-automation:
-          Target: ext-automation
+        # ext-automation: # 7/7
+        #   Target: ext-automation
         ext-azure-firewall:
           Target: ext-azure-firewall
         ext-bastion:
@@ -1411,28 +1411,28 @@ stages:
           Target: ext-billing-benefits
         ext-blockchain:
           Target: ext-blockchain
-        ext-blueprint:
-          Target: ext-blueprint
-        ext-change-analysis:
-          Target: ext-change-analysis
-        ext-cli-translator:
-          Target: ext-cli-translator
+        # ext-blueprint: # 4/4
+        #   Target: ext-blueprint
+        # ext-change-analysis: # 1/1
+        #   Target: ext-change-analysis
+        # ext-cli-translator: # 1/1
+        #   Target: ext-cli-translator
         #ext-cloudservice:
         #  Target: ext-cloudservice
         ext-communication:
           Target: ext-communication
         ext-confcom:
           Target: ext-confcom
-        ext-confidentialledger:
-          Target: ext-confidentialledger
-        ext-confluent:
-          Target: ext-confluent
-        ext-connectedk8s:
-          Target: ext-connectedk8s
-        ext-connectedmachine:
-          Target: ext-connectedmachine
-        ext-connectedvmware:
-          Target: ext-connectedvmware
+        # ext-confidentialledger: # 5/7
+        #   Target: ext-confidentialledger
+        # ext-confluent: # 2/2
+        #   Target: ext-confluent
+        # ext-connectedk8s: # 10/10
+        #   Target: ext-connectedk8s
+        # ext-connectedmachine: # 5/5
+        #   Target: ext-connectedmachine
+        # ext-connectedvmware: # 1/1
+        #   Target: ext-connectedvmware
         ext-connection-monitor-preview:
           Target: ext-connection-monitor-preview
         ext-containerapp:
@@ -1441,46 +1441,46 @@ stages:
         #  Target: ext-containerapp-preview
         ext-cosmosdb-preview:
           Target: ext-cosmosdb-preview
-        ext-costmanagement:
-          Target: ext-costmanagement
-        ext-custom-providers:
-          Target: ext-custom-providers
-        ext-databox:
-          Target: ext-databox
+        # ext-costmanagement: # 3/4
+        #   Target: ext-costmanagement
+        # ext-custom-providers: # 1/1
+        #   Target: ext-custom-providers
+        # ext-databox: # 2/3
+        #   Target: ext-databox
         ext-databricks:
           Target: ext-databricks
         ext-datadog:
           Target: ext-datadog
         ext-datafactory:
           Target: ext-datafactory
-        ext-datamigration:
-          Target: ext-datamigration
-        ext-dataprotection:
-          Target: ext-dataprotection
-        ext-datashare:
-          Target: ext-datashare
+        # ext-datamigration: # 1/1
+        #   Target: ext-datamigration
+        # ext-dataprotection: # 27/40
+        #   Target: ext-dataprotection
+        # ext-datashare: # 1/1
+        #   Target: ext-datashare
         ext-db-up:
           Target: ext-db-up
-        ext-desktopvirtualization:
-          Target: ext-desktopvirtualization
+        # ext-desktopvirtualization: # 2/3
+        #   Target: ext-desktopvirtualization
         #ext-dev-spaces:
         #  Target: ext-dev-spaces
         ext-devcenter:
           Target: ext-devcenter
-        ext-diskpool:
-          Target: ext-diskpool
-        ext-dms-preview:
-          Target: ext-dms-preview
-        ext-dnc:
-          Target: ext-dnc
+        # ext-diskpool: # 2/2
+        #   Target: ext-diskpool
+        # ext-dms-preview: # 2/2
+        #   Target: ext-dms-preview
+        # ext-dnc: # 7/10
+        #   Target: ext-dnc
         ext-dns-resolver:
           Target: ext-dns-resolver
-        ext-dynatrace:
-          Target: ext-dynatrace
+        # ext-dynatrace: # 3/4
+        #   Target: ext-dynatrace
         ext-edgeorder:
           Target: ext-edgeorder
-        ext-elastic:
-          Target: ext-elastic
+        # ext-elastic: # 4/4
+        #   Target: ext-elastic
         ext-elastic-san:
           Target: ext-elastic-san
         #ext-eventgrid:
@@ -1489,16 +1489,16 @@ stages:
         #  Target: ext-express-route-cross-connection
         ext-fleet:
           Target: ext-fleet
-        ext-fluid-relay:
-          Target: ext-fluid-relay
-        ext-footprint:
-          Target: ext-footprint
-        ext-front-door:
-          Target: ext-front-door
+        # ext-fluid-relay: # 1/1
+        #   Target: ext-fluid-relay
+        # ext-footprint: # 1/1
+        #   Target: ext-footprint
+        # ext-front-door: # 16/20
+        #   Target: ext-front-door
         #ext-functionapp:
         #  Target: ext-functionapp
-        ext-guestconfig:
-          Target: ext-guestconfig
+        # ext-guestconfig: # 1/1
+        #   Target: ext-guestconfig
         #ext-hack:
         #  Target: ext-hack
         ext-hardware-security-modules:
@@ -1507,50 +1507,50 @@ stages:
           Target: ext-healthbot
         ext-healthcareapis:
           Target: ext-healthcareapis
-        ext-hpc-cache:
-          Target: ext-hpc-cache
+        # ext-hpc-cache: # 2/2
+        #   Target: ext-hpc-cache
         #ext-image-copy-extension:
         #  Target: ext-image-copy-extension
         ext-image-gallery:
           Target: ext-image-gallery
-        ext-import-export:
-          Target: ext-import-export
+        # ext-import-export: # 1/1
+        #   Target: ext-import-export
         ext-init:
           Target: ext-init
         ext-interactive:
           Target: ext-interactive
-        ext-internet-analyzer:
-          Target: ext-internet-analyzer
-        ext-ip-group:
-          Target: ext-ip-group
+        # ext-internet-analyzer: # 1/1
+        #   Target: ext-internet-analyzer
+        # ext-ip-group: # 1/1
+        #   Target: ext-ip-group
         ext-k8s-configuration:
           Target: ext-k8s-configuration
         ext-k8s-extension:
           Target: ext-k8s-extension
         #ext-kusto:
         #  Target: ext-kusto
-        ext-load:
-          Target: ext-load
+        # ext-load: # 34/52
+        #   Target: ext-load
         ext-log-analytics:
           Target: ext-log-analytics
         ext-log-analytics-solution:
           Target: ext-log-analytics-solution
         ext-logic:
           Target: ext-logic
-        ext-logz:
-          Target: ext-logz
-        ext-maintenance:
-          Target: ext-maintenance
-        ext-managedccfs:
-          Target: ext-managedccfs
+        # ext-logz: # 7/7
+        #   Target: ext-logz
+        # ext-maintenance: # 1/1
+        #   Target: ext-maintenance
+        # ext-managedccfs: # 5/5
+        #   Target: ext-managedccfs
         ext-managementpartner:
           Target: ext-managementpartner
         ext-mesh:
           Target: ext-mesh
-        ext-mixed-reality:
-          Target: ext-mixed-reality
-        ext-mobile-network:
-          Target: ext-mobile-network
+        # ext-mixed-reality: # 1/1
+        #   Target: ext-mixed-reality
+        # ext-mobile-network: # 10/10
+        #   Target: ext-mobile-network
         ext-monitor-control-service:
           Target: ext-monitor-control-service
         ext-netappfiles-preview:
@@ -1559,30 +1559,30 @@ stages:
           Target: ext-network-manager
         ext-next:
           Target: ext-next
-        ext-nginx:
-          Target: ext-nginx
+        # ext-nginx: # 1/1
+        #   Target: ext-nginx
         ext-notification-hub:
           Target: ext-notification-hub
-        ext-nsp:
+        ext-nsp: # 3/7
           Target: ext-nsp
         ext-offazure:
           Target: ext-offazure
-        ext-orbital:
-          Target: ext-orbital
+        # ext-orbital: # 4/4
+        #   Target: ext-orbital
         ext-peering:
           Target: ext-peering
         ext-portal:
           Target: ext-portal
         ext-powerbidedicated:
           Target: ext-powerbidedicated
-        ext-providerhub:
-          Target: ext-providerhub
-        ext-purview:
-          Target: ext-purview
+        # ext-providerhub: # 36/52
+        #   Target: ext-providerhub
+        # ext-purview: # 2/2
+        #   Target: ext-purview
         ext-quantum:
           Target: ext-quantum
-        ext-quota:
-          Target: ext-quota
+        # ext-quota: # 2/2
+        #   Target: ext-quota
         #ext-rdbms-connect:
         #  Target: ext-rdbms-connect
         ext-redisenterprise:
@@ -1591,62 +1591,62 @@ stages:
           Target: ext-reservation
         ext-resource-graph:
           Target: ext-resource-graph
-        ext-resource-mover:
-          Target: ext-resource-mover
+        # ext-resource-mover: # 3/3
+        #   Target: ext-resource-mover
         ext-scenario-guide:
           Target: ext-scenario-guide
         ext-scheduled-query:
           Target: ext-scheduled-query
-        ext-scvmm:
-          Target: ext-scvmm
-        ext-securityinsight:
-          Target: ext-securityinsight
+        # ext-scvmm: # 1/1
+        #   Target: ext-scvmm
+        # ext-securityinsight: # 11/12
+        #   Target: ext-securityinsight
         ext-self-help:
           Target: ext-self-help
-        ext-serial-console:
-          Target: ext-serial-console
+        # ext-serial-console: # 5/9
+        #   Target: ext-serial-console
         ext-serviceconnector-passwordless:
           Target: ext-serviceconnector-passwordless
         ext-spring:
           Target: ext-spring
-        ext-spring-cloud:
-          Target: ext-spring-cloud
+        # ext-spring-cloud: # 46/46
+        #   Target: ext-spring-cloud
         ext-ssh:
           Target: ext-ssh
-        ext-stack-hci:
-          Target: ext-stack-hci
+        # ext-stack-hci: # 4/4
+        #   Target: ext-stack-hci
         ext-staticwebapp:
           Target: ext-staticwebapp
         ext-storage-blob-preview:
           Target: ext-storage-blob-preview
-        ext-storage-mover:
-          Target: ext-storage-mover
+        # ext-storage-mover: # 4/6
+        #   Target: ext-storage-mover
         ext-storage-preview:
           Target: ext-storage-preview
         ext-storagesync:
           Target: ext-storagesync
         ext-stream-analytics:
           Target: ext-stream-analytics
-        ext-subscription:
-          Target: ext-subscription
+        # ext-subscription: # 1/1
+        #   Target: ext-subscription
         ext-support:
           Target: ext-support
-        ext-swiftlet:
-          Target: ext-swiftlet
-        ext-timeseriesinsights:
-          Target: ext-timeseriesinsights
-        ext-traffic-collector:
-          Target: ext-traffic-collector
+        # ext-swiftlet: # 2/2
+        #   Target: ext-swiftlet
+        # ext-timeseriesinsights: # 6/6
+        #   Target: ext-timeseriesinsights
+        # ext-traffic-collector: # 1/1
+        #   Target: ext-traffic-collector
         #ext-virtual-network-tap:
         #  Target: ext-virtual-network-tap
         ext-virtual-wan:
           Target: ext-virtual-wan
-        ext-vm-repair:
-          Target: ext-vm-repair
-        ext-vmware:
-          Target: ext-vmware
-        ext-voice-service:
-          Target: ext-voice-service
+        # ext-vm-repair: # 28/32
+        #   Target: ext-vm-repair
+        # ext-vmware: # 14/18
+        #   Target: ext-vmware
+        # ext-voice-service: # 2/3
+        #   Target: ext-voice-service
         #ext-webapp:
         #  Target: ext-webapp
         ext-webpubsub:
