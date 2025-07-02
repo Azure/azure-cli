@@ -453,3 +453,8 @@ def validate_tag_filters(namespace):
 def validate_import_tag_filters(namespace):
     """Validates tag filters in the 'src_tags' attribute."""
     _validate_tag_filter_list(getattr(namespace, 'src_tags', None))
+
+
+def validate_dry_run(namespace):
+    if namespace.dry_run and namespace.yes:
+        raise MutuallyExclusiveArgumentError("The '--dry-run' and '--yes' options cannot be specified together.")

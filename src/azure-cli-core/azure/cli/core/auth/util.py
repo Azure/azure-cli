@@ -29,6 +29,8 @@ def aad_error_handler(error, **kwargs):
     # To trigger this function for testing, simply provide an invalid scope:
     # az account get-access-token --scope https://my-invalid-scope
 
+    logger.debug('MSAL error: %r', error)
+
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
         import socket
@@ -151,7 +153,7 @@ def build_sdk_access_token(token_entry):
     # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
     # So We define our own AccessToken.
     from .constants import ACCESS_TOKEN, EXPIRES_IN
-    return AccessToken(token_entry[ACCESS_TOKEN], _now_timestamp() + token_entry[EXPIRES_IN])
+    return AccessToken(token_entry[ACCESS_TOKEN], now_timestamp() + token_entry[EXPIRES_IN])
 
 
 def decode_access_token(access_token):
@@ -177,6 +179,6 @@ def read_response_templates():
     return success_template, error_template
 
 
-def _now_timestamp():
+def now_timestamp():
     import time
     return int(time.time())

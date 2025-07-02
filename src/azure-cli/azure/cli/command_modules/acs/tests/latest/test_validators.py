@@ -733,6 +733,43 @@ class TestValidateNodepoolName(unittest.TestCase):
         )
 
 
+class GatewayPrefixSizeSpace:
+    def __init__(self, gateway_prefix_size=None, mode=None):
+        self.gateway_prefix_size = gateway_prefix_size
+        self.mode = mode
+
+
+class TestValidateGatewayPrefixSize(unittest.TestCase):
+    def test_none_gateway_prefix_size(self):
+        namespace = GatewayPrefixSizeSpace()
+        validators.validate_gateway_prefix_size(namespace)
+
+    def test_invalid_gateway_prefix_size_1(self):
+        namespace = GatewayPrefixSizeSpace(gateway_prefix_size=27, mode="Gateway")
+        err = '--gateway-prefix-size must be in the range [28, 31]'
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_gateway_prefix_size(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_gateway_prefix_size_2(self):
+        namespace = GatewayPrefixSizeSpace(gateway_prefix_size=32, mode="Gateway")
+        err = '--gateway-prefix-size must be in the range [28, 31]'
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_gateway_prefix_size(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_mode(self):
+        namespace = GatewayPrefixSizeSpace(gateway_prefix_size=31, mode="System")
+        err = '--gateway-prefix-size can only be set for Gateway-mode nodepools'
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_gateway_prefix_size(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_gateway_prefix_size(self):
+        namespace = GatewayPrefixSizeSpace(gateway_prefix_size=30, mode="Gateway")
+        validators.validate_gateway_prefix_size(namespace)
+
+
 class TestValidateRegistryName(unittest.TestCase):
     def test_append_suffix(self):
         from azure.cli.core.cloud import HARD_CODED_CLOUD_LIST, CloudSuffixNotSetException

@@ -25,6 +25,7 @@ CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
 # mode
 CONST_NODEPOOL_MODE_SYSTEM = "System"
 CONST_NODEPOOL_MODE_USER = "User"
+CONST_NODEPOOL_MODE_GATEWAY = "Gateway"
 
 # os type
 CONST_DEFAULT_NODE_OS_TYPE = "Linux"
@@ -123,6 +124,10 @@ CONST_NETWORK_POLICY_AZURE = "azure"
 CONST_NETWORK_POLICY_CILIUM = "cilium"
 CONST_NETWORK_POLICY_CALICO = "calico"
 CONST_NETWORK_POLICY_NONE = "none"
+
+# network pod ip allocation mode
+CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL = "DynamicIndividual"
+CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK = "StaticBlock"
 
 # consts for addons
 # http application routing

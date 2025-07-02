@@ -602,6 +602,7 @@ def aks_create(
     rotation_poll_interval=None,
     enable_app_routing=False,
     app_routing_default_nginx_controller=None,
+    enable_static_egress_gateway=False,
     # nodepool paramerters
     nodepool_name="nodepool1",
     node_vm_size=None,
@@ -609,6 +610,7 @@ def aks_create(
     snapshot_id=None,
     vnet_subnet_id=None,
     pod_subnet_id=None,
+    pod_ip_allocation_mode=None,
     enable_node_public_ip=False,
     node_public_ip_prefix_id=None,
     enable_cluster_autoscaler=False,
@@ -756,6 +758,7 @@ def aks_update(
     disable_windows_gmsa=False,
     attach_acr=None,
     detach_acr=None,
+    assignee_principal_type=None,
     nrg_lockdown_restriction_level=None,
     enable_defender=False,
     disable_defender=False,
@@ -799,6 +802,8 @@ def aks_update(
     enable_secret_rotation=False,
     disable_secret_rotation=False,
     rotation_poll_interval=None,
+    enable_static_egress_gateway=False,
+    disable_static_egress_gateway=False,
     # nodepool paramerters
     enable_cluster_autoscaler=False,
     disable_cluster_autoscaler=False,
@@ -2392,6 +2397,7 @@ def aks_agentpool_add(
     snapshot_id=None,
     vnet_subnet_id=None,
     pod_subnet_id=None,
+    pod_ip_allocation_mode=None,
     enable_node_public_ip=False,
     node_public_ip_prefix_id=None,
     enable_cluster_autoscaler=False,
@@ -2439,6 +2445,8 @@ def aks_agentpool_add(
     if_none_match=None,
     # gpu driver
     gpu_driver=None,
+    # static egress gateway - gateway-mode pool
+    gateway_prefix_size=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()

@@ -58,6 +58,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy', 'PolicyClient')
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
+    MGMT_RESOURCE_DEPLOYMENTS = ('azure.mgmt.resource.deployments', 'DeploymentsMgmtClient')
     MGMT_RESOURCE_DEPLOYMENTSCRIPTS = ('azure.mgmt.resource.deploymentscripts', 'DeploymentScriptsClient')
     MGMT_RESOURCE_TEMPLATESPECS = ('azure.mgmt.resource.templatespecs', 'TemplateSpecsClient')
     MGMT_RESOURCE_DEPLOYMENTSTACKS = ('azure.mgmt.resource.deploymentstacks', 'DeploymentStacksClient')
@@ -179,9 +180,10 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_RESOURCE_RESOURCES: '2024-11-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2022-12-01',
-        ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
-        ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS: '2024-03-01',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTS: None,
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: None,
+        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: None,
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS: None,
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
@@ -218,6 +220,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILESHARE: '2025-05-05',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.DATA_STORAGE_TABLE: None,
         ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: None,

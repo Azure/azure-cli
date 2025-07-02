@@ -27,7 +27,7 @@ from ._validators import (validate_appservice_name_or_id, validate_sku, validate
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
                           validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
                           validate_snapshot_export, validate_snapshot_import, validate_tag_filters,
-                          validate_import_tag_filters)
+                          validate_import_tag_filters, validate_dry_run)
 
 
 def load_arguments(self, _):
@@ -228,6 +228,7 @@ def load_arguments(self, _):
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all feature flags will be imported from file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('content_type', help='Content type of all imported items.')
         c.argument('import_mode', arg_type=get_enum_type([ImportMode.ALL, ImportMode.IGNORE_MATCH]), help='If import mode is "ignore-match", only source key-values that do not already exist or whose value, content-type or tags are different from that of an existing key-value with the same key and label, will be written. Import mode "all" writes all key-values to the destination regardless of whether they exist or not.')
+        c.argument('dry_run', validator=validate_dry_run, help="Preview the result of import operation without making any changes to the App Configuration store.")
 
     with self.argument_context('appconfig kv import', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -265,6 +266,7 @@ def load_arguments(self, _):
         c.argument('snapshot', validator=validate_snapshot_export,
                    help="Export all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are exported based on the specified key and label filters.")
         c.argument('tags', arg_type=tags_arg_type, help="Key-values which contain the specified tags in source AppConfig will be exported. If no tags are specified, all key-values with any tags can be exported. Support space-separated tag filters: key[=value] [key[=value] ...].")
+        c.argument('dry_run', validator=validate_dry_run, help="Preview the result of export operation without making any changes to the App Configuration store.")
 
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -324,6 +326,7 @@ def load_arguments(self, _):
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, restore all key-value pairs with all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
         c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, restore all key-values with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
+        c.argument('dry_run', validator=validate_dry_run, help="Preview the result of restore operation without making any changes to the App Configuration store.")
 
     with self.argument_context('appconfig kv lock') as c:
         c.argument('key', help='Key to be locked.')
