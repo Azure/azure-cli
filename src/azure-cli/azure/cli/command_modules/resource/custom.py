@@ -1723,6 +1723,7 @@ def export_group_as_template(
 
     return result.output if export_format.lower() == "bicep" else result.template
 
+
 def create_application(cmd, resource_group_name,
                        application_name, managedby_resource_group_id,
                        kind, managedapp_definition_id=None, location=None,
