@@ -92,11 +92,218 @@ class Create(AAZCommand):
             help="This property allows you to specify if the requests will be allowed to access the host endpoints. Possible values are: 'Allow', 'Deny'.",
             enum={"Allow": "Allow", "Deny": "Deny"},
         )
+        _args_schema.exclude_from_latest = AAZBoolArg(
+            options=["--exclude-from-latest"],
+            arg_group="Properties",
+            help="If set to true, Virtual Machines deployed from the latest version of the Resource Profile won't use this Profile version.",
+        )
         _args_schema.mode = AAZStrArg(
             options=["--mode"],
             arg_group="Properties",
             help="This property allows you to specify whether the access control rules are in Audit mode, in Enforce mode or Disabled. Possible values are: 'Audit', 'Enforce' or 'Disabled'.",
             enum={"Audit": "Audit", "Disabled": "Disabled", "Enforce": "Enforce"},
+        )
+        _args_schema.rules = AAZObjectArg(
+            options=["--rules"],
+            arg_group="Properties",
+            help="This is the Access Control Rules specification for an in VM access control profile version.",
+        )
+        _args_schema.target_locations = AAZListArg(
+            options=["--target-locations"],
+            arg_group="Properties",
+            help="The target regions where the Resource Profile version is going to be replicated to. This property is updatable.",
+        )
+
+        rules = cls._args_schema.rules
+        rules.identities = AAZListArg(
+            options=["identities"],
+            help="A list of identities.",
+        )
+        rules.privileges = AAZListArg(
+            options=["privileges"],
+            help="A list of privileges.",
+        )
+        rules.role_assignments = AAZListArg(
+            options=["role-assignments"],
+            help="A list of role assignments.",
+        )
+        rules.roles = AAZListArg(
+            options=["roles"],
+            help="A list of roles.",
+        )
+
+        identities = cls._args_schema.rules.identities
+        identities.Element = AAZObjectArg()
+
+        _element = cls._args_schema.rules.identities.Element
+        _element.exe_path = AAZStrArg(
+            options=["exe-path"],
+            help="The path to the executable.",
+        )
+        _element.group_name = AAZStrArg(
+            options=["group-name"],
+            help="The groupName corresponding to this identity.",
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the identity.",
+            required=True,
+        )
+        _element.process_name = AAZStrArg(
+            options=["process-name"],
+            help="The process name of the executable.",
+        )
+        _element.user_name = AAZStrArg(
+            options=["user-name"],
+            help="The username corresponding to this identity.",
+        )
+
+        privileges = cls._args_schema.rules.privileges
+        privileges.Element = AAZObjectArg()
+
+        _element = cls._args_schema.rules.privileges.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the privilege.",
+            required=True,
+        )
+        _element.path = AAZStrArg(
+            options=["path"],
+            help="The HTTP path corresponding to the privilege.",
+            required=True,
+        )
+        _element.query_parameters = AAZDictArg(
+            options=["query-parameters"],
+            help="The query parameters to match in the path.",
+        )
+
+        query_parameters = cls._args_schema.rules.privileges.Element.query_parameters
+        query_parameters.Element = AAZStrArg()
+
+        role_assignments = cls._args_schema.rules.role_assignments
+        role_assignments.Element = AAZObjectArg()
+
+        _element = cls._args_schema.rules.role_assignments.Element
+        _element.identities = AAZListArg(
+            options=["identities"],
+            help="A list of identities that can access the privileges defined by the role.",
+            required=True,
+        )
+        _element.role = AAZStrArg(
+            options=["role"],
+            help="The name of the role.",
+            required=True,
+        )
+
+        identities = cls._args_schema.rules.role_assignments.Element.identities
+        identities.Element = AAZStrArg()
+
+        roles = cls._args_schema.rules.roles
+        roles.Element = AAZObjectArg()
+
+        _element = cls._args_schema.rules.roles.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the role.",
+            required=True,
+        )
+        _element.privileges = AAZListArg(
+            options=["privileges"],
+            help="A list of privileges needed by this role.",
+            required=True,
+        )
+
+        privileges = cls._args_schema.rules.roles.Element.privileges
+        privileges.Element = AAZStrArg()
+
+        target_locations = cls._args_schema.target_locations
+        target_locations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.target_locations.Element
+        _element.additional_replica_sets = AAZListArg(
+            options=["additional-replica-sets"],
+            help="List of storage sku with replica count to create direct drive replicas.",
+        )
+        _element.encryption = AAZObjectArg(
+            options=["encryption"],
+            help="Optional. Allows users to provide customer managed keys for encrypting the OS and data disks in the gallery artifact.",
+        )
+        _element.exclude_from_latest = AAZBoolArg(
+            options=["exclude-from-latest"],
+            help="Contains the flag setting to hide an image when users specify version='latest'",
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the region.",
+            required=True,
+        )
+        _element.regional_replica_count = AAZIntArg(
+            options=["regional-replica-count"],
+            help="The number of replicas of the Image Version to be created per region. This property is updatable.",
+        )
+        _element.storage_account_type = AAZStrArg(
+            options=["storage-account-type"],
+            help="Specifies the storage account type to be used to store the image. This property is not updatable.",
+            enum={"PremiumV2_LRS": "PremiumV2_LRS", "Premium_LRS": "Premium_LRS", "Standard_LRS": "Standard_LRS", "Standard_ZRS": "Standard_ZRS"},
+        )
+
+        additional_replica_sets = cls._args_schema.target_locations.Element.additional_replica_sets
+        additional_replica_sets.Element = AAZObjectArg()
+
+        _element = cls._args_schema.target_locations.Element.additional_replica_sets.Element
+        _element.regional_replica_count = AAZIntArg(
+            options=["regional-replica-count"],
+            help="The number of direct drive replicas of the Image Version to be created.This Property is updatable",
+        )
+        _element.storage_account_type = AAZStrArg(
+            options=["storage-account-type"],
+            help="Specifies the storage account type to be used to create the direct drive replicas",
+            enum={"PremiumV2_LRS": "PremiumV2_LRS", "Premium_LRS": "Premium_LRS", "Standard_LRS": "Standard_LRS", "Standard_ZRS": "Standard_ZRS"},
+        )
+
+        encryption = cls._args_schema.target_locations.Element.encryption
+        encryption.data_disk_images = AAZListArg(
+            options=["data-disk-images"],
+            help="A list of encryption specifications for data disk images.",
+        )
+        encryption.os_disk_image = AAZObjectArg(
+            options=["os-disk-image"],
+            help="Contains encryption settings for an OS disk image.",
+        )
+
+        data_disk_images = cls._args_schema.target_locations.Element.encryption.data_disk_images
+        data_disk_images.Element = AAZObjectArg()
+
+        _element = cls._args_schema.target_locations.Element.encryption.data_disk_images.Element
+        _element.disk_encryption_set_id = AAZStrArg(
+            options=["disk-encryption-set-id"],
+            help="A relative URI containing the resource ID of the disk encryption set.",
+        )
+        _element.lun = AAZIntArg(
+            options=["lun"],
+            help="This property specifies the logical unit number of the data disk. This value is used to identify data disks within the Virtual Machine and therefore must be unique for each data disk attached to the Virtual Machine.",
+            required=True,
+        )
+
+        os_disk_image = cls._args_schema.target_locations.Element.encryption.os_disk_image
+        os_disk_image.disk_encryption_set_id = AAZStrArg(
+            options=["disk-encryption-set-id"],
+            help="A relative URI containing the resource ID of the disk encryption set.",
+        )
+        os_disk_image.security_profile = AAZObjectArg(
+            options=["security-profile"],
+            help="This property specifies the security profile of an OS disk image.",
+        )
+
+        security_profile = cls._args_schema.target_locations.Element.encryption.os_disk_image.security_profile
+        security_profile.confidential_vm_encryption_type = AAZStrArg(
+            options=["confidential-vm-encryption-type"],
+            help="confidential VM encryption types",
+            enum={"EncryptedVMGuestStateOnlyWithPmk": "EncryptedVMGuestStateOnlyWithPmk", "EncryptedWithCmk": "EncryptedWithCmk", "EncryptedWithPmk": "EncryptedWithPmk", "NonPersistedTPM": "NonPersistedTPM"},
+        )
+        security_profile.secure_vm_disk_encryption_set_id = AAZStrArg(
+            options=["secure-vm-disk-encryption-set-id"],
+            help="secure VM disk encryption set id",
         )
         return cls._args_schema
 
@@ -220,7 +427,115 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("defaultAccess", AAZStrType, ".default_access", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("excludeFromLatest", AAZBoolType, ".exclude_from_latest")
                 properties.set_prop("mode", AAZStrType, ".mode", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("rules", AAZObjectType, ".rules")
+                properties.set_prop("targetLocations", AAZListType, ".target_locations")
+
+            rules = _builder.get(".properties.rules")
+            if rules is not None:
+                rules.set_prop("identities", AAZListType, ".identities")
+                rules.set_prop("privileges", AAZListType, ".privileges")
+                rules.set_prop("roleAssignments", AAZListType, ".role_assignments")
+                rules.set_prop("roles", AAZListType, ".roles")
+
+            identities = _builder.get(".properties.rules.identities")
+            if identities is not None:
+                identities.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.rules.identities[]")
+            if _elements is not None:
+                _elements.set_prop("exePath", AAZStrType, ".exe_path")
+                _elements.set_prop("groupName", AAZStrType, ".group_name")
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("processName", AAZStrType, ".process_name")
+                _elements.set_prop("userName", AAZStrType, ".user_name")
+
+            privileges = _builder.get(".properties.rules.privileges")
+            if privileges is not None:
+                privileges.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.rules.privileges[]")
+            if _elements is not None:
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("path", AAZStrType, ".path", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("queryParameters", AAZDictType, ".query_parameters")
+
+            query_parameters = _builder.get(".properties.rules.privileges[].queryParameters")
+            if query_parameters is not None:
+                query_parameters.set_elements(AAZStrType, ".")
+
+            role_assignments = _builder.get(".properties.rules.roleAssignments")
+            if role_assignments is not None:
+                role_assignments.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.rules.roleAssignments[]")
+            if _elements is not None:
+                _elements.set_prop("identities", AAZListType, ".identities", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("role", AAZStrType, ".role", typ_kwargs={"flags": {"required": True}})
+
+            identities = _builder.get(".properties.rules.roleAssignments[].identities")
+            if identities is not None:
+                identities.set_elements(AAZStrType, ".")
+
+            roles = _builder.get(".properties.rules.roles")
+            if roles is not None:
+                roles.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.rules.roles[]")
+            if _elements is not None:
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("privileges", AAZListType, ".privileges", typ_kwargs={"flags": {"required": True}})
+
+            privileges = _builder.get(".properties.rules.roles[].privileges")
+            if privileges is not None:
+                privileges.set_elements(AAZStrType, ".")
+
+            target_locations = _builder.get(".properties.targetLocations")
+            if target_locations is not None:
+                target_locations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.targetLocations[]")
+            if _elements is not None:
+                _elements.set_prop("additionalReplicaSets", AAZListType, ".additional_replica_sets")
+                _elements.set_prop("encryption", AAZObjectType, ".encryption")
+                _elements.set_prop("excludeFromLatest", AAZBoolType, ".exclude_from_latest")
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("regionalReplicaCount", AAZIntType, ".regional_replica_count")
+                _elements.set_prop("storageAccountType", AAZStrType, ".storage_account_type")
+
+            additional_replica_sets = _builder.get(".properties.targetLocations[].additionalReplicaSets")
+            if additional_replica_sets is not None:
+                additional_replica_sets.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.targetLocations[].additionalReplicaSets[]")
+            if _elements is not None:
+                _elements.set_prop("regionalReplicaCount", AAZIntType, ".regional_replica_count")
+                _elements.set_prop("storageAccountType", AAZStrType, ".storage_account_type")
+
+            encryption = _builder.get(".properties.targetLocations[].encryption")
+            if encryption is not None:
+                encryption.set_prop("dataDiskImages", AAZListType, ".data_disk_images")
+                encryption.set_prop("osDiskImage", AAZObjectType, ".os_disk_image")
+
+            data_disk_images = _builder.get(".properties.targetLocations[].encryption.dataDiskImages")
+            if data_disk_images is not None:
+                data_disk_images.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.targetLocations[].encryption.dataDiskImages[]")
+            if _elements is not None:
+                _elements.set_prop("diskEncryptionSetId", AAZStrType, ".disk_encryption_set_id")
+                _elements.set_prop("lun", AAZIntType, ".lun", typ_kwargs={"flags": {"required": True}})
+
+            os_disk_image = _builder.get(".properties.targetLocations[].encryption.osDiskImage")
+            if os_disk_image is not None:
+                os_disk_image.set_prop("diskEncryptionSetId", AAZStrType, ".disk_encryption_set_id")
+                os_disk_image.set_prop("securityProfile", AAZObjectType, ".security_profile")
+
+            security_profile = _builder.get(".properties.targetLocations[].encryption.osDiskImage.securityProfile")
+            if security_profile is not None:
+                security_profile.set_prop("confidentialVMEncryptionType", AAZStrType, ".confidential_vm_encryption_type")
+                security_profile.set_prop("secureVMDiskEncryptionSetId", AAZStrType, ".secure_vm_disk_encryption_set_id")
 
             return self.serialize_content(_content_value)
 

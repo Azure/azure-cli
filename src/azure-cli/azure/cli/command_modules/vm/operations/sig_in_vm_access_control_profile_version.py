@@ -28,8 +28,26 @@ class SigInVMAccessControlProfileVersionCreate(_SigInVMAccessControlProfileVersi
 
         args_schema.default_access._required = True
         args_schema.mode._required = True
+        args_schema.target_locations._registered = False
+
+        args_schema.target_regions = AAZListArg(
+            options=["--target-regions"],
+            help="The target regions where the Resource Profile version is going to be replicated to.",
+        )
+        target_regions = args_schema.target_regions
+        target_regions.Element = AAZStrArg()
 
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+
+        if args.target_regions:
+            args.target_locations = []
+            for name in args.target_regions:
+                args.target_locations.append({
+                    'name': name
+                })
 
 
 @register_command(
