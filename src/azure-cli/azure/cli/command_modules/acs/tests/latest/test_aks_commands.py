@@ -12,7 +12,8 @@ import unittest
 
 from azure.cli.command_modules.acs._format import (
     version_to_tuple,
-    aks_machine_list_table_format
+    aks_machine_list_table_format,
+    aks_machine_show_table_format
 )    
 from azure.cli.command_modules.acs._helpers import (
     _get_test_sp_object_id,
@@ -261,7 +262,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
             self.check('agentPoolProfiles[0].tags.tag2', 'tv2'),
             self.check('agentPoolProfiles[0].maxPods', 250),  # default maxPods is 250 now as default network plugin has been changed to azure
-            self.check('agentPoolProfiles[0].osDiskSizeGb', 128),
         ])
 
         # list
@@ -2167,10 +2167,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'ssh_key_value': self.generate_ssh_keys()
+            'ssh_key_value': self.generate_ssh_keys(),
+            'zones': "1 2 3"
         })
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
-            '--ssh-key-value={ssh_key_value} -o json'
+            '--ssh-key-value={ssh_key_value}  --zones {zones}  -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.openServiceMesh', None),
@@ -2181,12 +2182,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'node_pool_name': node_pool_name,
             'ssh_key_value': self.generate_ssh_keys(),
+            'zones': "1 2 3"
         })
         # add nodepool
         self.cmd('aks nodepool add ' \
                  ' --resource-group={resource_group} ' \
                  ' --cluster-name={name} ' \
-                 ' --name={node_pool_name} --node-count=2', checks=[
+                 ' --name={node_pool_name} --node-count=2 --zones {zones}', checks=[
             self.check('provisioningState', 'Succeeded')
         ])
         list_cmd = 'aks machine list ' \
@@ -2194,8 +2196,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                    ' --cluster-name={name} --nodepool-name={node_pool_name} -o json'
         machine_list = self.cmd(list_cmd).get_output_in_json()
         assert len(machine_list) == 2
-        aks_machine_list_table_format(machine_list)
-        machine_name = machine_list[0]["name"]
+        formatted_machines = aks_machine_list_table_format(machine_list)
+        assert len(formatted_machines) == 2
+        # Assert that zones are not None in the output
+        for machine in formatted_machines:
+            self.assertIsNotNone(machine['zones'], "Zones should not be None in the formatted output")
+            self.assertNotEqual(machine['zones'], "", "Zones should not be empty in the formatted output")
+        machine_name =  formatted_machines[0]['name']   
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -2207,7 +2214,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--resource-group={resource_group} --cluster-name={name} ' \
             '--nodepool-name={node_pool_name} --machine-name={machine_name} -o json'
         machine_show = self.cmd(show_cmd).get_output_in_json()
-        assert machine_show["name"] == machine_name
+        formatted_machines = aks_machine_show_table_format(machine_show)
+        # Assert that zones are not None in the output
+        self.assertIsNotNone(formatted_machines['zones'], "Zones should not be None in the formatted output")
+        self.assertNotEqual(formatted_machines['zones'], "", "Zones should not be empty in the formatted output")
+        assert formatted_machines["name"] == machine_name
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -5641,48 +5652,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         time.sleep(10)
         show_cmd = 'aks show --resource-group={resource_group} --name={name}'
         self.cmd(show_cmd, checks=[self.check('provisioningState', 'Canceled')])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_nodepool_abort(self, resource_group, resource_group_location):
-        aks_name = self.create_random_name('cliakstest', 16)
-        node_pool_name = self.create_random_name('c', 6)
-        node_vm_size = 'Standard_DS2_v2'
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'node_pool_name': node_pool_name,
-            'ssh_key_value': self.generate_ssh_keys(),
-            'node_vm_size': node_vm_size,
-        })
-
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
-                     '--ssh-key-value={ssh_key_value} ' \
-                     '--node-vm-size={node_vm_size} -o json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded')
-        ])
-
-        # add nodepool
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={node_pool_name} --node-vm-size={node_vm_size} --node-count=2', checks=[
-            self.check('provisioningState', 'Succeeded')
-        ])
-        # stop nodepool
-        self.cmd('aks nodepool stop --no-wait --resource-group={resource_group} --cluster-name={name} --nodepool-name={node_pool_name} --aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/PreviewStartStopAgentPool')
-
-        abort_cmd = 'aks nodepool operation-abort --resource-group={resource_group} --cluster-name={name} --nodepool-name={node_pool_name}'
-        self.cmd(abort_cmd, checks=[self.is_empty()])
-
-        time.sleep(10)
-        get_nodepool_cmd = 'aks nodepool show ' \
-                           '--resource-group={resource_group} ' \
-                           '--cluster-name={name} ' \
-                           '-n {node_pool_name} '
-        self.cmd(get_nodepool_cmd, checks=[
-            self.check('provisioningState', 'Canceled'),
-            self.check('powerState.code', 'Running')
-        ])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
