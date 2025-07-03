@@ -12,7 +12,8 @@ import unittest
 
 from azure.cli.command_modules.acs._format import (
     version_to_tuple,
-    aks_machine_list_table_format
+    aks_machine_list_table_format,
+    aks_machine_show_table_format
 )    
 from azure.cli.command_modules.acs._helpers import (
     _get_test_sp_object_id,
@@ -2166,10 +2167,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'ssh_key_value': self.generate_ssh_keys()
+            'ssh_key_value': self.generate_ssh_keys(),
+            'zones': "1 2 3"
         })
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
-            '--ssh-key-value={ssh_key_value} -o json'
+            '--ssh-key-value={ssh_key_value}  --zones {zones}  -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.openServiceMesh', None),
@@ -2180,12 +2182,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'node_pool_name': node_pool_name,
             'ssh_key_value': self.generate_ssh_keys(),
+            'zones': "1 2 3"
         })
         # add nodepool
         self.cmd('aks nodepool add ' \
                  ' --resource-group={resource_group} ' \
                  ' --cluster-name={name} ' \
-                 ' --name={node_pool_name} --node-count=2', checks=[
+                 ' --name={node_pool_name} --node-count=2 --zones {zones}', checks=[
             self.check('provisioningState', 'Succeeded')
         ])
         list_cmd = 'aks machine list ' \
@@ -2193,8 +2196,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                    ' --cluster-name={name} --nodepool-name={node_pool_name} -o json'
         machine_list = self.cmd(list_cmd).get_output_in_json()
         assert len(machine_list) == 2
-        aks_machine_list_table_format(machine_list)
-        machine_name = machine_list[0]["name"]
+        formatted_machines = aks_machine_list_table_format(machine_list)
+        assert len(formatted_machines) == 2
+        # Assert that zones are not None in the output
+        for machine in formatted_machines:
+            self.assertIsNotNone(machine['zones'], "Zones should not be None in the formatted output")
+            self.assertNotEqual(machine['zones'], "", "Zones should not be empty in the formatted output")
+        machine_name =  formatted_machines[0]['name']   
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -2206,7 +2214,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--resource-group={resource_group} --cluster-name={name} ' \
             '--nodepool-name={node_pool_name} --machine-name={machine_name} -o json'
         machine_show = self.cmd(show_cmd).get_output_in_json()
-        assert machine_show["name"] == machine_name
+        formatted_machines = aks_machine_show_table_format(machine_show)
+        # Assert that zones are not None in the output
+        self.assertIsNotNone(formatted_machines['zones'], "Zones should not be None in the formatted output")
+        self.assertNotEqual(formatted_machines['zones'], "", "Zones should not be empty in the formatted output")
+        assert formatted_machines["name"] == machine_name
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
