@@ -162,6 +162,10 @@ def load_command_table(self, _):
         from .custom import WAFCustomRuleMatchConditionAdd
         self.command_table["network application-gateway waf-policy custom-rule match-condition add"] = WAFCustomRuleMatchConditionAdd(loader=self)
 
+    with self.command_group("network application-gateway waf-policy managed-rule exception") as g:
+        g.custom_command("remove", "remove_waf_managed_rule_exception")
+        g.custom_command("list", "list_waf_managed_rules")
+
     with self.command_group("network application-gateway waf-policy managed-rule exclusion") as g:
         g.custom_command("remove", "remove_waf_managed_rule_exclusion")
         g.custom_command("list", "list_waf_managed_rules")

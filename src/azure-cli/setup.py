@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.74.0"
+VERSION = "2.75.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -51,12 +51,12 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
-    'azure-appconfiguration~=1.7.0',
+    'azure-appconfiguration~=1.7.1',
     'azure-batch~=15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
-    'azure-datalake-store~=1.0.0a0',
+    'azure-datalake-store~=1.0.1',
     'azure-keyvault-administration==4.4.0b2',
     'azure-keyvault-certificates==4.7.0',
     'azure-keyvault-keys==4.11.0b1',
@@ -77,7 +77,7 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==14.1.0b1',
-    'azure-mgmt-containerservice~=36.0.0',
+    'azure-mgmt-containerservice~=37.0.0',
     'azure-mgmt-cosmosdb==9.8.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
@@ -106,10 +106,14 @@ DEPENDENCIES = [
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-mysqlflexibleservers==1.0.0b3',
     'azure-mgmt-recoveryservicesbackup~=9.2.0',
-    'azure-mgmt-recoveryservices~=3.0.0',
+    'azure-mgmt-recoveryservices~=3.1.0',
     'azure-mgmt-redhatopenshift~=1.5.0',
     'azure-mgmt-redis~=14.5.0',
     'azure-mgmt-resource==23.3.0',
+    'azure-mgmt-resource-deployments==1.0.0b1',
+    'azure-mgmt-resource-deploymentscripts==1.0.0b1',
+    'azure-mgmt-resource-deploymentstacks==1.0.0b1',
+    'azure-mgmt-resource-templatespecs==1.0.0b1',
     'azure-mgmt-search~=9.0',
     'azure-mgmt-security==6.0.0',
     'azure-mgmt-servicebus~=8.2.0',
@@ -124,7 +128,7 @@ DEPENDENCIES = [
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.3.1',
     'azure-monitor-query==1.2.0',
-    'azure-multiapi-storage==1.4.0',
+    'azure-multiapi-storage==1.4.1',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.20.0',

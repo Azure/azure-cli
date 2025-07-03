@@ -16,6 +16,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_AZURELINUX,
     CONST_OS_SKU_CBLMARINER,
     CONST_OS_SKU_MARINER,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+    CONST_NODEPOOL_MODE_GATEWAY,
 )
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
@@ -341,6 +344,17 @@ def validate_spot_max_price(namespace):
 def validate_acr(namespace):
     if namespace.attach_acr and namespace.detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+    if namespace.assignee_principal_type and not namespace.attach_acr:
+        raise CLIError('The "--assignee-principal-type" argument can only be used with "--attach-acr".')
+    if namespace.attach_acr:
+        # Validate assignee_principal_type if specified
+        if namespace.assignee_principal_type:
+            valid_types = ['User', 'ServicePrincipal', 'Group']
+            if namespace.assignee_principal_type not in valid_types:
+                raise CLIError(
+                    f"Invalid value for --assignee_principal_type. "
+                    f"Allowed values are: {', '.join(valid_types)}"
+                )
 
 
 def validate_nodepool_tags(ns):
@@ -358,6 +372,16 @@ def validate_vnet_subnet_id(namespace):
 
 def validate_pod_subnet_id(namespace):
     _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
+
+
+def validate_pod_ip_allocation_mode(namespace):
+    """Validates the pod ip allocation mode string."""
+    if namespace.pod_ip_allocation_mode is not None:
+        if namespace.pod_ip_allocation_mode not in (
+            CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+            CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+        ):
+            raise InvalidArgumentValueError("--pod-ip-allocation-mode can only be DynamicIndividual or StaticBlock")
 
 
 def validate_apiserver_subnet_id(namespace):
@@ -860,7 +884,7 @@ def validate_bootstrap_container_registry_resource_id(namespace):
     container_registry_resource_id = namespace.bootstrap_container_registry_resource_id
     if container_registry_resource_id is None or container_registry_resource_id == '':
         return
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if not is_valid_resource_id(container_registry_resource_id):
         raise InvalidArgumentValueError("--bootstrap-container-registry-resource-id is not a valid Azure resource ID.")
 
@@ -871,3 +895,12 @@ def validate_custom_ca_trust_certificates(namespace):
         if hasattr(namespace, 'os_type') and namespace.os_type != "Linux":
             raise ArgumentUsageError(
                 '--custom-ca-trust-certificates can only be set for linux nodepools')
+
+
+def validate_gateway_prefix_size(namespace):
+    """Validates the gateway prefix size."""
+    if namespace.gateway_prefix_size is not None:
+        if not hasattr(namespace, 'mode') or namespace.mode != CONST_NODEPOOL_MODE_GATEWAY:
+            raise ArgumentUsageError("--gateway-prefix-size can only be set for Gateway-mode nodepools")
+        if namespace.gateway_prefix_size < 28 or namespace.gateway_prefix_size > 31:
+            raise InvalidArgumentValueError("--gateway-prefix-size must be in the range [28, 31]")

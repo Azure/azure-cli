@@ -2192,6 +2192,21 @@ def list_waf_managed_rules(cmd, resource_group_name, policy_name):
 # endregion
 
 
+# region ApplicationGatewayWAFPolicy ManagedRule Exception
+def remove_waf_managed_rule_exception(cmd, resource_group_name, policy_name):
+    from .aaz.latest.network.application_gateway.waf_policy import Update
+
+    class WAFExceptionRemove(Update):
+        def pre_instance_update(self, instance):
+            instance.properties.managed_rules.exceptions = []
+
+    return WAFExceptionRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": policy_name,
+        "resource_group": resource_group_name,
+    })
+# endregion
+
+
 # region ApplicationGatewayWAFPolicy ManagedRule OwaspCrsExclusionEntry
 # pylint: disable=too-many-nested-blocks
 def remove_waf_managed_rule_exclusion(cmd, resource_group_name, policy_name):
@@ -5687,6 +5702,9 @@ class VNetSubnetCreate(_VNetSubnetCreate):
             logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
+
 
 class VNetSubnetUpdate(_VNetSubnetUpdate):
     @classmethod
@@ -5802,6 +5820,9 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         if has_value(args.disable_private_link_service_network_policies):
             logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+
+        if args.ipam_pool_prefix_allocations.to_serialized_data():
+            args.address_prefixes = []
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.network_security_group.id):
