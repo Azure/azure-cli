@@ -30,7 +30,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
 
 from azure.cli.command_modules.resource._client_factory import (
-    _resource_client_factory, _resource_lock_client_factory,
+    _resource_client_factory, _resource_deployments_client_factory, _resource_lock_client_factory,
     _resource_links_client_factory, _resource_deploymentscripts_client_factory, _resource_deploymentstacks_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory, _resource_privatelinks_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 from azure.cli.command_modules.resource.parameters import StacksActionOnUnmanage
