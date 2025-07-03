@@ -1721,7 +1721,7 @@ def export_group_as_template(
         for detail in getattr(error, 'details', None) or []:
             logger.error(detail.message)
 
-    return result.output if export_format.lower() == "bicep" else result.template
+    return result.output if export_format and export_format.lower() == "bicep" else result.template
 
 
 def create_application(cmd, resource_group_name,
