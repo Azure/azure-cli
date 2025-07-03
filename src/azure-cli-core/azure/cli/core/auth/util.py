@@ -84,7 +84,7 @@ def _generate_login_command(tenant=None, scopes=None, claims_challenge=None):
         from azure.cli.core.util import b64encode
         # Base64 encode the claims_challenge to avoid shell interpretation
         claims_challenge_encoded = b64encode(claims_challenge)
-        login_command.extend(['--claims', f'"{claims_challenge_encoded}"'])
+        login_command.extend(['--claims-challenge', f'"{claims_challenge_encoded}"'])
         # Explicit logout is needed: https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
         return 'az logout\n' + ' '.join(login_command)
 
