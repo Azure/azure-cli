@@ -19,10 +19,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies", "2024-03-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies", "2024-07-01"],
         ]
     }
 
@@ -43,17 +42,14 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg()
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
-        if condition_0:
-            self.WebApplicationFirewallPoliciesList(ctx=self.ctx)()
-        if condition_1:
-            self.WebApplicationFirewallPoliciesListAll(ctx=self.ctx)()
+        self.WebApplicationFirewallPoliciesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -113,7 +109,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -226,7 +222,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.id = AAZStrType()
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _ListHelper._build_schema_managed_service_identity_read(_element.identity)
             _element.location = AAZStrType()
             _element.name = AAZStrType(
@@ -1456,6 +1452,7 @@ class List(AAZCommand):
             _element = cls._schema_on_200.value.Element.properties.custom_rules.Element.match_conditions.Element
             _element.match_values = AAZListType(
                 serialized_name="matchValues",
+                flags={"required": True},
             )
             _element.match_variables = AAZListType(
                 serialized_name="matchVariables",
@@ -1552,6 +1549,10 @@ class List(AAZCommand):
             managed_rule_sets.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element
+            _element.computed_disabled_rules = AAZListType(
+                serialized_name="computedDisabledRules",
+                flags={"read_only": True},
+            )
             _element.rule_group_overrides = AAZListType(
                 serialized_name="ruleGroupOverrides",
             )
@@ -1564,1582 +1565,18 @@ class List(AAZCommand):
                 flags={"required": True},
             )
 
-            rule_group_overrides = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides
-            rule_group_overrides.Element = AAZObjectType()
+            computed_disabled_rules = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules
+            computed_disabled_rules.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides.Element
+            _element = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules.Element
             _element.rule_group_name = AAZStrType(
                 serialized_name="ruleGroupName",
                 flags={"required": True},
             )
             _element.rules = AAZListType()
 
-            rules = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides.Element.rules
-            rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides.Element.rules.Element
-            _element.action = AAZStrType()
-            _element.rule_id = AAZStrType(
-                serialized_name="ruleId",
-                flags={"required": True},
-            )
-            _element.sensitivity = AAZStrType()
-            _element.state = AAZStrType()
-
-            path_based_rules = cls._schema_on_200.value.Element.properties.path_based_rules
-            path_based_rules.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(path_based_rules.Element)
-
-            policy_settings = cls._schema_on_200.value.Element.properties.policy_settings
-            policy_settings.custom_block_response_body = AAZStrType(
-                serialized_name="customBlockResponseBody",
-            )
-            policy_settings.custom_block_response_status_code = AAZIntType(
-                serialized_name="customBlockResponseStatusCode",
-            )
-            policy_settings.file_upload_enforcement = AAZBoolType(
-                serialized_name="fileUploadEnforcement",
-            )
-            policy_settings.file_upload_limit_in_mb = AAZIntType(
-                serialized_name="fileUploadLimitInMb",
-            )
-            policy_settings.js_challenge_cookie_expiration_in_mins = AAZIntType(
-                serialized_name="jsChallengeCookieExpirationInMins",
-            )
-            policy_settings.log_scrubbing = AAZObjectType(
-                serialized_name="logScrubbing",
-            )
-            policy_settings.max_request_body_size_in_kb = AAZIntType(
-                serialized_name="maxRequestBodySizeInKb",
-            )
-            policy_settings.mode = AAZStrType()
-            policy_settings.request_body_check = AAZBoolType(
-                serialized_name="requestBodyCheck",
-            )
-            policy_settings.request_body_enforcement = AAZBoolType(
-                serialized_name="requestBodyEnforcement",
-            )
-            policy_settings.request_body_inspect_limit_in_kb = AAZIntType(
-                serialized_name="requestBodyInspectLimitInKB",
-            )
-            policy_settings.state = AAZStrType()
-
-            log_scrubbing = cls._schema_on_200.value.Element.properties.policy_settings.log_scrubbing
-            log_scrubbing.scrubbing_rules = AAZListType(
-                serialized_name="scrubbingRules",
-            )
-            log_scrubbing.state = AAZStrType()
-
-            scrubbing_rules = cls._schema_on_200.value.Element.properties.policy_settings.log_scrubbing.scrubbing_rules
-            scrubbing_rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.policy_settings.log_scrubbing.scrubbing_rules.Element
-            _element.match_variable = AAZStrType(
-                serialized_name="matchVariable",
-                flags={"required": True},
-            )
-            _element.selector = AAZStrType()
-            _element.selector_match_operator = AAZStrType(
-                serialized_name="selectorMatchOperator",
-                flags={"required": True},
-            )
-            _element.state = AAZStrType()
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
-
-            return cls._schema_on_200
-
-    class WebApplicationFirewallPoliciesListAll(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2024-03-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-                flags={"read_only": True},
-            )
-            _schema_on_200.value = AAZListType(
-                flags={"read_only": True},
-            )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.location = AAZStrType()
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.application_gateway_for_containers = AAZListType(
-                serialized_name="applicationGatewayForContainers",
-                flags={"read_only": True},
-            )
-            properties.application_gateways = AAZListType(
-                serialized_name="applicationGateways",
-                flags={"read_only": True},
-            )
-            properties.custom_rules = AAZListType(
-                serialized_name="customRules",
-            )
-            properties.http_listeners = AAZListType(
-                serialized_name="httpListeners",
-                flags={"read_only": True},
-            )
-            properties.managed_rules = AAZObjectType(
-                serialized_name="managedRules",
-                flags={"required": True},
-            )
-            properties.path_based_rules = AAZListType(
-                serialized_name="pathBasedRules",
-                flags={"read_only": True},
-            )
-            properties.policy_settings = AAZObjectType(
-                serialized_name="policySettings",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.resource_state = AAZStrType(
-                serialized_name="resourceState",
-                flags={"read_only": True},
-            )
-
-            application_gateway_for_containers = cls._schema_on_200.value.Element.properties.application_gateway_for_containers
-            application_gateway_for_containers.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateway_for_containers.Element
-            _element.id = AAZStrType(
-                flags={"required": True},
-            )
-
-            application_gateways = cls._schema_on_200.value.Element.properties.application_gateways
-            application_gateways.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.identity = AAZObjectType()
-            _ListHelper._build_schema_managed_service_identity_read(_element.identity)
-            _element.location = AAZStrType()
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.zones = AAZListType()
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties
-            properties.authentication_certificates = AAZListType(
-                serialized_name="authenticationCertificates",
-            )
-            properties.autoscale_configuration = AAZObjectType(
-                serialized_name="autoscaleConfiguration",
-            )
-            properties.backend_address_pools = AAZListType(
-                serialized_name="backendAddressPools",
-            )
-            properties.backend_http_settings_collection = AAZListType(
-                serialized_name="backendHttpSettingsCollection",
-            )
-            properties.backend_settings_collection = AAZListType(
-                serialized_name="backendSettingsCollection",
-            )
-            properties.custom_error_configurations = AAZListType(
-                serialized_name="customErrorConfigurations",
-            )
-            properties.default_predefined_ssl_policy = AAZStrType(
-                serialized_name="defaultPredefinedSslPolicy",
-                flags={"read_only": True},
-            )
-            properties.enable_fips = AAZBoolType(
-                serialized_name="enableFips",
-            )
-            properties.enable_http2 = AAZBoolType(
-                serialized_name="enableHttp2",
-            )
-            properties.firewall_policy = AAZObjectType(
-                serialized_name="firewallPolicy",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.firewall_policy)
-            properties.force_firewall_policy_association = AAZBoolType(
-                serialized_name="forceFirewallPolicyAssociation",
-            )
-            properties.frontend_ip_configurations = AAZListType(
-                serialized_name="frontendIPConfigurations",
-            )
-            properties.frontend_ports = AAZListType(
-                serialized_name="frontendPorts",
-            )
-            properties.gateway_ip_configurations = AAZListType(
-                serialized_name="gatewayIPConfigurations",
-            )
-            properties.global_configuration = AAZObjectType(
-                serialized_name="globalConfiguration",
-            )
-            properties.http_listeners = AAZListType(
-                serialized_name="httpListeners",
-            )
-            properties.listeners = AAZListType()
-            properties.load_distribution_policies = AAZListType(
-                serialized_name="loadDistributionPolicies",
-            )
-            properties.operational_state = AAZStrType(
-                serialized_name="operationalState",
-                flags={"read_only": True},
-            )
-            properties.private_endpoint_connections = AAZListType(
-                serialized_name="privateEndpointConnections",
-                flags={"read_only": True},
-            )
-            properties.private_link_configurations = AAZListType(
-                serialized_name="privateLinkConfigurations",
-            )
-            properties.probes = AAZListType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.redirect_configurations = AAZListType(
-                serialized_name="redirectConfigurations",
-            )
-            properties.request_routing_rules = AAZListType(
-                serialized_name="requestRoutingRules",
-            )
-            properties.resource_guid = AAZStrType(
-                serialized_name="resourceGuid",
-                flags={"read_only": True},
-            )
-            properties.rewrite_rule_sets = AAZListType(
-                serialized_name="rewriteRuleSets",
-            )
-            properties.routing_rules = AAZListType(
-                serialized_name="routingRules",
-            )
-            properties.sku = AAZObjectType()
-            properties.ssl_certificates = AAZListType(
-                serialized_name="sslCertificates",
-            )
-            properties.ssl_policy = AAZObjectType(
-                serialized_name="sslPolicy",
-            )
-            _ListHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
-            properties.ssl_profiles = AAZListType(
-                serialized_name="sslProfiles",
-            )
-            properties.trusted_client_certificates = AAZListType(
-                serialized_name="trustedClientCertificates",
-            )
-            properties.trusted_root_certificates = AAZListType(
-                serialized_name="trustedRootCertificates",
-            )
-            properties.url_path_maps = AAZListType(
-                serialized_name="urlPathMaps",
-            )
-            properties.web_application_firewall_configuration = AAZObjectType(
-                serialized_name="webApplicationFirewallConfiguration",
-            )
-
-            authentication_certificates = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.authentication_certificates
-            authentication_certificates.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.authentication_certificates.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.authentication_certificates.Element.properties
-            properties.data = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-
-            autoscale_configuration = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.autoscale_configuration
-            autoscale_configuration.max_capacity = AAZIntType(
-                serialized_name="maxCapacity",
-            )
-            autoscale_configuration.min_capacity = AAZIntType(
-                serialized_name="minCapacity",
-                flags={"required": True},
-            )
-
-            backend_address_pools = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_address_pools
-            backend_address_pools.Element = AAZObjectType()
-            _ListHelper._build_schema_application_gateway_backend_address_pool_read(backend_address_pools.Element)
-
-            backend_http_settings_collection = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_http_settings_collection
-            backend_http_settings_collection.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_http_settings_collection.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_http_settings_collection.Element.properties
-            properties.affinity_cookie_name = AAZStrType(
-                serialized_name="affinityCookieName",
-            )
-            properties.authentication_certificates = AAZListType(
-                serialized_name="authenticationCertificates",
-            )
-            properties.connection_draining = AAZObjectType(
-                serialized_name="connectionDraining",
-            )
-            properties.cookie_based_affinity = AAZStrType(
-                serialized_name="cookieBasedAffinity",
-            )
-            properties.host_name = AAZStrType(
-                serialized_name="hostName",
-            )
-            properties.path = AAZStrType()
-            properties.pick_host_name_from_backend_address = AAZBoolType(
-                serialized_name="pickHostNameFromBackendAddress",
-            )
-            properties.port = AAZIntType()
-            properties.probe = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(properties.probe)
-            properties.probe_enabled = AAZBoolType(
-                serialized_name="probeEnabled",
-            )
-            properties.protocol = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.request_timeout = AAZIntType(
-                serialized_name="requestTimeout",
-            )
-            properties.trusted_root_certificates = AAZListType(
-                serialized_name="trustedRootCertificates",
-            )
-
-            authentication_certificates = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_http_settings_collection.Element.properties.authentication_certificates
-            authentication_certificates.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(authentication_certificates.Element)
-
-            connection_draining = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_http_settings_collection.Element.properties.connection_draining
-            connection_draining.drain_timeout_in_sec = AAZIntType(
-                serialized_name="drainTimeoutInSec",
-                flags={"required": True},
-            )
-            connection_draining.enabled = AAZBoolType(
-                flags={"required": True},
-            )
-
-            trusted_root_certificates = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_http_settings_collection.Element.properties.trusted_root_certificates
-            trusted_root_certificates.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(trusted_root_certificates.Element)
-
-            backend_settings_collection = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_settings_collection
-            backend_settings_collection.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_settings_collection.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_settings_collection.Element.properties
-            properties.host_name = AAZStrType(
-                serialized_name="hostName",
-            )
-            properties.pick_host_name_from_backend_address = AAZBoolType(
-                serialized_name="pickHostNameFromBackendAddress",
-            )
-            properties.port = AAZIntType()
-            properties.probe = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(properties.probe)
-            properties.protocol = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.timeout = AAZIntType()
-            properties.trusted_root_certificates = AAZListType(
-                serialized_name="trustedRootCertificates",
-            )
-
-            trusted_root_certificates = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.backend_settings_collection.Element.properties.trusted_root_certificates
-            trusted_root_certificates.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(trusted_root_certificates.Element)
-
-            custom_error_configurations = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.custom_error_configurations
-            custom_error_configurations.Element = AAZObjectType()
-            _ListHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
-
-            frontend_ip_configurations = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.frontend_ip_configurations
-            frontend_ip_configurations.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.frontend_ip_configurations.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.frontend_ip_configurations.Element.properties
-            properties.private_ip_address = AAZStrType(
-                serialized_name="privateIPAddress",
-            )
-            properties.private_ip_allocation_method = AAZStrType(
-                serialized_name="privateIPAllocationMethod",
-            )
-            properties.private_link_configuration = AAZObjectType(
-                serialized_name="privateLinkConfiguration",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.private_link_configuration)
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.public_ip_address = AAZObjectType(
-                serialized_name="publicIPAddress",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.public_ip_address)
-            properties.subnet = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(properties.subnet)
-
-            frontend_ports = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.frontend_ports
-            frontend_ports.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.frontend_ports.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.frontend_ports.Element.properties
-            properties.port = AAZIntType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-
-            gateway_ip_configurations = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.gateway_ip_configurations
-            gateway_ip_configurations.Element = AAZObjectType()
-            _ListHelper._build_schema_application_gateway_ip_configuration_read(gateway_ip_configurations.Element)
-
-            global_configuration = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.global_configuration
-            global_configuration.enable_request_buffering = AAZBoolType(
-                serialized_name="enableRequestBuffering",
-            )
-            global_configuration.enable_response_buffering = AAZBoolType(
-                serialized_name="enableResponseBuffering",
-            )
-
-            http_listeners = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.http_listeners
-            http_listeners.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.http_listeners.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.http_listeners.Element.properties
-            properties.custom_error_configurations = AAZListType(
-                serialized_name="customErrorConfigurations",
-            )
-            properties.firewall_policy = AAZObjectType(
-                serialized_name="firewallPolicy",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.firewall_policy)
-            properties.frontend_ip_configuration = AAZObjectType(
-                serialized_name="frontendIPConfiguration",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.frontend_ip_configuration)
-            properties.frontend_port = AAZObjectType(
-                serialized_name="frontendPort",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.frontend_port)
-            properties.host_name = AAZStrType(
-                serialized_name="hostName",
-            )
-            properties.host_names = AAZListType(
-                serialized_name="hostNames",
-            )
-            properties.protocol = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.require_server_name_indication = AAZBoolType(
-                serialized_name="requireServerNameIndication",
-            )
-            properties.ssl_certificate = AAZObjectType(
-                serialized_name="sslCertificate",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.ssl_certificate)
-            properties.ssl_profile = AAZObjectType(
-                serialized_name="sslProfile",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.ssl_profile)
-
-            custom_error_configurations = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.http_listeners.Element.properties.custom_error_configurations
-            custom_error_configurations.Element = AAZObjectType()
-            _ListHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
-
-            host_names = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.http_listeners.Element.properties.host_names
-            host_names.Element = AAZStrType()
-
-            listeners = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.listeners
-            listeners.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.listeners.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.listeners.Element.properties
-            properties.frontend_ip_configuration = AAZObjectType(
-                serialized_name="frontendIPConfiguration",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.frontend_ip_configuration)
-            properties.frontend_port = AAZObjectType(
-                serialized_name="frontendPort",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.frontend_port)
-            properties.host_names = AAZListType(
-                serialized_name="hostNames",
-            )
-            properties.protocol = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.ssl_certificate = AAZObjectType(
-                serialized_name="sslCertificate",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.ssl_certificate)
-            properties.ssl_profile = AAZObjectType(
-                serialized_name="sslProfile",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.ssl_profile)
-
-            host_names = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.listeners.Element.properties.host_names
-            host_names.Element = AAZStrType()
-
-            load_distribution_policies = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.load_distribution_policies
-            load_distribution_policies.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.load_distribution_policies.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.load_distribution_policies.Element.properties
-            properties.load_distribution_algorithm = AAZStrType(
-                serialized_name="loadDistributionAlgorithm",
-            )
-            properties.load_distribution_targets = AAZListType(
-                serialized_name="loadDistributionTargets",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-
-            load_distribution_targets = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.load_distribution_policies.Element.properties.load_distribution_targets
-            load_distribution_targets.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.load_distribution_policies.Element.properties.load_distribution_targets.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.load_distribution_policies.Element.properties.load_distribution_targets.Element.properties
-            properties.backend_address_pool = AAZObjectType(
-                serialized_name="backendAddressPool",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.backend_address_pool)
-            properties.weight_per_server = AAZIntType(
-                serialized_name="weightPerServer",
-            )
-
-            private_endpoint_connections = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.private_endpoint_connections
-            private_endpoint_connections.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.private_endpoint_connections.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.private_endpoint_connections.Element.properties
-            properties.link_identifier = AAZStrType(
-                serialized_name="linkIdentifier",
-                flags={"read_only": True},
-            )
-            properties.private_endpoint = AAZObjectType(
-                serialized_name="privateEndpoint",
-                flags={"read_only": True},
-            )
-            _ListHelper._build_schema_private_endpoint_read(properties.private_endpoint)
-            properties.private_link_service_connection_state = AAZObjectType(
-                serialized_name="privateLinkServiceConnectionState",
-            )
-            _ListHelper._build_schema_private_link_service_connection_state_read(properties.private_link_service_connection_state)
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-
-            private_link_configurations = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.private_link_configurations
-            private_link_configurations.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.private_link_configurations.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.private_link_configurations.Element.properties
-            properties.ip_configurations = AAZListType(
-                serialized_name="ipConfigurations",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-
-            ip_configurations = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.private_link_configurations.Element.properties.ip_configurations
-            ip_configurations.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.private_link_configurations.Element.properties.ip_configurations.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.private_link_configurations.Element.properties.ip_configurations.Element.properties
-            properties.primary = AAZBoolType()
-            properties.private_ip_address = AAZStrType(
-                serialized_name="privateIPAddress",
-            )
-            properties.private_ip_allocation_method = AAZStrType(
-                serialized_name="privateIPAllocationMethod",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.subnet = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(properties.subnet)
-
-            probes = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.probes
-            probes.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.probes.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.probes.Element.properties
-            properties.host = AAZStrType()
-            properties.interval = AAZIntType()
-            properties.match = AAZObjectType()
-            properties.min_servers = AAZIntType(
-                serialized_name="minServers",
-            )
-            properties.path = AAZStrType()
-            properties.pick_host_name_from_backend_http_settings = AAZBoolType(
-                serialized_name="pickHostNameFromBackendHttpSettings",
-            )
-            properties.pick_host_name_from_backend_settings = AAZBoolType(
-                serialized_name="pickHostNameFromBackendSettings",
-            )
-            properties.port = AAZIntType()
-            properties.protocol = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.timeout = AAZIntType()
-            properties.unhealthy_threshold = AAZIntType(
-                serialized_name="unhealthyThreshold",
-            )
-
-            match = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.probes.Element.properties.match
-            match.body = AAZStrType()
-            match.status_codes = AAZListType(
-                serialized_name="statusCodes",
-            )
-
-            status_codes = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.probes.Element.properties.match.status_codes
-            status_codes.Element = AAZStrType()
-
-            redirect_configurations = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.redirect_configurations
-            redirect_configurations.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.redirect_configurations.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.redirect_configurations.Element.properties
-            properties.include_path = AAZBoolType(
-                serialized_name="includePath",
-            )
-            properties.include_query_string = AAZBoolType(
-                serialized_name="includeQueryString",
-            )
-            properties.path_rules = AAZListType(
-                serialized_name="pathRules",
-            )
-            properties.redirect_type = AAZStrType(
-                serialized_name="redirectType",
-            )
-            properties.request_routing_rules = AAZListType(
-                serialized_name="requestRoutingRules",
-            )
-            properties.target_listener = AAZObjectType(
-                serialized_name="targetListener",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.target_listener)
-            properties.target_url = AAZStrType(
-                serialized_name="targetUrl",
-            )
-            properties.url_path_maps = AAZListType(
-                serialized_name="urlPathMaps",
-            )
-
-            path_rules = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.redirect_configurations.Element.properties.path_rules
-            path_rules.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(path_rules.Element)
-
-            request_routing_rules = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.redirect_configurations.Element.properties.request_routing_rules
-            request_routing_rules.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(request_routing_rules.Element)
-
-            url_path_maps = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.redirect_configurations.Element.properties.url_path_maps
-            url_path_maps.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(url_path_maps.Element)
-
-            request_routing_rules = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.request_routing_rules
-            request_routing_rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.request_routing_rules.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.request_routing_rules.Element.properties
-            properties.backend_address_pool = AAZObjectType(
-                serialized_name="backendAddressPool",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.backend_address_pool)
-            properties.backend_http_settings = AAZObjectType(
-                serialized_name="backendHttpSettings",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.backend_http_settings)
-            properties.http_listener = AAZObjectType(
-                serialized_name="httpListener",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.http_listener)
-            properties.load_distribution_policy = AAZObjectType(
-                serialized_name="loadDistributionPolicy",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.load_distribution_policy)
-            properties.priority = AAZIntType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.redirect_configuration = AAZObjectType(
-                serialized_name="redirectConfiguration",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.redirect_configuration)
-            properties.rewrite_rule_set = AAZObjectType(
-                serialized_name="rewriteRuleSet",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.rewrite_rule_set)
-            properties.rule_type = AAZStrType(
-                serialized_name="ruleType",
-            )
-            properties.url_path_map = AAZObjectType(
-                serialized_name="urlPathMap",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.url_path_map)
-
-            rewrite_rule_sets = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets
-            rewrite_rule_sets.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element.properties
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.rewrite_rules = AAZListType(
-                serialized_name="rewriteRules",
-            )
-
-            rewrite_rules = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element.properties.rewrite_rules
-            rewrite_rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element
-            _element.action_set = AAZObjectType(
-                serialized_name="actionSet",
-            )
-            _element.conditions = AAZListType()
-            _element.name = AAZStrType()
-            _element.rule_sequence = AAZIntType(
-                serialized_name="ruleSequence",
-            )
-
-            action_set = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set
-            action_set.request_header_configurations = AAZListType(
-                serialized_name="requestHeaderConfigurations",
-            )
-            action_set.response_header_configurations = AAZListType(
-                serialized_name="responseHeaderConfigurations",
-            )
-            action_set.url_configuration = AAZObjectType(
-                serialized_name="urlConfiguration",
-            )
-
-            request_header_configurations = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.request_header_configurations
-            request_header_configurations.Element = AAZObjectType()
-            _ListHelper._build_schema_application_gateway_header_configuration_read(request_header_configurations.Element)
-
-            response_header_configurations = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.response_header_configurations
-            response_header_configurations.Element = AAZObjectType()
-            _ListHelper._build_schema_application_gateway_header_configuration_read(response_header_configurations.Element)
-
-            url_configuration = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.url_configuration
-            url_configuration.modified_path = AAZStrType(
-                serialized_name="modifiedPath",
-            )
-            url_configuration.modified_query_string = AAZStrType(
-                serialized_name="modifiedQueryString",
-            )
-            url_configuration.reroute = AAZBoolType()
-
-            conditions = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.conditions
-            conditions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.conditions.Element
-            _element.ignore_case = AAZBoolType(
-                serialized_name="ignoreCase",
-            )
-            _element.negate = AAZBoolType()
-            _element.pattern = AAZStrType()
-            _element.variable = AAZStrType()
-
-            routing_rules = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.routing_rules
-            routing_rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.routing_rules.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.routing_rules.Element.properties
-            properties.backend_address_pool = AAZObjectType(
-                serialized_name="backendAddressPool",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.backend_address_pool)
-            properties.backend_settings = AAZObjectType(
-                serialized_name="backendSettings",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.backend_settings)
-            properties.listener = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(properties.listener)
-            properties.priority = AAZIntType(
-                flags={"required": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.rule_type = AAZStrType(
-                serialized_name="ruleType",
-            )
-
-            sku = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.sku
-            sku.capacity = AAZIntType()
-            sku.family = AAZStrType()
-            sku.name = AAZStrType()
-            sku.tier = AAZStrType()
-
-            ssl_certificates = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.ssl_certificates
-            ssl_certificates.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.ssl_certificates.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.ssl_certificates.Element.properties
-            properties.data = AAZStrType()
-            properties.key_vault_secret_id = AAZStrType(
-                serialized_name="keyVaultSecretId",
-            )
-            properties.password = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.public_cert_data = AAZStrType(
-                serialized_name="publicCertData",
-                flags={"read_only": True},
-            )
-
-            ssl_profiles = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.ssl_profiles
-            ssl_profiles.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.ssl_profiles.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.ssl_profiles.Element.properties
-            properties.client_auth_configuration = AAZObjectType(
-                serialized_name="clientAuthConfiguration",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.ssl_policy = AAZObjectType(
-                serialized_name="sslPolicy",
-            )
-            _ListHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
-            properties.trusted_client_certificates = AAZListType(
-                serialized_name="trustedClientCertificates",
-            )
-
-            client_auth_configuration = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.ssl_profiles.Element.properties.client_auth_configuration
-            client_auth_configuration.verify_client_cert_issuer_dn = AAZBoolType(
-                serialized_name="verifyClientCertIssuerDN",
-            )
-            client_auth_configuration.verify_client_revocation = AAZStrType(
-                serialized_name="verifyClientRevocation",
-            )
-
-            trusted_client_certificates = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.ssl_profiles.Element.properties.trusted_client_certificates
-            trusted_client_certificates.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(trusted_client_certificates.Element)
-
-            trusted_client_certificates = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.trusted_client_certificates
-            trusted_client_certificates.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.trusted_client_certificates.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.trusted_client_certificates.Element.properties
-            properties.client_cert_issuer_dn = AAZStrType(
-                serialized_name="clientCertIssuerDN",
-                flags={"read_only": True},
-            )
-            properties.data = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.validated_cert_data = AAZStrType(
-                serialized_name="validatedCertData",
-                flags={"read_only": True},
-            )
-
-            trusted_root_certificates = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.trusted_root_certificates
-            trusted_root_certificates.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.trusted_root_certificates.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.trusted_root_certificates.Element.properties
-            properties.data = AAZStrType()
-            properties.key_vault_secret_id = AAZStrType(
-                serialized_name="keyVaultSecretId",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-
-            url_path_maps = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.url_path_maps
-            url_path_maps.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.url_path_maps.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.url_path_maps.Element.properties
-            properties.default_backend_address_pool = AAZObjectType(
-                serialized_name="defaultBackendAddressPool",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.default_backend_address_pool)
-            properties.default_backend_http_settings = AAZObjectType(
-                serialized_name="defaultBackendHttpSettings",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.default_backend_http_settings)
-            properties.default_load_distribution_policy = AAZObjectType(
-                serialized_name="defaultLoadDistributionPolicy",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.default_load_distribution_policy)
-            properties.default_redirect_configuration = AAZObjectType(
-                serialized_name="defaultRedirectConfiguration",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.default_redirect_configuration)
-            properties.default_rewrite_rule_set = AAZObjectType(
-                serialized_name="defaultRewriteRuleSet",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.default_rewrite_rule_set)
-            properties.path_rules = AAZListType(
-                serialized_name="pathRules",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-
-            path_rules = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.url_path_maps.Element.properties.path_rules
-            path_rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.url_path_maps.Element.properties.path_rules.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.url_path_maps.Element.properties.path_rules.Element.properties
-            properties.backend_address_pool = AAZObjectType(
-                serialized_name="backendAddressPool",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.backend_address_pool)
-            properties.backend_http_settings = AAZObjectType(
-                serialized_name="backendHttpSettings",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.backend_http_settings)
-            properties.firewall_policy = AAZObjectType(
-                serialized_name="firewallPolicy",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.firewall_policy)
-            properties.load_distribution_policy = AAZObjectType(
-                serialized_name="loadDistributionPolicy",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.load_distribution_policy)
-            properties.paths = AAZListType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.redirect_configuration = AAZObjectType(
-                serialized_name="redirectConfiguration",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.redirect_configuration)
-            properties.rewrite_rule_set = AAZObjectType(
-                serialized_name="rewriteRuleSet",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.rewrite_rule_set)
-
-            paths = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.url_path_maps.Element.properties.path_rules.Element.properties.paths
-            paths.Element = AAZStrType()
-
-            web_application_firewall_configuration = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.web_application_firewall_configuration
-            web_application_firewall_configuration.disabled_rule_groups = AAZListType(
-                serialized_name="disabledRuleGroups",
-            )
-            web_application_firewall_configuration.enabled = AAZBoolType(
-                flags={"required": True},
-            )
-            web_application_firewall_configuration.exclusions = AAZListType()
-            web_application_firewall_configuration.file_upload_limit_in_mb = AAZIntType(
-                serialized_name="fileUploadLimitInMb",
-            )
-            web_application_firewall_configuration.firewall_mode = AAZStrType(
-                serialized_name="firewallMode",
-                flags={"required": True},
-            )
-            web_application_firewall_configuration.max_request_body_size = AAZIntType(
-                serialized_name="maxRequestBodySize",
-            )
-            web_application_firewall_configuration.max_request_body_size_in_kb = AAZIntType(
-                serialized_name="maxRequestBodySizeInKb",
-            )
-            web_application_firewall_configuration.request_body_check = AAZBoolType(
-                serialized_name="requestBodyCheck",
-            )
-            web_application_firewall_configuration.rule_set_type = AAZStrType(
-                serialized_name="ruleSetType",
-                flags={"required": True},
-            )
-            web_application_firewall_configuration.rule_set_version = AAZStrType(
-                serialized_name="ruleSetVersion",
-                flags={"required": True},
-            )
-
-            disabled_rule_groups = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.web_application_firewall_configuration.disabled_rule_groups
-            disabled_rule_groups.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.web_application_firewall_configuration.disabled_rule_groups.Element
-            _element.rule_group_name = AAZStrType(
-                serialized_name="ruleGroupName",
-                flags={"required": True},
-            )
-            _element.rules = AAZListType()
-
-            rules = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.web_application_firewall_configuration.disabled_rule_groups.Element.rules
-            rules.Element = AAZIntType()
-
-            exclusions = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.web_application_firewall_configuration.exclusions
-            exclusions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties.web_application_firewall_configuration.exclusions.Element
-            _element.match_variable = AAZStrType(
-                serialized_name="matchVariable",
-                flags={"required": True},
-            )
-            _element.selector = AAZStrType(
-                flags={"required": True},
-            )
-            _element.selector_match_operator = AAZStrType(
-                serialized_name="selectorMatchOperator",
-                flags={"required": True},
-            )
-
-            tags = cls._schema_on_200.value.Element.properties.application_gateways.Element.tags
-            tags.Element = AAZStrType()
-
-            zones = cls._schema_on_200.value.Element.properties.application_gateways.Element.zones
-            zones.Element = AAZStrType()
-
-            custom_rules = cls._schema_on_200.value.Element.properties.custom_rules
-            custom_rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.custom_rules.Element
-            _element.action = AAZStrType(
-                flags={"required": True},
-            )
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.group_by_user_session = AAZListType(
-                serialized_name="groupByUserSession",
-            )
-            _element.match_conditions = AAZListType(
-                serialized_name="matchConditions",
-                flags={"required": True},
-            )
-            _element.name = AAZStrType()
-            _element.priority = AAZIntType(
-                flags={"required": True},
-            )
-            _element.rate_limit_duration = AAZStrType(
-                serialized_name="rateLimitDuration",
-            )
-            _element.rate_limit_threshold = AAZIntType(
-                serialized_name="rateLimitThreshold",
-            )
-            _element.rule_type = AAZStrType(
-                serialized_name="ruleType",
-                flags={"required": True},
-            )
-            _element.state = AAZStrType()
-
-            group_by_user_session = cls._schema_on_200.value.Element.properties.custom_rules.Element.group_by_user_session
-            group_by_user_session.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.custom_rules.Element.group_by_user_session.Element
-            _element.group_by_variables = AAZListType(
-                serialized_name="groupByVariables",
-                flags={"required": True},
-            )
-
-            group_by_variables = cls._schema_on_200.value.Element.properties.custom_rules.Element.group_by_user_session.Element.group_by_variables
-            group_by_variables.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.custom_rules.Element.group_by_user_session.Element.group_by_variables.Element
-            _element.variable_name = AAZStrType(
-                serialized_name="variableName",
-                flags={"required": True},
-            )
-
-            match_conditions = cls._schema_on_200.value.Element.properties.custom_rules.Element.match_conditions
-            match_conditions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.custom_rules.Element.match_conditions.Element
-            _element.match_values = AAZListType(
-                serialized_name="matchValues",
-            )
-            _element.match_variables = AAZListType(
-                serialized_name="matchVariables",
-                flags={"required": True},
-            )
-            _element.negation_conditon = AAZBoolType(
-                serialized_name="negationConditon",
-            )
-            _element.operator = AAZStrType(
-                flags={"required": True},
-            )
-            _element.transforms = AAZListType()
-
-            match_values = cls._schema_on_200.value.Element.properties.custom_rules.Element.match_conditions.Element.match_values
-            match_values.Element = AAZStrType()
-
-            match_variables = cls._schema_on_200.value.Element.properties.custom_rules.Element.match_conditions.Element.match_variables
-            match_variables.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.custom_rules.Element.match_conditions.Element.match_variables.Element
-            _element.selector = AAZStrType()
-            _element.variable_name = AAZStrType(
-                serialized_name="variableName",
-                flags={"required": True},
-            )
-
-            transforms = cls._schema_on_200.value.Element.properties.custom_rules.Element.match_conditions.Element.transforms
-            transforms.Element = AAZStrType()
-
-            http_listeners = cls._schema_on_200.value.Element.properties.http_listeners
-            http_listeners.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(http_listeners.Element)
-
-            managed_rules = cls._schema_on_200.value.Element.properties.managed_rules
-            managed_rules.exceptions = AAZListType()
-            managed_rules.exclusions = AAZListType()
-            managed_rules.managed_rule_sets = AAZListType(
-                serialized_name="managedRuleSets",
-                flags={"required": True},
-            )
-
-            exceptions = cls._schema_on_200.value.Element.properties.managed_rules.exceptions
-            exceptions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.exceptions.Element
-            _element.exception_managed_rule_sets = AAZListType(
-                serialized_name="exceptionManagedRuleSets",
-            )
-            _element.match_variable = AAZStrType(
-                serialized_name="matchVariable",
-                flags={"required": True},
-            )
-            _element.selector = AAZStrType()
-            _element.selector_match_operator = AAZStrType(
-                serialized_name="selectorMatchOperator",
-            )
-            _element.value_match_operator = AAZStrType(
-                serialized_name="valueMatchOperator",
-                flags={"required": True},
-            )
-            _element.values = AAZListType()
-
-            exception_managed_rule_sets = cls._schema_on_200.value.Element.properties.managed_rules.exceptions.Element.exception_managed_rule_sets
-            exception_managed_rule_sets.Element = AAZObjectType()
-            _ListHelper._build_schema_exclusion_managed_rule_set_read(exception_managed_rule_sets.Element)
-
-            values = cls._schema_on_200.value.Element.properties.managed_rules.exceptions.Element.values
-            values.Element = AAZStrType()
-
-            exclusions = cls._schema_on_200.value.Element.properties.managed_rules.exclusions
-            exclusions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element
-            _element.exclusion_managed_rule_sets = AAZListType(
-                serialized_name="exclusionManagedRuleSets",
-            )
-            _element.match_variable = AAZStrType(
-                serialized_name="matchVariable",
-                flags={"required": True},
-            )
-            _element.selector = AAZStrType(
-                flags={"required": True},
-            )
-            _element.selector_match_operator = AAZStrType(
-                serialized_name="selectorMatchOperator",
-                flags={"required": True},
-            )
-
-            exclusion_managed_rule_sets = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets
-            exclusion_managed_rule_sets.Element = AAZObjectType()
-            _ListHelper._build_schema_exclusion_managed_rule_set_read(exclusion_managed_rule_sets.Element)
-
-            managed_rule_sets = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets
-            managed_rule_sets.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element
-            _element.rule_group_overrides = AAZListType(
-                serialized_name="ruleGroupOverrides",
-            )
-            _element.rule_set_type = AAZStrType(
-                serialized_name="ruleSetType",
-                flags={"required": True},
-            )
-            _element.rule_set_version = AAZStrType(
-                serialized_name="ruleSetVersion",
-                flags={"required": True},
-            )
+            rules = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules.Element.rules
+            rules.Element = AAZStrType()
 
             rule_group_overrides = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides
             rule_group_overrides.Element = AAZObjectType()
@@ -3707,7 +2144,7 @@ class _ListHelper:
             _schema.user_assigned_identities = cls._schema_managed_service_identity_read.user_assigned_identities
             return
 
-        cls._schema_managed_service_identity_read = _schema_managed_service_identity_read = AAZObjectType()
+        cls._schema_managed_service_identity_read = _schema_managed_service_identity_read = AAZIdentityObjectType()
 
         managed_service_identity_read = _schema_managed_service_identity_read
         managed_service_identity_read.principal_id = AAZStrType(
@@ -4129,6 +2566,10 @@ class _ListHelper:
         properties.auxiliary_sku = AAZStrType(
             serialized_name="auxiliarySku",
         )
+        properties.default_outbound_connectivity_enabled = AAZBoolType(
+            serialized_name="defaultOutboundConnectivityEnabled",
+            flags={"read_only": True},
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -4482,7 +2923,7 @@ class _ListHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
-        _element.identity = AAZObjectType()
+        _element.identity = AAZIdentityObjectType()
         cls._build_schema_managed_service_identity_read(_element.identity)
         _element.location = AAZStrType()
         _element.name = AAZStrType(
@@ -4952,13 +3393,23 @@ class _ListHelper:
         properties.public_ip_addresses = AAZListType(
             serialized_name="publicIpAddresses",
         )
+        properties.public_ip_addresses_v6 = AAZListType(
+            serialized_name="publicIpAddressesV6",
+        )
         properties.public_ip_prefixes = AAZListType(
             serialized_name="publicIpPrefixes",
+        )
+        properties.public_ip_prefixes_v6 = AAZListType(
+            serialized_name="publicIpPrefixesV6",
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
+        properties.source_virtual_network = AAZObjectType(
+            serialized_name="sourceVirtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.source_virtual_network)
         properties.subnets = AAZListType(
             flags={"read_only": True},
         )
@@ -4967,9 +3418,17 @@ class _ListHelper:
         public_ip_addresses.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_addresses.Element)
 
+        public_ip_addresses_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_addresses_v6
+        public_ip_addresses_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+
         public_ip_prefixes = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes
         public_ip_prefixes.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
+
+        public_ip_prefixes_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes_v6
+        public_ip_prefixes_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
 
         subnets = _schema_public_ip_address_read.properties.nat_gateway.properties.subnets
         subnets.Element = AAZObjectType()
@@ -5170,6 +3629,9 @@ class _ListHelper:
             serialized_name="ipConfigurations",
             flags={"read_only": True},
         )
+        properties.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
         properties.nat_gateway = AAZObjectType(
             serialized_name="natGateway",
         )
@@ -5283,6 +3745,27 @@ class _ListHelper:
         ip_configurations = _schema_subnet_read.properties.ip_configurations
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
+
+        ipam_pool_prefix_allocations = _schema_subnet_read.properties.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
         private_endpoints.Element = AAZObjectType()
