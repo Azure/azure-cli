@@ -4921,7 +4921,7 @@ class _UpdateHelper:
         _element.rules = AAZListType()
 
         rules = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules.Element.rules
-        rules.Element = AAZStrType()
+        rules.Element = AAZAnyType()
 
         rule_group_overrides = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides
         rule_group_overrides.Element = AAZObjectType()

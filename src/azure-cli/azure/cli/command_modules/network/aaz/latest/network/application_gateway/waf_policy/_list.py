@@ -1576,7 +1576,7 @@ class List(AAZCommand):
             _element.rules = AAZListType()
 
             rules = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules.Element.rules
-            rules.Element = AAZStrType()
+            rules.Element = AAZAnyType()
 
             rule_group_overrides = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides
             rule_group_overrides.Element = AAZObjectType()
