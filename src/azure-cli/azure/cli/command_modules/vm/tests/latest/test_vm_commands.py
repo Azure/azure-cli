@@ -8832,9 +8832,18 @@ class VMGalleryImage(ScenarioTest):
             self.check('name', '{profile1}'),
             self.check('properties.description', 'test'),
         ])
+        
+        self.cmd('sig in-vm-access-control-profile list --resource-group {rg} --gallery-name {gallery}', checks=[
+            self.check('length(@)', '1'),
+        ])
 
         self.cmd(
             'sig in-vm-access-control-profile delete --resource-group {rg} --gallery-name {gallery} --name {profile1} --yes')
+
+    
+        self.cmd('sig in-vm-access-control-profile list --resource-group {rg} --gallery-name {gallery}', checks=[
+            self.check('length(@)', '0'),
+        ])
 
         self.cmd(
             'sig in-vm-access-control-profile create --resource-group {rg} --gallery-name {gallery} --name {profile2} '
@@ -8869,9 +8878,17 @@ class VMGalleryImage(ScenarioTest):
             self.check('excludeFromLatest', True),
             self.check('length(targetLocations)', '3'),
         ])
+        
+        self.cmd('sig in-vm-access-control-profile-version list --resource-group {rg} --gallery-name {gallery} --profile-name {profile2}', checks=[
+            self.check('length(@)', '1'),
+        ])
 
         self.cmd('sig in-vm-access-control-profile-version delete --resource-group {rg} --gallery-name {gallery} '
                  '--profile-name {profile2} --profile-version {profile_version} --yes')
+           
+        self.cmd('sig in-vm-access-control-profile-version list --resource-group {rg} --gallery-name {gallery} --profile-name {profile2}', checks=[
+            self.check('length(@)', '0'),
+        ])
 
 
 class VMGalleryApplication(ScenarioTest):
