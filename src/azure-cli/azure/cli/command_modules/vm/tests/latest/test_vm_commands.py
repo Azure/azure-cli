@@ -8844,7 +8844,7 @@ class VMGalleryImage(ScenarioTest):
 
         self.cmd('sig in-vm-access-control-profile-version create --resource-group {rg} --gallery-name {gallery} '
                  '--profile-name {profile2} --profile-version {profile_version} --default-access Allow --mode Audit '
-                 '--exclude-from-latest true --target-regions westus eastus --rules {rules_file}', checks=[
+                 '--exclude-from-latest true --target-regions westus eastus2 --rules {rules_file}', checks=[
             self.check('name', '{profile_version}'),
             self.check('mode', 'Audit'),
             self.check('defaultAccess', 'Allow'),
@@ -8857,17 +8857,17 @@ class VMGalleryImage(ScenarioTest):
         ])
 
         self.cmd('sig in-vm-access-control-profile-version update --resource-group {rg} --gallery-name {gallery} '
-                 '--profile-name {profile2} --profile-version {profile_version} --exclude-from-latest true --target-regions eastus2 westus', checks=[
+                 '--profile-name {profile2} --profile-version {profile_version} --exclude-from-latest true --target-regions eastus2 westus eastus', checks=[
             self.check('name', '{profile_version}'),
             self.check('excludeFromLatest', True),
-            self.check('length(targetLocations)', '2'),
+            self.check('length(targetLocations)', '3'),
         ])
 
         self.cmd('sig in-vm-access-control-profile-version show --resource-group {rg} --gallery-name {gallery} '
                  '--profile-name {profile2} --profile-version {profile_version}', checks=[
             self.check('name', '{profile_version}'),
             self.check('excludeFromLatest', True),
-            self.check('length(targetLocations)', '2'),
+            self.check('length(targetLocations)', '3'),
         ])
 
         self.cmd('sig in-vm-access-control-profile-version delete --resource-group {rg} --gallery-name {gallery} '
