@@ -8797,14 +8797,17 @@ class VMGalleryImage(ScenarioTest):
         #              self.check('sharingProfile.permissions', 'Community')
         #          ])
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_in_vm_access_', location='eastus2')
     def test_gallery_in_vm_access_control_profile(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        rules_file = os.path.join(curr_dir, 'sig_in_vm_access_control_profile_version_rules.json').replace('\\', '\\\\')
+
         self.kwargs.update({
             'gallery': self.create_random_name('gellery', 16),
             'profile1': 'profile1',
             'profile2': 'profile2',
             'profile_version': '1.0.0',
+            'rules_file': rules_file,
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
@@ -8840,10 +8843,17 @@ class VMGalleryImage(ScenarioTest):
             ])
 
         self.cmd('sig in-vm-access-control-profile-version create --resource-group {rg} --gallery-name {gallery} '
-                 '--profile-name {profile2} --profile-version {profile_version} --default-access Allow --mode Audit', checks=[
+                 '--profile-name {profile2} --profile-version {profile_version} --default-access Allow --mode Audit '
+                 '--exclude-from-latest true --target-regions westus eastus --rules {rules_file}', checks=[
             self.check('name', '{profile_version}'),
             self.check('mode', 'Audit'),
             self.check('defaultAccess', 'Allow'),
+            self.check('excludeFromLatest', True),
+            self.check('length(targetLocations)', '2'),
+            self.check('length(rules.identities)', '1'),
+            self.check('length(rules.privileges)', '1'),
+            self.check('length(rules.roleAssignments)', '1'),
+            self.check('length(rules.roles)', '1'),
         ])
 
         self.cmd('sig in-vm-access-control-profile-version update --resource-group {rg} --gallery-name {gallery} '
