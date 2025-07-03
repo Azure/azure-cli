@@ -105,6 +105,7 @@ class RecordTelemetryUserAgentPolicy(UserAgentPolicy):
         set_user_agent(request.http_request.headers[self._USERAGENT])
 
 
+# pylint: disable=line-too-long
 def get_custom_hook_policy(cli_ctx):
     def _acquire_policy_token_request_hook(request):
         http_request = request.http_request
@@ -133,9 +134,11 @@ def get_custom_hook_policy(cli_ctx):
                 policy_token = response_content.get('token', None)
             elif acquire_policy_token_response.status_code == 202:
                 # TODO: Handle async token acquisition after Service is ready
-                raise NotImplementedError("Asynchronous policy token acquisition is not supported in current Azure CLI. Please upgrade and retry.")
+                raise NotImplementedError("Asynchronous policy token acquisition is not supported in current Azure CLI."
+                                          " Please upgrade and retry.")
         except Exception as ex:
-            raise CLIError(f"Failed to acquire policy token, exception: {ex}")
+            from azure.cli.core.azclierror import ServiceError
+            raise ServiceError(f"Failed to acquire policy token, exception: {ex}")
         if policy_token:
             request.http_request.headers['x-ms-policy-external-evaluations'] = policy_token
 

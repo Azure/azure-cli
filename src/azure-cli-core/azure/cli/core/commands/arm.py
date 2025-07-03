@@ -188,7 +188,7 @@ def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type
 
 
 def register_global_policy_argument(cli_ctx):
-    from knack import events
+
     def add_global_policy_argument(_, **kwargs):
         command_table = kwargs.get('commands_loader').command_table
 
@@ -227,6 +227,7 @@ def register_global_policy_argument(cli_ctx):
             command.add_argument('_change_reference', '--change-reference', **change_reference_kwargs)
             command.add_argument('_acquire_policy_token', '--acquire-policy-token', **acquire_policy_token_kwargs)
 
+    from knack import events
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_global_policy_argument)
 
 
