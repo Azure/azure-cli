@@ -55,12 +55,21 @@ def aad_error_handler(error, **kwargs):
     raise AuthenticationError(error_description, msal_error=error, recommendation=recommendation)
 
 
-def _generate_login_command(scopes=None, claims_challenge=None):
+def _generate_login_command(tenant=None, scopes=None, claims_challenge=None):
     login_command = ['az login']
 
-    # Rejected by Conditional Access policy, like MFA
+    # Rejected by Conditional Access policy, like MFA.
+    # MFA status is not shared between tenants. Specifying tenant triggers the MFA process for that tenant.
+    # Double quotes are not necessary, but we add them following the best practice to avoid shell interpretation.
+    if tenant:
+        login_command.extend(['--tenant', f'"{tenant}"'])
+
+    # Some scopes (such as Graph) may require MFA while ARM may not.
+    # Specifying scope triggers the MFA process for that scope.
     if scopes:
-        login_command.append('--scope {}'.format(' '.join(scopes)))
+        login_command.append('--scope')
+        for s in scopes:
+            login_command.append(f'"{s}"')
 
     # Rejected by CAE
     if claims_challenge:
