@@ -213,6 +213,7 @@ class GetOsUpgradeHistory(AAZCommand):
             )
             rollback_info.rollback_error = AAZObjectType(
                 serialized_name="rollbackError",
+                flags={"read_only": True},
             )
             _GetOsUpgradeHistoryHelper._build_schema_api_error_read(rollback_info.rollback_error)
             rollback_info.successfully_rolledback_instance_count = AAZIntType(

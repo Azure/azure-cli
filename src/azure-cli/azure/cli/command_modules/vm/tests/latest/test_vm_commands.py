@@ -7040,6 +7040,7 @@ class VMDiskEncryptionTest(ScenarioTest):
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
 
+    @unittest.skip('need feature for this scenario')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_identity_set_at_encryption_cmdlet', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',

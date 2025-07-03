@@ -54,9 +54,20 @@ class TestUtil(unittest.TestCase):
         # No parameter is given
         assert _generate_login_command() == 'az login'
 
-        # scopes
+        # tenant
+        actual = _generate_login_command(tenant='21987a97-4e85-47c5-9a13-9dc3e11b2a9a')
+        assert actual == 'az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a"'
+
+        # scope
         actual = _generate_login_command(scopes=["https://management.core.windows.net//.default"])
-        assert actual == 'az login --scope https://management.core.windows.net//.default'
+        assert actual == 'az login --scope "https://management.core.windows.net//.default"'
+
+        # tenant and scopes
+        actual = _generate_login_command(tenant='21987a97-4e85-47c5-9a13-9dc3e11b2a9a',
+                                         scopes=["https://management.core.windows.net//.default"])
+        assert actual == ('az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
+                          '--scope "https://management.core.windows.net//.default"')
+
 
 
 if __name__ == '__main__':

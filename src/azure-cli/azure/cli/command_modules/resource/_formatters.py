@@ -5,7 +5,7 @@
 
 from itertools import groupby
 
-from azure.mgmt.resource.resources.models import ChangeType, PropertyChangeType, Level
+from azure.mgmt.resource.deployments.models import ChangeType, PropertyChangeType, Level
 
 from ._symbol import Symbol
 from ._color import Color, ColoredStringBuilder

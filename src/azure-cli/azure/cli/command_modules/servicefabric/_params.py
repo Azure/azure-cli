@@ -288,8 +288,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('protocol', arg_type=get_enum_type(['tcp', 'https', 'http', 'udp', 'icmp', 'ah', 'esp', 'any']), help='Network protocol')
         c.argument('source_port_ranges', nargs='+', help='A single or space separated list of source port ranges')
         c.argument('dest_port_ranges', nargs='+', help='A single or space separated list of destination port ranges')
+        c.argument('source_port_range', help='The source port or range. Integer or range between 0 and 65535. Asterisk \'*\' can also be used to match all ports.')
+        c.argument('dest_port_range', help='The destination port or range. Integer or range between 0 and 65535. Asterisk \'*\' can also be used to match all ports.')
         c.argument('source_addr_prefixes', nargs='+', help='The CIDR or source IP ranges. A single or space separated list of source address prefixes')
         c.argument('dest_addr_prefixes', nargs='+', help='CIDR or destination IP ranges. A single or space separated list of destination address prefixes')
+        c.argument('source_addr_prefix', help='The CIDR or source IP range. Asterisk \'*\' can also be used to match all source IPs. Default tags such as \'VirtualNetwork\', \'AzureLoadBalancer\' and \'Internet\' can also be used. If this is an ingress rule, specifies where network traffic originates from.')
+        c.argument('dest_addr_prefix', help='The destination address prefix. CIDR or destination IP range. Asterisk \'*\' can also be used to match all source IPs. Default tags such as \'VirtualNetwork\', \'AzureLoadBalancer\' and \'Internet\' can also be used.')
 
     # managed node type
     capacity = CLIArgumentType(
