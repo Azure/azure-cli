@@ -281,6 +281,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_3 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_4 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
@@ -386,6 +387,50 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', server_name_2),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
+    def test_sql_server_retention_days_create_mgmt(self, resource_group_1, resource_group_location):
+        server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_3 = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_passwords = ['SecretPassword123', 'SecretPassword456']
+
+        # test create sql server with retention days passed in, verify retentionDays == 7
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {} --retention-days-soft-delete {}'
+                 .format(resource_group_1, server_name_1, admin_login, admin_passwords[0], '7'),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('retentionDays', '7')])
+        
+    @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
+    def test_sql_server_retention_days_update_mgmt(self, resource_group, resource_group_location):
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_passwords = ['SecretPassword123', 'SecretPassword456']
+
+        # test create sql server with retention days passed in, verify retentionDays == 7
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {} --retention-days-soft-delete {}'
+                 .format(resource_group, server_name, admin_login, admin_passwords[0], '7'),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('retentionDays', '7')])
+        
+        # test update sql server with retention days passed in, verify retentionDays == 7
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {} --retention-days-soft-delete {}'
+                 .format(resource_group, server_name, admin_login, admin_passwords[0], '1'),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('retentionDays', '1')])
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
@@ -620,7 +665,6 @@ class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, outbound_firewall_rule_allowed_fqdn_2), checks=NoneCheck())
         self.cmd('sql server outbound-firewall-rule list -g {} --server {}'
                  .format(resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
-
 
 class SqlServerDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
