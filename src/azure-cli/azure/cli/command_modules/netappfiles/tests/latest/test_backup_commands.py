@@ -43,7 +43,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
                              backup_id)).get_output_in_json()
 
     def create_backup(self, account_name, pool_name, volume_name, backup_name, backup_vault_name,backup_only=False, vnet_name=None):
-        tags = "Tag1=Value1 Tag2=vault1"            
+        tags = "Tag1=Value1 Tag2=vault1"
         self.kwargs.update({
             'account_name': account_name,
             'location': LOCATION,
@@ -59,7 +59,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             # volume update with backup policy
             self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-vault-id %s " %
                      (account_name, pool_name, volume_name, backup_vault['id']))
-        
+
         volume = self.cmd("netappfiles volume show -g {rg} -a {account_name} -p {pool_name} -v {volume_name} ").get_output_in_json()
         # create backup
         logger.warning('create backup %s, group {rg} pool %s and volume %s, backup_vault %s backup_name %s', account_name, pool_name, volume_name, backup_vault_name, backup_name)
@@ -125,11 +125,11 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             'account_name': account_name,
             'pool_name': pool_name,
             'volume_name': volume_name,
-            'location': LOCATION,            
+            'location': LOCATION,
             'vault_name': vault_name,
             'first_backup_name': backup_name
         })
-            
+
         backup = self.create_backup(account_name, pool_name, volume_name, backup_name, vault_name)
         assert backup is not None
         #assert backup['id'] is not None
@@ -140,9 +140,9 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         })
         backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} " ).get_output_in_json()
         assert len(backup_list) == 1
-        
+
         # create second backup to test delete backup
-        backup_name2 = self.create_random_name(prefix='cli-backup2-', length=24)        
+        backup_name2 = self.create_random_name(prefix='cli-backup2-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name2, vault_name, backup_only=True)
         self.wait_for_backup_created(account_name, vault_name, backup_name2)
         backup_list = self.cmd("netappfiles account backup-vault backup list -g {rg} -a {account_name} -v {vault_name} " ).get_output_in_json()
@@ -168,11 +168,11 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             'account_name': account_name,
             'pool_name': pool_name,
             'volume_name': volume_name,
-            'location': LOCATION,            
+            'location': LOCATION,
             'vault_name': vault_name,
             'first_backup_name': backup_name
         })
-                 
+
         backup = self.create_backup(account_name, pool_name, volume_name, backup_name, vault_name)
         volume = self.cmd("netappfiles volume show -g {rg} -a {account_name} -p {pool_name} -v {volume_name} ").get_output_in_json()
         self.kwargs.update({
@@ -208,7 +208,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             'account_name': account_name,
             'pool_name': pool_name,
             'volume_name': volume_name,
-            'location': LOCATION,            
+            'location': LOCATION,
             'vault_name': vault_name,
             'first_backup_name': backup_name
         })
@@ -239,7 +239,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             'account_name': account_name,
             'pool_name': pool_name,
             'volume_name': volume_name,
-            'location': LOCATION,            
+            'location': LOCATION,
             'vault_name': vault_name,
             'first_backup_name': backup_name
         })
@@ -275,25 +275,25 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             'account_name': account_name,
             'pool_name': pool_name,
             'volume_name': volume_name,
-            'location': LOCATION,            
+            'location': LOCATION,
             'vault_name': vault_name,
             'first_backup_name': backup_name
         })
         backup = self.create_backup(account_name, pool_name, volume_name, backup_name, vault_name)
         self.wait_for_backup_created(account_name, vault_name, backup_name)
-        
+
         backupVault = self.cmd("az netappfiles account backup-vault show -g {rg} -a {account_name} -n {vault_name}").get_output_in_json()
-        
+
         volume = self.cmd("netappfiles volume show -g {rg} -a {account_name} -p {pool_name} -v {volume_name} ").get_output_in_json()
         logger.warning('Check updated  volume %s', volume)
         assert volume['dataProtection']['backup']['backupVaultId'] is not None
         assert volume['dataProtection']['backup']['backupVaultId'] == backupVault['id']
-        
+
         self.delete_backup(account_name, vault_name, backup_name)
         # volume update
         volume = self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-vault-id=null" %
                           (account_name, pool_name, volume_name)).get_output_in_json()
-        
+
         logger.warning('Check updated volume removed backupvaultid %s', volume)
         #assert not volume['dataProtection']['backup']['backupvaultid']
         assert 'backupVaultId' not in volume['dataProtection']['backup']
@@ -313,7 +313,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             'account_name': account_name,
             'pool_name': pool_name,
             'volume_name': volume_name,
-            'location': LOCATION,            
+            'location': LOCATION,
             'vault_name': vault_name,
             'first_backup_name': backup_name
         })
@@ -322,7 +322,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.wait_for_backup_initialized(account_name, pool_name, volume_name)
 
         backup = self.cmd("netappfiles account backup-vault backup show -g {rg} -a {account_name} -v {vault_name} --backup-name {backup_name}").get_output_in_json()
-        assert backup['provisioningState'] == "Succeeded"        
+        assert backup['provisioningState'] == "Succeeded"
         # create new volume and restore backup
         volume2_name = self.create_random_name(prefix='cli-vol-', length=24)
         self.create_volume(account_name, pool_name, volume2_name, volume_only=True, backup_id=backup['id'],
@@ -339,7 +339,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         # There is an issue in generated code with deserializing this singleton GET, it will try to deserialize as list, remove comment when fixed
         # self.wait_for_restore(account_name, pool_name, volume2_name)
         if self.is_live or self.in_recording:
-            time.sleep(120)
+            time.sleep(220)
 
         self.delete_backup(account_name, vault_name, backup_name)
 
@@ -357,10 +357,10 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             'account_name': account_name,
             'pool_name': pool_name,
             'volume_name': volume_name,
-            'location': LOCATION,            
+            'location': LOCATION,
             'vault_name': vault_name,
             'first_backup_name': backup_name
-        })        
+        })
         backup = self.create_backup(account_name, pool_name, volume_name, backup_name, vault_name, vnet_name=vnet_name)
         self.wait_for_backup_created(account_name, vault_name, backup_name)
 
