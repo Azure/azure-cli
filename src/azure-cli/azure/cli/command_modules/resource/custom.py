@@ -406,7 +406,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
 
     parameters = json.loads(json.dumps(parameters))
 
-    if mode == None:
+    if mode is None:
         mode = 'Incremental'
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
@@ -1165,7 +1165,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
         parameters = json.loads(json.dumps(parameters))
 
-    if mode == None:
+    if mode is None:
         mode = 'Incremental'
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
@@ -1522,7 +1522,7 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
     if subscription:
         subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
-                                            subscription_id=subscription_id)
+                                         subscription_id=subscription_id)
         policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
     try:
         if not management_group:
@@ -1684,7 +1684,7 @@ def export_group_as_template(
     export_template_request = ExportTemplateRequest(resources=resources, options=options)
 
     result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
-                                                                parameters=export_template_request)
+                                                              parameters=export_template_request)
     result = LongRunningOperation(cmd.cli_ctx)(result_poller)
 
     # pylint: disable=no-member
