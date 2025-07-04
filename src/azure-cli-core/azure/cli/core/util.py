@@ -1012,8 +1012,17 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identify
             #   the token from subscription anymore.
             token_subscription = None
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
-                token_subscription = _extract_subscription_id(url)
+
+            resources_which_dont_require_subscription_id = [
+                "providers/Microsoft.Authorization/roleDefinitions"
+            ]
+
+            if url.lower().startswith(endpoints.resource_manager.rstrip("/")):
+                if all(
+                    res.lower() not in url.lower()
+                    for res in resources_which_dont_require_subscription_id
+                ):
+                    token_subscription = _extract_subscription_id(url)
             if token_subscription:
                 logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
                 token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
