@@ -1691,7 +1691,7 @@ def export_group_as_template(
     elif export_format.lower() == "bicep":
         export_template_request = ExportTemplateRequest(resources=resources, options=options, output_format="Bicep")
     else:
-        raise CLIError('az resource: error: argument --export-format: invalid ExportFormat value: \'%s\'' % export_format)
+        raise InvalidArgumentValueError('az resource: error: argument --export-format: invalid ExportFormat value: \'%s\'' % export_format)
 
     # Exporting a resource group as a template is async since API version 2019-08-01.
     if cmd.supported_api_version(min_api='2019-08-01'):
