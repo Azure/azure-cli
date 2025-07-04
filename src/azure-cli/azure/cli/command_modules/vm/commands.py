@@ -527,6 +527,11 @@ def load_command_table(self, _):
         self.command_table['sig gallery-application version create'] = SigGalleryApplicationVersionCreate(loader=self)
         self.command_table['sig gallery-application version update'] = SiggalleryApplicationversionUpdate(loader=self)
 
+    with self.command_group('sig in-vm-access-control-profile-version'):
+        from .operations.sig_in_vm_access_control_profile_version import SigInVMAccessControlProfileVersionCreate, SigInVMAccessControlProfileVersionUpdate
+        self.command_table['sig in-vm-access-control-profile-version create'] = SigInVMAccessControlProfileVersionCreate(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version update'] = SigInVMAccessControlProfileVersionUpdate(loader=self)
+
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         from .operations.ppg import PPGCreate, PPGUpdate
         self.command_table['ppg create'] = PPGCreate(loader=self)
