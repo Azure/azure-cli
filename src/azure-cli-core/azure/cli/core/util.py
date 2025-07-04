@@ -19,6 +19,7 @@ from urllib.request import urlopen
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case, to_camel_case
+from azure.core.serialization import is_generated_model, attribute_list
 
 logger = get_logger(__name__)
 
@@ -647,16 +648,18 @@ def todict(obj, post_processor=None):
     # This is the only difference with knack.util.todict because for typespec generated SDKs
     # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
     # We need to call obj.as_dict() to extract data for this kind of model
-    if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
-        result = {to_camel_case(k): todict(v, post_processor) for k, v in obj.as_dict().items()}
+    if is_generated_model(obj):
+        # returns True for both msrest model and new hybrid model
+        # the backcompat methods handle both models the same way, so you don't need to have separate code
+        # for old vs new models
+        result = {
+            to_camel_case(attr): todict(getattr(obj, attr), post_processor)
+            for attr in attribute_list(obj)
+        }
+        # don't need to verify whether something is callable or private, as attribute_list() already does that
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
         return todict(obj._asdict(), post_processor)
-    if hasattr(obj, '__dict__'):
-        result = {to_camel_case(k): todict(v, post_processor)
-                  for k, v in obj.__dict__.items()
-                  if not callable(v) and not k.startswith('_')}
-        return post_processor(obj, result) if post_processor else result
     return obj
 
 
