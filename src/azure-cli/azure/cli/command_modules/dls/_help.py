@@ -69,6 +69,9 @@ parameters:
   - name: --firewall-rule-name
     type: string
     short-summary: 'The name of the firewall rule.'
+examples:
+  - name: Creates a firewall rule in a Data Lake Store account.
+    text: az dls account firewall create -g rg -n myaccount --firewall-rule-name rule --start-ip-address 127.0.0.1 --end-ip-address 127.0.0.2
 """
 
 helps['dls account firewall delete'] = """
@@ -138,6 +141,9 @@ parameters:
   - name: --trusted-id-provider-name
     type: string
     short-summary: 'The name of the trusted identity provider. This is used for differentiation of providers in the account.'
+examples:
+  - name: Creates or updates the specified trusted identity provider.
+    text: az dls account trusted-provider create -g rg -n myaccount --trusted-id-provider-name myprovider --id-provider providerURL
 """
 
 helps['dls account trusted-provider update'] = """
