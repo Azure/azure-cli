@@ -45,11 +45,7 @@ def aad_error_handler(error, **kwargs):
         recommendation = PASSWORD_CERTIFICATE_WARNING
     else:
         login_command = _generate_login_command(**kwargs)
-        recommendation = (
-            # Cloud Shell uses IMDS-like interface for implicit login. If getting token/cert failed,
-            # we let the user explicitly log in to AAD with MSAL.
-            "Please explicitly log in with:\n{}" if error.get('error') == 'broker_error'
-            else "Interactive authentication is needed. Please run:\n{}").format(login_command)
+        recommendation = "Interactive authentication is needed. Please run:\n{}".format(login_command)
 
     from azure.cli.core.azclierror import AuthenticationError
     raise AuthenticationError(error_description, msal_error=error, recommendation=recommendation)
