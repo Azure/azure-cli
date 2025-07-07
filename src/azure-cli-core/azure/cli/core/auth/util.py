@@ -41,9 +41,10 @@ def aad_error_handler(error, **kwargs):
     error_codes = error.get('error_codes')
 
     # Build recommendation message
+    recommendation = None
     if error_codes and 7000215 in error_codes:
         recommendation = PASSWORD_CERTIFICATE_WARNING
-    else:
+    elif kwargs:
         login_command = _generate_login_command(**kwargs)
         recommendation = "Interactive authentication is needed. Please run:\n{}".format(login_command)
 
