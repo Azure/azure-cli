@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.74.0"
+VERSION = "2.75.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -51,7 +51,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
-    'azure-appconfiguration~=1.7.0',
+    'azure-appconfiguration~=1.7.1',
     'azure-batch~=15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
@@ -110,6 +110,10 @@ DEPENDENCIES = [
     'azure-mgmt-redhatopenshift~=1.5.0',
     'azure-mgmt-redis~=14.5.0',
     'azure-mgmt-resource==23.3.0',
+    'azure-mgmt-resource-deployments==1.0.0b1',
+    'azure-mgmt-resource-deploymentscripts==1.0.0b1',
+    'azure-mgmt-resource-deploymentstacks==1.0.0b1',
+    'azure-mgmt-resource-templatespecs==1.0.0b1',
     'azure-mgmt-search~=9.0',
     'azure-mgmt-security==6.0.0',
     'azure-mgmt-servicebus~=8.2.0',

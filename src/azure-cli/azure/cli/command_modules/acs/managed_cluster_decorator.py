@@ -1872,6 +1872,21 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return detach_acr
 
+    def get_assignee_principal_type(self) -> Union[str, None]:
+        """Obtain the value of assignee_principal_type.
+
+        This function will return the override value of the assignee principal type (e.g., User, ServicePrincipal, Group)
+        to determine the type of identity being assigned for the ACR role. This is used
+        during the attach ACR operation to ensure proper role assignment based on the identity type.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        assignee_principal_type = self.raw_param.get("assignee_principal_type")
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return assignee_principal_type
+
     def get_http_proxy_config(self) -> Union[Dict, ManagedClusterHTTPProxyConfig, None]:
         """Obtain the value of http_proxy_config.
 
@@ -5454,6 +5469,37 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("bootstrap_container_registry_resource_id")
 
+    def _get_enable_static_egress_gateway(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_static_egress_gateway.
+        When enabled, if both enable_static_egress_gateway and disable_static_egress_gateway are
+        specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        enable_static_egress_gateway = self.raw_param.get("enable_static_egress_gateway")
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_static_egress_gateway and self.get_disable_static_egress_gateway():
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-static-egress-gateway and "
+                    "--disable-static-egress-gateway at the same time. "
+                )
+
+        return enable_static_egress_gateway
+
+    def get_enable_static_egress_gateway(self) -> bool:
+        """Obtain the value of enable_static_egress_gateway.
+        :return: bool
+        """
+        return self._get_enable_static_egress_gateway(enable_validation=True)
+
+    def get_disable_static_egress_gateway(self) -> bool:
+        """Obtain the value of disable_static_egress_gateway.
+        :return: bool
+        """
+        # Note: No need to check for mutually exclusive parameter with enable-static-egress-gateway here
+        # because it's already checked in get_enable_static_egress_gateway
+        return self.raw_param.get("disable_static_egress_gateway")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -6772,6 +6818,25 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def set_up_static_egress_gateway(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_static_egress_gateway():
+            if not mc.network_profile:
+                raise UnknownError(
+                    "Unexpectedly get an empty network profile in the process of "
+                    "updating enable-static-egress-gateway config."
+                )
+            if mc.network_profile.static_egress_gateway_profile is None:
+                mc.network_profile.static_egress_gateway_profile = (
+                    self.models.ManagedClusterStaticEgressGatewayProfile()  # pylint: disable=no-member
+                )
+            # set enabled
+            mc.network_profile.static_egress_gateway_profile.enabled = True
+
+        # Default is disabled so no need to worry about that here
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -6856,6 +6921,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_node_resource_group_profile(mc)
         # set up bootstrap profile
         mc = self.set_up_bootstrap_profile(mc)
+        # set up static egress gateway profile
+        mc = self.set_up_static_egress_gateway(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -7006,6 +7073,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     acr_name_or_id=attach_acr,
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
+                    assignee_principal_type=self.context.get_assignee_principal_type()
                 )
 
         # azure monitor metrics addon (v2)
@@ -7374,7 +7442,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         assignee, is_service_principal = self.context.get_assignee_from_identity_or_sp_profile()
         attach_acr = self.context.get_attach_acr()
         detach_acr = self.context.get_detach_acr()
-
+        assignee_principal_type = self.context.get_assignee_principal_type()
         if attach_acr:
             self.context.external_functions.ensure_aks_acr(
                 self.cmd,
@@ -7382,6 +7450,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 acr_name_or_id=attach_acr,
                 subscription_id=subscription_id,
                 is_service_principal=is_service_principal,
+                assignee_principal_type=assignee_principal_type,
             )
 
         if detach_acr:
@@ -7392,6 +7461,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 subscription_id=subscription_id,
                 detach=True,
                 is_service_principal=is_service_principal,
+                assignee_principal_type=assignee_principal_type,
             )
 
     def update_azure_service_mesh_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -8682,6 +8752,35 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_static_egress_gateway(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update static egress gateway addon for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_static_egress_gateway():
+            if not mc.network_profile:
+                raise UnknownError(
+                    "Unexpectedly get an empty network profile in the process of updating static-egress-gateway config."
+                )
+            if mc.network_profile.static_egress_gateway_profile is None:
+                mc.network_profile.static_egress_gateway_profile = (
+                    self.models.ManagedClusterStaticEgressGatewayProfile()  # pylint: disable=no-member
+                )
+            mc.network_profile.static_egress_gateway_profile.enabled = True
+
+        if self.context.get_disable_static_egress_gateway():
+            if not mc.network_profile:
+                raise UnknownError(
+                    "Unexpectedly get an empty network profile in the process of updating static-egress-gateway config."
+                )
+            if mc.network_profile.static_egress_gateway_profile is None:
+                mc.network_profile.static_egress_gateway_profile = (
+                    self.models.ManagedClusterStaticEgressGatewayProfile()  # pylint: disable=no-member
+                )
+            mc.network_profile.static_egress_gateway_profile.enabled = False
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -8765,6 +8864,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_node_resource_group_profile(mc)
         # update bootstrap profile
         mc = self.update_bootstrap_profile(mc)
+        # update static egress gateway
+        mc = self.update_static_egress_gateway(mc)
         # update kubernetes version and orchestrator version
         mc = self.update_kubernetes_version_and_orchestrator_version(mc)
         return mc
@@ -8925,6 +9026,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     acr_name_or_id=attach_acr,
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
+                    assignee_principal_type=self.context.get_assignee_principal_type()
                 )
 
         enable_azure_container_storage = self.context.get_intermediate("enable_azure_container_storage")

@@ -813,6 +813,12 @@ jobs:
           artifact: rpm-ubi9-${{ arch.value }}
           python_package: python3.12
           pool: ${{ arch.pool }}
+        Red Hat Universal Base Image 10 ${{ arch.name }}:
+          dockerfile: ubi
+          image: registry.access.redhat.com/ubi10/ubi:10.0
+          artifact: rpm-ubi10-${{ arch.value }}
+          python_package: python3.12
+          pool: ${{ arch.pool }}
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
@@ -862,6 +868,14 @@ jobs:
           artifact: rpm-ubi9-${{ arch.value }}
           distro: el9
           image: registry.access.redhat.com/ubi9/ubi:9.0.0
+          python_package: python3.12
+          python_cmd: python3.12
+          pip_cmd: pip3.12
+          pool: ${{ arch.pool }}
+        Red Hat Universal Base Image 10 ${{ arch.name }}:
+          artifact: rpm-ubi10-${{ arch.value }}
+          distro: el10
+          image: registry.access.redhat.com/ubi10/ubi:10.0
           python_package: python3.12
           python_cmd: python3.12
           pip_cmd: pip3.12
@@ -1022,7 +1036,7 @@ jobs:
   displayName: "Check CLI Style"
   timeoutInMinutes: 120
   pool:
-    name: ${{ variables.ubuntu_pool }}
+    name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.12'
@@ -1084,7 +1098,7 @@ jobs:
   displayName: "Check CLI Linter"
 
   pool:
-    name: ${{ variables.ubuntu_pool }}
+    name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.12'
@@ -1134,8 +1148,9 @@ jobs:
           exit 1
         fi
 
-
 - job: CodegenCoverage
+  condition: in(variables['Build.Reason'], 'BatchedCI', 'IndividualCI')
+  timeoutInMinutes: 180
   displayName: "Codegen Coverage"
   continueOnError: true
   pool:
@@ -1155,14 +1170,29 @@ jobs:
       azdev extension repo add ./azure-cli-extensions
       pip install setuptools==70.0.0 wheel==0.30.0
       azdev extension add "*"
+      pip install msrestazure markupsafe==2.0.1
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
-      azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
-      # CLI repo only
-      azdev statistics list-command-table CLI --statistics-only
-      # CLI + EXT repos
-      pip install jinja2 -U
-      azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
-      python s/scripts/ci/codegen_report.py
+      azdev setup -c ./s -r ./azure-cli-extensions
+
+      mkdir -p /tmp/module_stats
+
+      find /mnt/vss/_work/1/s/src/azure-cli/azure/cli/command_modules/ -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | grep -v '^__pycache__$' > /mnt/vss/_work/1/s/scripts/ci/core_modules.txt
+      echo "=== Core Modules ==="
+      cat /mnt/vss/_work/1/s/scripts/ci/core_modules.txt
+
+      find /mnt/vss/_work/1/azure-cli-extensions/src/ -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | grep -v '^__pycache__$' > /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt
+      echo "=== Extension Modules ==="
+      cat /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt
+
+      for module in $(cat /mnt/vss/_work/1/s/scripts/ci/core_modules.txt); do
+        azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json || true
+      done
+
+      for module in $(cat /mnt/vss/_work/1/s/scripts/ci/extension_modules.txt); do
+        azdev statistics list-command-table $module --statistics-only > /tmp/module_stats/${module}.json || true
+      done
+      azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json || true
+      python /mnt/vss/_work/1/s/scripts/ci/codegen_report.py
     env:
       BUILD_ID: $(Build.BuildId)
       BUILD_BRANCH: $(Build.SourceBranchName)

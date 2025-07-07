@@ -514,6 +514,46 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  checks=[JMESPathCheck('keyPolicy.keyExpirationPeriodInDays', 100000),
                          JMESPathCheck('sasPolicy.sasExpirationPeriod', '100000.00:00:00')])
 
+    @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_sas_expiration_policy(self, resource_group):
+        self.kwargs.update({
+            'sastorageexpiration': self.create_random_name('sa', 24),
+            'sastorageexpiration2': self.create_random_name('sa', 24),
+            'sastorageexpiration3': self.create_random_name('sa', 24),
+        })
+        self.cmd('az storage account create -n {sastorageexpiration} -g {rg} '
+                 '--sas-expiration-period 01.02:03:04 --sas-expiration-action Block',
+                 checks=[JMESPathCheck('sasPolicy.sasExpirationPeriod', '01.02:03:04'),
+                         JMESPathCheck('sasPolicy.expirationAction', 'Block')])
+        self.cmd('az storage account create -n {sastorageexpiration2} -g {rg} '
+                 '--sas-expiration-period 01.02:03:04',
+                 checks=[JMESPathCheck('sasPolicy.sasExpirationPeriod', '01.02:03:04'),
+                         JMESPathCheck('sasPolicy.expirationAction', 'Log')])
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('az storage account create -n {sastorageexpiration2} -g {rg} '
+                     '--sas-expiration-action Block')
+        self.cmd('az storage account create -n {sastorageexpiration3} -g {rg} '
+                 '--sas-expiration-period 01.02:03:04 --sas-expiration-action Log',
+                 checks=[JMESPathCheck('sasPolicy.sasExpirationPeriod', '01.02:03:04'),
+                         JMESPathCheck('sasPolicy.expirationAction', 'Log')])
+        # update without expire action
+        self.cmd('az storage account update -n {sastorageexpiration} -g {rg} '
+                 '--sas-expiration-period 02.03:04:05',
+                 checks=[JMESPathCheck('sasPolicy.sasExpirationPeriod', '02.03:04:05'),
+                         JMESPathCheck('sasPolicy.expirationAction', 'Block')])
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('az storage account update -n {sastorageexpiration} -g {rg} '
+                     '--sas-expiration-action Log',)
+        self.cmd('az storage account update -n {sastorageexpiration} -g {rg} '
+                 '--sas-expiration-period 03.04:05:06 --sas-expiration-action Log',
+                 checks=[JMESPathCheck('sasPolicy.sasExpirationPeriod', '03.04:05:06'),
+                         JMESPathCheck('sasPolicy.expirationAction', 'Log')])
+        self.cmd('az storage account update -n {sastorageexpiration} -g {rg} '
+                 '--sas-expiration-period 03.04:05:06 --sas-expiration-action Block',
+                 checks=[JMESPathCheck('sasPolicy.sasExpirationPeriod', '03.04:05:06'),
+                         JMESPathCheck('sasPolicy.expirationAction', 'Block')])
+
     @ResourceGroupPreparer()
     def test_storage_account_with_default_share_permission(self, resource_group):
         self.kwargs = {

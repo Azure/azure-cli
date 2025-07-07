@@ -65,6 +65,19 @@ class CdnAfdOriginGroupScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                          options=options,
                                          checks=update_checks)
 
+        update_checks = [JMESPathCheck('name', origin_group_name),
+                         JMESPathCheck('healthProbeSettings.probePath', "/test1/azure.txt"),
+                         JMESPathCheck('healthProbeSettings.probeProtocol', "Http"),
+                         JMESPathCheck('healthProbeSettings.probeIntervalInSeconds', 120),
+                         JMESPathCheck('healthProbeSettings.probeRequestType', "GET"),
+                         JMESPathCheck('provisioningState', 'Succeeded')]
+        options = '--probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt '
+        self.afd_origin_group_update_cmd(resource_group,
+                                         profile_name,
+                                         origin_group_name,
+                                         options=options,
+                                         checks=update_checks)
+
     @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_origin_group_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
