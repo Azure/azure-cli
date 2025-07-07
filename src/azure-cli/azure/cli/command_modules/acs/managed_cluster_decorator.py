@@ -87,7 +87,7 @@ from azure.cli.command_modules.acs.azurecontainerstorage.acstor_ops import (
     perform_enable_azure_container_storage,
     perform_enable_azure_container_storage_v2,
     perform_disable_azure_container_storage_v2,
-)   
+)
 from azure.cli.command_modules.acs.azuremonitormetrics.azuremonitorprofile import (
     ensure_azure_monitor_profile_prerequisites
 )
@@ -104,7 +104,6 @@ from azure.cli.core.azclierror import (
     CLIInternalError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
-    BadRequestError,
     NoTTYError,
     RequiredArgumentMissingError,
     UnknownError,
@@ -6656,7 +6655,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             )
 
         return mc
-    
+
     def set_up_azure_container_storage_v2(self, mc: ManagedCluster) -> ManagedCluster:  # pylint: disable=too-many-locals
         self._ensure_mc(mc)
         if self.context.raw_param.get("enable_azure_container_storage_v2"):
@@ -8733,7 +8732,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             self.context.set_intermediate("current_core_value", current_core_value, overwrite_exists=True)
 
         return mc
-    
+
     def update_azure_container_storage_v2(self, mc: ManagedCluster) -> ManagedCluster:
         self._ensure_mc(mc)
         enable_azure_container_storage_v2 = self.context.raw_param.get("enable_azure_container_storage_v2")
@@ -8778,7 +8777,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         if disable_azure_container_storage_v2:
             self.context.set_intermediate("disable_azure_container_storage_v2", True)
-        
+
         return mc
 
     def update_cost_analysis(self, mc: ManagedCluster) -> ManagedCluster:
@@ -9017,7 +9016,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             virtual_node_addon_enabled or
             (enable_managed_identity and attach_acr) or
             (keyvault_id and enable_azure_keyvault_secrets_provider_addon) or
-            (enable_azure_container_storage or disable_azure_container_storage) or 
+            (enable_azure_container_storage or disable_azure_container_storage) or
             (enable_azure_container_storage_v2 or disable_azure_container_storage_v2)
         ):
             return True
@@ -9208,7 +9207,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 self.context.get_resource_group_name(),
                 self.context.get_name(),
             )
-        
+
         disable_azure_container_storage_v2 = self.context.get_intermediate("disable_azure_container_storage_v2")
         if disable_azure_container_storage_v2:
             self.context.external_functions.perform_disable_azure_container_storage_v2(

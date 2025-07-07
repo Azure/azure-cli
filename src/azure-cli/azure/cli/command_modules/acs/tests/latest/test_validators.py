@@ -1525,7 +1525,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         ephemeral_disk_volume_type = acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION
         agentpools = {"nodepool1": {"node_labels": {"acstor.azure.com/io-engine": "acstor"}, "count": 3}, "nodepool2": {}}
         acstor_validator.validate_enable_azure_container_storage_params(
-            storage_pool_type, None, None, None, None, None, agentpools, True, False, False, True, False, False, "", ephemeral_disk_volume_type, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            storage_pool_type, None, None, None, None, None, agentpools, True, False, "", False, False, True, False, ephemeral_disk_volume_type, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
         )
 
     def test_valid_enable_for_ephemeral_disk_pool_with_ephemeral_disk_nvme_perf_tier(self):

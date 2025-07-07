@@ -695,32 +695,32 @@ def perform_enable_azure_container_storage_v2(
 
     try:
         result = k8s_extension_custom_mod.create_k8s_extension(
-                    cmd,
-                    client,
-                    resource_group,
-                    cluster_name,
-                    CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
-                    "managedClusters",
-                    CONST_ACSTOR_V2_K8S_EXTENSION_NAME,
-                    auto_upgrade_minor_version=True,
-                    release_train="official-latest",
-                    scope="cluster",
-                    release_namespace="storage-system",
-                    configuration_settings=config_settings,
-                )
+            cmd,
+            client,
+            resource_group,
+            cluster_name,
+            CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
+            "managedClusters",
+            CONST_ACSTOR_V2_K8S_EXTENSION_NAME,
+            auto_upgrade_minor_version=True,
+            release_train="official-latest",
+            scope="cluster",
+            release_namespace="storage-system",
+            configuration_settings=config_settings,
+        )
         op_text = "Azure Container Storage v2 successfully installed"
         long_op_result = LongRunningOperation(cmd.cli_ctx)(result)
         if long_op_result.provisioning_state == "Succeeded":
-                logger.warning(op_text)
-    except Exception as ex:
-            logger.error("Azure Container Storage failed to install.\nError: %s", ex)
-            logger.warning(
-                "AKS cluster is created. "
-                "Please run `az aks update` along with `--enable-azure-container-storage` "
-                "to enable Azure Container Storage."
-            )
+            logger.warning(op_text)
+    except Exception as ex:     # pylint: disable=broad-except
+        logger.error("Azure Container Storage failed to install.\nError: %s", ex)
+        logger.warning(
+            "AKS cluster is created. "
+            "Please run `az aks update` along with `--enable-azure-container-storage` "
+            "to enable Azure Container Storage."
+        )
 
-            delete_extension = True
+        delete_extension = True
 
     if delete_extension:
         try:
@@ -732,8 +732,8 @@ def perform_enable_azure_container_storage_v2(
                 CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
                 "managedClusters",
                 yes=True,
-            ) 
-            
+            )
+
             LongRunningOperation(cmd.cli_ctx)(delete_op_result)
             logger.warning("Azure Container Storage v2 has been disabled.")
         except Exception as delete_ex:
