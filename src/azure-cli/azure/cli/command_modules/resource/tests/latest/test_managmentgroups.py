@@ -179,7 +179,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             displayName)
         self.assertEqual(
             managementgroup_create["details"]["parent"]["displayName"],
-            "Root Management Group")
+            "Tenant Root Group")
         self.assertEqual(
             managementgroup_create["details"]["parent"]["id"],
             "/providers/Microsoft.Management/managementGroups/" +
@@ -213,7 +213,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             displayName)
         self.assertEqual(
             managementgroup_create["details"]["parent"]["displayName"],
-            "Root Management Group")
+            "Tenant Root Group")
         self.assertEqual(
             managementgroup_create["details"]["parent"]["id"],
             "/providers/Microsoft.Management/managementGroups/" +
@@ -322,7 +322,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertEqual(managementgroup_update["displayName"], displayName)
         self.assertEqual(
             managementgroup_update["details"]["parent"]["displayName"],
-            "Root Management Group")
+            "Tenant Root Group")
         self.assertEqual(
             managementgroup_update["details"]["parent"]["id"],
             "/providers/Microsoft.Management/managementGroups/" +
