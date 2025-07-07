@@ -2622,6 +2622,12 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
                  '--policy-name {waf} -n {rule3} --negate true '
                  '--match-variables RemoteAddr --operator IPMatch --values "192.168.1.0/24" "10.0.0.0/24"')
+        
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} --name ClientIPRateLimitRule '
+                 '--action Block  --priority 90 --rule-type RateLimitRule --rate-limit-threshold 100 '
+                 '--group-by-user-session [{{group-by-variables:[{{variable-name:"ClientAddrXffHeader"}}]}}] '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RequestHeaders"}}],"operator":"IPMatch","values":["198.51.100.0/24"]}}]')
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_')
     def test_network_app_gateway_waf_policy_setting(self, resource_group):
