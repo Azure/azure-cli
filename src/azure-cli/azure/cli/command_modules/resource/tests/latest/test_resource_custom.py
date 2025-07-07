@@ -250,7 +250,7 @@ class TestCustom(unittest.TestCase):
             _get_missing_parameters(parameters, template, prompt_function)
 
     def test_deployment_parameters(self):
-
+        # TODO(kylealbert): Update this for extension configs
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
         parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
