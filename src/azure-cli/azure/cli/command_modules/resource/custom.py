@@ -160,13 +160,15 @@ def _try_parse_key_value_object(parameters, template_obj, value):
 
 
 def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-many-statements
-
+    # NOTE(kylealbert): The historical `parsed.get('parameters', parsed)` calls use the object itself as a fallback if the `parameters` key
+    # is not found. Now that parameters and extension configs are in the same expected root object, similar logic for extension configs would
+    # conflict so default to an empty object if `extensionConfigs` is absent.
     def _try_parse_json_object(value):
         try:
             parsed = _remove_comments_from_json(value, False)
-            return parsed.get('parameters', parsed)
+            return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {})
         except Exception:  # pylint: disable=broad-except
-            return None
+            return None, None
 
     def _try_load_file_object(file_path):
         try:
@@ -177,37 +179,40 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
             try:
                 content = read_file_content(file_path)
                 if not content:
-                    return None
+                    return None, None
                 parsed = _remove_comments_from_json(content, False, file_path)
-                return parsed.get('parameters', parsed)
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {})
             except Exception as ex:
                 raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
-        return None
+        return None, None
 
     def _try_load_uri(uri):
         if "://" in uri:
             try:
                 value = _urlretrieve(uri).decode('utf-8')
                 parsed = _remove_comments_from_json(value, False)
-                return parsed.get('parameters', parsed)
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {})
             except Exception:  # pylint: disable=broad-except
                 pass
-        return None
+        return None, None
 
     parameters = {}
+    ext_configs = {}
+
     for params in parameter_lists or []:
         for item in params:
-            param_obj = _try_load_file_object(item)
+            param_obj, ext_config_obj = _try_load_file_object(item)
             if param_obj is None:
-                param_obj = _try_parse_json_object(item)
+                param_obj, ext_config_obj = _try_parse_json_object(item)
             if param_obj is None:
-                param_obj = _try_load_uri(item)
+                param_obj, ext_config_obj = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
+                ext_configs.update(ext_config_obj)
             elif not _try_parse_key_value_object(parameters, template_obj, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
-    return parameters
+    return parameters, ext_configs
 
 
 # pylint: disable=redefined-outer-name
@@ -401,13 +406,16 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_obj, parameters) or {}
+    parameters, ext_configs = _process_parameters(template_obj, parameters)
+    parameters = parameters or {}
+    ext_configs = ext_configs or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
 
     parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
-                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
+                                      parameters=parameters, extension_configs=ext_configs, mode=mode,
+                                      on_error_deployment=on_error_deployment)
 
     smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS,
                                   aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
@@ -1157,14 +1165,19 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
-        parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
+        params_file_json = json.loads(bicepparam_json_content) # pylint: disable=used-before-assignment
+        parameters = params_file_json.get('parameters', {})
+        ext_configs = params_file_json.get('extensionConfigs', {})
     else:
-        parameters = _process_parameters(template_obj, parameters) or {}
+        parameters, ext_configs = _process_parameters(template_obj, parameters)
+        parameters = parameters or {}
+        ext_configs = ext_configs or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
         parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
-                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
+                                      parameters=parameters, extension_configs=ext_configs, mode=mode,
+                                      on_error_deployment=on_error_deployment)
     return properties
 
 
@@ -1363,7 +1376,8 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
     if _is_bicepparam_file_provided(parameters):
         parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
     else:
-        parameters = _process_parameters(template_obj, parameters) or {}
+        parameters = _process_parameters(template_obj, parameters)
+        parameters = parameters or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
         parameters = json.loads(json.dumps(parameters))
 
