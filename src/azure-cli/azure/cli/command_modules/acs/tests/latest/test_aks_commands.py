@@ -11933,9 +11933,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         assert acs_extension_found, "Azure Container Storage v2 not found"
 
         # Sleep for 5 mins before next operation,
-        # since azure container storage operations take
-        # some time to post process.
-        time.sleep(10 * 60)
+        # since update operations take
+        # some time to finish.
+        time.sleep(5 * 60)
 
         # update: disable-azure-container-storage
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \

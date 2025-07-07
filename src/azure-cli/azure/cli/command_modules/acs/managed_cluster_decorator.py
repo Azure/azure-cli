@@ -8553,7 +8553,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             )
 
             from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v2_extension_installed
-            is_container_storage_v2_extension_installed, version_v2 = get_container_storage_v2_extension_installed(self.cmd, self.context.get_resource_group_name(), self.context.get_name())
+            is_container_storage_v2_extension_installed, version_v2 = get_container_storage_v2_extension_installed(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name()
+            )
 
             from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
             generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
@@ -8751,8 +8755,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_name()
         )
 
-        # TODO: waiting on Francis response on my comment on the doc. Version names should not be mentioned ideally.
-        # If he still requires me to use version names, I would get the current_version from the extension an dprint here.
         from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v1_extension_installed
         is_containerstorage_v1_installed, v1_extension_version = get_container_storage_v1_extension_installed(
             self.cmd,
