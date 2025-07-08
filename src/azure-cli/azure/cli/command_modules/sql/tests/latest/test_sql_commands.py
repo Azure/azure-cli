@@ -6859,7 +6859,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Create Failover Group
         self.cmd(
-            'sql failover-group create -n {} -g {} -s {} --partner-resource-group {} --partner-server {} --failover-policy Automatic --grace-period 2 --partner-server-ids {} {} --readonly-failover-policy Enabled'
+            'sql failover-group create -n {} -g {} -s {} --partner-resource-group {} --partner-server {} --failover-policy Automatic --grace-period 2 --partner-server-ids {} {} --ro-failover-policy Enabled'
                 .format(failover_group_name, s1.group, s1.name, s2.group, s2.name, server2_id, server3_id),
             checks=[
                 JMESPathCheck('name', failover_group_name),
@@ -6908,7 +6908,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
             time.sleep(60)
 
         # Update Failover Group
-        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {} --readonly-endpoint-target {} --readonly-failover-policy Disabled'
+        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {} --ro-endpoint-target {} --ro-failover-policy Disabled'
                  .format(s1.group, s1.name, failover_group_name, database_name, server3_id),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),

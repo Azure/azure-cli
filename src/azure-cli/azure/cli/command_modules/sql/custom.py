@@ -6524,8 +6524,8 @@ def failover_group_create(
         grace_period=1,
         add_db=None,
         partner_server_ids=None,
-        readonly_failover_policy=FailoverReadOnlyEndpointPolicy.disabled.value,
-        readonly_endpoint_target=None):
+        ro_failover_policy=FailoverReadOnlyEndpointPolicy.disabled.value,
+        ro_endpoint_target=None):
     '''
     Creates a failover group.
     '''
@@ -6564,8 +6564,8 @@ def failover_group_create(
     else:
         partner_servers = [partner_server]
 
-    if readonly_endpoint_target is None:
-        readonly_endpoint_target = partner_server_id
+    if ro_endpoint_target is None:
+        ro_endpoint_target = partner_server_id
 
     failover_group_params = FailoverGroup(
         partner_servers=partner_servers,
@@ -6574,8 +6574,8 @@ def failover_group_create(
             failover_policy=failover_policy,
             failover_with_data_loss_grace_period_minutes=grace_period),
         read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-            failover_policy=readonly_failover_policy,
-            target_server=readonly_endpoint_target)
+            failover_policy=ro_failover_policy,
+            target_server=ro_endpoint_target)
     )
 
     if secondary_type is not None:
@@ -6598,8 +6598,8 @@ def failover_group_update(
         grace_period=None,
         add_db=None,
         remove_db=None,
-        readonly_endpoint_target=None,
-        readonly_failover_policy=None,
+        ro_endpoint_target=None,
+        ro_failover_policy=None,
         partner_server_ids=None):
     '''
     Updates the failover group.
@@ -6632,8 +6632,8 @@ def failover_group_update(
         instance.partner_servers = [PartnerInfo(id=p) for p in partner_server_ids]
 
     instance.read_only_endpoint = FailoverGroupReadOnlyEndpoint(
-        failover_policy=readonly_failover_policy if readonly_failover_policy is not None else instance.read_only_endpoint.failover_policy,
-        target_server=readonly_endpoint_target if readonly_endpoint_target is not None else instance.read_only_endpoint.target_server)
+        failover_policy=ro_failover_policy if ro_failover_policy is not None else instance.read_only_endpoint.failover_policy,
+        target_server=ro_endpoint_target if ro_endpoint_target is not None else instance.read_only_endpoint.target_server)
 
     return instance
 

@@ -1729,9 +1729,9 @@ def load_arguments(self, _):
         c.argument('secondary_type', help="Databases secondary type on partner server",
                    arg_type=get_enum_type(FailoverGroupDatabasesSecondaryType))
         c.argument('partner_server_ids', nargs='+', help="The list of partner server resource id's of the Failover Group")
-        c.argument('readonly_failover_policy', help="The policy of the read only endpoint of the Failover Group",
+        c.argument('ro_failover_policy', help="The policy of the read only endpoint of the Failover Group",
                    arg_type=get_enum_type(FailoverReadOnlyEndpointPolicy))
-        c.argument('readonly_endpoint_target', help="The resource id of the read only endpoint target server")
+        c.argument('ro_endpoint_target', help="The resource id of the read only endpoint target server")
 
     ###############################################
     #             sql instance pool               #
