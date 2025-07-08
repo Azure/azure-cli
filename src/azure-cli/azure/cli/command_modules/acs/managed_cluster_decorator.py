@@ -8748,19 +8748,20 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 'and --disable-azure-container-storage-v2 together.'
             )
 
-        from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v2_extension_installed
-        is_extension_installed, _ = get_container_storage_v2_extension_installed(
-            self.cmd,
-            self.context.get_resource_group_name(),
-            self.context.get_name()
-        )
+        if enable_azure_container_storage_v2 or disable_azure_container_storage_v2:
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v2_extension_installed
+            is_extension_installed, _ = get_container_storage_v2_extension_installed(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name()
+            )
 
-        from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v1_extension_installed
-        is_containerstorage_v1_installed, v1_extension_version = get_container_storage_v1_extension_installed(
-            self.cmd,
-            self.context.get_resource_group_name(),
-            self.context.get_name()
-        )
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v1_extension_installed
+            is_containerstorage_v1_installed, v1_extension_version = get_container_storage_v1_extension_installed(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name()
+            )
 
         if enable_azure_container_storage_v2:
             from azure.cli.command_modules.acs.azurecontainerstorage._validators import (

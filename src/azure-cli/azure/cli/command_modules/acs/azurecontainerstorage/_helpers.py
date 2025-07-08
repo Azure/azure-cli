@@ -305,7 +305,6 @@ def get_container_storage_v2_extension_installed(
         # Extension not found, which is expected if not installed.
         is_extension_installed = False
     except Exception as ex:
-        is_extension_installed = False
         raise UnknownError(
             f"An error occurred while checking if Azure Container Storage V2 "
             f"extension is installed on the cluster: {str(ex)}"
