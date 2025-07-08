@@ -56,9 +56,9 @@ class Delete(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.custom_rule_name = AAZStrArg(
-            options=["--custom-rule-name"],
-            help="The name of the resource that is unique within a policy. This name can be used to access the resource.",
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="Name of the WAF policy rule",
             required=True,
             fmt=AAZStrArgFormat(
                 max_length=128,
@@ -98,7 +98,7 @@ class Delete(AAZCommand):
             result = result.properties.customRules
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.custom_rule_name,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters)[0]
@@ -109,7 +109,7 @@ class Delete(AAZCommand):
             result = result.properties.customRules
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.custom_rule_name,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters, [len(result)])[0]
