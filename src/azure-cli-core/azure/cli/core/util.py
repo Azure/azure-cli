@@ -652,7 +652,10 @@ def todict(obj, post_processor=None):
     # no matter it's track1/track2/swagger generated/typespec generated SDKs
     # no matter what transformation (renaming/formatting/...) the attribute has during auto generation
     if is_generated_model(obj):
-        result = {to_camel_case(attr): todict(getattr(obj, attr), post_processor) for attr in attribute_list(obj)}
+        result = {}
+        for attr in attribute_list(obj):
+            if hasattr(obj, attr):
+                result[to_camel_case(attr)] = todict(getattr(obj, attr), post_processor)
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
         return todict(obj._asdict(), post_processor)
