@@ -6633,7 +6633,7 @@ def failover_group_update(
 
     instance.read_only_endpoint = FailoverGroupReadOnlyEndpoint(
         failover_policy=readonly_failover_policy if readonly_failover_policy is not None else instance.read_only_endpoint.failover_policy,
-        target_server=readonly_endpoint_target if readonly_endpoint_target is not None else instance.readonly_endpoint_target)
+        target_server=readonly_endpoint_target if readonly_endpoint_target is not None else instance.read_only_endpoint.target_server)
 
     return instance
 

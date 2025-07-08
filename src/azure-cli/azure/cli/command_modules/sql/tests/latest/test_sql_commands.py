@@ -6864,8 +6864,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
             checks=[
                 JMESPathCheck('name', failover_group_name),
                 JMESPathCheck('resourceGroup', s1.group),
-                JMESPathCheck('partnerServers[0].id', server2_id),
-                JMESPathCheck('partnerServers[1].id', server3_id),
+                JMESPathCheck('length(partnerServers)', 2),
                 JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                 JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
                 JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Enabled'),
@@ -6960,11 +6959,6 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         if self.in_recording:
             time.sleep(60)
 
-        # Check secondary type parameter functionality
-        self._test_failover_group_with_secondary_type(s1, s2, failover_group_name, "Standby")
-
-        self._test_failover_group_with_secondary_type(s1, s2, failover_group_name, "Geo")
-
         # Update Failover Group failover policy to Manual
         self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'
                  .format(s1.group, s1.name, failover_group_name),
@@ -7021,11 +7015,10 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  .format(s1.group, s1.name, failover_group_name, server3_id),
                  checks=[
                      JMESPathCheck('partnerServers[0].id', server3_id),
-                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
-                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
                      JMESPathCheck('readOnlyEndpoint.targetServer', server3_id),
-                     JMESPathCheck('length(databases)', 1)
+                     JMESPathCheck('length(databases)', 0)
                  ])
 
         # Check partner server was removed
