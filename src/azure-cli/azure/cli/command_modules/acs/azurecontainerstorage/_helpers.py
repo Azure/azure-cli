@@ -30,7 +30,7 @@ from azure.cli.command_modules.acs._roleassignments import (
     build_role_scope,
     delete_role_assignments,
 )
-from azure.cli.core.azclierror import UnknownError
+from azure.cli.core.azclierror import ResourceNotFoundError, UnknownError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -268,9 +268,14 @@ def get_container_storage_v1_extension_installed(
         )
         is_extension_installed = True
         extension_version = extension.current_version
-    except Exception:  # pylint: disable=broad-except
-        # TODO: Figure out a way to handle the ReosurceNotFoundError exception instead of catching all exceptions.
+    except ResourceNotFoundError:
+        # Extension not found, which is expected if not installed.
         is_extension_installed = False
+    except Exception as ex:
+        raise UnknownError(
+            f"An error occurred while checking if Azure Container Storage "
+            f"extension is installed on the cluster: {str(ex)}"
+        ) from ex
     return is_extension_installed, extension_version
 
 
@@ -296,9 +301,15 @@ def get_container_storage_v2_extension_installed(
         )
         is_extension_installed = True
         extension_version = extension.current_version
-    except Exception:  # pylint: disable=broad-except
-        # TODO: Figure out a way to handle the ReosurceNotFoundError exception instead of catching all exceptions.
+    except ResourceNotFoundError:
+        # Extension not found, which is expected if not installed.
         is_extension_installed = False
+    except Exception as ex:
+        is_extension_installed = False
+        raise UnknownError(
+            f"An error occurred while checking if Azure Container Storage V2 "
+            f"extension is installed on the cluster: {str(ex)}"
+        ) from ex
     return is_extension_installed, extension_version
 
 
