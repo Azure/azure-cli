@@ -445,6 +445,7 @@ def load_arguments(self, _):
         c.argument('nodepool_name', default='nodepool1',
                    help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('vm_sizes')
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_create), validator=validate_os_sku)
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('vnet_subnet_id', validator=validate_vnet_subnet_id)
@@ -823,6 +824,8 @@ def load_arguments(self, _):
 
     with self.argument_context('aks nodepool add') as c:
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('vm_sizes')
+        c.argument('vm_set_type', validator=validate_vm_set_type)
         c.argument('os_type')
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus), validator=validate_os_sku)
         c.argument('snapshot_id', validator=validate_snapshot_id)
@@ -912,6 +915,16 @@ def load_arguments(self, _):
         c.argument("undrainable_node_behavior")
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+
+    with self.argument_context("aks nodepool manual-scale add") as c:
+        c.argument("vm_sizes")
+
+    with self.argument_context("aks nodepool manual-scale update") as c:
+        c.argument("current_vm_sizes")
+        c.argument("vm_sizes")
+
+    with self.argument_context("aks nodepool manual-scale delete") as c:
+        c.argument("current_vm_sizes")
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', options_list=[
