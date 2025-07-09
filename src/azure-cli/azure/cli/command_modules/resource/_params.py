@@ -535,7 +535,7 @@ def load_arguments(self, _):
         c.argument('skip_resource_name_params', action='store_true')
         c.argument('skip_all_params', action='store_true')
         c.argument('resource_ids', nargs='+', options_list='--resource-ids')
-        c.argument('export_format', arg_type=get_enum_type(['json', 'arm', 'bicep'], default='json'), 
+        c.argument('export_format', arg_type=get_enum_type(['json', 'arm', 'bicep'], default='json'),
                    help="The format of the exported template.")
 
     with self.argument_context('group create') as c:
