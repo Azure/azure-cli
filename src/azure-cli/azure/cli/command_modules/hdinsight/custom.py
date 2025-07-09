@@ -916,7 +916,7 @@ def _validate_schedule_configuration(autoscale_configuration):
     if not autoscale_configuration.recurrence:
         raise CLIError('The cluster has not enabled Schedule-based autoscale.')
 
-def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http_username ='admin', http_password=None , entra_user_identity=None, entra_user_full_info=None, no_wait=False):
+def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http_username =None, http_password=None,  entra_user_identity=None, entra_user_full_info=None, no_wait=False):
     from azure.mgmt.hdinsight.models import UpdateGatewaySettingsParameters
     from .util import get_entraUser_info
     if not http_password and not entra_user_identity and not entra_user_full_info:
@@ -924,17 +924,20 @@ def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http
             http_password = prompt_pass('HTTP password for the cluster:', confirm=True)
         except NoTTYException:
             raise CLIError('Please specify --http-password in non-interactive mode.')
+    if http_password and not http_username:
+        http_username = 'admin'
     if entra_user_identity and entra_user_full_info:
         raise MutuallyExclusiveArgumentError('Cannot provide both --entra-user-identity and --entra-user-full-info parameters.')
-    if http_password:
-        update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
-            is_credential_enabled = True,
+    rest_auth_entra_users_data = None
+    if entra_user_identity or entra_user_full_info:
+        rest_auth_entra_users_data = get_entraUser_info(cmd,entra_user_identity,entra_user_full_info,False)
+    update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
+            is_credential_enabled = bool(http_password),
             user_name = http_username,
-            password = http_password
-        )
-    else :
-        update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
-            is_credential_enabled = False,
-            rest_auth_entra_users = get_entraUser_info(cmd,entra_user_identity,entra_user_full_info,False)
-        )
-    return sdk_no_wait(no_wait, client.begin_update_gateway_settings, resource_group_name, cluster_name, update_gateway_settings_parameters)
+            password = http_password,
+            rest_auth_entra_users = rest_auth_entra_users_data
+    )
+    try:
+        return sdk_no_wait(no_wait, client.begin_update_gateway_settings, resource_group_name, cluster_name, update_gateway_settings_parameters)
+    except Exception as ex:
+        raise CLIError(str(ex))

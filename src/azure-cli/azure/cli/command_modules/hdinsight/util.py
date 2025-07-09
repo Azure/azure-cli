@@ -389,9 +389,9 @@ def get_entraUser_info(cmd,entra_user_identity,entra_user_full_info,toJson=True)
                 rest_auth_entra_users.append({'ObjectId': user['id'],'DisplayName': user['displayName'],'Upn': user['userPrincipalName']})
             except ResourceNotFoundError:
                 raise
-            except Exception as ex:                 
+            except Exception as ex:
                 raise AzureResponseError(
-                    error_msg=f'Failed to retrieve Entra user info for input: "{data}"',
+                    error_msg=f'Error: {type(ex).__name__}: {str(ex)}',
                     recommendation=[
                         'Check network connectivity to Microsoft Graph API',
                         'Validate authentication permissions for directory queries',
