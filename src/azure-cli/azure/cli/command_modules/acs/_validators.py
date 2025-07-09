@@ -185,9 +185,11 @@ def validate_vm_set_type(namespace):
     if namespace.vm_set_type is not None:
         if namespace.vm_set_type == '':
             return
-        if namespace.vm_set_type.lower() != "availabilityset" and \
-            namespace.vm_set_type.lower() != "virtualmachines" and \
-                namespace.vm_set_type.lower() != "virtualmachinescalesets":
+        if (
+            namespace.vm_set_type.lower() != "availabilityset" and
+            namespace.vm_set_type.lower() != "virtualmachines" and
+            namespace.vm_set_type.lower() != "virtualmachinescalesets"
+        ):
             raise CLIError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet or VirtualMachines")
 
 

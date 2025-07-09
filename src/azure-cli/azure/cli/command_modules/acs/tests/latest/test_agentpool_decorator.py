@@ -2659,7 +2659,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         dec_2 = AKSAgentPoolAddDecorator(
             self.cmd,
             self.client,
-            {"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3, Standard_D2s_v3", "node-count": 5},
+            {"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3, Standard_D2s_v3", "node_count": 5},
             self.resource_type,
             self.agentpool_decorator_mode,
          )
