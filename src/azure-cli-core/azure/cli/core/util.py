@@ -633,7 +633,7 @@ def todict(obj, post_processor=None):
     """
     from datetime import date, time, datetime, timedelta
     from enum import Enum
-    from azure.core.serialization import is_generated_model, attribute_list
+    from azure.core.serialization import attribute_list
     if isinstance(obj, dict):
         result = {k: todict(v, post_processor) for (k, v) in obj.items()}
         return post_processor(obj, result) if post_processor else result
@@ -647,10 +647,12 @@ def todict(obj, post_processor=None):
         return str(obj)
     # This is the only difference with knack.util.todict because for typespec generated SDKs
     # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
+    # The way to detect if it's a typespec generated model is to check the private `_is_model` attribute
     # azure-core provided new function `attribute_list` to list all attribute names
     # so that we don't need to use raw __dict__ directly
-    if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
-        result = {to_camel_case(attr): todict(getattr(obj, attr), post_processor) for attr in attribute_list(obj) if hasattr(obj, attr)}
+    if getattr(obj, "_is_model", False):
+        result = {to_camel_case(attr): todict(getattr(obj, attr), post_processor)
+                  for attr in attribute_list(obj) if hasattr(obj, attr)}
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
         return todict(obj._asdict(), post_processor)
