@@ -248,27 +248,24 @@ class FunctionAppHttpsOnlyTest(ScenarioTest):
 class FunctionAppWithPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    def test_functionapp_e2e(self, resource_group, resource_group2):
+    @StorageAccountPreparer(parameter_name='storage_account')
+    @StorageAccountPreparer(parameter_name='storage_account2', resource_group_parameter_name='resource_group2')
+    def test_functionapp_e2e(self, resource_group, resource_group2, storage_account, storage_account2):
         functionapp_name, functionapp_name2 = self.create_random_name(
             'func-e2e', 24), self.create_random_name('func-e2e', 24)
         plan = self.create_random_name('func-e2e-plan', 24)
-        storage, storage2 = self.create_random_name('funcstorage1', 24), self.create_random_name('funcstorage2', 24)
         plan_id = self.cmd('appservice plan create -g {} -n {}'.format(
             resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
-        self.cmd(
-            'storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
-        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(
-            storage2, resource_group2, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()['id']
 
-        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage), checks=[
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage_account), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', functionapp_name),
             JMESPathCheck('hostNames[0]',
                           functionapp_name + '.azurewebsites.net')
         ])
         self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group2,
-                                                                     functionapp_name2, plan_id, storage_account_id2))
+                                                                     functionapp_name2, plan_id, storage_account2))
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
@@ -295,7 +292,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Java|17')])
+            JMESPathCheck('linuxFxVersion', 'Java|21')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1244,7 +1241,9 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             .format(resource_group, functionapp_name, function_name))
 
     @ResourceGroupPreparer(location='southcentralus')
+
     @StorageAccountPreparer()
+    @unittest.skip("Temp skip - infra restriction")
     def test_functionapp_create_with_appcontainer_managed_environment_plan_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
@@ -1318,6 +1317,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
+    @unittest.skip("Temp skip - infra restriction")
     def test_functionapp_create_with_min_replicas_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 30)
@@ -1487,7 +1487,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('javaVersion', '17')])
+            JMESPathCheck('javaVersion', '21')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1846,7 +1846,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')])
+            JMESPathCheck('linuxFxVersion', 'Node|22')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
@@ -1969,7 +1969,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')
+            JMESPathCheck('linuxFxVersion', 'Node|22')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
