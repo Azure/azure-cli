@@ -645,17 +645,12 @@ def todict(obj, post_processor=None):
         return obj.isoformat()
     if isinstance(obj, timedelta):
         return str(obj)
-    # This is the only difference with knack.util.todict
-    # azure-core has provided
-    #   - `is_generated_model` to identify auto generated SDK models
-    #   - `attribute_list` to list all attribute names
-    # no matter it's track1/track2/swagger generated/typespec generated SDKs
-    # no matter what transformation (renaming/formatting/...) the attribute has during auto generation
-    if is_generated_model(obj):
-        result = {}
-        for attr in attribute_list(obj):
-            if hasattr(obj, attr):
-                result[to_camel_case(attr)] = todict(getattr(obj, attr), post_processor)
+    # This is the only difference with knack.util.todict because for typespec generated SDKs
+    # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
+    # azure-core provided new function `attribute_list` to list all attribute names
+    # so that we don't need to use raw __dict__ directly
+    if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
+        result = {to_camel_case(attr): todict(getattr(obj, attr), post_processor) for attr in attribute_list(obj) if hasattr(obj, attr)}
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
         return todict(obj._asdict(), post_processor)
