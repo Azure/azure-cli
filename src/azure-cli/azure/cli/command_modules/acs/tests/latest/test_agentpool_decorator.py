@@ -519,7 +519,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_2.attach_agentpool(agentpool_2)
         self.assertEqual(ctx_2.get_vm_sizes(), [CONST_DEFAULT_WINDOWS_VMS_VM_SIZE])
 
-        # one
+        # get value from node_vm_size
         ctx_3 = AKSAgentPoolContext(
             self.cmd,
             AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": None, "node_vm_size": "Standard_D4s_v3"}),
@@ -531,18 +531,56 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_3.attach_agentpool(agentpool_3)
         self.assertEqual(ctx_3.get_vm_sizes(), ["Standard_D4s_v3"])
 
-        # more than one, separated by comma
+        # one
         ctx_4 = AKSAgentPoolContext(
             self.cmd,
-            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3,Standard_D8s_v3"}),
+            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3"}),
             self.models,
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
         agentpool_4 = self.create_initialized_agentpool_instance(os_type="linux")
         ctx_4.attach_agentpool(agentpool_4)
-        self.assertEqual(ctx_4.get_vm_sizes(), ["Standard_D4s_v3", "Standard_D8s_v3"])
+        self.assertEqual(ctx_4.get_vm_sizes(), ["Standard_D4s_v3"])
 
+        # more than one, separated by comma
+        ctx_5 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3,Standard_D8s_v3"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_5 = self.create_initialized_agentpool_instance(os_type="linux")
+        ctx_5.attach_agentpool(agentpool_5)
+        self.assertEqual(ctx_5.get_vm_sizes(), ["Standard_D4s_v3", "Standard_D8s_v3"])
+
+        # fail when both vm_sizes and node_vm_size are specified
+        ctx_6 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3", "node_vm_size": "Standard_D8s_v3"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_6 = self.create_initialized_agentpool_instance(os_type="linux")
+        ctx_6.attach_agentpool(agentpool_6)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_6.get_vm_sizes()
+
+        # fail when vm_set_type is not VirtualMachines
+        ctx_7 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": None, "vm_sizes": "StandardD4s_v3"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_7 = self.create_initialized_agentpool_instance(os_type="linux")
+        ctx_7.attach_agentpool(agentpool_7)
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_7.get_vm_sizes()
+                                   
 
     def common_get_os_type(self):
         # default
@@ -2667,6 +2705,19 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         dec_2.context.attach_agentpool(agentpool_2)
         with self.assertRaises(InvalidArgumentValueError):
             dec_2.set_up_virtual_machines_profile(agentpool_2)
+
+        # fail on passing vm_sizes to VirtualMachinesScaleSets
+        dec_3 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"vm_set_type": "VirtualMachineScaleSets", "vm_sizes": "Standard_D4s_v3", "node_count": 5},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(type=CONST_VIRTUAL_MACHINE_SCALE_SETS, restore_defaults=False)
+        dec_3.context.attach_agentpool(agentpool_3)
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_3.set_up_virtual_machines_profile(agentpool_3)
 
 class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
     def setUp(self):

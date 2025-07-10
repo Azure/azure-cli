@@ -638,15 +638,17 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: list of strings
         """
         raw_value = self.raw_param.get("vm_sizes")
+        node_vm_size = self.raw_param.get("node_vm_size")
         if raw_value is not None:
             # vm_sizes is a comma-separated string, only used when vm_set_type is VirtualMachines
             if self.get_vm_set_type() != CONST_VIRTUAL_MACHINES:
-                raise InvalidArgumentValueError("--vm-sizes can only be used with --vm-set-type VirtualMachines")
+                raise InvalidArgumentValueError("--vm-sizes can only be used with --vm-set-type VirtualMachines.")
+            if node_vm_size:
+                raise MutuallyExclusiveArgumentError("Cannot specify -vm-sizes and --node-vm-size at the same time.")
             vm_sizes = [x.strip() for x in raw_value.split(",")]
         else:
             # when vm_sizes is not specified, try to use the value from node_vm_size (only 1 size)
-            node_vm_size = self.get_node_vm_size()
-            if node_vm_size != "":
+            if node_vm_size:
                 vm_sizes = [node_vm_size]
             else:
                 # use default value
@@ -2103,12 +2105,14 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
 
-        if self.context.get_vm_set_type() != CONST_VIRTUAL_MACHINES:
-            return agentpool
-
+        # validate vm_sizes first, then skip if not Virtual Machines
         sizes = self.context.get_vm_sizes()
         if len(sizes) != 1:
             raise InvalidArgumentValueError(f"We only accept single sku size for manual profile. {sizes} is invalid.")
+
+        if self.context.get_vm_set_type() != CONST_VIRTUAL_MACHINES:
+            return agentpool
+
         count, _, _, _ = self.context.get_node_count_and_enable_cluster_autoscaler_min_max_count()
         agentpool.virtual_machines_profile = self.models.VirtualMachinesProfile(
             scale=self.models.ScaleProfile(
