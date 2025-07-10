@@ -140,7 +140,7 @@ def load_arguments(self, _):
     kv_revision_retention_period_arg_type = CLIArgumentType(
         options_list=['--kv-revision-retention-period'],
         type=int,
-        help='Duration in seconds to retain revisions of key-values in the App Configuration store. Defaults to 604800 seconds (7 days) for Free and Developer sku stores and 2592000 seconds (30 days) for Standard and Premium sku stores',
+        help='Duration in seconds to retain key-value revisions in the App Configuration store. For Free and Developer sku stores, revisions can be retained for a maximum of 7 days (604,800s); for Standard and Premium sku stores, up to 30 days (2,592,000s). Only Non-Free tiers can update this value. If specified, retention period must be at least 1 hour (3600s).',
         validator=validate_kv_revision_retention_period
     )
 
