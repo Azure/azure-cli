@@ -49,7 +49,7 @@ def aad_error_handler(error, claims_challenge, **kwargs):
 
         # During a challenge, the exception will caught by azure-mgmt-core, so we show a warning now
         if claims_challenge:
-            logger.warning('Failed to acquire token silently. Error detail: %s', error_description)
+            logger.info('Failed to acquire token silently. Error detail: %s', error_description)
             logger.warning('Run the command below to authenticate interactively; '
                            'additional arguments may be added as needed:\n%s', login_command)
         else:
