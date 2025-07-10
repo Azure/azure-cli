@@ -85,6 +85,8 @@ from azure.cli.command_modules.acs.agentpool_decorator import (
 from azure.cli.command_modules.acs.azurecontainerstorage.acstor_ops import (
     perform_disable_azure_container_storage,
     perform_enable_azure_container_storage,
+    perform_enable_azure_container_storage_v2,
+    perform_disable_azure_container_storage_v2,
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.azuremonitorprofile import (
     ensure_azure_monitor_profile_prerequisites
@@ -325,6 +327,8 @@ class AKSManagedClusterContext(BaseAKSContext):
             # azure container storage functions
             external_functions["perform_enable_azure_container_storage"] = perform_enable_azure_container_storage
             external_functions["perform_disable_azure_container_storage"] = perform_disable_azure_container_storage
+            external_functions["perform_enable_azure_container_storage_v2"] = perform_enable_azure_container_storage_v2
+            external_functions["perform_disable_azure_container_storage_v2"] = perform_disable_azure_container_storage_v2
             self.__external_functions = SimpleNamespace(**external_functions)
         return self.__external_functions
 
@@ -6652,6 +6656,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def set_up_azure_container_storage_v2(self, mc: ManagedCluster) -> ManagedCluster:  # pylint: disable=too-many-locals
+        self._ensure_mc(mc)
+        if self.context.raw_param.get("enable_azure_container_storage_v2"):
+            print("Setting up Azure Container Storage v2")
+            self.context.set_intermediate("enable_azure_container_storage_v2", True, overwrite_exists=True)
+        return mc
+
     def set_up_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up sku (uptime sla) for the ManagedCluster object.
 
@@ -6915,6 +6926,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_azure_service_mesh_profile(mc)
         # set up for azure container storage
         mc = self.set_up_azure_container_storage(mc)
+        # set up for azure container storage
+        mc = self.set_up_azure_container_storage_v2(mc)
         # set up metrics profile
         mc = self.set_up_metrics_profile(mc)
         # set up node resource group profile
@@ -6952,6 +6965,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             "enable_azure_container_storage",
             default_value=False
         )
+        enable_azure_container_storage_v2 = self.context.get_intermediate(
+            "enable_azure_container_storage_v2",
+            default_value=False
+        )
 
         # pylint: disable=too-many-boolean-expressions
         if (
@@ -6961,7 +6978,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             azuremonitormetrics_addon_enabled or
             (enable_managed_identity and attach_acr) or
             need_grant_vnet_permission_to_cluster_identity or
-            enable_azure_container_storage
+            enable_azure_container_storage or
+            enable_azure_container_storage_v2
         ):
             return True
         return False
@@ -7148,6 +7166,15 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 True,
                 existing_ephemeral_disk_volume_type,
                 existing_ephemeral_nvme_perf_tier,
+            )
+
+        # enable azure container storage v2
+        enable_azure_container_storage_v2 = self.context.get_intermediate("enable_azure_container_storage_v2")
+        if enable_azure_container_storage_v2:
+            self.context.external_functions.perform_enable_azure_container_storage_v2(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
             )
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
@@ -8525,6 +8552,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 mc.agent_pool_profiles,
             )
 
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v2_extension_installed
+            is_container_storage_v2_extension_installed, version_v2 = get_container_storage_v2_extension_installed(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name()
+            )
+
             from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
             generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
 
@@ -8577,6 +8611,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     nodepool_list,
                     agentpool_details,
                     is_extension_installed,
+                    is_container_storage_v2_extension_installed,
+                    version_v2,
                     is_azureDisk_enabled,
                     is_elasticSan_enabled,
                     is_ephemeralDisk_localssd_enabled,
@@ -8698,6 +8734,52 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 overwrite_exists=True
             )
             self.context.set_intermediate("current_core_value", current_core_value, overwrite_exists=True)
+
+        return mc
+
+    def update_azure_container_storage_v2(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+        enable_azure_container_storage_v2 = self.context.raw_param.get("enable_azure_container_storage_v2")
+        disable_azure_container_storage_v2 = self.context.raw_param.get("disable_azure_container_storage_v2")
+
+        if enable_azure_container_storage_v2 and disable_azure_container_storage_v2:
+            raise MutuallyExclusiveArgumentError(
+                'Conflicting flags. Cannot set --enable-azure-container-storage-v2 '
+                'and --disable-azure-container-storage-v2 together.'
+            )
+
+        if enable_azure_container_storage_v2 or disable_azure_container_storage_v2:
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v2_extension_installed
+            is_extension_installed, _ = get_container_storage_v2_extension_installed(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name()
+            )
+
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v1_extension_installed
+            is_containerstorage_v1_installed, v1_extension_version = get_container_storage_v1_extension_installed(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name()
+            )
+
+        if enable_azure_container_storage_v2:
+            from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                validate_enable_azure_container_storage_v2_params
+            )
+            validate_enable_azure_container_storage_v2_params(is_extension_installed, is_containerstorage_v1_installed, v1_extension_version)
+
+        if disable_azure_container_storage_v2:
+            from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                validate_disable_azure_container_storage_v2_params
+            )
+            validate_disable_azure_container_storage_v2_params(is_extension_installed)
+
+        if enable_azure_container_storage_v2:
+            self.context.set_intermediate("enable_azure_container_storage_v2", True)
+
+        if disable_azure_container_storage_v2:
+            self.context.set_intermediate("disable_azure_container_storage_v2", True)
 
         return mc
 
@@ -8856,6 +8938,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_azure_monitor_profile(mc)
         # update azure container storage
         mc = self.update_azure_container_storage(mc)
+        # update azure container storage v2
+        mc = self.update_azure_container_storage_v2(mc)
         # update cluster upgrade settings
         mc = self.update_upgrade_settings(mc)
         # update metrics profile
@@ -8922,6 +9006,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         disable_azure_container_storage = self.context.get_intermediate(
             "disable_azure_container_storage", default_value=False
         )
+        enable_azure_container_storage_v2 = self.context.get_intermediate(
+            "enable_azure_container_storage_v2", default_value=False
+        )
+        disable_azure_container_storage_v2 = self.context.get_intermediate(
+            "disable_azure_container_storage_v2", default_value=False
+        )
         # pylint: disable=too-many-boolean-expressions
         if (
             monitoring_addon_enabled or
@@ -8929,7 +9019,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             virtual_node_addon_enabled or
             (enable_managed_identity and attach_acr) or
             (keyvault_id and enable_azure_keyvault_secrets_provider_addon) or
-            (enable_azure_container_storage or disable_azure_container_storage)
+            (enable_azure_container_storage or disable_azure_container_storage) or
+            (enable_azure_container_storage_v2 or disable_azure_container_storage_v2)
         ):
             return True
         return False
@@ -9110,6 +9201,22 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 current_core_value,
                 existing_ephemeral_disk_volume_type,
                 existing_ephemeral_nvme_perf_tier,
+            )
+
+        enable_azure_container_storage_v2 = self.context.get_intermediate("enable_azure_container_storage_v2")
+        if enable_azure_container_storage_v2:
+            self.context.external_functions.perform_enable_azure_container_storage_v2(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+            )
+
+        disable_azure_container_storage_v2 = self.context.get_intermediate("disable_azure_container_storage_v2")
+        if disable_azure_container_storage_v2:
+            self.context.external_functions.perform_disable_azure_container_storage_v2(
+                self.cmd,
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
             )
 
         # attach keyvault to app routing addon
