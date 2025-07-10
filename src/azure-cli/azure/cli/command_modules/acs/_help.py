@@ -596,6 +596,17 @@ parameters:
   - name: --enable-static-egress-gateway
     type: bool
     short-summary: Enable Static Egress Gateway addon to the cluster.
+  - name: --node-provisioning-mode
+    type: string
+    short-summary: Set the node provisioning mode of the cluster. Valid values are "Auto" and "Manual". For more information on "Auto" mode see aka.ms/aks/nap.
+  - name: --node-provisioning-default-pools
+    type: string
+    short-summary: The set of default Karpenter NodePools configured for node provisioning. Valid values are "Auto" and "None".
+    long-summary: |-
+        The set of default Karpenter NodePools configured for node provisioning. Valid values are "Auto" and "None".
+        Auto: A standard set of Karpenter NodePools are provisioned.
+        None: No Karpenter NodePools are provisioned.
+        WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted by that action.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -675,6 +686,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu --max-pods MaxPodsPerNode --network-plugin azure --vnet-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/NodeSubnet --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/PodSubnet --pod-ip-allocation-mode StaticBlock
   - name: Create a kubernetes cluster with VirtualMachines vm set type.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
+  - name: Create a kubernetes cluster with auto node provisioning.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto
+  - name: Create a kubernetes cluster with auto node provisioning and no default pools.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
 """
 
 helps['aks update'] = """
@@ -1057,6 +1072,17 @@ parameters:
   - name: --disable-static-egress-gateway
     type: bool
     short-summary: Disable Static Egress Gateway addon to the cluster.
+  - name: --node-provisioning-mode
+    type: string
+    short-summary: Set the node provisioning mode of the cluster. Valid values are "Auto" and "Manual". For more information on "Auto" mode see aka.ms/aks/nap.
+  - name: --node-provisioning-default-pools
+    type: string
+    short-summary: The set of default Karpenter NodePools configured for node provisioning. Valid values are "Auto" and "None".
+    long-summary: |-
+        The set of default Karpenter NodePools configured for node provisioning. Valid values are "Auto" and "None".
+        Auto: A standard set of Karpenter NodePools are provisioned.
+        None: No Karpenter NodePools are provisioned.
+        WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted by that action.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
@@ -1116,6 +1142,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCLuster --enable-vpa
   - name: Disable VPA(Vertical Pod Autoscaler) for an existing kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCLuster --disable-vpa
+  - name: Update a kubernetes cluster to use auto node provisioning.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto
+  - name: Update a kubernetes cluster to use auto node provisioning mode with no default pools.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
 """
 
 helps['aks delete'] = """
