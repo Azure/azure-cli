@@ -33,7 +33,7 @@ set +e
 for ext in $output; do
     echo
     # Use regex to detect if $ext is in $ignore_list
-    if [[ $ignore_list =~ $ext ]]; then
+    if [[ " $ignore_list " =~ " $ext " ]]; then
         echo "Ignore extension: $ext"
         continue
     fi
