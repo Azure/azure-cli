@@ -166,7 +166,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
     def _try_parse_json_object(value):
         try:
             parsed = _remove_comments_from_json(value, False)
-            return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {})
+            return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}
         except Exception:  # pylint: disable=broad-except
             return None, None
 
@@ -181,7 +181,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
                 if not content:
                     return None, None
                 parsed = _remove_comments_from_json(content, False, file_path)
-                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {})
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}
             except Exception as ex:
                 raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
         return None, None
@@ -191,7 +191,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
             try:
                 value = _urlretrieve(uri).decode('utf-8')
                 parsed = _remove_comments_from_json(value, False)
-                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {})
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}
             except Exception:  # pylint: disable=broad-except
                 pass
         return None, None
@@ -208,6 +208,7 @@ def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-m
                 param_obj, ext_config_obj = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
+            if ext_config_obj is not None:
                 ext_configs.update(ext_config_obj)
             elif not _try_parse_key_value_object(parameters, template_obj, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))

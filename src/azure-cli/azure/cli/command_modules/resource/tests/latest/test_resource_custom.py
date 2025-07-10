@@ -250,7 +250,6 @@ class TestCustom(unittest.TestCase):
             _get_missing_parameters(parameters, template, prompt_function)
 
     def test_deployment_parameters(self):
-        # TODO(kylealbert): Update this for extension configs
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
         parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
@@ -348,8 +347,9 @@ class TestCustom(unittest.TestCase):
 
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
-            result_parameters = _process_parameters(template, parameter_list)
+            result_parameters, result_ext_configs = _process_parameters(template, parameter_list)
             self.assertEqual(result_parameters, test['expected'], i)
+            self.assertEqual(result_ext_configs, {}, i)
 
     def test_deployment_missing_values(self):
 
@@ -415,6 +415,52 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(_is_bicepparam_file_provided([['test.json']]), False)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam']]), True)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam'], ['test.json'],  ['{ \"foo\": { \"value\": \"bar\" } }']]), True)
+
+    def test_deployment_extension_configs(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
+        parameters_path = os.path.join(curr_dir, 'param-validation-ext-configs.json').replace('\\', '\\\\')
+
+        template = get_file_json(template_path, preserve_order=True)
+
+        # test different ways of passing in parameters
+        tests = [
+            {  # empty JSON works
+                "parameter_list": [["{}"]],
+                "expected": {},
+            },
+            {  # empty parameters works
+                "parameter_list": [],
+                "expected": {},
+            },
+            {  # loading from file
+                "parameter_list": [[parameters_path]],
+                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
+            },
+            {  # raw JSON (same as @file)
+                "parameter_list": [['{\"parameters\": {\"stringParam\": {\"value\": \"foo\"}},\"extensionConfigs\": {\"k8s\": {\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\" },\"secretName\": \"myKubeconfig\" }},\"namespace\": {\"value\": \"ns\"}}}}']],
+                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
+            },
+            {  # raw JSON, but no 'parameters' key. Historical behavior uses the object as the parameters object in this case, so extensionConfigs here would be a parameter, not actual extensionConfigs.
+                "parameter_list": [['{\"stringParam\": {\"value\": \"foo\"},\"extensionConfigs\": {\"k8s\": {\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\" },\"secretName\": \"myKubeconfig\" }},\"namespace\": {\"value\": \"ns\"}}}}']],
+                "expected": {},
+            },
+            {  # Last wins at the extension level (extensionConfigs.k8s). At the extensionConfigs level, objects are merged.
+                "parameter_list": [[
+                    '{\"parameters\": {\"stringParam\": {\"value\": \"x\"}}, \"extensionConfigs\": {\"k8s\": {\"namespace\": {\"value\": \"thisIsDiscarded\"}}, \"k8s2\":{\"namespace\": {\"value\": \"thisIsKept\"}} }}',
+                    '{\"parameters\": {\"stringParam\": {\"value\": \"x\"}}, \"extensionConfigs\": {\"k8s\": {\"kubeconfig\": {\"value\": \"thisIsLastSoKept\"}}} }']],
+                "expected": { "k8s":{"kubeconfig":{"value":"thisIsLastSoKept"}}, "k8s2":{"namespace":{"value":"thisIsKept"}} },
+            },
+            {  # file loading overridden by inline obj
+                "parameter_list": [[parameters_path], ['{\"parameters\":{}, \"extensionConfigs\":{\"k8s\":{\"inlined\":{\"value\":\"overwrites\"}}} }']], # 'parameters' must be present otherwise 'extensionConfigs' is treated as a parameter.
+                "expected": {"k8s": {"inlined": {"value": "overwrites"}}},
+            }
+        ]
+
+        for i, test in enumerate(tests):
+            parameter_list = test['parameter_list']
+            result_parameters, result_ext_configs = _process_parameters(template, parameter_list)
+            self.assertEqual(result_ext_configs, test['expected'], i)
 
     @live_only()
     def test_bicep_generate_params_defaults(self):
