@@ -55,6 +55,9 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('allow_no_subscriptions', action='store_true',
                        help="Support accessing tenants without subscriptions. It's useful to run "
                             "tenant-level commands, such as 'az ad'.")
+            c.argument('claims_challenge',
+                       help="Base64-encoded claims challenge requested by a resource API in the "
+                            "WWW-Authenticate header.")
             c.ignore('_subscription')  # hide the global subscription parameter
 
             # Device code flow
