@@ -160,9 +160,9 @@ def _try_parse_key_value_object(parameters, template_obj, value):
 
 
 def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-many-statements
-    # NOTE(kylealbert): The historical `parsed.get('parameters', parsed)` calls use the object itself as a fallback if the `parameters` key
-    # is not found. Now that parameters and extension configs are in the same expected root object, similar logic for extension configs would
-    # conflict so default to an empty object if `extensionConfigs` is absent.
+    # NOTE(kylealbert): The historical `parsed.get('parameters', parsed)` calls use the object itself as a fallback for parameters if the
+    # `parameters` key is not found. Now that parameters and extension configs are in the same expected root object, similar logic for
+    # extension configs would conflict, so extensionConfigs can only be extracted if `parameters` is present.
     def _try_parse_json_object(value):
         try:
             parsed = _remove_comments_from_json(value, False)
