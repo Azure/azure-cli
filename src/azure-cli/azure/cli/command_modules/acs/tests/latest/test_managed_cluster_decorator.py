@@ -11450,6 +11450,38 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_9, ground_truth_mc_9)
 
+    def test_enable_disable_ai_toolchain_operator(self):
+        # Should not update mc if unset
+        dec_0 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.update_ai_toolchain_operator(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        # Should error if both set
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"disable_ai_toolchain_operator": True, "enable_ai_toolchain_operator": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_6.context.attach_mc(mc_6)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_6.update_ai_toolchain_operator(mc_6)
+
     def test_enable_disable_cost_analysis(self):
         # Should not update mc if unset
         dec_0 = AKSManagedClusterUpdateDecorator(
