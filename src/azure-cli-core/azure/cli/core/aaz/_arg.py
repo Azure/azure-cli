@@ -14,10 +14,11 @@ from knack.util import status_tag_messages
 from knack.log import get_logger
 
 from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, \
-    AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction, AAZAnyTypeArgAction
+    AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction, AAZAnyTypeArgAction, \
+    AAZFileUploadTypeArgAction
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
-    AAZSimpleType, AAZFreeFormDictType, AAZAnyType
+    AAZSimpleType, AAZFreeFormDictType, AAZAnyType, AAZFileUploadType
 from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
@@ -597,6 +598,20 @@ class AAZFileArg(AAZStrArg):
     def __init__(self, fmt=None, **kwargs):
         fmt = fmt or AAZFileArgTextFormat()
         super().__init__(fmt=fmt, **kwargs)
+
+
+class AAZFileUploadArg(AAZStrArg, AAZFileUploadType):
+    """Argument that accepts a file path and returns file content, file hander and file size"""
+
+    @property
+    def _type_in_help(self):
+        return "File Content"
+
+    def _build_cmd_action(self):
+        class Action(AAZFileUploadTypeArgAction):
+            _schema = self  # bind action class with current schema
+
+        return Action
 
 
 # Generic Update arguments
