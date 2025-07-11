@@ -46,14 +46,16 @@ def aad_error_handler(error, claims_challenge, **kwargs):
         recommendation = PASSWORD_CERTIFICATE_WARNING
     else:
         login_command = _generate_login_command(claims_challenge=claims_challenge, **kwargs)
+        login_message = ('Run the command below to authenticate interactively; '
+                          'additional arguments may be added as needed:\n'
+                          f'{login_command}')
 
         # During a challenge, the exception will caught by azure-mgmt-core, so we show a warning now
         if claims_challenge:
             logger.info('Failed to acquire token silently. Error detail: %s', error_description)
-            logger.warning('Run the command below to authenticate interactively; '
-                           'additional arguments may be added as needed:\n%s', login_command)
+            logger.warning(login_message)
         else:
-            recommendation = "Interactive authentication is needed. Please run:\n{}".format(login_command)
+            recommendation = login_message
 
     from azure.cli.core.azclierror import AuthenticationError
     raise AuthenticationError(error_description, msal_error=error, recommendation=recommendation)
@@ -81,10 +83,10 @@ def _generate_login_command(tenant=None, scopes=None, claims_challenge=None):
         # Base64 encode the claims_challenge to avoid shell interpretation
         claims_challenge_encoded = b64encode(claims_challenge)
         login_command.extend(['--claims-challenge', f'"{claims_challenge_encoded}"'])
-        # Explicit logout is needed: https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
-        return 'az logout\n' + ' '.join(login_command)
 
-    return ' '.join(login_command)
+    # Explicit logout is preferred, making sure MSAL cache is purged:
+    # https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
+    return 'az logout\n' + ' '.join(login_command)
 
 
 def resource_to_scopes(resource):
