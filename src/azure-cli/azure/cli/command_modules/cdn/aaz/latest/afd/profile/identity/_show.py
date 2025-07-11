@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Show the details of managed identities.
+
+    :example: Show afd profile identity info
+        az afd profile identity show --resource-group RG --profile-name profile1
     """
 
     _aaz_info = {
