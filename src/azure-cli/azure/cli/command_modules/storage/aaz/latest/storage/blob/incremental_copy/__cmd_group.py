@@ -8,4 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from ._clients import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "storage blob incremental-copy",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage blob incremental copy operations.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

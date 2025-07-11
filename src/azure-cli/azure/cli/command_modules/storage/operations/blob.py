@@ -1089,3 +1089,40 @@ def exists(client, container_name, blob_name, snapshot, timeout):
     else:
         client = client.get_container_client(container=container_name)
     return client.exists(timeout=timeout)
+
+
+def incremental_copy_start(client, cmd, copy_source=None, metadata=None,
+                           destination_if_modified_since=None, destination_if_unmodified_since=None,
+                           destination_if_match=None, destination_if_none_match=None, **kwargs):
+    from ..aaz.latest.storage.blob.incremental_copy import Start
+
+    cmd_args = {
+        "x_ms_version": "2025-07-05",
+        "account_name": client.account_name,
+        "destination_blob": client.blob_name,
+        "destination_container": client.container_name,
+        "source_uri": copy_source,
+        "comp": 'incrementalcopy',
+        "destination_if_modified_since": destination_if_modified_since,
+        "destination_if_unmodified_since": destination_if_unmodified_since,
+        "destination_if_match": destination_if_match,
+        "destination_if_none_match": destination_if_none_match,
+    }
+    _Start = Start(cli_ctx=cmd.cli_ctx)
+
+    def on_202(self, session):
+        result = dict(session.http_response.headers._store)
+        output = {
+            "completionTime": None,
+            "id": result.get('x-ms-copy-id')[1],
+            "progress": None,
+            "source": None,
+            "status": result.get('x-ms-copy-status')[1],
+            "statusDescription": None
+        }
+        self.ctx.vars._output = output
+
+    _Start.PageBlobCopyIncremental.on_202 = on_202
+
+    _Start(command_args=cmd_args)
+    return _Start.ctx.vars._output
