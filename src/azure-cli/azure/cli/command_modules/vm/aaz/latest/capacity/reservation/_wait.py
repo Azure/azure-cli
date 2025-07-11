@@ -12,27 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "capacity reservation list",
+    "capacity reservation wait",
 )
-class List(AAZCommand):
-    """List all of the capacity reservations in the specified capacity reservation group. Use the nextLink property in the response to get the next page of capacity reservations.
-
-    :example: List capacity reservation.
-        az capacity reservation list -c ReservationGroupName -g MyResourceGroup
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations/{}", "2024-11-01"],
         ]
     }
 
-    AZ_SUPPORT_PAGINATION = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_paging(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -49,15 +44,27 @@ class List(AAZCommand):
             options=["-c", "--capacity-reservation-group"],
             help="The name of the capacity reservation group.",
             required=True,
+            id_part="name",
+        )
+        _args_schema.capacity_reservation_name = AAZStrArg(
+            options=["-n", "--name", "--capacity-reservation-name"],
+            help="The name of the capacity reservation.",
+            required=True,
+            id_part="child_name_1",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
+        )
+        _args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="The expand expression to apply on the operation. 'InstanceView' retrieves a snapshot of the runtime properties of the capacity reservation that is managed by the platform and can change outside of control plane operations.",
+            enum={"instanceView": "instanceView"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.CapacityReservationsListByCapacityReservationGroup(ctx=self.ctx)()
+        self.CapacityReservationsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,11 +76,10 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        return result, next_link
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        return result
 
-    class CapacityReservationsListByCapacityReservationGroup(AAZHttpOperation):
+    class CapacityReservationsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -87,7 +93,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/capacityReservationGroups/{capacityReservationGroupName}/capacityReservations",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/capacityReservationGroups/{capacityReservationGroupName}/capacityReservations/{capacityReservationName}",
                 **self.url_parameters
             )
 
@@ -107,6 +113,10 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "capacityReservationName", self.ctx.args.capacity_reservation_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
@@ -120,6 +130,9 @@ class List(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2024-11-01",
                     required=True,
@@ -154,39 +167,28 @@ class List(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType(
-                flags={"required": True},
-            )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
+            _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.location = AAZStrType(
+            _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
-            _element.name = AAZStrType(
+            _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
+            _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _element.sku = AAZObjectType(
+            _schema_on_200.sku = AAZObjectType(
                 flags={"required": True},
             )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
+            _schema_on_200.tags = AAZDictType()
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.zones = AAZListType()
+            _schema_on_200.zones = AAZListType()
 
-            properties = cls._schema_on_200.value.Element.properties
+            properties = cls._schema_on_200.properties
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
                 flags={"read_only": True},
@@ -216,16 +218,16 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            instance_view = cls._schema_on_200.value.Element.properties.instance_view
+            instance_view = cls._schema_on_200.properties.instance_view
             instance_view.statuses = AAZListType()
             instance_view.utilization_info = AAZObjectType(
                 serialized_name="utilizationInfo",
             )
 
-            statuses = cls._schema_on_200.value.Element.properties.instance_view.statuses
+            statuses = cls._schema_on_200.properties.instance_view.statuses
             statuses.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.instance_view.statuses.Element
+            _element = cls._schema_on_200.properties.instance_view.statuses.Element
             _element.code = AAZStrType()
             _element.display_status = AAZStrType(
                 serialized_name="displayStatus",
@@ -234,7 +236,7 @@ class List(AAZCommand):
             _element.message = AAZStrType()
             _element.time = AAZStrType()
 
-            utilization_info = cls._schema_on_200.value.Element.properties.instance_view.utilization_info
+            utilization_info = cls._schema_on_200.properties.instance_view.utilization_info
             utilization_info.current_capacity = AAZIntType(
                 serialized_name="currentCapacity",
                 flags={"read_only": True},
@@ -244,30 +246,30 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            virtual_machines_allocated = cls._schema_on_200.value.Element.properties.instance_view.utilization_info.virtual_machines_allocated
+            virtual_machines_allocated = cls._schema_on_200.properties.instance_view.utilization_info.virtual_machines_allocated
             virtual_machines_allocated.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read_only_read(virtual_machines_allocated.Element)
+            _WaitHelper._build_schema_sub_resource_read_only_read(virtual_machines_allocated.Element)
 
-            virtual_machines_associated = cls._schema_on_200.value.Element.properties.virtual_machines_associated
+            virtual_machines_associated = cls._schema_on_200.properties.virtual_machines_associated
             virtual_machines_associated.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read_only_read(virtual_machines_associated.Element)
+            _WaitHelper._build_schema_sub_resource_read_only_read(virtual_machines_associated.Element)
 
-            sku = cls._schema_on_200.value.Element.sku
+            sku = cls._schema_on_200.sku
             sku.capacity = AAZIntType()
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
 
-            tags = cls._schema_on_200.value.Element.tags
+            tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
 
-            zones = cls._schema_on_200.value.Element.zones
+            zones = cls._schema_on_200.zones
             zones.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_sub_resource_read_only_read = None
 
@@ -287,4 +289,4 @@ class _ListHelper:
         _schema.id = cls._schema_sub_resource_read_only_read.id
 
 
-__all__ = ["List"]
+__all__ = ["Wait"]

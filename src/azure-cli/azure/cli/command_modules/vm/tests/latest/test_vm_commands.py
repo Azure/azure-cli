@@ -12492,8 +12492,8 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='centraluseuap')
-    def test_capacity_reservation_list_delete(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='eastus2euap')
+    def test_capacity_reservation_operations(self, resource_group):
 
         self.kwargs.update({
             'rg': resource_group,
@@ -12521,12 +12521,32 @@ class CapacityReservationScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ])
 
+        self.cmd('capacity reservation update -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--capacity 6 --tags key2=val2',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 6),
+                     self.check('tags', {'key2': 'val2'}),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg}',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 6),
+                     self.check('zones', ['1']),
+                     self.check('tags', {'key2': 'val2'}),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
         self.cmd('capacity reservation list -c {reservation_group} -g {rg} --query "[?name==\'{reservation_name}\']" ',
                  checks=[
                      self.check('[0].name', '{reservation_name}'),
                      self.check('[0].sku.name', '{sku}'),
-                     self.check('[0].sku.capacity', 5),
-                     self.check('[0].tags', {'key': 'val'}),
+                     self.check('[0].sku.capacity', 6),
+                     self.check('[0].tags', {'key2': 'val2'}),
                      self.check('[0].zones', ['1']),
                      self.check('[0].provisioningState', 'Succeeded')
                  ])
