@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 # pylint: disable=ungrouped-imports
 
-from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import AAZStrArg, AAZResourceGroupNameArg, has_value
 from .aaz.latest.aks.safeguards._wait import Wait
 from .aaz.latest.aks.safeguards._list import List
