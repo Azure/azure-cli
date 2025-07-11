@@ -51,8 +51,7 @@ class UserCredential:  # pylint: disable=too-few-public-methods
                      scopes, claims_challenge, kwargs)
 
         if claims_challenge:
-            logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
-                           self._msal_app.authority.tenant, claims_challenge)
+            logger.info('Acquiring new access token silently with claims challenge: %s', claims_challenge)
         result = self._msal_app.acquire_token_silent_with_error(
             scopes, self._account, claims_challenge=claims_challenge, **kwargs)
 
