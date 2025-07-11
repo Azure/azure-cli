@@ -19,6 +19,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
     CONST_NODEPOOL_MODE_GATEWAY,
+    CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_AVAILABILITY_SET,
+    CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
@@ -185,9 +188,12 @@ def validate_vm_set_type(namespace):
     if namespace.vm_set_type is not None:
         if namespace.vm_set_type == '':
             return
-        if namespace.vm_set_type.lower() != "availabilityset" and \
-                namespace.vm_set_type.lower() != "virtualmachinescalesets":
-            raise CLIError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet")
+        if (
+            namespace.vm_set_type.lower() != CONST_VIRTUAL_MACHINE_SCALE_SETS.lower() and
+            namespace.vm_set_type.lower() != CONST_AVAILABILITY_SET.lower() and
+            namespace.vm_set_type.lower() != CONST_VIRTUAL_MACHINES.lower()
+        ):
+            raise CLIError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet or VirtualMachines")
 
 
 def validate_load_balancer_sku(namespace):
