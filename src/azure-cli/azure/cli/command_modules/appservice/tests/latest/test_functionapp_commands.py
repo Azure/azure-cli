@@ -256,8 +256,8 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd(
-            'storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
-        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(
+            'storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(storage, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(
             storage2, resource_group2, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()['id']
 
         self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage), checks=[
@@ -970,10 +970,10 @@ class FunctionAppFlex(LiveScenarioTest):
         container_name = self.create_random_name('funccontainer', 24)
         storage2_name = self.create_random_name('funcstorage2', 24)
         identity_name = self.create_random_name('id1', 8)
-        storage_account = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'
+        storage_account = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'
                                    .format(storage_name, resource_group, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         storage_account_blob_endpoint = storage_account['primaryEndpoints']['blob']
-        deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'
+        deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS --allow-blob-public-access false'
                                               .format(resource_group, storage2_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         deployment_account_blob_endpoint = deployment_storage_account['primaryEndpoints']['blob']
         self.cmd('storage container create -g {} -n {} --account-name {}'
@@ -1913,7 +1913,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')
+            JMESPathCheck('linuxFxVersion', 'Node|22')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -1950,7 +1950,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')
+            JMESPathCheck('linuxFxVersion', 'Node|22')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -2817,7 +2817,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         functionapp_name = self.create_random_name('functionapp', 24)
         storage_account = self.create_random_name('funcstorage1', 24)
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --public-network-access Disabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --public-network-access Disabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
@@ -2828,7 +2828,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         functionapp_name = self.create_random_name('functionapp', 24)
         storage_account = self.create_random_name('funcstorage', 24)
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
@@ -2842,7 +2842,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
@@ -2858,7 +2858,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
             resource_group, vnet_name, subnet_name))
@@ -2877,7 +2877,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         subnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
             resource_group, vnet_name, subnet_name)).get_output_in_json()['newVNet']['subnets'][0]['id']
@@ -2897,7 +2897,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --cnl'.format(resource_group, functionapp_name, storage_account, ep_plan_name)).assert_with_checks([
             JMESPathCheck('vnetContentShareEnabled', True),
