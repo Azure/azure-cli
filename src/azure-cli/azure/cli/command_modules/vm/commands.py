@@ -559,10 +559,6 @@ def load_command_table(self, _):
         from .operations.capacity_reservation import CapacityReservationUpdate, CapacityReservationShow
         self.command_table['capacity reservation update'] = CapacityReservationUpdate(loader=self)
         self.command_table['capacity reservation show'] = CapacityReservationShow(loader=self)
-        #
-        # g.custom_command('create', 'create_capacity_reservation', supports_no_wait=True)
-        # g.custom_command('update', 'update_capacity_reservation', supports_no_wait=True)
-        # g.custom_show_command('show', 'show_capacity_reservation')
 
     with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
         g.custom_show_command('show', 'restore_point_show')

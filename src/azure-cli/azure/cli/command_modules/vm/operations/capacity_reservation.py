@@ -55,6 +55,8 @@ class CapacityReservationShow(_CapacityReservationShow):
             blank=True
         )
 
+        return args_schema
+
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.instance_view) and args.instance_view.to_serialized_data() is True:
