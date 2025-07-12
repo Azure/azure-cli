@@ -32,8 +32,16 @@ set +e
 
 for ext in $output; do
     echo
-    # Use regex to detect if $ext is in $ignore_list
-    if [[ " $ignore_list " =~ " $ext " ]]; then
+    # Exact string matching against each item in the ignore list
+    ignore_match=0
+    for item in $ignore_list; do
+        if [ "$ext" = "$item" ]; then
+            ignore_match=1
+            break
+        fi
+    done
+    
+    if [ $ignore_match -eq 1 ]; then
         echo "Ignore extension: $ext"
         continue
     fi
