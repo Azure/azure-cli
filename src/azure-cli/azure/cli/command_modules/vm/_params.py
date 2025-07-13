@@ -1476,22 +1476,6 @@ def load_arguments(self, _):
 
     with self.argument_context('capacity reservation group show') as c:
         c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve the list of instance views of the capacity reservations under the capacity reservation group which is a snapshot of the runtime properties of a capacity reservation that is managed by the platform and can change outside of control plane operations.')
-
-    with self.argument_context('capacity reservation') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-c'],
-                   help='The name of the capacity reservation group.')
-        c.argument('capacity_reservation_name', options_list=['--capacity-reservation-name', '-n'],
-                   help='The name of the capacity reservation.')
-        c.argument('capacity', type=int, help='Specify the number of virtual machines in the scale set.')
-        c.argument('tags', tags_type)
-
-    with self.argument_context('capacity reservation create') as c:
-        c.argument('zone', zone_type, help='Availability Zone to use for this capacity reservation. The zone has to be single value and also should be part for the list of zones specified during the capacity reservation group creation. If not provided, the reservation supports only non-zonal deployments. If provided, enforces VM/VMSS using this capacity reservation to be in same zone.')
-        c.argument('sku_name', options_list=['--sku', '-s'], required=True, help='The SKU of the resource for which capacity needs be reserved. Currently VM Skus with the capability called "CapacityReservationSupported" set to true are supported. Refer to List Microsoft.Compute SKUs in a region (https://learn.microsoft.com/rest/api/compute/resourceskus/list) for supported values.')
-
-    with self.argument_context('capacity reservation show') as c:
-        c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve a snapshot of the runtime properties of the capacity reservation that is managed by the platform and can change outside of control plane operations.')
     # endRegion
 
     # region Restore point
