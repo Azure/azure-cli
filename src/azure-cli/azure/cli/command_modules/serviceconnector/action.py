@@ -88,6 +88,8 @@ class AddSecretAuthInfo(argparse.Action):
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. All possible '
                                       'keys are: name, secret/secret-uri/secret-name'.format(k))
+        if is_mongodb_atlas_target(command_name):
+            d['name'] = 'NA'
         if len(d) != 2:
             raise ValidationError('Required keys missing for parameter --secret.'
                                   ' All possible keys are: name, secret/secret-uri/secret-name')
@@ -118,6 +120,11 @@ class AddSecretAuthInfoAuto(argparse.Action):
 def is_mysql_target(command_name):
     target_name = command_name.split(' ')[-1]
     return target_name.lower() == "mysql-flexible"
+
+
+def is_mongodb_atlas_target(command_name):
+    target_name = command_name.split(' ')[-1]
+    return target_name.lower() == "mongodb-atlas"
 
 
 class AddUserAssignedIdentityAuthInfo(argparse.Action):

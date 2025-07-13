@@ -21,12 +21,7 @@ jobs:
       inputs:
         versionSpec: '3.12'
         displayName: "Use Python 3.12"
-    - task: AzureCLI@1
-      displayName: 'checkout branch'
-      inputs:
-        azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
-        scriptLocation: inlineScript
-        inlineScript: |
+    - bash: |
           set -ev
           pwd
           git clone https://github.com/Azure/azure-cli-extensions.git
@@ -39,6 +34,7 @@ jobs:
           git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli-extensions.git
           git checkout -b regression_test_$(Build.BuildId)
           git push --set-upstream azclibot regression_test_$(Build.BuildId)
+      displayName: 'checkout branch'
 
 - job: CLIExtensionRegressionTest
   displayName: CLI Extension Regression Test
@@ -78,12 +74,7 @@ jobs:
     inputs:
       versionSpec: '3.12'
       displayName: "Use Python 3.12"
-  - task: AzureCLI@1
-    displayName: 'checkout cli and extension repo'
-    inputs:
-      azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
-      scriptLocation: inlineScript
-      inlineScript: |
+  - bash: |
         set -ev
         pwd
         if [[ -n "$(CUSTOM_CLI_REPO)" && -n "$(CUSTOM_CLI_BRANCH)" ]]; then
@@ -103,13 +94,15 @@ jobs:
 
         git fetch azclibot
         git checkout -b regression_test_$(Build.BuildId) azclibot/regression_test_$(Build.BuildId)
+    displayName: 'checkout cli and extension repo'
   - template: ../../.azure-pipelines/templates/azdev_setup.yml
     parameters:
       CLIExtensionRepoPath: ./azure-cli-extensions
-  - task: AzureCLI@1
+  - task: AzureCLI@2
     displayName: 'Rerun tests'
     inputs:
-      azureSubscription: $(AZURE_SDK_TEST_SUB_CONNECTED_SERVICE)
+      connectedServiceNameARM: $(azure-cli-live-test-bami-connected-service)
+      scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
         set -ev
@@ -117,7 +110,7 @@ jobs:
         source env/bin/activate
         cd azure-cli-extensions
         
-        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+        az account set -s $(azure-cli-live-test-bami-sub-id)
         
         python ../scripts/ci/automation_full_test.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
   
@@ -160,12 +153,7 @@ jobs:
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
-    - task: AzureCLI@1
-      displayName: 'Result Summary'
-      inputs:
-        azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
-        scriptLocation: inlineScript
-        inlineScript: |
+    - bash: |
           set -ev
 
           # git config
@@ -207,3 +195,4 @@ jobs:
 
             sleep 5
           done
+      displayName: 'Result Summary'

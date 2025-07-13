@@ -63,7 +63,8 @@ def build_role_scope(resource_group_name: str, scope: str, subscription_id: str)
     return scope
 
 
-def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None, scope=None, resolve_assignee=True):
+def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None,
+                                 scope=None, resolve_assignee=True, assignee_principal_type=None):
     factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -94,7 +95,7 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None, 
     )
     if cmd.supported_api_version(min_api="2018-01-01-preview", resource_type=ResourceType.MGMT_AUTHORIZATION):
         parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id,
-                                                    principal_type=None)
+                                                    principal_type=assignee_principal_type)
         return assignments_client.create(scope, assignment_name, parameters, headers=custom_headers)
 
     # for backward compatibility
@@ -109,7 +110,8 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None, 
     return assignments_client.create(scope, assignment_name, properties, headers=custom_headers)
 
 
-def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
+def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True,
+                        delay=2, scope=None, assignee_principal_type=None):
     # AAD can have delays in propagating data, so sleep and retry
     hook = cmd.cli_ctx.get_progress_controller(True)
     hook.add(message="Waiting for AAD role to propagate", value=0, total_val=1.0)
@@ -124,6 +126,7 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
                 service_principal_msi_id,
                 scope=scope,
                 resolve_assignee=is_service_principal,
+                assignee_principal_type=assignee_principal_type,
             )
             break
         except HttpResponseError as ex:
@@ -305,7 +308,9 @@ def ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity
         )
 
 
-def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False, is_service_principal=True):
+def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False, is_service_principal=True,
+                                   assignee_principal_type=None):
+
     if detach:
         if not delete_role_assignments(
             cmd.cli_ctx, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal
@@ -313,13 +318,16 @@ def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False, is_
             raise AzCLIError("Could not delete role assignments for ACR. Are you an Owner on this subscription?")
         return
 
-    if not add_role_assignment(cmd, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal):
+    if not add_role_assignment(cmd, "acrpull", assignee, scope=registry_id, is_service_principal=is_service_principal,
+                               assignee_principal_type=assignee_principal_type):
         raise AzCLIError("Could not create a role assignment for ACR. Are you an Owner on this subscription?")
     return
 
 
 # pylint: disable=unused-argument
-def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False, is_service_principal=True):
+def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False,
+                   is_service_principal=True, assignee_principal_type=None):
+
     from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
     # Check if the ACR exists by resource ID.
@@ -330,7 +338,8 @@ def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False,
             registry = acr_client.registries.get(parsed_registry["resource_group"], parsed_registry["name"])
         except HttpResponseError as ex:
             raise AzCLIError(ex.message)
-        ensure_aks_acr_role_assignment(cmd, assignee, registry.id, detach, is_service_principal)
+        ensure_aks_acr_role_assignment(cmd, assignee, registry.id, detach,
+                                       is_service_principal, assignee_principal_type)
         return
 
     # Check if the ACR exists by name accross all resource groups.
@@ -342,5 +351,5 @@ def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False,
         if "was not found" in ex.message:
             raise AzCLIError("ACR {} not found. Have you provided the right ACR name?".format(registry_name))
         raise AzCLIError(ex.message)
-    ensure_aks_acr_role_assignment(cmd, assignee, registry.id, detach, is_service_principal)
+    ensure_aks_acr_role_assignment(cmd, assignee, registry.id, detach, is_service_principal, assignee_principal_type)
     return

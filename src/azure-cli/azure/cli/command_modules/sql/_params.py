@@ -32,7 +32,6 @@ from azure.mgmt.sql.models import (
     ServerKeyType,
     StorageKeyType,
     TransparentDataEncryptionState,
-    FreemiumType,
     ManagedInstanceDatabaseFormat
 )
 
@@ -64,6 +63,7 @@ from .custom import (
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType,
+    FreemiumType,
     FreeLimitExhaustionBehavior,
     FailoverGroupDatabasesSecondaryType
 )
@@ -1132,6 +1132,11 @@ def load_arguments(self, _):
                    options_list=['--secondary-type'],
                    help='Type of secondary to create.'
                    ' Allowed values include: Geo, Named.')
+
+        c.argument('partner_sub_id',
+                   options_list=['--partner-sub-id'],
+                   help='Subscription id to create the new replica in.'
+                   ' If unspecified, defaults to the origin subscription id.')
 
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',

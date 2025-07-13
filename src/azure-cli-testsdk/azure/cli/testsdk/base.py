@@ -24,7 +24,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
 from .utilities import (find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer,
-                        MSGraphClientPasswordReplacer, AADAuthRequestFilter)
+                        MSGraphClientPasswordReplacer, AADAuthRequestFilter, EmailAddressReplacer)
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -93,6 +93,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             AADAuthRequestFilter(),
+            EmailAddressReplacer(),
             LargeRequestBodyProcessor(),
             LargeResponseBodyProcessor(),
             DeploymentNameReplacer(),

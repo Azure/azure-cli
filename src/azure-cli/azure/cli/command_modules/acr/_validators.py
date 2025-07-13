@@ -109,23 +109,24 @@ def validate_registry_name(cmd, namespace):
     if registry is None:
         return
     suffixes = cmd.cli_ctx.cloud.suffixes
+    dnl_hash = registry.find("-")
+
+    if dnl_hash > 0:
+        logger.warning(
+            "Registry name is %s. The following suffix '%s' is automatically omitted.",
+            registry[:dnl_hash],
+            registry[dnl_hash:])
+        namespace.registry_name = registry[:dnl_hash]
     # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
-    if registry and hasattr(suffixes, 'acr_login_server_endpoint'):
+    elif hasattr(suffixes, 'acr_login_server_endpoint'):
         acr_suffix = suffixes.acr_login_server_endpoint
         pos = registry.find(acr_suffix)
         if pos > 0:
-            logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
+            logger.warning("Registry name is %s. The following suffix '%s' is automatically omitted.",
+                           registry[:pos],
+                           acr_suffix)
             namespace.registry_name = registry[:pos]
             registry = registry[:pos]
-    # If registry contains '-' due to Domain Name Label Scope,
-    # ex: "myregistry-dnlhash123.azurecr.io", strip "-dnlhash123"
-    dnl_hash = registry.find("-")
-    if registry and dnl_hash > 0:
-        logger.warning(
-            "The domain name label suffix '%s' is automatically omitted. Registry name is %s.",
-            registry[dnl_hash:],
-            registry[:dnl_hash])
-        namespace.registry_name = registry[:dnl_hash]
 
     registry = namespace.registry_name
     if not re.match(ACR_NAME_VALIDATION_REGEX, registry):

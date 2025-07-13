@@ -24,7 +24,3 @@ def _msi_user_identities_operations(cli_ctx, _):
 
 def _msi_operations_operations(cli_ctx, _):
     return _msi_client_factory(cli_ctx).operations
-
-
-def _msi_federated_identity_credentials_operations(cli_ctx, _):
-    return _msi_client_factory(cli_ctx).federated_identity_credentials

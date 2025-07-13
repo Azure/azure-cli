@@ -763,6 +763,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return pod_subnet_id
 
+    def get_pod_ip_allocation_mode(self: bool = False) -> Union[str, None]:
+        """Get the value of pod_ip_allocation_mode.
+
+        :return: str or None
+        """
+
+        # Get the value of pod_ip_allocation_mode from the raw parameters provided by the user
+        pod_ip_allocation_mode = self.raw_param.get("pod_ip_allocation_mode")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        # if it exists and user has not provided any value in raw parameters
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                pod_ip_allocation_mode and
+                self.agentpool and
+                self.agentpool.pod_ip_allocation_mode is not None
+            ):
+                pod_ip_allocation_mode = self.agentpool.pod_ip_allocation_mode
+
+        return pod_ip_allocation_mode
+
     def get_enable_node_public_ip(self) -> bool:
         """Obtain the value of enable_node_public_ip, default value is False.
 
@@ -1103,6 +1123,25 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return max_surge
 
+    def get_max_unavailable(self):
+        """Obtain the value of max_unavailable.
+        :return: string
+        """
+        # read the original value passed by the command
+        max_unavailable = self.raw_param.get("max_unavailable")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.max_unavailable is not None
+            ):
+                max_unavailable = self.agentpool.upgrade_settings.max_unavailable
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return max_unavailable
+
     def get_drain_timeout(self):
         """Obtain the value of drain_timeout.
 
@@ -1142,6 +1181,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_soak_duration
+
+    def get_undrainable_node_behavior(self) -> str:
+        """Obtain the value of undrainable_node_behavior.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        undrainable_node_behavior = self.raw_param.get("undrainable_node_behavior")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.undrainable_node_behavior is not None
+            ):
+                undrainable_node_behavior = self.agentpool.upgrade_settings.undrainable_node_behavior
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return undrainable_node_behavior
 
     def get_vm_set_type(self) -> str:
         """Obtain the value of vm_set_type, default value is CONST_VIRTUAL_MACHINE_SCALE_SETS.
@@ -1551,6 +1610,42 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self.raw_param.get("if_none_match")
 
+    def _get_gpu_driver(self) -> Union[str, None]:
+        """Obtain the value of gpu_driver.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        gpu_driver = self.raw_param.get("gpu_driver")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "gpu_profile") and      # backward compatibility
+                self.agentpool.gpu_profile and
+                self.agentpool.gpu_profile.driver is not None
+            ):
+                gpu_driver = self.agentpool.gpu_profile.driver
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return gpu_driver
+
+    def get_gpu_driver(self) -> Union[str, None]:
+        """Obtain the value of gpu_driver.
+
+        :return: string or None
+        """
+        return self._get_gpu_driver()
+
+    def get_gateway_prefix_size(self) -> Union[int, None]:
+        """Obtain the value of gateway_prefix_size.
+
+        :return: int or None
+        """
+        return self.raw_param.get('gateway_prefix_size')
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1710,6 +1805,7 @@ class AKSAgentPoolAddDecorator:
 
         agentpool.vnet_subnet_id = self.context.get_vnet_subnet_id()
         agentpool.pod_subnet_id = self.context.get_pod_subnet_id()
+        agentpool.pod_ip_allocation_mode = self.context.get_pod_ip_allocation_mode()
         agentpool.enable_node_public_ip = self.context.get_enable_node_public_ip()
         agentpool.node_public_ip_prefix_id = self.context.get_node_public_ip_prefix_id()
         return agentpool
@@ -1784,6 +1880,10 @@ class AKSAgentPoolAddDecorator:
         if max_surge:
             upgrade_settings.max_surge = max_surge
 
+        max_unavailable = self.context.get_max_unavailable()
+        if max_unavailable:
+            upgrade_settings.max_unavailable = max_unavailable
+
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
@@ -1791,6 +1891,10 @@ class AKSAgentPoolAddDecorator:
         node_soak_duration = self.context.get_node_soak_duration()
         if node_soak_duration:
             upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
+
+        undrainable_node_behavior = self.context.get_undrainable_node_behavior()
+        if undrainable_node_behavior:
+            upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
 
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
@@ -1915,6 +2019,51 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up gpu profile for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        gpu_driver = self.context.get_gpu_driver()
+
+        # Construct AgentPoolGPUProfile if one of the fields has been set
+        if gpu_driver:
+            agentpool.gpu_profile = self.models.GPUProfile()
+            agentpool.gpu_profile.driver = gpu_driver
+
+        return agentpool
+
+    def set_up_agentpool_gateway_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up agentpool gateway profile for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        gateway_prefix_size = self.context.get_gateway_prefix_size()
+        if gateway_prefix_size is not None:
+            if agentpool.gateway_profile is None:
+                agentpool.gateway_profile = self.models.AgentPoolGatewayProfile()  # pylint: disable=no-member
+
+            agentpool.gateway_profile.public_ip_prefix_size = gateway_prefix_size
+
+        return agentpool
+
+    def set_up_pod_ip_allocation_mode(self, agentpool: AgentPool) -> AgentPool:
+        """Set up pod ip allocation mode for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        pod_ip_allocation_mode = self.context.get_pod_ip_allocation_mode()
+        if pod_ip_allocation_mode is not None:
+            agentpool.pod_ip_allocation_mode = pod_ip_allocation_mode
+
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -1951,6 +2100,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_gpu_properties(agentpool)
         # set up agentpool network profile
         agentpool = self.set_up_agentpool_network_profile(agentpool)
+        # set up agentpool pod ip allocation mode
+        agentpool = self.set_up_pod_ip_allocation_mode(agentpool)
         # set up agentpool windows profile
         agentpool = self.set_up_agentpool_windows_profile(agentpool)
         # set up crg id
@@ -1959,6 +2110,10 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_agentpool_security_profile(agentpool)
         # set up message of the day
         agentpool = self.set_up_motd(agentpool)
+        # set up gpu profile
+        agentpool = self.set_up_gpu_profile(agentpool)
+        # set up agentpool gateway profile
+        agentpool = self.set_up_agentpool_gateway_profile(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -2153,6 +2308,10 @@ class AKSAgentPoolUpdateDecorator:
             # why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
             agentpool.upgrade_settings = upgrade_settings
 
+        max_unavailable = self.context.get_max_unavailable()
+        if max_unavailable:
+            upgrade_settings.max_unavailable = max_unavailable
+
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
@@ -2161,6 +2320,11 @@ class AKSAgentPoolUpdateDecorator:
         node_soak_duration = self.context.get_node_soak_duration()
         if node_soak_duration:
             upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
+            agentpool.upgrade_settings = upgrade_settings
+
+        undrainable_node_behavior = self.context.get_undrainable_node_behavior()
+        if undrainable_node_behavior:
+            upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
             agentpool.upgrade_settings = upgrade_settings
 
         return agentpool

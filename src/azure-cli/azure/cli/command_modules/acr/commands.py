@@ -420,7 +420,7 @@ def load_command_table(self, _):
         g.show_command('show', 'show_encryption')
         g.command('rotate-key', "rotate_key")
 
-    with self.command_group('acr connected-registry', acr_connected_registry_util, is_preview=True) as g:
+    with self.command_group('acr connected-registry', acr_connected_registry_util) as g:
         g.command('create', 'acr_connected_registry_create')
         g.command('delete', 'acr_connected_registry_delete')
         g.show_command('show', 'acr_connected_registry_show')

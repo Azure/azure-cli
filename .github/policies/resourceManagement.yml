@@ -1176,9 +1176,11 @@ configuration:
         - mentionUsers:
             mentionees:
             - toddysm
-            - luisdlp
             - northtyphoon
+            - luisdlp
             - terencet-dev
+            - shizhMSFT
+            - JXavierMSFT
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1482,8 +1484,7 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - alec-baird
-            - costinhagiu
+            - MichaelWu
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1759,6 +1760,7 @@ configuration:
             - schaabs
             - chen-karen
             - chandanrr
+            - cheathamb36
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2274,6 +2276,17 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Neon Postgre
+        then:
+        - mentionUsers:
+            mentionees:
+            - alluri02
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: NetApp Files
         then:
         - mentionUsers:
@@ -2370,8 +2383,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - gopimsft
-            - gimotwanMSFT
-            - avripintoms
+            - Azure/azure-firewall
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2837,10 +2849,10 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - mwesigwaguma
-            - a-Santamaria
+            - iliu816
+            - a-santamaria
             - LukeSlev
-            - jkochhar
+            - Jkochhar
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -4423,7 +4435,19 @@ configuration:
           isRegex: True
       then:
       - requestReview:
-          reviewer: wangzelin007
+          reviewer: northtyphoon
+      - requestReview:
+          reviewer: terencet-dev
+      - requestReview:
+          reviewer: JXavierMSFT
+      - requestReview:
+          reviewer: toddysm
+      - requestReview:
+          reviewer: rosanch
+      - requestReview:
+          reviewer: yanzhudd
+      - requestReview:
+          reviewer: shizhMSFT
       - requestReview:
           reviewer: zhoxing-ms
       - requestReview:

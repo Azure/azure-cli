@@ -63,7 +63,6 @@ from azure.mgmt.sql.models import (
     ServerKey,
     ServerKeyType,
     ServerNetworkAccessFlag,
-    ServiceObjectiveName,
     ServerTrustGroup,
     ServicePrincipal,
     ShortTermRetentionPolicyName,
@@ -90,6 +89,9 @@ from ._util import (
     get_sql_managed_instances_operations,
     get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
     get_sql_managed_database_restore_details_operations,
+    get_sql_replication_links_operations,
+    get_sql_elastic_pools_operations,
+    get_sql_databases_operations,
 )
 
 
@@ -103,12 +105,12 @@ BACKUP_STORAGE_ACCESS_TIERS = ["hot",
 ###############################################
 
 
-def _get_server_location(cli_ctx, server_name, resource_group_name):
+def _get_server_location(cli_ctx, server_name, resource_group_name, subscription_id=None):
     '''
     Returns the location (i.e. Azure region) that the specified server is in.
     '''
 
-    server_client = get_sql_servers_operations(cli_ctx, None)
+    server_client = get_sql_servers_operations(cli_ctx, None, subscription_id)
     # pylint: disable=no-member
     return server_client.get(
         server_name=server_name,
@@ -719,6 +721,13 @@ class AuthenticationType(str, Enum):
 
     sql = "SQL"
     ad_password = "ADPassword"
+    managed_identity = "ManagedIdentity"
+
+
+class FreemiumType(str, Enum):
+
+    Regular = "Regular"
+    Freemium = "Freemium"
 
 
 def _get_server_dns_suffx(cli_ctx):
@@ -947,19 +956,22 @@ class DatabaseIdentity:  # pylint: disable=too-few-public-methods
     database resource id.
     '''
 
-    def __init__(self, cli_ctx, database_name, server_name, resource_group_name):
-
+    def __init__(self, cli_ctx, database_name, server_name, resource_group_name, subscription_id=None):
+        from azure.cli.core.commands.client_factory import get_subscription_id
         self.database_name = database_name
         self.server_name = server_name
         self.resource_group_name = resource_group_name
         self.cli_ctx = cli_ctx
+        if subscription_id is not None:
+            self.subscription_id = subscription_id
+        else:
+            self.subscription_id = get_subscription_id(self.cli_ctx)
 
     def id(self):
         from urllib.parse import quote
-        from azure.cli.core.commands.client_factory import get_subscription_id
 
         return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
-            quote(get_subscription_id(self.cli_ctx)),
+            quote(self.subscription_id),
             quote(self.resource_group_name),
             quote(self.server_name),
             quote(self.database_name))
@@ -1016,7 +1028,8 @@ def _validate_elastic_pool_id(
         cli_ctx,
         elastic_pool_id,
         server_name,
-        resource_group_name):
+        resource_group_name,
+        subscription_id=None):
     '''
     Validates elastic_pool_id is either None or a valid resource id.
 
@@ -1031,9 +1044,12 @@ def _validate_elastic_pool_id(
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
+    if subscription_id is None:
+        subscription_id = get_subscription_id(cli_ctx)
+
     if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
         return resource_id(
-            subscription=get_subscription_id(cli_ctx),
+            subscription=subscription_id,
             resource_group=resource_group_name,
             namespace='Microsoft.Sql',
             type='servers',
@@ -1138,7 +1154,8 @@ def _db_dw_create(
     kwargs['location'] = _get_server_location(
         cli_ctx,
         server_name=dest_db.server_name,
-        resource_group_name=dest_db.resource_group_name)
+        resource_group_name=dest_db.resource_group_name,
+        subscription_id=dest_db.subscription_id)
 
     # Set create mode properties
     if source_db:
@@ -1160,7 +1177,8 @@ def _db_dw_create(
         cli_ctx,
         kwargs['elastic_pool_id'],
         dest_db.server_name,
-        dest_db.resource_group_name)
+        dest_db.resource_group_name,
+        dest_db.subscription_id)
 
     # Expand maintenance configuration id if needed
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
@@ -1211,6 +1229,56 @@ def _backup_storage_redundancy_take_source_warning():
     print("""You have not specified the value for backup storage redundancy
     which will default to source's backup storage redundancy.
     To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
+
+
+def _should_show_forward_migration_with_links_warnings(
+        cli_ctx,
+        instance,
+        server_name,
+        resource_group_name):
+    '''
+    Checks if the database update operation is a forward migration to Hyperscale and if geo-replication links exist.
+
+    :param cli_ctx: The CLI context object to interact with Azure SQL.
+    :param instance: The database instance object.
+    :param server_name: The name of the server.
+    :param resource_group_name: The name of the resource group.
+    :return: A boolean indicating if it is forward migration of database with geo-replication links.
+    '''
+
+    # Find the replication links for the database
+    replication_links_client = get_sql_replication_links_operations(cli_ctx, None)
+    links = list(replication_links_client.list_by_database(
+        database_name=instance.name,
+        server_name=server_name,
+        resource_group_name=resource_group_name))
+
+    elastic_pools_client = get_sql_elastic_pools_operations(cli_ctx, None)
+    elastic_pool = None
+    if instance.elastic_pool_id:
+        elastic_pool = elastic_pools_client.get(
+            elastic_pool_name=instance.elastic_pool_id.split('/')[-1],
+            server_name=server_name,
+            resource_group_name=resource_group_name)
+
+    # Check if the current SKU is not Hyperscale and the target SKU is Hyperscale
+    # This is to verify forward migration to Hyperscale
+    current_sku = instance.current_sku.name if instance.current_sku else None
+    target_sku = instance.sku.name if instance.sku else None
+    is_target_hyperscale_pool = elastic_pool is not None and elastic_pool.sku.tier == "Hyperscale"
+
+    is_forward_migration = (
+        current_sku is not None and "HS" not in current_sku and
+        ((target_sku is not None and "HS" in target_sku) or is_target_hyperscale_pool)
+    )
+    links_exist = links is not None and len(links) > 0
+
+    return is_forward_migration and links_exist
+
+
+def _forward_migration_with_geodr_links_warning():
+    print("""Changing the service tier to Hyperscale also converts the geo-secondary replica to Hyperscale.
+    For more information, see https://go.microsoft.com/fwlink/?linkid=2314103""")
 
 
 def db_create(
@@ -1343,6 +1411,7 @@ def db_create_replica(
         partner_server_name,
         partner_database_name=None,
         partner_resource_group_name=None,
+        partner_sub_id=None,
         secondary_type=None,
         no_wait=False,
         assign_identity=False,
@@ -1360,6 +1429,10 @@ def db_create_replica(
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
     partner_database_name = partner_database_name or database_name
+    if partner_sub_id is not None:
+        partner_client = get_sql_databases_operations(cmd.cli_ctx, None, partner_sub_id)
+    else:
+        partner_client = client
 
     # Set create mode
     kwargs['create_mode'] = CreateMode.SECONDARY
@@ -1377,18 +1450,26 @@ def db_create_replica(
     # Check backup storage redundancy configurations
     location = _get_server_location(cmd.cli_ctx,
                                     server_name=partner_server_name,
-                                    resource_group_name=partner_resource_group_name)
+                                    resource_group_name=partner_resource_group_name,
+                                    subscription_id=partner_sub_id)
     if _should_show_backup_storage_redundancy_warnings(location):
         if not kwargs['requested_backup_storage_redundancy']:
             _backup_storage_redundancy_take_source_warning()
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
+    primary_database = DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name)
+    secondary_database = DatabaseIdentity(cmd.cli_ctx,
+                                          partner_database_name,
+                                          partner_server_name,
+                                          partner_resource_group_name,
+                                          partner_sub_id)
+
     return _db_dw_create(
         cmd.cli_ctx,
-        client,
-        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
+        partner_client,
+        primary_database,
+        secondary_database,
         no_wait,
         secondary_type=secondary_type,
         assign_identity=assign_identity,
@@ -1795,10 +1876,10 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
     # actually ignores the value of service objective name (!!). We are trying to protect the CLI
     # user from this unintuitive behavior.
     if (elastic_pool_id and service_objective and
-            service_objective != ServiceObjectiveName.ELASTIC_POOL):
+            service_objective != "ELASTIC_POOL"):
         raise CLIError('If elastic pool is specified, service objective must be'
                        ' unspecified or equal \'{}\'.'.format(
-                           ServiceObjectiveName.ELASTIC_POOL))
+                           "ELASTIC_POOL"))
 
     # Update both elastic pool and sku. The service treats elastic pool and sku properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
@@ -1833,6 +1914,10 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
     # TODO Temporary workaround for elastic pool sku name issue
     if instance.elastic_pool_id:
         instance.sku = None
+
+    # Display warning if database is being updated to Hyperscale and if geo-replication links exist
+    if _should_show_forward_migration_with_links_warnings(cmd.cli_ctx, instance, server_name, resource_group_name):
+        _forward_migration_with_geodr_links_warning()
 
     #####
     # Set other (non-sku related) properties

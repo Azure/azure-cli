@@ -12,8 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network virtual-appliance sku",
-    is_preview=True,
+    "network virtual-appliance sku"
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage Azure Network Virtual Appliance Sku.

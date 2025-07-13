@@ -18,13 +18,13 @@ class Create(AAZCommand):
     """Create a new origin group within the specified profile.
 
     :example: Creates a new origin group within the specified profile.
-        az afd origin-group create -g group --origin-group-name og1 --profile-name profile --probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt --sample-size 4 --successful-samples-required 3 --additional-latency-in-milliseconds 50  --enable-health-probe true
+        az afd origin-group create --resource-group RG --profile-name profile1 --origin-group-name origingroup1 --sample-size 3 --successful-samples-required 3 --additional-latency-in-milliseconds 1000 --health-probe-settings "{probe-path:/path2,probe-request-type:NotSet,probe-protocol:NotSet,probe-interval-in-seconds:10}" --traffic-restoration-time-to-healed-or-new-endpoints-in-minutes 5
     """
 
     _aaz_info = {
-        "version": "2024-09-01",
+        "version": "2025-04-15",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/origingroups/{}", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/origingroups/{}", "2025-04-15"],
         ]
     }
 
@@ -52,41 +52,16 @@ class Create(AAZCommand):
         )
         _args_schema.profile_name = AAZStrArg(
             options=["--profile-name"],
-            help="Name of the Azure Front Door Standard or Azure Front Door Premium profile which is unique within the resource group.",
+            help="Name of the Azure Front Door Standard or Azure Front Door Premium which is unique within the resource group.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$",
+                max_length=260,
+                min_length=1,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-
-        # define Arg Group "HealthProbeSettings"
-
-        _args_schema = cls._args_schema
-        _args_schema.probe_interval_in_seconds = AAZIntArg(
-            options=["--probe-interval-in-seconds"],
-            arg_group="HealthProbeSettings",
-            help="The number of seconds between health probes.Default is 240sec.",
-            fmt=AAZIntArgFormat(
-                maximum=255,
-                minimum=1,
-            ),
-        )
-        _args_schema.probe_path = AAZStrArg(
-            options=["--probe-path"],
-            arg_group="HealthProbeSettings",
-            help="The path relative to the origin that is used to determine the health of the origin.",
-        )
-        _args_schema.probe_protocol = AAZStrArg(
-            options=["--probe-protocol"],
-            arg_group="HealthProbeSettings",
-            help="Protocol to use for health probe.",
-            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
-        )
-        _args_schema.probe_request_type = AAZStrArg(
-            options=["--probe-request-type"],
-            arg_group="HealthProbeSettings",
-            help="The type of health probe request that is made.",
-            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
         )
 
         # define Arg Group "LoadBalancingSettings"
@@ -111,6 +86,11 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.health_probe_settings = AAZObjectArg(
+            options=["--health-probe-settings"],
+            arg_group="Properties",
+            help="Health probe settings to the origin that is used to determine the health of the origin.",
+        )
         _args_schema.session_affinity_state = AAZStrArg(
             options=["--session-affinity-state"],
             arg_group="Properties",
@@ -125,6 +105,30 @@ class Create(AAZCommand):
                 maximum=50,
                 minimum=0,
             ),
+        )
+
+        health_probe_settings = cls._args_schema.health_probe_settings
+        health_probe_settings.probe_interval_in_seconds = AAZIntArg(
+            options=["probe-interval-in-seconds"],
+            help="The number of seconds between health probes.Default is 240sec.",
+            fmt=AAZIntArgFormat(
+                maximum=255,
+                minimum=1,
+            ),
+        )
+        health_probe_settings.probe_path = AAZStrArg(
+            options=["probe-path"],
+            help="The path relative to the origin that is used to determine the health of the origin.",
+        )
+        health_probe_settings.probe_protocol = AAZStrArg(
+            options=["probe-protocol"],
+            help="Protocol to use for health probe.",
+            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
+        )
+        health_probe_settings.probe_request_type = AAZStrArg(
+            options=["probe-request-type"],
+            help="The type of health probe request that is made.",
+            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
         )
         return cls._args_schema
 
@@ -213,7 +217,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-04-15",
                     required=True,
                 ),
             }
@@ -242,7 +246,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("healthProbeSettings", AAZObjectType)
+                properties.set_prop("healthProbeSettings", AAZObjectType, ".health_probe_settings")
                 properties.set_prop("loadBalancingSettings", AAZObjectType)
                 properties.set_prop("sessionAffinityState", AAZStrType, ".session_affinity_state")
                 properties.set_prop("trafficRestorationTimeToHealedOrNewEndpointsInMinutes", AAZIntType, ".traffic_restoration_time_to_healed_or_new_endpoints_in_minutes")

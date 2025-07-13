@@ -906,14 +906,15 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                 FeatureFlagConstants.REQUIREMENT_TYPE, None
             )
             if requirement_type:
-                if requirement_type.lower() not in (
-                    FeatureFlagConstants.REQUIREMENT_TYPE_ALL,
-                    FeatureFlagConstants.REQUIREMENT_TYPE_ANY,
-                ):
+                # Requirement type is case insensitive.
+                if requirement_type.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ALL.lower():
+                    conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = FeatureFlagConstants.REQUIREMENT_TYPE_ALL
+                elif requirement_type.lower() == FeatureFlagConstants.REQUIREMENT_TYPE_ANY.lower():
+                    conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = FeatureFlagConstants.REQUIREMENT_TYPE_ANY
+                else:
                     raise ValidationError(
-                        f"Feature '{feature_name}' must have an any/all requirement type."
+                        f"Feature '{feature_name}' must have an Any/All requirement type."
                     )
-                conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
 
             # Backend returns conditions: {client_filters: None} for flags with no conditions.
             # No need to write empty conditions to key-values.

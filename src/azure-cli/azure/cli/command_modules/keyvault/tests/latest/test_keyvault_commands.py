@@ -544,7 +544,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.kwargs.update({
             'hsm_name': self.create_random_name('test-mhsm-sd1', 24),
             'next_hsm_name': self.create_random_name('test-mhsm-sd2', 24),
-            'loc': 'uksouth',
+            'loc': 'canadaeast',
             'init_admin': logged_in_user,
             'key_name': self.create_random_name('key', 10),
             'sdtest_dir': sdtest_dir
@@ -568,7 +568,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
                  '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"',
                  checks=[self.check('status', 'Success')])
-        time.sleep(180)
+        time.sleep(300)
         with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {hsm_name} '
                      '--role "Managed HSM Crypto User" --scope "/"')
@@ -591,17 +591,17 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.cmd('az keyvault security-domain init-recovery --hsm-name {next_hsm_name} '
                  '--sd-exchange-key "{exchange_key}"')
 
-        time.sleep(180)
+        time.sleep(600)
         # upload the blob
         self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
                  '--sd-exchange-key "{exchange_key}" '
                  '--sd-wrapping-keys "{key1_path}" "{key2_path}"',
                  checks=[self.check('status', 'Success')])
-        time.sleep(180)
+        time.sleep(300)
         with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {next_hsm_name} '
                      '--role "Managed HSM Crypto User" --scope "/"')
-        time.sleep(180)
+        time.sleep(300)
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
 
@@ -1371,6 +1371,27 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         result = self.cmd('keyvault key random --count 1 --id {hsm_url}').get_output_in_json()
         self.assertIsNotNone(result['value'])
 
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_key_attestation')
+    @ManagedHSMPreparer(name_prefix='clitesthsmkeyats', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
+    def test_keyvault_hsm_key_attestation(self, resource_group, managed_hsm):
+        self.kwargs.update({
+            'hsm_name': managed_hsm,
+            'hsm_url': 'https://{}.managedhsm.azure.net'.format(managed_hsm),
+            'key': self.create_random_name('key1-', 24)
+        })
+
+        # create a key
+        hsm_key = self.cmd('keyvault key create --hsm-name {hsm_name} -n {key}').get_output_in_json()
+        self.kwargs['hsm_kid'] = hsm_key['key']['kid']
+        self.assertNotIn('attestation', hsm_key['attributes'])
+
+        # get key's attestation
+        key_attestation = self.cmd('keyvault key get-attestation --hsm-name {hsm_name} --name {key}').get_output_in_json()
+        self.assertIn('publicKeyAttestation', key_attestation)
+        self.assertIn('privateKeyAttestation', key_attestation)
+
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_key')
     @ManagedHSMPreparer(name_prefix='clitesthsmkey', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
@@ -1594,7 +1615,7 @@ class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
 
 class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_kv_key_download')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-key-d-', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-d-', location='eastus2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_key_download(self, resource_group, key_vault):
         import OpenSSL.crypto
 
@@ -1751,19 +1772,33 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         with open(secret_path, 'r') as f:
             expected = f.read().replace('\r\n', '\n')
 
-        def _test_set_and_download(encoding):
+        def _test_set_and_download(encoding, dest_path):
             self.kwargs['enc'] = encoding
             self.cmd('keyvault secret set --vault-name {kv} -n download-{enc} --file "{src_path}" --encoding {enc}')
-            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
             self.kwargs['dest_path'] = dest_path
             self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}"')
             with open(dest_path, 'r') as f:
                 actual = f.read().replace('\r\n', '\n')
             self.assertEqual(actual, expected)
-            os.remove(dest_path)
+
+        def _test_download_with_overwrite(encoding, dest_path):
+            self.kwargs['dest_path'] = dest_path
+            with open(dest_path, 'w') as f:
+                f.write('This file will be overwritten.')
+            # test without and with overwrite
+            with self.assertRaises(CLIError):
+                self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}"')
+            self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}" --overwrite')
+            with open(dest_path, 'r') as f:
+                actual = f.read().replace('\r\n', '\n')
+            self.assertEqual(actual, expected)
 
         for encoding in secret_encoding_values:
-            _test_set_and_download(encoding)
+            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
+            _test_set_and_download(encoding, dest_path)
+            _test_download_with_overwrite(encoding, dest_path)
+            if os.path.exists(dest_path):
+                os.remove(dest_path)
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     @KeyVaultPreparer(name_prefix='cli-test-kv-se-', additional_params='--enable-rbac-authorization false')

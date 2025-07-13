@@ -41,6 +41,15 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
         # Make sure no role assignment is created by default
         self.cmd('role assignment list --assignee {app_id} --all', checks=self.check('length(@)', 0))
 
+    def test_create_for_rbac_no_password(self):
+        self.kwargs['display_name'] = self.create_random_name('azure-cli-test-', 30)
+        result = self.cmd('ad sp create-for-rbac --display-name {display_name} --create-password false',
+                          checks=[
+                              self.check('displayName', '{display_name}'),
+                              self.check('password', None)
+                          ]).get_output_in_json()
+        self.kwargs['app_id'] = result['appId']
+
     def test_create_for_rbac_create_cert(self):
 
         self.kwargs['display_name'] = self.create_random_name('azure-cli-test-', 30)
@@ -810,15 +819,6 @@ class RoleAssignmentLiveScenarioTest(LiveScenarioTest):
 
         # There are role assignments inherited from subscription, so we can't tell the exact number.
         self.cmd('role assignment list -g {rg} --include-inherited', checks=[self.greater_than("length([])", 0)])
-
-    @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
-    def test_role_assignment_for_co_admins(self, resource_group):
-
-        result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
-        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
-
-        result = self.cmd('role assignment list -g {rg} --include-classic-administrator').get_output_in_json()
-        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
 
 
 if __name__ == '__main__':

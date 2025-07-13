@@ -25,6 +25,7 @@ CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
 # mode
 CONST_NODEPOOL_MODE_SYSTEM = "System"
 CONST_NODEPOOL_MODE_USER = "User"
+CONST_NODEPOOL_MODE_GATEWAY = "Gateway"
 
 # os type
 CONST_DEFAULT_NODE_OS_TYPE = "Linux"
@@ -43,8 +44,8 @@ CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
 CONST_AVAILABILITY_SET = "AvailabilitySet"
 
 # vm size
-CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
-CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
+CONST_DEFAULT_NODE_VM_SIZE = ""
+CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = ""
 
 # gpu instance
 CONST_GPU_INSTANCE_PROFILE_MIG1_G = "MIG1g"
@@ -52,6 +53,10 @@ CONST_GPU_INSTANCE_PROFILE_MIG2_G = "MIG2g"
 CONST_GPU_INSTANCE_PROFILE_MIG3_G = "MIG3g"
 CONST_GPU_INSTANCE_PROFILE_MIG4_G = "MIG4g"
 CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
+
+# gpu driver install
+CONST_GPU_DRIVER_INSTALL = "Install"
+CONST_GPU_DRIVER_NONE = "None"
 
 # consts for ManagedCluster
 # load balancer sku
@@ -120,6 +125,10 @@ CONST_NETWORK_POLICY_CILIUM = "cilium"
 CONST_NETWORK_POLICY_CALICO = "calico"
 CONST_NETWORK_POLICY_NONE = "none"
 
+# network pod ip allocation mode
+CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL = "DynamicIndividual"
+CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK = "StaticBlock"
+
 # consts for addons
 # http application routing
 CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = "httpApplicationRouting"
@@ -163,6 +172,13 @@ CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
 
+# app routing nginx config options
+CONST_WEB_APPLICATION_ROUTING_KEY_NAME = "ingress/webApplicationRouting"
+CONST_APP_ROUTING_ANNOTATION_CONTROLLED_NGINX = "AnnotationControlled"
+CONST_APP_ROUTING_EXTERNAL_NGINX = "External"
+CONST_APP_ROUTING_INTERNAL_NGINX = "Internal"
+CONST_APP_ROUTING_NONE_NGINX = "None"
+
 # all supported addons
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
@@ -173,7 +189,8 @@ ADDONS = {
     'ingress-appgw': CONST_INGRESS_APPGW_ADDON_NAME,
     "confcom": CONST_CONFCOM_ADDON_NAME,
     'open-service-mesh': CONST_OPEN_SERVICE_MESH_ADDON_NAME,
-    'azure-keyvault-secrets-provider': CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+    'azure-keyvault-secrets-provider': CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
+    "web_application_routing": CONST_WEB_APPLICATION_ROUTING_KEY_NAME,
 }
 
 # consts for check-acr command

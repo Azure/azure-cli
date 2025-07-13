@@ -76,7 +76,7 @@ def _build_sdk_access_token_info(token_entry):
     #     'token_source': 'cache'
     # }
     from .constants import ACCESS_TOKEN, EXPIRES_IN
-    from .util import _now_timestamp
+    from .util import now_timestamp
     from azure.core.credentials import AccessTokenInfo
 
-    return AccessTokenInfo(token_entry[ACCESS_TOKEN], _now_timestamp() + token_entry[EXPIRES_IN])
+    return AccessTokenInfo(token_entry[ACCESS_TOKEN], now_timestamp() + token_entry[EXPIRES_IN])

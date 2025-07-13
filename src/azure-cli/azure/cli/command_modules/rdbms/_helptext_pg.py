@@ -845,14 +845,6 @@ examples:
     text: az postgres flexible-server replica list -g testGroup -n testserver
 """
 
-helps['postgres flexible-server replica stop-replication'] = """
-type: command
-short-summary: Stop replication to a read replica and make it a read/write server.
-examples:
-  - name: Stop replication to 'testreplicaserver' and make it a read/write server.
-    text: az postgres flexible-server replica stop-replication -g testGroup -n testreplicaserver
-"""
-
 helps['postgres flexible-server replica promote'] = """
 type: command
 short-summary: Stop replication of a read replica and promote it to an independent server or as a primary server.
@@ -956,53 +948,6 @@ short-summary: List all user assigned managed identities from the server.
 examples:
   - name: List all identities from server 'testsvr'.
     text: az postgres flexible-server identity list -g testgroup -s testsvr
-"""
-
-helps['postgres flexible-server ad-admin'] = """
-type: group
-short-summary: Manage server Microsoft Entra administrators.
-"""
-
-helps['postgres flexible-server ad-admin create'] = """
-type: command
-short-summary: Create a Microsoft Entra administrator.
-examples:
-  - name: Create Microsoft Entra administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and type User.
-    text: az postgres flexible-server ad-admin create -g testgroup -s testsvr -u john@contoso.com -i 00000000-0000-0000-0000-000000000000 -t User
-"""
-
-helps['postgres flexible-server ad-admin delete'] = """
-type: command
-short-summary: Delete a Microsoft Entra administrator.
-examples:
-  - name: Delete Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
-    text: az postgres flexible-server ad-admin delete -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
-"""
-
-helps['postgres flexible-server ad-admin list'] = """
-type: command
-short-summary: List all Microsoft Entra administrators.
-examples:
-  - name: List Microsoft Entra administrators.
-    text: az postgres flexible-server ad-admin list -g testgroup -s testsvr
-"""
-
-helps['postgres flexible-server ad-admin show'] = """
-type: command
-short-summary: Get a Microsoft Entra administrator.
-examples:
-  - name: Get Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
-    text: az postgres flexible-server ad-admin show -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
-"""
-
-helps['postgres flexible-server ad-admin wait'] = """
-type: command
-short-summary: Wait for a Microsoft Entra administrator to satisfy certain conditions.
-examples:
-  - name: Wait until a Microsoft Entra administrator exists.
-    text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --exists
-  - name: Wait for a Microsoft Entra administrator to be deleted.
-    text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
 """
 
 helps['postgres flexible-server microsoft-entra-admin'] = """

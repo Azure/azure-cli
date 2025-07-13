@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only, live_only
 import os
 
 
@@ -11,6 +11,7 @@ class AcrTaskCommandsTests(ScenarioTest):
 
     # @unittest.skip("task.py line 250, BUG: Discriminator type is absent or null, use base class TaskStepProperties.")
     @ResourceGroupPreparer()
+    @live_only()
     def test_acr_task(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -28,7 +29,7 @@ class AcrTaskCommandsTests(ScenarioTest):
             'trigger_enabled': 'False',
             'identity': '[system]',
             'loginServer': 'test.acr.com',
-            'file_path': os.path.join(curr_dir, 'data//taskfilesample.yaml').replace('\\', '\\\\')
+            'file_path': os.path.join(curr_dir, 'taskfilesample.yaml').replace('\\', '\\\\')
         })
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),

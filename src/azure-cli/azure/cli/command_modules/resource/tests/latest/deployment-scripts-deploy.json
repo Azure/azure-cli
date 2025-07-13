@@ -15,6 +15,12 @@
     },
     "resources": [
         {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2023-01-31",
+            "name": "[parameters('scriptName')]",
+            "location": "[resourceGroup().location]"
+        },
+        {
             "type": "Microsoft.Resources/deploymentScripts",
             "apiVersion": "2020-10-01",
             "name": "[parameters('scriptName')]",
@@ -22,7 +28,7 @@
             "identity": {
                 "type": "UserAssigned",
                 "userAssignedIdentities": {
-                    "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi')]": {}
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('scriptName'))]": {}
                 }
             },
             "kind": "AzureCLI",
@@ -37,7 +43,10 @@
                 "scriptContent": "echo 'foo'",
                 "cleanupPreference": "OnExpiration",
                 "retentionInterval": "P1D"
-            }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('scriptName'))]"
+            ]
         }
     ],
     "outputs": {}

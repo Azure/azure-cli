@@ -46,6 +46,7 @@ from azure.cli.command_modules.acs._consts import (
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
     check_is_msi_cluster,
+    check_is_apiserver_vnet_integration_cluster,
     check_is_private_cluster,
     format_parameter_name_to_option_name,
     get_user_assigned_identity_by_resource_id,
@@ -109,7 +110,7 @@ from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand, LongRunningOperation
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json
+from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json, read_file_content
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
@@ -140,6 +141,7 @@ ManagedClusterStorageProfileBlobCSIDriver = TypeVar('ManagedClusterStorageProfil
 ManagedClusterStorageProfileSnapshotController = TypeVar('ManagedClusterStorageProfileSnapshotController')
 ManagedClusterIngressProfile = TypeVar("ManagedClusterIngressProfile")
 ManagedClusterIngressProfileWebAppRouting = TypeVar("ManagedClusterIngressProfileWebAppRouting")
+ManagedClusterIngressProfileNginx = TypeVar("ManagedClusterIngressProfileNginx")
 ServiceMeshProfile = TypeVar("ServiceMeshProfile")
 
 # TODO
@@ -814,6 +816,18 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("update_dns_zone")
 
+    def get_app_routing_default_nginx_controller(self) -> str:
+        """Obtain the value of app_routing_default_nginx_controller.
+        :return: str
+        """
+        return self.raw_param.get("app_routing_default_nginx_controller")
+
+    def get_nginx(self):
+        """Obtain the value of nginx, written to the update decorator context by _aks_approuting_update
+        :return: string
+        """
+        return self.raw_param.get("nginx")
+
     def get_enable_keda(self) -> bool:
         """Obtain the value of enable_keda.
 
@@ -884,6 +898,30 @@ class AKSManagedClusterContext(BaseAKSContext):
                 )
 
         return disable_keda
+
+    def get_custom_ca_trust_certificates(self) -> Union[List[bytes], None]:
+        """Obtain the value of custom ca trust certificates.
+        :return: List[str] or None
+        """
+        custom_ca_certs_file_path = self.raw_param.get("custom_ca_trust_certificates")
+        if not custom_ca_certs_file_path:
+            return None
+        if not os.path.isfile(custom_ca_certs_file_path):
+            raise InvalidArgumentValueError(
+                "{} is not valid file, or not accessible.".format(
+                    custom_ca_certs_file_path
+                )
+            )
+        # CAs are supposed to be separated with a new line, we filter out empty strings (e.g. some stray new line). We only allow up to 10 CAs
+        file_content = read_file_content(custom_ca_certs_file_path).split(os.linesep + os.linesep)
+        certs = [str.encode(x) for x in file_content if len(x) > 1]
+        if len(certs) > 10:
+            raise InvalidArgumentValueError(
+                "Only up to 10 new-line separated CAs can be passed, got {} instead.".format(
+                    len(certs)
+                )
+            )
+        return certs
 
     def get_snapshot_controller(self) -> Optional[ManagedClusterStorageProfileSnapshotController]:
         """Obtain the value of storage_profile.snapshot_controller
@@ -1833,6 +1871,21 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return detach_acr
+
+    def get_assignee_principal_type(self) -> Union[str, None]:
+        """Obtain the value of assignee_principal_type.
+
+        This function will return the override value of the assignee principal type (e.g., User, ServicePrincipal, Group)
+        to determine the type of identity being assigned for the ACR role. This is used
+        during the attach ACR operation to ensure proper role assignment based on the identity type.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        assignee_principal_type = self.raw_param.get("assignee_principal_type")
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return assignee_principal_type
 
     def get_http_proxy_config(self) -> Union[Dict, ManagedClusterHTTPProxyConfig, None]:
         """Obtain the value of http_proxy_config.
@@ -3762,6 +3815,101 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_fqdn_subdomain(enable_validation=True)
 
+    def _get_enable_apiserver_vnet_integration(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_apiserver_vnet_integration.
+
+        This function supports the option of enable_validation. When enable_apiserver_vnet_integration is specified,
+        For UPDATE: if apiserver-subnet-id is not used, raise an RequiredArgumentMissingError;
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_apiserver_vnet_integration = self.raw_param.get("enable_apiserver_vnet_integration")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.api_server_access_profile and
+                "enableVnetIntegration" in self.mc.api_server_access_profile.additional_properties
+            ):
+                enable_apiserver_vnet_integration = self.mc.api_server_access_profile.additional_properties['enableVnetIntegration']
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                is_apiserver_vnet_integration_cluster = check_is_apiserver_vnet_integration_cluster(self.mc)
+                if enable_apiserver_vnet_integration and not is_apiserver_vnet_integration_cluster:
+                    if self._get_apiserver_subnet_id(enable_validation=False) is None:
+                        raise RequiredArgumentMissingError(
+                            "--apiserver-subnet-id is required for update with --enable-apiserver-vnet-integration."
+                        )
+
+        return enable_apiserver_vnet_integration
+
+    def get_enable_apiserver_vnet_integration(self) -> bool:
+        """Obtain the value of enable_apiserver_vnet_integration.
+
+        This function will verify the parameter by default. When enable_apiserver_vnet_integration is specified,
+        For UPDATE: if apiserver-subnet-id is not used, raise an RequiredArgumentMissingError
+
+        :return: bool
+        """
+        return self._get_enable_apiserver_vnet_integration(enable_validation=True)
+
+    def _get_apiserver_subnet_id(self, enable_validation: bool = False) -> Union[str, None]:
+        """Internal function to obtain the value of apiserver_subnet_id.
+
+        This function supports the option of enable_validation. When apiserver_subnet_id is specified,
+        if enable_apiserver_vnet_integration is not used, raise an RequiredArgumentMissingError;
+        For CREATE: if vnet_subnet_id is not used, raise an RequiredArgumentMissingError;
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        apiserver_subnet_id = self.raw_param.get("apiserver_subnet_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.api_server_access_profile and
+                self.mc.api_server_access_profile.subnet_id is not None
+            ):
+                apiserver_subnet_id = self.mc.api_server_access_profile.subnet_id
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.CREATE:
+                vnet_subnet_id = self.get_vnet_subnet_id()
+                if apiserver_subnet_id and vnet_subnet_id is None:
+                    raise RequiredArgumentMissingError(
+                        '"--apiserver-subnet-id" requires "--vnet-subnet-id".')
+
+            enable_apiserver_vnet_integration = self._get_enable_apiserver_vnet_integration(
+                enable_validation=False)
+            if (
+                apiserver_subnet_id and
+                (
+                    enable_apiserver_vnet_integration is None or
+                    enable_apiserver_vnet_integration is False
+                )
+            ):
+                raise RequiredArgumentMissingError(
+                    '"--apiserver-subnet-id" requires "--enable-apiserver-vnet-integration".')
+
+        return apiserver_subnet_id
+
+    def get_apiserver_subnet_id(self) -> Union[str, None]:
+        """Obtain the value of apiserver_subnet_id.
+
+        This function will verify the parameter by default. When apiserver_subnet_id is specified,
+        if enable_apiserver_vnet_integration is not specified, raise an RequiredArgumentMissingError;
+
+        :return: bool
+        """
+        return self._get_apiserver_subnet_id(enable_validation=True)
+
     def _get_enable_private_cluster(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_private_cluster.
 
@@ -3770,9 +3918,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         is assigned, raise an MutuallyExclusiveArgumentError; Otherwise when enable_private_cluster is not specified
         and disable_public_fqdn, enable_public_fqdn or private_dns_zone is assigned, raise an InvalidArgumentValueError.
 
+        For UPDATE: if existing cluster is not using apiserver vnet integration, raise an ArgumentUsageError;
+
         :return: bool
         """
         # read the original value passed by the command
+        enable_apiserver_vnet_integration = self.raw_param.get("enable_apiserver_vnet_integration")
         enable_private_cluster = self.raw_param.get("enable_private_cluster")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
@@ -3810,7 +3961,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                         )
             elif self.decorator_mode == DecoratorMode.UPDATE:
                 is_private_cluster = check_is_private_cluster(self.mc)
-                if is_private_cluster:
+                is_apiserver_vnet_integration_cluster = check_is_apiserver_vnet_integration_cluster(self.mc)
+
+                if is_private_cluster or enable_private_cluster:
                     if self._get_api_server_authorized_ip_ranges(enable_validation=False):
                         raise MutuallyExclusiveArgumentError(
                             "--api-server-authorized-ip-ranges is not supported for private cluster"
@@ -3823,6 +3976,14 @@ class AKSManagedClusterContext(BaseAKSContext):
                     if self._get_enable_public_fqdn(enable_validation=False):
                         raise InvalidArgumentValueError(
                             "--enable-public-fqdn can only be used for private cluster"
+                        )
+
+                # new validation added for vnet integration
+                if enable_private_cluster and not enable_apiserver_vnet_integration:
+                    if not is_apiserver_vnet_integration_cluster:
+                        raise ArgumentUsageError(
+                            "EEnabling private cluster requires enabling apiserver vnet integration"
+                            "(--enable-apiserver-vnet-integration)."
                         )
         return enable_private_cluster
 
@@ -3838,6 +3999,53 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
 
         return self._get_enable_private_cluster(enable_validation=True)
+
+    def _get_disable_private_cluster(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_private_cluster.
+
+        This function supports the option of enable_validation.
+        For UPDATE: if existing cluster is not using apiserver vnet integration, raise an ArgumentUsageError;
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_apiserver_vnet_integration = self.raw_param.get("enable_apiserver_vnet_integration")
+        disable_private_cluster = self.raw_param.get("disable_private_cluster")
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if disable_private_cluster:
+                    if self._get_disable_public_fqdn(enable_validation=False):
+                        raise InvalidArgumentValueError(
+                            "--disable-public-fqdn can only be used for private cluster"
+                        )
+                    if self._get_enable_public_fqdn(enable_validation=False):
+                        raise InvalidArgumentValueError(
+                            "--enable-public-fqdn can only be used for private cluster"
+                        )
+                # new validation added for apiserver vnet integration
+                is_apiserver_vnet_integration_cluster = check_is_apiserver_vnet_integration_cluster(self.mc)
+                if disable_private_cluster and not enable_apiserver_vnet_integration:
+                    if not is_apiserver_vnet_integration_cluster:
+                        raise ArgumentUsageError(
+                            "DDisabling private cluster requires enabling apiserver vnet integration"
+                            "(--enable-apiserver-vnet-integration)."
+                        )
+
+        return disable_private_cluster
+
+    def get_disable_private_cluster(self) -> bool:
+        """Obtain the value of disable_private_cluster.
+
+        This function will verify the parameter by default. When disable_private_cluster is specified,
+        For UPDATE: if enable-apiserver-vnet-integration is not used and existing cluster is not using
+        apiserver vnet integration, raise an ArgumentUsageError
+
+        :return: bool
+        """
+        return self._get_disable_private_cluster(enable_validation=True)
 
     def _get_disable_public_fqdn(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_public_fqdn.
@@ -5261,6 +5469,37 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("bootstrap_container_registry_resource_id")
 
+    def _get_enable_static_egress_gateway(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_static_egress_gateway.
+        When enabled, if both enable_static_egress_gateway and disable_static_egress_gateway are
+        specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        enable_static_egress_gateway = self.raw_param.get("enable_static_egress_gateway")
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_static_egress_gateway and self.get_disable_static_egress_gateway():
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-static-egress-gateway and "
+                    "--disable-static-egress-gateway at the same time. "
+                )
+
+        return enable_static_egress_gateway
+
+    def get_enable_static_egress_gateway(self) -> bool:
+        """Obtain the value of enable_static_egress_gateway.
+        :return: bool
+        """
+        return self._get_enable_static_egress_gateway(enable_validation=True)
+
+    def get_disable_static_egress_gateway(self) -> bool:
+        """Obtain the value of disable_static_egress_gateway.
+        :return: bool
+        """
+        # Note: No need to check for mutually exclusive parameter with enable-static-egress-gateway here
+        # because it's already checked in get_enable_static_egress_gateway
+        return self.raw_param.get("disable_static_egress_gateway")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -6151,6 +6390,22 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = True
         return mc
 
+    def set_up_custom_ca_trust_certificates(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up Custom CA Trust Certificates for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ca_certs = self.context.get_custom_ca_trust_certificates()
+        if ca_certs:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
+
+            mc.security_profile.custom_ca_trust_certificates = ca_certs
+
+        return mc
+
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up api server access profile and fqdn subdomain for the ManagedCluster object.
 
@@ -6170,6 +6425,18 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 enable_private_cluster_public_fqdn=False if disable_public_fqdn else None,
                 private_dns_zone=private_dns_zone
             )
+        if self.context.get_enable_apiserver_vnet_integration():
+            if api_server_access_profile is None:
+                api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
+            # todo(levimm): remove the additional_properties after 2025-03-01 sdk is generated
+            api_server_access_profile.additional_properties['enableVnetIntegration'] = True
+            api_server_access_profile.enable_additional_properties_sending()
+        if self.context.get_apiserver_subnet_id():
+            if api_server_access_profile is None:
+                # pylint: disable=no-member
+                api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
+            api_server_access_profile.additional_properties['subnetId'] = self.context.get_apiserver_subnet_id()
+            api_server_access_profile.enable_additional_properties_sending()
         mc.api_server_access_profile = api_server_access_profile
 
         fqdn_subdomain = self.context.get_fqdn_subdomain()
@@ -6481,6 +6748,16 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.ingress_profile.web_app_routing = (
                 self.models.ManagedClusterIngressProfileWebAppRouting(enabled=True)  # pylint: disable=no-member
             )
+
+            nginx_ingress_controller = self.context.get_app_routing_default_nginx_controller()
+
+            if nginx_ingress_controller:
+                mc.ingress_profile.web_app_routing.nginx = (
+                    self.models.ManagedClusterIngressProfileNginx(
+                        default_ingress_controller_type=nginx_ingress_controller
+                    )
+                )
+
             if "web_application_routing" in addons:
                 dns_zone_resource_ids = self.context.get_dns_zone_resource_ids()
                 mc.ingress_profile.web_app_routing.dns_zone_resource_ids = dns_zone_resource_ids
@@ -6539,6 +6816,25 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.bootstrap_profile.artifact_source = bootstrap_artifact_source
             mc.bootstrap_profile.container_registry_id = bootstrap_container_registry_resource_id
 
+        return mc
+
+    def set_up_static_egress_gateway(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_static_egress_gateway():
+            if not mc.network_profile:
+                raise UnknownError(
+                    "Unexpectedly get an empty network profile in the process of "
+                    "updating enable-static-egress-gateway config."
+                )
+            if mc.network_profile.static_egress_gateway_profile is None:
+                mc.network_profile.static_egress_gateway_profile = (
+                    self.models.ManagedClusterStaticEgressGatewayProfile()  # pylint: disable=no-member
+                )
+            # set enabled
+            mc.network_profile.static_egress_gateway_profile.enabled = True
+
+        # Default is disabled so no need to worry about that here
         return mc
 
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
@@ -6608,6 +6904,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_workload_auto_scaler_profile(mc)
         # set up app routing profile
         mc = self.set_up_ingress_web_app_routing(mc)
+        # set up custom ca trust certificates
+        mc = self.set_up_custom_ca_trust_certificates(mc)
 
         # setup k8s support plan
         mc = self.set_up_k8s_support_plan(mc)
@@ -6623,6 +6921,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_node_resource_group_profile(mc)
         # set up bootstrap profile
         mc = self.set_up_bootstrap_profile(mc)
+        # set up static egress gateway profile
+        mc = self.set_up_static_egress_gateway(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -6773,6 +7073,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     acr_name_or_id=attach_acr,
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
+                    assignee_principal_type=self.context.get_assignee_principal_type()
                 )
 
         # azure monitor metrics addon (v2)
@@ -7141,7 +7442,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         assignee, is_service_principal = self.context.get_assignee_from_identity_or_sp_profile()
         attach_acr = self.context.get_attach_acr()
         detach_acr = self.context.get_detach_acr()
-
+        assignee_principal_type = self.context.get_assignee_principal_type()
         if attach_acr:
             self.context.external_functions.ensure_aks_acr(
                 self.cmd,
@@ -7149,6 +7450,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 acr_name_or_id=attach_acr,
                 subscription_id=subscription_id,
                 is_service_principal=is_service_principal,
+                assignee_principal_type=assignee_principal_type,
             )
 
         if detach_acr:
@@ -7159,6 +7461,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 subscription_id=subscription_id,
                 detach=True,
                 is_service_principal=is_service_principal,
+                assignee_principal_type=assignee_principal_type,
             )
 
     def update_azure_service_mesh_profile(self, mc: ManagedCluster) -> ManagedCluster:
@@ -7301,6 +7604,20 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             profile_holder.enable_private_cluster_public_fqdn = True
         if private_dns_zone is not None:
             profile_holder.private_dns_zone = private_dns_zone
+        if self.context.get_enable_apiserver_vnet_integration():
+            profile_holder.additional_properties['enableVnetIntegration'] = True
+            profile_holder.enable_additional_properties_sending()
+        if self.context.get_apiserver_subnet_id():
+            profile_holder.additional_properties['subnetId'] = self.context.get_apiserver_subnet_id()
+            profile_holder.enable_additional_properties_sending()
+        if self.context.get_enable_private_cluster():
+            profile_holder.enable_private_cluster = True
+            # send additional properties when enable private cluster since enableVnetIntegration is required
+            profile_holder.enable_additional_properties_sending()
+        if self.context.get_disable_private_cluster():
+            profile_holder.enable_private_cluster = False
+            # send additional properties when enable private cluster since enableVnetIntegration is required
+            profile_holder.enable_additional_properties_sending()
 
         # keep api_server_access_profile empty if none of its properties are updated
         if (
@@ -7852,6 +8169,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         enable_app_routing = self.context.get_enable_app_routing()
         enable_keyvault_secret_provider = self.context.get_enable_kv()
         dns_zone_resource_ids = self.context.get_dns_zone_resource_ids_from_input()
+        nginx = self.context.get_nginx()
 
         # update ManagedCluster object with app routing settings
         mc.ingress_profile = (
@@ -7880,7 +8198,23 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if dns_zone_resource_ids:
             self._update_dns_zone_resource_ids(mc, dns_zone_resource_ids)
 
+        # modify default nic config
+        if nginx:
+            self._update_app_routing_nginx(mc, nginx)
+
         return mc
+
+    def _update_app_routing_nginx(self, mc: ManagedCluster, nginx) -> None:
+        """Helper function to set default nginx ingress controller config for app routing
+        :return: None
+        """
+        # web app routing object has been created
+        if mc.ingress_profile and mc.ingress_profile.web_app_routing and mc.ingress_profile.web_app_routing.enabled:
+            if mc.ingress_profile.web_app_routing.nginx is None:
+                mc.ingress_profile.web_app_routing.nginx = self.models.ManagedClusterIngressProfileNginx()
+            mc.ingress_profile.web_app_routing.nginx.default_ingress_controller_type = nginx
+        else:
+            raise CLIError('App Routing must be enabled to modify the default nginx ingress controller.\n')
 
     def update_node_resource_group_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update node resource group profile for the ManagedCluster object.
@@ -8064,6 +8398,22 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
             # set disabled
             mc.workload_auto_scaler_profile.vertical_pod_autoscaler.enabled = False
+
+        return mc
+
+    def update_custom_ca_trust_certificates(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update Custom CA Trust Certificates for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ca_certs = self.context.get_custom_ca_trust_certificates()
+        if ca_certs:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
+
+            mc.security_profile.custom_ca_trust_certificates = ca_certs
 
         return mc
 
@@ -8402,6 +8752,35 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_static_egress_gateway(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update static egress gateway addon for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_static_egress_gateway():
+            if not mc.network_profile:
+                raise UnknownError(
+                    "Unexpectedly get an empty network profile in the process of updating static-egress-gateway config."
+                )
+            if mc.network_profile.static_egress_gateway_profile is None:
+                mc.network_profile.static_egress_gateway_profile = (
+                    self.models.ManagedClusterStaticEgressGatewayProfile()  # pylint: disable=no-member
+                )
+            mc.network_profile.static_egress_gateway_profile.enabled = True
+
+        if self.context.get_disable_static_egress_gateway():
+            if not mc.network_profile:
+                raise UnknownError(
+                    "Unexpectedly get an empty network profile in the process of updating static-egress-gateway config."
+                )
+            if mc.network_profile.static_egress_gateway_profile is None:
+                mc.network_profile.static_egress_gateway_profile = (
+                    self.models.ManagedClusterStaticEgressGatewayProfile()  # pylint: disable=no-member
+                )
+            mc.network_profile.static_egress_gateway_profile.enabled = False
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -8449,6 +8828,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_oidc_issuer_profile(mc)
         # update auto upgrade profile
         mc = self.update_auto_upgrade_profile(mc)
+        # update custom ca trust certificates
+        mc = self.update_custom_ca_trust_certificates(mc)
         # update identity
         mc = self.update_identity(mc)
         # update addon profiles
@@ -8483,6 +8864,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_node_resource_group_profile(mc)
         # update bootstrap profile
         mc = self.update_bootstrap_profile(mc)
+        # update static egress gateway
+        mc = self.update_static_egress_gateway(mc)
         # update kubernetes version and orchestrator version
         mc = self.update_kubernetes_version_and_orchestrator_version(mc)
         return mc
@@ -8643,6 +9026,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     acr_name_or_id=attach_acr,
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
+                    assignee_principal_type=self.context.get_assignee_principal_type()
                 )
 
         enable_azure_container_storage = self.context.get_intermediate("enable_azure_container_storage")
