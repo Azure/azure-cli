@@ -347,7 +347,9 @@ examples:
   - name: Remove the `MaxFileOperationTimeout` setting from a cluster.
     text: >
         az sf cluster setting remove -g group-name -c cluster1 --section 'NamingService' --parameter 'MaxFileOperationTimeout'
-
+  - name: Remove the `MaxFileOperationTimeout` setting from a cluster using settings file.
+    text: >
+        az sf cluster setting remove -g group-name -c cluster1 --settings-file '@settings-section.json'
 """
 
 helps['sf cluster setting set'] = """
@@ -357,7 +359,9 @@ examples:
   - name: Set the `MaxFileOperationTimeout` setting for a cluster to 5 seconds.
     text: >
         az sf cluster setting set -g group-name -c cluster1 --section 'NamingService' --parameter 'MaxFileOperationTimeout' --value 5000
-
+  - name: Set the `MaxFileOperationTimeout` setting for a cluster to 5 seconds using settings file.
+    text: >
+        az sf cluster setting set -g group-name -c cluster1 --settings-file '@settings-section.json'
 """
 
 helps['sf cluster upgrade-type'] = """
