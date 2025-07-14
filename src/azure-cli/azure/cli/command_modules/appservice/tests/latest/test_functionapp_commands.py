@@ -515,7 +515,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
 
 class FunctionWorkloadProfile(ScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
@@ -712,7 +712,7 @@ class FunctionappDaprConfig(ScenarioTest):
 
 
 class FunctionappDapr(LiveScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location="northeurope")
     @StorageAccountPreparer()
     def test_functionapp_disable_dapr(self, resource_group, storage_account):
@@ -1051,7 +1051,7 @@ class FunctionAppFlex(LiveScenarioTest):
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment(self, resource_group, storage_account):
@@ -1827,7 +1827,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')])
+            JMESPathCheck('linuxFxVersion', 'Node|22')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
@@ -2626,7 +2626,7 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('functionapp plan delete -n {plan_name} -y')
 
 class FunctionappIdentityTest(ScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     @unittest.skip("Temp Skip")
@@ -2658,7 +2658,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group,
                                                            functionapp_name), checks=self.is_empty())
 
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_assign_user_identity(self, resource_group, storage_account):
@@ -2690,7 +2690,7 @@ class FunctionappIdentityTest(ScenarioTest):
             self.check('userAssignedIdentities', None),
         ])
 
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_remove_identity(self, resource_group, storage_account):
