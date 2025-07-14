@@ -8797,6 +8797,99 @@ class VMGalleryImage(ScenarioTest):
         #              self.check('sharingProfile.permissions', 'Community')
         #          ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_in_vm_access_', location='eastus2')
+    def test_gallery_in_vm_access_control_profile(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        rules_file = os.path.join(curr_dir, 'sig_in_vm_access_control_profile_version_rules.json').replace('\\', '\\\\')
+
+        self.kwargs.update({
+            'gallery': self.create_random_name('gellery', 16),
+            'profile1': 'profile1',
+            'profile2': 'profile2',
+            'profile_version': '1.0.0',
+            'rules_file': rules_file,
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+
+        self.cmd('sig in-vm-access-control-profile create --resource-group {rg} --gallery-name {gallery} --name {profile1} '
+                 '--os-type Linux --applicable-host-endpoint WireServer', checks=[
+            self.check('name', '{profile1}'),
+            self.check('properties.osType', 'Linux'),
+            self.check('properties.applicableHostEndpoint', 'WireServer'),
+        ])
+
+        self.cmd(
+            'sig in-vm-access-control-profile show --resource-group {rg} --gallery-name {gallery} --name {profile1}',
+            checks=[
+                self.check('name', '{profile1}'),
+                self.check('properties.osType', 'Linux'),
+                self.check('properties.applicableHostEndpoint', 'WireServer'),
+            ])
+
+        self.cmd('sig in-vm-access-control-profile update --resource-group {rg} --gallery-name {gallery} --name {profile1} '
+                 '--description test', checks=[
+            self.check('name', '{profile1}'),
+            self.check('properties.description', 'test'),
+        ])
+        
+        self.cmd('sig in-vm-access-control-profile list --resource-group {rg} --gallery-name {gallery}', checks=[
+            self.check('length(@)', '1'),
+        ])
+
+        self.cmd(
+            'sig in-vm-access-control-profile delete --resource-group {rg} --gallery-name {gallery} --name {profile1} --yes')
+
+    
+        self.cmd('sig in-vm-access-control-profile list --resource-group {rg} --gallery-name {gallery}', checks=[
+            self.check('length(@)', '0'),
+        ])
+
+        self.cmd(
+            'sig in-vm-access-control-profile create --resource-group {rg} --gallery-name {gallery} --name {profile2} '
+            '--os-type Linux --applicable-host-endpoint WireServer', checks=[
+                self.check('name', '{profile2}'),
+            ])
+
+        self.cmd('sig in-vm-access-control-profile-version create --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version} --default-access Allow --mode Audit '
+                 '--exclude-from-latest true --target-regions westus eastus2 --rules {rules_file}', checks=[
+            self.check('name', '{profile_version}'),
+            self.check('mode', 'Audit'),
+            self.check('defaultAccess', 'Allow'),
+            self.check('excludeFromLatest', True),
+            self.check('length(targetLocations)', '2'),
+            self.check('length(rules.identities)', '1'),
+            self.check('length(rules.privileges)', '1'),
+            self.check('length(rules.roleAssignments)', '1'),
+            self.check('length(rules.roles)', '1'),
+        ])
+
+        self.cmd('sig in-vm-access-control-profile-version update --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version} --exclude-from-latest true --target-regions eastus2 westus eastus', checks=[
+            self.check('name', '{profile_version}'),
+            self.check('excludeFromLatest', True),
+            self.check('length(targetLocations)', '3'),
+        ])
+
+        self.cmd('sig in-vm-access-control-profile-version show --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version}', checks=[
+            self.check('name', '{profile_version}'),
+            self.check('excludeFromLatest', True),
+            self.check('length(targetLocations)', '3'),
+        ])
+        
+        self.cmd('sig in-vm-access-control-profile-version list --resource-group {rg} --gallery-name {gallery} --profile-name {profile2}', checks=[
+            self.check('length(@)', '1'),
+        ])
+
+        self.cmd('sig in-vm-access-control-profile-version delete --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version} --yes')
+           
+        self.cmd('sig in-vm-access-control-profile-version list --resource-group {rg} --gallery-name {gallery} --profile-name {profile2}', checks=[
+            self.check('length(@)', '0'),
+        ])
+
 
 class VMGalleryApplication(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
@@ -12492,8 +12585,8 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='centraluseuap')
-    def test_capacity_reservation_list_delete(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='eastus2euap')
+    def test_capacity_reservation_operations(self, resource_group):
 
         self.kwargs.update({
             'rg': resource_group,
@@ -12521,12 +12614,32 @@ class CapacityReservationScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ])
 
+        self.cmd('capacity reservation update -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--capacity 6 --tags key2=val2',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 6),
+                     self.check('tags', {'key2': 'val2'}),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg}',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 6),
+                     self.check('zones', ['1']),
+                     self.check('tags', {'key2': 'val2'}),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
         self.cmd('capacity reservation list -c {reservation_group} -g {rg} --query "[?name==\'{reservation_name}\']" ',
                  checks=[
                      self.check('[0].name', '{reservation_name}'),
                      self.check('[0].sku.name', '{sku}'),
-                     self.check('[0].sku.capacity', 5),
-                     self.check('[0].tags', {'key': 'val'}),
+                     self.check('[0].sku.capacity', 6),
+                     self.check('[0].tags', {'key2': 'val2'}),
                      self.check('[0].zones', ['1']),
                      self.check('[0].provisioningState', 'Succeeded')
                  ])

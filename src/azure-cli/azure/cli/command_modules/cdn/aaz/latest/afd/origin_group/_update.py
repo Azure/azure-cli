@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-04-15",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/origingroups/{}", "2025-04-15"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/origingroups/{}", "2025-06-01"],
         ]
     }
 
@@ -93,6 +93,12 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.authentication = AAZObjectArg(
+            options=["--authentication"],
+            arg_group="Properties",
+            help="Authentication settings for origin in origin group.",
+            nullable=True,
+        )
         _args_schema.health_probe_settings = AAZObjectArg(
             options=["--health-probe-settings"],
             arg_group="Properties",
@@ -115,6 +121,31 @@ class Update(AAZCommand):
                 maximum=50,
                 minimum=0,
             ),
+        )
+
+        authentication = cls._args_schema.authentication
+        authentication.scope = AAZStrArg(
+            options=["scope"],
+            help="The scope used when requesting token from Microsoft Entra. For example, for Azure Blob Storage, scope could be \"https://storage.azure.com/.default\".",
+            nullable=True,
+        )
+        authentication.type = AAZStrArg(
+            options=["type"],
+            help="The type of the authentication for the origin.",
+            nullable=True,
+            enum={"SystemAssignedIdentity": "SystemAssignedIdentity", "UserAssignedIdentity": "UserAssignedIdentity"},
+        )
+        authentication.user_assigned_identity = AAZObjectArg(
+            options=["user-assigned-identity"],
+            help="The user assigned managed identity to use for the origin authentication if type is UserAssignedIdentity.",
+            nullable=True,
+        )
+
+        user_assigned_identity = cls._args_schema.authentication.user_assigned_identity
+        user_assigned_identity.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
         )
 
         health_probe_settings = cls._args_schema.health_probe_settings
@@ -228,7 +259,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-15",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -331,7 +362,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-15",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -393,10 +424,21 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("authentication", AAZObjectType, ".authentication")
                 properties.set_prop("healthProbeSettings", AAZObjectType, ".health_probe_settings")
                 properties.set_prop("loadBalancingSettings", AAZObjectType)
                 properties.set_prop("sessionAffinityState", AAZStrType, ".session_affinity_state")
                 properties.set_prop("trafficRestorationTimeToHealedOrNewEndpointsInMinutes", AAZIntType, ".traffic_restoration_time_to_healed_or_new_endpoints_in_minutes")
+
+            authentication = _builder.get(".properties.authentication")
+            if authentication is not None:
+                authentication.set_prop("scope", AAZStrType, ".scope")
+                authentication.set_prop("type", AAZStrType, ".type")
+                authentication.set_prop("userAssignedIdentity", AAZObjectType, ".user_assigned_identity")
+
+            user_assigned_identity = _builder.get(".properties.authentication.userAssignedIdentity")
+            if user_assigned_identity is not None:
+                user_assigned_identity.set_prop("id", AAZStrType, ".id")
 
             health_probe_settings = _builder.get(".properties.healthProbeSettings")
             if health_probe_settings is not None:
@@ -458,6 +500,7 @@ class _UpdateHelper:
         )
 
         properties = _schema_afd_origin_group_read.properties
+        properties.authentication = AAZObjectType()
         properties.deployment_status = AAZStrType(
             serialized_name="deploymentStatus",
             flags={"read_only": True},
@@ -482,6 +525,16 @@ class _UpdateHelper:
         properties.traffic_restoration_time_to_healed_or_new_endpoints_in_minutes = AAZIntType(
             serialized_name="trafficRestorationTimeToHealedOrNewEndpointsInMinutes",
         )
+
+        authentication = _schema_afd_origin_group_read.properties.authentication
+        authentication.scope = AAZStrType()
+        authentication.type = AAZStrType()
+        authentication.user_assigned_identity = AAZObjectType(
+            serialized_name="userAssignedIdentity",
+        )
+
+        user_assigned_identity = _schema_afd_origin_group_read.properties.authentication.user_assigned_identity
+        user_assigned_identity.id = AAZStrType()
 
         health_probe_settings = _schema_afd_origin_group_read.properties.health_probe_settings
         health_probe_settings.probe_interval_in_seconds = AAZIntType(
