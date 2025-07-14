@@ -32,7 +32,7 @@ from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, mysql_accelerated_logs_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server, mysql_import_single_server_ready_validator, \
-    mysql_import_version_validator, mysql_import_storage_validator, validate_and_format_maintenance_start_time, storage_redundancy_validator
+    mysql_import_version_validator, mysql_import_storage_validator, validate_and_format_maintenance_start_time
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
@@ -377,7 +377,6 @@ def flexible_server_create(cmd, client,
                               backup_byok_key=backup_byok_key,
                               auto_io_scaling=auto_scale_iops,
                               accelerated_logs=accelerated_logs,
-                              storage_redundancy=storage_redundancy,
                               iops=iops)
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
@@ -405,8 +404,6 @@ def flexible_server_create(cmd, client,
                            sku_name=sku_name)
 
     accelerated_logs = _determine_acceleratedLogs(accelerated_logs, tier)
-
-    storage_redundancy = _determine_storage_redundancy(storage_redundancy, tier)
 
     storage = models.Storage(storage_size_gb=storage_gb,
                              iops=iops,
@@ -769,8 +766,6 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 
         if not storage_redundancy:
             storage_redundancy = source_server_object.storage.storage_redundancy
-        else:
-            storage_redundancy_validator(storage_redundancy, tier)
 
         if not backup_retention:
             backup_retention = source_server_object.backup.backup_retention_days
@@ -908,8 +903,6 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
         if not storage_redundancy:
             storage_redundancy = source_server_object.storage.storage_redundancy
-        else:
-            storage_redundancy_validator(storage_redundancy, tier)
 
         if not backup_retention:
             backup_retention = source_server_object.backup.backup_retention_days
@@ -1380,11 +1373,6 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     else:
         auto_io_scaling = _determine_auto_io_scaling_by_faster_provisioning(faster_provisioning)
 
-    if not storage_redundancy:
-        storage_redundancy = source_server_object.storage.storage_redundancy
-    else:
-        storage_redundancy_validator(storage_redundancy, tier)
-
     identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
     storage = models.Storage(storage_size_gb=storage_gb,
@@ -1693,11 +1681,6 @@ def _determine_acceleratedLogs(accelerated_logs, tier):
     if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
         accelerated_logs = "Disabled"
     return accelerated_logs
-
-
-def _determine_storage_redundancy(storage_redundancy, tier):
-    storage_redundancy = "LocalRedundancy"
-    return storage_redundancy
 
 
 def get_free_iops(storage_in_mb, iops_info, tier, sku_name):
