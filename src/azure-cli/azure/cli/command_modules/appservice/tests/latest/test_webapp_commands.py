@@ -428,10 +428,11 @@ class BackupRestoreTest(ScenarioTest):
 
         # Delete webapp slot backup
         self.cmd('webapp config backup delete -g {} --webapp-name {} --backup-id {} --slot {} --yes'.format(resource_group, webapp, webapp_slot_backup_id, slot_name))
+        time.sleep(30)
 
         # Verify webapp slot backups count
         self.cmd(f"webapp config backup list -g {resource_group} --webapp-name {webapp} -s {slot_name}", checks=[
-            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('length(@)', 0),
         ])
 
     @AllowLargeResponse()
