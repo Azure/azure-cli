@@ -28,7 +28,7 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
-    with self.argument_context('eventhubs namespace', min_api='2021-06-01-preview') as c:
+    with self.argument_context('eventhubs namespace' ) as c:
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.eventhubs/namespaces'), help='Name of Namespace')
         c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
@@ -58,7 +58,7 @@ def load_arguments_eh(self, _):
         c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
         c.argument('max_replication_lag_duration_in_seconds', type=int, options_list=['--max-replication-lag-duration-in-seconds', '--max-lag'], help='The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas')
 
-    with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
+    with self.argument_context('eventhubs namespace create') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='Cluster ARM ID of the Namespace')
 
 # region - Eventhub Create
