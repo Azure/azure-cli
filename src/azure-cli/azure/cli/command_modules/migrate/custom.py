@@ -868,7 +868,6 @@ def connect_azure_account(cmd, subscription_id=None, tenant_id=None, device_code
         if ($context) {
             Write-Host ""
             Write-Host "✅ Successfully connected to Azure!" -ForegroundColor Green
-            Write-Host "=" * 50 -ForegroundColor Gray
             Write-Host ""
             Write-Host "🔐 Account Details:" -ForegroundColor Yellow
             Write-Host "   Account ID: $($context.Context.Account.Id)" -ForegroundColor White
@@ -1353,3 +1352,422 @@ def get_azure_context(cmd):
         }
     except Exception as e:
         raise CLIError(f'Failed to get Azure context: {str(e)}')
+
+
+# Azure Storage Commands for Migration - Cross-Platform
+def get_storage_account(cmd, resource_group_name, storage_account_name, subscription_id=None):
+    """
+    Azure CLI equivalent to Get-AzStorageAccount PowerShell cmdlet.
+    Cross-platform command equivalent to:
+    $CustomStorageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    storage_script = f"""
+    # Azure CLI equivalent functionality for Get-AzStorageAccount
+    $ResourceGroupName = '{resource_group_name}'
+    $StorageAccountName = '{storage_account_name}'
+    
+    try {{
+        Write-Host ""
+        Write-Host "💾 Retrieving Azure Storage Account..." -ForegroundColor Cyan
+        Write-Host "Storage Account: $StorageAccountName" -ForegroundColor Yellow
+        Write-Host "Resource Group: $ResourceGroupName" -ForegroundColor Yellow
+        Write-Host ""
+        
+        # Execute the real PowerShell cmdlet - equivalent to your provided command
+        $CustomStorageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
+        
+        if ($CustomStorageAccount) {{
+            Write-Host "✅ Successfully retrieved storage account!" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "📊 Storage Account Details:" -ForegroundColor Yellow
+            Write-Host "  Name: $($CustomStorageAccount.StorageAccountName)" -ForegroundColor White
+            Write-Host "  Resource Group: $($CustomStorageAccount.ResourceGroupName)" -ForegroundColor White
+            Write-Host "  Location: $($CustomStorageAccount.Location)" -ForegroundColor White
+            Write-Host "  SKU: $($CustomStorageAccount.Sku.Name)" -ForegroundColor White
+            Write-Host "  Kind: $($CustomStorageAccount.Kind)" -ForegroundColor White
+            Write-Host "  Access Tier: $($CustomStorageAccount.AccessTier)" -ForegroundColor White
+            Write-Host "  Status: $($CustomStorageAccount.StatusOfPrimary)" -ForegroundColor White
+            Write-Host ""
+            
+            # Display endpoints
+            if ($CustomStorageAccount.PrimaryEndpoints) {{
+                Write-Host "🔗 Primary Endpoints:" -ForegroundColor Yellow
+                if ($CustomStorageAccount.PrimaryEndpoints.Blob) {{
+                    Write-Host "  Blob: $($CustomStorageAccount.PrimaryEndpoints.Blob)" -ForegroundColor White
+                }}
+                if ($CustomStorageAccount.PrimaryEndpoints.File) {{
+                    Write-Host "  File: $($CustomStorageAccount.PrimaryEndpoints.File)" -ForegroundColor White
+                }}
+                if ($CustomStorageAccount.PrimaryEndpoints.Queue) {{
+                    Write-Host "  Queue: $($CustomStorageAccount.PrimaryEndpoints.Queue)" -ForegroundColor White
+                }}
+                if ($CustomStorageAccount.PrimaryEndpoints.Table) {{
+                    Write-Host "  Table: $($CustomStorageAccount.PrimaryEndpoints.Table)" -ForegroundColor White
+                }}
+                Write-Host ""
+            }}
+            
+            # Return JSON for programmatic use
+            $result = @{{
+                'StorageAccount' = $CustomStorageAccount
+                'StorageAccountName' = $CustomStorageAccount.StorageAccountName
+                'ResourceGroupName' = $CustomStorageAccount.ResourceGroupName
+                'Location' = $CustomStorageAccount.Location
+                'Sku' = $CustomStorageAccount.Sku.Name
+                'Kind' = $CustomStorageAccount.Kind
+                'AccessTier' = $CustomStorageAccount.AccessTier
+                'CreationTime' = $CustomStorageAccount.CreationTime
+                'PrimaryLocation' = $CustomStorageAccount.PrimaryLocation
+                'SecondaryLocation' = $CustomStorageAccount.SecondaryLocation
+                'PrimaryEndpoints' = @{{
+                    'Blob' = $CustomStorageAccount.PrimaryEndpoints.Blob
+                    'File' = $CustomStorageAccount.PrimaryEndpoints.File
+                    'Queue' = $CustomStorageAccount.PrimaryEndpoints.Queue
+                    'Table' = $CustomStorageAccount.PrimaryEndpoints.Table
+                }}
+                'Message' = 'Storage account retrieved successfully'
+            }}
+            $result | ConvertTo-Json -Depth 5
+            
+        }} else {{
+            Write-Host "❌ Storage account not found" -ForegroundColor Red
+            Write-Host "Storage Account: $StorageAccountName" -ForegroundColor White
+            Write-Host "Resource Group: $ResourceGroupName" -ForegroundColor White
+            Write-Host ""
+            
+            @{{
+                'StorageAccount' = $null
+                'Found' = $false
+                'StorageAccountName' = $StorageAccountName
+                'ResourceGroupName' = $ResourceGroupName
+                'Message' = 'Storage account not found'
+            }} | ConvertTo-Json
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to get storage account: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "1. Check authentication: az migrate auth check" -ForegroundColor White
+        Write-Host "2. Verify storage account name and resource group" -ForegroundColor White
+        Write-Host "3. Check permissions on the storage account" -ForegroundColor White
+        Write-Host "4. List all storage accounts: az migrate storage list-accounts" -ForegroundColor White
+        Write-Host ""
+        
+        @{{
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'StorageAccountName' = $StorageAccountName
+            'ResourceGroupName' = $ResourceGroupName
+            'Message' = 'Failed to get storage account'
+        }} | ConvertTo-Json
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(storage_script, subscription_id=subscription_id)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': f'Get-AzStorageAccount -ResourceGroupName {resource_group_name} -Name {storage_account_name}',
+            'parameters': {
+                'StorageAccountName': storage_account_name,
+                'ResourceGroupName': resource_group_name
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to get storage account: {str(e)}')
+
+
+def list_storage_accounts(cmd, resource_group_name=None, subscription_id=None):
+    """
+    Azure CLI equivalent to Get-AzStorageAccount PowerShell cmdlet (list all accounts).
+    Cross-platform command to list Azure Storage Accounts in a resource group or subscription.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    # Build command based on whether resource group is specified
+    if resource_group_name:
+        command_text = f"Get-AzStorageAccount -ResourceGroupName {resource_group_name}"
+        scope_text = f"Resource Group: {resource_group_name}"
+    else:
+        command_text = "Get-AzStorageAccount"
+        scope_text = "All Resource Groups in Subscription"
+    
+    storage_script = f"""
+    # Azure CLI equivalent functionality for Get-AzStorageAccount (list)
+    try {{
+        Write-Host ""
+        Write-Host "💾 Listing Azure Storage Accounts..." -ForegroundColor Cyan
+        Write-Host "Scope: {scope_text}" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "Executing: {command_text}" -ForegroundColor Gray
+        Write-Host ""
+        
+        # Execute the real PowerShell cmdlet
+        """
+    
+    if resource_group_name:
+        storage_script += f"""
+        $StorageAccounts = Get-AzStorageAccount -ResourceGroupName '{resource_group_name}'
+        """
+    else:
+        storage_script += """
+        $StorageAccounts = Get-AzStorageAccount
+        """
+    
+    storage_script += """
+        
+        if ($StorageAccounts) {
+            Write-Host "✅ Found $($StorageAccounts.Count) storage account(s)" -ForegroundColor Green
+            Write-Host ""
+            
+            # Display storage accounts in table format
+            Write-Host "📊 Storage Accounts:" -ForegroundColor Yellow
+            $StorageAccounts | Format-Table -Property StorageAccountName, ResourceGroupName, Location, @{Name='SKU';Expression={$_.Sku.Name}}, Kind -AutoSize
+            
+            Write-Host ""
+            Write-Host "📈 Total: $($StorageAccounts.Count) storage account(s)" -ForegroundColor Cyan
+            Write-Host ""
+            
+            # Return JSON for programmatic use
+            $result = @{
+                'StorageAccounts' = $StorageAccounts
+                'Count' = $StorageAccounts.Count
+                'ResourceGroupName' = if ('""" + str(resource_group_name or "").replace("'", "''") + """') { '""" + str(resource_group_name or "").replace("'", "''") + """' } else { 'All' }
+                'Message' = 'Storage accounts listed successfully'
+            }
+            $result | ConvertTo-Json -Depth 5
+            
+        } else {
+            Write-Host "ℹ️  No storage accounts found" -ForegroundColor Yellow
+            Write-Host "Scope: """ + scope_text + """" -ForegroundColor White
+            Write-Host ""
+            
+            @{
+                'StorageAccounts' = @()
+                'Count' = 0
+                'ResourceGroupName' = '""" + str(resource_group_name or "All").replace("'", "''") + """'
+                'Message' = 'No storage accounts found'
+            } | ConvertTo-Json
+        }
+        
+    } catch {
+        Write-Host ""
+        Write-Host "❌ Failed to list storage accounts: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "1. Check authentication: az migrate auth check" -ForegroundColor White
+        Write-Host "2. Verify resource group name (if specified)" -ForegroundColor White
+        Write-Host "3. Check permissions on the subscription/resource group" -ForegroundColor White
+        Write-Host "4. Ensure Az.Storage module is available" -ForegroundColor White
+        Write-Host ""
+        
+        @{
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'ResourceGroupName' = '""" + str(resource_group_name or "All").replace("'", "''") + """'
+            'Message' = 'Failed to list storage accounts'
+        } | ConvertTo-Json
+        throw
+    }
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(storage_script, subscription_id=subscription_id)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': command_text,
+            'parameters': {
+                'ResourceGroupName': resource_group_name or 'All',
+                'Scope': scope_text
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to list storage accounts: {str(e)}')
+
+
+def show_storage_account_details(cmd, resource_group_name, storage_account_name, subscription_id=None, show_keys=False):
+    """
+    Azure CLI equivalent to Get-AzStorageAccount with detailed information.
+    Cross-platform command to show comprehensive storage account details.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    storage_script = f"""
+    # Azure CLI equivalent functionality for detailed storage account information
+    $ResourceGroupName = '{resource_group_name}'
+    $StorageAccountName = '{storage_account_name}'
+    
+    try {{
+        Write-Host ""
+        Write-Host "💾 Storage Account Detailed Information" -ForegroundColor Cyan
+        Write-Host "======================================" -ForegroundColor Gray
+        Write-Host "Storage Account: $StorageAccountName" -ForegroundColor Yellow
+        Write-Host "Resource Group: $ResourceGroupName" -ForegroundColor Yellow
+        Write-Host ""
+        
+        # Get storage account details
+        $StorageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
+        
+        if ($StorageAccount) {{
+            Write-Host "✅ Storage Account Found!" -ForegroundColor Green
+            Write-Host ""
+            
+            # Basic Information
+            Write-Host "📋 Basic Information:" -ForegroundColor Yellow
+            Write-Host "  Name: $($StorageAccount.StorageAccountName)" -ForegroundColor White
+            Write-Host "  Resource Group: $($StorageAccount.ResourceGroupName)" -ForegroundColor White
+            Write-Host "  Subscription: $($StorageAccount.Id.Split('/')[2])" -ForegroundColor White
+            Write-Host "  Location: $($StorageAccount.Location)" -ForegroundColor White
+            Write-Host "  SKU: $($StorageAccount.Sku.Name)" -ForegroundColor White
+            Write-Host "  Tier: $($StorageAccount.Sku.Tier)" -ForegroundColor White
+            Write-Host "  Kind: $($StorageAccount.Kind)" -ForegroundColor White
+            Write-Host "  Access Tier: $($StorageAccount.AccessTier)" -ForegroundColor White
+            Write-Host "  Creation Time: $($StorageAccount.CreationTime)" -ForegroundColor White
+            Write-Host "  Status: $($StorageAccount.StatusOfPrimary)" -ForegroundColor White
+            Write-Host ""
+            
+            # Network Information
+            Write-Host "🌐 Network Configuration:" -ForegroundColor Yellow
+            Write-Host "  Primary Location: $($StorageAccount.PrimaryLocation)" -ForegroundColor White
+            if ($StorageAccount.SecondaryLocation) {{
+                Write-Host "  Secondary Location: $($StorageAccount.SecondaryLocation)" -ForegroundColor White
+            }}
+            Write-Host "  HTTPS Traffic Only: $($StorageAccount.EnableHttpsTrafficOnly)" -ForegroundColor White
+            if ($StorageAccount.NetworkRuleSet) {{
+                Write-Host "  Default Action: $($StorageAccount.NetworkRuleSet.DefaultAction)" -ForegroundColor White
+            }}
+            Write-Host ""
+            
+            # Service Endpoints
+            Write-Host "🔗 Service Endpoints:" -ForegroundColor Yellow
+            if ($StorageAccount.PrimaryEndpoints) {{
+                if ($StorageAccount.PrimaryEndpoints.Blob) {{
+                    Write-Host "  Blob (Primary): $($StorageAccount.PrimaryEndpoints.Blob)" -ForegroundColor White
+                }}
+                if ($StorageAccount.PrimaryEndpoints.File) {{
+                    Write-Host "  File (Primary): $($StorageAccount.PrimaryEndpoints.File)" -ForegroundColor White
+                }}
+                if ($StorageAccount.PrimaryEndpoints.Queue) {{
+                    Write-Host "  Queue (Primary): $($StorageAccount.PrimaryEndpoints.Queue)" -ForegroundColor White
+                }}
+                if ($StorageAccount.PrimaryEndpoints.Table) {{
+                    Write-Host "  Table (Primary): $($StorageAccount.PrimaryEndpoints.Table)" -ForegroundColor White
+                }}
+                if ($StorageAccount.PrimaryEndpoints.Dfs) {{
+                    Write-Host "  Data Lake (Primary): $($StorageAccount.PrimaryEndpoints.Dfs)" -ForegroundColor White
+                }}
+            }}
+            
+            if ($StorageAccount.SecondaryEndpoints) {{
+                if ($StorageAccount.SecondaryEndpoints.Blob) {{
+                    Write-Host "  Blob (Secondary): $($StorageAccount.SecondaryEndpoints.Blob)" -ForegroundColor White
+                }}
+                if ($StorageAccount.SecondaryEndpoints.File) {{
+                    Write-Host "  File (Secondary): $($StorageAccount.SecondaryEndpoints.File)" -ForegroundColor White
+                }}
+                if ($StorageAccount.SecondaryEndpoints.Queue) {{
+                    Write-Host "  Queue (Secondary): $($StorageAccount.SecondaryEndpoints.Queue)" -ForegroundColor White
+                }}
+                if ($StorageAccount.SecondaryEndpoints.Table) {{
+                    Write-Host "  Table (Secondary): $($StorageAccount.SecondaryEndpoints.Table)" -ForegroundColor White
+                }}
+            }}
+            Write-Host ""
+            
+            # Security Features
+            Write-Host "🔒 Security Features:" -ForegroundColor Yellow
+            Write-Host "  Encryption: $($StorageAccount.Encryption.Services)" -ForegroundColor White
+            Write-Host "  Allow Blob Public Access: $($StorageAccount.AllowBlobPublicAccess)" -ForegroundColor White
+            Write-Host "  Minimum TLS Version: $($StorageAccount.MinimumTlsVersion)" -ForegroundColor White
+            Write-Host ""
+            
+            # Tags
+            if ($StorageAccount.Tags -and $StorageAccount.Tags.Count -gt 0) {{
+                Write-Host "🏷️  Tags:" -ForegroundColor Yellow
+                $StorageAccount.Tags.GetEnumerator() | ForEach-Object {{
+                    Write-Host "  $($_.Key): $($_.Value)" -ForegroundColor White
+                }}
+                Write-Host ""
+            }}
+            """
+    
+    if show_keys:
+        storage_script += """
+            # Get storage account keys if requested
+            try {
+                Write-Host "🔑 Storage Account Keys:" -ForegroundColor Yellow
+                $Keys = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
+                if ($Keys) {
+                    for ($i = 0; $i -lt $Keys.Count; $i++) {
+                        Write-Host "  Key $($i + 1): $($Keys[$i].Value)" -ForegroundColor White
+                    }
+                }
+                Write-Host ""
+            } catch {
+                Write-Host "  ⚠️  Could not retrieve storage keys (insufficient permissions)" -ForegroundColor Yellow
+                Write-Host ""
+            }
+            """
+    
+    storage_script += """
+            # Complete details output
+            Write-Host "📄 Complete Details:" -ForegroundColor Yellow
+            $StorageAccount | Format-List
+            
+        } else {
+            Write-Host "❌ Storage account not found" -ForegroundColor Red
+            Write-Host ""
+        }
+        
+    } catch {
+        Write-Host ""
+        Write-Host "❌ Failed to get storage account details: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "1. Check authentication: az migrate auth check" -ForegroundColor White
+        Write-Host "2. Verify storage account name and resource group" -ForegroundColor White
+        Write-Host "3. Check permissions on the storage account" -ForegroundColor White
+        Write-Host ""
+        throw
+    }
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(storage_script, subscription_id=subscription_id)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': f'Get-AzStorageAccount -ResourceGroupName {resource_group_name} -Name {storage_account_name} (detailed)',
+            'parameters': {
+                'StorageAccountName': storage_account_name,
+                'ResourceGroupName': resource_group_name,
+                'ShowKeys': show_keys
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to get storage account details: {str(e)}')

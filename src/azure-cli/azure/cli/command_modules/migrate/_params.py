@@ -163,3 +163,19 @@ def load_arguments(self, _):
         c.argument('source_appliance_name', help='Name of the source Azure Migrate appliance.', required=True)
         c.argument('target_appliance_name', help='Name of the target Azure Migrate appliance.', required=True)
         c.argument('subscription_id', help='Azure subscription ID.')
+
+    # Azure Storage commands
+    with self.argument_context('migrate storage get-account') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the storage account.', required=True)
+        c.argument('storage_account_name', help='Name of the Azure Storage account.', required=True)
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate storage list-accounts') as c:
+        c.argument('resource_group_name', help='Name of the resource group to list storage accounts from. If not specified, lists from entire subscription.')
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate storage show-account-details') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the storage account.', required=True)
+        c.argument('storage_account_name', help='Name of the Azure Storage account.', required=True)
+        c.argument('subscription_id', help='Azure subscription ID.')
+        c.argument('show_keys', action='store_true', help='Include storage account access keys in the output (requires appropriate permissions).')

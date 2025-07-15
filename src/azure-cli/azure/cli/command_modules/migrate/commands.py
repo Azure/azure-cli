@@ -33,3 +33,9 @@ def load_command_table(self, _):
         g.custom_command('set-context', 'set_azure_context')
         g.custom_command('show-context', 'get_azure_context')
 
+    # Azure CLI equivalents to PowerShell Az.Storage commands
+    with self.command_group('migrate storage') as g:
+        g.custom_command('get-account', 'get_storage_account')
+        g.custom_command('list-accounts', 'list_storage_accounts')
+        g.custom_command('show-account-details', 'show_storage_account_details')
+

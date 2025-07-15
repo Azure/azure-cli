@@ -485,3 +485,128 @@ helps['migrate infrastructure initialize'] = """
         - name: Common use case - VMware to Azure setup
           text: az migrate infrastructure initialize --resource-group production-rg --project-name migrate-prod --source-appliance-name "VMware-Appliance-01" --target-appliance-name "Azure-Target-01"
 """
+
+helps['migrate storage'] = """
+    type: group
+    short-summary: Azure CLI commands for managing Azure Storage accounts (equivalent to PowerShell Az.Storage cmdlets).
+    long-summary: |
+        Cross-platform commands to manage Azure Storage accounts using PowerShell automation.
+        These commands provide Azure CLI equivalents to PowerShell Get-AzStorageAccount cmdlets.
+        
+        All commands work on Windows, Linux, and macOS when PowerShell Core is installed.
+        
+        Common PowerShell equivalent:
+        $CustomStorageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
+"""
+
+helps['migrate storage get-account'] = """
+    type: command
+    short-summary: Get Azure Storage account details (equivalent to Get-AzStorageAccount).
+    long-summary: |
+        Azure CLI equivalent to the PowerShell Get-AzStorageAccount cmdlet.
+        This command retrieves detailed information about a specific Azure Storage account.
+        
+        PowerShell equivalent:
+        $CustomStorageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
+        
+        The command provides:
+        - Basic storage account information (name, location, SKU, kind)
+        - Service endpoints (Blob, File, Queue, Table, Data Lake)
+        - Security configuration
+        - Access tier and performance settings
+        - Creation time and status
+        
+        Cross-platform compatibility: Works on Windows, Linux, and macOS with PowerShell Core.
+    examples:
+        - name: Get storage account details
+          text: az migrate storage get-account --resource-group myRG --storage-account-name mystorageaccount
+        - name: Get storage account in specific subscription
+          text: az migrate storage get-account --resource-group myRG --storage-account-name mystorageaccount --subscription-id "00000000-0000-0000-0000-000000000000"
+        - name: PowerShell command equivalent
+          text: |
+            # PowerShell command:
+            # $CustomStorageAccount = Get-AzStorageAccount -ResourceGroupName "myRG" -Name "mystorageaccount"
+            
+            # Azure CLI equivalent:
+            az migrate storage get-account --resource-group myRG --storage-account-name mystorageaccount
+        - name: Common migration scenario - verify storage account for migration data
+          text: az migrate storage get-account --resource-group migration-rg --storage-account-name migrationstorageacct
+"""
+
+helps['migrate storage list-accounts'] = """
+    type: command
+    short-summary: List Azure Storage accounts in resource group or subscription (equivalent to Get-AzStorageAccount).
+    long-summary: |
+        Azure CLI equivalent to the PowerShell Get-AzStorageAccount cmdlet without specific account name.
+        This command lists all Azure Storage accounts in a resource group or entire subscription.
+        
+        PowerShell equivalents:
+        - Get-AzStorageAccount (all accounts in subscription)
+        - Get-AzStorageAccount -ResourceGroupName $ResourceGroupName (accounts in specific resource group)
+        
+        The command provides:
+        - Table format display of storage accounts
+        - Account names, resource groups, locations, SKUs, and kinds
+        - Total count of accounts found
+        - JSON output for programmatic use
+        
+        Cross-platform compatibility: Works on Windows, Linux, and macOS with PowerShell Core.
+    examples:
+        - name: List all storage accounts in subscription
+          text: az migrate storage list-accounts
+        - name: List storage accounts in specific resource group
+          text: az migrate storage list-accounts --resource-group myRG
+        - name: List storage accounts in specific subscription
+          text: az migrate storage list-accounts --subscription-id "00000000-0000-0000-0000-000000000000"
+        - name: List storage accounts in resource group with subscription
+          text: az migrate storage list-accounts --resource-group myRG --subscription-id "00000000-0000-0000-0000-000000000000"
+        - name: PowerShell command equivalents
+          text: |
+            # PowerShell commands:
+            # Get-AzStorageAccount (all accounts)
+            # Get-AzStorageAccount -ResourceGroupName "myRG" (specific resource group)
+            
+            # Azure CLI equivalents:
+            az migrate storage list-accounts
+            az migrate storage list-accounts --resource-group myRG
+"""
+
+helps['migrate storage show-account-details'] = """
+    type: command
+    short-summary: Show comprehensive Azure Storage account details with optional access keys.
+    long-summary: |
+        Azure CLI equivalent to Get-AzStorageAccount with detailed formatting and optional key retrieval.
+        This command provides comprehensive information about an Azure Storage account including
+        security settings, network configuration, and optionally access keys.
+        
+        PowerShell equivalents:
+        - Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
+        - Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName (for keys)
+        
+        The command provides:
+        - Complete storage account configuration
+        - Network and security settings
+        - Service endpoints and locations
+        - Tags and metadata
+        - Access keys (if --show-keys is specified and user has permissions)
+        - Full PowerShell object details
+        
+        Cross-platform compatibility: Works on Windows, Linux, and macOS with PowerShell Core.
+    examples:
+        - name: Show detailed storage account information
+          text: az migrate storage show-account-details --resource-group myRG --storage-account-name mystorageaccount
+        - name: Show storage account details including access keys
+          text: az migrate storage show-account-details --resource-group myRG --storage-account-name mystorageaccount --show-keys
+        - name: Show details for storage account in specific subscription
+          text: az migrate storage show-account-details --resource-group myRG --storage-account-name mystorageaccount --subscription-id "00000000-0000-0000-0000-000000000000"
+        - name: Migration scenario - verify storage configuration and get keys
+          text: az migrate storage show-account-details --resource-group migration-rg --storage-account-name migrationdata --show-keys
+        - name: PowerShell command equivalent
+          text: |
+            # PowerShell commands:
+            # Get-AzStorageAccount -ResourceGroupName "myRG" -Name "mystorageaccount"
+            # Get-AzStorageAccountKey -ResourceGroupName "myRG" -Name "mystorageaccount"
+            
+            # Azure CLI equivalent:
+            az migrate storage show-account-details --resource-group myRG --storage-account-name mystorageaccount --show-keys
+"""
