@@ -99,7 +99,7 @@ def load_arguments(self, _):
                   help='Comma-separated list of fields to display (e.g., DisplayName,Name,Type).')
 
     with self.argument_context('migrate server list-discovered-table') as c:
-        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('subscription_id', help='Azure subscription ID.')
         c.argument('source_machine_type', 
@@ -235,7 +235,7 @@ def load_arguments(self, _):
         c.argument('physical_sector_size', type=int, help='Physical sector size in bytes. Default is 512.')
 
     with self.argument_context('migrate local create-replication') as c:
-        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('server_index', type=int, help='Index of the discovered server to replicate (0-based).', required=True)
         c.argument('target_vm_name', help='Name for the target VM in Azure Stack HCI.', required=True)
@@ -267,7 +267,7 @@ def load_arguments(self, _):
         c.argument('subscription_id', help='Azure subscription ID.')
 
     with self.argument_context('migrate local init-infrastructure') as c:
-        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('source_appliance_name', help='Name of the source appliance.', required=True)
         c.argument('target_appliance_name', help='Name of the target appliance.', required=True)
