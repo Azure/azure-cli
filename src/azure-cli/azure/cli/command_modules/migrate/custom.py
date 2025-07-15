@@ -1991,8 +1991,8 @@ def create_local_server_replication(cmd, resource_group_name, project_name, serv
         Write-Host "🔧 Creating disk mapping object..." -ForegroundColor Cyan
         $DiskMappings = New-AzMigrateLocalDiskMappingObject `
             -DiskID $OSDiskID `
-            -IsOSDisk 'true' `
-            -IsDynamic '{str(is_dynamic).lower()}' `
+            -IsOSDisk $true `
+            -IsDynamic ${'$true' if is_dynamic else '$false'} `
             -Size {disk_size_gb} `
             -Format '{disk_format}' `
             -PhysicalSectorSize {physical_sector_size}
@@ -2190,8 +2190,8 @@ def create_local_server_replication_advanced(cmd, resource_group_name, project_n
                 
                 $diskMapping = New-AzMigrateLocalDiskMappingObject `
                     -DiskID $OSDiskID `
-                    -IsOSDisk 'true' `
-                    -IsDynamic 'false' `
+                    -IsOSDisk $true `
+                    -IsDynamic $false `
                     -Size 64 `
                     -Format 'VHD' `
                     -PhysicalSectorSize 512
@@ -2294,25 +2294,91 @@ def get_local_replication_job(cmd, job_id=None, input_object=None, subscription_
         Write-Host "=" * 50 -ForegroundColor Gray
         Write-Host ""
         
+        # First, let's check what parameters are available for Get-AzMigrateLocalJob
+        Write-Host "📋 Checking cmdlet parameters..." -ForegroundColor Yellow
+        $cmdletInfo = Get-Command Get-AzMigrateLocalJob -ErrorAction SilentlyContinue
+        if ($cmdletInfo) {{
+            Write-Host "Available parameters:" -ForegroundColor Cyan
+            $cmdletInfo.Parameters.Keys | ForEach-Object {{ Write-Host "   - $_" -ForegroundColor White }}
+            Write-Host ""
+        }}
+        
         {param_script}
         
-        # Get the job details
-        $Job = Get-AzMigrateLocalJob {job_param}
+        # Try different approaches to get the job
+        $Job = $null
+        
+        if ("{job_id}" -ne "None" -and "{job_id}" -ne "") {{
+            Write-Host "🔍 Trying to get job with ID: {job_id}" -ForegroundColor Cyan
+            
+            # Method 1: Try with -Id parameter
+            try {{
+                $Job = Get-AzMigrateLocalJob -Id "{job_id}" -ErrorAction SilentlyContinue
+                Write-Host "✅ Found job using -Id parameter" -ForegroundColor Green
+            }} catch {{
+                Write-Host "⚠️ -Id parameter failed: $($_.Exception.Message)" -ForegroundColor Yellow
+            }}
+            
+            # Method 2: Try with -Name parameter if -Id failed
+            if (-not $Job) {{
+                try {{
+                    $Job = Get-AzMigrateLocalJob -Name "{job_id}" -ErrorAction SilentlyContinue
+                    Write-Host "✅ Found job using -Name parameter" -ForegroundColor Green
+                }} catch {{
+                    Write-Host "⚠️ -Name parameter failed: $($_.Exception.Message)" -ForegroundColor Yellow
+                }}
+            }}
+            
+            # Method 3: Try listing all jobs and filtering if previous methods failed
+            if (-not $Job) {{
+                try {{
+                    Write-Host "🔍 Getting all jobs and filtering..." -ForegroundColor Cyan
+                    $AllJobs = Get-AzMigrateLocalJob -ErrorAction SilentlyContinue
+                    $Job = $AllJobs | Where-Object {{ $_.Id -like "*{job_id}*" -or $_.Name -like "*{job_id}*" }}
+                    
+                    if ($Job) {{
+                        Write-Host "✅ Found job by filtering all jobs" -ForegroundColor Green
+                    }} else {{
+                        Write-Host "⚠️ No job found with ID containing: {job_id}" -ForegroundColor Yellow
+                        Write-Host "Available jobs:" -ForegroundColor Cyan
+                        $AllJobs | ForEach-Object {{ Write-Host "   - $($_.Id) ($($_.Name))" -ForegroundColor White }}
+                    }}
+                }} catch {{
+                    Write-Host "⚠️ Failed to list all jobs: $($_.Exception.Message)" -ForegroundColor Yellow
+                }}
+            }}
+        }} else {{
+            # Get all jobs if no specific job ID provided
+            Write-Host "🔍 Getting all local replication jobs..." -ForegroundColor Cyan
+            $Job = Get-AzMigrateLocalJob
+        }}
         
         if ($Job) {{
             Write-Host "✅ Job found!" -ForegroundColor Green
             Write-Host ""
             Write-Host "📊 Job Details:" -ForegroundColor Yellow
-            Write-Host "   Job ID: $($Job.Id)" -ForegroundColor White
-            Write-Host "   State: $($Job.Property.State)" -ForegroundColor White
-            Write-Host "   Start Time: $($Job.Property.StartTime)" -ForegroundColor White
-            if ($Job.Property.EndTime) {{
-                Write-Host "   End Time: $($Job.Property.EndTime)" -ForegroundColor White
+            
+            if ($Job -is [array] -and $Job.Count -gt 1) {{
+                Write-Host "   Found multiple jobs ($($Job.Count))" -ForegroundColor White
+                $Job | ForEach-Object {{
+                    Write-Host "   Job: $($_.Id)" -ForegroundColor White
+                    Write-Host "      State: $($_.Property.State)" -ForegroundColor White
+                    Write-Host "      Display Name: $($_.Property.DisplayName)" -ForegroundColor White
+                    Write-Host ""
+                }}
+            }} else {{
+                if ($Job -is [array]) {{ $Job = $Job[0] }}
+                Write-Host "   Job ID: $($Job.Id)" -ForegroundColor White
+                Write-Host "   State: $($Job.Property.State)" -ForegroundColor White
+                Write-Host "   Start Time: $($Job.Property.StartTime)" -ForegroundColor White
+                if ($Job.Property.EndTime) {{
+                    Write-Host "   End Time: $($Job.Property.EndTime)" -ForegroundColor White
+                }}
+                Write-Host "   Display Name: $($Job.Property.DisplayName)" -ForegroundColor White
+                Write-Host ""
+                Write-Host "🔍 Job State: $($Job.Property.State)" -ForegroundColor Cyan
+                Write-Host ""
             }}
-            Write-Host "   Display Name: $($Job.Property.DisplayName)" -ForegroundColor White
-            Write-Host ""
-            Write-Host "🔍 Job State: $($Job.Property.State)" -ForegroundColor Cyan
-            Write-Host ""
             
             return @{{
                 'Id' = $Job.Id
@@ -2323,13 +2389,18 @@ def get_local_replication_job(cmd, job_id=None, input_object=None, subscription_
                 'ActivityId' = $Job.Property.ActivityId
             }}
         }} else {{
-            throw "Job not found"
+            throw "Job not found with ID: {job_id}"
         }}
         
     }} catch {{
         Write-Host ""
         Write-Host "❌ Failed to get job details:" -ForegroundColor Red
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        Write-Host "💡 Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "   1. Verify the job ID is correct" -ForegroundColor White
+        Write-Host "   2. Check if the job exists in the current project" -ForegroundColor White
+        Write-Host "   3. Ensure you have access to the job" -ForegroundColor White
         Write-Host ""
         throw
     }}
