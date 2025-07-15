@@ -68,6 +68,15 @@ class TestUtil(unittest.TestCase):
         assert actual == ('az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
                           '--scope "https://management.core.windows.net//.default"')
 
+        # tenant, scopes and claims_challenge
+        actual = _generate_login_command(
+            tenant='21987a97-4e85-47c5-9a13-9dc3e11b2a9a',
+            scopes=["https://management.core.windows.net//.default"],
+            claims_challenge='{"access_token":{"acrs":{"essential":true,"values":["p1"]}}}')
+        assert actual == ('az logout\n'
+                          'az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
+                          '--scope "https://management.core.windows.net//.default" '
+                          '--claims-challenge "eyJhY2Nlc3NfdG9rZW4iOnsiYWNycyI6eyJlc3NlbnRpYWwiOnRydWUsInZhbHVlcyI6WyJwMSJdfX19"')
 
 
 if __name__ == '__main__':
