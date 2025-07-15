@@ -644,9 +644,11 @@ class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
 
+
 class FailoverReadOnlyEndpointPolicy(Enum):
     enabled = 'Enabled'
     disabled = 'Disabled'
+
 
 class FailoverGroupDatabasesSecondaryType(Enum):
     geo = 'Geo'
