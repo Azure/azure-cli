@@ -19,25 +19,6 @@ def load_command_table(self, _):
         g.custom_command('discover', 'discover_migration_sources')
         g.custom_command('assess', 'assess_migration_readiness')
         g.custom_command('setup-env', 'setup_migration_environment')
-        
-    with self.command_group('migrate plan') as g:
-        g.custom_command('create', 'create_migration_plan')
-        g.custom_command('list', 'list_migration_plans')
-        g.custom_command('show', 'get_migration_status')
-        g.custom_command('execute-step', 'execute_migration_step')
-
-    with self.command_group('migrate assess') as g:
-        g.custom_command('sql-server', 'assess_sql_server')
-        g.custom_command('hyperv-vm', 'assess_hyperv_vm')
-        g.custom_command('filesystem', 'assess_filesystem')
-        g.custom_command('network', 'assess_network')
-
-    with self.command_group('migrate powershell') as g:
-        g.custom_command('execute', 'execute_custom_powershell')
-        # g.custom_command('get-module', 'get_installed_module')  # TODO: Implement this function
-
-    with self.command_group('migrate', is_preview=True):
-        pass
 
     # Azure CLI equivalents to PowerShell Az.Migrate commands
     with self.command_group('migrate server') as g:
