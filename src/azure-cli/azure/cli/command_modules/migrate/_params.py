@@ -117,36 +117,23 @@ def load_arguments(self, _):
         c.argument('subscription_id', help='Azure subscription ID.')
 
     with self.argument_context('migrate server create-replication') as c:
-        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('machine_id', help='ID of the discovered server.', required=True)
-        c.argument('os_disk_id', help='OS disk ID (Uuid for VMware, InstanceId for Hyper-V).', required=True)
-        c.argument('target_storage_path_id', help='Target storage path ARM ID.', required=True)
-        c.argument('target_virtual_switch_id', help='Target virtual switch ARM ID.', required=True)
-        c.argument('target_resource_group_id', help='Target resource group ARM ID.', required=True)
         c.argument('target_vm_name', help='Name for the target VM.', required=True)
+        c.argument('target_resource_group', help='Target resource group ARM ID.', required=True)
+        c.argument('target_network', help='Target virtual network ARM ID.', required=True)
+        c.argument('server_name', help='Display name of the discovered server to replicate.')
+        c.argument('server_index', type=int, help='Index of the server to replicate (0-based).')
         c.argument('subscription_id', help='Azure subscription ID.')
-        c.argument('target_vm_cpu_core', type=int, help='Number of CPU cores for target VM.')
-        c.argument('is_dynamic_memory_enabled', arg_type=get_three_state_flag(), 
-                  help='Enable dynamic memory for target VM.')
-        c.argument('target_vm_ram', type=int, help='RAM size in MB for target VM.')
 
     with self.argument_context('migrate server create-replication-by-index') as c:
-        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('server_index', type=int, help='Index of the server to migrate (0-based, e.g., 2 for third server).', required=True)
-        c.argument('source_machine_type', 
-                  arg_type=get_enum_type(['HyperV', 'VMware']),
-                  help='Type of source machine (HyperV or VMware). Default is VMware.')
-        c.argument('target_storage_path_id', help='Target storage path ARM ID.', required=True)
-        c.argument('target_virtual_switch_id', help='Target virtual switch ARM ID.', required=True)
-        c.argument('target_resource_group_id', help='Target resource group ARM ID.', required=True)
-        c.argument('target_vm_name', help='Name for the target VM. If not specified, uses source server display name.')
+        c.argument('server_index', type=int, help='Index of the server to replicate (0-based).', required=True)
+        c.argument('target_vm_name', help='Name for the target VM.', required=True)
+        c.argument('target_resource_group', help='Target resource group ARM ID.', required=True)
+        c.argument('target_network', help='Target virtual network ARM ID.', required=True)
         c.argument('subscription_id', help='Azure subscription ID.')
-        c.argument('target_vm_cpu_core', type=int, help='Number of CPU cores for target VM.')
-        c.argument('is_dynamic_memory_enabled', arg_type=get_three_state_flag(), 
-                  help='Enable dynamic memory for target VM.')
-        c.argument('target_vm_ram', type=int, help='RAM size in MB for target VM.')
 
     with self.argument_context('migrate server create-bulk-replication') as c:
         c.argument('resource_group_name', help='Name of the resource group.', required=True)
@@ -166,10 +153,10 @@ def load_arguments(self, _):
         c.argument('target_vm_ram', type=int, help='RAM size in MB for target VMs.')
 
     with self.argument_context('migrate server show-replication-status') as c:
-        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('vm_name', help='Target VM name to check replication status for.')
         c.argument('job_id', help='Specific replication job ID to check.')
-        c.argument('target_vm_name', help='Target VM name to filter jobs.')
         c.argument('subscription_id', help='Azure subscription ID.')
 
     with self.argument_context('migrate server update-replication') as c:
@@ -209,11 +196,15 @@ def load_arguments(self, _):
         c.argument('subscription_name', help='Azure subscription name to set as current context.')
         c.argument('tenant_id', help='Azure tenant ID to set as current context.')
 
-    with self.argument_context('migrate infrastructure initialize') as c:
-        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+    with self.argument_context('migrate infrastructure init') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('source_appliance_name', help='Name of the source Azure Migrate appliance.', required=True)
-        c.argument('target_appliance_name', help='Name of the target Azure Migrate appliance.', required=True)
+        c.argument('target_region', help='Target Azure region for replication infrastructure (e.g., eastus, westus2).', required=True)
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate infrastructure check') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('subscription_id', help='Azure subscription ID.')
 
     # Azure Storage commands
@@ -231,3 +222,60 @@ def load_arguments(self, _):
         c.argument('storage_account_name', help='Name of the Azure Storage account.', required=True)
         c.argument('subscription_id', help='Azure subscription ID.')
         c.argument('show_keys', action='store_true', help='Include storage account access keys in the output (requires appropriate permissions).')
+
+    # Azure Stack HCI Local Migration Commands
+    with self.argument_context('migrate local create-disk-mapping') as c:
+        c.argument('disk_id', help='Disk ID (UUID) for the disk mapping.', required=True)
+        c.argument('is_os_disk', action='store_true', help='Whether this is the OS disk. Default is True.')
+        c.argument('is_dynamic', action='store_true', help='Whether dynamic allocation is enabled. Default is False.')
+        c.argument('size_gb', type=int, help='Size of the disk in GB. Default is 64.')
+        c.argument('format_type', 
+                  arg_type=get_enum_type(['VHD', 'VHDX']),
+                  help='Disk format type. Default is VHD.')
+        c.argument('physical_sector_size', type=int, help='Physical sector size in bytes. Default is 512.')
+
+    with self.argument_context('migrate local create-replication') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('server_index', type=int, help='Index of the discovered server to replicate (0-based).', required=True)
+        c.argument('target_vm_name', help='Name for the target VM in Azure Stack HCI.', required=True)
+        c.argument('target_storage_path_id', help='Azure Stack HCI storage container ARM ID.', required=True)
+        c.argument('target_virtual_switch_id', help='Azure Stack HCI logical network ARM ID.', required=True)
+        c.argument('target_resource_group_id', help='Target resource group ARM ID.', required=True)
+        c.argument('disk_size_gb', type=int, help='OS disk size in GB. Default is 64.')
+        c.argument('disk_format', 
+                  arg_type=get_enum_type(['VHD', 'VHDX']),
+                  help='Disk format type. Default is VHD.')
+        c.argument('is_dynamic', action='store_true', help='Enable dynamic disk allocation. Default is False.')
+        c.argument('physical_sector_size', type=int, help='Physical sector size in bytes. Default is 512.')
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate local create-replication-advanced') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('server_name', help='Display name of the discovered server to replicate.', required=True)
+        c.argument('target_vm_name', help='Name for the target VM in Azure Stack HCI.', required=True)
+        c.argument('target_storage_path_id', help='Azure Stack HCI storage container ARM ID.', required=True)
+        c.argument('target_virtual_switch_id', help='Azure Stack HCI logical network ARM ID.', required=True)
+        c.argument('target_resource_group_id', help='Target resource group ARM ID.', required=True)
+        c.argument('disk_mappings', help='JSON array of custom disk mappings with DiskID, IsOSDisk, IsDynamic, Size, Format, PhysicalSectorSize.')
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate local get-job') as c:
+        c.argument('job_id', help='Job ID of the local replication job.')
+        c.argument('input_object', help='Input object containing job information (JSON string).')
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate local init-infrastructure') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('source_appliance_name', help='Name of the source appliance.', required=True)
+        c.argument('target_appliance_name', help='Name of the target appliance.', required=True)
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate resource list-groups') as c:
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate powershell check-module') as c:
+        c.argument('module_name', help='Name of the PowerShell module to check. Default is Az.Migrate.')
+        c.argument('subscription_id', help='Azure subscription ID.')

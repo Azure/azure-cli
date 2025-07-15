@@ -27,8 +27,25 @@ def load_command_table(self, _):
         g.custom_command('show-replication-status', 'get_replication_job_status')
         g.custom_command('update-replication', 'set_replication_target_properties')
 
+    # Azure Stack HCI Local Migration Commands
+    with self.command_group('migrate local') as g:
+        g.custom_command('create-disk-mapping', 'create_local_disk_mapping')
+        g.custom_command('create-replication', 'create_local_server_replication')
+        g.custom_command('create-replication-advanced', 'create_local_server_replication_advanced')
+        g.custom_command('get-job', 'get_local_replication_job')
+        g.custom_command('init-infrastructure', 'initialize_local_replication_infrastructure')
+
+    # Azure Resource Management Commands
+    with self.command_group('migrate resource') as g:
+        g.custom_command('list-groups', 'list_resource_groups')
+
+    # PowerShell Module Management Commands  
+    with self.command_group('migrate powershell') as g:
+        g.custom_command('check-module', 'check_powershell_module')
+
     with self.command_group('migrate infrastructure') as g:
-        g.custom_command('initialize', 'initialize_replication_infrastructure')
+        g.custom_command('init', 'initialize_replication_infrastructure')
+        g.custom_command('check', 'check_replication_infrastructure')
 
     with self.command_group('migrate auth') as g:
         g.custom_command('check', 'check_azure_authentication')

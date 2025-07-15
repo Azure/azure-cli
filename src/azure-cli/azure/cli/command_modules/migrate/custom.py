@@ -447,7 +447,7 @@ def get_discovered_server(cmd, resource_group_name, project_name, subscription_i
     try:
         if output_format == 'table':
             # For table output, use interactive execution to show PowerShell formatting
-            result = ps_executor.execute_script_interactive(discover_script, subscription_id=subscription_id)
+            result = ps_executor.execute_script_interactive(discover_script)
             return {'message': 'Table output displayed above', 'format': 'table'}
         else:
             # For JSON output, use regular execution
@@ -493,12 +493,6 @@ def get_discovered_server(cmd, resource_group_name, project_name, subscription_i
             
     except Exception as e:
         raise CLIError(f'Failed to get discovered servers: {str(e)}')
-
-
-# Removed unused migration commands - keeping only the specifically requested ones:
-# - get_discovered_server and get_discovered_servers_table (Get-AzMigrateDiscoveredServer equivalent)
-# - initialize_replication_infrastructure (Initialize-AzMigrateLocalReplicationInfrastructure equivalent)
-
 
 def get_discovered_servers_table(cmd, resource_group_name, project_name, source_machine_type='VMware', subscription_id=None):
     """
@@ -679,130 +673,296 @@ def initialize_replication_infrastructure(cmd, resource_group_name, project_name
         raise CLIError(f'Failed to initialize replication infrastructure: {str(e)}')
 
 
-# Azure Authentication Commands
-def check_azure_authentication(cmd):
-    """
-    Check Azure authentication status for PowerShell Az.Migrate module.
-    Azure CLI equivalent to Get-AzContext PowerShell cmdlet with enhanced visibility.
-    """
+def initialize_replication_infrastructure(cmd, resource_group_name, project_name, 
+                                         target_region, subscription_id=None):
+    """Initialize Azure Migrate replication infrastructure."""
+    
+    # Get PowerShell executor
     ps_executor = get_powershell_executor()
     
-    # Enhanced PowerShell script with rich visual output
-    auth_check_script = """
-    try {
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    # Build the PowerShell script
+    init_script = f"""
+    # Initialize Azure Migrate replication infrastructure
+    try {{
         Write-Host ""
-        Write-Host "🔍 Checking Azure Authentication Status..." -ForegroundColor Cyan
-        Write-Host "=" * 50 -ForegroundColor Gray
+        Write-Host "🚀 Initializing Azure Migrate Replication Infrastructure..." -ForegroundColor Cyan
+        Write-Host "=" * 60 -ForegroundColor Gray
         Write-Host ""
-        
-        # Check current Azure context
-        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
-        
-        # Check PowerShell and module information
-        $psVersion = $PSVersionTable.PSVersion.ToString()
-        $platform = $PSVersionTable.Platform
-        if (-not $platform) { $platform = "Windows PowerShell" }
-        
-        # Check Az.Migrate module availability
-        $azMigrateModule = Get-Module -ListAvailable -Name Az.Migrate -ErrorAction SilentlyContinue
-        $moduleAvailable = $azMigrateModule -ne $null
-        
-        Write-Host "Environment Information:" -ForegroundColor Yellow
-        Write-Host "  PowerShell Version: $psVersion" -ForegroundColor White
-        Write-Host "  Platform: $platform" -ForegroundColor White
-        Write-Host "  Az.Migrate Module: $(if ($moduleAvailable) { '✅ Available' } else { '❌ Not Available' })" -ForegroundColor White
-        if ($azMigrateModule) {
-            Write-Host "  Module Version: $($azMigrateModule.Version)" -ForegroundColor White
-        }
+        Write-Host "📋 Configuration:" -ForegroundColor Yellow
+        Write-Host "   Resource Group: {resource_group_name}" -ForegroundColor White
+        Write-Host "   Project Name: {project_name}" -ForegroundColor White
+        Write-Host "   Target Region: {target_region}" -ForegroundColor White
         Write-Host ""
         
-        if ($currentContext) {
-            Write-Host "✅ Azure Authentication Status: AUTHENTICATED" -ForegroundColor Green
-            Write-Host ""
-            Write-Host "Current Azure Context:" -ForegroundColor Yellow
-            Write-Host "  Account ID: $($currentContext.Account.Id)" -ForegroundColor White
-            Write-Host "  Account Type: $($currentContext.Account.Type)" -ForegroundColor White
-            Write-Host "  Subscription: $($currentContext.Subscription.Name)" -ForegroundColor White
-            Write-Host "  Subscription ID: $($currentContext.Subscription.Id)" -ForegroundColor White
-            Write-Host "  Tenant ID: $($currentContext.Tenant.Id)" -ForegroundColor White
-            Write-Host "  Environment: $($currentContext.Environment.Name)" -ForegroundColor White
-            Write-Host ""
-            
-            $result = @{
-                'Status' = 'Authenticated'
-                'IsAuthenticated' = $true
-                'AccountId' = $currentContext.Account.Id
-                'AccountType' = $currentContext.Account.Type
-                'SubscriptionId' = $currentContext.Subscription.Id
-                'SubscriptionName' = $currentContext.Subscription.Name
-                'TenantId' = $currentContext.Tenant.Id
-                'Environment' = $currentContext.Environment.Name
-                'Platform' = $platform
-                'PSVersion' = $psVersion
-                'ModuleAvailable' = $moduleAvailable
-                'ModuleVersion' = if ($azMigrateModule) { $azMigrateModule.Version.ToString() } else { $null }
-                'Message' = 'Successfully authenticated to Azure'
-            }
-        } else {
-            Write-Host "❌ Azure Authentication Status: NOT AUTHENTICATED" -ForegroundColor Red
-            Write-Host ""
-            Write-Host "Next Steps:" -ForegroundColor Yellow
-            Write-Host "  1. Connect to Azure: az migrate auth login" -ForegroundColor Cyan
-            Write-Host "  2. Or use PowerShell: Connect-AzAccount" -ForegroundColor Cyan
-            if (-not $moduleAvailable) {
-                Write-Host "  3. Install Az.Migrate module: Install-Module -Name Az.Migrate" -ForegroundColor Cyan
-            }
-            Write-Host ""
-            
-            $result = @{
-                'Status' = 'NotAuthenticated'
-                'IsAuthenticated' = $false
-                'Error' = 'No active Azure context found'
-                'Platform' = $platform
-                'PSVersion' = $psVersion
-                'ModuleAvailable' = $moduleAvailable
-                'ModuleVersion' = if ($azMigrateModule) { $azMigrateModule.Version.ToString() } else { $null }
-                'NextSteps' = @(
-                    'Connect to Azure: az migrate auth login',
-                    'Or use PowerShell: Connect-AzAccount',
-                    $(if (-not $moduleAvailable) { 'Install Az.Migrate module: Install-Module -Name Az.Migrate' })
-                )
-                'Message' = 'Not authenticated to Azure'
-            }
-        }
+        # Get current subscription context
+        $Context = Get-AzContext
+        if (-not $Context) {{
+            throw "No Azure context found. Please authenticate first."
+        }}
         
-        $result | ConvertTo-Json -Depth 4
-        
-    } catch {
-        Write-Error "❌ Failed to check Azure authentication: $($_.Exception.Message)"
-        Write-Host ""
-        Write-Host "Troubleshooting:" -ForegroundColor Yellow
-        Write-Host "1. Ensure PowerShell execution policy allows scripts" -ForegroundColor Yellow
-        Write-Host "2. Install Azure PowerShell modules: Install-Module -Name Az" -ForegroundColor Yellow
-        Write-Host "3. Check network connectivity" -ForegroundColor Yellow
+        Write-Host "   Subscription: $($Context.Subscription.Name)" -ForegroundColor White
+        Write-Host "   Account: $($Context.Account.Id)" -ForegroundColor White
         Write-Host ""
         
-        @{
-            'Status' = 'Error'
-            'IsAuthenticated' = $false
-            'Error' = $_.Exception.Message
-            'Message' = 'Failed to check Azure authentication'
-        } | ConvertTo-Json
+        Write-Host "⏳ Starting infrastructure initialization..." -ForegroundColor Cyan
+        Write-Host ""
+        
+        # Initialize the replication infrastructure
+        $InitResult = Initialize-AzMigrateReplicationInfrastructure `
+            -ResourceGroupName "{resource_group_name}" `
+            -ProjectName "{project_name}" `
+            -Scenario "agentlessVMware" `
+            -TargetRegion "{target_region}"
+        
+        Write-Host ""
+        Write-Host "✅ Replication infrastructure initialization completed!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "📊 Initialization Results:" -ForegroundColor Yellow
+        if ($InitResult) {{
+            $InitResult | Format-List
+        }}
+        Write-Host ""
+        Write-Host "💡 Next Steps:" -ForegroundColor Cyan
+        Write-Host "   1. You can now create server replications" -ForegroundColor White
+        Write-Host "   2. Use: az migrate server create-replication" -ForegroundColor White
+        Write-Host "   3. Monitor replication jobs with: az migrate server get-replication-status" -ForegroundColor White
+        Write-Host ""
+        
+        return @{{
+            Status = "Success"
+            ResourceGroupName = "{resource_group_name}"
+            ProjectName = "{project_name}"
+            TargetRegion = "{target_region}"
+            Message = "Replication infrastructure initialized successfully"
+            InitializationResult = $InitResult
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to initialize replication infrastructure:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting Steps:" -ForegroundColor Yellow
+        Write-Host "   1. Verify you have sufficient permissions on the subscription" -ForegroundColor White
+        Write-Host "   2. Check that the Azure Migrate project exists" -ForegroundColor White
+        Write-Host "   3. Ensure the target region is valid and available" -ForegroundColor White
+        Write-Host "   4. Verify Azure Migrate service is available in your region" -ForegroundColor White
+        Write-Host "   5. Check Azure resource quotas in the target region" -ForegroundColor White
+        Write-Host ""
+        
+        @{{
+            Status = "Failed"
+            Error = $_.Exception.Message
+            ResourceGroupName = "{resource_group_name}"
+            ProjectName = "{project_name}"
+            TargetRegion = "{target_region}"
+            Message = "Failed to initialize replication infrastructure"
+            TroubleshootingSteps = @(
+                "Verify sufficient permissions on subscription",
+                "Check Azure Migrate project exists",
+                "Ensure target region is valid",
+                "Verify Azure Migrate service availability",
+                "Check Azure resource quotas"
+            )
+        }} | ConvertTo-Json -Depth 3
         throw
-    }
+    }}
     """
     
     try:
-        # Use interactive execution to show real-time PowerShell output with full visibility
-        result = ps_executor.execute_script_interactive(auth_check_script)
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(init_script)
         return {
-            'message': 'Azure authentication check completed. See detailed status above.',
-            'command_executed': 'Get-AzContext and module availability checks',
-            'help': 'Use "az migrate auth login" to connect to Azure if not authenticated'
+            'message': 'Infrastructure initialization completed. See detailed results above.',
+            'command_executed': f'Initialize-AzMigrateReplicationInfrastructure for project: {project_name}',
+            'parameters': {
+                'ResourceGroupName': resource_group_name,
+                'ProjectName': project_name,
+                'TargetRegion': target_region,
+                'Scenario': 'agentlessVMware'
+            },
+            'next_steps': [
+                'Create server replications using: az migrate server create-replication',
+                'Monitor replication status using: az migrate server get-replication-status'
+            ]
         }
+        
     except Exception as e:
-        raise CLIError(f'Failed to check Azure authentication: {str(e)}')
+        raise CLIError(f'Failed to initialize replication infrastructure: {str(e)}')
 
+
+def check_replication_infrastructure(cmd, resource_group_name, project_name, subscription_id=None):
+    """Check the status of Azure Migrate replication infrastructure."""
+    
+    # Get PowerShell executor
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    # Build the PowerShell script
+    check_script = f"""
+    # Check Azure Migrate replication infrastructure status
+    try {{
+        Write-Host ""
+        Write-Host "🔍 Checking Azure Migrate Replication Infrastructure Status..." -ForegroundColor Cyan
+        Write-Host "=" * 65 -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "📋 Configuration:" -ForegroundColor Yellow
+        Write-Host "   Resource Group: {resource_group_name}" -ForegroundColor White
+        Write-Host "   Project Name: {project_name}" -ForegroundColor White
+        Write-Host ""
+        
+        # Get current subscription context
+        $Context = Get-AzContext
+        Write-Host "   Subscription: $($Context.Subscription.Name)" -ForegroundColor White
+        Write-Host "   Account: $($Context.Account.Id)" -ForegroundColor White
+        Write-Host ""
+        
+        Write-Host "⏳ Checking infrastructure components..." -ForegroundColor Cyan
+        Write-Host ""
+        
+        # Check if the Azure Migrate project exists
+        Write-Host "1. Checking Azure Migrate Project..." -ForegroundColor Yellow
+        try {{
+            $Project = Get-AzResource -ResourceGroupName "{resource_group_name}" -ResourceType "Microsoft.Migrate/MigrateProjects" -Name "{project_name}" -ErrorAction SilentlyContinue
+            if ($Project) {{
+                Write-Host "   ✅ Azure Migrate Project found" -ForegroundColor Green
+                Write-Host "      Name: $($Project.Name)" -ForegroundColor White
+                Write-Host "      Location: $($Project.Location)" -ForegroundColor White
+            }} else {{
+                Write-Host "   ❌ Azure Migrate Project not found" -ForegroundColor Red
+            }}
+        }} catch {{
+            Write-Host "   ⚠️  Could not check project: $($_.Exception.Message)" -ForegroundColor Yellow
+        }}
+        Write-Host ""
+        
+        # Check for replication infrastructure resources
+        Write-Host "2. Checking Replication Infrastructure Resources..." -ForegroundColor Yellow
+        
+        # Check for Recovery Services Vaults
+        try {{
+            $Vaults = Get-AzResource -ResourceGroupName "{resource_group_name}" -ResourceType "Microsoft.RecoveryServices/vaults" -ErrorAction SilentlyContinue
+            if ($Vaults) {{
+                Write-Host "   ✅ Recovery Services Vault(s) found: $($Vaults.Count)" -ForegroundColor Green
+                $Vaults | ForEach-Object {{
+                    Write-Host "      - $($_.Name) (Location: $($_.Location))" -ForegroundColor White
+                }}
+            }} else {{
+                Write-Host "   ⚠️  No Recovery Services Vaults found" -ForegroundColor Yellow
+            }}
+        }} catch {{
+            Write-Host "   ⚠️  Could not check Recovery Services Vaults: $($_.Exception.Message)" -ForegroundColor Yellow
+        }}
+        Write-Host ""
+        
+        # Check for Storage Accounts (used for replication)
+        try {{
+            $StorageAccounts = Get-AzStorageAccount -ResourceGroupName "{resource_group_name}" -ErrorAction SilentlyContinue
+            if ($StorageAccounts) {{
+                Write-Host "   ✅ Storage Account(s) found: $($StorageAccounts.Count)" -ForegroundColor Green
+                $StorageAccounts | ForEach-Object {{
+                    Write-Host "      - $($_.StorageAccountName) (SKU: $($_.Sku.Name))" -ForegroundColor White
+                }}
+            }} else {{
+                Write-Host "   ⚠️  No Storage Accounts found" -ForegroundColor Yellow
+            }}
+        }} catch {{
+            Write-Host "   ⚠️  Could not check Storage Accounts: $($_.Exception.Message)" -ForegroundColor Yellow
+        }}
+        Write-Host ""
+        
+        # Check for Site Recovery resources
+        Write-Host "3. Checking Site Recovery Resources..." -ForegroundColor Yellow
+        try {{
+            $SiteRecoveryResources = Get-AzResource -ResourceGroupName "{resource_group_name}" -ResourceType "Microsoft.RecoveryServices/*" -ErrorAction SilentlyContinue
+            if ($SiteRecoveryResources) {{
+                Write-Host "   ✅ Site Recovery resources found: $($SiteRecoveryResources.Count)" -ForegroundColor Green
+                $SiteRecoveryResources | ForEach-Object {{
+                    Write-Host "      - $($_.Name) (Type: $($_.ResourceType))" -ForegroundColor White
+                }}
+            }} else {{
+                Write-Host "   ⚠️  No Site Recovery resources found" -ForegroundColor Yellow
+            }}
+        }} catch {{
+            Write-Host "   ⚠️  Could not check Site Recovery resources: $($_.Exception.Message)" -ForegroundColor Yellow
+        }}
+        Write-Host ""
+        
+        # Try to get existing server replications to test if infrastructure is working
+        Write-Host "4. Testing Replication Infrastructure..." -ForegroundColor Yellow
+        try {{
+            $Replications = Get-AzMigrateServerReplication -ProjectName "{project_name}" -ResourceGroupName "{resource_group_name}" -ErrorAction SilentlyContinue
+            Write-Host "   ✅ Replication infrastructure is accessible" -ForegroundColor Green
+            if ($Replications) {{
+                Write-Host "      Existing replications found: $($Replications.Count)" -ForegroundColor White
+            }} else {{
+                Write-Host "      No existing replications (this is normal for new projects)" -ForegroundColor White
+            }}
+        }} catch {{
+            if ($_.Exception.Message -like "*not initialized*") {{
+                Write-Host "   ❌ Replication infrastructure is NOT initialized" -ForegroundColor Red
+                Write-Host "      This is the cause of your error!" -ForegroundColor Red
+            }} else {{
+                Write-Host "   ⚠️  Could not test replication infrastructure: $($_.Exception.Message)" -ForegroundColor Yellow
+            }}
+        }}
+        Write-Host ""
+        
+        # Provide recommendations
+        Write-Host "🔧 Recommendations:" -ForegroundColor Cyan
+        Write-Host "   If infrastructure is not initialized, run:" -ForegroundColor White
+        Write-Host "   az migrate infrastructure init --resource-group {resource_group_name} --project-name {project_name} --target-region <region>" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "   Common target regions: eastus, westus2, centralus, westeurope, eastasia" -ForegroundColor White
+        Write-Host ""
+        
+        return @{{
+            Status = "Check completed"
+            ResourceGroupName = "{resource_group_name}"
+            ProjectName = "{project_name}"
+            Message = "Infrastructure status check completed"
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to check replication infrastructure:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        
+        @{{
+            Status = "Failed"
+            Error = $_.Exception.Message
+            ResourceGroupName = "{resource_group_name}"
+            ProjectName = "{project_name}"
+            Message = "Failed to check replication infrastructure"
+        }} | ConvertTo-Json -Depth 3
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(check_script)
+        return {
+            'message': 'Infrastructure status check completed. See detailed results above.',
+            'command_executed': f'Infrastructure status check for project: {project_name}',
+            'parameters': {
+                'ResourceGroupName': resource_group_name,
+                'ProjectName': project_name
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to check replication infrastructure: {str(e)}')
 
 def connect_azure_account(cmd, subscription_id=None, tenant_id=None, device_code=False, app_id=None, secret=None):
     """
@@ -947,7 +1107,6 @@ def connect_azure_account(cmd, subscription_id=None, tenant_id=None, device_code
     except Exception as e:
         raise CLIError(f'Failed to connect to Azure: {str(e)}')
 
-
 def disconnect_azure_account(cmd):
     """
     Disconnect from Azure account using PowerShell Disconnect-AzAccount with enhanced visibility.
@@ -1044,7 +1203,7 @@ def disconnect_azure_account(cmd):
     
     try:
         # Use interactive execution to show real-time disconnect progress with full visibility
-        result = ps_executor.execute_script_interactive(disconnect_script)
+        ps_executor.execute_script_interactive(disconnect_script)
         return {
             'message': 'Azure disconnection completed. See detailed results above.',
             'command_executed': 'Disconnect-AzAccount',
@@ -1052,7 +1211,6 @@ def disconnect_azure_account(cmd):
         }
     except Exception as e:
         raise CLIError(f'Failed to disconnect from Azure: {str(e)}')
-
 
 def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_id=None):
     """
@@ -1133,18 +1291,7 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
             Write-Host "   Tenant: $($newContext.Tenant.Id)" -ForegroundColor White
             Write-Host "   Environment: $($newContext.Environment.Name)" -ForegroundColor White
             Write-Host ""
-            
-            # Show available subscriptions for reference
-            $allSubscriptions = Get-AzSubscription -ErrorAction SilentlyContinue
-            if ($allSubscriptions -and $allSubscriptions.Count -gt 1) {
-                Write-Host "📋 All available subscriptions:" -ForegroundColor Yellow
-                $allSubscriptions | ForEach-Object {
-                    $indicator = if ($_.Id -eq $newContext.Subscription.Id) { " (current)" } else { "" }
-                    Write-Host "   $($_.Name) - $($_.Id)$indicator" -ForegroundColor White
-                }
-                Write-Host ""
-            }
-            
+                        
             $result = @{
                 'Status' = 'Success'
                 'AccountId' = $newContext.Account.Id
@@ -1153,13 +1300,6 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
                 'SubscriptionName' = $newContext.Subscription.Name
                 'TenantId' = $newContext.Tenant.Id
                 'Environment' = $newContext.Environment.Name
-                'AvailableSubscriptions' = @($allSubscriptions | ForEach-Object { 
-                    @{
-                        'Name' = $_.Name
-                        'Id' = $_.Id
-                        'IsCurrent' = ($_.Id -eq $newContext.Subscription.Id)
-                    }
-                })
                 'Message' = 'Successfully set Azure context'
             }
             $result | ConvertTo-Json -Depth 4
@@ -1212,566 +1352,6 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
         }
     except Exception as e:
         raise CLIError(f'Failed to set Azure context: {str(e)}')
-
-
-def get_azure_context(cmd):
-    """
-    Get the current Azure context using PowerShell Get-AzContext with enhanced visibility.
-    Azure CLI equivalent to Get-AzContext PowerShell cmdlet.
-    """
-    ps_executor = get_powershell_executor()
-    
-    get_context_script = """
-    try {
-        Write-Host ""
-        Write-Host "📋 Getting current Azure context..." -ForegroundColor Cyan
-        Write-Host "=" * 50 -ForegroundColor Gray
-        Write-Host ""
-        
-        # Get current context
-        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
-        
-        if (-not $currentContext) {
-            Write-Host "ℹ️  No current Azure context found" -ForegroundColor Yellow
-            Write-Host ""
-            Write-Host "❌ You are not authenticated to Azure" -ForegroundColor Red
-            Write-Host ""
-            Write-Host "💡 Next Steps:" -ForegroundColor Cyan
-            Write-Host "   1. Connect to Azure: az migrate auth login" -ForegroundColor White
-            Write-Host "   2. Or use PowerShell: Connect-AzAccount" -ForegroundColor White
-            Write-Host ""
-            
-            @{
-                'Status' = 'NoContext'
-                'IsAuthenticated' = $false
-                'Message' = 'No current Azure context found'
-                'NextSteps' = @(
-                    'Connect to Azure: az migrate auth login',
-                    'Or use PowerShell: Connect-AzAccount'
-                )
-            } | ConvertTo-Json -Depth 3
-            return
-        }
-        
-        Write-Host "✅ Current Azure Context Found" -ForegroundColor Green
-        Write-Host "=" * 50 -ForegroundColor Gray
-        Write-Host ""
-        Write-Host "🔐 Account Information:" -ForegroundColor Yellow
-        Write-Host "   Account ID: $($currentContext.Account.Id)" -ForegroundColor White
-        Write-Host "   Account Type: $($currentContext.Account.Type)" -ForegroundColor White
-        Write-Host ""
-        Write-Host "📋 Subscription Information:" -ForegroundColor Yellow
-        Write-Host "   Subscription Name: $($currentContext.Subscription.Name)" -ForegroundColor White
-        Write-Host "   Subscription ID: $($currentContext.Subscription.Id)" -ForegroundColor White
-        Write-Host ""
-        Write-Host "🏢 Tenant Information:" -ForegroundColor Yellow
-        Write-Host "   Tenant ID: $($currentContext.Tenant.Id)" -ForegroundColor White
-        Write-Host ""
-        Write-Host "🌐 Environment:" -ForegroundColor Yellow
-        Write-Host "   Environment: $($currentContext.Environment.Name)" -ForegroundColor White
-        Write-Host ""
-        
-        # Get all available subscriptions
-        Write-Host "⏳ Retrieving available subscriptions..." -ForegroundColor Cyan
-        $subscriptions = Get-AzSubscription -ErrorAction SilentlyContinue
-        if ($subscriptions) {
-            Write-Host ""
-            Write-Host "📋 Available Subscriptions ($($subscriptions.Count) total):" -ForegroundColor Yellow
-            Write-Host "-" * 60 -ForegroundColor Gray
-            $subscriptions | ForEach-Object {
-                $indicator = if ($_.Id -eq $currentContext.Subscription.Id) { " ⭐ (current)" } else { "" }
-                $state = if ($_.State) { " [$($_.State)]" } else { "" }
-                Write-Host "   $($_.Name)$state" -ForegroundColor White
-                Write-Host "     ID: $($_.Id)$indicator" -ForegroundColor Gray
-            }
-            Write-Host ""
-            if ($subscriptions.Count -gt 1) {
-                Write-Host "💡 To switch subscriptions:" -ForegroundColor Cyan
-                Write-Host "   az migrate auth set-context --subscription-id <subscription-id>" -ForegroundColor White
-                Write-Host "   az migrate auth set-context --subscription-name '<subscription-name>'" -ForegroundColor White
-                Write-Host ""
-            }
-        } else {
-            Write-Host ""
-            Write-Host "⚠️  Could not retrieve subscription list" -ForegroundColor Yellow
-            Write-Host ""
-        }
-        
-        $result = @{
-            'Status' = 'Success'
-            'IsAuthenticated' = $true
-            'AccountId' = $currentContext.Account.Id
-            'AccountType' = $currentContext.Account.Type
-            'SubscriptionId' = $currentContext.Subscription.Id
-            'SubscriptionName' = $currentContext.Subscription.Name
-            'TenantId' = $currentContext.Tenant.Id
-            'Environment' = $currentContext.Environment.Name
-            'AvailableSubscriptions' = @($subscriptions | ForEach-Object { 
-                @{
-                    'Name' = $_.Name
-                    'Id' = $_.Id
-                    'State' = $_.State
-                    'IsCurrent' = ($_.Id -eq $currentContext.Subscription.Id)
-                }
-            })
-            'Message' = 'Current Azure context retrieved successfully'
-        }
-        $result | ConvertTo-Json -Depth 4
-        
-    } catch {
-        Write-Host ""
-        Write-Host "❌ Failed to get Azure context: $($_.Exception.Message)" -ForegroundColor Red
-        Write-Host ""
-        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
-        Write-Host "   1. Check if Azure PowerShell modules are loaded" -ForegroundColor White
-        Write-Host "   2. Verify network connectivity" -ForegroundColor White
-        Write-Host "   3. Try reconnecting: az migrate auth login" -ForegroundColor White
-        Write-Host ""
-        
-        @{
-            'Status' = 'Failed'
-            'Error' = $_.Exception.Message
-            'Message' = 'Failed to get Azure context'
-            'TroubleshootingSteps' = @(
-                'Check Azure PowerShell modules',
-                'Verify network connectivity',
-                'Try reconnecting: az migrate auth login'
-            )
-        } | ConvertTo-Json -Depth 3
-        throw
-    }
-    """
-    
-    try:
-        # Use interactive execution to show real-time context information with full visibility
-        result = ps_executor.execute_script_interactive(get_context_script)
-        return {
-            'message': 'Azure context information displayed above.',
-            'command_executed': 'Get-AzContext and Get-AzSubscription',
-            'help': 'Current authentication status and available subscriptions are shown above'
-        }
-    except Exception as e:
-        raise CLIError(f'Failed to get Azure context: {str(e)}')
-
-
-# Azure Storage Commands for Migration - Cross-Platform
-def get_storage_account(cmd, resource_group_name, storage_account_name, subscription_id=None):
-    """
-    Azure CLI equivalent to Get-AzStorageAccount PowerShell cmdlet.
-    Cross-platform command equivalent to:
-    $CustomStorageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
-    """
-    ps_executor = get_powershell_executor()
-    
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
-    storage_script = f"""
-    # Azure CLI equivalent functionality for Get-AzStorageAccount
-    $ResourceGroupName = '{resource_group_name}'
-    $StorageAccountName = '{storage_account_name}'
-    
-    try {{
-        Write-Host ""
-        Write-Host "💾 Retrieving Azure Storage Account..." -ForegroundColor Cyan
-        Write-Host "Storage Account: $StorageAccountName" -ForegroundColor Yellow
-        Write-Host "Resource Group: $ResourceGroupName" -ForegroundColor Yellow
-        Write-Host ""
-        
-        # Execute the real PowerShell cmdlet - equivalent to your provided command
-        $CustomStorageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
-        
-        if ($CustomStorageAccount) {{
-            Write-Host "✅ Successfully retrieved storage account!" -ForegroundColor Green
-            Write-Host ""
-            Write-Host "📊 Storage Account Details:" -ForegroundColor Yellow
-            Write-Host "  Name: $($CustomStorageAccount.StorageAccountName)" -ForegroundColor White
-            Write-Host "  Resource Group: $($CustomStorageAccount.ResourceGroupName)" -ForegroundColor White
-            Write-Host "  Location: $($CustomStorageAccount.Location)" -ForegroundColor White
-            Write-Host "  SKU: $($CustomStorageAccount.Sku.Name)" -ForegroundColor White
-            Write-Host "  Kind: $($CustomStorageAccount.Kind)" -ForegroundColor White
-            Write-Host "  Access Tier: $($CustomStorageAccount.AccessTier)" -ForegroundColor White
-            Write-Host "  Status: $($CustomStorageAccount.StatusOfPrimary)" -ForegroundColor White
-            Write-Host ""
-            
-            # Display endpoints
-            if ($CustomStorageAccount.PrimaryEndpoints) {{
-                Write-Host "🔗 Primary Endpoints:" -ForegroundColor Yellow
-                if ($CustomStorageAccount.PrimaryEndpoints.Blob) {{
-                    Write-Host "  Blob: $($CustomStorageAccount.PrimaryEndpoints.Blob)" -ForegroundColor White
-                }}
-                if ($CustomStorageAccount.PrimaryEndpoints.File) {{
-                    Write-Host "  File: $($CustomStorageAccount.PrimaryEndpoints.File)" -ForegroundColor White
-                }}
-                if ($CustomStorageAccount.PrimaryEndpoints.Queue) {{
-                    Write-Host "  Queue: $($CustomStorageAccount.PrimaryEndpoints.Queue)" -ForegroundColor White
-                }}
-                if ($CustomStorageAccount.PrimaryEndpoints.Table) {{
-                    Write-Host "  Table: $($CustomStorageAccount.PrimaryEndpoints.Table)" -ForegroundColor White
-                }}
-                Write-Host ""
-            }}
-            
-            # Return JSON for programmatic use
-            $result = @{{
-                'StorageAccount' = $CustomStorageAccount
-                'StorageAccountName' = $CustomStorageAccount.StorageAccountName
-                'ResourceGroupName' = $CustomStorageAccount.ResourceGroupName
-                'Location' = $CustomStorageAccount.Location
-                'Sku' = $CustomStorageAccount.Sku.Name
-                'Kind' = $CustomStorageAccount.Kind
-                'AccessTier' = $CustomStorageAccount.AccessTier
-                'CreationTime' = $CustomStorageAccount.CreationTime
-                'PrimaryLocation' = $CustomStorageAccount.PrimaryLocation
-                'SecondaryLocation' = $CustomStorageAccount.SecondaryLocation
-                'PrimaryEndpoints' = @{{
-                    'Blob' = $CustomStorageAccount.PrimaryEndpoints.Blob
-                    'File' = $CustomStorageAccount.PrimaryEndpoints.File
-                    'Queue' = $CustomStorageAccount.PrimaryEndpoints.Queue
-                    'Table' = $CustomStorageAccount.PrimaryEndpoints.Table
-                }}
-                'Message' = 'Storage account retrieved successfully'
-            }}
-            $result | ConvertTo-Json -Depth 5
-            
-        }} else {{
-            Write-Host "❌ Storage account not found" -ForegroundColor Red
-            Write-Host "Storage Account: $StorageAccountName" -ForegroundColor White
-            Write-Host "Resource Group: $ResourceGroupName" -ForegroundColor White
-            Write-Host ""
-            
-            @{{
-                'StorageAccount' = $null
-                'Found' = $false
-                'StorageAccountName' = $StorageAccountName
-                'ResourceGroupName' = $ResourceGroupName
-                'Message' = 'Storage account not found'
-            }} | ConvertTo-Json
-        }}
-        
-    }} catch {{
-        Write-Host ""
-        Write-Host "❌ Failed to get storage account: $($_.Exception.Message)" -ForegroundColor Red
-        Write-Host ""
-        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
-        Write-Host "1. Check authentication: az migrate auth check" -ForegroundColor White
-        Write-Host "2. Verify storage account name and resource group" -ForegroundColor White
-        Write-Host "3. Check permissions on the storage account" -ForegroundColor White
-        Write-Host "4. List all storage accounts: az migrate storage list-accounts" -ForegroundColor White
-        Write-Host ""
-        
-        @{{
-            'Status' = 'Failed'
-            'Error' = $_.Exception.Message
-            'StorageAccountName' = $StorageAccountName
-            'ResourceGroupName' = $ResourceGroupName
-            'Message' = 'Failed to get storage account'
-        }} | ConvertTo-Json
-        throw
-    }}
-    """
-    
-    try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(storage_script, subscription_id=subscription_id)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'Get-AzStorageAccount -ResourceGroupName {resource_group_name} -Name {storage_account_name}',
-            'parameters': {
-                'StorageAccountName': storage_account_name,
-                'ResourceGroupName': resource_group_name
-            }
-        }
-        
-    except Exception as e:
-        raise CLIError(f'Failed to get storage account: {str(e)}')
-
-
-def list_storage_accounts(cmd, resource_group_name=None, subscription_id=None):
-    """
-    Azure CLI equivalent to Get-AzStorageAccount PowerShell cmdlet (list all accounts).
-    Cross-platform command to list Azure Storage Accounts in a resource group or subscription.
-    """
-    ps_executor = get_powershell_executor()
-    
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
-    # Build command based on whether resource group is specified
-    if resource_group_name:
-        command_text = f"Get-AzStorageAccount -ResourceGroupName {resource_group_name}"
-        scope_text = f"Resource Group: {resource_group_name}"
-    else:
-        command_text = "Get-AzStorageAccount"
-        scope_text = "All Resource Groups in Subscription"
-    
-    storage_script = f"""
-    # Azure CLI equivalent functionality for Get-AzStorageAccount (list)
-    try {{
-        Write-Host ""
-        Write-Host "💾 Listing Azure Storage Accounts..." -ForegroundColor Cyan
-        Write-Host "Scope: {scope_text}" -ForegroundColor Yellow
-        Write-Host ""
-        Write-Host "Executing: {command_text}" -ForegroundColor Gray
-        Write-Host ""
-        
-        # Execute the real PowerShell cmdlet
-        """
-    
-    if resource_group_name:
-        storage_script += f"""
-        $StorageAccounts = Get-AzStorageAccount -ResourceGroupName '{resource_group_name}'
-        """
-    else:
-        storage_script += """
-        $StorageAccounts = Get-AzStorageAccount
-        """
-    
-    storage_script += """
-        
-        if ($StorageAccounts) {
-            Write-Host "✅ Found $($StorageAccounts.Count) storage account(s)" -ForegroundColor Green
-            Write-Host ""
-            
-            # Display storage accounts in table format
-            Write-Host "📊 Storage Accounts:" -ForegroundColor Yellow
-            $StorageAccounts | Format-Table -Property StorageAccountName, ResourceGroupName, Location, @{Name='SKU';Expression={$_.Sku.Name}}, Kind -AutoSize
-            
-            Write-Host ""
-            Write-Host "📈 Total: $($StorageAccounts.Count) storage account(s)" -ForegroundColor Cyan
-            Write-Host ""
-            
-            # Return JSON for programmatic use
-            $result = @{
-                'StorageAccounts' = $StorageAccounts
-                'Count' = $StorageAccounts.Count
-                'ResourceGroupName' = if ('""" + str(resource_group_name or "").replace("'", "''") + """') { '""" + str(resource_group_name or "").replace("'", "''") + """' } else { 'All' }
-                'Message' = 'Storage accounts listed successfully'
-            }
-            $result | ConvertTo-Json -Depth 5
-            
-        } else {
-            Write-Host "ℹ️  No storage accounts found" -ForegroundColor Yellow
-            Write-Host "Scope: """ + scope_text + """" -ForegroundColor White
-            Write-Host ""
-            
-            @{
-                'StorageAccounts' = @()
-                'Count' = 0
-                'ResourceGroupName' = '""" + str(resource_group_name or "All").replace("'", "''") + """'
-                'Message' = 'No storage accounts found'
-            } | ConvertTo-Json
-        }
-        
-    } catch {
-        Write-Host ""
-        Write-Host "❌ Failed to list storage accounts: $($_.Exception.Message)" -ForegroundColor Red
-        Write-Host ""
-        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
-        Write-Host "1. Check authentication: az migrate auth check" -ForegroundColor White
-        Write-Host "2. Verify resource group name (if specified)" -ForegroundColor White
-        Write-Host "3. Check permissions on the subscription/resource group" -ForegroundColor White
-        Write-Host "4. Ensure Az.Storage module is available" -ForegroundColor White
-        Write-Host ""
-        
-        @{
-            'Status' = 'Failed'
-            'Error' = $_.Exception.Message
-            'ResourceGroupName' = '""" + str(resource_group_name or "All").replace("'", "''") + """'
-            'Message' = 'Failed to list storage accounts'
-        } | ConvertTo-Json
-        throw
-    }
-    """
-    
-    try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(storage_script, subscription_id=subscription_id)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': command_text,
-            'parameters': {
-                'ResourceGroupName': resource_group_name or 'All',
-                'Scope': scope_text
-            }
-        }
-        
-    except Exception as e:
-        raise CLIError(f'Failed to list storage accounts: {str(e)}')
-
-
-def show_storage_account_details(cmd, resource_group_name, storage_account_name, subscription_id=None, show_keys=False):
-    """
-    Azure CLI equivalent to Get-AzStorageAccount with detailed information.
-    Cross-platform command to show comprehensive storage account details.
-    """
-    ps_executor = get_powershell_executor()
-    
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
-    storage_script = f"""
-    # Azure CLI equivalent functionality for detailed storage account information
-    $ResourceGroupName = '{resource_group_name}'
-    $StorageAccountName = '{storage_account_name}'
-    
-    try {{
-        Write-Host ""
-        Write-Host "💾 Storage Account Detailed Information" -ForegroundColor Cyan
-        Write-Host "======================================" -ForegroundColor Gray
-        Write-Host "Storage Account: $StorageAccountName" -ForegroundColor Yellow
-        Write-Host "Resource Group: $ResourceGroupName" -ForegroundColor Yellow
-        Write-Host ""
-        
-        # Get storage account details
-        $StorageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
-        
-        if ($StorageAccount) {{
-            Write-Host "✅ Storage Account Found!" -ForegroundColor Green
-            Write-Host ""
-            
-            # Basic Information
-            Write-Host "📋 Basic Information:" -ForegroundColor Yellow
-            Write-Host "  Name: $($StorageAccount.StorageAccountName)" -ForegroundColor White
-            Write-Host "  Resource Group: $($StorageAccount.ResourceGroupName)" -ForegroundColor White
-            Write-Host "  Subscription: $($StorageAccount.Id.Split('/')[2])" -ForegroundColor White
-            Write-Host "  Location: $($StorageAccount.Location)" -ForegroundColor White
-            Write-Host "  SKU: $($StorageAccount.Sku.Name)" -ForegroundColor White
-            Write-Host "  Tier: $($StorageAccount.Sku.Tier)" -ForegroundColor White
-            Write-Host "  Kind: $($StorageAccount.Kind)" -ForegroundColor White
-            Write-Host "  Access Tier: $($StorageAccount.AccessTier)" -ForegroundColor White
-            Write-Host "  Creation Time: $($StorageAccount.CreationTime)" -ForegroundColor White
-            Write-Host "  Status: $($StorageAccount.StatusOfPrimary)" -ForegroundColor White
-            Write-Host ""
-            
-            # Network Information
-            Write-Host "🌐 Network Configuration:" -ForegroundColor Yellow
-            Write-Host "  Primary Location: $($StorageAccount.PrimaryLocation)" -ForegroundColor White
-            if ($StorageAccount.SecondaryLocation) {{
-                Write-Host "  Secondary Location: $($StorageAccount.SecondaryLocation)" -ForegroundColor White
-            }}
-            Write-Host "  HTTPS Traffic Only: $($StorageAccount.EnableHttpsTrafficOnly)" -ForegroundColor White
-            if ($StorageAccount.NetworkRuleSet) {{
-                Write-Host "  Default Action: $($StorageAccount.NetworkRuleSet.DefaultAction)" -ForegroundColor White
-            }}
-            Write-Host ""
-            
-            # Service Endpoints
-            Write-Host "🔗 Service Endpoints:" -ForegroundColor Yellow
-            if ($StorageAccount.PrimaryEndpoints) {{
-                if ($StorageAccount.PrimaryEndpoints.Blob) {{
-                    Write-Host "  Blob (Primary): $($StorageAccount.PrimaryEndpoints.Blob)" -ForegroundColor White
-                }}
-                if ($StorageAccount.PrimaryEndpoints.File) {{
-                    Write-Host "  File (Primary): $($StorageAccount.PrimaryEndpoints.File)" -ForegroundColor White
-                }}
-                if ($StorageAccount.PrimaryEndpoints.Queue) {{
-                    Write-Host "  Queue (Primary): $($StorageAccount.PrimaryEndpoints.Queue)" -ForegroundColor White
-                }}
-                if ($StorageAccount.PrimaryEndpoints.Table) {{
-                    Write-Host "  Table (Primary): $($StorageAccount.PrimaryEndpoints.Table)" -ForegroundColor White
-                }}
-                if ($StorageAccount.PrimaryEndpoints.Dfs) {{
-                    Write-Host "  Data Lake (Primary): $($StorageAccount.PrimaryEndpoints.Dfs)" -ForegroundColor White
-                }}
-            }}
-            
-            if ($StorageAccount.SecondaryEndpoints) {{
-                if ($StorageAccount.SecondaryEndpoints.Blob) {{
-                    Write-Host "  Blob (Secondary): $($StorageAccount.SecondaryEndpoints.Blob)" -ForegroundColor White
-                }}
-                if ($StorageAccount.SecondaryEndpoints.File) {{
-                    Write-Host "  File (Secondary): $($StorageAccount.SecondaryEndpoints.File)" -ForegroundColor White
-                }}
-                if ($StorageAccount.SecondaryEndpoints.Queue) {{
-                    Write-Host "  Queue (Secondary): $($StorageAccount.SecondaryEndpoints.Queue)" -ForegroundColor White
-                }}
-                if ($StorageAccount.SecondaryEndpoints.Table) {{
-                    Write-Host "  Table (Secondary): $($StorageAccount.SecondaryEndpoints.Table)" -ForegroundColor White
-                }}
-            }}
-            Write-Host ""
-            
-            # Security Features
-            Write-Host "🔒 Security Features:" -ForegroundColor Yellow
-            Write-Host "  Encryption: $($StorageAccount.Encryption.Services)" -ForegroundColor White
-            Write-Host "  Allow Blob Public Access: $($StorageAccount.AllowBlobPublicAccess)" -ForegroundColor White
-            Write-Host "  Minimum TLS Version: $($StorageAccount.MinimumTlsVersion)" -ForegroundColor White
-            Write-Host ""
-            
-            # Tags
-            if ($StorageAccount.Tags -and $StorageAccount.Tags.Count -gt 0) {{
-                Write-Host "🏷️  Tags:" -ForegroundColor Yellow
-                $StorageAccount.Tags.GetEnumerator() | ForEach-Object {{
-                    Write-Host "  $($_.Key): $($_.Value)" -ForegroundColor White
-                }}
-                Write-Host ""
-            }}
-            """
-    
-    if show_keys:
-        storage_script += """
-            # Get storage account keys if requested
-            try {
-                Write-Host "🔑 Storage Account Keys:" -ForegroundColor Yellow
-                $Keys = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
-                if ($Keys) {
-                    for ($i = 0; $i -lt $Keys.Count; $i++) {
-                        Write-Host "  Key $($i + 1): $($Keys[$i].Value)" -ForegroundColor White
-                    }
-                }
-                Write-Host ""
-            } catch {
-                Write-Host "  ⚠️  Could not retrieve storage keys (insufficient permissions)" -ForegroundColor Yellow
-                Write-Host ""
-            }
-            """
-    
-    storage_script += """
-            # Complete details output
-            Write-Host "📄 Complete Details:" -ForegroundColor Yellow
-            $StorageAccount | Format-List
-            
-        } else {
-            Write-Host "❌ Storage account not found" -ForegroundColor Red
-            Write-Host ""
-        }
-        
-    } catch {
-        Write-Host ""
-        Write-Host "❌ Failed to get storage account details: $($_.Exception.Message)" -ForegroundColor Red
-        Write-Host ""
-        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
-        Write-Host "1. Check authentication: az migrate auth check" -ForegroundColor White
-        Write-Host "2. Verify storage account name and resource group" -ForegroundColor White
-        Write-Host "3. Check permissions on the storage account" -ForegroundColor White
-        Write-Host ""
-        throw
-    }
-    """
-    
-    try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(storage_script, subscription_id=subscription_id)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'Get-AzStorageAccount -ResourceGroupName {resource_group_name} -Name {storage_account_name} (detailed)',
-            'parameters': {
-                'StorageAccountName': storage_account_name,
-                'ResourceGroupName': resource_group_name,
-                'ShowKeys': show_keys
-            }
-        }
-        
-    except Exception as e:
-        raise CLIError(f'Failed to get storage account details: {str(e)}')
-
 
 # --------------------------------------------------------------------------------------------
 # Server Replication Commands
@@ -1831,8 +1411,7 @@ def create_server_replication(cmd, resource_group_name, project_name, target_vm_
                 $MachineResourcePath = "/subscriptions/$SubscriptionId/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/VMwareSites/$SiteName/machines/$MachineId"
                 Write-Host "Full machine path: $MachineResourcePath" -ForegroundColor Cyan
             }} else {{
-                Write-Host "Could not find VMware site, using machine ID only" -ForegroundColor Yellow
-                $MachineResourcePath = $MachineId
+                Write-Host "Could not find subnets, using default subnet name" -ForegroundColor Yellow
             }}
         }} catch {{
             Write-Host "Could not query VMware sites, using machine ID: $($_.Exception.Message)" -ForegroundColor Yellow
@@ -2091,7 +1670,7 @@ def create_multiple_server_replications(cmd, resource_group_name, project_name,
                 
                 if ($SelectedServer) {{
                     # Create replication
-                    $ReplicationJob = New-AzMigrateServerReplication -InputObject $SelectedServer -TargetVMName $Config.TargetVMName -TargetResourceGroupId $Config.TargetResourceGroup -TargetNetworkId $Config.TargetNetwork
+                    $ReplicationJob = New-AzMigrateServerReplication -InputObject $SelectedServer -TargetVMName $Config.TargetVMName -TargetResourceGroup $Config.TargetResourceGroup -TargetNetwork $Config.TargetNetwork
                     
                     $Results += @{{
                         ServerName = $Config.ServerName
@@ -2218,3 +1797,754 @@ def set_replication_target_properties(cmd, resource_group_name, project_name, vm
         
     except Exception as e:
         raise CLIError(f'Failed to update replication properties: {str(e)}')
+
+
+# --------------------------------------------------------------------------------------------
+# Azure Stack HCI Local Migration Commands
+# --------------------------------------------------------------------------------------------
+
+def create_local_disk_mapping(cmd, disk_id, is_os_disk=True, is_dynamic=False, 
+                             size_gb=64, format_type='VHD', physical_sector_size=512):
+    """
+    Azure CLI equivalent to New-AzMigrateLocalDiskMappingObject PowerShell cmdlet.
+    Creates a disk mapping object for Azure Stack HCI local migration.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    disk_mapping_script = f"""
+    # Azure CLI equivalent functionality for New-AzMigrateLocalDiskMappingObject
+    try {{
+        Write-Host ""
+        Write-Host "💾 Creating Local Disk Mapping Object..." -ForegroundColor Cyan
+        Write-Host "=" * 50 -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "📋 Disk Configuration:" -ForegroundColor Yellow
+        Write-Host "   Disk ID: {disk_id}" -ForegroundColor White
+        Write-Host "   Is OS Disk: {str(is_os_disk).lower()}" -ForegroundColor White
+        Write-Host "   Is Dynamic: {str(is_dynamic).lower()}" -ForegroundColor White
+        Write-Host "   Size (GB): {size_gb}" -ForegroundColor White
+        Write-Host "   Format: {format_type}" -ForegroundColor White
+        Write-Host "   Physical Sector Size: {physical_sector_size}" -ForegroundColor White
+        Write-Host ""
+        
+        # Execute the real PowerShell cmdlet - equivalent to your provided command
+        $DiskMapping = New-AzMigrateLocalDiskMappingObject `
+            -DiskID "{disk_id}" `
+            -IsOSDisk '{str(is_os_disk).lower()}' `
+            -IsDynamic '{str(is_dynamic).lower()}' `
+            -Size {size_gb} `
+            -Format '{format_type}' `
+            -PhysicalSectorSize {physical_sector_size}
+        
+        if ($DiskMapping) {{
+            Write-Host "✅ Disk mapping object created successfully!" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "📊 Disk Mapping Details:" -ForegroundColor Yellow
+            $DiskMapping | Format-List
+            Write-Host ""
+            
+            # Return JSON for programmatic use
+            $result = @{{
+                'DiskMapping' = $DiskMapping
+                'DiskID' = "{disk_id}"
+                'IsOSDisk' = {str(is_os_disk).lower()}
+                'IsDynamic' = {str(is_dynamic).lower()}
+                'SizeGB' = {size_gb}
+                'Format' = "{format_type}"
+                'PhysicalSectorSize' = {physical_sector_size}
+                'Message' = 'Disk mapping object created successfully'
+            }}
+            $result | ConvertTo-Json -Depth 3
+            
+        }} else {{
+            Write-Host "❌ Failed to create disk mapping object" -ForegroundColor Red
+            Write-Host ""
+            
+            @{{
+                'DiskMapping' = $null
+                'Created' = $false
+                'DiskID' = "{disk_id}"
+                'Message' = 'Failed to create disk mapping object'
+            }} | ConvertTo-Json
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to create disk mapping: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "1. Check authentication: az migrate auth check" -ForegroundColor White
+        Write-Host "2. Verify disk ID format is correct" -ForegroundColor White
+        Write-Host "3. Ensure disk size and format values are valid" -ForegroundColor White
+        Write-Host "4. Check that Az.Migrate module supports local operations" -ForegroundColor White
+        Write-Host ""
+        
+        @{{
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'DiskID' = "{disk_id}"
+            'Message' = 'Failed to create disk mapping object'
+        }} | ConvertTo-Json -Depth 3
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(disk_mapping_script)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': f'New-AzMigrateLocalDiskMappingObject for disk: {disk_id}',
+            'parameters': {
+                'DiskID': disk_id,
+                'IsOSDisk': is_os_disk,
+                'IsDynamic': is_dynamic,
+                'SizeGB': size_gb,
+                'Format': format_type,
+                'PhysicalSectorSize': physical_sector_size
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to create disk mapping object: {str(e)}')
+
+
+def create_local_server_replication(cmd, resource_group_name, project_name, server_index, 
+                                   target_vm_name, target_storage_path_id, target_virtual_switch_id, 
+                                   target_resource_group_id, disk_size_gb=64, disk_format='VHD', 
+                                   is_dynamic=False, physical_sector_size=512, subscription_id=None):
+    """
+    Azure CLI equivalent to New-AzMigrateLocalServerReplication PowerShell cmdlet.
+    Creates replication for Azure Stack HCI local migration.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    local_replication_script = f"""
+    # Azure CLI equivalent functionality for New-AzMigrateLocalServerReplication
+    try {{
+        Write-Host ""
+        Write-Host "🚀 Creating Local Server Replication (Azure Stack HCI)..." -ForegroundColor Cyan
+        Write-Host "=" * 60 -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "📋 Configuration:" -ForegroundColor Yellow
+        Write-Host "   Resource Group: {resource_group_name}" -ForegroundColor White
+        Write-Host "   Project Name: {project_name}" -ForegroundColor White
+        Write-Host "   Server Index: {server_index}" -ForegroundColor White
+        Write-Host "   Target VM Name: {target_vm_name}" -ForegroundColor White
+        Write-Host ""
+        Write-Host "🎯 Target Configuration:" -ForegroundColor Yellow
+        Write-Host "   Storage Path: {target_storage_path_id}" -ForegroundColor White
+        Write-Host "   Virtual Switch: {target_virtual_switch_id}" -ForegroundColor White
+        Write-Host "   Resource Group: {target_resource_group_id}" -ForegroundColor White
+        Write-Host ""
+        Write-Host "💾 Disk Configuration:" -ForegroundColor Yellow
+        Write-Host "   Size: {disk_size_gb} GB" -ForegroundColor White
+        Write-Host "   Format: {disk_format}" -ForegroundColor White
+        Write-Host "   Dynamic: {str(is_dynamic).lower()}" -ForegroundColor White
+        Write-Host "   Sector Size: {physical_sector_size}" -ForegroundColor White
+        Write-Host ""
+        
+        # Get discovered servers
+        Write-Host "⏳ Getting discovered servers..." -ForegroundColor Cyan
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType VMware
+        
+        if (-not $DiscoveredServers -or $DiscoveredServers.Count -eq 0) {{
+            throw "No discovered servers found in project {project_name}"
+        }}
+        
+        # Select server by index
+        $ServerIndex = {server_index}
+        if ($ServerIndex -ge 0 -and $ServerIndex -lt $DiscoveredServers.Count) {{
+            $DiscoveredServer = $DiscoveredServers[$ServerIndex]
+            Write-Host "✅ Selected server: $($DiscoveredServer.DisplayName)" -ForegroundColor Green
+            Write-Host "   Server ID: $($DiscoveredServer.Id)" -ForegroundColor White
+            Write-Host ""
+        }} else {{
+            throw "Server index $ServerIndex is out of range. Total servers: $($DiscoveredServers.Count)"
+        }}
+        
+        # Get OS disk information
+        Write-Host "💾 Getting disk information..." -ForegroundColor Cyan
+        if ($DiscoveredServer.Disk -and $DiscoveredServer.Disk.Count -gt 0) {{
+            $OSDisk = $DiscoveredServer.Disk | Where-Object {{ $_.IsOSDisk -eq $true }}
+            if (-not $OSDisk) {{
+                $OSDisk = $DiscoveredServer.Disk[0]
+            }}
+            $OSDiskID = $OSDisk.Uuid
+            Write-Host "   OS Disk ID: $OSDiskID" -ForegroundColor White
+        }} else {{
+            throw "No disk information found for server $($DiscoveredServer.DisplayName)"
+        }}
+        Write-Host ""
+        
+        # Create disk mapping object
+        Write-Host "🔧 Creating disk mapping object..." -ForegroundColor Cyan
+        $DiskMappings = New-AzMigrateLocalDiskMappingObject `
+            -DiskID $OSDiskID `
+            -IsOSDisk 'true' `
+            -IsDynamic '{str(is_dynamic).lower()}' `
+            -Size {disk_size_gb} `
+            -Format '{disk_format}' `
+            -PhysicalSectorSize {physical_sector_size}
+        
+        Write-Host "✅ Disk mapping created successfully" -ForegroundColor Green
+        Write-Host ""
+        
+        # Create local server replication
+        Write-Host "🚀 Starting local server replication..." -ForegroundColor Cyan
+        $ReplicationJob = New-AzMigrateLocalServerReplication `
+            -MachineId $DiscoveredServer.Id `
+            -OSDiskID $OSDiskID `
+            -TargetStoragePathId "{target_storage_path_id}" `
+            -TargetVirtualSwitchId "{target_virtual_switch_id}" `
+            -TargetResourceGroupId "{target_resource_group_id}" `
+            -TargetVMName "{target_vm_name}"
+        
+        Write-Host ""
+        Write-Host "✅ Local server replication created successfully!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "📊 Replication Job Details:" -ForegroundColor Yellow
+        if ($ReplicationJob) {{
+            Write-Host "   Job ID: $($ReplicationJob.JobId)" -ForegroundColor White
+            Write-Host "   Job Type: $($ReplicationJob.Type)" -ForegroundColor White
+            Write-Host "   Status: $($ReplicationJob.Status)" -ForegroundColor White
+            Write-Host "   Target VM: {target_vm_name}" -ForegroundColor White
+            Write-Host "   Source Server: $($DiscoveredServer.DisplayName)" -ForegroundColor White
+        }}
+        Write-Host ""
+        Write-Host "💡 Next Steps:" -ForegroundColor Cyan
+        Write-Host "   1. Monitor replication progress with: az migrate server show-replication-status" -ForegroundColor White
+        Write-Host "   2. Check job status with: az migrate server show-replication-status --job-id <job-id>" -ForegroundColor White
+        Write-Host ""
+        
+        # Return JSON for programmatic use
+        $result = @{{
+            'ReplicationJob' = $ReplicationJob
+            'JobId' = $ReplicationJob.JobId
+            'TargetVMName' = "{target_vm_name}"
+            'SourceServerName' = $DiscoveredServer.DisplayName
+            'SourceServerId' = $DiscoveredServer.Id
+            'OSDiskID' = $OSDiskID
+            'TargetStoragePathId' = "{target_storage_path_id}"
+            'TargetVirtualSwitchId' = "{target_virtual_switch_id}"
+            'TargetResourceGroupId' = "{target_resource_group_id}"
+            'DiskConfiguration' = @{{
+                'SizeGB' = {disk_size_gb}
+                'Format' = "{disk_format}"
+                'IsDynamic' = {str(is_dynamic).lower()}
+                'PhysicalSectorSize' = {physical_sector_size}
+            }}
+            'Status' = 'Started'
+            'Message' = 'Local server replication created successfully'
+        }}
+        $result | ConvertTo-Json -Depth 4
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to create local server replication:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting Steps:" -ForegroundColor Yellow
+        Write-Host "   1. Verify server index is correct (0-based)" -ForegroundColor White
+        Write-Host "   2. Check Azure Stack HCI resource paths are valid" -ForegroundColor White
+        Write-Host "   3. Ensure target storage container exists" -ForegroundColor White
+        Write-Host "   4. Verify target virtual switch is available" -ForegroundColor White
+        Write-Host "   5. Check permissions on target resource group" -ForegroundColor White
+        Write-Host "   6. Ensure Az.Migrate module supports local operations" -ForegroundColor White
+        Write-Host ""
+        Write-Host "💡 Common Issues:" -ForegroundColor Cyan
+        Write-Host "   • Invalid storage path: Check Azure Stack HCI storage container path" -ForegroundColor White
+        Write-Host "   • Network issues: Verify logical network path is correct" -ForegroundColor White
+        Write-Host "   • Permissions: Ensure contributor access to target resources" -ForegroundColor White
+        Write-Host ""
+        
+        @{{
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'ServerIndex' = {server_index}
+            'TargetVMName' = "{target_vm_name}"
+            'Message' = 'Failed to create local server replication'
+            'TroubleshootingSteps' = @(
+                'Verify server index is correct',
+                'Check Azure Stack HCI resource paths',
+                'Ensure target storage container exists',
+                'Verify target virtual switch availability',
+                'Check permissions on target resource group'
+            )
+        }} | ConvertTo-Json -Depth 3
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(local_replication_script)
+        return {
+            'message': 'Azure Stack HCI local replication created successfully. See detailed results above.',
+            'command_executed': f'New-AzMigrateLocalServerReplication for target VM: {target_vm_name}',
+            'parameters': {
+                'ResourceGroupName': resource_group_name,
+                'ProjectName': project_name,
+                'ServerIndex': server_index,
+                'TargetVMName': target_vm_name,
+                'TargetStoragePathId': target_storage_path_id,
+                'TargetVirtualSwitchId': target_virtual_switch_id,
+                'TargetResourceGroupId': target_resource_group_id,
+                'DiskConfiguration': {
+                    'SizeGB': disk_size_gb,
+                    'Format': disk_format,
+                    'IsDynamic': is_dynamic,
+                    'PhysicalSectorSize': physical_sector_size
+                }
+            },
+            'next_steps': [
+                'Monitor replication: az migrate server show-replication-status',
+                'Check job status: az migrate server show-replication-status --job-id <job-id>'
+            ]
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to create local server replication: {str(e)}')
+
+
+def create_local_server_replication_advanced(cmd, resource_group_name, project_name, 
+                                           server_name, target_vm_name, target_storage_path_id, 
+                                           target_virtual_switch_id, target_resource_group_id,
+                                           disk_mappings=None, subscription_id=None):
+    """
+    Azure CLI equivalent with advanced disk mapping support.
+    Creates replication for Azure Stack HCI local migration with custom disk mappings.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    # Parse disk mappings if provided
+    disk_mappings_param = disk_mappings or "[]"
+    
+    advanced_replication_script = f"""
+    # Azure CLI equivalent functionality for New-AzMigrateLocalServerReplication with advanced options
+    try {{
+        Write-Host ""
+        Write-Host "🚀 Creating Advanced Local Server Replication..." -ForegroundColor Cyan
+        Write-Host "=" * 60 -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "📋 Configuration:" -ForegroundColor Yellow
+        Write-Host "   Resource Group: {resource_group_name}" -ForegroundColor White
+        Write-Host "   Project Name: {project_name}" -ForegroundColor White
+        Write-Host "   Server Name: {server_name}" -ForegroundColor White
+        Write-Host "   Target VM Name: {target_vm_name}" -ForegroundColor White
+        Write-Host ""
+        
+        # Get discovered servers
+        Write-Host "⏳ Finding server by name..." -ForegroundColor Cyan
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType VMware
+        $DiscoveredServer = $DiscoveredServers | Where-Object {{ $_.DisplayName -eq "{server_name}" }}
+        
+        if (-not $DiscoveredServer) {{
+            throw "Server with name '{server_name}' not found in project {project_name}"
+        }}
+        
+        Write-Host "✅ Found server: $($DiscoveredServer.DisplayName)" -ForegroundColor Green
+        Write-Host "   Server ID: $($DiscoveredServer.Id)" -ForegroundColor White
+        Write-Host ""
+        
+        # Process disk mappings
+        $DiskMappingsArray = @()
+        $CustomMappings = '{disk_mappings_param}' | ConvertFrom-Json -ErrorAction SilentlyContinue
+        
+        if ($CustomMappings -and $CustomMappings.Count -gt 0) {{
+            Write-Host "🔧 Creating custom disk mappings..." -ForegroundColor Cyan
+            foreach ($mapping in $CustomMappings) {{
+                $diskMapping = New-AzMigrateLocalDiskMappingObject `
+                    -DiskID $mapping.DiskID `
+                    -IsOSDisk $mapping.IsOSDisk `
+                    -IsDynamic $mapping.IsDynamic `
+                    -Size $mapping.Size `
+                    -Format $mapping.Format `
+                    -PhysicalSectorSize $mapping.PhysicalSectorSize
+                $DiskMappingsArray += $diskMapping
+                Write-Host "   ✅ Created mapping for disk: $($mapping.DiskID)" -ForegroundColor Green
+            }}
+        }} else {{
+            Write-Host "🔧 Creating default disk mapping for OS disk..." -ForegroundColor Cyan
+            if ($DiscoveredServer.Disk -and $DiscoveredServer.Disk.Count -gt 0) {{
+                $OSDisk = $DiscoveredServer.Disk | Where-Object {{ $_.IsOSDisk -eq $true }}
+                if (-not $OSDisk) {{
+                    $OSDisk = $DiscoveredServer.Disk[0]
+                }}
+                $OSDiskID = $OSDisk.Uuid
+                
+                $diskMapping = New-AzMigrateLocalDiskMappingObject `
+                    -DiskID $OSDiskID `
+                    -IsOSDisk 'true' `
+                    -IsDynamic 'false' `
+                    -Size 64 `
+                    -Format 'VHD' `
+                    -PhysicalSectorSize 512
+                $DiskMappingsArray += $diskMapping
+                Write-Host "   ✅ Created default mapping for OS disk: $OSDiskID" -ForegroundColor Green
+            }} else {{
+                throw "No disk information found for server {server_name}"
+            }}
+        }}
+        Write-Host ""
+        
+        # Create local server replication
+        Write-Host "🚀 Starting local server replication..." -ForegroundColor Cyan
+        $ReplicationJob = New-AzMigrateLocalServerReplication `
+            -MachineId $DiscoveredServer.Id `
+            -OSDiskID $DiskMappingsArray[0].DiskID `
+            -TargetStoragePathId "{target_storage_path_id}" `
+            -TargetVirtualSwitchId "{target_virtual_switch_id}" `
+            -TargetResourceGroupId "{target_resource_group_id}" `
+            -TargetVMName "{target_vm_name}"
+        
+        Write-Host ""
+        Write-Host "✅ Advanced local server replication created successfully!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "📊 Results:" -ForegroundColor Yellow
+        if ($ReplicationJob) {{
+            Write-Host "   Job ID: $($ReplicationJob.JobId)" -ForegroundColor White
+            Write-Host "   Target VM: {target_vm_name}" -ForegroundColor White
+            Write-Host "   Source: $($DiscoveredServer.DisplayName)" -ForegroundColor White
+            Write-Host "   Disk Mappings: $($DiskMappingsArray.Count)" -ForegroundColor White
+        }}
+        Write-Host ""
+        
+        return @{{
+            'JobId' = $ReplicationJob.JobId
+            'TargetVMName' = "{target_vm_name}"
+            'SourceServerName' = $DiscoveredServer.DisplayName
+            'DiskMappings' = $DiskMappingsArray.Count
+            'Status' = 'Started'
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to create advanced local server replication:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(advanced_replication_script)
+        return {
+            'message': 'Advanced Azure Stack HCI local replication created successfully. See detailed results above.',
+            'command_executed': f'New-AzMigrateLocalServerReplication (advanced) for target VM: {target_vm_name}',
+            'parameters': {
+                'ResourceGroupName': resource_group_name,
+                'ProjectName': project_name,
+                'ServerName': server_name,
+                'TargetVMName': target_vm_name,
+                'TargetStoragePathId': target_storage_path_id,
+                'TargetVirtualSwitchId': target_virtual_switch_id,
+                'TargetResourceGroupId': target_resource_group_id,
+                'CustomDiskMappings': disk_mappings_param != "[]"
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to create advanced local server replication: {str(e)}')
+
+
+def get_local_replication_job(cmd, job_id=None, input_object=None, subscription_id=None):
+    """
+    Azure CLI equivalent to Get-AzMigrateLocalJob.
+    Gets the status and details of a local replication job.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    # Determine which parameter to use
+    if input_object:
+        param_script = f'$InputObject = {input_object}'
+        job_param = '-InputObject $InputObject'
+    elif job_id:
+        param_script = f'$JobId = "{job_id}"'
+        job_param = '-JobId $JobId'
+    else:
+        raise CLIError('Either job_id or input_object must be provided')
+    
+    get_job_script = f"""
+    # Azure CLI equivalent functionality for Get-AzMigrateLocalJob
+    try {{
+        Write-Host ""
+        Write-Host "🔍 Getting Local Replication Job Details..." -ForegroundColor Cyan
+        Write-Host "=" * 50 -ForegroundColor Gray
+        Write-Host ""
+        
+        {param_script}
+        
+        # Get the job details
+        $Job = Get-AzMigrateLocalJob {job_param}
+        
+        if ($Job) {{
+            Write-Host "✅ Job found!" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "📊 Job Details:" -ForegroundColor Yellow
+            Write-Host "   Job ID: $($Job.Id)" -ForegroundColor White
+            Write-Host "   State: $($Job.Property.State)" -ForegroundColor White
+            Write-Host "   Start Time: $($Job.Property.StartTime)" -ForegroundColor White
+            if ($Job.Property.EndTime) {{
+                Write-Host "   End Time: $($Job.Property.EndTime)" -ForegroundColor White
+            }}
+            Write-Host "   Display Name: $($Job.Property.DisplayName)" -ForegroundColor White
+            Write-Host ""
+            Write-Host "🔍 Job State: $($Job.Property.State)" -ForegroundColor Cyan
+            Write-Host ""
+            
+            return @{{
+                'Id' = $Job.Id
+                'State' = $Job.Property.State
+                'DisplayName' = $Job.Property.DisplayName
+                'StartTime' = $Job.Property.StartTime
+                'EndTime' = $Job.Property.EndTime
+                'ActivityId' = $Job.Property.ActivityId
+            }}
+        }} else {{
+            throw "Job not found"
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to get job details:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        throw
+    }}
+    """
+    
+    try:
+        result = ps_executor.execute_script_interactive(get_job_script)
+        return {
+            'message': 'Local replication job details retrieved successfully. See detailed results above.',
+            'command_executed': f'Get-AzMigrateLocalJob',
+            'parameters': {
+                'JobId': job_id,
+                'InputObject': input_object is not None
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to get local replication job: {str(e)}')
+
+
+def initialize_local_replication_infrastructure(cmd, resource_group_name, project_name, 
+                                               source_appliance_name, target_appliance_name, 
+                                               subscription_id=None):
+    """
+    Azure CLI equivalent to Initialize-AzMigrateLocalReplicationInfrastructure.
+    Initializes the local replication infrastructure for Azure Stack HCI migrations.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    initialize_script = f"""
+    # Azure CLI equivalent functionality for Initialize-AzMigrateLocalReplicationInfrastructure
+    try {{
+        Write-Host ""
+        Write-Host "🚀 Initializing Local Replication Infrastructure..." -ForegroundColor Cyan
+        Write-Host "=" * 60 -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "📋 Configuration:" -ForegroundColor Yellow
+        Write-Host "   Resource Group: {resource_group_name}" -ForegroundColor White
+        Write-Host "   Project Name: {project_name}" -ForegroundColor White
+        Write-Host "   Source Appliance: {source_appliance_name}" -ForegroundColor White
+        Write-Host "   Target Appliance: {target_appliance_name}" -ForegroundColor White
+        Write-Host ""
+        
+        # Initialize the local replication infrastructure
+        Write-Host "⏳ Setting up replication infrastructure..." -ForegroundColor Cyan
+        $Result = Initialize-AzMigrateLocalReplicationInfrastructure `
+            -ProjectName "{project_name}" `
+            -ResourceGroupName "{resource_group_name}" `
+            -SourceApplianceName "{source_appliance_name}" `
+            -TargetApplianceName "{target_appliance_name}"
+        
+        Write-Host ""
+        Write-Host "✅ Local replication infrastructure initialized successfully!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "📊 Infrastructure Details:" -ForegroundColor Yellow
+        if ($Result) {{
+            Write-Host "   Status: Initialized" -ForegroundColor White
+            Write-Host "   Project: {project_name}" -ForegroundColor White
+            Write-Host "   Source Appliance: {source_appliance_name}" -ForegroundColor White
+            Write-Host "   Target Appliance: {target_appliance_name}" -ForegroundColor White
+        }}
+        Write-Host ""
+        
+        return @{{
+            'Status' = 'Initialized'
+            'ProjectName' = "{project_name}"
+            'ResourceGroupName' = "{resource_group_name}"
+            'SourceApplianceName' = "{source_appliance_name}"
+            'TargetApplianceName' = "{target_appliance_name}"
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to initialize local replication infrastructure:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        throw
+    }}
+    """
+    
+    try:
+        result = ps_executor.execute_script_interactive(initialize_script)
+        return {
+            'message': 'Local replication infrastructure initialized successfully. See detailed results above.',
+            'command_executed': f'Initialize-AzMigrateLocalReplicationInfrastructure',
+            'parameters': {
+                'ResourceGroupName': resource_group_name,
+                'ProjectName': project_name,
+                'SourceApplianceName': source_appliance_name,
+                'TargetApplianceName': target_appliance_name
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to initialize local replication infrastructure: {str(e)}')
+
+
+def list_resource_groups(cmd, subscription_id=None):
+    """
+    Azure CLI equivalent to Get-AzResourceGroup.
+    Lists all resource groups in the current subscription.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    list_rg_script = f"""
+    # Azure CLI equivalent functionality for Get-AzResourceGroup
+    try {{
+        Write-Host ""
+        Write-Host "📋 Listing Resource Groups..." -ForegroundColor Cyan
+        Write-Host "=" * 40 -ForegroundColor Gray
+        Write-Host ""
+        
+        # Get all resource groups
+        $ResourceGroups = Get-AzResourceGroup
+        
+        Write-Host "✅ Found $($ResourceGroups.Count) resource group(s)" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "📊 Resource Groups:" -ForegroundColor Yellow
+        
+        $ResourceGroups | Format-Table ResourceGroupName, Location, ProvisioningState -AutoSize
+        
+        return $ResourceGroups | ForEach-Object {{
+            @{{
+                'ResourceGroupName' = $_.ResourceGroupName
+                'Location' = $_.Location
+                'ProvisioningState' = $_.ProvisioningState
+                'ResourceId' = $_.ResourceId
+            }}
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to list resource groups:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        throw
+    }}
+    """
+    
+    try:
+        result = ps_executor.execute_script_interactive(list_rg_script)
+        return {
+            'message': 'Resource groups listed successfully. See detailed results above.',
+            'command_executed': 'Get-AzResourceGroup'
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to list resource groups: {str(e)}')
+
+
+def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None):
+    """
+    Azure CLI equivalent of Get-InstalledModule -Name Az.Migrate
+    Checks if the required PowerShell module is installed.
+    """
+    ps_executor = get_powershell_executor()
+    
+    module_check_script = f"""
+    try {{
+        Write-Host "🔍 Checking PowerShell module: {module_name}" -ForegroundColor Cyan
+        Write-Host "=" * 50 -ForegroundColor Gray
+        
+        $Module = Get-InstalledModule -Name "{module_name}" -ErrorAction SilentlyContinue
+        
+        if ($Module) {{
+            Write-Host "✅ Module found:" -ForegroundColor Green
+            Write-Host "   Name: $($Module.Name)" -ForegroundColor White
+            Write-Host "   Version: $($Module.Version)" -ForegroundColor White
+            Write-Host "   Author: $($Module.Author)" -ForegroundColor White
+            Write-Host "   Description: $($Module.Description)" -ForegroundColor White
+            Write-Host ""
+            
+            return @{{
+                'IsInstalled' = $true
+                'Name' = $Module.Name
+                'Version' = $Module.Version.ToString()
+                'Author' = $Module.Author
+                'Description' = $Module.Description
+            }}
+        }} else {{
+            Write-Host "❌ Module '{module_name}' is not installed" -ForegroundColor Red
+            Write-Host "💡 Install with: Install-Module -Name {module_name} -Force" -ForegroundColor Yellow
+            Write-Host ""
+            
+            return @{{
+                'IsInstalled' = $false
+                'Name' = '{module_name}'
+                'InstallCommand' = 'Install-Module -Name {module_name} -Force'
+            }}
+        }}
+        
+    }} catch {{
+        Write-Host "❌ Error checking module:" -ForegroundColor Red
+        Write-Host "   $($_.Exception.Message)" -ForegroundColor White
+        throw
+    }}
+    """
+    
+    try:
+        result = ps_executor.execute_script_interactive(module_check_script)
+        return {
+            'message': f'PowerShell module check completed for {module_name}',
+            'command_executed': f'Get-InstalledModule -Name {module_name}',
+            'module_name': module_name
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to check PowerShell module {module_name}: {str(e)}')
