@@ -1728,7 +1728,8 @@ def load_arguments(self, _):
                    arg_type=try_planned_before_forced_failover_param_type)
         c.argument('secondary_type', help="Databases secondary type on partner server",
                    arg_type=get_enum_type(FailoverGroupDatabasesSecondaryType))
-        c.argument('partner_server_ids', nargs='+', help="The list of partner server resource id's of the Failover Group")
+        c.argument('partner_server_ids', nargs='+', 
+                   help="The list of partner server resource id's of the Failover Group")
         c.argument('ro_failover_policy', help="The policy of the read only endpoint of the Failover Group",
                    arg_type=get_enum_type(FailoverReadOnlyEndpointPolicy))
         c.argument('ro_endpoint_target', help="The resource id of the read only endpoint target server")
