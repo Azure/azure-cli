@@ -97,9 +97,6 @@ from ._util import (
 
 logger = get_logger(__name__)
 
-BACKUP_STORAGE_ACCESS_TIERS = ["hot",
-                               "archive"]
-
 ###############################################
 #                Common funcs                 #
 ###############################################
@@ -3103,7 +3100,6 @@ def update_long_term_retention(
         yearly_retention=None,
         week_of_year=None,
         make_backups_immutable=None,
-        backup_storage_access_tier=None,
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -3121,10 +3117,6 @@ def update_long_term_retention(
         if not confirmation:
             return
 
-    if backup_storage_access_tier and backup_storage_access_tier.lower() not in BACKUP_STORAGE_ACCESS_TIERS:
-        raise CLIError('Please specify a valid backup storage access tier type for backup storage access tier.'
-                       'See \'--help\' for more details.')
-
     kwargs['weekly_retention'] = weekly_retention
 
     kwargs['monthly_retention'] = monthly_retention
@@ -3134,8 +3126,6 @@ def update_long_term_retention(
     kwargs['week_of_year'] = week_of_year
 
     kwargs['make_backups_immutable'] = make_backups_immutable
-
-    kwargs['backup_storage_access_tier'] = backup_storage_access_tier
 
     policy = client.begin_create_or_update(
         database_name=database_name,

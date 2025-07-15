@@ -152,7 +152,7 @@ class Profile:
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
               show_progress=False,
-              **kwargs):
+              claims_challenge=None):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
@@ -172,12 +172,12 @@ class Profile:
                 use_device_code = True
 
             if use_device_code:
-                user_identity = identity.login_with_device_code(scopes=scopes, **kwargs)
+                user_identity = identity.login_with_device_code(scopes=scopes)
             else:
-                user_identity = identity.login_with_auth_code(scopes=scopes, **kwargs)
+                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge)
         else:
             if not is_service_principal:
-                user_identity = identity.login_with_username_password(username, password, scopes=scopes, **kwargs)
+                user_identity = identity.login_with_username_password(username, password, scopes=scopes)
             else:
                 identity.login_with_service_principal(username, password, scopes=scopes)
 
@@ -299,7 +299,8 @@ class Profile:
         identity.logout_all_users()
         identity.logout_all_service_principal()
 
-    def get_login_credentials(self, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
+    def get_login_credentials(self, subscription_id=None, aux_subscriptions=None, aux_tenants=None,
+                              sdk_credential=True):
         """Get a credential compatible with Track 2 SDK."""
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
@@ -307,18 +308,15 @@ class Profile:
         account = self.get_subscription(subscription_id)
 
         managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
-
+        external_credentials = None
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
             from .auth.msal_credentials import CloudShellCredential
-            # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
-            sdk_cred = CredentialAdaptor(CloudShellCredential())
+            cred = CloudShellCredential()
 
         elif managed_identity_type:
             # managed identity
-            # The credential must be wrapped by CredentialAdaptor so that it can work with SDK.
             cred = ManagedIdentityAuth.credential_factory(managed_identity_type, managed_identity_id)
-            sdk_cred = CredentialAdaptor(cred)
 
         else:
             # user and service principal
@@ -332,13 +330,15 @@ class Profile:
                     if sub[_TENANT_ID] != account[_TENANT_ID]:
                         external_tenants.append(sub[_TENANT_ID])
 
-            credential = self._create_credential(account)
+            cred = self._create_credential(account)
             external_credentials = []
             for external_tenant in external_tenants:
                 external_credentials.append(self._create_credential(account, tenant_id=external_tenant))
-            sdk_cred = CredentialAdaptor(credential, auxiliary_credentials=external_credentials)
 
-        return (sdk_cred,
+        # Wrapping the credential with CredentialAdaptor makes it compatible with SDK.
+        cred_result = CredentialAdaptor(cred, auxiliary_credentials=external_credentials) if sdk_credential else cred
+
+        return (cred_result,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
@@ -400,6 +400,15 @@ class Profile:
         return (token_tuple,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
+
+    def get_msal_token(self, scopes, data):
+        """Get VM SSH certificate. DO NOT use it for other purposes. To get an access token, use get_raw_token instead.
+        """
+        credential, _, _ = self.get_login_credentials(sdk_credential=False)
+        from .auth.constants import ACCESS_TOKEN
+        certificate_string = credential.acquire_token(scopes, data=data)[ACCESS_TOKEN]
+        # The first value used to be username, but it is no longer used.
+        return None, certificate_string
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
                               assigned_identity_info=None):

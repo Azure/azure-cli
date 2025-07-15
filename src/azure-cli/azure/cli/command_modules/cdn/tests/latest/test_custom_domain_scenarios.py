@@ -13,6 +13,7 @@ from azure.core.exceptions import (HttpResponseError, ResourceNotFoundError, Res
 from knack.util import CLIError
 
 
+# To run this test, please edit https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/27cafca8-b9a4-4264-b399-45d0c9cca1ab/resourceGroups/CliDevReservedGroup/providers/Microsoft.Network/dnszones/afdx-rp-platform-test.azfdtest.xyz/recordsets
 class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain', additional_tags={'owner': 'jingnanxu'})
     def test_cdn_custom_domain_errors(self, resource_group):
@@ -54,7 +55,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'aaz-09-01-crud'
+        endpoint_name = 'aaz-06-01-crud'
         origin = 'www.microsoft1.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
 
@@ -93,13 +94,13 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'msft-byoc-060301'
+        endpoint_name = 'msft-byoc-071401'
         origin = 'www.microsoft1.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domains for CDN managed cert and BYOC
-        custom_domain_name = "msft-0415-c"
-        byoc_custom_domain_name = "msft-0415-b"
+        custom_domain_name = "msft-0601-c"
+        byoc_custom_domain_name = "msft-0601-b"
         hostname = custom_domain_name + '-h.afdx-rp-platform-test.azfdtest.xyz'
         byoc_hostname = byoc_custom_domain_name + '-h.afdx-rp-platform-test.azfdtest.xyz'
         # # Use alternate hostnames for dogfood.
@@ -159,13 +160,13 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'byoc-l-060301'
+        endpoint_name = 'byoc-l-071401'
         origin = 'www.microsoft1.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domain for BYOC
         custom_domain_name = "byoc"
-        hostname = custom_domain_name + '-0415.afdx-rp-platform-test.azfdtest.xyz'
+        hostname = custom_domain_name + '-0601.afdx-rp-platform-test.azfdtest.xyz'
         # # Use alternate hostname for dogfood.
         # if '.azureedge-test.net' in endpoint['hostName']:
         #     hostname = custom_domain_name + '.aaz-5-df.clitest.azfdtest.xyz'
