@@ -879,19 +879,6 @@ def connect_azure_account(cmd, subscription_id=None, tenant_id=None, device_code
             Write-Host "   Environment: $($context.Context.Environment.Name)" -ForegroundColor White
             Write-Host ""
             
-            # Check for additional subscriptions
-            $allSubscriptions = Get-AzSubscription -ErrorAction SilentlyContinue
-            if ($allSubscriptions -and $allSubscriptions.Count -gt 1) {
-                Write-Host "📋 Available Subscriptions ($($allSubscriptions.Count) total):" -ForegroundColor Yellow
-                $allSubscriptions | ForEach-Object {
-                    $indicator = if ($_.Id -eq $context.Context.Subscription.Id) { " (current)" } else { "" }
-                    Write-Host "   $($_.Name) - $($_.Id)$indicator" -ForegroundColor White
-                }
-                Write-Host ""
-                Write-Host "💡 To switch subscriptions, use: az migrate auth set-context --subscription-id <id>" -ForegroundColor Cyan
-                Write-Host ""
-            }
-            
             $result = @{
                 'Status' = 'Success'
                 'AccountId' = $context.Context.Account.Id
