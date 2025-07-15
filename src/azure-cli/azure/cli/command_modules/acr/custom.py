@@ -7,6 +7,7 @@
 
 import os
 import re
+import shutil
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
@@ -396,6 +397,8 @@ def get_docker_command(is_diagnostics_context=False):
         docker_command = os.getenv('DOCKER_COMMAND')
     else:
         docker_command = 'docker'
+        if shutil.which('podman'):
+            docker_command = 'podman'
 
     from subprocess import PIPE, Popen, CalledProcessError
     try:
@@ -405,7 +408,7 @@ def get_docker_command(is_diagnostics_context=False):
         logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(e))
         # The executable may not be discoverable in WSL so retry *.exe once
         try:
-            docker_command = 'docker.exe'
+            docker_command = docker_command + '.exe'
             p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
             _, stderr = p.communicate()
         except OSError as inner:
