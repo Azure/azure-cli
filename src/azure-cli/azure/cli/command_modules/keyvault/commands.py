@@ -43,19 +43,19 @@ def transform_definition_list(result):
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
     # region Command Types
-    mgmt_vaults_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.vaults)
-    mgmt_pec_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_endpoint_connections)
-    mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
-    data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
-    data_certificate_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)
-    data_secret_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECRETS)
+    mgmt_vaults_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.vaults)
+    mgmt_pec_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.private_endpoint_connections)
+    mgmt_plr_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
+    data_key_entity = get_client(ResourceType.DATA_KEYVAULT_KEYS)
+    data_certificate_entity = get_client(ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    data_secret_entity = get_client(ResourceType.DATA_KEYVAULT_SECRETS)
 
-    mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
-    mgmt_hsms_regions_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
-    data_security_domain_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN)
-    data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
-    data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
-    data_setting_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
+    mgmt_hsms_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
+    mgmt_hsms_regions_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
+    data_security_domain_entity = get_client(ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN)
+    data_backup_entity = get_client(ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
+    data_access_control_entity = get_client(ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
+    data_setting_entity = get_client(ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',

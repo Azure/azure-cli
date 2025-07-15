@@ -127,7 +127,7 @@ class ClientEntity:  # pylint: disable=too-few-public-methods
         self.models_docs_tmpl = models_docs_tmpl
 
 
-def get_client(cli_ctx, resource_type, client_name=''):
+def get_client(resource_type, client_name=''):
     client_factory = get_client_factory(resource_type, client_name)
     command_type = CliCommandType(
         operations_tmpl=get_operations_tmpl(resource_type, client_name),
