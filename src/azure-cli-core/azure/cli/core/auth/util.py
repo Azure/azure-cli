@@ -29,6 +29,8 @@ def aad_error_handler(error, **kwargs):
     # To trigger this function for testing, simply provide an invalid scope:
     # az account get-access-token --scope https://my-invalid-scope
 
+    logger.debug('MSAL error: %r', error)
+
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
         import socket
@@ -43,22 +45,27 @@ def aad_error_handler(error, **kwargs):
         recommendation = PASSWORD_CERTIFICATE_WARNING
     else:
         login_command = _generate_login_command(**kwargs)
-        recommendation = (
-            # Cloud Shell uses IMDS-like interface for implicit login. If getting token/cert failed,
-            # we let the user explicitly log in to AAD with MSAL.
-            "Please explicitly log in with:\n{}" if error.get('error') == 'broker_error'
-            else "Interactive authentication is needed. Please run:\n{}").format(login_command)
+        recommendation = "Interactive authentication is needed. Please run:\n{}".format(login_command)
 
     from azure.cli.core.azclierror import AuthenticationError
     raise AuthenticationError(error_description, msal_error=error, recommendation=recommendation)
 
 
-def _generate_login_command(scopes=None, claims_challenge=None):
+def _generate_login_command(tenant=None, scopes=None, claims_challenge=None):
     login_command = ['az login']
 
-    # Rejected by Conditional Access policy, like MFA
+    # Rejected by Conditional Access policy, like MFA.
+    # MFA status is not shared between tenants. Specifying tenant triggers the MFA process for that tenant.
+    # Double quotes are not necessary, but we add them following the best practice to avoid shell interpretation.
+    if tenant:
+        login_command.extend(['--tenant', f'"{tenant}"'])
+
+    # Some scopes (such as Graph) may require MFA while ARM may not.
+    # Specifying scope triggers the MFA process for that scope.
     if scopes:
-        login_command.append('--scope {}'.format(' '.join(scopes)))
+        login_command.append('--scope')
+        for s in scopes:
+            login_command.append(f'"{s}"')
 
     # Rejected by CAE
     if claims_challenge:

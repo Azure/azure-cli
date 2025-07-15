@@ -5569,50 +5569,6 @@ def show_capacity_reservation_group(client, resource_group_name, capacity_reserv
                       expand=expand)
 
 
-def create_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
-                                capacity_reservation_name, location=None, sku_name=None, capacity=None,
-                                zone=None, tags=None):
-    Sku = cmd.get_models('Sku')
-    sku = Sku(name=sku_name, capacity=capacity)
-    CapacityReservation = cmd.get_models('CapacityReservation')
-    capacity_reservation = CapacityReservation(location=location, sku=sku, zones=zone, tags=tags)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         capacity_reservation_group_name=capacity_reservation_group_name,
-                                         capacity_reservation_name=capacity_reservation_name,
-                                         parameters=capacity_reservation)
-
-
-def update_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
-                                capacity_reservation_name, capacity=None, tags=None):
-    Sku = cmd.get_models('Sku')
-    sku = Sku(capacity=capacity)
-
-    # If only the data of SKU capacity is updated, the original tags will be cleared.
-    # Therefore, before the service fixes this issue, we add this temporary logic
-    if tags is None:
-        capacity_reservation = client.get(resource_group_name=resource_group_name,
-                                          capacity_reservation_group_name=capacity_reservation_group_name,
-                                          capacity_reservation_name=capacity_reservation_name)
-        tags = capacity_reservation.tags
-
-    CapacityReservationUpdate = cmd.get_models('CapacityReservationUpdate')
-    capacity_reservation_update = CapacityReservationUpdate(sku=sku, tags=tags)
-    return client.begin_update(resource_group_name=resource_group_name,
-                               capacity_reservation_group_name=capacity_reservation_group_name,
-                               capacity_reservation_name=capacity_reservation_name,
-                               parameters=capacity_reservation_update)
-
-
-def show_capacity_reservation(client, resource_group_name, capacity_reservation_group_name, capacity_reservation_name,
-                              instance_view=None):
-    expand = None
-    if instance_view:
-        expand = 'instanceView'
-    return client.get(resource_group_name=resource_group_name,
-                      capacity_reservation_group_name=capacity_reservation_group_name,
-                      capacity_reservation_name=capacity_reservation_name, expand=expand)
-
-
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     from .aaz.latest.vm import Update as _VMUpdate
 
