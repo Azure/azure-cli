@@ -73,6 +73,10 @@ def load_arguments(self, _):
         c.argument('script_path', required=True, help='Path to the PowerShell script to execute.')
         c.argument('parameters', help='Parameters to pass to the script in format key=value,key2=value2.')
 
+    with self.argument_context('migrate powershell get-module') as c:
+        c.argument('module_name', help='Name of the PowerShell module to check (default: Az.Migrate).')
+        c.argument('all_versions', action='store_true', help='Return all installed versions of the module.')
+
     with self.argument_context('migrate setup-env') as c:
         c.argument('install_powershell', action='store_true',
                   help='Attempt to automatically install PowerShell Core if not found.')
@@ -81,10 +85,26 @@ def load_arguments(self, _):
 
     # Parameters for Azure CLI equivalents to PowerShell Az.Migrate commands
     with self.argument_context('migrate server list-discovered') as c:
-        c.argument('resource_group_name', help='Name of the resource group.')
-        c.argument('project_name', help='Name of the Azure Migrate project.')
+        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('subscription_id', help='Azure subscription ID.')
         c.argument('server_id', help='Specific server ID to retrieve.')
+        c.argument('source_machine_type', 
+                  arg_type=get_enum_type(['HyperV', 'VMware']),
+                  help='Type of source machine (HyperV or VMware). Default is VMware.')
+        c.argument('output_format', 
+                  arg_type=get_enum_type(['json', 'table']),
+                  help='Output format. Default is json.')
+        c.argument('display_fields', 
+                  help='Comma-separated list of fields to display (e.g., DisplayName,Name,Type).')
+
+    with self.argument_context('migrate server list-discovered-table') as c:
+        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('subscription_id', help='Azure subscription ID.')
+        c.argument('source_machine_type', 
+                  arg_type=get_enum_type(['HyperV', 'VMware']),
+                  help='Type of source machine (HyperV or VMware). Default is VMware.')
 
     with self.argument_context('migrate server start-replication') as c:
         c.argument('resource_group_name', help='Name of the resource group.', required=True)
@@ -135,3 +155,10 @@ def load_arguments(self, _):
     with self.argument_context('migrate auth set-context') as c:
         c.argument('subscription_id', help='Azure subscription ID to set as current context.')
         c.argument('tenant_id', help='Azure tenant ID to set as current context.')
+
+    with self.argument_context('migrate infrastructure initialize') as c:
+        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('source_appliance_name', help='Name of the source Azure Migrate appliance.', required=True)
+        c.argument('target_appliance_name', help='Name of the target Azure Migrate appliance.', required=True)
+        c.argument('subscription_id', help='Azure subscription ID.')

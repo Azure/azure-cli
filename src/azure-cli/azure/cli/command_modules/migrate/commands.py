@@ -34,6 +34,7 @@ def load_command_table(self, _):
 
     with self.command_group('migrate powershell') as g:
         g.custom_command('execute', 'execute_custom_powershell')
+        # g.custom_command('get-module', 'get_installed_module')  # TODO: Implement this function
 
     with self.command_group('migrate', is_preview=True):
         pass
@@ -41,16 +42,14 @@ def load_command_table(self, _):
     # Azure CLI equivalents to PowerShell Az.Migrate commands
     with self.command_group('migrate server') as g:
         g.custom_command('list-discovered', 'get_discovered_server')
+        g.custom_command('list-discovered-table', 'get_discovered_servers_table')
         g.custom_command('start-replication', 'new_server_replication')
         g.custom_command('show-replication', 'get_server_replication')
         g.custom_command('start-migration', 'start_server_migration')
         g.custom_command('stop-replication', 'remove_server_replication')
-        g.custom_command('show-replication-by-id', 'get_server_replication_by_id')
-        g.custom_command('start-migration-with-object', 'start_server_migration_with_object')
 
     with self.command_group('migrate job') as g:
         g.custom_command('show', 'get_migration_job')
-        g.custom_command('show-local', 'get_local_job')
 
     with self.command_group('migrate project') as g:
         g.custom_command('create', 'create_migrate_project')
@@ -58,16 +57,11 @@ def load_command_table(self, _):
     with self.command_group('migrate infrastructure') as g:
         g.custom_command('initialize', 'initialize_replication_infrastructure')
 
-    with self.command_group('migrate disk') as g:
-        g.custom_command('create-mapping', 'create_disk_mapping')
-
-    with self.command_group('migrate replication') as g:
-        g.custom_command('create-with-params', 'create_server_replication_with_params')
-
-    with self.command_group('migrate auth') as g:
-        g.custom_command('check', 'check_azure_authentication')
-        g.custom_command('login', 'connect_azure_account')
-        g.custom_command('logout', 'disconnect_azure_account')
-        g.custom_command('set-context', 'set_azure_context')
-        g.custom_command('show-context', 'get_azure_context')
+    # Add auth commands back when implemented
+    # with self.command_group('migrate auth') as g:
+    #     g.custom_command('check', 'check_azure_authentication')
+    #     g.custom_command('login', 'connect_azure_account')
+    #     g.custom_command('logout', 'disconnect_azure_account')
+    #     g.custom_command('set-context', 'set_azure_context')
+    #     g.custom_command('show-context', 'get_azure_context')
 

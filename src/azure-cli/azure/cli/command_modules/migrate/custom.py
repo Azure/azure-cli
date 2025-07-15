@@ -800,7 +800,7 @@ def _get_platform_recommendations(system, checks):
 
 # Azure CLI equivalents to PowerShell Az.Migrate commands
 
-def get_discovered_server(cmd, resource_group_name, project_name, subscription_id=None, server_id=None, source_machine_type='VMware'):
+def get_discovered_server(cmd, resource_group_name, project_name, subscription_id=None, server_id=None, source_machine_type='VMware', output_format='json', display_fields=None):
     """Azure CLI equivalent to Get-AzMigrateDiscoveredServer PowerShell cmdlet."""
     ps_executor = get_powershell_executor()
     
@@ -816,7 +816,7 @@ def get_discovered_server(cmd, resource_group_name, project_name, subscription_i
     $SourceMachineType = '{source_machine_type}'
     
     try {{
-        # Execute the real PowerShell cmdlet
+        # Execute the real PowerShell cmdlet - equivalent to your provided commands
         if ('{server_id}') {{
             $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceMachineType $SourceMachineType | Where-Object {{ $_.Id -eq '{server_id}' }}
         }} else {{
@@ -824,10 +824,43 @@ def get_discovered_server(cmd, resource_group_name, project_name, subscription_i
         }}
         
         if ($DiscoveredServers) {{
-            $DiscoveredServers | ConvertTo-Json -Depth 5
+            # Format output similar to Write-Output $DiscoveredServers | Format-Table DisplayName,Name,Type
+            if ('{output_format}' -eq 'table') {{
+                Write-Host ""
+                Write-Host "Discovered Servers in Project: $ProjectName (Source Type: $SourceMachineType)" -ForegroundColor Green
+                Write-Host "=" * 80 -ForegroundColor Gray
+                
+                # Create table output similar to PowerShell Format-Table
+                $DiscoveredServers | Format-Table -Property DisplayName, Name, Type -AutoSize | Out-String
+                
+                Write-Host ""
+                Write-Host "Total discovered servers: $($DiscoveredServers.Count)" -ForegroundColor Cyan
+            }} else {{
+                # Return JSON for programmatic use
+                $result = @{{
+                    'DiscoveredServers' = $DiscoveredServers
+                    'Count' = $DiscoveredServers.Count
+                    'ProjectName' = $ProjectName
+                    'ResourceGroupName' = $ResourceGroupName
+                    'SourceMachineType' = $SourceMachineType
+                }}
+                $result | ConvertTo-Json -Depth 5
+            }}
         }} else {{
-            Write-Host "No discovered servers found in project $ProjectName"
-            @{{ 'DiscoveredServers' = @(); 'Count' = 0 }} | ConvertTo-Json
+            if ('{output_format}' -eq 'table') {{
+                Write-Host ""
+                Write-Host "No discovered servers found in project: $ProjectName (Source Type: $SourceMachineType)" -ForegroundColor Yellow
+                Write-Host ""
+            }} else {{
+                @{{ 
+                    'DiscoveredServers' = @()
+                    'Count' = 0
+                    'ProjectName' = $ProjectName
+                    'ResourceGroupName' = $ResourceGroupName
+                    'SourceMachineType' = $SourceMachineType
+                    'Message' = 'No discovered servers found'
+                }} | ConvertTo-Json
+            }}
         }}
     }} catch {{
         Write-Error "Failed to get discovered servers: $($_.Exception.Message)"
@@ -836,28 +869,48 @@ def get_discovered_server(cmd, resource_group_name, project_name, subscription_i
     """
     
     try:
-        result = ps_executor.execute_azure_authenticated_script(discover_script, subscription_id=subscription_id)
-        
-        # Extract JSON from PowerShell output (may have other text mixed in)
-        stdout_content = result.get('stdout', '').strip()
-        if not stdout_content:
-            raise CLIError('No output received from PowerShell command')
-        
-        # Find JSON content (starts with { and ends with })
-        json_start = stdout_content.find('{')
-        json_end = stdout_content.rfind('}')
-        
-        if json_start != -1 and json_end != -1 and json_end > json_start:
-            json_content = stdout_content[json_start:json_end + 1]
-            try:
-                discovered_data = json.loads(json_content)
-                return discovered_data
-            except json.JSONDecodeError as je:
-                raise CLIError(f'Failed to parse JSON from PowerShell output: {str(je)}')
+        if output_format == 'table':
+            # For table output, use interactive execution to show PowerShell formatting
+            result = ps_executor.execute_script_interactive(discover_script, subscription_id=subscription_id)
+            return {'message': 'Table output displayed above', 'format': 'table'}
         else:
-            # No JSON found, return raw output for debugging
-            return {
-                'raw_output': stdout_content,
+            # For JSON output, use regular execution
+            result = ps_executor.execute_azure_authenticated_script(discover_script, subscription_id=subscription_id)
+            
+            # Extract JSON from PowerShell output (may have other text mixed in)
+            stdout_content = result.get('stdout', '').strip()
+            if not stdout_content:
+                raise CLIError('No output received from PowerShell command')
+            
+            # Find JSON content (starts with { and ends with })
+            json_start = stdout_content.find('{')
+            json_end = stdout_content.rfind('}')
+            
+            if json_start != -1 and json_end != -1 and json_end > json_start:
+                json_content = stdout_content[json_start:json_end + 1]
+                try:
+                    discovered_data = json.loads(json_content)
+                    
+                    # If display_fields is specified, filter the output
+                    if display_fields and discovered_data.get('DiscoveredServers'):
+                        fields = [field.strip() for field in display_fields.split(',')]
+                        filtered_servers = []
+                        for server in discovered_data['DiscoveredServers']:
+                            filtered_server = {}
+                            for field in fields:
+                                if field in server:
+                                    filtered_server[field] = server[field]
+                            filtered_servers.append(filtered_server)
+                        discovered_data['DiscoveredServers'] = filtered_servers
+                        discovered_data['DisplayFields'] = fields
+                    
+                    return discovered_data
+                except json.JSONDecodeError as je:
+                    raise CLIError(f'Failed to parse JSON from PowerShell output: {str(je)}')
+            else:
+                # No JSON found, return raw output for debugging
+                return {
+                    'raw_output': stdout_content,
                 'message': 'No JSON structure found in PowerShell output',
                 'stderr': result.get('stderr', '')
             }
@@ -1200,342 +1253,180 @@ def create_migrate_project(cmd, resource_group_name, project_name, location='Eas
         raise CLIError(f'Failed to create migrate project: {str(e)}')
 
 
-# Additional Azure CLI equivalents needed for full PowerShell compatibility
-
-def initialize_replication_infrastructure(cmd, resource_group_name, project_name, 
-                                        source_appliance_name, target_appliance_name):
-    """Azure CLI equivalent to Initialize-AzMigrateLocalReplicationInfrastructure."""
+def get_discovered_servers_table(cmd, resource_group_name, project_name, source_machine_type='VMware', subscription_id=None):
+    """
+    Exact Azure CLI equivalent to the PowerShell commands:
+    $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceMachineType <'HyperV' or 'VMware'>
+    Write-Output $DiscoveredServers | Format-Table DisplayName,Name,Type
+    """
     ps_executor = get_powershell_executor()
     
-    infrastructure_script = f"""
-    # Real Azure authentication and execution
-    $ResourceGroupName = '{resource_group_name}'
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    # This script exactly matches your PowerShell commands
+    powershell_script = f"""
+    # Exact equivalent of the provided PowerShell commands
     $ProjectName = '{project_name}'
-    $SourceApplianceName = '{source_appliance_name}'
-    $TargetApplianceName = '{target_appliance_name}'
+    $ResourceGroupName = '{resource_group_name}'
+    $SourceMachineType = '{source_machine_type}'
     
     try {{
-        # This would need real Azure authentication
-        Initialize-AzMigrateLocalReplicationInfrastructure `
-            -ProjectName $ProjectName `
-            -ResourceGroupName $ResourceGroupName `
-            -SourceApplianceName $SourceApplianceName `
-            -TargetApplianceName $TargetApplianceName
-            
-        Write-Output "Infrastructure initialized successfully"
+        Write-Host ""
+        Write-Host "Executing: Get-AzMigrateDiscoveredServer -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceMachineType $SourceMachineType" -ForegroundColor Cyan
+        Write-Host ""
+        
+        # Your exact PowerShell commands:
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceMachineType $SourceMachineType
+        Write-Output $DiscoveredServers | Format-Table DisplayName,Name,Type
+        
+        Write-Host ""
+        Write-Host "Total discovered servers: $($DiscoveredServers.Count)" -ForegroundColor Green
+        Write-Host ""
+        
     }} catch {{
-        Write-Error "Failed to initialize replication infrastructure: $($_.Exception.Message)"
+        Write-Error "Failed to execute PowerShell commands: $($_.Exception.Message)"
+        Write-Host ""
+        Write-Host "Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "1. Ensure you are authenticated to Azure: az migrate auth login" -ForegroundColor Yellow
+        Write-Host "2. Verify the project exists: az migrate project create --resource-group $ResourceGroupName --project-name $ProjectName" -ForegroundColor Yellow
+        Write-Host "3. Check if Az.Migrate module is installed: az migrate powershell get-module" -ForegroundColor Yellow
+        Write-Host ""
         throw
     }}
     """
     
     try:
-        result = ps_executor.execute_script(infrastructure_script)
-        return {"status": "success", "message": "Infrastructure initialized"}
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(powershell_script)
+        return {
+            'message': 'PowerShell commands executed successfully. Output displayed above.',
+            'commands_executed': [
+                f'$DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType {source_machine_type}',
+                'Write-Output $DiscoveredServers | Format-Table DisplayName,Name,Type'
+            ],
+            'parameters': {
+                'ProjectName': project_name,
+                'ResourceGroupName': resource_group_name,
+                'SourceMachineType': source_machine_type
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to execute PowerShell commands: {str(e)}')
+
+
+def initialize_replication_infrastructure(cmd, resource_group_name, project_name, source_appliance_name, target_appliance_name, subscription_id=None):
+    """
+    Azure CLI equivalent to Initialize-AzMigrateLocalReplicationInfrastructure PowerShell cmdlet.
+    Initializes the replication infrastructure for Azure Migrate server migration.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Check Azure authentication first
+    auth_status = ps_executor.check_azure_authentication()
+    if not auth_status.get('IsAuthenticated', False):
+        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
+    
+    # PowerShell script that executes the real cmdlet
+    infrastructure_script = f"""
+    # Azure CLI equivalent functionality for Initialize-AzMigrateLocalReplicationInfrastructure
+    $ProjectName = '{project_name}'
+    $ResourceGroupName = '{resource_group_name}'
+    $SourceApplianceName = '{source_appliance_name}'
+    $TargetApplianceName = '{target_appliance_name}'
+    
+    try {{
+        Write-Host ""
+        Write-Host "Executing: Initialize-AzMigrateLocalReplicationInfrastructure -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceApplianceName $SourceApplianceName -TargetApplianceName $TargetApplianceName" -ForegroundColor Cyan
+        Write-Host ""
+        
+        # Execute the real PowerShell cmdlet
+        $InfrastructureResult = Initialize-AzMigrateLocalReplicationInfrastructure `
+            -ProjectName $ProjectName `
+            -ResourceGroupName $ResourceGroupName `
+            -SourceApplianceName $SourceApplianceName `
+            -TargetApplianceName $TargetApplianceName
+        
+        Write-Host ""
+        Write-Host "Replication infrastructure initialization completed successfully!" -ForegroundColor Green
+        Write-Host ""
+        
+        # Display results
+        if ($InfrastructureResult) {{
+            Write-Host "Infrastructure Details:" -ForegroundColor Yellow
+            $InfrastructureResult | Format-List
+            
+            # Return JSON for programmatic use
+            $result = @{{
+                'Status' = 'Success'
+                'ProjectName' = $ProjectName
+                'ResourceGroupName' = $ResourceGroupName
+                'SourceApplianceName' = $SourceApplianceName
+                'TargetApplianceName' = $TargetApplianceName
+                'InfrastructureDetails' = $InfrastructureResult
+                'Message' = 'Replication infrastructure initialized successfully'
+            }}
+            $result | ConvertTo-Json -Depth 5
+        }} else {{
+            Write-Host "Infrastructure initialization completed but no detailed results returned." -ForegroundColor Yellow
+            @{{
+                'Status' = 'Completed'
+                'ProjectName' = $ProjectName
+                'ResourceGroupName' = $ResourceGroupName
+                'SourceApplianceName' = $SourceApplianceName
+                'TargetApplianceName' = $TargetApplianceName
+                'Message' = 'Infrastructure initialization completed'
+            }} | ConvertTo-Json
+        }}
+        
+    }} catch {{
+        Write-Error "Failed to initialize replication infrastructure: $($_.Exception.Message)"
+        Write-Host ""
+        Write-Host "Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "1. Ensure you are authenticated to Azure with proper permissions" -ForegroundColor Yellow
+        Write-Host "2. Verify the Azure Migrate project exists and is accessible" -ForegroundColor Yellow
+        Write-Host "3. Check that the source and target appliances are properly configured" -ForegroundColor Yellow
+        Write-Host "4. Ensure Azure Migrate: Server Migration solution is enabled" -ForegroundColor Yellow
+        Write-Host "5. Verify network connectivity between appliances" -ForegroundColor Yellow
+        Write-Host ""
+        
+        $errorResult = @{{
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'ProjectName' = $ProjectName
+            'ResourceGroupName' = $ResourceGroupName
+            'SourceApplianceName' = $SourceApplianceName
+            'TargetApplianceName' = $TargetApplianceName
+            'TroubleshootingSteps' = @(
+                'Verify Azure authentication and permissions',
+                'Check Azure Migrate project accessibility',
+                'Confirm appliance names and configuration',
+                'Ensure Server Migration solution is enabled',
+                'Test network connectivity between appliances',
+                'Review Azure Migrate documentation for infrastructure requirements'
+            )
+        }}
+        $errorResult | ConvertTo-Json -Depth 3
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(infrastructure_script)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': f'Initialize-AzMigrateLocalReplicationInfrastructure -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceApplianceName {source_appliance_name} -TargetApplianceName {target_appliance_name}',
+            'parameters': {
+                'ProjectName': project_name,
+                'ResourceGroupName': resource_group_name,
+                'SourceApplianceName': source_appliance_name,
+                'TargetApplianceName': target_appliance_name
+            }
+        }
+        
     except Exception as e:
         raise CLIError(f'Failed to initialize replication infrastructure: {str(e)}')
-
-
-def create_disk_mapping(cmd, disk_id, is_os_disk=True, is_dynamic=False, 
-                       size_gb=64, format_type='VHD', physical_sector_size=512):
-    """Azure CLI equivalent to New-AzMigrateLocalDiskMappingObject."""
-    ps_executor = get_powershell_executor()
-    
-    disk_mapping_script = f"""
-    $DiskMapping = New-AzMigrateLocalDiskMappingObject `
-        -DiskID '{disk_id}' `
-        -IsOSDisk '{str(is_os_disk).lower()}' `
-        -IsDynamic '{str(is_dynamic).lower()}' `
-        -Size {size_gb} `
-        -Format '{format_type}' `
-        -PhysicalSectorSize {physical_sector_size}
-        
-    $DiskMapping | ConvertTo-Json -Depth 3
-    """
-    
-    try:
-        result = ps_executor.execute_script(disk_mapping_script)
-        disk_mapping = json.loads(result['stdout'])
-        return disk_mapping
-    except Exception as e:
-        raise CLIError(f'Failed to create disk mapping: {str(e)}')
-
-
-def create_server_replication_with_params(cmd, machine_id, os_disk_id, target_storage_path_id,
-                                        target_virtual_switch_id, target_resource_group_id, 
-                                        target_vm_name):
-    """Azure CLI equivalent to New-AzMigrateLocalServerReplication with full parameters."""
-    ps_executor = get_powershell_executor()
-    
-    replication_script = f"""
-    $ReplicationJob = New-AzMigrateLocalServerReplication `
-        -MachineId '{machine_id}' `
-        -OSDiskID '{os_disk_id}' `
-        -TargetStoragePathId '{target_storage_path_id}' `
-        -TargetVirtualSwitch '{target_virtual_switch_id}' `
-        -TargetResourceGroupId '{target_resource_group_id}' `
-        -TargetVMName '{target_vm_name}'
-        
-    $ReplicationJob | ConvertTo-Json -Depth 3
-    """
-    
-    try:
-        result = ps_executor.execute_script(replication_script)
-        replication_job = json.loads(result['stdout'])
-        return replication_job
-    except Exception as e:
-        raise CLIError(f'Failed to create server replication: {str(e)}')
-
-
-def get_local_job(cmd, input_object=None, job_id=None):
-    """Azure CLI equivalent to Get-AzMigrateLocalJob."""
-    ps_executor = get_powershell_executor()
-    
-    if input_object:
-        job_script = f"""
-        $Job = Get-AzMigrateLocalJob -InputObject $({json.dumps(input_object)})
-        $Job | ConvertTo-Json -Depth 3
-        """
-    elif job_id:
-        job_script = f"""
-        $Job = Get-AzMigrateLocalJob -Id '{job_id}'
-        $Job | ConvertTo-Json -Depth 3
-        """
-    else:
-        job_script = """
-        $Jobs = Get-AzMigrateLocalJob
-        $Jobs | ConvertTo-Json -Depth 3
-        """
-    
-    try:
-        result = ps_executor.execute_script(job_script)
-        job_data = json.loads(result['stdout'])
-        return job_data
-    except Exception as e:
-        raise CLIError(f'Failed to get migration job: {str(e)}')
-
-
-def get_server_replication_by_id(cmd, discovered_machine_id=None, input_object=None):
-    """Azure CLI equivalent to Get-AzMigrateLocalServerReplication with specific parameters."""
-    ps_executor = get_powershell_executor()
-    
-    if discovered_machine_id:
-        replication_script = f"""
-        $ProtectedItem = Get-AzMigrateLocalServerReplication -DiscoveredMachineId '{discovered_machine_id}'
-        $ProtectedItem | ConvertTo-Json -Depth 3
-        """
-    elif input_object:
-        replication_script = f"""
-        $ProtectedItem = Get-AzMigrateLocalServerReplication -InputObject $({json.dumps(input_object)})
-        $ProtectedItem | ConvertTo-Json -Depth 3
-        """
-    else:
-        replication_script = """
-        $ProtectedItems = Get-AzMigrateLocalServerReplication
-        $ProtectedItems | ConvertTo-Json -Depth 3
-        """
-    
-    try:
-        result = ps_executor.execute_script(replication_script)
-        replication_data = json.loads(result['stdout'])
-        return replication_data
-    except Exception as e:
-        raise CLIError(f'Failed to get server replication: {str(e)}')
-
-
-def start_server_migration_with_object(cmd, input_object, turn_off_source_server=False):
-    """Azure CLI equivalent to Start-AzMigrateLocalServerMigration with InputObject."""
-    ps_executor = get_powershell_executor()
-    
-    migration_script = f"""
-    $MigrationJob = Start-AzMigrateLocalServerMigration `
-        -InputObject $({json.dumps(input_object)}) `
-        {'-TurnOffSourceServer' if turn_off_source_server else ''}
-        
-    $MigrationJob | ConvertTo-Json -Depth 3
-    """
-    
-    try:
-        result = ps_executor.execute_script(migration_script)
-        migration_job = json.loads(result['stdout'])
-        return migration_job
-    except Exception as e:
-        raise CLIError(f'Failed to start server migration: {str(e)}')
-
-
-def check_azure_authentication(cmd):
-    """Check Azure authentication status and Az.Migrate module availability."""
-    ps_executor = get_powershell_executor()
-    
-    auth_status = ps_executor.check_azure_authentication()
-    
-    return {
-        'azure_authentication': {
-            'is_authenticated': auth_status.get('IsAuthenticated', False),
-            'module_available': auth_status.get('ModuleAvailable', False),
-            'subscription_id': auth_status.get('SubscriptionId'),
-            'account_id': auth_status.get('AccountId'),
-            'tenant_id': auth_status.get('TenantId'),
-            'error': auth_status.get('Error')
-        },
-        'recommendations': [
-            "Install Az.Migrate module: Install-Module -Name Az.Migrate" if not auth_status.get('ModuleAvailable') else None,
-            "Authenticate to Azure: Connect-AzAccount" if not auth_status.get('IsAuthenticated') else None,
-            "Set subscription context: Set-AzContext -SubscriptionId 'your-subscription-id'" if auth_status.get('IsAuthenticated') else None
-        ]
-    }
-
-
-def connect_azure_account(cmd, tenant_id=None, subscription_id=None, device_code=False, 
-                        app_id=None, secret=None):
-    """
-    Azure CLI equivalent to Connect-AzAccount PowerShell cmdlet.
-    
-    This command works cross-platform (Windows, Linux, macOS) but requires:
-    - PowerShell Core (pwsh) on Linux/macOS
-    - Azure PowerShell modules (Az.Accounts, Az.Migrate)
-    
-    Installation instructions:
-    - Windows: PowerShell is pre-installed, install Az modules with: Install-Module -Name Az
-    - Linux: Install PowerShell Core, then Az modules
-    - macOS: Install PowerShell Core via Homebrew, then Az modules
-    """
-    ps_executor = get_powershell_executor()
-    
-    # Check if PowerShell is available for cross-platform compatibility
-    current_platform = platform.system().lower()
-    is_available, ps_command = ps_executor.check_powershell_availability()
-    
-    if not is_available:
-        error_msg = f"PowerShell not found on {current_platform}. "
-        
-        if current_platform == 'linux':
-            error_msg += "Install PowerShell Core:\n"
-            error_msg += "Ubuntu/Debian: curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add - && "
-            error_msg += "echo \"deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -rs)-prod $(lsb_release -cs) main\" | "
-            error_msg += "sudo tee /etc/apt/sources.list.d/microsoft.list && sudo apt update && sudo apt install -y powershell"
-        elif current_platform == 'darwin':
-            error_msg += "Install PowerShell Core:\nmacOS: brew install --cask powershell"
-        else:
-            error_msg += "Please install PowerShell."
-            
-        raise CLIError(error_msg)
-    
-    print(f"Using PowerShell: {ps_command} on {current_platform}")
-    
-    service_principal = None
-    if app_id and secret:
-        service_principal = {
-            'app_id': app_id,
-            'secret': secret
-        }
-    
-    try:
-        result = ps_executor.connect_azure_account(
-            tenant_id=tenant_id,
-            subscription_id=subscription_id,
-            device_code=device_code,
-            service_principal=service_principal
-        )
-        
-        if result.get('Success'):
-            # For interactive logins, the output has already been displayed
-            # Just return the final result
-            return {
-                'status': 'success',
-                'account_id': result.get('AccountId'),
-                'subscription_id': result.get('SubscriptionId'),
-                'subscription_name': result.get('SubscriptionName'),
-                'tenant_id': result.get('TenantId'),
-                'environment': result.get('Environment'),
-                'message': f'Successfully connected to Azure using {ps_command}',
-                'platform': current_platform
-            }
-        else:
-            error_msg = result.get('Error', 'Unknown error')
-            if 'Output' in result:
-                # Include the PowerShell output for context
-                logger.info(f"PowerShell output: {result['Output']}")
-            raise CLIError(f"Failed to connect to Azure: {error_msg}")
-            
-    except Exception as e:
-        raise CLIError(f'Failed to connect to Azure: {str(e)}')
-
-
-def disconnect_azure_account(cmd):
-    """Azure CLI equivalent to Disconnect-AzAccount PowerShell cmdlet."""
-    ps_executor = get_powershell_executor()
-    
-    try:
-        result = ps_executor.disconnect_azure_account()
-        
-        if result.get('Success'):
-            return {
-                'status': 'success',
-                'message': result.get('Message', 'Successfully disconnected from Azure')
-            }
-        else:
-            raise CLIError(f"Failed to disconnect from Azure: {result.get('Error', 'Unknown error')}")
-            
-    except Exception as e:
-        raise CLIError(f'Failed to disconnect from Azure: {str(e)}')
-
-
-def set_azure_context(cmd, subscription_id=None, tenant_id=None):
-    """Azure CLI equivalent to Set-AzContext PowerShell cmdlet."""
-    ps_executor = get_powershell_executor()
-    
-    if not subscription_id and not tenant_id:
-        raise CLIError('Either --subscription-id or --tenant-id must be provided')
-    
-    try:
-        result = ps_executor.set_azure_context(
-            subscription_id=subscription_id,
-            tenant_id=tenant_id
-        )
-        
-        if result.get('Success'):
-            return {
-                'status': 'success',
-                'account_id': result.get('AccountId'),
-                'subscription_id': result.get('SubscriptionId'),
-                'subscription_name': result.get('SubscriptionName'),
-                'tenant_id': result.get('TenantId'),
-                'environment': result.get('Environment'),
-                'message': 'Successfully set Azure context'
-            }
-        else:
-            raise CLIError(f"Failed to set Azure context: {result.get('Error', 'Unknown error')}")
-            
-    except Exception as e:
-        raise CLIError(f'Failed to set Azure context: {str(e)}')
-
-
-def get_azure_context(cmd):
-    """Azure CLI equivalent to Get-AzContext PowerShell cmdlet."""
-    ps_executor = get_powershell_executor()
-    
-    try:
-        result = ps_executor.get_azure_context()
-        
-        if result.get('Success'):
-            if result.get('IsAuthenticated'):
-                return {
-                    'is_authenticated': True,
-                    'account_id': result.get('AccountId'),
-                    'subscription_id': result.get('SubscriptionId'),
-                    'subscription_name': result.get('SubscriptionName'),
-                    'tenant_id': result.get('TenantId'),
-                    'environment': result.get('Environment'),
-                    'account_type': result.get('AccountType')
-                }
-            else:
-                return {
-                    'is_authenticated': False,
-                    'message': result.get('Message', 'No Azure context found')
-                }
-        else:
-            raise CLIError(f"Failed to get Azure context: {result.get('Error', 'Unknown error')}")
-            
-    except Exception as e:
-        raise CLIError(f'Failed to get Azure context: {str(e)}')

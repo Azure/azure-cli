@@ -177,6 +177,28 @@ helps['migrate powershell execute'] = """
           text: az migrate powershell execute --script-path "C:\\Scripts\\MyScript.ps1" --parameters "Server=MyServer,Database=MyDB"
 """
 
+helps['migrate powershell get-module'] = """
+    type: command
+    short-summary: Check if a PowerShell module is installed (equivalent to Get-InstalledModule).
+    long-summary: |
+        Azure CLI equivalent to the PowerShell Get-InstalledModule cmdlet. Checks if specified 
+        PowerShell modules are installed on the system and displays detailed information about 
+        installed versions. Works cross-platform with PowerShell Core on Linux/macOS and 
+        Windows PowerShell on Windows.
+    examples:
+        - name: Check if Az.Migrate module is installed
+          text: az migrate powershell get-module
+        - name: Check if a specific module is installed
+          text: az migrate powershell get-module --module-name "Az.Accounts"
+        - name: Get all installed versions of a module
+          text: az migrate powershell get-module --module-name "Az.Migrate" --all-versions
+        - name: Check multiple modules installation status
+          text: |
+            az migrate powershell get-module --module-name "Az.Accounts"
+            az migrate powershell get-module --module-name "Az.Migrate" 
+            az migrate powershell get-module --module-name "Az.Resources"
+"""
+
 helps['migrate setup-env'] = """
     type: command
     short-summary: Configure the system environment for migration operations.
@@ -208,12 +230,53 @@ helps['migrate server list-discovered'] = """
     short-summary: List discovered servers in an Azure Migrate project.
     long-summary: |
         Azure CLI equivalent to Get-AzMigrateDiscoveredServer PowerShell cmdlet.
-        Lists all servers discovered in the specified Azure Migrate project.
+        Lists all servers discovered in the specified Azure Migrate project with support
+        for different source machine types (HyperV or VMware) and output formats.
+        Supports both JSON and table output formats, with table format providing
+        PowerShell-like Format-Table display similar to:
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceMachineType <'HyperV' or 'VMware'>
+        Write-Output $DiscoveredServers | Format-Table DisplayName,Name,Type
     examples:
-        - name: List all discovered servers
+        - name: List all discovered VMware servers (default)
           text: az migrate server list-discovered --resource-group myRG --project-name myProject
+        - name: List all discovered HyperV servers  
+          text: az migrate server list-discovered --resource-group myRG --project-name myProject --source-machine-type HyperV
+        - name: List discovered servers with table output (equivalent to PowerShell Format-Table)
+          text: az migrate server list-discovered --resource-group myRG --project-name myProject --output-format table
+        - name: List discovered servers showing only specific fields
+          text: az migrate server list-discovered --resource-group myRG --project-name myProject --display-fields "DisplayName,Name,Type"
         - name: Get specific server details
           text: az migrate server list-discovered --resource-group myRG --project-name myProject --server-id myServer
+        - name: Exact equivalent of the PowerShell commands provided
+          text: |
+            # Equivalent to: $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceMachineType HyperV
+            # Equivalent to: Write-Output $DiscoveredServers | Format-Table DisplayName,Name,Type
+            az migrate server list-discovered --resource-group myRG --project-name myProject --source-machine-type HyperV --output-format table --display-fields "DisplayName,Name,Type"
+"""
+
+helps['migrate server list-discovered-table'] = """
+    type: command
+    short-summary: Exact Azure CLI equivalent to the PowerShell commands for listing discovered servers with table formatting.
+    long-summary: |
+        This command provides an exact Azure CLI equivalent to these PowerShell commands:
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceMachineType <'HyperV' or 'VMware'>
+        Write-Output $DiscoveredServers | Format-Table DisplayName,Name,Type
+        
+        The command executes the PowerShell cmdlets directly and displays the output in the same table format
+        as the original PowerShell commands, making it perfect for users transitioning from PowerShell to Azure CLI.
+    examples:
+        - name: Exact equivalent for VMware servers (default)
+          text: az migrate server list-discovered-table --resource-group myRG --project-name myProject
+        - name: Exact equivalent for HyperV servers
+          text: az migrate server list-discovered-table --resource-group myRG --project-name myProject --source-machine-type HyperV
+        - name: PowerShell command equivalents
+          text: |
+            # PowerShell commands:
+            # $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName "myProject" -ResourceGroupName "myRG" -SourceMachineType "HyperV"
+            # Write-Output $DiscoveredServers | Format-Table DisplayName,Name,Type
+            
+            # Azure CLI equivalent:
+            az migrate server list-discovered-table --resource-group myRG --project-name myProject --source-machine-type HyperV
 """
 
 helps['migrate server start-replication'] = """
@@ -379,4 +442,46 @@ helps['migrate auth check'] = """
     examples:
         - name: Check authentication status
           text: az migrate auth check
+"""
+
+helps['migrate infrastructure'] = """
+    type: group
+    short-summary: Azure CLI commands for managing Azure Migrate replication infrastructure.
+    long-summary: |
+        Commands to initialize and manage Azure Migrate replication infrastructure for server migration.
+        These commands provide Azure CLI equivalents to PowerShell Az.Migrate infrastructure cmdlets.
+"""
+
+helps['migrate infrastructure initialize'] = """
+    type: command
+    short-summary: Initialize Azure Migrate replication infrastructure (equivalent to Initialize-AzMigrateLocalReplicationInfrastructure).
+    long-summary: |
+        Azure CLI equivalent to the PowerShell Initialize-AzMigrateLocalReplicationInfrastructure cmdlet.
+        This command initializes the replication infrastructure required for Azure Migrate server migration
+        between source and target appliances. It sets up the necessary components for replicating servers
+        from on-premises environments to Azure.
+        
+        This command executes the real PowerShell cmdlet:
+        Initialize-AzMigrateLocalReplicationInfrastructure -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceApplianceName $SourceApplianceName -TargetApplianceName $TargetApplianceName
+        
+        Prerequisites:
+        - Azure Migrate project with Server Migration solution enabled
+        - Source appliance deployed and configured in on-premises environment
+        - Target appliance (if required) deployed and configured
+        - Proper Azure authentication and permissions
+        - Network connectivity between appliances
+    examples:
+        - name: Initialize replication infrastructure between appliances
+          text: az migrate infrastructure initialize --resource-group myRG --project-name myProject --source-appliance-name "OnPremAppliance" --target-appliance-name "AzureAppliance"
+        - name: Initialize with specific subscription
+          text: az migrate infrastructure initialize --resource-group myRG --project-name myProject --source-appliance-name "VMwareAppliance" --target-appliance-name "AzureTarget" --subscription-id "00000000-0000-0000-0000-000000000000"
+        - name: PowerShell command equivalent
+          text: |
+            # PowerShell command:
+            # Initialize-AzMigrateLocalReplicationInfrastructure -ProjectName "myProject" -ResourceGroupName "myRG" -SourceApplianceName "OnPremAppliance" -TargetApplianceName "AzureAppliance"
+            
+            # Azure CLI equivalent:
+            az migrate infrastructure initialize --resource-group myRG --project-name myProject --source-appliance-name "OnPremAppliance" --target-appliance-name "AzureAppliance"
+        - name: Common use case - VMware to Azure setup
+          text: az migrate infrastructure initialize --resource-group production-rg --project-name migrate-prod --source-appliance-name "VMware-Appliance-01" --target-appliance-name "Azure-Target-01"
 """
