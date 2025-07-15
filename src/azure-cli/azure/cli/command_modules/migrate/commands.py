@@ -3,10 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.migrate._client_factory import cf_migrate
-
 
 def load_command_table(self, _):
 
