@@ -13066,7 +13066,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "--resource-group {resource_group} "
             "--cluster-name {name} "
             "--name {node_pool_name} "
-            "--current-vm-sizes Standard_D8s_v3",
+            "--current-vm-sizes Standard_D8s_v3 "
+            "--yes",
         ).get_output_in_json()
         assert len(np["virtualMachinesProfile"]["scale"]["manual"]) == 1
 

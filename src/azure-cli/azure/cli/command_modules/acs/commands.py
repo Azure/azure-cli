@@ -155,7 +155,7 @@ def load_command_table(self, _):
     with self.command_group('aks nodepool manual-scale', agent_pools_sdk, client_factory=cf_agent_pools) as g:
         g.custom_command("add", "aks_agentpool_manual_scale_add", supports_no_wait=True)
         g.custom_command("update", "aks_agentpool_manual_scale_update", supports_no_wait=True)
-        g.custom_command("delete", "aks_agentpool_manual_scale_delete", supports_no_wait=True)
+        g.custom_command("delete", "aks_agentpool_manual_scale_delete", supports_no_wait=True, confirmation=True)
 
     with self.command_group('aks command', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command('invoke', 'aks_runcommand', supports_no_wait=True,
