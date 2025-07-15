@@ -125,17 +125,16 @@ def validate_registry_name(cmd, namespace):
     # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
     if hasattr(suffixes, 'acr_login_server_endpoint'):
         acr_suffix = suffixes.acr_login_server_endpoint
-        if registry_login_server_suffix.lower() == acr_suffix:
-            if len(registry_components) > 1:
-                if dnl_hash != -1:
-                    removed_suffix = trimmed_registry_name[dnl_hash:] + registry_login_server_suffix
-                    registry_name = registry_components[0][:dnl_hash]
-                else:
-                    removed_suffix = registry_login_server_suffix
-                    registry_name = registry_components[0]
-                logger.warning("Registry name is %s. The following suffix '%s' is automatically omitted.",
-                                registry_name,
-                                removed_suffix)           
+        if registry_login_server_suffix.lower() == acr_suffix and len(registry_components) > 1:
+            if dnl_hash != -1:
+                removed_suffix = trimmed_registry_name[dnl_hash:] + registry_login_server_suffix
+                registry_name = registry_components[0][:dnl_hash]
+            else:
+                removed_suffix = registry_login_server_suffix
+                registry_name = registry_components[0]
+            logger.warning("Registry name is %s. The following suffix '%s' is automatically omitted.",
+                            registry_name,
+                            removed_suffix)           
         else:
             if registry_login_server_suffix != '':
                 raise InvalidArgumentValueError(INVALID_LOGIN_SERVER_SUFFIX)
