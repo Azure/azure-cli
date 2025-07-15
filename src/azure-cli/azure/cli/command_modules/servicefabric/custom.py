@@ -75,6 +75,7 @@ DEFAULT_BACKEND_PORT = 3389
 SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME = "servicefabricnode"
 SERVICE_FABRIC_LINUX_NODE_EXT_NAME = "servicefabriclinuxnode"
 
+CLUSTER_NAME_VALUE = "clusterName"
 SOURCE_VAULT_VALUE = "sourceVaultValue"
 CERTIFICATE_THUMBPRINT = "certificateThumbprint"
 CERTIFICATE_URL_VALUE = "certificateUrlValue"
@@ -134,7 +135,7 @@ def new_cluster(cmd,
                 'when \'--secret-identifier\' is specified')
     if parameter_file or template_file:
         if parameter_file is None or template_file is None:
-            raise CLIError('If using customize template to deploy,both \'--parameter-file\' and \'--template-file\' can not be None ' + '\n For example:\n az sf cluster create --resource-group myRg --location westus --certificate-subject-name test.com --parameter-file c:\\parameter.json --template-file c:\\template.json' +
+            raise CLIError('If using customize template to deploy, neither \'--parameter-file\' and \'--template-file\' can be None ' + '\n For example:\n az sf cluster create --resource-group myRg --location westus --certificate-subject-name test.com --parameter-file c:\\parameter.json --template-file c:\\template.json' +
                            '\n az sf cluster create --resource-group myRg --location westus --parameter-file c:\\parameter.json --template-file c:\\template.json --certificate_file c:\\test.pfx' + '\n az sf cluster create --resource-group myRg --location westus --certificate-subject-name test.com --parameter-file c:\\parameter.json --template-file c:\\template.json --certificate-output-folder c:\\certoutput')
         if cluster_size or vm_sku or vm_user_name:
             raise CLIError('\'cluster_size\',\'vm_sku\',\'vm_os\',\'vm_user_name\' can not be specified when using customize template deployment')
@@ -218,18 +219,19 @@ def new_cluster(cmd,
                                                           os_type=vm_os,
                                                           linux=linux)
     else:
-        parameters, output_file = _set_parameters_for_customize_template(cmd,
-                                                                         cli_ctx,
-                                                                         resource_group_name,
-                                                                         certificate_file,
-                                                                         certificate_password,
-                                                                         vault_name,
-                                                                         vault_resource_group_name,
-                                                                         certificate_output_folder,
-                                                                         certificate_subject_name,
-                                                                         secret_identifier,
-                                                                         parameter_file)
+        parameters, output_file = _set_parameters_for_customize_template(cmd=cmd,
+                                                                         cli_ctx=cli_ctx,
+                                                                         resource_group_name=resource_group_name,
+                                                                         certificate_file=certificate_file,
+                                                                         certificate_password=certificate_password,
+                                                                         vault_name=vault_name,
+                                                                         vault_resource_group_name=vault_resource_group_name,
+                                                                         certificate_output_folder=certificate_output_folder,
+                                                                         certificate_subject_name=certificate_subject_name,
+                                                                         secret_identifier=secret_identifier,
+                                                                         parameter_file=parameter_file)
 
+        cluster_name = parameters[CLUSTER_NAME_VALUE]['value']
         vault_id = parameters[SOURCE_VAULT_VALUE]['value']
         certificate_uri = parameters[CERTIFICATE_URL_VALUE]['value']
         cert_thumbprint = parameters[CERTIFICATE_THUMBPRINT]['value']
