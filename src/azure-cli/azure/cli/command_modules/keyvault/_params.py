@@ -189,7 +189,7 @@ def load_arguments(self, _):
         c.argument('secondary_locations', nargs='+',
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
-        c.argument('user_identities', options_list=['--mi-user-assigned'],nargs='*',
+        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*',
                    help="Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
