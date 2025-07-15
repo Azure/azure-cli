@@ -5,7 +5,7 @@
 # pylint: disable=line-too-long
 
 from knack.arguments import CLIArgumentType
-from azure.cli.core.commands.parameters import get_enum_type
+from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 
 
 def load_arguments(self, _):
@@ -106,31 +106,83 @@ def load_arguments(self, _):
                   arg_type=get_enum_type(['HyperV', 'VMware']),
                   help='Type of source machine (HyperV or VMware). Default is VMware.')
 
-    with self.argument_context('migrate server start-replication') as c:
+    # New Azure Migrate server replication command parameters
+    with self.argument_context('migrate server find-by-name') as c:
         c.argument('resource_group_name', help='Name of the resource group.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('machine_name', help='Name of the source machine.', required=True)
-        c.argument('target_vm_name', help='Name for the target VM.')
-        c.argument('target_resource_group', help='Target resource group for the VM.')
-        c.argument('target_network', help='Target virtual network for the VM.')
+        c.argument('display_name', help='Display name pattern to match discovered servers.', required=True)
+        c.argument('source_machine_type', 
+                  arg_type=get_enum_type(['HyperV', 'VMware']),
+                  help='Type of source machine (HyperV or VMware). Default is VMware.')
+        c.argument('subscription_id', help='Azure subscription ID.')
 
-    with self.argument_context('migrate server show-replication') as c:
+    with self.argument_context('migrate server create-replication') as c:
         c.argument('resource_group_name', help='Name of the resource group.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('machine_name', help='Name of the source machine.')
+        c.argument('machine_id', help='ID of the discovered server.', required=True)
+        c.argument('os_disk_id', help='OS disk ID (Uuid for VMware, InstanceId for Hyper-V).', required=True)
+        c.argument('target_storage_path_id', help='Target storage path ARM ID.', required=True)
+        c.argument('target_virtual_switch_id', help='Target virtual switch ARM ID.', required=True)
+        c.argument('target_resource_group_id', help='Target resource group ARM ID.', required=True)
+        c.argument('target_vm_name', help='Name for the target VM.', required=True)
+        c.argument('subscription_id', help='Azure subscription ID.')
+        c.argument('target_vm_cpu_core', type=int, help='Number of CPU cores for target VM.')
+        c.argument('is_dynamic_memory_enabled', arg_type=get_three_state_flag(), 
+                  help='Enable dynamic memory for target VM.')
+        c.argument('target_vm_ram', type=int, help='RAM size in MB for target VM.')
 
-    with self.argument_context('migrate server start-migration') as c:
+    with self.argument_context('migrate server create-replication-by-index') as c:
         c.argument('resource_group_name', help='Name of the resource group.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('machine_name', help='Name of the source machine.', required=True)
-        c.argument('shutdown_source', action='store_true', help='Shutdown source machine after migration.')
-        c.argument('test_migration', action='store_true', help='Perform test migration.')
+        c.argument('server_index', type=int, help='Index of the server to migrate (0-based, e.g., 2 for third server).', required=True)
+        c.argument('source_machine_type', 
+                  arg_type=get_enum_type(['HyperV', 'VMware']),
+                  help='Type of source machine (HyperV or VMware). Default is VMware.')
+        c.argument('target_storage_path_id', help='Target storage path ARM ID.', required=True)
+        c.argument('target_virtual_switch_id', help='Target virtual switch ARM ID.', required=True)
+        c.argument('target_resource_group_id', help='Target resource group ARM ID.', required=True)
+        c.argument('target_vm_name', help='Name for the target VM. If not specified, uses source server display name.')
+        c.argument('subscription_id', help='Azure subscription ID.')
+        c.argument('target_vm_cpu_core', type=int, help='Number of CPU cores for target VM.')
+        c.argument('is_dynamic_memory_enabled', arg_type=get_three_state_flag(), 
+                  help='Enable dynamic memory for target VM.')
+        c.argument('target_vm_ram', type=int, help='RAM size in MB for target VM.')
 
-    with self.argument_context('migrate server stop-replication') as c:
+    with self.argument_context('migrate server create-bulk-replication') as c:
         c.argument('resource_group_name', help='Name of the resource group.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('machine_name', help='Name of the source machine.', required=True)
-        c.argument('force', action='store_true', help='Force removal without confirmation.')
+        c.argument('display_name_pattern', help='Display name pattern to match discovered servers.', required=True)
+        c.argument('source_machine_type', 
+                  arg_type=get_enum_type(['HyperV', 'VMware']),
+                  help='Type of source machine (HyperV or VMware). Default is VMware.')
+        c.argument('target_storage_path_id', help='Target storage path ARM ID.', required=True)
+        c.argument('target_virtual_switch_id', help='Target virtual switch ARM ID.', required=True)
+        c.argument('target_resource_group_id', help='Target resource group ARM ID.', required=True)
+        c.argument('subscription_id', help='Azure subscription ID.')
+        c.argument('target_vm_name_prefix', help='Prefix for target VM names (will be combined with source VM display name).')
+        c.argument('target_vm_cpu_core', type=int, help='Number of CPU cores for target VMs.')
+        c.argument('is_dynamic_memory_enabled', arg_type=get_three_state_flag(), 
+                  help='Enable dynamic memory for target VMs.')
+        c.argument('target_vm_ram', type=int, help='RAM size in MB for target VMs.')
+
+    with self.argument_context('migrate server show-replication-status') as c:
+        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('job_id', help='Specific replication job ID to check.')
+        c.argument('target_vm_name', help='Target VM name to filter jobs.')
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate server update-replication') as c:
+        c.argument('resource_group_name', help='Name of the resource group.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('target_object_id', help='Target object ID for the replication.', required=True)
+        c.argument('target_storage_path_id', help='Updated target storage path ARM ID.')
+        c.argument('target_virtual_switch_id', help='Updated target virtual switch ARM ID.')
+        c.argument('target_resource_group_id', help='Updated target resource group ARM ID.')
+        c.argument('target_vm_name', help='Updated target VM name.')
+        c.argument('target_vm_cpu_core', type=int, help='Updated number of CPU cores for target VM.')
+        c.argument('target_vm_ram', type=int, help='Updated RAM size in MB for target VM.')
+        c.argument('subscription_id', help='Azure subscription ID.')
 
     with self.argument_context('migrate job show') as c:
         c.argument('resource_group_name', help='Name of the resource group.', required=True)

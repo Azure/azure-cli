@@ -279,58 +279,140 @@ helps['migrate server list-discovered-table'] = """
             az migrate server list-discovered-table --resource-group myRG --project-name myProject --source-machine-type HyperV
 """
 
-helps['migrate server start-replication'] = """
+# New Azure Migrate server replication command help
+helps['migrate server find-by-name'] = """
     type: command
-    short-summary: Start replication for a server.
+    short-summary: Find discovered servers by display name pattern.
+    long-summary: |
+        Azure CLI equivalent to Get-AzMigrateDiscoveredServer with DisplayName filter PowerShell cmdlet.
+        Finds discovered servers that match a specific display name pattern. This is equivalent to:
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -DisplayName $SourceMachineDisplayNameToMatch -SourceMachineType $SourceMachineType
+    examples:
+        - name: Find servers by exact display name
+          text: az migrate server find-by-name --resource-group myRG --project-name myProject --display-name "WebServer01"
+        - name: Find VMware servers by display name pattern
+          text: az migrate server find-by-name --resource-group myRG --project-name myProject --display-name "WebServer*" --source-machine-type VMware
+        - name: Find Hyper-V servers by display name
+          text: az migrate server find-by-name --resource-group myRG --project-name myProject --display-name "DBServer" --source-machine-type HyperV
+"""
+
+helps['migrate server create-replication'] = """
+    type: command
+    short-summary: Create replication for a single server.
     long-summary: |
         Azure CLI equivalent to New-AzMigrateLocalServerReplication PowerShell cmdlet.
-        Initiates replication for a source server to prepare for migration.
+        Creates replication for a single discovered server. This is equivalent to:
+        $ReplicationJob = New-AzMigrateLocalServerReplication -MachineId $DiscoveredServer.Id -OSDiskID $DiscoveredServer.Disk[0].Uuid -TargetStoragePathId $TargetStoragePathId -TargetVirtualSwitch $TargetVirtualSwitchId -TargetResourceGroupId $TargetResourceGroupId -TargetVMName $TargetVMName
     examples:
-        - name: Start basic replication
-          text: az migrate server start-replication --resource-group myRG --project-name myProject --machine-name myMachine
-        - name: Start replication with custom target settings
-          text: az migrate server start-replication --resource-group myRG --project-name myProject --machine-name myMachine --target-vm-name myTargetVM --target-resource-group myTargetRG
+        - name: Create basic replication
+          text: |
+            az migrate server create-replication \\
+              --resource-group myRG \\
+              --project-name myProject \\
+              --machine-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.OffAzure/VMwareSites/xxx/machines/xxx" \\
+              --os-disk-id "6000C294-1234-5678-9abc-def012345678" \\
+              --target-storage-path-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/storageContainers/xxx" \\
+              --target-virtual-switch-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/xxx" \\
+              --target-resource-group-id "/subscriptions/xxx/resourceGroups/xxx" \\
+              --target-vm-name "MigratedVM01"
+        - name: Create replication with custom VM specs
+          text: |
+            az migrate server create-replication \\
+              --resource-group myRG \\
+              --project-name myProject \\
+              --machine-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.OffAzure/VMwareSites/xxx/machines/xxx" \\
+              --os-disk-id "6000C294-1234-5678-9abc-def012345678" \\
+              --target-storage-path-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/storageContainers/xxx" \\
+              --target-virtual-switch-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/xxx" \\
+              --target-resource-group-id "/subscriptions/xxx/resourceGroups/xxx" \\
+              --target-vm-name "MigratedVM01" \\
+              --target-vm-cpu-core 4 \\
+              --target-vm-ram 8192 \\
+              --is-dynamic-memory-enabled true
 """
 
-helps['migrate server show-replication'] = """
+helps['migrate server create-bulk-replication'] = """
     type: command
-    short-summary: Show replication status for servers.
+    short-summary: Create replication for multiple servers matching a display name pattern.
     long-summary: |
-        Azure CLI equivalent to Get-AzMigrateLocalServerReplication PowerShell cmdlet.
-        Displays the current replication status and progress for migrating servers.
+        Azure CLI equivalent to the complete PowerShell workflow for bulk server replication.
+        This command replicates the complete PowerShell script workflow:
+        1. Get discovered servers by display name pattern
+        2. Create replication for each server
+        3. Monitor replication job status
+        This is equivalent to the PowerShell foreach loop that processes multiple discovered servers.
     examples:
-        - name: Show all replication jobs
-          text: az migrate server show-replication --resource-group myRG --project-name myProject
-        - name: Show replication for specific machine
-          text: az migrate server show-replication --resource-group myRG --project-name myProject --machine-name myMachine
+        - name: Create bulk replication for servers matching pattern
+          text: |
+            az migrate server create-bulk-replication \\
+              --resource-group myRG \\
+              --project-name myProject \\
+              --display-name-pattern "WebServer*" \\
+              --source-machine-type VMware \\
+              --target-storage-path-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/storageContainers/xxx" \\
+              --target-virtual-switch-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/xxx" \\
+              --target-resource-group-id "/subscriptions/xxx/resourceGroups/xxx"
+        - name: Create bulk replication with custom VM prefix and specs
+          text: |
+            az migrate server create-bulk-replication \\
+              --resource-group myRG \\
+              --project-name myProject \\
+              --display-name-pattern "DBServer*" \\
+              --source-machine-type HyperV \\
+              --target-storage-path-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/storageContainers/xxx" \\
+              --target-virtual-switch-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/xxx" \\
+              --target-resource-group-id "/subscriptions/xxx/resourceGroups/xxx" \\
+              --target-vm-name-prefix "Migrated-" \\
+              --target-vm-cpu-core 4 \\
+              --target-vm-ram 8192
 """
 
-helps['migrate server start-migration'] = """
+helps['migrate server show-replication-status'] = """
     type: command
-    short-summary: Start migration for a server.
+    short-summary: Show replication job status and progress.
     long-summary: |
-        Azure CLI equivalent to Start-AzMigrateLocalServerMigration PowerShell cmdlet.
-        Initiates the actual migration process for a server that has been replicating.
+        Azure CLI equivalent to Get-AzMigrateJob PowerShell cmdlet for monitoring replication jobs.
+        Shows the status and progress of replication jobs, including the job state information.
     examples:
-        - name: Start production migration
-          text: az migrate server start-migration --resource-group myRG --project-name myProject --machine-name myMachine
-        - name: Start test migration
-          text: az migrate server start-migration --resource-group myRG --project-name myProject --machine-name myMachine --test-migration
-        - name: Start migration and shutdown source
-          text: az migrate server start-migration --resource-group myRG --project-name myProject --machine-name myMachine --shutdown-source
+        - name: Show all replication jobs in project
+          text: az migrate server show-replication-status --resource-group myRG --project-name myProject
+        - name: Show specific replication job by ID
+          text: az migrate server show-replication-status --resource-group myRG --project-name myProject --job-id "job-12345"
+        - name: Show replication jobs for specific target VM
+          text: az migrate server show-replication-status --resource-group myRG --project-name myProject --target-vm-name "MigratedVM01"
 """
 
-helps['migrate server stop-replication'] = """
+helps['migrate server update-replication'] = """
     type: command
-    short-summary: Stop replication for a server.
+    short-summary: Update replication target properties.
     long-summary: |
-        Azure CLI equivalent to Remove-AzMigrateLocalServerReplication PowerShell cmdlet.
-        Stops replication and removes protection for a server.
+        Azure CLI equivalent to Set-AzMigrateLocalServerReplication PowerShell cmdlet.
+        Updates replication target properties after initial replication setup. Allows changing target VM configurations.
     examples:
-        - name: Stop replication with confirmation
-          text: az migrate server stop-replication --resource-group myRG --project-name myProject --machine-name myMachine
-        - name: Force stop replication without confirmation
-          text: az migrate server stop-replication --resource-group myRG --project-name myProject --machine-name myMachine --force
+        - name: Update target VM name and resource group
+          text: |
+            az migrate server update-replication \\
+              --resource-group myRG \\
+              --project-name myProject \\
+              --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Migrate/migrateProjects/xxx/machines/xxx" \\
+              --target-vm-name "NewVMName" \\
+              --target-resource-group-id "/subscriptions/xxx/resourceGroups/newRG"
+        - name: Update target VM specifications
+          text: |
+            az migrate server update-replication \\
+              --resource-group myRG \\
+              --project-name myProject \\
+              --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Migrate/migrateProjects/xxx/machines/xxx" \\
+              --target-vm-cpu-core 8 \\
+              --target-vm-ram 16384
+        - name: Update target storage and network
+          text: |
+            az migrate server update-replication \\
+              --resource-group myRG \\
+              --project-name myProject \\
+              --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Migrate/migrateProjects/xxx/machines/xxx" \\
+              --target-storage-path-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/storageContainers/newStorage" \\
+              --target-virtual-switch-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/newNetwork"
 """
 
 helps['migrate job'] = """

@@ -1771,3 +1771,450 @@ def show_storage_account_details(cmd, resource_group_name, storage_account_name,
         
     except Exception as e:
         raise CLIError(f'Failed to get storage account details: {str(e)}')
+
+
+# --------------------------------------------------------------------------------------------
+# Server Replication Commands
+# --------------------------------------------------------------------------------------------
+
+def create_server_replication(cmd, resource_group_name, project_name, target_vm_name, 
+                             target_resource_group, target_network, server_name=None, 
+                             server_index=None, subscription_id=None):
+    """Create replication for a discovered server."""
+    
+    # Get PowerShell executor
+    ps_executor = get_powershell_executor()
+    
+    # Build the PowerShell script
+    replication_script = f"""
+    # Create server replication
+    try {{
+        Write-Host "🚀 Creating server replication..." -ForegroundColor Green
+        
+        # Get discovered servers first
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType VMware
+        
+        # Select server by index or name
+        if ("{server_index}" -ne "None" -and "{server_index}" -ne "") {{
+            $ServerIndex = [int]"{server_index}"
+            if ($ServerIndex -ge 0 -and $ServerIndex -lt $DiscoveredServers.Count) {{
+                $SelectedServer = $DiscoveredServers[$ServerIndex]
+                Write-Host "Selected server by index $ServerIndex`: $($SelectedServer.DisplayName)" -ForegroundColor Cyan
+            }} else {{
+                throw "Server index $ServerIndex is out of range. Total servers: $($DiscoveredServers.Count)"
+            }}
+        }} elseif ("{server_name}" -ne "None" -and "{server_name}" -ne "") {{
+            $SelectedServer = $DiscoveredServers | Where-Object {{ $_.DisplayName -eq "{server_name}" }}
+            if (-not $SelectedServer) {{
+                throw "Server with name '{server_name}' not found"
+            }}
+            Write-Host "Selected server by name: $($SelectedServer.DisplayName)" -ForegroundColor Cyan
+        }} else {{
+            throw "Either server_name or server_index must be provided"
+        }}
+        
+        # Get machine details including disk information
+        $MachineId = $SelectedServer.Name
+        Write-Host "Machine ID: $MachineId" -ForegroundColor Cyan
+        
+        # Build the full machine resource path for New-AzMigrateServerReplication
+        # The cmdlet expects a full resource path like the one shown in the examples
+        $SubscriptionId = (Get-AzContext).Subscription.Id
+        $MachineResourcePath = "/subscriptions/$SubscriptionId/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/VMwareSites/**/machines/$MachineId"
+        
+        # Try to get the exact machine resource path by finding the VMware site
+        try {{
+            Write-Host "Looking up VMware site for full machine path..." -ForegroundColor Cyan
+            $Sites = Get-AzResource -ResourceGroupName "{resource_group_name}" -ResourceType "Microsoft.OffAzure/VMwareSites" -ErrorAction SilentlyContinue
+            if ($Sites -and $Sites.Count -gt 0) {{
+                $SiteName = $Sites[0].Name
+                $MachineResourcePath = "/subscriptions/$SubscriptionId/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/VMwareSites/$SiteName/machines/$MachineId"
+                Write-Host "Full machine path: $MachineResourcePath" -ForegroundColor Cyan
+            }} else {{
+                Write-Host "Could not find VMware site, using machine ID only" -ForegroundColor Yellow
+                $MachineResourcePath = $MachineId
+            }}
+        }} catch {{
+            Write-Host "Could not query VMware sites, using machine ID: $($_.Exception.Message)" -ForegroundColor Yellow
+            $MachineResourcePath = $MachineId
+        }}
+        
+        # Get detailed server information to extract disk details
+        Write-Host "Getting server disk information..." -ForegroundColor Cyan
+        $ServerDetails = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -DisplayName $SelectedServer.DisplayName
+        
+        # Extract OS disk ID from the server details
+        $OSDiskId = $null
+        if ($ServerDetails.Disk) {{
+            $OSDisk = $ServerDetails.Disk | Where-Object {{ $_.IsOSDisk -eq $true }}
+            if ($OSDisk) {{
+                $OSDiskId = $OSDisk.Uuid
+                Write-Host "Found OS Disk ID: $OSDiskId" -ForegroundColor Cyan
+            }} else {{
+                # If no OS disk found with IsOSDisk flag, take the first disk
+                $OSDiskId = $ServerDetails.Disk[0].Uuid
+                Write-Host "Using first disk as OS Disk ID: $OSDiskId" -ForegroundColor Cyan
+            }}
+        }} else {{
+            throw "No disk information found for server $($SelectedServer.DisplayName)"
+        }}
+        
+        # Create replication with required parameters including OS disk ID
+        Write-Host "Creating replication with OS Disk ID: $OSDiskId" -ForegroundColor Cyan
+        
+        # Extract subnet name from the target network path or use default
+        $TargetNetworkPath = "{target_network}"
+        $SubnetName = "default"
+        
+        # Try to find available subnets in the target network
+        try {{
+            $NetworkParts = $TargetNetworkPath -split "/"
+            $NetworkRG = $NetworkParts[4]  # Resource group from the network path
+            $NetworkName = $NetworkParts[-1]  # Network name from the path
+            
+            Write-Host "Checking subnets in network: $NetworkName (RG: $NetworkRG)" -ForegroundColor Cyan
+            $VirtualNetwork = Get-AzVirtualNetwork -ResourceGroupName $NetworkRG -Name $NetworkName -ErrorAction SilentlyContinue
+            
+            if ($VirtualNetwork -and $VirtualNetwork.Subnets) {{
+                # Use the first available subnet
+                $SubnetName = $VirtualNetwork.Subnets[0].Name
+                Write-Host "Found subnet: $SubnetName" -ForegroundColor Cyan
+            }} else {{
+                Write-Host "Could not find subnets, using default subnet name" -ForegroundColor Yellow
+            }}
+        }} catch {{
+            Write-Host "Could not query network subnets, using default: $($_.Exception.Message)" -ForegroundColor Yellow
+        }}
+        
+        Write-Host "Using target subnet: $SubnetName" -ForegroundColor Cyan
+        Write-Host "Using machine resource path: $MachineResourcePath" -ForegroundColor Cyan
+        
+        $ReplicationJob = New-AzMigrateServerReplication `
+            -MachineId $MachineResourcePath `
+            -LicenseType "NoLicenseType" `
+            -TargetResourceGroupId "{target_resource_group}" `
+            -TargetNetworkId "{target_network}" `
+            -TargetSubnetName $SubnetName `
+            -TargetVMName "{target_vm_name}" `
+            -DiskType "Standard_LRS" `
+            -OSDiskID $OSDiskId
+        
+        Write-Host "✅ Replication created successfully!" -ForegroundColor Green
+        Write-Host "Job ID: $($ReplicationJob.JobId)" -ForegroundColor Yellow
+        Write-Host "Target VM Name: {target_vm_name}" -ForegroundColor Cyan
+        
+        return @{{
+            JobId = $ReplicationJob.JobId
+            TargetVMName = "{target_vm_name}"
+            Status = "Started"
+            ServerName = $SelectedServer.DisplayName
+        }}
+        
+    }} catch {{
+        Write-Host "❌ Error creating replication:" -ForegroundColor Red
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "1. Verify server exists and index is correct" -ForegroundColor White
+        Write-Host "2. Check target resource group and network paths" -ForegroundColor White
+        Write-Host "3. Ensure replication infrastructure is initialized" -ForegroundColor White
+        Write-Host ""
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(replication_script)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': f'New-AzMigrateServerReplication for target VM: {target_vm_name}',
+            'parameters': {
+                'ProjectName': project_name,
+                'ResourceGroupName': resource_group_name,
+                'TargetVMName': target_vm_name,
+                'TargetResourceGroup': target_resource_group,
+                'TargetNetwork': target_network,
+                'ServerName': server_name,
+                'ServerIndex': server_index
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to create server replication: {str(e)}')
+
+
+def create_server_replication_by_index(cmd, resource_group_name, project_name, server_index, 
+                                      target_vm_name, target_resource_group, target_network, 
+                                      subscription_id=None):
+    """Create replication for a server by its index in the discovered servers list."""
+    return create_server_replication(cmd, resource_group_name, project_name, target_vm_name, 
+                                   target_resource_group, target_network, 
+                                   server_index=server_index, subscription_id=subscription_id)
+
+
+def get_discovered_servers_by_display_name(cmd, resource_group_name, project_name, display_name, 
+                                          source_machine_type='VMware', subscription_id=None):
+    """Find discovered servers by display name."""
+    
+    # Get PowerShell executor
+    ps_executor = get_powershell_executor()
+    
+    # Build the PowerShell script
+    search_script = f"""
+    # Find servers by display name
+    try {{
+        Write-Host "🔍 Searching for servers with display name: {display_name}" -ForegroundColor Green
+        
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType {source_machine_type}
+        $MatchingServers = $DiscoveredServers | Where-Object {{ $_.DisplayName -like "*{display_name}*" }}
+        
+        if ($MatchingServers) {{
+            Write-Host "Found $($MatchingServers.Count) matching server(s):" -ForegroundColor Cyan
+            $MatchingServers | Format-Table DisplayName, Name, Type -AutoSize
+        }} else {{
+            Write-Host "No servers found matching: {display_name}" -ForegroundColor Yellow
+        }}
+        
+        return $MatchingServers
+        
+    }} catch {{
+        Write-Host "❌ Error searching for servers:" -ForegroundColor Red
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(search_script)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': f'Get-AzMigrateDiscoveredServer filtered by DisplayName: {display_name}',
+            'parameters': {
+                'ProjectName': project_name,
+                'ResourceGroupName': resource_group_name,
+                'DisplayName': display_name,
+                'SourceMachineType': source_machine_type
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to search for servers: {str(e)}')
+
+
+def get_replication_job_status(cmd, resource_group_name, project_name, vm_name=None, 
+                              job_id=None, subscription_id=None):
+    """Get replication job status for a VM or job."""
+    
+    # Get PowerShell executor
+    ps_executor = get_powershell_executor()
+    
+    # Build the PowerShell script
+    status_script = f"""
+    # Get replication status
+    try {{
+        Write-Host "📊 Checking replication status..." -ForegroundColor Green
+        
+        if ("{vm_name}" -ne "None" -and "{vm_name}" -ne "") {{
+            Write-Host "Checking status for VM: {vm_name}" -ForegroundColor Cyan
+            $ReplicationStatus = Get-AzMigrateServerReplication -ProjectName {project_name} -ResourceGroupName {resource_group_name} -MachineName "{vm_name}"
+        }} elseif ("{job_id}" -ne "None" -and "{job_id}" -ne "") {{
+            Write-Host "Checking job status for Job ID: {job_id}" -ForegroundColor Cyan
+            $ReplicationStatus = Get-AzMigrateJob -JobId "{job_id}" -ProjectName {project_name} -ResourceGroupName {resource_group_name}
+        }} else {{
+            Write-Host "Getting all replication jobs..." -ForegroundColor Cyan
+            $ReplicationStatus = Get-AzMigrateServerReplication -ProjectName {project_name} -ResourceGroupName {resource_group_name}
+        }}
+        
+        if ($ReplicationStatus) {{
+            Write-Host "✅ Status retrieved successfully!" -ForegroundColor Green
+            $ReplicationStatus | Format-Table -AutoSize
+        }} else {{
+            Write-Host "No replication status found" -ForegroundColor Yellow
+        }}
+        
+        return $ReplicationStatus
+        
+    }} catch {{
+        Write-Host "❌ Error getting replication status:" -ForegroundColor Red
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(status_script)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': f'Get-AzMigrateServerReplication/Get-AzMigrateJob for VM/Job: {vm_name or job_id}',
+            'parameters': {
+                'ProjectName': project_name,
+                'ResourceGroupName': resource_group_name,
+                'VMName': vm_name,
+                'JobId': job_id
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to get replication status: {str(e)}')
+
+
+def create_multiple_server_replications(cmd, resource_group_name, project_name, 
+                                       server_configs, subscription_id=None):
+    """Create replication for multiple servers."""
+    
+    # Get PowerShell executor
+    ps_executor = get_powershell_executor()
+    
+    # Build the PowerShell script
+    bulk_script = f"""
+    # Create multiple server replications
+    try {{
+        Write-Host "🚀 Creating multiple server replications..." -ForegroundColor Green
+        
+        # Get discovered servers
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType VMware
+        
+        $Results = @()
+        
+        # Process each server configuration
+        $ServerConfigs = '{server_configs}' | ConvertFrom-Json
+        
+        foreach ($Config in $ServerConfigs) {{
+            try {{
+                Write-Host "Processing server: $($Config.ServerName)" -ForegroundColor Cyan
+                
+                # Find the server
+                $SelectedServer = $DiscoveredServers | Where-Object {{ $_.DisplayName -eq $Config.ServerName }}
+                
+                if ($SelectedServer) {{
+                    # Create replication
+                    $ReplicationJob = New-AzMigrateServerReplication -InputObject $SelectedServer -TargetVMName $Config.TargetVMName -TargetResourceGroupId $Config.TargetResourceGroup -TargetNetworkId $Config.TargetNetwork
+                    
+                    $Results += @{{
+                        ServerName = $Config.ServerName
+                        TargetVMName = $Config.TargetVMName
+                        JobId = $ReplicationJob.JobId
+                        Status = "Started"
+                    }}
+                    
+                    Write-Host "✅ Replication started for $($Config.ServerName)" -ForegroundColor Green
+                }} else {{
+                    Write-Host "⚠️ Server not found: $($Config.ServerName)" -ForegroundColor Yellow
+                    $Results += @{{
+                        ServerName = $Config.ServerName
+                        Status = "Server not found"
+                    }}
+                }}
+            }} catch {{
+                Write-Host "❌ Failed to create replication for $($Config.ServerName): $($_.Exception.Message)" -ForegroundColor Red
+                $Results += @{{
+                    ServerName = $Config.ServerName
+                    Status = "Failed"
+                    Error = $_.Exception.Message
+                }}
+            }}
+        }}
+        
+        Write-Host "📊 Bulk replication summary:" -ForegroundColor Green
+        $Results | Format-Table -AutoSize
+        
+        return $Results
+        
+    }} catch {{
+        Write-Host "❌ Error in bulk replication:" -ForegroundColor Red
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(bulk_script)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': 'New-AzMigrateServerReplication (bulk operation)',
+            'parameters': {
+                'ProjectName': project_name,
+                'ResourceGroupName': resource_group_name,
+                'ServerConfigs': server_configs
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to create multiple server replications: {str(e)}')
+
+
+def set_replication_target_properties(cmd, resource_group_name, project_name, vm_name, 
+                                     target_vm_size=None, target_disk_type=None, 
+                                     target_network=None, subscription_id=None):
+    """Update replication target properties."""
+    
+    # Get PowerShell executor
+    ps_executor = get_powershell_executor()
+    
+    # Build the PowerShell script
+    update_script = f"""
+    # Update replication properties
+    try {{
+        Write-Host "🔧 Updating replication properties for VM: {vm_name}" -ForegroundColor Green
+        
+        # Get current replication
+        $Replication = Get-AzMigrateServerReplication -ProjectName {project_name} -ResourceGroupName {resource_group_name} -MachineName "{vm_name}"
+        
+        if ($Replication) {{
+            $UpdateParams = @{{}}
+            
+            if ("{target_vm_size}" -ne "None" -and "{target_vm_size}" -ne "") {{
+                $UpdateParams.TargetVMSize = "{target_vm_size}"
+                Write-Host "Setting target VM size: {target_vm_size}" -ForegroundColor Cyan
+            }}
+            
+            if ("{target_disk_type}" -ne "None" -and "{target_disk_type}" -ne "") {{
+                $UpdateParams.TargetDiskType = "{target_disk_type}"
+                Write-Host "Setting target disk type: {target_disk_type}" -ForegroundColor Cyan
+            }}
+            
+            if ("{target_network}" -ne "None" -and "{target_network}" -ne "") {{
+                $UpdateParams.TargetNetworkId = "{target_network}"
+                Write-Host "Setting target network: {target_network}" -ForegroundColor Cyan
+            }}
+            
+            if ($UpdateParams.Count -gt 0) {{
+                $UpdateJob = Set-AzMigrateServerReplication -InputObject $Replication @UpdateParams
+                Write-Host "✅ Replication properties updated successfully!" -ForegroundColor Green
+                Write-Host "Update Job ID: $($UpdateJob.JobId)" -ForegroundColor Yellow
+            }} else {{
+                Write-Host "No properties to update" -ForegroundColor Yellow
+            }}
+        }} else {{
+            throw "Replication not found for VM: {vm_name}"
+        }}
+        
+    }} catch {{
+        Write-Host "❌ Error updating replication properties:" -ForegroundColor Red
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        throw
+    }}
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output
+        result = ps_executor.execute_script_interactive(update_script)
+        return {
+            'message': 'PowerShell command executed successfully. Output displayed above.',
+            'command_executed': f'Set-AzMigrateServerReplication for VM: {vm_name}',
+            'parameters': {
+                'ProjectName': project_name,
+                'ResourceGroupName': resource_group_name,
+                'VMName': vm_name,
+                'TargetVMSize': target_vm_size,
+                'TargetDiskType': target_disk_type,
+                'TargetNetwork': target_network
+            }
+        }
+        
+    except Exception as e:
+        raise CLIError(f'Failed to update replication properties: {str(e)}')

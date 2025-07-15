@@ -18,10 +18,14 @@ def load_command_table(self, _):
     with self.command_group('migrate server') as g:
         g.custom_command('list-discovered', 'get_discovered_server')
         g.custom_command('list-discovered-table', 'get_discovered_servers_table')
-        g.custom_command('start-replication', 'new_server_replication')
-        g.custom_command('show-replication', 'get_server_replication')
-        g.custom_command('start-migration', 'start_server_migration')
-        g.custom_command('stop-replication', 'remove_server_replication')
+        
+        # New Azure Migrate server replication commands
+        g.custom_command('find-by-name', 'get_discovered_servers_by_display_name')
+        g.custom_command('create-replication', 'create_server_replication')
+        g.custom_command('create-replication-by-index', 'create_server_replication_by_index')
+        g.custom_command('create-bulk-replication', 'create_multiple_server_replications')
+        g.custom_command('show-replication-status', 'get_replication_job_status')
+        g.custom_command('update-replication', 'set_replication_target_properties')
 
     with self.command_group('migrate infrastructure') as g:
         g.custom_command('initialize', 'initialize_replication_infrastructure')
