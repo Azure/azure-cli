@@ -72,7 +72,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_subject_name', options_list=['--certificate-subject-name', '--cert-subject-name'], help='The subject name of the certificate to be created.')
         c.argument('vault_resource_group_name', options_list=['--vault-rg', c.deprecate(target='--vault-resource-group', redirect='--vault-rg', hide=True)],
                    help='Key vault resource group name, if not given it will be cluster resource group name')
-        c.argument('vault_name', help='Azure key vault name, it not given it will be the cluster resource group name')
+        c.argument('vault_name', help='Azure key vault name, if not given it will be the cluster resource group name')
         c.argument('cluster_size', options_list=['--cluster-size', '-s'], help='The number of nodes in the cluster. Default are 5 nodes')
         c.argument('vm_sku', help='VM Sku')
         c.argument('vm_user_name', help='The user name for logging to Vm. Default will be adminuser')
@@ -140,7 +140,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('sf cluster setting set') as c:
         c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], type=get_json_object,
                    help='JSON encoded parameters configuration. Use @{file} to load from a file. '
-                        'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout","value": 1000},{"section": "MaxFileOperationTimeout","parameter": "Max2","value": 1000]')
+                        'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout","value": 1000},{"section": "MaxFileOperationTimeout","parameter": "Max2","value": 1000}]')
 
     with self.argument_context('sf cluster setting remove') as c:
         c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], type=get_json_object,
@@ -199,13 +199,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('consider_warning_as_error', options_list=['--warning-as-error', '--consider-warning-as-error'], arg_type=get_three_state_flag(),
                    help='Indicates whether to treat a warning health event as an error event during health evaluation.')
         c.argument('default_service_type_max_percent_unhealthy_partitions_per_service', options_list=['--max-unhealthy-parts'],
-                   help='Specify the maximum percent of unhelthy partitions per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
+                   help='Specify the maximum percent of unhealthy partitions per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
         c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition', options_list=['--max-unhealthy-reps'],
-                   help='Specify the maximum percent of unhelthy replicas per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
+                   help='Specify the maximum percent of unhealthy replicas per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
         c.argument('default_service_type_max_percent_unhealthy_services', options_list=['--max-unhealthy-servs'],
-                   help='Specify the maximum percent of unhelthy services allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
+                   help='Specify the maximum percent of unhealthy services allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
         c.argument('max_percent_unhealthy_deployed_applications', options_list=['--max-unhealthy-apps'],
-                   help='Specify the maximum percentage of the application instances deployed on the nodes in the cluster that have a health state of error before the application health state for the cluster is error. Allowed values are form 0 to 100.')
+                   help='Specify the maximum percentage of the application instances deployed on the nodes in the cluster that have a health state of error before the application health state for the cluster is error. Allowed values are from 0 to 100.')
 
     with self.argument_context('sf application create', validator=validate_create_application) as c:
         c.argument('application_type_name', options_list=['--type-name', '--application-type-name'], help='Specify the application type name.')
@@ -312,13 +312,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf managed-node-type') as c:
         c.argument('node_type_name', options_list=['-n', '--name', '--node-type-name'], help='node type name.')
-        c.argument('instance_count', help='essage = "The number of nodes in the node type.')
+        c.argument('instance_count', help='The number of nodes in the node type.')
         c.argument('primary', arg_type=get_three_state_flag(), help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
         c.argument('disk_size', type=int, options_list=['--disk-size', '--data-disk-size'], help='Disk size for each vm in the node type in GBs.', default=100)
         c.argument('disk_type', arg_type=get_enum_type(DiskType), options_list=['--disk-type', '--data-disk-type'],
-                   help='Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://learn.microsoft.com/azure/virtual-machines/disks-types. Default StandardSSD_LRS'
-                   'Standard_LRS: Standard HDD locally redundant storage. Best for backup, non-critical, and infrequent access.'
-                   'StandardSSD_LRS: Standard SSD locally redundant storage. Best for web servers, lightly used enterprise applications and dev/test.'
+                   help='Managed data disk type. IOPS and throughput are given by the disk size. To see more information, go to https://learn.microsoft.com/azure/virtual-machines/disks-types. Default: StandardSSD_LRS. '
+                   'Standard_LRS: Standard HDD locally redundant storage. Best for backup, non-critical, and infrequent access. '
+                   'StandardSSD_LRS: Standard SSD locally redundant storage. Best for web servers, lightly used enterprise applications and dev/test. '
                    'Premium_LRS: Premium SSD locally redundant storage. Best for production and performance sensitive workloads.')
         c.argument('application_start_port', options_list=['--application-start-port', '--app-start-port'], help='Application start port of a range of ports.')
         c.argument('application_end_port', options_list=['--application-end-port', '--app-end-port'], help='Application End port of a range of ports.')
@@ -408,14 +408,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('consider_warning_as_error', options_list=['--warning-as-error'], arg_type=get_three_state_flag(),
                    help='Indicates whether to treat a warning health event as an error event during health evaluation.')
         c.argument('default_service_type_max_percent_unhealthy_partitions_per_service', options_list=['--max-unhealthy-parts'],
-                   help='Specify the maximum percent of unhelthy partitions per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
+                   help='Specify the maximum percent of unhealthy partitions per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
         c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition', options_list=['--max-unhealthy-reps'],
-                   help='Specify the maximum percent of unhelthy replicas per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
+                   help='Specify the maximum percent of unhealthy replicas per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
         c.argument('default_service_type_max_percent_unhealthy_services', options_list=['--max-unhealthy-servs'],
-                   help='Specify the maximum percent of unhelthy services allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
+                   help='Specify the maximum percent of unhealthy services allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
         c.argument('service_type_health_policy_map', arg_type=service_type_health_policy_map)
         c.argument('max_percent_unhealthy_deployed_applications', options_list=['--max-unhealthy-apps'],
-                   help='Specify the maximum percentage of the application instances deployed on the nodes in the cluster that have a health state of error before the application health state for the cluster is error. Allowed values are form 0 to 100.')
+                   help='Specify the maximum percentage of the application instances deployed on the nodes in the cluster that have a health state of error before the application health state for the cluster is error. Allowed values are from 0 to 100.')
 
     with self.argument_context('sf managed-application create', validator=validate_create_managed_application) as c:
         c.argument('application_type_name', options_list=['--type-name', '--application-type-name'], help='Specify the application type name.')
@@ -425,7 +425,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     # managed-service
     partition_names = CLIArgumentType(
-        nards="+",
+        nargs='+',
         help='Specify the array for the names of the partitions. This is only used with Named partition scheme.')
 
     with self.argument_context('sf managed-service') as c:
@@ -481,7 +481,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('default_move_cost', arg_type=get_enum_type(MoveCost),
                    help='Specify the default cost for a move. Higher costs make it less likely that the Cluster Resource Manager will move the replica when trying to balance the cluster.')
         c.argument('placement_constraints',
-                   help='Specify the placement constraints as a string. Placement constraints are boolean expressions on node properties and allow for restricting a service to particular nodes based on the service requirements. For example, to place a service on nodes where NodeType is blue specify the following: \"NodeColor == blue)\".')
+                   help='Specify the placement constraints as a string. Placement constraints are boolean expressions on node properties and allow for restricting a service to particular nodes based on the service requirements. For example, to place a service on nodes where NodeType is blue specify the following: \"(NodeColor == blue)\".')
         # Stateful arguments
         c.argument('min_replica_set_size', options_list=['--min-replica-set-size', '--min-replica'], help='Specify the min replica set size for the stateful service.')
         c.argument('target_replica_set_size', options_list=['--target-replica-set-size', '--target-replica'], help='Specify the target replica set size for the stateful service.')
