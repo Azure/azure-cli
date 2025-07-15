@@ -985,26 +985,13 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
 
 # pylint: disable=too-many-branches, disable=too-many-locals, too-many-statements, raise-missing-from
-def flexible_server_update_custom_func(cmd, client, instance,
-                                       sku_name=None,
-                                       tier=None,
-                                       storage_gb=None,
-                                       auto_grow=None,
-                                       iops=None,
-                                       auto_scale_iops=None,
-                                       accelerated_logs=None,
-                                       backup_retention=None,
-                                       geo_redundant_backup=None,
-                                       administrator_login_password=None,
-                                       high_availability=None,
-                                       standby_availability_zone=None,
-                                       maintenance_window=None,
-                                       tags=None,
-                                       replication_role=None,
-                                       byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
-                                       disable_data_encryption=False,
-                                       public_access=None,
-                                       maintenance_policy_patch_strategy=None):
+def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tier=None, storage_gb=None,
+                                       auto_grow=None, iops=None, auto_scale_iops=None, accelerated_logs=None,
+                                       backup_retention=None, geo_redundant_backup=None, administrator_login_password=None,
+                                       high_availability=None, standby_availability_zone=None, maintenance_window=None,
+                                       tags=None, replication_role=None, byok_identity=None, backup_byok_identity=None,
+                                       byok_key=None, backup_byok_key=None, disable_data_encryption=False,
+                                       public_access=None, maintenance_policy_patch_strategy=None, backup_interval=None):
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
@@ -1036,7 +1023,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               backup_byok_key=backup_byok_key,
                               disable_data_encryption=disable_data_encryption,
                               auto_io_scaling=auto_scale_iops,
-                              iops=iops)
+                              iops=iops,
+                              backup_interval=backup_interval)
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
     iops_info = list_skus_info['iops_info']
@@ -1057,6 +1045,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if geo_redundant_backup:
         instance.backup.geo_redundant_backup = geo_redundant_backup
+
+    if backup_interval:
+        instance.backup.backup_interval_hours = backup_interval
 
     if maintenance_window:
         # if disabled is pass in reset to default values

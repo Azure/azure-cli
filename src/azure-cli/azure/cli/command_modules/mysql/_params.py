@@ -479,6 +479,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
         c.argument('high_availability', arg_type=high_availability_arg_type)
+        c.argument('backup_interval', arg_type=backup_interval_arg_type)
         c.argument('byok_key', arg_type=key_arg_type)
         c.argument('byok_identity', arg_type=identity_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
