@@ -78,7 +78,7 @@ def get_operations_tmpl(resource_type, client_name):
         obj_name='.{}')
 
 
-def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations'):
+def get_docs_tmpl(resource_type, client_name, module_name='operations'):
     if resource_type in [ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
                          ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL,
                          ResourceType.DATA_KEYVAULT_CERTIFICATES,
@@ -134,8 +134,8 @@ def get_client(cli_ctx, resource_type, client_name=''):
         client_factory=client_factory,
         resource_type=resource_type
     )
-    operations_docs_tmpl = get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
-    models_docs_tmpl = get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='models')
+    operations_docs_tmpl = get_docs_tmpl(resource_type, client_name, module_name='operations')
+    models_docs_tmpl = get_docs_tmpl(resource_type, client_name, module_name='models')
     return ClientEntity(client_factory, command_type, operations_docs_tmpl, models_docs_tmpl)
 
 
