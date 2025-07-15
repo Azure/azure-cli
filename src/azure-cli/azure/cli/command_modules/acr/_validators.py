@@ -20,7 +20,7 @@ BAD_MANIFEST_FQDN = "The positional parameter 'manifest_id' must be a fully qual
                     " 'myregistry.azurecr.io/hello-world@sha256:abc123'."
 BAD_REGISTRY_NAME = "Registry names may contain only alpha numeric characters and must be between 5 and 50 characters"
 INVALID_LOGIN_SERVER_SUFFIX = "The login server suffix is not valid. It must be a valid Azure Container Registry"\
-                    " login endpoint such as 'azurecr.io'."
+                              " login endpoint such as 'azurecr.io'."
 
 logger = get_logger(__name__)
 
@@ -113,14 +113,20 @@ def validate_registry_name(cmd, namespace):
     suffixes = cmd.cli_ctx.cloud.suffixes
 
     # Parse registry name and suffix
-    registry_components = registry.split('.', 1) 
+    registry_components = registry.split('.', 1)
     trimmed_registry_name = registry_components[0]
-    registry_login_server_suffix = '.' + registry_components[1] if len(registry_components) > 1 else ''
+
+    # Set the registry login server suffix
+    if len(registry_components) > 1:
+        registry_login_server_suffix = '.' + registry_components[1]
+    else:
+        registry_login_server_suffix = ''
+
     dnl_hash = trimmed_registry_name.find("-")
 
     # Registry name has hyphen but no login server endpoint suffix
     if registry_login_server_suffix == '' and dnl_hash != -1:
-            raise InvalidArgumentValueError(BAD_REGISTRY_NAME)        
+        raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
 
     # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
     if hasattr(suffixes, 'acr_login_server_endpoint'):
@@ -133,19 +139,20 @@ def validate_registry_name(cmd, namespace):
                 removed_suffix = registry_login_server_suffix
                 registry_name = registry_components[0]
             logger.warning("Registry name is %s. The following suffix '%s' is automatically omitted.",
-                            registry_name,
-                            removed_suffix)           
+                           registry_name,
+                           removed_suffix)
         else:
             if registry_login_server_suffix != '':
                 raise InvalidArgumentValueError(INVALID_LOGIN_SERVER_SUFFIX)
-            registry_name = registry_components[0]  
+            registry_name = registry_components[0]
         namespace.registry_name = registry_name
         registry = registry_name
 
     registry = namespace.registry_name
     if not re.match(ACR_NAME_VALIDATION_REGEX, registry):
         raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
- 
+
+
 def validate_expiration_time(namespace):
     import datetime
     DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
