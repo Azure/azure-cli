@@ -154,6 +154,7 @@ def load_arguments(self, _):
 
     with self.argument_context('migrate auth set-context') as c:
         c.argument('subscription_id', help='Azure subscription ID to set as current context.')
+        c.argument('subscription_name', help='Azure subscription name to set as current context.')
         c.argument('tenant_id', help='Azure tenant ID to set as current context.')
 
     with self.argument_context('migrate infrastructure initialize') as c:

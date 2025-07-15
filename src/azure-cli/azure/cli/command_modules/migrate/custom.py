@@ -34,133 +34,6 @@ def check_migration_prerequisites(cmd):
     except Exception as e:
         raise CLIError(f'Failed to check migration prerequisites: {str(e)}')
 
-
-def discover_migration_sources(cmd, source_type=None, server_name=None):
-    """Discover available migration sources using PowerShell cmdlets."""
-    ps_executor = get_powershell_executor()
-    
-    discover_script = """
-    $sources = @()
-    
-    # Discover local system information
-    $computerInfo = @{
-        ComputerName = $env:COMPUTERNAME
-        OSVersion = (Get-WmiObject -Class Win32_OperatingSystem).Caption
-        Architecture = (Get-WmiObject -Class Win32_Processor).Architecture
-        TotalMemory = [math]::Round((Get-WmiObject -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)
-        IPAddress = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -ne 'Loopback Pseudo-Interface 1'}).IPAddress
-    }
-    $sources += $computerInfo
-    
-    # Discover SQL Server instances (if available)
-    try {
-        $sqlInstances = Get-Service -Name 'MSSQL*' -ErrorAction SilentlyContinue | Select-Object Name, Status, DisplayName
-        if ($sqlInstances) {
-            $sources += @{
-                Type = 'SQLServer'
-                Instances = $sqlInstances
-            }
-        }
-    } catch {
-        Write-Warning "Could not discover SQL Server instances"
-    }
-    
-    # Discover Hyper-V VMs (if available)
-    try {
-        $vms = Get-VM -ErrorAction SilentlyContinue | Select-Object Name, State, Path, ProcessorCount, MemoryAssigned
-        if ($vms) {
-            $sources += @{
-                Type = 'HyperV'
-                VirtualMachines = $vms
-            }
-        }
-    } catch {
-        Write-Warning "Could not discover Hyper-V virtual machines"
-    }
-    
-    $sources | ConvertTo-Json -Depth 3
-    """
-    
-    try:
-        result = ps_executor.execute_script(discover_script)
-        sources_data = json.loads(result['stdout'])
-        
-        return {
-            'sources': sources_data,
-            'discovery_timestamp': 'discovery completed'
-        }
-        
-    except Exception as e:
-        raise CLIError(f'Failed to discover migration sources: {str(e)}')
-
-
-def assess_migration_readiness(cmd, source_path=None, assessment_type='basic'):
-    """Assess migration readiness for the specified source."""
-    ps_executor = get_powershell_executor()
-    
-    assessment_script = f"""
-    $assessment = @{{
-        AssessmentType = '{assessment_type}'
-        Timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-        Results = @()
-    }}
-    
-    # Basic system assessment
-    $systemInfo = @{{
-        OS = (Get-WmiObject -Class Win32_OperatingSystem)
-        CPU = (Get-WmiObject -Class Win32_Processor)
-        Memory = (Get-WmiObject -Class Win32_ComputerSystem)
-        Disk = (Get-WmiObject -Class Win32_LogicalDisk)
-        Network = (Get-NetAdapter | Where-Object {{$_.Status -eq 'Up'}})
-    }}
-    
-    # Check disk space
-    $diskSpaceWarnings = @()
-    foreach ($disk in $systemInfo.Disk) {{
-        $freeSpaceGB = [math]::Round($disk.FreeSpace / 1GB, 2)
-        $totalSpaceGB = [math]::Round($disk.Size / 1GB, 2)
-        $usedPercentage = [math]::Round((($totalSpaceGB - $freeSpaceGB) / $totalSpaceGB) * 100, 2)
-        
-        if ($usedPercentage -gt 80) {{
-            $diskSpaceWarnings += "Drive $($disk.DeviceID) is $usedPercentage% full"
-        }}
-    }}
-    
-    $assessment.Results += @{{
-        Category = 'Storage'
-        Status = if ($diskSpaceWarnings.Count -eq 0) {{ 'Passed' }} else {{ 'Warning' }}
-        Details = $diskSpaceWarnings
-    }}
-    
-    # Check memory
-    $totalMemoryGB = [math]::Round($systemInfo.Memory.TotalPhysicalMemory / 1GB, 2)
-    $memoryStatus = if ($totalMemoryGB -ge 4) {{ 'Passed' }} else {{ 'Warning' }}
-    $assessment.Results += @{{
-        Category = 'Memory'
-        Status = $memoryStatus
-        Details = "Total Memory: $totalMemoryGB GB"
-    }}
-    
-    # Check network connectivity
-    $networkStatus = if ($systemInfo.Network.Count -gt 0) {{ 'Passed' }} else {{ 'Failed' }}
-    $assessment.Results += @{{
-        Category = 'Network'
-        Status = $networkStatus
-        Details = "Active network adapters: $($systemInfo.Network.Count)"
-    }}
-    
-    $assessment | ConvertTo-Json -Depth 3
-    """
-    
-    try:
-        result = ps_executor.execute_script(assessment_script)
-        assessment_data = json.loads(result['stdout'])
-        
-        return assessment_data
-        
-    except Exception as e:
-        raise CLIError(f'Failed to assess migration readiness: {str(e)}')
-
 def setup_migration_environment(cmd, install_powershell=False, check_only=False):
     """Configure the system environment for migration operations."""
     import platform
@@ -804,3 +677,692 @@ def initialize_replication_infrastructure(cmd, resource_group_name, project_name
         
     except Exception as e:
         raise CLIError(f'Failed to initialize replication infrastructure: {str(e)}')
+
+
+# Azure Authentication Commands
+def check_azure_authentication(cmd):
+    """
+    Check Azure authentication status for PowerShell Az.Migrate module.
+    Azure CLI equivalent to Get-AzContext PowerShell cmdlet with enhanced visibility.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Enhanced PowerShell script with rich visual output
+    auth_check_script = """
+    try {
+        Write-Host ""
+        Write-Host "🔍 Checking Azure Authentication Status..." -ForegroundColor Cyan
+        Write-Host "=" * 50 -ForegroundColor Gray
+        Write-Host ""
+        
+        # Check current Azure context
+        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
+        
+        # Check PowerShell and module information
+        $psVersion = $PSVersionTable.PSVersion.ToString()
+        $platform = $PSVersionTable.Platform
+        if (-not $platform) { $platform = "Windows PowerShell" }
+        
+        # Check Az.Migrate module availability
+        $azMigrateModule = Get-Module -ListAvailable -Name Az.Migrate -ErrorAction SilentlyContinue
+        $moduleAvailable = $azMigrateModule -ne $null
+        
+        Write-Host "Environment Information:" -ForegroundColor Yellow
+        Write-Host "  PowerShell Version: $psVersion" -ForegroundColor White
+        Write-Host "  Platform: $platform" -ForegroundColor White
+        Write-Host "  Az.Migrate Module: $(if ($moduleAvailable) { '✅ Available' } else { '❌ Not Available' })" -ForegroundColor White
+        if ($azMigrateModule) {
+            Write-Host "  Module Version: $($azMigrateModule.Version)" -ForegroundColor White
+        }
+        Write-Host ""
+        
+        if ($currentContext) {
+            Write-Host "✅ Azure Authentication Status: AUTHENTICATED" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "Current Azure Context:" -ForegroundColor Yellow
+            Write-Host "  Account ID: $($currentContext.Account.Id)" -ForegroundColor White
+            Write-Host "  Account Type: $($currentContext.Account.Type)" -ForegroundColor White
+            Write-Host "  Subscription: $($currentContext.Subscription.Name)" -ForegroundColor White
+            Write-Host "  Subscription ID: $($currentContext.Subscription.Id)" -ForegroundColor White
+            Write-Host "  Tenant ID: $($currentContext.Tenant.Id)" -ForegroundColor White
+            Write-Host "  Environment: $($currentContext.Environment.Name)" -ForegroundColor White
+            Write-Host ""
+            
+            $result = @{
+                'Status' = 'Authenticated'
+                'IsAuthenticated' = $true
+                'AccountId' = $currentContext.Account.Id
+                'AccountType' = $currentContext.Account.Type
+                'SubscriptionId' = $currentContext.Subscription.Id
+                'SubscriptionName' = $currentContext.Subscription.Name
+                'TenantId' = $currentContext.Tenant.Id
+                'Environment' = $currentContext.Environment.Name
+                'Platform' = $platform
+                'PSVersion' = $psVersion
+                'ModuleAvailable' = $moduleAvailable
+                'ModuleVersion' = if ($azMigrateModule) { $azMigrateModule.Version.ToString() } else { $null }
+                'Message' = 'Successfully authenticated to Azure'
+            }
+        } else {
+            Write-Host "❌ Azure Authentication Status: NOT AUTHENTICATED" -ForegroundColor Red
+            Write-Host ""
+            Write-Host "Next Steps:" -ForegroundColor Yellow
+            Write-Host "  1. Connect to Azure: az migrate auth login" -ForegroundColor Cyan
+            Write-Host "  2. Or use PowerShell: Connect-AzAccount" -ForegroundColor Cyan
+            if (-not $moduleAvailable) {
+                Write-Host "  3. Install Az.Migrate module: Install-Module -Name Az.Migrate" -ForegroundColor Cyan
+            }
+            Write-Host ""
+            
+            $result = @{
+                'Status' = 'NotAuthenticated'
+                'IsAuthenticated' = $false
+                'Error' = 'No active Azure context found'
+                'Platform' = $platform
+                'PSVersion' = $psVersion
+                'ModuleAvailable' = $moduleAvailable
+                'ModuleVersion' = if ($azMigrateModule) { $azMigrateModule.Version.ToString() } else { $null }
+                'NextSteps' = @(
+                    'Connect to Azure: az migrate auth login',
+                    'Or use PowerShell: Connect-AzAccount',
+                    $(if (-not $moduleAvailable) { 'Install Az.Migrate module: Install-Module -Name Az.Migrate' })
+                )
+                'Message' = 'Not authenticated to Azure'
+            }
+        }
+        
+        $result | ConvertTo-Json -Depth 4
+        
+    } catch {
+        Write-Error "❌ Failed to check Azure authentication: $($_.Exception.Message)"
+        Write-Host ""
+        Write-Host "Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "1. Ensure PowerShell execution policy allows scripts" -ForegroundColor Yellow
+        Write-Host "2. Install Azure PowerShell modules: Install-Module -Name Az" -ForegroundColor Yellow
+        Write-Host "3. Check network connectivity" -ForegroundColor Yellow
+        Write-Host ""
+        
+        @{
+            'Status' = 'Error'
+            'IsAuthenticated' = $false
+            'Error' = $_.Exception.Message
+            'Message' = 'Failed to check Azure authentication'
+        } | ConvertTo-Json
+        throw
+    }
+    """
+    
+    try:
+        # Use interactive execution to show real-time PowerShell output with full visibility
+        result = ps_executor.execute_script_interactive(auth_check_script)
+        return {
+            'message': 'Azure authentication check completed. See detailed status above.',
+            'command_executed': 'Get-AzContext and module availability checks',
+            'help': 'Use "az migrate auth login" to connect to Azure if not authenticated'
+        }
+    except Exception as e:
+        raise CLIError(f'Failed to check Azure authentication: {str(e)}')
+
+
+def connect_azure_account(cmd, subscription_id=None, tenant_id=None, device_code=False, app_id=None, secret=None):
+    """
+    Connect to Azure account using PowerShell Connect-AzAccount with enhanced visibility.
+    Azure CLI equivalent to Connect-AzAccount PowerShell cmdlet.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Build PowerShell connection script with rich visual feedback
+    connect_script = """
+    try {
+        Write-Host ""
+        Write-Host "🔗 Connecting to Azure using PowerShell..." -ForegroundColor Cyan
+        Write-Host "=" * 50 -ForegroundColor Gray
+        Write-Host ""
+        
+        # Connection parameters
+        $connectParams = @{}
+        """
+    
+    if subscription_id:
+        connect_script += f"""
+        $connectParams['Subscription'] = '{subscription_id}'
+        Write-Host "📋 Target Subscription: {subscription_id}" -ForegroundColor Yellow
+        """
+    
+    if tenant_id:
+        connect_script += f"""
+        $connectParams['Tenant'] = '{tenant_id}'
+        Write-Host "🏢 Target Tenant: {tenant_id}" -ForegroundColor Yellow
+        """
+    
+    if device_code:
+        connect_script += """
+        $connectParams['UseDeviceAuthentication'] = $true
+        Write-Host "📱 Using Device Code Authentication" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "⚠️  You will be prompted to:" -ForegroundColor Magenta
+        Write-Host "   1. Copy the device code" -ForegroundColor White
+        Write-Host "   2. Open https://microsoft.com/devicelogin" -ForegroundColor White
+        Write-Host "   3. Enter the code and complete authentication" -ForegroundColor White
+        Write-Host ""
+        """
+    
+    if app_id and secret:
+        connect_script += f"""
+        $securePassword = ConvertTo-SecureString '{secret}' -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential('{app_id}', $securePassword)
+        $connectParams['ServicePrincipal'] = $true
+        $connectParams['Credential'] = $credential
+        Write-Host "🤖 Using Service Principal Authentication" -ForegroundColor Yellow
+        Write-Host "   Application ID: {app_id}" -ForegroundColor White
+        """
+    
+    connect_script += """
+        Write-Host ""
+        Write-Host "⏳ Initiating Azure connection..." -ForegroundColor Cyan
+        Write-Host ""
+        
+        # Connect to Azure
+        $context = Connect-AzAccount @connectParams
+        
+        if ($context) {
+            Write-Host ""
+            Write-Host "✅ Successfully connected to Azure!" -ForegroundColor Green
+            Write-Host "=" * 50 -ForegroundColor Gray
+            Write-Host ""
+            Write-Host "🔐 Account Details:" -ForegroundColor Yellow
+            Write-Host "   Account ID: $($context.Context.Account.Id)" -ForegroundColor White
+            Write-Host "   Account Type: $($context.Context.Account.Type)" -ForegroundColor White
+            Write-Host "   Subscription: $($context.Context.Subscription.Name)" -ForegroundColor White
+            Write-Host "   Subscription ID: $($context.Context.Subscription.Id)" -ForegroundColor White
+            Write-Host "   Tenant ID: $($context.Context.Tenant.Id)" -ForegroundColor White
+            Write-Host "   Environment: $($context.Context.Environment.Name)" -ForegroundColor White
+            Write-Host ""
+            
+            # Check for additional subscriptions
+            $allSubscriptions = Get-AzSubscription -ErrorAction SilentlyContinue
+            if ($allSubscriptions -and $allSubscriptions.Count -gt 1) {
+                Write-Host "📋 Available Subscriptions ($($allSubscriptions.Count) total):" -ForegroundColor Yellow
+                $allSubscriptions | ForEach-Object {
+                    $indicator = if ($_.Id -eq $context.Context.Subscription.Id) { " (current)" } else { "" }
+                    Write-Host "   $($_.Name) - $($_.Id)$indicator" -ForegroundColor White
+                }
+                Write-Host ""
+                Write-Host "💡 To switch subscriptions, use: az migrate auth set-context --subscription-id <id>" -ForegroundColor Cyan
+                Write-Host ""
+            }
+            
+            $result = @{
+                'Status' = 'Success'
+                'AccountId' = $context.Context.Account.Id
+                'AccountType' = $context.Context.Account.Type
+                'SubscriptionId' = $context.Context.Subscription.Id
+                'SubscriptionName' = $context.Context.Subscription.Name
+                'TenantId' = $context.Context.Tenant.Id
+                'Environment' = $context.Context.Environment.Name
+                'AvailableSubscriptions' = @($allSubscriptions | ForEach-Object { 
+                    @{
+                        'Name' = $_.Name
+                        'Id' = $_.Id
+                        'IsCurrent' = ($_.Id -eq $context.Context.Subscription.Id)
+                    }
+                })
+                'Message' = 'Successfully connected to Azure'
+            }
+            $result | ConvertTo-Json -Depth 4
+        } else {
+            Write-Host ""
+            Write-Host "❌ Failed to connect to Azure" -ForegroundColor Red
+            Write-Host "   Connection attempt returned null context" -ForegroundColor White
+            Write-Host ""
+            
+            @{
+                'Status' = 'Failed'
+                'Error' = 'Connection attempt returned null context'
+                'Message' = 'Failed to connect to Azure'
+            } | ConvertTo-Json
+        }
+    } catch {
+        Write-Host ""
+        Write-Host "❌ Failed to connect to Azure: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting Steps:" -ForegroundColor Yellow
+        Write-Host "   1. Ensure Azure PowerShell modules are installed:" -ForegroundColor White
+        Write-Host "      Install-Module -Name Az" -ForegroundColor Cyan
+        Write-Host "   2. Try using device code authentication:" -ForegroundColor White
+        Write-Host "      az migrate auth login --use-device-code" -ForegroundColor Cyan
+        Write-Host "   3. Check network connectivity and firewall settings" -ForegroundColor White
+        Write-Host "   4. Verify your credentials are correct" -ForegroundColor White
+        Write-Host ""
+        
+        @{
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'Message' = 'Failed to connect to Azure'
+            'TroubleshootingSteps' = @(
+                'Install Azure PowerShell modules: Install-Module -Name Az',
+                'Try device code authentication: az migrate auth login --use-device-code',
+                'Check network connectivity and firewall settings',
+                'Verify your credentials are correct'
+            )
+        } | ConvertTo-Json -Depth 3
+        throw
+    }
+    """
+    
+    try:
+        # Use interactive execution to show real-time authentication progress with full visibility
+        result = ps_executor.execute_script_interactive(connect_script)
+        return {
+            'message': 'Azure connection attempt completed. See detailed results above.',
+            'command_executed': 'Connect-AzAccount with specified parameters',
+            'help': 'Authentication status and account details are displayed above'
+        }
+    except Exception as e:
+        raise CLIError(f'Failed to connect to Azure: {str(e)}')
+
+
+def disconnect_azure_account(cmd):
+    """
+    Disconnect from Azure account using PowerShell Disconnect-AzAccount with enhanced visibility.
+    Azure CLI equivalent to Disconnect-AzAccount PowerShell cmdlet.
+    """
+    ps_executor = get_powershell_executor()
+    
+    disconnect_script = """
+    try {
+        Write-Host ""
+        Write-Host "🔌 Disconnecting from Azure..." -ForegroundColor Cyan
+        Write-Host "=" * 40 -ForegroundColor Gray
+        Write-Host ""
+        
+        # Check if currently connected
+        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
+        if (-not $currentContext) {
+            Write-Host "ℹ️  Not currently connected to Azure" -ForegroundColor Yellow
+            Write-Host ""
+            Write-Host "💡 To connect, use: az migrate auth login" -ForegroundColor Cyan
+            Write-Host ""
+            
+            @{
+                'Status' = 'NotConnected'
+                'IsAuthenticated' = $false
+                'Message' = 'Not currently connected to Azure'
+                'NextSteps' = @('Connect to Azure: az migrate auth login')
+            } | ConvertTo-Json -Depth 3
+            return
+        }
+        
+        Write-Host "📋 Current Azure context to be disconnected:" -ForegroundColor Yellow
+        Write-Host "   Account: $($currentContext.Account.Id)" -ForegroundColor White
+        Write-Host "   Subscription: $($currentContext.Subscription.Name)" -ForegroundColor White
+        Write-Host "   Tenant: $($currentContext.Tenant.Id)" -ForegroundColor White
+        Write-Host ""
+        
+        Write-Host "⏳ Disconnecting from Azure..." -ForegroundColor Cyan
+        
+        # Store context info before disconnecting
+        $previousAccountId = $currentContext.Account.Id
+        $previousSubscriptionId = $currentContext.Subscription.Id
+        $previousSubscriptionName = $currentContext.Subscription.Name
+        $previousTenantId = $currentContext.Tenant.Id
+        
+        # Disconnect from Azure
+        Disconnect-AzAccount -Confirm:$false
+        
+        Write-Host ""
+        Write-Host "✅ Successfully disconnected from Azure" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "🔐 Previous session details:" -ForegroundColor Yellow
+        Write-Host "   Account: $previousAccountId" -ForegroundColor White
+        Write-Host "   Subscription: $previousSubscriptionName ($previousSubscriptionId)" -ForegroundColor White
+        Write-Host "   Tenant: $previousTenantId" -ForegroundColor White
+        Write-Host ""
+        Write-Host "💡 To reconnect, use: az migrate auth login" -ForegroundColor Cyan
+        Write-Host ""
+        
+        @{
+            'Status' = 'Success'
+            'IsAuthenticated' = $false
+            'PreviousAccountId' = $previousAccountId
+            'PreviousSubscriptionId' = $previousSubscriptionId
+            'PreviousSubscriptionName' = $previousSubscriptionName
+            'PreviousTenantId' = $previousTenantId
+            'Message' = 'Successfully disconnected from Azure'
+            'NextSteps' = @('To reconnect: az migrate auth login')
+        } | ConvertTo-Json -Depth 3
+        
+    } catch {
+        Write-Host ""
+        Write-Host "❌ Failed to disconnect from Azure: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "   1. Check if you have an active PowerShell session" -ForegroundColor White
+        Write-Host "   2. Verify Azure PowerShell modules are properly loaded" -ForegroundColor White
+        Write-Host "   3. Try clearing PowerShell session and reconnecting" -ForegroundColor White
+        Write-Host ""
+        
+        @{
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'Message' = 'Failed to disconnect from Azure'
+            'TroubleshootingSteps' = @(
+                'Check active PowerShell session',
+                'Verify Azure PowerShell modules are loaded',
+                'Try clearing PowerShell session and reconnecting'
+            )
+        } | ConvertTo-Json -Depth 3
+        throw
+    }
+    """
+    
+    try:
+        # Use interactive execution to show real-time disconnect progress with full visibility
+        result = ps_executor.execute_script_interactive(disconnect_script)
+        return {
+            'message': 'Azure disconnection completed. See detailed results above.',
+            'command_executed': 'Disconnect-AzAccount',
+            'help': 'Use "az migrate auth login" to reconnect to Azure'
+        }
+    except Exception as e:
+        raise CLIError(f'Failed to disconnect from Azure: {str(e)}')
+
+
+def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_id=None):
+    """
+    Set the current Azure context using PowerShell Set-AzContext with enhanced visibility.
+    Azure CLI equivalent to Set-AzContext PowerShell cmdlet.
+    """
+    ps_executor = get_powershell_executor()
+    
+    if not subscription_id and not subscription_name:
+        raise CLIError('Either subscription_id or subscription_name must be provided')
+    
+    set_context_script = f"""
+    try {{
+        Write-Host ""
+        Write-Host "🔄 Setting Azure context..." -ForegroundColor Cyan
+        Write-Host "=" * 40 -ForegroundColor Gray
+        Write-Host ""
+        
+        # Check if currently connected
+        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
+        if (-not $currentContext) {{
+            Write-Host "❌ Not currently connected to Azure" -ForegroundColor Red
+            Write-Host ""
+            Write-Host "💡 Please connect first with: az migrate auth login" -ForegroundColor Cyan
+            Write-Host ""
+            
+            @{{
+                'Status' = 'NotConnected'
+                'Error' = 'Not authenticated to Azure'
+                'Message' = 'Please connect to Azure first'
+                'NextSteps' = @('Connect to Azure: az migrate auth login')
+            }} | ConvertTo-Json -Depth 3
+            return
+        }}
+        
+        Write-Host "📋 Current context:" -ForegroundColor Yellow
+        Write-Host "   Account: $($currentContext.Account.Id)" -ForegroundColor White
+        Write-Host "   Subscription: $($currentContext.Subscription.Name)" -ForegroundColor White
+        Write-Host ""
+        
+        # Set context parameters
+        $contextParams = @{{}}
+        """
+    
+    if subscription_id:
+        set_context_script += f"""
+        $contextParams['SubscriptionId'] = '{subscription_id}'
+        Write-Host "🎯 Target Subscription ID: {subscription_id}" -ForegroundColor Yellow
+        """
+    elif subscription_name:
+        set_context_script += f"""
+        $contextParams['SubscriptionName'] = '{subscription_name}'
+        Write-Host "🎯 Target Subscription Name: {subscription_name}" -ForegroundColor Yellow
+        """
+    
+    if tenant_id:
+        set_context_script += f"""
+        $contextParams['TenantId'] = '{tenant_id}'
+        Write-Host "🏢 Target Tenant ID: {tenant_id}" -ForegroundColor Yellow
+        """
+    
+    set_context_script += """
+        Write-Host ""
+        Write-Host "⏳ Setting new Azure context..." -ForegroundColor Cyan
+        
+        # Set the context
+        $newContext = Set-AzContext @contextParams
+        
+        if ($newContext) {
+            Write-Host ""
+            Write-Host "✅ Successfully set Azure context!" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "🔐 New Context Details:" -ForegroundColor Yellow
+            Write-Host "   Account: $($newContext.Account.Id)" -ForegroundColor White
+            Write-Host "   Account Type: $($newContext.Account.Type)" -ForegroundColor White
+            Write-Host "   Subscription: $($newContext.Subscription.Name)" -ForegroundColor White
+            Write-Host "   Subscription ID: $($newContext.Subscription.Id)" -ForegroundColor White
+            Write-Host "   Tenant: $($newContext.Tenant.Id)" -ForegroundColor White
+            Write-Host "   Environment: $($newContext.Environment.Name)" -ForegroundColor White
+            Write-Host ""
+            
+            # Show available subscriptions for reference
+            $allSubscriptions = Get-AzSubscription -ErrorAction SilentlyContinue
+            if ($allSubscriptions -and $allSubscriptions.Count -gt 1) {
+                Write-Host "📋 All available subscriptions:" -ForegroundColor Yellow
+                $allSubscriptions | ForEach-Object {
+                    $indicator = if ($_.Id -eq $newContext.Subscription.Id) { " (current)" } else { "" }
+                    Write-Host "   $($_.Name) - $($_.Id)$indicator" -ForegroundColor White
+                }
+                Write-Host ""
+            }
+            
+            $result = @{
+                'Status' = 'Success'
+                'AccountId' = $newContext.Account.Id
+                'AccountType' = $newContext.Account.Type
+                'SubscriptionId' = $newContext.Subscription.Id
+                'SubscriptionName' = $newContext.Subscription.Name
+                'TenantId' = $newContext.Tenant.Id
+                'Environment' = $newContext.Environment.Name
+                'AvailableSubscriptions' = @($allSubscriptions | ForEach-Object { 
+                    @{
+                        'Name' = $_.Name
+                        'Id' = $_.Id
+                        'IsCurrent' = ($_.Id -eq $newContext.Subscription.Id)
+                    }
+                })
+                'Message' = 'Successfully set Azure context'
+            }
+            $result | ConvertTo-Json -Depth 4
+        } else {
+            Write-Host ""
+            Write-Host "❌ Failed to set Azure context" -ForegroundColor Red
+            Write-Host "   Set-AzContext returned null" -ForegroundColor White
+            Write-Host ""
+            
+            @{
+                'Status' = 'Failed'
+                'Error' = 'Set-AzContext returned null'
+                'Message' = 'Failed to set Azure context'
+            } | ConvertTo-Json
+        }
+        
+    } catch {
+        Write-Host ""
+        Write-Host "❌ Failed to set Azure context: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting Steps:" -ForegroundColor Yellow
+        Write-Host "   1. Verify the subscription ID or name is correct" -ForegroundColor White
+        Write-Host "   2. Ensure you have access to the specified subscription" -ForegroundColor White
+        Write-Host "   3. Check that you're authenticated: az migrate auth check" -ForegroundColor White
+        Write-Host "   4. List available subscriptions: az migrate auth show-context" -ForegroundColor White
+        Write-Host ""
+        
+        @{
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'Message' = 'Failed to set Azure context'
+            'TroubleshootingSteps' = @(
+                'Verify the subscription ID or name is correct',
+                'Ensure you have access to the specified subscription',
+                'Check authentication: az migrate auth check',
+                'List subscriptions: az migrate auth show-context'
+            )
+        } | ConvertTo-Json -Depth 3
+        throw
+    }
+    """
+    
+    try:
+        # Use interactive execution to show real-time context change with full visibility
+        result = ps_executor.execute_script_interactive(set_context_script)
+        return {
+            'message': 'Azure context change completed. See detailed results above.',
+            'command_executed': 'Set-AzContext with specified parameters',
+            'help': 'Context details and available subscriptions are displayed above'
+        }
+    except Exception as e:
+        raise CLIError(f'Failed to set Azure context: {str(e)}')
+
+
+def get_azure_context(cmd):
+    """
+    Get the current Azure context using PowerShell Get-AzContext with enhanced visibility.
+    Azure CLI equivalent to Get-AzContext PowerShell cmdlet.
+    """
+    ps_executor = get_powershell_executor()
+    
+    get_context_script = """
+    try {
+        Write-Host ""
+        Write-Host "📋 Getting current Azure context..." -ForegroundColor Cyan
+        Write-Host "=" * 50 -ForegroundColor Gray
+        Write-Host ""
+        
+        # Get current context
+        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
+        
+        if (-not $currentContext) {
+            Write-Host "ℹ️  No current Azure context found" -ForegroundColor Yellow
+            Write-Host ""
+            Write-Host "❌ You are not authenticated to Azure" -ForegroundColor Red
+            Write-Host ""
+            Write-Host "💡 Next Steps:" -ForegroundColor Cyan
+            Write-Host "   1. Connect to Azure: az migrate auth login" -ForegroundColor White
+            Write-Host "   2. Or use PowerShell: Connect-AzAccount" -ForegroundColor White
+            Write-Host ""
+            
+            @{
+                'Status' = 'NoContext'
+                'IsAuthenticated' = $false
+                'Message' = 'No current Azure context found'
+                'NextSteps' = @(
+                    'Connect to Azure: az migrate auth login',
+                    'Or use PowerShell: Connect-AzAccount'
+                )
+            } | ConvertTo-Json -Depth 3
+            return
+        }
+        
+        Write-Host "✅ Current Azure Context Found" -ForegroundColor Green
+        Write-Host "=" * 50 -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "🔐 Account Information:" -ForegroundColor Yellow
+        Write-Host "   Account ID: $($currentContext.Account.Id)" -ForegroundColor White
+        Write-Host "   Account Type: $($currentContext.Account.Type)" -ForegroundColor White
+        Write-Host ""
+        Write-Host "📋 Subscription Information:" -ForegroundColor Yellow
+        Write-Host "   Subscription Name: $($currentContext.Subscription.Name)" -ForegroundColor White
+        Write-Host "   Subscription ID: $($currentContext.Subscription.Id)" -ForegroundColor White
+        Write-Host ""
+        Write-Host "🏢 Tenant Information:" -ForegroundColor Yellow
+        Write-Host "   Tenant ID: $($currentContext.Tenant.Id)" -ForegroundColor White
+        Write-Host ""
+        Write-Host "🌐 Environment:" -ForegroundColor Yellow
+        Write-Host "   Environment: $($currentContext.Environment.Name)" -ForegroundColor White
+        Write-Host ""
+        
+        # Get all available subscriptions
+        Write-Host "⏳ Retrieving available subscriptions..." -ForegroundColor Cyan
+        $subscriptions = Get-AzSubscription -ErrorAction SilentlyContinue
+        if ($subscriptions) {
+            Write-Host ""
+            Write-Host "📋 Available Subscriptions ($($subscriptions.Count) total):" -ForegroundColor Yellow
+            Write-Host "-" * 60 -ForegroundColor Gray
+            $subscriptions | ForEach-Object {
+                $indicator = if ($_.Id -eq $currentContext.Subscription.Id) { " ⭐ (current)" } else { "" }
+                $state = if ($_.State) { " [$($_.State)]" } else { "" }
+                Write-Host "   $($_.Name)$state" -ForegroundColor White
+                Write-Host "     ID: $($_.Id)$indicator" -ForegroundColor Gray
+            }
+            Write-Host ""
+            if ($subscriptions.Count -gt 1) {
+                Write-Host "💡 To switch subscriptions:" -ForegroundColor Cyan
+                Write-Host "   az migrate auth set-context --subscription-id <subscription-id>" -ForegroundColor White
+                Write-Host "   az migrate auth set-context --subscription-name '<subscription-name>'" -ForegroundColor White
+                Write-Host ""
+            }
+        } else {
+            Write-Host ""
+            Write-Host "⚠️  Could not retrieve subscription list" -ForegroundColor Yellow
+            Write-Host ""
+        }
+        
+        $result = @{
+            'Status' = 'Success'
+            'IsAuthenticated' = $true
+            'AccountId' = $currentContext.Account.Id
+            'AccountType' = $currentContext.Account.Type
+            'SubscriptionId' = $currentContext.Subscription.Id
+            'SubscriptionName' = $currentContext.Subscription.Name
+            'TenantId' = $currentContext.Tenant.Id
+            'Environment' = $currentContext.Environment.Name
+            'AvailableSubscriptions' = @($subscriptions | ForEach-Object { 
+                @{
+                    'Name' = $_.Name
+                    'Id' = $_.Id
+                    'State' = $_.State
+                    'IsCurrent' = ($_.Id -eq $currentContext.Subscription.Id)
+                }
+            })
+            'Message' = 'Current Azure context retrieved successfully'
+        }
+        $result | ConvertTo-Json -Depth 4
+        
+    } catch {
+        Write-Host ""
+        Write-Host "❌ Failed to get Azure context: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "   1. Check if Azure PowerShell modules are loaded" -ForegroundColor White
+        Write-Host "   2. Verify network connectivity" -ForegroundColor White
+        Write-Host "   3. Try reconnecting: az migrate auth login" -ForegroundColor White
+        Write-Host ""
+        
+        @{
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'Message' = 'Failed to get Azure context'
+            'TroubleshootingSteps' = @(
+                'Check Azure PowerShell modules',
+                'Verify network connectivity',
+                'Try reconnecting: az migrate auth login'
+            )
+        } | ConvertTo-Json -Depth 3
+        throw
+    }
+    """
+    
+    try:
+        # Use interactive execution to show real-time context information with full visibility
+        result = ps_executor.execute_script_interactive(get_context_script)
+        return {
+            'message': 'Azure context information displayed above.',
+            'command_executed': 'Get-AzContext and Get-AzSubscription',
+            'help': 'Current authentication status and available subscriptions are shown above'
+        }
+    except Exception as e:
+        raise CLIError(f'Failed to get Azure context: {str(e)}')
