@@ -1189,13 +1189,7 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
         raise CLIError('Either subscription_id or subscription_name must be provided')
     
     set_context_script = f"""
-    try {{
-        Write-Host ""
-        Write-Host "🔄 Setting Azure context..." -ForegroundColor Cyan
-        Write-Host "=" * 40 -ForegroundColor Gray
-        Write-Host ""
-        
-        # Check if currently connected
+    try {{ 
         $currentContext = Get-AzContext -ErrorAction SilentlyContinue
         if (-not $currentContext) {{
             Write-Host "❌ Not currently connected to Azure" -ForegroundColor Red
@@ -1212,11 +1206,6 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
             return
         }}
         
-        Write-Host "📋 Current context:" -ForegroundColor Yellow
-        Write-Host "   Account: $($currentContext.Account.Id)" -ForegroundColor White
-        Write-Host "   Subscription: $($currentContext.Subscription.Name)" -ForegroundColor White
-        Write-Host ""
-        
         # Set context parameters
         $contextParams = @{{}}
         """
@@ -1224,7 +1213,6 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
     if subscription_id:
         set_context_script += f"""
         $contextParams['SubscriptionId'] = '{subscription_id}'
-        Write-Host "🎯 Target Subscription ID: {subscription_id}" -ForegroundColor Yellow
         """
     elif subscription_name:
         set_context_script += f"""
@@ -1235,53 +1223,10 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
     if tenant_id:
         set_context_script += f"""
         $contextParams['TenantId'] = '{tenant_id}'
-        Write-Host "🏢 Target Tenant ID: {tenant_id}" -ForegroundColor Yellow
         """
     
     set_context_script += """
-        Write-Host ""
-        Write-Host "⏳ Setting new Azure context..." -ForegroundColor Cyan
-        
-        # Set the context
-        $newContext = Set-AzContext @contextParams
-        
-        if ($newContext) {
-            Write-Host ""
-            Write-Host "✅ Successfully set Azure context!" -ForegroundColor Green
-            Write-Host ""
-            Write-Host "🔐 New Context Details:" -ForegroundColor Yellow
-            Write-Host "   Account: $($newContext.Account.Id)" -ForegroundColor White
-            Write-Host "   Account Type: $($newContext.Account.Type)" -ForegroundColor White
-            Write-Host "   Subscription: $($newContext.Subscription.Name)" -ForegroundColor White
-            Write-Host "   Subscription ID: $($newContext.Subscription.Id)" -ForegroundColor White
-            Write-Host "   Tenant: $($newContext.Tenant.Id)" -ForegroundColor White
-            Write-Host "   Environment: $($newContext.Environment.Name)" -ForegroundColor White
-            Write-Host ""
-                        
-            $result = @{
-                'Status' = 'Success'
-                'AccountId' = $newContext.Account.Id
-                'AccountType' = $newContext.Account.Type
-                'SubscriptionId' = $newContext.Subscription.Id
-                'SubscriptionName' = $newContext.Subscription.Name
-                'TenantId' = $newContext.Tenant.Id
-                'Environment' = $newContext.Environment.Name
-                'Message' = 'Successfully set Azure context'
-            }
-            $result | ConvertTo-Json -Depth 4
-        } else {
-            Write-Host ""
-            Write-Host "❌ Failed to set Azure context" -ForegroundColor Red
-            Write-Host "   Set-AzContext returned null" -ForegroundColor White
-            Write-Host ""
-            
-            @{
-                'Status' = 'Failed'
-                'Error' = 'Set-AzContext returned null'
-                'Message' = 'Failed to set Azure context'
-            } | ConvertTo-Json
-        }
-        
+        Set-AzContext @contextParams
     } catch {
         Write-Host ""
         Write-Host "❌ Failed to set Azure context: $($_.Exception.Message)" -ForegroundColor Red
@@ -1309,8 +1254,7 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
     """
     
     try:
-        # Use interactive execution to show real-time context change with full visibility
-        result = ps_executor.execute_script_interactive(set_context_script)
+        ps_executor.execute_script_interactive(set_context_script)
         return {
             'message': 'Azure context change completed. See detailed results above.',
             'command_executed': 'Set-AzContext with specified parameters',
@@ -1325,22 +1269,15 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
 
 def create_server_replication(cmd, resource_group_name, project_name, target_vm_name, 
                              target_resource_group, target_network, server_name=None, 
-                             server_index=None, subscription_id=None):
+                             server_index=None):
     """Create replication for a discovered server."""
     
-    # Get PowerShell executor
-    ps_executor = get_powershell_executor()
-    
-    # Build the PowerShell script
+    ps_executor = get_powershell_executor()    
     replication_script = f"""
     # Create server replication
-    try {{
-        Write-Host "🚀 Creating server replication..." -ForegroundColor Green
-        
-        # Get discovered servers first
+    try {{        
         $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType VMware
         
-        # Select server by index or name
         if ("{server_index}" -ne "None" -and "{server_index}" -ne "") {{
             $ServerIndex = [int]"{server_index}"
             if ($ServerIndex -ge 0 -and $ServerIndex -lt $DiscoveredServers.Count) {{
@@ -1490,12 +1427,12 @@ def create_server_replication(cmd, resource_group_name, project_name, target_vm_
 
 
 def create_server_replication_by_index(cmd, resource_group_name, project_name, server_index, 
-                                      target_vm_name, target_resource_group, target_network, 
-                                      subscription_id=None):
+                                      target_vm_name, target_resource_group, target_network):
+    
     """Create replication for a server by its index in the discovered servers list."""
     return create_server_replication(cmd, resource_group_name, project_name, target_vm_name, 
                                    target_resource_group, target_network, 
-                                   server_index=server_index, subscription_id=subscription_id)
+                                   server_index=server_index)
 
 
 def get_discovered_servers_by_display_name(cmd, resource_group_name, project_name, display_name, 
