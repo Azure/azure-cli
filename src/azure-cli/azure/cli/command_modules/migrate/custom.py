@@ -1426,15 +1426,6 @@ def create_server_replication(cmd, resource_group_name, project_name, target_vm_
         raise CLIError(f'Failed to create server replication: {str(e)}')
 
 
-def create_server_replication_by_index(cmd, resource_group_name, project_name, server_index, 
-                                      target_vm_name, target_resource_group, target_network):
-    
-    """Create replication for a server by its index in the discovered servers list."""
-    return create_server_replication(cmd, resource_group_name, project_name, target_vm_name, 
-                                   target_resource_group, target_network, 
-                                   server_index=server_index)
-
-
 def get_discovered_servers_by_display_name(cmd, resource_group_name, project_name, display_name, 
                                           source_machine_type='VMware', subscription_id=None):
     """Find discovered servers by display name."""
@@ -1541,92 +1532,6 @@ def get_replication_job_status(cmd, resource_group_name, project_name, vm_name=N
         
     except Exception as e:
         raise CLIError(f'Failed to get replication status: {str(e)}')
-
-
-def create_multiple_server_replications(cmd, resource_group_name, project_name, 
-                                       server_configs, subscription_id=None):
-    """Create replication for multiple servers."""
-    
-    # Get PowerShell executor
-    ps_executor = get_powershell_executor()
-    
-    # Build the PowerShell script
-    bulk_script = f"""
-    # Create multiple server replications
-    try {{
-        Write-Host "🚀 Creating multiple server replications..." -ForegroundColor Green
-        
-        # Get discovered servers
-        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType VMware
-        
-        $Results = @()
-        
-        # Process each server configuration
-        $ServerConfigs = '{server_configs}' | ConvertFrom-Json
-        
-        foreach ($Config in $ServerConfigs) {{
-            try {{
-                Write-Host "Processing server: $($Config.ServerName)" -ForegroundColor Cyan
-                
-                # Find the server
-                $SelectedServer = $DiscoveredServers | Where-Object {{ $_.DisplayName -eq $Config.ServerName }}
-                
-                if ($SelectedServer) {{
-                    # Create replication
-                    $ReplicationJob = New-AzMigrateServerReplication -InputObject $SelectedServer -TargetVMName $Config.TargetVMName -TargetResourceGroup $Config.TargetResourceGroup -TargetNetwork $Config.TargetNetwork
-                    
-                    $Results += @{{
-                        ServerName = $Config.ServerName
-                        TargetVMName = $Config.TargetVMName
-                        JobId = $ReplicationJob.JobId
-                        Status = "Started"
-                    }}
-                    
-                    Write-Host "✅ Replication started for $($Config.ServerName)" -ForegroundColor Green
-                }} else {{
-                    Write-Host "⚠️ Server not found: $($Config.ServerName)" -ForegroundColor Yellow
-                    $Results += @{{
-                        ServerName = $Config.ServerName
-                        Status = "Server not found"
-                    }}
-                }}
-            }} catch {{
-                Write-Host "❌ Failed to create replication for $($Config.ServerName): $($_.Exception.Message)" -ForegroundColor Red
-                $Results += @{{
-                    ServerName = $Config.ServerName
-                    Status = "Failed"
-                    Error = $_.Exception.Message
-                }}
-            }}
-        }}
-        
-        Write-Host "📊 Bulk replication summary:" -ForegroundColor Green
-        $Results | Format-Table -AutoSize
-        
-        return $Results
-        
-    }} catch {{
-        Write-Host "❌ Error in bulk replication:" -ForegroundColor Red
-        Write-Host $_.Exception.Message -ForegroundColor Red
-        throw
-    }}
-    """
-    
-    try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(bulk_script)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': 'New-AzMigrateServerReplication (bulk operation)',
-            'parameters': {
-                'ProjectName': project_name,
-                'ResourceGroupName': resource_group_name,
-                'ServerConfigs': server_configs
-            }
-        }
-        
-    except Exception as e:
-        raise CLIError(f'Failed to create multiple server replications: {str(e)}')
 
 
 def set_replication_target_properties(cmd, resource_group_name, project_name, vm_name, 
