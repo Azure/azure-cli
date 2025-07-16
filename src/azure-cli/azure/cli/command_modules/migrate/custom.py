@@ -6,9 +6,11 @@
 import json
 import os
 import platform
+import sys
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.command_modules.migrate._powershell_utils import get_powershell_executor
+from azure.cli.core.util import run_cmd
+from azure.cli.command_modules.migrate._powershell_utils import get_powershell_executor, PowerShellExecutor
 
 logger = get_logger(__name__)
 
@@ -20,7 +22,6 @@ def check_migration_prerequisites(cmd):
     try:
         prereqs = ps_executor.check_migration_prerequisites()
         
-        # Display prerequisite information
         logger.info(f"PowerShell Version: {prereqs.get('PowerShellVersion', 'Unknown')}")
         logger.info(f"Platform: {prereqs.get('Platform', 'Unknown')}")
         logger.info(f"Edition: {prereqs.get('Edition', 'Unknown')}")
@@ -35,13 +36,7 @@ def check_migration_prerequisites(cmd):
         raise CLIError(f'Failed to check migration prerequisites: {str(e)}')
 
 def setup_migration_environment(cmd, install_powershell=False, check_only=False):
-    """Configure the system environment for migration operations."""
-    import platform
-    import sys
-    from azure.cli.core.util import run_cmd
-    from knack.util import CLIError
-    from knack.log import get_logger
-    
+    """Configure the system environment for migration operations."""    
     logger = get_logger(__name__)
     system = platform.system().lower()
     
@@ -54,7 +49,6 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
     }
     
     try:
-        # Check Python version
         python_version = sys.version_info
         if python_version.major >= 3 and python_version.minor >= 7:
             setup_results['checks'].append({
@@ -72,16 +66,13 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
             })
             setup_results['status'] = 'warning'
         
-        # Check PowerShell availability
         powershell_check = _check_powershell_availability(system)
         setup_results['checks'].append(powershell_check)
         
         if powershell_check['status'] == 'failed' and install_powershell and not check_only:
-            # Attempt to install PowerShell
             install_result = _install_powershell(system, logger)
             setup_results['actions_taken'].append(install_result)
             
-            # Re-check after installation attempt
             powershell_recheck = _check_powershell_availability(system)
             setup_results['checks'].append({
                 'component': 'PowerShell (after installation)',
@@ -90,7 +81,6 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
                 'message': powershell_recheck['message']
             })
         
-        # Check for specific tools based on platform
         if system == 'windows':
             setup_results['checks'].extend(_check_windows_tools())
         elif system == 'linux':
@@ -98,10 +88,8 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
         elif system == 'darwin':
             setup_results['checks'].extend(_check_macos_tools())
         
-        # Add platform-specific recommendations
         setup_results['recommendations'] = _get_platform_recommendations(system, setup_results['checks'])
         
-        # Determine overall status
         failed_checks = [c for c in setup_results['checks'] if c['status'] == 'failed']
         if failed_checks:
             setup_results['status'] = 'failed' if any(c['component'] == 'PowerShell' for c in failed_checks) else 'warning'
@@ -114,16 +102,12 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
 
 def _check_powershell_availability(system):
     """Check if PowerShell is available on the system."""
-    from ._powershell_utils import PowerShellExecutor
-    from azure.cli.core.util import run_cmd
     
-    # Try to use our PowerShell executor's check method
     try:
         executor = PowerShellExecutor()
         is_available, command = executor.check_powershell_available()
         
         if is_available:
-            # Get version information
             try:
                 if command == 'pwsh':
                     result = run_cmd([command, '--version'], capture_output=True, timeout=10)
@@ -146,7 +130,6 @@ def _check_powershell_availability(system):
                 'message': f'PowerShell is available via {command}'
             }
     except Exception as e:
-        # Fallback to original logic if needed
         pass
     
     return {
@@ -160,7 +143,6 @@ def _check_powershell_availability(system):
 
 def _install_powershell(system, logger):
     """Attempt to install PowerShell on the system."""
-    from azure.cli.core.util import run_cmd
     
     install_result = {
         'component': 'PowerShell Installation',
@@ -171,7 +153,6 @@ def _install_powershell(system, logger):
     
     try:
         if system == 'windows':
-            # Windows - try winget first, then provide manual instructions
             try:
                 result = run_cmd(['winget', 'install', 'Microsoft.PowerShell'], 
                                 capture_output=True, timeout=300)
@@ -187,7 +168,6 @@ def _install_powershell(system, logger):
                 install_result['message'] = 'winget not available. Please install PowerShell Core manually from https://github.com/PowerShell/PowerShell'
         
         elif system == 'linux':
-            # Linux - provide distribution-specific instructions
             install_result['status'] = 'manual_required'
             install_result['message'] = 'Please install PowerShell Core using your distribution package manager'
             install_result['commands'] = [
@@ -197,7 +177,6 @@ def _install_powershell(system, logger):
             ]
         
         elif system == 'darwin':
-            # macOS - try Homebrew
             try:
                 result = run_cmd(['brew', 'install', 'powershell'], 
                                 capture_output=True, timeout=300)
@@ -227,11 +206,8 @@ def _install_powershell(system, logger):
 
 def _check_windows_tools():
     """Check for Windows-specific migration tools."""
-    from azure.cli.core.util import run_cmd
     
-    checks = []
-    
-    # Check for Windows PowerShell modules
+    checks = []    
     powershell_modules = [
         'Hyper-V',
         'SqlServer',
@@ -270,11 +246,8 @@ def _check_windows_tools():
 
 def _check_linux_tools():
     """Check for Linux-specific tools that might be useful for migration."""
-    from azure.cli.core.util import run_cmd
     
-    checks = []
-    
-    # Check for common tools
+    checks = []    
     tools = [
         ('curl', 'Data transfer tool'),
         ('wget', 'File download tool'),
@@ -309,11 +282,8 @@ def _check_linux_tools():
 
 def _check_macos_tools():
     """Check for macOS-specific tools."""
-    from azure.cli.core.util import run_cmd
     
-    checks = []
-    
-    # Check for Homebrew
+    checks = []    
     try:
         result = run_cmd(['brew', '--version'], capture_output=True, timeout=5)
         if result.returncode == 0:
@@ -342,7 +312,6 @@ def _get_platform_recommendations(system, checks):
     """Get platform-specific recommendations based on check results."""
     recommendations = []
     
-    # Check if PowerShell is missing
     powershell_checks = [c for c in checks if 'PowerShell' in c['component']]
     if any(c['status'] == 'failed' for c in powershell_checks):
         if system == 'windows':
@@ -352,7 +321,6 @@ def _get_platform_recommendations(system, checks):
         elif system == 'darwin':
             recommendations.append("Install PowerShell Core using 'brew install powershell' or from https://github.com/PowerShell/PowerShell")
     
-    # Platform-specific recommendations
     if system == 'windows':
         recommendations.extend([
             "Consider installing Hyper-V PowerShell module for VM migrations: Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-Management-PowerShell",
@@ -373,8 +341,6 @@ def _get_platform_recommendations(system, checks):
     
     return recommendations
 
-
-# Azure CLI equivalents to PowerShell Az.Migrate commands
 
 def get_discovered_server(cmd, resource_group_name, project_name, subscription_id=None, server_id=None, source_machine_type='VMware', output_format='json', display_fields=None):
     """Azure CLI equivalent to Get-AzMigrateDiscoveredServer PowerShell cmdlet."""
