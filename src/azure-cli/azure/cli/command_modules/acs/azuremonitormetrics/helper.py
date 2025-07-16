@@ -7,6 +7,8 @@ from knack.util import CLIError
 from azure.cli.core.azclierror import (
     UnknownError
 )
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import (
     RP_API,
     AKS_CLUSTER_API
@@ -23,17 +25,10 @@ def sanitize_resource_id(resource_id):
 
 
 def post_request(cmd, subscription_id, rp_name, headers):
-    from azure.cli.core.util import send_raw_request
-    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
-    customUrl = "{0}/subscriptions/{1}/providers/{2}/register?api-version={3}".format(
-        armendpoint,
-        subscription_id,
-        rp_name,
-        RP_API,
-    )
+    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     try:
-        send_raw_request(cmd.cli_ctx, "POST", customUrl, headers=headers)
-    except CLIError as e:
+        resource_client.providers.register(rp_name)
+    except Exception as e:
         raise CLIError(e)
 
 
