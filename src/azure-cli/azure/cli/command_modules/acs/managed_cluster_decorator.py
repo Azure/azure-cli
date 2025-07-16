@@ -42,6 +42,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_ARTIFACT_SOURCE_CACHE,
     CONST_NONE_UPGRADE_CHANNEL,
+    CONST_AVAILABILITY_SET,
+    CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
@@ -5500,6 +5502,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         # because it's already checked in get_enable_static_egress_gateway
         return self.raw_param.get("disable_static_egress_gateway")
 
+    def get_migrate_vmas_to_vms(self) -> bool:
+        """Obtain the value of migrate_vmas_to_vms.
+        :return: bool
+        """
+        return self.raw_param.get("migrate_vmas_to_vms")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -8781,6 +8789,30 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.network_profile.static_egress_gateway_profile.enabled = False
         return mc
 
+    def update_vmas_to_vms(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update the agent pool profile type from VMAS to VMS and LB sku to standard
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_migrate_vmas_to_vms():
+            msg = (
+                "\nWARNING: This operation will be disruptive to your workload while underway. "
+                "Do you wish to continue?"
+            )
+            if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+                raise DecoratorEarlyExitException()
+            # Ensure we have valid vmas AP
+            if len(mc.agent_pool_profiles) == 1 and mc.agent_pool_profiles[0].type == CONST_AVAILABILITY_SET:
+                mc.agent_pool_profiles[0].type = CONST_VIRTUAL_MACHINES
+            else:
+                raise CLIError('This is not a valid VMAS cluster, we cannot proceed with the migration.')
+
+            if mc.network_profile.load_balancer_sku == CONST_LOAD_BALANCER_SKU_BASIC:
+                mc.network_profile.load_balancer_sku = CONST_LOAD_BALANCER_SKU_STANDARD
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -8868,6 +8900,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_static_egress_gateway(mc)
         # update kubernetes version and orchestrator version
         mc = self.update_kubernetes_version_and_orchestrator_version(mc)
+        # update VMAS to VMS
+        mc = self.update_vmas_to_vms(mc)
         return mc
 
     def update_kubernetes_version_and_orchestrator_version(self, mc: ManagedCluster) -> ManagedCluster:

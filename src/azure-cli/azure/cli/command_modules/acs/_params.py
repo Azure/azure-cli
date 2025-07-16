@@ -649,6 +649,8 @@ def load_arguments(self, _):
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('nodepool_taints', validator=validate_nodepool_taints)
+        c.argument('migrate_vmas_to_vms', action='store_true')
+
         # azure monitor profile
         c.argument('enable_azure_monitor_metrics', action='store_true')
         c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid)
