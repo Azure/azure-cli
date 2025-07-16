@@ -186,10 +186,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
-        ResourceType.MGMT_KEYVAULT: SDKProfile('2024-11-01', {
-            'vaults': '2023-02-01',
-            'managed_hsms': '2024-11-01'
-        }),
+        ResourceType.MGMT_KEYVAULT: None,
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
