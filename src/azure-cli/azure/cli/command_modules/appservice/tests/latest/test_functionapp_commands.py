@@ -1242,7 +1242,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp function delete -g {} -n {} --function-name {}'
             .format(resource_group, functionapp_name, function_name))
 
-    @ResourceGroupPreparer(location='southcentralus')
+    @ResourceGroupPreparer(location='eastus2')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_plan_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -1254,13 +1254,13 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'functionappplan', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location southcentralus --logs-destination none'
+        self.cmd('containerapp env create --name {} --resource-group {} --location eastus2 --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'South Central US')])
+                     JMESPathCheck('location', 'East US 2')])
 
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location southcentralus'.format(resource_group, plan_name))
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location eastus2'.format(resource_group, plan_name))
 
         with self.assertRaises(ArgumentUsageError):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
@@ -1315,7 +1315,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1),
             JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
 
-    @ResourceGroupPreparer(location='southcentralus')
+    @ResourceGroupPreparer(location='eastus2')
     @StorageAccountPreparer()
     def test_functionapp_create_with_min_replicas_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -1325,7 +1325,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'functionappplan', 40
         )
 
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location southcentralus'.format(resource_group, plan_name))
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location eastus2'.format(resource_group, plan_name))
 
         with self.assertRaises(RequiredArgumentMissingError):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime dotnet --functions-version 4 --min-replicas 1'

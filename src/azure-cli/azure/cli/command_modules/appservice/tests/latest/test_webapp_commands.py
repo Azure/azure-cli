@@ -1488,6 +1488,7 @@ class WebappGitScenarioTest(ScenarioTest):
 
 
 class WebappSlotScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_slot(self, resource_group):
         plan = self.create_random_name(prefix='slot-test-plan', length=24)
