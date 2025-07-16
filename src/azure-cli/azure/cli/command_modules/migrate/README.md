@@ -1,153 +1,153 @@
 # Azure CLI Migration Module
 
-This module provides cross-platform migration capabilities by leveraging PowerShell cmdlets from within Azure CLI. The module works on Windows, Linux, and macOS when PowerShell Core is installed.
+This module provides migration capabilities for Azure resources and workloads through Azure CLI commands.
 
 ## Features
 
-- **Cross-platform PowerShell execution**: Execute PowerShell migration commands on Windows, Linux, and macOS
-- **Migration assessment**: Comprehensive assessment tools for various workloads
-- **Migration planning**: Create and manage structured migration plans
-- **Specialized assessments**: Dedicated commands for SQL Server, Hyper-V, file systems, and network configurations
-- **Custom script execution**: Run organization-specific PowerShell migration scripts
+- **Migration assessment**: Assessment tools for various Azure migration scenarios
+- **Resource migration**: Commands for migrating different types of resources
+- **Migration project management**: Create and manage Azure Migrate projects
+- **Appliance management**: Configure and manage Azure Migrate appliances
 
 ## Prerequisites
 
-### Windows
-- Windows PowerShell 5.1+ or PowerShell Core 6.0+
-- Azure CLI
-
-### Linux/macOS
-- PowerShell Core 6.0+ (required)
-- Azure CLI
-
-To install PowerShell Core on Linux/macOS, visit: https://github.com/PowerShell/PowerShell
+- Azure CLI 2.0+
+- Valid Azure subscription
+- Appropriate permissions for migration operations
 
 ## Commands Overview
 
-### Basic Migration Commands
+### Project Management Commands
 
 ```bash
-# Check migration prerequisites
-az migrate check-prerequisites
+# Create a migration project
+az migrate project create --name "MyMigrationProject" --resource-group "MyRG" --location "East US"
 
-# Discover migration sources
-az migrate discover
+# List migration projects
+az migrate project list
 
-# Perform basic migration assessment
-az migrate assess
+# Show project details
+az migrate project show --name "MyMigrationProject" --resource-group "MyRG"
+
+# Delete migration project
+az migrate project delete --name "MyMigrationProject" --resource-group "MyRG"
 ```
 
-### Migration Planning
+### Assessment Commands
 
 ```bash
-# Create a migration plan
-az migrate plan create --source-name "MyServer" --target-type azure-vm
+# List assessments in a project
+az migrate assessment list --project-name "MyMigrationProject" --resource-group "MyRG"
 
-# List migration plans
-az migrate plan list
-
-# Show plan details
-az migrate plan show --plan-name "MyServer-migration-plan"
-
-# Execute a migration step
-az migrate plan execute-step --plan-name "MyServer-migration-plan" --step-number 1
+# Show assessment details
+az migrate assessment show --assessment-name "MyAssessment" --project-name "MyMigrationProject" --resource-group "MyRG"
 ```
 
-### Specialized Assessments
+### Machine Discovery and Management
 
 ```bash
-# Assess SQL Server for Azure SQL migration
-az migrate assess sql-server --server-name "MyServer"
+# List discovered machines
+az migrate machine list --project-name "MyMigrationProject" --resource-group "MyRG"
 
-# Assess Hyper-V VMs for Azure migration
-az migrate assess hyperv-vm --vm-name "MyVM"
-
-# Assess file system for Azure Storage migration
-az migrate assess filesystem --path "C:\\MyData"
-
-# Assess network configuration
-az migrate assess network
+# Show machine details
+az migrate machine show --machine-name "MyMachine" --project-name "MyMigrationProject" --resource-group "MyRG"
 ```
 
-### Custom PowerShell Execution
+### Solution Management
 
 ```bash
-# Execute a custom PowerShell script
-az migrate powershell execute --script-path "C:\\Scripts\\MyMigration.ps1"
+# Add solution to project
+az migrate solution create --solution-type "Servers" --project-name "MyMigrationProject" --resource-group "MyRG"
 
-# Execute script with parameters
-az migrate powershell execute --script-path "C:\\Scripts\\MyScript.ps1" --parameters "Server=MyServer,Database=MyDB"
+# List solutions in project
+az migrate solution list --project-name "MyMigrationProject" --resource-group "MyRG"
+
+# Delete solution
+az migrate solution delete --solution-type "Servers" --project-name "MyMigrationProject" --resource-group "MyRG"
 ```
 
 ## Architecture
 
 The migration module consists of several key components:
 
-1. **PowerShell Executor** (`_powershell_utils.py`): Cross-platform PowerShell command execution
-2. **Migration Scripts** (`_powershell_scripts.py`): Pre-built PowerShell scripts for common scenarios
-3. **Custom Commands** (`custom.py`): Azure CLI command implementations
-4. **Command Registration** (`commands.py`): Command structure and organization
-5. **Parameters** (`_params.py`): Command-line argument definitions
-6. **Help Documentation** (`_help.py`): Comprehensive help and examples
+1. **Project Management**: Core project operations and lifecycle management
+2. **Assessment Operations**: Resource assessment and evaluation capabilities  
+3. **Machine Discovery**: Discovery and inventory of source machines
+4. **Solution Management**: Integration with Azure Migrate solutions
 
-## PowerShell Scripts
+## Common Workflows
 
-The module includes several pre-built PowerShell scripts for common migration scenarios:
+### Setting up a Migration Project
 
-- **SQL Server Assessment**: Analyzes SQL Server instances and databases
-- **Hyper-V VM Assessment**: Evaluates virtual machines for Azure compatibility
-- **File System Assessment**: Analyzes file structures and storage requirements
-- **Network Assessment**: Reviews network configuration and requirements
+```bash
+# Create resource group if needed
+az group create --name "migration-rg" --location "East US"
 
-## Migration Planning
+# Create migration project
+az migrate project create --name "server-migration-2025" --resource-group "migration-rg" --location "East US"
 
-The migration planning feature provides a structured approach to migrations:
+# Add server assessment solution
+az migrate solution create --solution-type "Servers" --project-name "server-migration-2025" --resource-group "migration-rg"
 
-1. **Prerequisites Check**: Verify system requirements
-2. **Data Assessment**: Analyze data and applications
-3. **Migration Preparation**: Prepare environments
-4. **Data Migration**: Execute migration
-5. **Validation**: Verify migration results
-6. **Cutover**: Complete migration
+# List project contents
+az migrate project show --name "server-migration-2025" --resource-group "migration-rg"
+```
+
+### Viewing Migration Data
+
+```bash
+# List all discovered machines
+az migrate machine list --project-name "server-migration-2025" --resource-group "migration-rg"
+
+# View assessments
+az migrate assessment list --project-name "server-migration-2025" --resource-group "migration-rg"
+
+# Get detailed assessment information
+az migrate assessment show --assessment-name "ServerAssessment" --project-name "server-migration-2025" --resource-group "migration-rg"
+```
 
 ## Error Handling
 
-The module includes comprehensive error handling:
+The module includes comprehensive error handling for:
 
-- PowerShell availability checks
-- Cross-platform compatibility validation
-- Detailed error messages with troubleshooting guidance
-- Timeout protection for long-running operations
+- Invalid project configurations
+- Permission and authentication issues
+- Resource not found scenarios
+- Azure service connectivity problems
 
-## Security Considerations
+## Troubleshooting
 
-- Scripts execute with current user permissions
-- No credential storage or transmission
-- PowerShell execution policy bypass for migration scripts only
-- Administrative privilege detection and warnings
+### Common Issues
 
-## Examples
+**Project Creation Fails**
+- Verify you have Contributor permissions on the subscription
+- Ensure the location supports Azure Migrate
+- Check resource naming conventions
 
-### Complete SQL Server Migration Assessment
+**Assessment Data Not Visible**
+- Confirm the appliance is properly configured
+- Verify network connectivity from appliance to Azure
+- Check that discovery is running on the appliance
 
-```bash
-# Check prerequisites
-az migrate check-prerequisites
+**Permission Errors**
+- Ensure Azure Migrate Contributor role is assigned
+- Verify subscription-level permissions for creating resources
 
-# Assess SQL Server
-az migrate assess sql-server --server-name "SQLSERVER01"
+## Contributing
 
-# Create migration plan
-az migrate plan create --source-name "SQLSERVER01" --target-type azure-sql --plan-name "sql-migration-2025"
+When extending the migration module:
 
-# Execute assessment step
-az migrate plan execute-step --plan-name "sql-migration-2025" --step-number 2
-```
+1. Follow Azure CLI command naming conventions
+2. Implement proper error handling and validation
+3. Add comprehensive help documentation
+4. Include usage examples in help text
+5. Update this README with new command examples
 
-### Hyper-V to Azure VM Migration
+For more information on Azure Migrate, visit: https://docs.microsoft.com/azure/migrate/
 
-```bash
-# Discover Hyper-V environment
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 az migrate discover --source-type vm
 
 # Assess specific VM
