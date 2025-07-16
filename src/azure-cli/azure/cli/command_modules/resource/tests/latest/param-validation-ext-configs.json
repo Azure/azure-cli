@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "stringParam": {
+      "value": "foo"
+    },
+    "intParam": {
+      "value": 10
+    },
+    "madeupParam": {
+      "value": "bar"
+    }
+  },
+  "extensionConfigs": {
+    "k8s": {
+      "kubeconfig": {
+        "keyVaultReference": {
+          "keyVault": {
+            "id": "/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"
+          },
+          "secretName": "myKubeconfig"
+        }
+      },
+      "namespace": {
+        "value": "ns"
+      }
+    }
+  }
+}
