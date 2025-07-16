@@ -27,18 +27,6 @@ class PowerShellExecutor:
     def _get_powershell_command(self):
         """Get the appropriate PowerShell command for the current platform."""
         
-        # Try PowerShell Core first (cross-platform)
-        for cmd in ['pwsh']:
-            try:
-                result = run_cmd([cmd, '-Command', '$PSVersionTable.PSVersion.ToString()'], 
-                                capture_output=True, timeout=10)
-                if result.returncode == 0:
-                    logger.info(f'Found PowerShell Core: {result.stdout.strip()}')
-                    return cmd
-            except Exception:
-                logger.debug(f'PowerShell command {cmd} not found')
-        
-        # On Windows, try Windows PowerShell as fallback
         if self.platform == 'windows':
             for cmd in ['powershell.exe', 'powershell']:
                 try:
@@ -49,8 +37,17 @@ class PowerShellExecutor:
                         return cmd
                 except Exception:
                     logger.debug(f'PowerShell command {cmd} not found')
+        else:
+            for cmd in ['pwsh']:
+                try:
+                    result = run_cmd([cmd, '-Command', '$PSVersionTable.PSVersion.ToString()'], 
+                                    capture_output=True, timeout=10)
+                    if result.returncode == 0:
+                        logger.info(f'Found PowerShell Core: {result.stdout.strip()}')
+                        return cmd
+                except Exception:
+                    logger.debug(f'PowerShell command {cmd} not found')
         
-        # PowerShell not found - provide platform-specific guidance
         install_guidance = {
             'windows': 'Install PowerShell Core from https://github.com/PowerShell/PowerShell or ensure Windows PowerShell is available.',
             'linux': 'Install PowerShell Core using your package manager:\n' +
@@ -91,7 +88,7 @@ class PowerShellExecutor:
             result = run_cmd(
                 cmd,
                 capture_output=True,
-                timeout=300  # 5-minute timeout
+                timeout=300
             )
             
             if result.returncode != 0:
@@ -117,7 +114,7 @@ class PowerShellExecutor:
         Note: This method uses subprocess.Popen directly for real-time output streaming,
         which is an approved exception to the CLI subprocess guidelines for interactive scenarios.
         """
-        import subprocess  # Import locally only where needed for real-time output
+        import subprocess
         
         try:
             if not self.powershell_cmd:
@@ -131,19 +128,16 @@ class PowerShellExecutor:
             print("=" * 60)
             print("PowerShell Authentication Output:")
             print("=" * 60)
-            
-            # Use subprocess.Popen for real-time output with no buffering
-            # This is an approved exception for interactive scenarios per CLI guidelines
+           
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                bufsize=0,  # No buffering for immediate output
+                bufsize=0,
                 universal_newlines=True
             )
             
-            # Capture and display output in real-time
             output_lines = []
             error_lines = []
             
@@ -154,6 +148,7 @@ class PowerShellExecutor:
             if platform.system().lower() == 'windows':
                 import threading
                 import queue
+                import time
                 
                 stdout_queue = queue.Queue()
                 stderr_queue = queue.Queue()
@@ -183,7 +178,7 @@ class PowerShellExecutor:
                 while not (stdout_done and stderr_done):
                     # Check stdout queue
                     try:
-                        stream, line = stdout_queue.get_nowait()
+                        _, line = stdout_queue.get_nowait()
                         if line is None:
                             stdout_done = True
                         else:
@@ -197,7 +192,7 @@ class PowerShellExecutor:
                     
                     # Check stderr queue
                     try:
-                        stream, line = stderr_queue.get_nowait()
+                        _, line = stderr_queue.get_nowait()
                         if line is None:
                             stderr_done = True
                         else:
@@ -209,11 +204,8 @@ class PowerShellExecutor:
                     except queue.Empty:
                         pass
                     
-                    # Small sleep to prevent busy waiting
-                    import time
                     time.sleep(0.01)
                     
-                    # Check if process is done
                     if process.poll() is not None and stdout_queue.empty() and stderr_queue.empty():
                         break
             
@@ -244,12 +236,7 @@ class PowerShellExecutor:
                     if process.poll() is not None:
                         break
             
-            # Wait for process to complete
             return_code = process.wait()
-            
-            print("=" * 60)
-            print(f"PowerShell command completed with exit code: {return_code}")
-            print("=" * 60)
             
             return {
                 'stdout': '\n'.join(output_lines),
@@ -267,7 +254,7 @@ class PowerShellExecutor:
     
     def execute_migration_cmdlet(self, cmdlet, parameters=None):
         """Execute a migration-specific PowerShell cmdlet."""
-        # Import required modules first
+        
         import_script = """
         try {
             Import-Module Microsoft.PowerShell.Management -Force
@@ -277,7 +264,6 @@ class PowerShellExecutor:
         }
         """
         
-        # Construct the full script
         if parameters:
             param_string = ' '.join([f'-{k} "{v}"' for k, v in parameters.items()])
             full_script = f'{import_script}; {cmdlet} {param_string}'
@@ -288,6 +274,7 @@ class PowerShellExecutor:
     
     def check_migration_prerequisites(self):
         """Check if migration prerequisites are met."""
+        
         check_script = """
         $result = @{
             PowerShellVersion = $PSVersionTable.PSVersion.ToString()
@@ -320,6 +307,7 @@ class PowerShellExecutor:
     
     def check_powershell_available(self):
         """Check if PowerShell is available on the system."""
+        
         # Try pwsh first (PowerShell Core)
         try:
             result = run_cmd(['pwsh', '-Command', 'echo "test"'], 
@@ -353,9 +341,7 @@ class PowerShellExecutor:
     def execute_azure_authenticated_script(self, script, parameters=None, subscription_id=None):
         """Execute a PowerShell script with Azure authentication."""
         
-        # Prepare the Azure authentication prefix
         auth_prefix = """
-        # Check if already authenticated
         try {
             $context = Get-AzContext
             if (-not $context) {
@@ -369,10 +355,8 @@ class PowerShellExecutor:
         }
         """
         
-        # Add subscription context if provided
         if subscription_id:
             auth_prefix += f"""
-        # Set subscription context
         try {{
             Set-AzContext -SubscriptionId "{subscription_id}"
             Write-Host "Subscription context set to: {subscription_id}"
@@ -382,16 +366,15 @@ class PowerShellExecutor:
         }}
         """
         
-        # Combine authentication prefix with the actual script
         full_script = auth_prefix + "\n" + script
         
         return self.execute_script(full_script, parameters)
     
     def check_azure_authentication(self):
         """Check if Azure authentication is available."""
+        
         auth_check_script = """
         try {
-            # Check if Az.Accounts module is available first
             $azAccountsModule = Get-Module -ListAvailable -Name Az.Accounts -ErrorAction SilentlyContinue
             if (-not $azAccountsModule) {
                 $result = @{
@@ -405,7 +388,6 @@ class PowerShellExecutor:
                 return
             }
             
-            # Check if Az.Migrate module is available
             $azMigrateModule = Get-Module -ListAvailable -Name Az.Migrate -ErrorAction SilentlyContinue
             if (-not $azMigrateModule) {
                 $result = @{
@@ -419,7 +401,6 @@ class PowerShellExecutor:
                 return
             }
             
-            # Check if authenticated
             $context = Get-AzContext -ErrorAction SilentlyContinue
             if (-not $context) {
                 $result = @{
@@ -488,7 +469,7 @@ class PowerShellExecutor:
         """Execute Connect-AzAccount PowerShell command with cross-platform support."""
         
         # Check PowerShell availability first
-        is_available, ps_command = self.check_powershell_availability()
+        is_available, _ = self.check_powershell_availability()
         if not is_available:
             return {
                 'Success': False,
@@ -513,12 +494,10 @@ class PowerShellExecutor:
             connect_cmd += f" -TenantId '{tenant_id}'"
         
         if service_principal:
-            # Service principal authentication
             connect_cmd += f" -ServicePrincipal -Credential (New-Object System.Management.Automation.PSCredential('{service_principal['app_id']}', (ConvertTo-SecureString '{service_principal['secret']}' -AsPlainText -Force)))"
             if tenant_id:
                 connect_cmd += f" -TenantId '{tenant_id}'"
         
-        # For interactive authentication, we need to show the output in real-time
         if not service_principal and not device_code:
             return self._execute_interactive_connect(connect_cmd, subscription_id)
         else:
@@ -531,17 +510,12 @@ class PowerShellExecutor:
         which is an approved exception to the CLI subprocess guidelines for interactive scenarios.
         """
         try:
-            import subprocess  # Import locally only for real-time output scenarios
+            import subprocess
             import sys
             
             # Prepare the command array to avoid shell injection
             cmd = [self.powershell_cmd, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', connect_cmd]
-            
-            print("Executing Azure authentication...")
-            print("=" * 50)
-            
-            # Run the command with real-time output
-            # This is an approved exception for interactive scenarios per CLI guidelines
+           
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -562,13 +536,9 @@ class PowerShellExecutor:
                     print(output.strip())
                     sys.stdout.flush()
             
-            # Wait for completion
             return_code = process.poll()
-            
-            print("=" * 50)
-            
+                        
             if return_code == 0:
-                # Get the context after successful connection
                 context_result = self.get_azure_context()
                 if context_result.get('Success') and context_result.get('IsAuthenticated'):
                     result = {
@@ -580,7 +550,6 @@ class PowerShellExecutor:
                         'Environment': context_result.get('Environment')
                     }
                     
-                    # Set subscription context if specified
                     if subscription_id:
                         context_set = self.set_azure_context(subscription_id=subscription_id)
                         if context_set.get('Success'):
@@ -610,59 +579,56 @@ class PowerShellExecutor:
     
     def _execute_non_interactive_connect(self, connect_cmd, subscription_id=None):
         """Execute Connect-AzAccount non-interactively (service principal or device code)."""
-        connect_script = f"""
-try {{
-    $result = {connect_cmd}
-    
-    $context = Get-AzContext
-    if ($context) {{
-        $connectionResult = @{{
-            'Success' = $true
-            'AccountId' = $context.Account.Id
-            'SubscriptionId' = $context.Subscription.Id
-            'SubscriptionName' = $context.Subscription.Name
-            'TenantId' = $context.Tenant.Id
-            'Environment' = $context.Environment.Name
-        }}
-    }} else {{
-        $connectionResult = @{{
-            'Success' = $false
-            'Error' = 'Failed to establish Azure context after authentication'
-        }}
-    }}
-    
-    $connectionResult | ConvertTo-Json -Depth 3
-}} catch {{
-    $errorResult = @{{
-        'Success' = $false
-        'Error' = $_.Exception.Message
-        'ErrorType' = $_.Exception.GetType().Name
-    }}
-    $errorResult | ConvertTo-Json -Depth 3
-}}
-"""
         
-        # Set subscription context if provided
+        connect_script = f"""
+        try {{
+            $result = {connect_cmd}
+            
+            $context = Get-AzContext
+            if ($context) {{
+                $connectionResult = @{{
+                    'Success' = $true
+                    'AccountId' = $context.Account.Id
+                    'SubscriptionId' = $context.Subscription.Id
+                    'SubscriptionName' = $context.Subscription.Name
+                    'TenantId' = $context.Tenant.Id
+                    'Environment' = $context.Environment.Name
+                }}
+            }} else {{
+                $connectionResult = @{{
+                    'Success' = $false
+                    'Error' = 'Failed to establish Azure context after authentication'
+                }}
+            }}
+            
+            $connectionResult | ConvertTo-Json -Depth 3
+        }} catch {{
+            $errorResult = @{{
+                'Success' = $false
+                'Error' = $_.Exception.Message
+                'ErrorType' = $_.Exception.GetType().Name
+            }}
+            $errorResult | ConvertTo-Json -Depth 3
+        }}
+        """
+        
         if subscription_id:
             connect_script += f"""
-
-# Set subscription context if specified
-if ($connectionResult.Success) {{
-    try {{
-        Set-AzContext -SubscriptionId '{subscription_id}'
-        $connectionResult.SubscriptionId = '{subscription_id}'
-        $connectionResult.SubscriptionContextSet = $true
-    }} catch {{
-        $connectionResult.SubscriptionContextError = $_.Exception.Message
-    }}
-    $connectionResult | ConvertTo-Json -Depth 3
-}}
-"""
+            if ($connectionResult.Success) {{
+                try {{
+                    Set-AzContext -SubscriptionId '{subscription_id}'
+                    $connectionResult.SubscriptionId = '{subscription_id}'
+                    $connectionResult.SubscriptionContextSet = $true
+                }} catch {{
+                    $connectionResult.SubscriptionContextError = $_.Exception.Message
+                }}
+                $connectionResult | ConvertTo-Json -Depth 3
+            }}
+            """
         
         try:
             result = self.execute_script(connect_script)
             
-            # Extract JSON from output
             stdout_content = result.get('stdout', '').strip()
             json_start = stdout_content.find('{')
             json_end = stdout_content.rfind('}')
@@ -688,39 +654,38 @@ if ($connectionResult.Success) {{
         """Execute Disconnect-AzAccount PowerShell command."""
         
         disconnect_script = """
-try {
-    Disconnect-AzAccount -Confirm:$false
-    
-    # Verify disconnection
-    $context = Get-AzContext
-    if (-not $context) {
-        $result = @{
-            'Success' = $true
-            'Message' = 'Successfully disconnected from Azure'
+        try {
+            Disconnect-AzAccount -Confirm:$false
+            
+            # Verify disconnection
+            $context = Get-AzContext
+            if (-not $context) {
+                $result = @{
+                    'Success' = $true
+                    'Message' = 'Successfully disconnected from Azure'
+                }
+            } else {
+                $result = @{
+                    'Success' = $false
+                    'Error' = 'Azure context still exists after disconnect attempt'
+                }
+            }
+            
+            $result | ConvertTo-Json -Depth 3
+        } catch {
+            $errorResult = @{
+                'Success' = $false
+                'Error' = $_.Exception.Message
+            }
+            $errorResult | ConvertTo-Json -Depth 3
         }
-    } else {
-        $result = @{
-            'Success' = $false
-            'Error' = 'Azure context still exists after disconnect attempt'
-        }
-    }
-    
-    $result | ConvertTo-Json -Depth 3
-} catch {
-    $errorResult = @{
-        'Success' = $false
-        'Error' = $_.Exception.Message
-    }
-    $errorResult | ConvertTo-Json -Depth 3
-}
-"""
+        """
         
         try:
             result = self.execute_script(disconnect_script)
             
             stdout_content = result.get('stdout', '').strip()
             
-            # Check if there's any JSON content
             json_start = stdout_content.find('{')
             json_end = stdout_content.rfind('}')
             
@@ -730,7 +695,6 @@ try {
                     disconnect_result = json.loads(json_content)
                     return disconnect_result
                 except json.JSONDecodeError:
-                    # If JSON parsing fails, assume success if no error output
                     if result.get('stderr', '').strip():
                         return {
                             'Success': False,
@@ -742,7 +706,6 @@ try {
                             'Message': 'Successfully disconnected from Azure'
                         }
             else:
-                # No JSON found, check if there's error output
                 if result.get('stderr', '').strip():
                     return {
                         'Success': False,
@@ -769,9 +732,7 @@ try {
                 'Error': 'Either subscription_id or tenant_id must be provided'
             }
         
-        context_script = "try {\n"
-        
-        # Build Set-AzContext command
+        context_script = "try {\n"        
         context_cmd = "Set-AzContext"
         
         if subscription_id:
@@ -782,7 +743,6 @@ try {
         
         context_script += f"    $context = {context_cmd}\n"
         context_script += """
-    
     if ($context) {
         $contextResult = @{
             'Success' = $true
@@ -893,10 +853,8 @@ try {
     
     def interactive_connect_azure(self):
         """Execute Connect-AzAccount interactively with real-time output for cross-platform compatibility."""
-        # First check for platform-specific installation guidance
+
         current_platform = platform.system().lower()
-        
-        # Platform-specific module check and installation guidance
         module_check_script = """
         $platform = $PSVersionTable.Platform
         $psVersion = $PSVersionTable.PSVersion.ToString()
@@ -934,7 +892,6 @@ try {
         """
         
         try:
-            # First check module availability
             module_check = self.execute_script(module_check_script)
             json_output = module_check['stdout'].strip()
             json_start = json_output.find('{')
@@ -945,12 +902,10 @@ try {
             else:
                 module_info = {}
             
-            # Display platform information
             print(f"PowerShell Platform: {module_info.get('Platform', 'Unknown')}")
             print(f"PowerShell Version: {module_info.get('PSVersion', 'Unknown')}")
             print(f"PowerShell Edition: {module_info.get('PSEdition', 'Unknown')}")
             
-            # Check if modules are available
             if not module_info.get('AzAccountsAvailable', False):
                 print("\n❌ Azure PowerShell modules not found!")
                 install_info = module_info.get('InstallationInstructions', {})
@@ -980,7 +935,6 @@ try {
                     return {'success': False, 'error': 'Failed to install Az.Migrate module'}
                 print("✅ Az.Migrate module installed successfully")
             
-            # Now proceed with authentication
             connect_script = "Connect-AzAccount"
             
             print("\n🔐 Starting Azure authentication...")
@@ -992,13 +946,11 @@ try {
             print("  3. Complete any multi-factor authentication if required")
             print("\nWaiting for authentication to complete...\n")
             
-            # Execute the authentication command with real-time output
             result = self.execute_script_interactive(connect_script)
             
             if result['returncode'] == 0:
                 print("\n✅ Azure authentication successful!")
                 
-                # Get additional context information
                 try:
                     context_info = self.get_azure_context()
                     if context_info.get('Success') and context_info.get('IsAuthenticated'):
@@ -1006,7 +958,7 @@ try {
                         print(f"✅ Active subscription: {context_info.get('SubscriptionName', 'Unknown')}")
                         print(f"✅ Tenant ID: {context_info.get('TenantId', 'Unknown')}")
                 except:
-                    pass  # Context retrieval is optional
+                    pass
                 
                 return {'success': True, 'output': result['stdout']}
             else:
