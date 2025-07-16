@@ -628,6 +628,148 @@ def api_export_result_to_dict(api_export_result):
     }
 
 
+def _get_policy_context(client, api_id, operation_id):
+    # Helper function that returns the correct context for policy operations
+
+    if api_id is None and operation_id is not None:
+        raise RequiredArgumentMissingError(
+            "Please specify api-id when operation-id is specified.")
+
+    if api_id and operation_id:
+        return client.api_operation_policy
+    if api_id:
+        return client.api_policy
+
+    return client.policy
+
+
+# Api Policy Operations
+def apim_api_policy_set(client, resource_group_name, service_name,
+                        specification_path, api_id=None,
+                        operation_id=None, policy_id="policy",
+                        policy_format=None, no_wait=False):
+    """Sets or updates an API Policy. """
+    try:
+        with open(specification_path, 'r') as api_file:
+            content_value = api_file.read()
+    except OSError as e:
+        logger.warning("Error opening policy file: %s", e)
+
+    parameters = PolicyContract(
+        format=policy_format,
+        value=content_value
+    )
+
+    # Select the method based on the presence of api_id and operation_id
+    module_context = _get_policy_context(client, api_id, operation_id)
+
+    # Prepare the arguments dynamically based on use case
+    arguments = {
+        "resource_group_name": resource_group_name,
+        "service_name": service_name,
+        "policy_id": policy_id,
+        "parameters": parameters
+    }
+
+    if api_id:
+        arguments["api_id"] = api_id
+    if operation_id:
+        arguments["operation_id"] = operation_id
+
+    # Use the selected method
+    return sdk_no_wait(no_wait, module_context.create_or_update, **arguments)
+
+
+def apim_api_policy_delete(client, resource_group_name,
+                           service_name, api_id=None,
+                           operation_id=None, policy_id="policy",
+                           if_match=None, no_wait=False):
+    """Deletes an API Policy. """
+
+    module_context = _get_policy_context(client, api_id, operation_id)
+    arguments = {
+        "resource_group_name": resource_group_name,
+        "service_name": service_name,
+        "policy_id": policy_id,
+        "if_match": "*" if if_match is None else if_match
+    }
+
+    if api_id:
+        arguments["api_id"] = api_id
+    if operation_id:
+        arguments["operation_id"] = operation_id
+
+    return sdk_no_wait(no_wait, module_context.delete, **arguments)
+
+
+def apim_api_policy_show(client, resource_group_name,
+                         service_name, api_id=None,
+                         operation_id=None, policy_id="policy", file_path=None):
+    """Shows the details of an API Policy. """
+
+    module_context = _get_policy_context(client, api_id, operation_id)
+
+    arguments = {
+        "resource_group_name": resource_group_name,
+        "service_name": service_name,
+        "policy_id": policy_id
+    }
+
+    if api_id:
+        arguments["api_id"] = api_id
+    if operation_id:
+        arguments["operation_id"] = operation_id
+
+    policy = module_context.get(**arguments)
+
+    if file_path is not None:
+        logger.warning("Writing policy to file: %s", file_path)
+        try:
+            with open(file_path, 'w') as f:
+                f.write(policy.value)
+        except OSError as e:
+            logger.warning("Error writing policy to file: %s", e)
+
+        return logger.warning("Policy export complete. Policy written to file: %s", file_path)
+    return policy
+
+
+def apim_api_policy_list(client, resource_group_name,
+                         service_name, api_id=None, operation_id=None):
+    """ List Policies for the given scope. """
+
+    module_context = _get_policy_context(client, api_id, operation_id)
+
+    if api_id and operation_id:
+        return module_context.list_by_operation(resource_group_name, service_name, api_id, operation_id)
+    if api_id:
+        return module_context.list_by_api(resource_group_name, service_name, api_id)
+
+    return module_context.list_by_service(resource_group_name, service_name)
+
+
+def apim_api_policy_get_entity(client, resource_group_name,
+                               service_name, policy_id="policy",
+                               api_id=None, operation_id=None):
+
+    """ Gets the entity state (etag) version of the API Policy. """
+
+    module_context = _get_policy_context(client, api_id, operation_id)
+
+    arguments = {
+        "resource_group_name": resource_group_name,
+        "service_name": service_name,
+        "policy_id": policy_id
+    }
+
+    if api_id:
+        arguments["api_id"] = api_id
+    if operation_id:
+        arguments["operation_id"] = operation_id
+
+    return module_context.get_entity_tag(**arguments)
+
+
 # Product API Operations
 def apim_product_api_list(client, resource_group_name, service_name, product_id):
 
