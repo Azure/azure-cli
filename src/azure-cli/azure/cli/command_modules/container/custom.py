@@ -71,7 +71,7 @@ def delete_container(client, resource_group_name, name, **kwargs):
     return client.begin_delete(resource_group_name, name)
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-branches
 def create_container(cmd,
                      resource_group_name,
                      name=None,
@@ -143,17 +143,17 @@ def create_container(cmd,
     standby_pool_profile_reference = _create_standby_pool_profile_reference(standby_pool_profile_id=standby_pool_profile_id, fail_container_group_create_on_reuse_failure=fail_container_group_create_on_reuse_failure)
 
     # No default values need to be set for the standbypool reuse scenario
-    if standby_pool_profile_id != None:
+    if standby_pool_profile_id is not None:
         vnet_address_prefix = None
         subnet_address_prefix = None
-        
-    ports = ports
-    protocol = protocol
 
-    if standby_pool_profile_id == None:
+    ports = ports or None
+    protocol = protocol or None
+
+    if standby_pool_profile_id is None:
         ports = [80]
         protocol = ContainerGroupNetworkProtocol.tcp
-    
+
     config_map = _create_config_map(config_map)
 
     container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory)
@@ -231,7 +231,7 @@ def create_container(cmd,
         cgroup_subnet = [ContainerGroupSubnetId(id=subnet_id)]
 
     cgroup_ip_address = None
-    if standby_pool_profile_id == None:
+    if standby_pool_profile_id is None:
         cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id)
 
     # Setup zones, validation done in control plane so check is not needed here
