@@ -37,8 +37,8 @@ def check_migration_prerequisites(cmd):
 def setup_migration_environment(cmd, install_powershell=False, check_only=False):
     """Configure the system environment for migration operations."""
     import platform
-    import subprocess
     import sys
+    from azure.cli.core.util import run_cmd
     from knack.util import CLIError
     from knack.log import get_logger
     
@@ -115,7 +115,7 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
 def _check_powershell_availability(system):
     """Check if PowerShell is available on the system."""
     from ._powershell_utils import PowerShellExecutor
-    import subprocess
+    from azure.cli.core.util import run_cmd
     
     # Try to use our PowerShell executor's check method
     try:
@@ -126,10 +126,10 @@ def _check_powershell_availability(system):
             # Get version information
             try:
                 if command == 'pwsh':
-                    result = subprocess.run([command, '--version'], capture_output=True, text=True, timeout=10)
+                    result = run_cmd([command, '--version'], capture_output=True, timeout=10)
                 else:
-                    result = subprocess.run([command, '-Command', '$PSVersionTable.PSVersion.ToString()'], 
-                                          capture_output=True, text=True, timeout=10)
+                    result = run_cmd([command, '-Command', '$PSVersionTable.PSVersion.ToString()'], 
+                                   capture_output=True, timeout=10)
                 
                 if result.returncode == 0:
                     version = result.stdout.strip().split('\n')[0] if result.stdout else 'Unknown'
@@ -160,7 +160,7 @@ def _check_powershell_availability(system):
 
 def _install_powershell(system, logger):
     """Attempt to install PowerShell on the system."""
-    import subprocess
+    from azure.cli.core.util import run_cmd
     
     install_result = {
         'component': 'PowerShell Installation',
@@ -173,8 +173,8 @@ def _install_powershell(system, logger):
         if system == 'windows':
             # Windows - try winget first, then provide manual instructions
             try:
-                result = subprocess.run(['winget', 'install', 'Microsoft.PowerShell'], 
-                                      capture_output=True, text=True, timeout=300)
+                result = run_cmd(['winget', 'install', 'Microsoft.PowerShell'], 
+                                capture_output=True, timeout=300)
                 if result.returncode == 0:
                     install_result['status'] = 'success'
                     install_result['message'] = 'PowerShell Core installed via winget'
@@ -182,7 +182,7 @@ def _install_powershell(system, logger):
                 else:
                     install_result['status'] = 'failed'
                     install_result['message'] = 'winget installation failed. Please install manually from https://github.com/PowerShell/PowerShell'
-            except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+            except Exception:
                 install_result['status'] = 'failed'
                 install_result['message'] = 'winget not available. Please install PowerShell Core manually from https://github.com/PowerShell/PowerShell'
         
@@ -199,8 +199,8 @@ def _install_powershell(system, logger):
         elif system == 'darwin':
             # macOS - try Homebrew
             try:
-                result = subprocess.run(['brew', 'install', 'powershell'], 
-                                      capture_output=True, text=True, timeout=300)
+                result = run_cmd(['brew', 'install', 'powershell'], 
+                                capture_output=True, timeout=300)
                 if result.returncode == 0:
                     install_result['status'] = 'success'
                     install_result['message'] = 'PowerShell Core installed via Homebrew'
@@ -208,7 +208,7 @@ def _install_powershell(system, logger):
                 else:
                     install_result['status'] = 'failed'
                     install_result['message'] = 'Homebrew installation failed'
-            except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+            except Exception:
                 install_result['status'] = 'manual_required'
                 install_result['message'] = 'Homebrew not available. Please install PowerShell Core manually'
                 install_result['commands'] = [
@@ -227,7 +227,7 @@ def _install_powershell(system, logger):
 
 def _check_windows_tools():
     """Check for Windows-specific migration tools."""
-    import subprocess
+    from azure.cli.core.util import run_cmd
     
     checks = []
     
@@ -241,10 +241,10 @@ def _check_windows_tools():
     
     for module in powershell_modules:
         try:
-            result = subprocess.run([
+            result = run_cmd([
                 'powershell', '-Command', 
                 f'Get-Module -ListAvailable -Name {module} | Select-Object -First 1'
-            ], capture_output=True, text=True, timeout=30)
+            ], capture_output=True, timeout=30)
             
             if result.returncode == 0 and result.stdout.strip():
                 checks.append({
@@ -258,7 +258,7 @@ def _check_windows_tools():
                     'status': 'warning',
                     'message': f'{module} module not found (optional for some migrations)'
                 })
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+        except Exception:
             checks.append({
                 'component': f'PowerShell Module: {module}',
                 'status': 'warning',
@@ -270,7 +270,7 @@ def _check_windows_tools():
 
 def _check_linux_tools():
     """Check for Linux-specific tools that might be useful for migration."""
-    import subprocess
+    from azure.cli.core.util import run_cmd
     
     checks = []
     
@@ -284,7 +284,7 @@ def _check_linux_tools():
     
     for tool, description in tools:
         try:
-            result = subprocess.run(['which', tool], capture_output=True, text=True, timeout=5)
+            result = run_cmd(['which', tool], capture_output=True, timeout=5)
             if result.returncode == 0:
                 checks.append({
                     'component': f'Tool: {tool}',
@@ -297,7 +297,7 @@ def _check_linux_tools():
                     'status': 'warning',
                     'message': f'{description} not found (may be useful for some migrations)'
                 })
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+        except Exception:
             checks.append({
                 'component': f'Tool: {tool}',
                 'status': 'warning',
@@ -309,13 +309,13 @@ def _check_linux_tools():
 
 def _check_macos_tools():
     """Check for macOS-specific tools."""
-    import subprocess
+    from azure.cli.core.util import run_cmd
     
     checks = []
     
     # Check for Homebrew
     try:
-        result = subprocess.run(['brew', '--version'], capture_output=True, text=True, timeout=5)
+        result = run_cmd(['brew', '--version'], capture_output=True, timeout=5)
         if result.returncode == 0:
             checks.append({
                 'component': 'Homebrew',
@@ -328,7 +328,7 @@ def _check_macos_tools():
                 'status': 'warning',
                 'message': 'Homebrew not available (useful for installing additional tools)'
             })
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+    except Exception:
         checks.append({
             'component': 'Homebrew',
             'status': 'warning',
