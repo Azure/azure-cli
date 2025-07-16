@@ -134,17 +134,17 @@ def validate_registry_name(cmd, namespace):
         if registry_login_server_suffix.lower() == acr_suffix and len(registry_components) > 1:
             if dnl_hash != -1:
                 removed_suffix = trimmed_registry_name[dnl_hash:] + registry_login_server_suffix
-                registry_name = registry_components[0][:dnl_hash]
+                registry_name = trimmed_registry_name[:dnl_hash]
             else:
                 removed_suffix = registry_login_server_suffix
-                registry_name = registry_components[0]
+                registry_name = trimmed_registry_name
             logger.warning("Registry name is %s. The following suffix '%s' is automatically omitted.",
                            registry_name,
                            removed_suffix)
         else:
             if registry_login_server_suffix != '':
                 raise InvalidArgumentValueError(INVALID_LOGIN_SERVER_SUFFIX)
-            registry_name = registry_components[0]
+            registry_name = trimmed_registry_name
         namespace.registry_name = registry_name
         registry = registry_name
 
