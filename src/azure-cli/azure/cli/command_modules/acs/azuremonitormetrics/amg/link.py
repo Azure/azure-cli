@@ -71,7 +71,7 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
             # If already exists (409), ignore, else print error
             if not (hasattr(e, "status_code") and e.status_code == 409):
                 erroString = (
-                    f"Role Assingment failed. Please manually assign the `Monitoring Data Reader` role\n"
+                    f"Role Assignment failed. Please manually assign the `Monitoring Data Reader` role\n"
                     f"to the Azure Monitor Workspace ({azure_monitor_workspace_resource_id}) "
                     f"for the Azure Managed Grafana\nSystem Assigned Managed Identity ({servicePrincipalId})"
                 )
