@@ -2252,7 +2252,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     "for more details."
                 )
             if isBasicSKULb:
-                if outbound_type is not None:
+                if not read_from_mc and outbound_type is not None: # outbound type default to loadbalancer for BLB creation
                     raise InvalidArgumentValueError(
                         "{outbound_type} doesn't support basic load balancer sku".format(outbound_type=outbound_type)
                     )
@@ -8806,7 +8806,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             if len(mc.agent_pool_profiles) == 1 and mc.agent_pool_profiles[0].type == CONST_AVAILABILITY_SET:
                 mc.agent_pool_profiles[0].type = CONST_VIRTUAL_MACHINES
             else:
-                raise CLIError('This is not a valid VMAS cluster, we cannot proceed with the migration.')
+                raise CLIError('This is not a valid VMAS cluster with {} agent pool profiles and {} agent pool type, we cannot proceed with the migration.'.format(len(mc.agent_pool_profiles), mc.agent_pool_profiles[0].type))
 
             if mc.network_profile.load_balancer_sku == CONST_LOAD_BALANCER_SKU_BASIC:
                 mc.network_profile.load_balancer_sku = CONST_LOAD_BALANCER_SKU_STANDARD
