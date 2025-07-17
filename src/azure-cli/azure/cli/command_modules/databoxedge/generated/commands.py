@@ -10,36 +10,7 @@
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 
-from azure.cli.core.commands import CliCommandType
-
 
 def load_command_table(self, _):
 
-    from ..generated._client_factory import cf_bandwidth_schedule
-    databoxedge_bandwidth_schedule = CliCommandType(
-        operations_tmpl='azure.mgmt.databoxedge.operations._bandwidth_schedules_operations#BandwidthSchedulesOperations'
-        '.{}',
-        client_factory=cf_bandwidth_schedule)
-    with self.command_group('databoxedge bandwidth-schedule', databoxedge_bandwidth_schedule,
-                            client_factory=cf_bandwidth_schedule, min_api='2019-08-01') as g:
-        g.custom_command('list', 'databoxedge_bandwidth_schedule_list')
-        g.custom_show_command('show', 'databoxedge_bandwidth_schedule_show')
-        g.custom_command('create', 'databoxedge_bandwidth_schedule_create', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='databoxedge_bandwidth_schedule_update',
-                                 supports_no_wait=True)
-        g.custom_command('delete', 'databoxedge_bandwidth_schedule_delete', supports_no_wait=True, confirmation=True)
-        g.custom_wait_command('wait', 'databoxedge_bandwidth_schedule_show')
-
-    from ..generated._client_factory import cf_order
-    databoxedge_order = CliCommandType(
-        operations_tmpl='azure.mgmt.databoxedge.operations._orders_operations#OrdersOperations.{}',
-        client_factory=cf_order)
-    with self.command_group('databoxedge order', databoxedge_order, client_factory=cf_order,
-                            min_api='2019-08-01') as g:
-        g.custom_command('list', 'databoxedge_order_list')
-        g.custom_show_command('show', 'databoxedge_order_show')
-        g.custom_command('create', 'databoxedge_order_create', supports_no_wait=True)
-        g.generic_update_command('update', setter_arg_name='order', custom_func_name='databoxedge_order_update',
-                                 supports_no_wait=True)
-        g.custom_command('delete', 'databoxedge_order_delete', supports_no_wait=True, confirmation=True)
-        g.custom_wait_command('wait', 'databoxedge_order_show')
+    pass
