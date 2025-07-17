@@ -122,17 +122,6 @@ def load_arguments(self, _):
         c.argument('physical_sector_size', type=int, 
                   help='Physical sector size in bytes.')
 
-    with self.argument_context('migrate local create-replication') as c:
-        c.argument('server_index', type=int, 
-                  help='Index of the discovered server to replicate.', required=True)
-        c.argument('target_vm_name', help='Name for the target VM.', required=True)
-        c.argument('target_storage_path_id', 
-                  help='Azure Stack HCI storage container ARM ID.', required=True)
-        c.argument('target_virtual_switch_id', 
-                  help='Azure Stack HCI logical network ARM ID.', required=True)
-        c.argument('target_resource_group_id', 
-                  help='Target resource group ARM ID.', required=True)
-
     # Authentication arguments
     with self.argument_context('migrate auth login') as c:
         c.argument('tenant_id', help='Azure tenant ID to authenticate against.')
@@ -287,8 +276,8 @@ def load_arguments(self, _):
                   help='Disk format type. Default is VHD.')
         c.argument('physical_sector_size', type=int, help='Physical sector size in bytes. Default is 512.')
 
-    with self.argument_context('migrate local create-replication') as c:
-        c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group containing the Azure Migrate project.', required=True)
+    with self.argument_context('migrate local create-local-replication') as c:
+        c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('server_index', type=int, help='Index of the discovered server to replicate (0-based).', required=True)
         c.argument('target_vm_name', help='Name for the target VM in Azure Stack HCI.', required=True)
