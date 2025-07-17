@@ -13,106 +13,6 @@
 from azure.cli.core.util import sdk_no_wait
 
 
-def databoxedge_device_list(client,
-                            resource_group_name=None,
-                            expand=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name=resource_group_name,
-                                             expand=expand)
-    return client.list_by_subscription(expand=expand)
-
-
-def databoxedge_device_show(client,
-                            device_name,
-                            resource_group_name):
-    return client.get(device_name=device_name,
-                      resource_group_name=resource_group_name)
-
-
-def databoxedge_device_create(client,
-                              device_name,
-                              resource_group_name,
-                              location,
-                              tags=None,
-                              sku=None,
-                              etag=None,
-                              data_box_edge_device_status=None,
-                              description=None,
-                              model_description=None,
-                              friendly_name=None,
-                              no_wait=False):
-    data_box_edge_device = {}
-    data_box_edge_device['location'] = location
-    data_box_edge_device['tags'] = tags
-    data_box_edge_device['sku'] = sku
-    data_box_edge_device['etag'] = etag
-    data_box_edge_device['data_box_edge_device_status'] = data_box_edge_device_status
-    data_box_edge_device['description'] = description
-    data_box_edge_device['model_description'] = model_description
-    data_box_edge_device['friendly_name'] = friendly_name
-    return sdk_no_wait(no_wait,
-                       client.create_or_update,
-                       device_name=device_name,
-                       resource_group_name=resource_group_name,
-                       data_box_edge_device=data_box_edge_device)
-
-
-def databoxedge_device_update(client,
-                              device_name,
-                              resource_group_name,
-                              tags=None):
-    return client.update(device_name=device_name,
-                         resource_group_name=resource_group_name,
-                         tags=tags)
-
-
-def databoxedge_device_delete(client,
-                              device_name,
-                              resource_group_name,
-                              no_wait=False):
-    return sdk_no_wait(no_wait,
-                       client.delete,
-                       device_name=device_name,
-                       resource_group_name=resource_group_name)
-
-
-def databoxedge_device_download_update(client,
-                                       device_name,
-                                       resource_group_name,
-                                       no_wait=False):
-    return sdk_no_wait(no_wait,
-                       client.download_updates,
-                       device_name=device_name,
-                       resource_group_name=resource_group_name)
-
-
-def databoxedge_device_install_update(client,
-                                      device_name,
-                                      resource_group_name,
-                                      no_wait=False):
-    return sdk_no_wait(no_wait,
-                       client.install_updates,
-                       device_name=device_name,
-                       resource_group_name=resource_group_name)
-
-
-def databoxedge_device_scan_for_update(client,
-                                       device_name,
-                                       resource_group_name,
-                                       no_wait=False):
-    return sdk_no_wait(no_wait,
-                       client.scan_for_updates,
-                       device_name=device_name,
-                       resource_group_name=resource_group_name)
-
-
-def databoxedge_device_show_update_summary(client,
-                                           device_name,
-                                           resource_group_name):
-    return client.get_update_summary(device_name=device_name,
-                                     resource_group_name=resource_group_name)
-
-
 def databoxedge_alert_list(client,
                            device_name,
                            resource_group_name):
@@ -197,22 +97,6 @@ def databoxedge_bandwidth_schedule_delete(client,
                        device_name=device_name,
                        name=name,
                        resource_group_name=resource_group_name)
-
-
-def databoxedge_show_job(client,
-                         device_name,
-                         name,
-                         resource_group_name):
-    return client.get(device_name=device_name,
-                      name=name,
-                      resource_group_name=resource_group_name)
-
-
-def databoxedge_list_node(client,
-                          device_name,
-                          resource_group_name):
-    return client.list_by_data_box_edge_device(device_name=device_name,
-                                               resource_group_name=resource_group_name)
 
 
 def databoxedge_order_list(client,
@@ -324,8 +208,3 @@ def databoxedge_order_delete(client,
                        client.delete,
                        device_name=device_name,
                        resource_group_name=resource_group_name)
-
-
-def databoxedge_list_sku(client,
-                         filter_=None):
-    return client.list(filter=filter_)

@@ -39,22 +39,6 @@ def load_command_table(self, _):
         g.custom_command('delete', 'databoxedge_bandwidth_schedule_delete', supports_no_wait=True, confirmation=True)
         g.custom_wait_command('wait', 'databoxedge_bandwidth_schedule_show')
 
-    from ..generated._client_factory import cf_job
-    databoxedge_job = CliCommandType(
-        operations_tmpl='azure.mgmt.databoxedge.operations._jobs_operations#JobsOperations.{}',
-        client_factory=cf_job)
-    with self.command_group('databoxedge', databoxedge_job, client_factory=cf_job, is_preview=True,
-                            min_api='2019-08-01') as g:
-        g.custom_command('show-job', 'databoxedge_show_job')
-
-    from ..generated._client_factory import cf_node
-    databoxedge_node = CliCommandType(
-        operations_tmpl='azure.mgmt.databoxedge.operations._nodes_operations#NodesOperations.{}',
-        client_factory=cf_node)
-    with self.command_group('databoxedge', databoxedge_node, client_factory=cf_node, is_preview=True,
-                            min_api='2019-08-01') as g:
-        g.custom_command('list-node', 'databoxedge_list_node')
-
     from ..generated._client_factory import cf_order
     databoxedge_order = CliCommandType(
         operations_tmpl='azure.mgmt.databoxedge.operations._orders_operations#OrdersOperations.{}',
@@ -68,11 +52,3 @@ def load_command_table(self, _):
                                  supports_no_wait=True)
         g.custom_command('delete', 'databoxedge_order_delete', supports_no_wait=True, confirmation=True)
         g.custom_wait_command('wait', 'databoxedge_order_show')
-
-    from ..generated._client_factory import cf_sku
-    databoxedge_sku = CliCommandType(
-        operations_tmpl='azure.mgmt.databoxedge.operations._skus_operations#SkusOperations.{}',
-        client_factory=cf_sku)
-    with self.command_group('databoxedge', databoxedge_sku, client_factory=cf_sku, is_preview=True,
-                            min_api='2019-08-01') as g:
-        g.custom_command('list-sku', 'databoxedge_list_sku')
