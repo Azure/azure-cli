@@ -2,8 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import json
-from azure.cli.command_modules.acs.azuremonitormetrics.constants import AKS_CLUSTER_API
+from azure.cli.command_modules.acs._client_factory import get_container_service_client
 from azure.cli.core.azclierror import (
     UnknownError,
     CLIError
@@ -12,8 +11,7 @@ from azure.cli.core.azclierror import (
 
 # pylint: disable=line-too-long
 def addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
-    from azure.cli.command_modules.acs._client_factory import get_managed_clusters_client
-    client = get_managed_clusters_client(cmd.cli_ctx, cluster_subscription)
+    client = get_container_service_client(cmd.cli_ctx, cluster_subscription).managed_clusters
     try:
         mc = client.get(cluster_resource_group_name, cluster_name)
     except CLIError as e:

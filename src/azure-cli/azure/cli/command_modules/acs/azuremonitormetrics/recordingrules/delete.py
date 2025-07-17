@@ -9,7 +9,10 @@ from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.common imp
 def delete_rule(cmd, cluster_subscription, cluster_resource_group_name, default_rule_group_name):
     from azure.cli.command_modules.acs._client_factory import get_resources_client
     resources = get_resources_client(cmd.cli_ctx, cmd.cli_ctx.data.get('subscription_id'))
-    default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
+    default_rule_group_id = (
+        "/subscriptions/{0}/resourceGroups/{1}/providers/"
+        "Microsoft.AlertsManagement/prometheusRuleGroups/{2}"
+    ).format(
         cluster_subscription,
         cluster_resource_group_name,
         default_rule_group_name

@@ -24,7 +24,7 @@ def sanitize_resource_id(resource_id):
     return resource_id.lower()
 
 
-def post_request(cmd, subscription_id, rp_name, headers):
+def post_request(cmd, rp_name):
     resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     try:
         resource_client.providers.register(rp_name)
@@ -54,7 +54,7 @@ def register_rps(cmd, subscription_id, rp_namespaces, user_agent):
         for namespace, registered in rp_namespaces.items():
             if not registered:
                 headers = ['User-Agent=azuremonitormetrics.register_{}_rp'.format(namespace.split('.')[1].lower())]
-                post_request(cmd, subscription_id, namespace, headers)
+                post_request(cmd, namespace)
     except CLIError as e:
         raise CLIError(e)
 

@@ -13,6 +13,7 @@ from azure.cli.command_modules.acs.azuremonitormetrics.constants import (
 from azure.cli.command_modules.acs.azuremonitormetrics.helper import sanitize_resource_id
 
 
+# pylint: disable=line-too-long
 def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_id):
     from azure.cli.command_modules.acs._client_factory import get_resources_client
     resources = get_resources_client(cmd.cli_ctx, raw_parameters.get("subscription_id"))
@@ -45,10 +46,15 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
     # Add Role Assignment
     try:
         MonitoringDataReader = "b0d8363b-8ddd-447d-831f-62ca05bff136"
-        import uuid as _uuid
-        roleAssignmentId = str(_uuid.uuid4())
-        roleDefinitionId = f"{azure_monitor_workspace_resource_id}/providers/Microsoft.Authorization/roleDefinitions/{MonitoringDataReader}"
-        roleAssignmentResourceId = f"{azure_monitor_workspace_resource_id}/providers/Microsoft.Authorization/roleAssignments/{roleAssignmentId}"
+        roleAssignmentId = str(uuid.uuid4())
+        roleDefinitionId = (
+            f"{azure_monitor_workspace_resource_id}/providers/Microsoft.Authorization/roleDefinitions/"
+            f"{MonitoringDataReader}"
+        )
+        roleAssignmentResourceId = (
+            f"{azure_monitor_workspace_resource_id}/providers/Microsoft.Authorization/roleAssignments/"
+            f"{roleAssignmentId}"
+        )
         association_body = {
             "properties": {
                 "roleDefinitionId": roleDefinitionId,
@@ -61,15 +67,23 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
                 GRAFANA_ROLE_ASSIGNMENT_API,
                 association_body
             )
-        except Exception as e:
+        except CLIError as e:
             # If already exists (409), ignore, else print error
             if not (hasattr(e, "status_code") and e.status_code == 409):
-                erroString = f"Role Assingment failed. Please manually assign the `Monitoring Data Reader` role\n                to the Azure Monitor Workspace ({azure_monitor_workspace_resource_id}) for the Azure Managed Grafana\n                System Assigned Managed Identity ({servicePrincipalId})"
+                erroString = (
+                    f"Role Assingment failed. Please manually assign the `Monitoring Data Reader` role\n"
+                    f"to the Azure Monitor Workspace ({azure_monitor_workspace_resource_id}) "
+                    f"for the Azure Managed Grafana\nSystem Assigned Managed Identity ({servicePrincipalId})"
+                )
                 print(erroString)
     except Exception as e:
         raise CLIError(e)
     # Setting up AMW Integration
-    targetGrafanaArmPayload = grafanaArmResponse.as_dict() if hasattr(grafanaArmResponse, "as_dict") else grafanaArmResponse
+    targetGrafanaArmPayload = (
+        grafanaArmResponse.as_dict()
+        if hasattr(grafanaArmResponse, "as_dict")
+        else grafanaArmResponse
+    )
     if targetGrafanaArmPayload["properties"] is None:
         raise CLIError("Invalid grafana payload to add AMW integration")
     if "grafanaIntegrations" not in json.dumps(targetGrafanaArmPayload):
@@ -88,6 +102,6 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
             GRAFANA_API,
             targetGrafanaArmPayload
         )
-    except Exception as e:
+    except CLIError as e:
         raise CLIError(e)
     return GrafanaLink.SUCCESS

@@ -2,8 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import json
-
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import MAC_API
 from azure.cli.command_modules.acs.azuremonitormetrics.amw.defaults import get_default_mac_name_and_region
 from azure.cli.command_modules.acs._client_factory import get_resource_groups_client, get_resources_client
