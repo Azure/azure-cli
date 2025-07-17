@@ -178,7 +178,7 @@ def load_arguments(self, _):
         c.argument('module_name', 
                   help='Name of the PowerShell module to check. Default is Az.Migrate.')
 
-    with self.argument_context('migrate server list-discovered-table') as c:
+    with self.argument_context('migrate server get-discovered-servers-table') as c:
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('subscription_id', help='Azure subscription ID.')
