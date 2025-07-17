@@ -35,7 +35,10 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
             user_assigned_identities = getattr(identity_info, "user_assigned_identities", {})
             if not user_assigned_identities:
                 raise CLIError("No user-assigned identities found.")
-            servicePrincipalId = list(user_assigned_identities.values())[0]["principal_id"]
+            user_assigned_values = list(user_assigned_identities.values())
+            if not user_assigned_values or "principal_id" not in user_assigned_values[0]:
+                raise CLIError("Invalid user-assigned identity structure or missing principal_id.")
+            servicePrincipalId = user_assigned_values[0]["principal_id"]
         else:
             raise CLIError("Unsupported or missing identity type.")
 
