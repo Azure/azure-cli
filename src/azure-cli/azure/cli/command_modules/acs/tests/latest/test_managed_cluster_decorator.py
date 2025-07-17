@@ -85,8 +85,6 @@ from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
 import datetime
 from dateutil.parser import parse
-import paramiko
-
 
 class AKSManagedClusterModelsTestCase(unittest.TestCase):
     def setUp(self):
