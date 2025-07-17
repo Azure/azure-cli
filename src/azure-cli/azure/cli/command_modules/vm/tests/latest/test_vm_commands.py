@@ -3859,7 +3859,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use at least one of --name, --disks and --disk-ids'):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use at least one of --name, --disks, --disk-ids, --source-snapshots-or-disks and --source-disk-restore-point'):
             self.cmd('vm disk attach -g {rg} --vm-name {vm} --new --size-gb 1 ')
 
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disks'):
