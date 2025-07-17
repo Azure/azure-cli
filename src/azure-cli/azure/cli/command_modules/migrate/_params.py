@@ -304,6 +304,8 @@ def load_arguments(self, _):
         c.argument('subscription_id', help='Azure subscription ID.')
 
     with self.argument_context('migrate local get-job') as c:
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('job_id', help='Job ID of the local replication job.')
         c.argument('input_object', help='Input object containing job information (JSON string).')
         c.argument('subscription_id', help='Azure subscription ID.')
