@@ -2238,11 +2238,6 @@ def initialize_local_replication_infrastructure(cmd, resource_group_name, projec
     """
     ps_executor = get_powershell_executor()
     
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
     initialize_script = f"""
     # Azure CLI equivalent functionality for Initialize-AzMigrateLocalReplicationInfrastructure
     try {{

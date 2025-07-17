@@ -319,7 +319,7 @@ def load_arguments(self, _):
         c.argument('input_object', help='Input object containing job information (JSON string).')
         c.argument('subscription_id', help='Azure subscription ID.')
 
-    with self.argument_context('migrate local init-infrastructure') as c:
+    with self.argument_context('migrate local init-local') as c:
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('source_appliance_name', help='Name of the source appliance.', required=True)
