@@ -2252,7 +2252,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     "for more details."
                 )
             if isBasicSKULb:
-                if not read_from_mc and outbound_type is not None: # outbound type default to loadbalancer for BLB creation
+                if not read_from_mc and outbound_type is not None:  # outbound type was default to loadbalancer for BLB creation
                     raise InvalidArgumentValueError(
                         "{outbound_type} doesn't support basic load balancer sku".format(outbound_type=outbound_type)
                     )
@@ -8814,7 +8814,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             # Set agent pool profile count and vm_size to None
             mc.agent_pool_profiles[0].count = None
             mc.agent_pool_profiles[0].vm_size = None
-            
+
         return mc
 
     def update_mc_profile_default(self) -> ManagedCluster:
