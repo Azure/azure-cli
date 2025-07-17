@@ -23,13 +23,14 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_STORAGE_POOL_TYPE_AZURE_DISK,
     CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
+    CONST_ACSTOR_V2_EXT_INSTALLATION_NAME
 )
 from azure.cli.command_modules.acs._roleassignments import (
     add_role_assignment,
     build_role_scope,
     delete_role_assignments,
 )
-from azure.cli.core.azclierror import UnknownError
+from azure.cli.core.azclierror import ResourceNotFoundError, UnknownError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -243,6 +244,72 @@ def get_extension_installed_and_cluster_configs(
         ephemeral_disk_volume_type,
         perf_tier
     )
+
+
+def get_container_storage_v1_extension_installed(
+    cmd,
+    resource_group,
+    cluster_name
+) -> Tuple[bool, str]:
+
+    client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
+    client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
+    k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
+    is_extension_installed = False
+    extension_version = ""
+
+    try:
+        extension = k8s_extension_custom_mod.show_k8s_extension(
+            client,
+            resource_group,
+            cluster_name,
+            CONST_EXT_INSTALLATION_NAME,
+            "managedClusters",
+        )
+        is_extension_installed = True
+        extension_version = extension.current_version
+    except ResourceNotFoundError:
+        # Extension not found, which is expected if not installed.
+        is_extension_installed = False
+    except Exception as ex:
+        raise UnknownError(
+            f"An error occurred while checking if Azure Container Storage "
+            f"extension is installed on the cluster: {str(ex)}"
+        ) from ex
+    return is_extension_installed, extension_version
+
+
+def get_container_storage_v2_extension_installed(
+    cmd,
+    resource_group,
+    cluster_name
+) -> Tuple[bool, str]:
+    """Check if the Azure Container Storage V2 extension is installed."""
+    client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
+    client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
+    k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
+    is_extension_installed = False
+    extension_version = ""
+
+    try:
+        extension = k8s_extension_custom_mod.show_k8s_extension(
+            client,
+            resource_group,
+            cluster_name,
+            CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
+            "managedClusters",
+        )
+        is_extension_installed = True
+        extension_version = extension.current_version
+    except ResourceNotFoundError:
+        # Extension not found, which is expected if not installed.
+        is_extension_installed = False
+    except Exception as ex:
+        raise UnknownError(
+            f"An error occurred while checking if Azure Container Storage V2 "
+            f"extension is installed on the cluster: {str(ex)}"
+        ) from ex
+    return is_extension_installed, extension_version
 
 
 def get_initial_resource_value_args(

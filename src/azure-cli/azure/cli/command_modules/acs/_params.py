@@ -523,6 +523,10 @@ def load_arguments(self, _):
             arg_type=get_enum_type(ephemeral_disk_nvme_perf_tiers),
             help="set ephemeral disk volume type for azure container storage",
         )
+        c.argument(
+            "enable_azure_container_storage_v2",
+            help="enable azure container storage v2"
+        )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_cost_analysis', action='store_true')
@@ -704,6 +708,14 @@ def load_arguments(self, _):
             "ephemeral_disk_nvme_perf_tier",
             arg_type=get_enum_type(ephemeral_disk_nvme_perf_tiers),
             help="set ephemeral disk volume type for azure container storage",
+        )
+        c.argument(
+            "enable_azure_container_storage_v2",
+            help="enable azure container storage v2",
+        )
+        c.argument(
+            "disable_azure_container_storage_v2",
+            help="disable azure container storage v2",
         )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')

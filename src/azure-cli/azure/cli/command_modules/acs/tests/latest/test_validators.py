@@ -905,7 +905,6 @@ class TestValidateApplicationSecurityGroups(unittest.TestCase):
             namespace
         )
 
-
 class TestValidateDisableAzureContainerStorage(unittest.TestCase):
     def test_disable_when_extension_not_installed(self):
         is_extension_installed = False
@@ -1067,6 +1066,18 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
             pool_type, None, None, None, None, None, True, False, True, True, False, None, None
         )
 
+class TestValidateDisableAzureContainerStorageV2(unittest.TestCase):
+    def test_disable_v2_when_extension_not_installed(self):
+        is_extension_installed = False
+        err = (
+            'Invalid usage of --disable-azure-container-storage-v2. '
+            'Azure Container Storage v2 is not enabled in the cluster.'
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_disable_azure_container_storage_v2_params(
+                is_extension_installed
+            )
+        self.assertEqual(str(cm.exception), err)
 
 class TestValidateEnableAzureContainerStorage(unittest.TestCase):
     @classmethod
@@ -1095,6 +1106,21 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
     def tearDownClass(cls):
         # Stop the patcher
         cls.patcher.stop()
+    
+    def test_enable_when_container_storage_v2_installed(self):
+        is_container_storage_v2_extension_installed = True
+        v2_extension_version = "2.0.0"
+        err = (
+             f'Azure Container Storage v2 version {v2_extension_version} is already installed on the cluster which is why Azure Container Storage cannot be enabled. '
+            'Try enabling Azure Container Storage in another cluster. '
+            'You can also enable Azure Container Storage by first disabling the existing Azure Container Storage v2 using --disable-azure-container-storage-v2. ' \
+            'Note that this can impact existing workloads that depend on Azure Container Storage.'
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                None, "test_pool", None, None, None, None, None, False, is_container_storage_v2_extension_installed, v2_extension_version, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            )
+        self.assertEqual(str(cm.exception), err)
 
     def test_enable_with_invalid_storage_pool_name(self):
         storage_pool_name = "my_test_pool"
@@ -1105,7 +1131,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                None, storage_pool_name, None, None, None, None, None, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                None, storage_pool_name, None, None, None, None, None, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1116,7 +1142,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         err = "Cannot set --storage-pool-sku when --enable-azure-container-storage is ephemeralDisk."
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, None, None, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, None, None, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1138,7 +1164,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, None, None, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, None, None, False,False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1157,7 +1183,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1174,7 +1200,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1191,7 +1217,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1208,7 +1234,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1225,7 +1251,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1242,7 +1268,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1253,7 +1279,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         err = "Cannot set --storage-pool-option when --enable-azure-container-storage is not ephemeralDisk."
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, storage_pool_option, None, None, None, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, storage_pool_option, None, None, None, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1264,7 +1290,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         err = "Cannot set --ephemeral-disk-volume-type when --enable-azure-container-storage is not ephemeralDisk."
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, None, None, None, None, False, False, False, False, False, ephemeral_disk_volume_type, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, None, None, None, None, False, False, "", False, False, False, False, ephemeral_disk_volume_type, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1277,7 +1303,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, None, None, None, None, False, False, False, False, False, None, perf_tier, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, None, None, None, None, False, False, "", False, False, False, False, None, perf_tier, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1293,7 +1319,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, storage_pool_option, None, None, None, False, False, False, False, False, None, perf_tier, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, storage_pool_option, None, None, None, False, False, "", False, False, False, False, None, perf_tier, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1306,7 +1332,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, None, None, None, None, None, None, True, False, False, False, True, None, perf_tier, acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
+                storage_pool_type, None, None, None, None, None, None, True, False, "", False, False, False, True, None, perf_tier, acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1319,7 +1345,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, None, None, None, None, None, None, True, False, False, False, True, disk_vol_type, None, acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
+                storage_pool_type, None, None, None, None, None, None, True, False, "", False, False, False, True, disk_vol_type, None, acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1334,7 +1360,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, None, None, None, None, None, None, True, False, False, False, True, disk_vol_type, perf_tier, acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, None, None, None, None, None, None, True, False, "", False, False, False, True, disk_vol_type, perf_tier, acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1345,7 +1371,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         err = "Cannot set --storage-pool-option value as all when --enable-azure-container-storage is set."
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, storage_pool_option, None, None, None, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, storage_pool_option, None, None, None, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1356,7 +1382,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         err = "Value for --storage-pool-size should be defined with size followed by Gi or Ti e.g. 512Gi or 2Ti."
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, None, storage_pool_size, None, None, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, None, storage_pool_size, None, None, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1367,7 +1393,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         err = "Value for --storage-pool-size must be at least 1Ti when --enable-azure-container-storage is elasticSan."
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, None, storage_pool_size, None, None, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, None, storage_pool_size, None, None, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1384,7 +1410,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, None, storage_pool_size, nodepool_list, None, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, None, storage_pool_size, nodepool_list, None, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1403,7 +1429,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1422,7 +1448,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1440,7 +1466,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1456,7 +1482,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(UnknownError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1468,7 +1494,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         nodepool_list = "nodepool1,nodepool2"
         agentpools = {"nodepool1": {"mode": "User", "count": 2}, "nodepool2": {"mode": "System", "count": 1}}
         acstor_validator.validate_enable_azure_container_storage_params(
-            storage_pool_type, storage_pool_name, storage_pool_sku, None, storage_pool_size, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            storage_pool_type, storage_pool_name, storage_pool_sku, None, storage_pool_size, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
         )
 
     def test_valid_enable_for_ephemeral_disk_pool(self):
@@ -1479,7 +1505,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         nodepool_list = "nodepool1"
         agentpools = {"nodepool1": {"vm_size": "Standard_L8s_v3", "mode": "System", "count": 5}, "nodepool2": {"vm_size": "Standard_L8s_v3"}}
         acstor_validator.validate_enable_azure_container_storage_params(
-            storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
         )
 
     def test_valid_enable_for_ephemeral_disk_pool_with_ephemeral_disk_volume_type(self):
@@ -1491,7 +1517,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         ephemeral_disk_volume_type = acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION
         agentpools = {"nodepool1": {"vm_size": "Standard_L8s_v3", "mode": "System", "count": 3}, "nodepool2": {"vm_size": "Standard_L8s_v3"}}
         acstor_validator.validate_enable_azure_container_storage_params(
-            storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, False, False, False, ephemeral_disk_volume_type, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, "", False, False, False, False, ephemeral_disk_volume_type, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
         )
 
     def test_valid_enable_for_ephemeral_disk_pool_with_ephemeral_disk_volume_type_already_installed(self):
@@ -1499,7 +1525,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         ephemeral_disk_volume_type = acstor_consts.CONST_DISK_TYPE_PV_WITH_ANNOTATION
         agentpools = {"nodepool1": {"node_labels": {"acstor.azure.com/io-engine": "acstor"}, "count": 3}, "nodepool2": {}}
         acstor_validator.validate_enable_azure_container_storage_params(
-            storage_pool_type, None, None, None, None, None, agentpools, True, False, False, True, False, ephemeral_disk_volume_type, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            storage_pool_type, None, None, None, None, None, agentpools, True, False, "", False, False, True, False, ephemeral_disk_volume_type, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
         )
 
     def test_valid_enable_for_ephemeral_disk_pool_with_ephemeral_disk_nvme_perf_tier(self):
@@ -1511,7 +1537,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         perf_tier = acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
         agentpools = {"nodepool1": {"vm_size": "Standard_L8s_v3", "count": 4}, "nodepool2": {"vm_size": "Standard_L8s_v3"}}
         acstor_validator.validate_enable_azure_container_storage_params(
-            storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, False, False, False, None, perf_tier, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            storage_pool_type, storage_pool_name, None, storage_pool_option, storage_pool_size, nodepool_list, agentpools, False, False, "", False, False, False, False, None, perf_tier, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
         )
 
     def test_valid_enable_for_ephemeral_disk_pool_with_azure_container_storage_per_tier_nvme_already_installed(self):
@@ -1519,7 +1545,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         perf_tier = acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM
         agentpools = {"nodepool1": {"node_labels": {"acstor.azure.com/io-engine": "acstor"}, "count": 3}, "nodepool2": {}}
         acstor_validator.validate_enable_azure_container_storage_params(
-            storage_pool_type, None, None, None, None, None, agentpools, True, False, False, False, True, None, perf_tier, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            storage_pool_type, None, None, None, None, None, agentpools, True, False, "", False, False, False, True, None, perf_tier, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
         )
 
     def test_extension_installed_nodepool_list_defined(self):
@@ -1533,7 +1559,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, None, None, None, None, nodepool_list, None, True, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, None, None, None, None, nodepool_list, None, True, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1550,7 +1576,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, storage_pool_size, None, agentpools, True, True, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, storage_pool_size, None, agentpools, True, False, "", True, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1561,8 +1587,75 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         storage_pool_sku = acstor_consts.CONST_STORAGE_POOL_SKU_PREMIUM_LRS
         agentpools = {"nodepool1": {"node_labels": {"acstor.azure.com/io-engine": "acstor"}, "mode": "User", "count": 3}, "nodepool2": {}}
         acstor_validator.validate_enable_azure_container_storage_params(
-            storage_pool_type, storage_pool_name, storage_pool_sku, None, storage_pool_size, None, agentpools, True, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            storage_pool_type, storage_pool_name, storage_pool_sku, None, storage_pool_size, None, agentpools, True, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
         )
+
+class TestValidateEnableAzureContainerStorageV2(unittest.TestCase):
+    def test_enable_v2_when_extension_installed(self):
+        err = (
+            'Cannot set --enable-azure-container-storage-v2 when' \
+            ' Azure Container Storage v2 is already enabled.'
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_v2_params(
+                True, False, "", None, None, None, None
+            )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_v2_when_extension_v1_installed(self):
+        v1_extension_version = "1.3.0"
+        err = (
+            f'Azure Container Storage version {v1_extension_version} is already installed on the cluster which is why Azure Container Storage v2 cannot be enabled. '
+            'Try enabling Azure Container Storage v2 in another cluster. '
+            'You can also enable Azure Container Storage v2 by first disabling the existing Azure Container Storage v1 using --disable-azure-container-storage. ' \
+            'Note that this can impact existing workloads that depend on Azure Container Storage.'
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_v2_params(
+                False, True, v1_extension_version, None, None, None, None
+            )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_v2_with_invalid_params(self):
+        err = (
+            'Azure Container Storage v2 does not'
+            ' require or support a --storage-pool-name value. '
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_v2_params(
+                False, False, "", "pool1", None, None, None
+            )
+        self.assertEqual(str(cm.exception), err)
+
+        err = (
+            'Azure Container Storage v2 does not'
+            ' require or support a --storage-pool-sku value. '
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_v2_params(
+                False, False, "", None, "Premium_LRS", None, None
+            )
+        self.assertEqual(str(cm.exception), err)
+
+        err = (
+            'Azure Container Storage v2 does not'
+            ' require or support a --storage-pool-option value. '
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_v2_params(
+                False, False, "", None, None, "NVME", None
+            )
+        self.assertEqual(str(cm.exception), err)
+
+        err = (
+             'Azure Container Storage v2 does not'
+            ' require or support a --storage-pool-size value. '
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_v2_params(
+                False, False, "", None, None, None, "5Ti"
+            )
+        self.assertEqual(str(cm.exception), err)
 
 
 class DisableWindowsOutboundNatNamespace:

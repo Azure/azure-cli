@@ -653,6 +653,7 @@ def aks_create(
     enable_windows_recording_rules=False,
     # azure container storage
     enable_azure_container_storage=None,
+    enable_azure_container_storage_v2=False,
     storage_pool_name=None,
     storage_pool_size=None,
     storage_pool_sku=None,
@@ -836,6 +837,8 @@ def aks_update(
     azure_container_storage_nodepools=None,
     ephemeral_disk_volume_type=None,
     ephemeral_disk_nvme_perf_tier=None,
+    enable_azure_container_storage_v2=False,
+    disable_azure_container_storage_v2=False,
     # misc
     yes=False,
     no_wait=False,
