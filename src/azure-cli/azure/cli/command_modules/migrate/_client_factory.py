@@ -8,15 +8,13 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 def cf_migrate(cli_ctx, **_):
     """Client factory for Azure Migrate operations."""
-    # Since Azure Migrate may not have a standard management client,
-    # we'll create a generic client that can be used for REST API calls
     from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_MIGRATE)
 
 
 def cf_migrate_projects(cli_ctx, **_):
     """Client factory for Azure Migrate projects."""
-    # For now, return the base client. In a real implementation,
+    # For now, return the base client. Later as the app grows,
     # this would return a specific operation group
     return cf_migrate(cli_ctx)
 
