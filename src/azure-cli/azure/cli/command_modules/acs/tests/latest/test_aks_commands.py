@@ -13127,6 +13127,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check("agentPoolProfiles[0].type", "VirtualMachines"),
+            self.check("agentPoolProfiles[0].vmSize", ""),
+            self.check("agentPoolProfiles[0].count", None),
             self.check("networkProfile.loadBalancerSku", "standard"),
         ])
 
