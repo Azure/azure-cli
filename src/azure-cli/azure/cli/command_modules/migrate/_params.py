@@ -2,101 +2,182 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=line-too-long
 
 from knack.arguments import CLIArgumentType
-from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
+from azure.cli.core.commands.parameters import (
+    get_enum_type, 
+    get_three_state_flag,
+    resource_group_name_type,
+    get_location_type
+)
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 
 def load_arguments(self, _):
-
     from azure.cli.core.commands.parameters import tags_type
-    from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
-    # Common argument types
-    plan_name_type = CLIArgumentType(
-        options_list=['--plan-name', '-p'],
-        help='Name of the migration plan.'
+    # Common argument types for reuse
+    project_name_type = CLIArgumentType(
+        options_list=['--project-name'],
+        help='Name of the Azure Migrate project.',
+        id_part='name'
     )
     
-    source_name_type = CLIArgumentType(
-        options_list=['--source-name', '-s'],
-        help='Name of the migration source (server, database, etc.).'
+    subscription_id_type = CLIArgumentType(
+        options_list=['--subscription'],
+        help='Azure subscription ID. Uses the default subscription if not specified.'
     )
 
-    with self.argument_context('migrate discover') as c:
-        c.argument('source_type', 
-                  arg_type=get_enum_type(['server', 'database', 'vm', 'all']),
-                  help='Type of source to discover. Default is all.')
-        c.argument('server_name', help='Specific server name to discover.')
+    # Global migrate arguments
+    with self.argument_context('migrate') as c:
+        c.argument('subscription_id', subscription_id_type)
 
-    with self.argument_context('migrate assess') as c:
-        c.argument('source_path', help='Path to the source to assess.')
-        c.argument('assessment_type',
-                  arg_type=get_enum_type(['basic', 'detailed', 'security']),
-                  help='Type of assessment to perform. Default is basic.')
-
-    with self.argument_context('migrate plan create') as c:
-        c.argument('source_name', source_name_type, required=True)
-        c.argument('target_type',
-                  arg_type=get_enum_type(['azure-vm', 'azure-sql', 'azure-webapp', 'azure-aks']),
-                  help='Target type for migration. Default is azure-vm.')
-        c.argument('plan_name', plan_name_type,
-                  help='Name for the migration plan. If not specified, will be auto-generated.')
-
-    with self.argument_context('migrate plan list') as c:
-        c.argument('status',
-                  arg_type=get_enum_type(['pending', 'in-progress', 'completed', 'failed']),
-                  help='Filter plans by status.')
-
-    with self.argument_context('migrate plan show') as c:
-        c.argument('plan_name', plan_name_type, required=True)
-
-    with self.argument_context('migrate plan execute-step') as c:
-        c.argument('plan_name', plan_name_type, required=True)
-        c.argument('step_number', type=int, required=True,
-                  help='Step number to execute (1-6).')
-        c.argument('force', action='store_true',
-                  help='Force execution even if previous steps failed.')
-
-    with self.argument_context('migrate assess sql-server') as c:
-        c.argument('server_name', help='SQL Server name. Defaults to local computer.')
-        c.argument('instance_name', help='SQL Server instance name. Defaults to MSSQLSERVER.')
-
-    with self.argument_context('migrate assess hyperv-vm') as c:
-        c.argument('vm_name', help='Specific VM name to assess. If not specified, all VMs will be assessed.')
-
-    with self.argument_context('migrate assess filesystem') as c:
-        c.argument('path', help='Path to assess. Defaults to C:\\.')
-
-    with self.argument_context('migrate powershell execute') as c:
-        c.argument('script_path', required=True, help='Path to the PowerShell script to execute.')
-        c.argument('parameters', help='Parameters to pass to the script in format key=value,key2=value2.')
-
-    with self.argument_context('migrate powershell get-module') as c:
-        c.argument('module_name', help='Name of the PowerShell module to check (default: Az.Migrate).')
-        c.argument('all_versions', action='store_true', help='Return all installed versions of the module.')
-
+    # Setup environment arguments
     with self.argument_context('migrate setup-env') as c:
         c.argument('install_powershell', action='store_true',
                   help='Attempt to automatically install PowerShell Core if not found.')
         c.argument('check_only', action='store_true',
                   help='Only check environment requirements without making changes.')
 
-    # Parameters for Azure CLI equivalents to PowerShell Az.Migrate commands
+    # Project management arguments
+    with self.argument_context('migrate project') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('project_name', project_name_type)
+        c.argument('location', get_location_type(self.cli_ctx), 
+                  validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+
+    with self.argument_context('migrate project create') as c:
+        c.argument('assessment_solution', 
+                  help='Assessment solution to enable (e.g., ServerAssessment).')
+        c.argument('migration_solution', 
+                  help='Migration solution to enable (e.g., ServerMigration).')
+
+    # Assessment arguments
+    with self.argument_context('migrate assessment') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('project_name', project_name_type)
+        c.argument('assessment_name', 
+                  options_list=['--assessment-name', '--name', '-n'],
+                  help='Name of the assessment.',
+                  id_part='child_name_1')
+
+    with self.argument_context('migrate assessment create') as c:
+        c.argument('assessment_type',
+                  arg_type=get_enum_type(['Basic', 'Standard', 'Premium']),
+                  help='Type of assessment to perform.')
+        c.argument('group_name', help='Name of the group containing machines to assess.')
+
+    # Machine arguments
+    with self.argument_context('migrate machine') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('project_name', project_name_type)
+        c.argument('machine_name', 
+                  options_list=['--machine-name', '--name', '-n'],
+                  help='Name of the machine.',
+                  id_part='child_name_1')
+
+    # Server discovery and replication arguments
+    with self.argument_context('migrate server') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('project_name', project_name_type)
+        c.argument('subscription_id', subscription_id_type)
+
     with self.argument_context('migrate server list-discovered') as c:
-        c.argument('resource_group_name', help='Name of the resource group.', required=True)
-        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('subscription_id', help='Azure subscription ID.')
         c.argument('server_id', help='Specific server ID to retrieve.')
         c.argument('source_machine_type', 
                   arg_type=get_enum_type(['HyperV', 'VMware']),
-                  help='Type of source machine (HyperV or VMware). Default is VMware.')
+                  help='Type of source machine. Default is VMware.')
         c.argument('output_format', 
                   arg_type=get_enum_type(['json', 'table']),
                   help='Output format. Default is json.')
         c.argument('display_fields', 
-                  help='Comma-separated list of fields to display (e.g., DisplayName,Name,Type).')
+                  help='Comma-separated list of fields to display.')
+
+    with self.argument_context('migrate server create-replication') as c:
+        c.argument('server_name', help='Name of the server to replicate.', required=True)
+        c.argument('target_vm_name', help='Name for the target VM.', required=True)
+        c.argument('target_resource_group', help='Target resource group for the VM.', required=True)
+        c.argument('target_location', help='Target Azure region.', required=True)
+        c.argument('target_vm_size', help='Target VM size (e.g., Standard_D2s_v3).')
+        c.argument('test_migrate', action='store_true',
+                  help='Perform test migration only.')
+
+    # Azure Stack HCI Local Migration
+    with self.argument_context('migrate local') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('project_name', project_name_type)
+        c.argument('subscription_id', subscription_id_type)
+
+    with self.argument_context('migrate local create-disk-mapping') as c:
+        c.argument('disk_id', help='Disk ID (UUID) for the disk mapping.', required=True)
+        c.argument('is_os_disk', action='store_true', 
+                  help='Whether this is the OS disk.')
+        c.argument('is_dynamic', action='store_true', 
+                  help='Whether dynamic allocation is enabled.')
+        c.argument('size_gb', type=int, help='Size of the disk in GB.')
+        c.argument('format_type', 
+                  arg_type=get_enum_type(['VHD', 'VHDX']),
+                  help='Disk format type.')
+        c.argument('physical_sector_size', type=int, 
+                  help='Physical sector size in bytes.')
+
+    with self.argument_context('migrate local create-replication') as c:
+        c.argument('server_index', type=int, 
+                  help='Index of the discovered server to replicate.', required=True)
+        c.argument('target_vm_name', help='Name for the target VM.', required=True)
+        c.argument('target_storage_path_id', 
+                  help='Azure Stack HCI storage container ARM ID.', required=True)
+        c.argument('target_virtual_switch_id', 
+                  help='Azure Stack HCI logical network ARM ID.', required=True)
+        c.argument('target_resource_group_id', 
+                  help='Target resource group ARM ID.', required=True)
+
+    # Authentication arguments
+    with self.argument_context('migrate auth login') as c:
+        c.argument('tenant_id', help='Azure tenant ID to authenticate against.')
+        c.argument('subscription_id', subscription_id_type)
+        c.argument('device_code', action='store_true', 
+                  help='Use device code authentication flow.')
+        c.argument('app_id', help='Service principal application ID.')
+        c.argument('secret', help='Service principal secret.')
+
+    with self.argument_context('migrate auth set-context') as c:
+        c.argument('subscription_id', subscription_id_type)
+        c.argument('subscription_name', help='Azure subscription name.')
+        c.argument('tenant_id', help='Azure tenant ID.')
+
+    # Infrastructure management
+    with self.argument_context('migrate infrastructure') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('project_name', project_name_type)
+        c.argument('subscription_id', subscription_id_type)
+
+    with self.argument_context('migrate infrastructure init') as c:
+        c.argument('target_region', help='Target Azure region for replication.', required=True)
+
+    # Storage management
+    with self.argument_context('migrate storage') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('subscription_id', subscription_id_type)
+
+    with self.argument_context('migrate storage get-account') as c:
+        c.argument('storage_account_name', 
+                  options_list=['--storage-account-name', '--name', '-n'],
+                  help='Name of the Azure Storage account.', required=True)
+
+    with self.argument_context('migrate storage show-account-details') as c:
+        c.argument('storage_account_name', 
+                  options_list=['--storage-account-name', '--name', '-n'],
+                  help='Name of the Azure Storage account.', required=True)
+        c.argument('show_keys', action='store_true', 
+                  help='Include storage account access keys.')
+
+    # PowerShell module management
+    with self.argument_context('migrate powershell check-module') as c:
+        c.argument('module_name', 
+                  help='Name of the PowerShell module to check. Default is Az.Migrate.')
+        c.argument('subscription_id', subscription_id_type)
 
     with self.argument_context('migrate server list-discovered-table') as c:
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group.', required=True)

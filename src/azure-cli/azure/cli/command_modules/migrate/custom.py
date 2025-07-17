@@ -699,14 +699,16 @@ def initialize_replication_infrastructure(cmd, resource_group_name, project_name
         Write-Host "   3. Monitor replication jobs with: az migrate server get-replication-status" -ForegroundColor White
         Write-Host ""
         
-        return @{{
-            Status = "Success"
-            ResourceGroupName = "{resource_group_name}"
-            ProjectName = "{project_name}"
-            TargetRegion = "{target_region}"
-            Message = "Replication infrastructure initialized successfully"
-            InitializationResult = $InitResult
+        # Return JSON for programmatic use
+        $result = @{{
+            'Status' = 'Success'
+            'ProjectName' = "{project_name}"
+            'ResourceGroupName' = "{resource_group_name}"
+            'TargetRegion' = "{target_region}"
+            'Message' = 'Replication infrastructure initialized successfully'
+            'InitializationResult' = $InitResult
         }}
+        $result | ConvertTo-Json -Depth 4
         
     }} catch {{
         Write-Host ""
@@ -722,18 +724,18 @@ def initialize_replication_infrastructure(cmd, resource_group_name, project_name
         Write-Host ""
         
         @{{
-            Status = "Failed"
-            Error = $_.Exception.Message
-            ResourceGroupName = "{resource_group_name}"
-            ProjectName = "{project_name}"
-            TargetRegion = "{target_region}"
-            Message = "Failed to initialize replication infrastructure"
-            TroubleshootingSteps = @(
-                "Verify sufficient permissions on subscription",
-                "Check Azure Migrate project exists",
-                "Ensure target region is valid",
-                "Verify Azure Migrate service availability",
-                "Check Azure resource quotas"
+            'Status' = 'Failed'
+            'Error' = $_.Exception.Message
+            'ProjectName' = "{project_name}"
+            'ResourceGroupName' = "{resource_group_name}"
+            'TargetRegion' = "{target_region}"
+            'Message' = 'Failed to initialize replication infrastructure'
+            'TroubleshootingSteps' = @(
+                'Verify sufficient permissions on subscription',
+                'Check Azure Migrate project exists',
+                'Ensure target region is valid',
+                'Verify Azure Migrate service availability',
+                'Check Azure resource quotas'
             )
         }} | ConvertTo-Json -Depth 3
         throw
@@ -1689,8 +1691,6 @@ def create_local_disk_mapping(cmd, disk_id, is_os_disk=True, is_dynamic=False,
         Write-Host "1. Check authentication: az migrate auth check" -ForegroundColor White
         Write-Host "2. Verify disk ID format is correct" -ForegroundColor White
         Write-Host "3. Ensure disk size and format values are valid" -ForegroundColor White
-        Write-Host "4. Check that Az.Migrate module supports local operations" -ForegroundColor White
-        Write-Host ""
         
         @{{
             'Status' = 'Failed'
