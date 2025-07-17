@@ -7,27 +7,17 @@ from azure.cli.core.commands import CliCommandType
 
 
 def load_command_table(self, _):
-    from azure.cli.command_modules.migrate._client_factory import (
-        cf_migrate, 
-        cf_migrate_projects, 
-        cf_migrate_assessments,
-        cf_migrate_machines
-    )
-
     # Define command types for different operation groups
     migrate_projects_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.migrate.operations#ProjectsOperations.{}',
-        client_factory=cf_migrate_projects
     )
 
     migrate_assessments_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.migrate.operations#AssessmentsOperations.{}',
-        client_factory=cf_migrate_assessments
     )
 
     migrate_machines_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.migrate.operations#MachinesOperations.{}',
-        client_factory=cf_migrate_machines
     )
 
     # Basic migration commands

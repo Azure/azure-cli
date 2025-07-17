@@ -24,7 +24,7 @@ def load_arguments(self, _):
     )
     
     subscription_id_type = CLIArgumentType(
-        options_list=['--subscription'],
+        options_list=['--subscription-id'],
         help='Azure subscription ID. Uses the default subscription if not specified.'
     )
 
@@ -177,7 +177,6 @@ def load_arguments(self, _):
     with self.argument_context('migrate powershell check-module') as c:
         c.argument('module_name', 
                   help='Name of the PowerShell module to check. Default is Az.Migrate.')
-        c.argument('subscription_id', subscription_id_type)
 
     with self.argument_context('migrate server list-discovered-table') as c:
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group.', required=True)
