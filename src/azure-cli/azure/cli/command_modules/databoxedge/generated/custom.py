@@ -13,22 +13,6 @@
 from azure.cli.core.util import sdk_no_wait
 
 
-def databoxedge_alert_list(client,
-                           device_name,
-                           resource_group_name):
-    return client.list_by_data_box_edge_device(device_name=device_name,
-                                               resource_group_name=resource_group_name)
-
-
-def databoxedge_alert_show(client,
-                           device_name,
-                           name,
-                           resource_group_name):
-    return client.get(device_name=device_name,
-                      name=name,
-                      resource_group_name=resource_group_name)
-
-
 def databoxedge_bandwidth_schedule_list(client,
                                         device_name,
                                         resource_group_name):

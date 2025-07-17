@@ -15,15 +15,6 @@ from azure.cli.core.commands import CliCommandType
 
 def load_command_table(self, _):
 
-    from ..generated._client_factory import cf_alert
-    databoxedge_alert = CliCommandType(
-        operations_tmpl='azure.mgmt.databoxedge.operations._alerts_operations#AlertsOperations.{}',
-        client_factory=cf_alert)
-    with self.command_group('databoxedge alert', databoxedge_alert, client_factory=cf_alert,
-                            min_api='2019-08-01') as g:
-        g.custom_command('list', 'databoxedge_alert_list')
-        g.custom_show_command('show', 'databoxedge_alert_show')
-
     from ..generated._client_factory import cf_bandwidth_schedule
     databoxedge_bandwidth_schedule = CliCommandType(
         operations_tmpl='azure.mgmt.databoxedge.operations._bandwidth_schedules_operations#BandwidthSchedulesOperations'
