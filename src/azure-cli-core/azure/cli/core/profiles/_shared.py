@@ -183,7 +183,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS: None,
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: None,
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: None,
-        ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
         ResourceType.MGMT_KEYVAULT: None,
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
