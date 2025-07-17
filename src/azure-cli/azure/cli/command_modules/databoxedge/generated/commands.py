@@ -15,23 +15,6 @@ from azure.cli.core.commands import CliCommandType
 
 def load_command_table(self, _):
 
-    from ..generated._client_factory import cf_device
-    databoxedge_device = CliCommandType(
-        operations_tmpl='azure.mgmt.databoxedge.operations._devices_operations#DevicesOperations.{}',
-        client_factory=cf_device)
-    with self.command_group('databoxedge device', databoxedge_device, client_factory=cf_device,
-                            min_api='2019-08-01') as g:
-        g.custom_command('list', 'databoxedge_device_list')
-        g.custom_show_command('show', 'databoxedge_device_show')
-        g.custom_command('create', 'databoxedge_device_create', supports_no_wait=True)
-        g.custom_command('update', 'databoxedge_device_update')
-        g.custom_command('delete', 'databoxedge_device_delete', supports_no_wait=True, confirmation=True)
-        g.custom_command('download-update', 'databoxedge_device_download_update', supports_no_wait=True)
-        g.custom_command('install-update', 'databoxedge_device_install_update', supports_no_wait=True)
-        g.custom_command('scan-for-update', 'databoxedge_device_scan_for_update', supports_no_wait=True)
-        g.custom_command('show-update-summary', 'databoxedge_device_show_update_summary')
-        g.custom_wait_command('wait', 'databoxedge_device_show')
-
     from ..generated._client_factory import cf_alert
     databoxedge_alert = CliCommandType(
         operations_tmpl='azure.mgmt.databoxedge.operations._alerts_operations#AlertsOperations.{}',
