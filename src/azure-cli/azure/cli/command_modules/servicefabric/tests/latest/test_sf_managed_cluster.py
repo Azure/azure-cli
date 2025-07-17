@@ -53,7 +53,9 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
-            'tags': "key1=value1 key2=value2",
+            'vm_image_sku': '2022-datacenter-azure-edition',
+            'vm_size': 'Standard_D2s_v3',
+            'tags': "SFRP.DisableDefaultOutboundAccess=True SFRP.EnableDiagnosticMI=True",
             'name': self.create_random_name('NSR-', 10),
             'access': 'allow',
             'inv_access': 'deny',
@@ -66,28 +68,52 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'source_port_ranges': '1-1000 1122-65535',
             'dest_port_ranges': '1-1900 2200-65535',
             'source_addr_prefixes': '167.220.242.0/27 167.220.0.0/23 131.107.132.16/28 167.220.81.128/26',
-            'dest_addr_prefixes': '194.69.104.0/25 194.69.119.64/26 167.220.249.128/26 255.255.255.255/32'
+            'dest_addr_prefixes': '194.69.104.0/25 194.69.119.64/26 167.220.249.128/26 255.255.255.255/32',
+            'deny_name': 'deny-nsr',
+            'deny_access': 'deny',
+            'deny_description': self.create_random_name('NSR-', 10),
+            'deny_direction': 'inbound',
+            'deny_protocol': 'any',
+            'deny_priority': 1300,
+            'deny_source_port_range': '*',
+            'deny_dest_port_ranges': '19000 19080',
+            'deny_source_addr_prefix': 'Internet',
+            'deny_dest_addr_prefix': '*',
         })
-        
+
         cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags}',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('clusterState', 'WaitingForNodes')]).get_output_in_json()
 
-        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary',
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --vm-image-sku {vm_image_sku} --vm-size {vm_size}',
                  checks=[self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('az sf managed-cluster network-security-rule add -g {rg} -c {cluster_name} '
+                '--name {deny_name} --access {deny_access} --description {deny_description} --direction {deny_direction} --protocol {deny_protocol} --priority {deny_priority} --source-port-range {deny_source_port_range} --dest-port-ranges {deny_dest_port_ranges}'
+                ' --source-addr-prefix {deny_source_addr_prefix} --dest-addr-prefix {deny_dest_addr_prefix}',
+                checks=[self.check('provisioningState', 'Succeeded'),
+                        self.check('networkSecurityRules[0].destinationAddressPrefix', '*'),
+                        self.check('networkSecurityRules[0].sourceAddressPrefix', 'Internet'),
+                        self.check('networkSecurityRules[0].protocol', '*'),
+                        self.check('networkSecurityRules[0].direction', 'inbound'),
+                        self.check('networkSecurityRules[0].access', 'deny'),
+                        self.check('networkSecurityRules[0].priority', 1300),
+                        self.check('networkSecurityRules[0].sourcePortRange', '*'),
+                        self.check('networkSecurityRules[0].destinationPortRanges[0]', '19000'),
+                        self.check('networkSecurityRules[0].destinationPortRanges[1]', '19080')])
 
         self.cmd('az sf managed-cluster network-security-rule add -g {rg} -c {cluster_name} '
                 '--name {name} --access {access} --description {description} --direction {direction} --protocol {protocol} --priority {priority} --source-port-ranges {source_port_ranges} --dest-port-ranges {dest_port_ranges}'
                 ' --source-addr-prefixes {source_addr_prefixes} --dest-addr-prefixes {dest_addr_prefixes}',
                 checks=[self.check('provisioningState', 'Succeeded'),
-                        self.check('networkSecurityRules[0].destinationAddressPrefixes[0]', '194.69.104.0/25'),
-                        self.check('networkSecurityRules[0].sourceAddressPrefixes[1]', '167.220.0.0/23'),
-                        self.check('networkSecurityRules[0].protocol', '*'),
-                        self.check('networkSecurityRules[0].direction', 'inbound'),
-                        self.check('networkSecurityRules[0].access', 'allow'),
-                        self.check('networkSecurityRules[0].priority', 1200),
-                        self.check('networkSecurityRules[0].sourcePortRanges[0]', '1-1000'),
-                        self.check('networkSecurityRules[0].destinationPortRanges[1]', '2200-65535')])
+                        self.check('networkSecurityRules[1].destinationAddressPrefixes[0]', '194.69.104.0/25'),
+                        self.check('networkSecurityRules[1].sourceAddressPrefixes[1]', '167.220.0.0/23'),
+                        self.check('networkSecurityRules[1].protocol', '*'),
+                        self.check('networkSecurityRules[1].direction', 'inbound'),
+                        self.check('networkSecurityRules[1].access', 'allow'),
+                        self.check('networkSecurityRules[1].priority', 1200),
+                        self.check('networkSecurityRules[1].sourcePortRanges[0]', '1-1000'),
+                        self.check('networkSecurityRules[1].destinationPortRanges[1]', '2200-65535')])
         
         self.cmd('az sf managed-cluster network-security-rule update -g {rg} -c {cluster_name} '
                 '--name {name} --access {inv_access} --direction {inv_direction} --priority {update_priority}',
@@ -99,14 +125,14 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                          self.check('priority', 1100)])
 
         self.cmd('az sf managed-cluster network-security-rule list -g {rg} -c {cluster_name}',
-                checks=[self.check('length(@)', 1)])
+                checks=[self.check('length(@)', 2)])
         
         self.cmd('az sf managed-cluster network-security-rule delete -g {rg} -c {cluster_name} --name {name}',
                 checks=[self.check('provisioningState', 'Succeeded')])
         
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
                 checks=[self.check('clusterState', 'Ready'),
-                        self.check('length(networkSecurityRules)', 0)])
+                        self.check('length(networkSecurityRules)', 1)])
 
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
