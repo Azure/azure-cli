@@ -459,7 +459,7 @@ helps['appconfig feature delete'] = """
           text:
             az appconfig feature delete -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta --yes
         - name: Delete a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta" with tags "tag1=value1" and "tag2=value2".
-          text: 
+          text:
             az appconfig feature delete -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta --tags tag1=value1 tag2=value2 --yes
     """
 
