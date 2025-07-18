@@ -814,6 +814,7 @@ def aks_update(
     max_count=None,
     nodepool_labels=None,
     nodepool_taints=None,
+    migrate_vmas_to_vms=False,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,
