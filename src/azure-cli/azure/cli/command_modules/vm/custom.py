@@ -2092,7 +2092,8 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 
 # region VirtualMachines Disks (Managed)
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=None, disks=None, new=False, sku=None,
-                             size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None):
+                             size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None,
+                             source_snapshots_or_disks=None, source_disk_restore_point=None):
     # attach multiple managed disks using disk attach API
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     if not new and not sku and not size_gb and disk_ids is not None:
@@ -2148,6 +2149,33 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 data_disk.write_accelerator_enabled = enable_write_accelerator
 
             vm.storage_profile.data_disks.append(data_disk)
+        disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
+        if source_snapshots_or_disks is not None:
+            for disk_item in source_snapshots_or_disks:
+                disk = {
+                    'create_option': 'Copy',
+                    'caching': caching,
+                    'lun': disk_lun,
+                    'writeAcceleratorEnabled': enable_write_accelerator,
+                    "sourceResource": {
+                        "id": disk_item
+                    }
+                }
+                disk_lun += 1
+                vm.storage_profile.data_disks.append(disk)
+        if source_disk_restore_point is not None:
+            for disk_item in source_disk_restore_point:
+                disk = {
+                    'create_option': 'Restore',
+                    'caching': caching,
+                    'lun': disk_lun,
+                    'writeAcceleratorEnabled': enable_write_accelerator,
+                    "sourceResource": {
+                        "id": disk_item
+                    }
+                }
+                disk_lun += 1
+                vm.storage_profile.data_disks.append(disk)
 
         set_vm(cmd, vm)
 
