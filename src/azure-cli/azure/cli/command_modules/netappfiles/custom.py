@@ -318,6 +318,14 @@ class VolumeCreate(_VolumeCreate):
         # The API does only support setting Basic and Standard
         args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
 
+        # --endpoint-type removed in API, is readOnly this property is marked for deprecation in breaking_change.py remove for breaking change release Nov 2025
+        args_schema.endpoint_type = AAZStrArg(
+            options=["--endpoint-type"],
+            arg_group="Replication",
+            help="Indicates whether the local volume is the source or destination for the Volume Replication, no longer required will be deprecated in future versions.",
+            enum={"dst": "dst", "src": "src"},
+        )
+
         return args_schema
 
     def pre_operations(self):
@@ -413,6 +421,14 @@ class VolumeUpdate(_VolumeUpdate):
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2457600,
             minimum=50
+        )
+
+        # --endpoint-type removed in API, is readOnly this property is marked for deprecation in breaking_change.py remove for breaking change release Nov 2025
+        args_schema.endpoint_type = AAZStrArg(
+            options=["--endpoint-type"],
+            arg_group="Replication",
+            help="Indicates whether the local volume is the source or destination for the Volume Replication, no longer required will be deprecated in future versions.",
+            enum={"dst": "dst", "src": "src"},
         )
         return args_schema
 

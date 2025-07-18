@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2025-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-01-01", "properties.exportPolicy.rules"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-03-01", "properties.exportPolicy.rules"],
         ]
     }
 
@@ -162,7 +162,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-03-01",
                     required=True,
                 ),
             }
@@ -468,6 +468,7 @@ class _ListHelper:
         )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
+            flags={"read_only": True},
         )
         replication.remote_path = AAZObjectType(
             serialized_name="remotePath",

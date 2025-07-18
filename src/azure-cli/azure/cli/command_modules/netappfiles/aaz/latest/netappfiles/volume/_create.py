@@ -30,9 +30,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2025-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-03-01"],
         ]
     }
 
@@ -501,12 +501,6 @@ class Create(AAZCommand):
         # define Arg Group "Replication"
 
         _args_schema = cls._args_schema
-        _args_schema.endpoint_type = AAZStrArg(
-            options=["--endpoint-type"],
-            arg_group="Replication",
-            help="Indicates whether the local volume is the source or destination for the Volume Replication",
-            enum={"dst": "dst", "src": "src"},
-        )
         _args_schema.remote_volume_region = AAZStrArg(
             options=["--remote-volume-region"],
             arg_group="Replication",
@@ -632,7 +626,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-03-01",
                     required=True,
                 ),
             }
@@ -718,7 +712,6 @@ class Create(AAZCommand):
 
             replication = _builder.get(".properties.dataProtection.replication")
             if replication is not None:
-                replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remotePath", AAZObjectType)
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
                 replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
@@ -1053,6 +1046,7 @@ class Create(AAZCommand):
             )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+                flags={"read_only": True},
             )
             replication.remote_path = AAZObjectType(
                 serialized_name="remotePath",
