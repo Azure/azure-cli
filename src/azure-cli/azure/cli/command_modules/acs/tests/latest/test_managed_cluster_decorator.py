@@ -78,7 +78,6 @@ from azure.cli.core.azclierror import (
     NoTTYError,
     RequiredArgumentMissingError,
     UnknownError,
-    CLIError,
 )
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
@@ -12951,7 +12950,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         mc_1.agent_pool_profiles = [ap_1]
         dec_1.context.attach_mc(mc_1)
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             dec_1.update_vmas_to_vms(mc_1)
 
         # Should raise error if cluster has more than 1 AP
@@ -12977,7 +12976,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         mc_2.agent_pool_profiles = [ap_2_1, ap_2_2]
         dec_2.context.attach_mc(mc_2)
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             dec_2.update_vmas_to_vms(mc_2)
 
         # Should migrate vmas-blb to vms-slb
