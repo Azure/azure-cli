@@ -1095,6 +1095,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus')
     def test_private_link_resource_webapp(self, resource_group):
         self.kwargs.update({
@@ -1110,6 +1111,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus')
     def test_private_endpoint_connection_webapp(self, resource_group):
         self.kwargs.update({
@@ -1165,7 +1167,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
                                                   conn['properties']['privateEndpoint']['id'].lower()][0]
 
         self.cmd('network private-endpoint-connection reject -g {resource_group} --resource-name {webapp_name} -n {second_endpoint_request} --type Microsoft.Web/sites',
-                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejecting')])
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
 
         # Remove endpoints
         self.cmd('network private-endpoint-connection delete -g {resource_group} --resource-name {webapp_name} -n {second_endpoint_request} --type Microsoft.Web/sites -y')
