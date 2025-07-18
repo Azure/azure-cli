@@ -51,15 +51,15 @@ class UserCredential:  # pylint: disable=too-few-public-methods
                      scopes, claims_challenge, kwargs)
 
         if claims_challenge:
-            logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
-                           self._msal_app.authority.tenant, claims_challenge)
+            logger.info('Acquiring new access token silently with claims challenge: %s', claims_challenge)
         result = self._msal_app.acquire_token_silent_with_error(
             scopes, self._account, claims_challenge=claims_challenge, **kwargs)
 
         from azure.cli.core.azclierror import AuthenticationError
         try:
             # Check if an access token is returned.
-            check_result(result, scopes=scopes, claims_challenge=claims_challenge)
+            check_result(result, tenant=self._msal_app.authority.tenant, scopes=scopes,
+                         claims_challenge=claims_challenge)
         except AuthenticationError as ex:
             # For VM SSH ('data' is passed), if getting access token fails because
             # Conditional Access MFA step-up or compliance check is required, re-launch

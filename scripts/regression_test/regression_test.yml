@@ -22,12 +22,7 @@ jobs:
       inputs:
         versionSpec: '3.12'
         displayName: "Use Python 3.12"
-    - task: AzureCLI@1
-      displayName: 'update version'
-      inputs:
-        azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
-        scriptLocation: inlineScript
-        inlineScript: |
+    - bash: |
           set -ev
 
           # git config
@@ -58,6 +53,7 @@ jobs:
           git add .
           git commit -m "update version"
           git push --set-upstream azclibot regression_test_$(Build.BuildId)
+      displayName: 'update version'
 
 - job: RerunTests
   displayName: CLI Regression tests
@@ -90,12 +86,7 @@ jobs:
       inputs:
         versionSpec: '3.12'
         displayName: "Use Python 3.12"
-    - task: AzureCLI@1
-      displayName: 'Checkout Target Branch'
-      inputs:
-        azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
-        scriptLocation: inlineScript
-        inlineScript: |
+    - bash: |
           set -ev
           # git config
           if [[ -n "$(CUSTOM_REPO)" && -n "$(CUSTOM_BRANCH)" && -n "$(CUSTOM_GITHUB_TOKEN)" ]]; then
@@ -113,11 +104,13 @@ jobs:
           git fetch ${GITHUB_REPO} ${GITHUB_BRANCH}
 
           git checkout -b ${GITHUB_BRANCH} ${GITHUB_REPO}/${GITHUB_BRANCH}
+      displayName: 'Checkout Target Branch'
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
-    - task: AzureCLI@1
+    - task: AzureCLI@2
       displayName: 'Rerun tests'
       inputs:
-        azureSubscription: $(AZURE_SDK_TEST_SUB_CONNECTED_SERVICE)
+        connectedServiceNameARM: $(azure-cli-live-test-bami-connected-service)
+        scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
           set -ev
@@ -128,7 +121,7 @@ jobs:
             pip install $(CUSTOM_WHL_URL) --force-reinstall
           fi
   
-          az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+          az account set -s $(azure-cli-live-test-bami-sub-id)
   
           serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
           python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules" "True"
@@ -144,12 +137,7 @@ jobs:
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
-    - task: AzureCLI@1
-      displayName: 'Create PR'
-      inputs:
-        azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
-        scriptLocation: inlineScript
-        inlineScript: |
+    - bash: |
           set -ev
           # git config
           if [[ -n "$(CUSTOM_REPO)" && -n "$(CUSTOM_BRANCH)" && -n "$(CUSTOM_GITHUB_TOKEN)" ]]; then

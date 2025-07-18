@@ -458,3 +458,13 @@ def validate_import_tag_filters(namespace):
 def validate_dry_run(namespace):
     if namespace.dry_run and namespace.yes:
         raise MutuallyExclusiveArgumentError("The '--dry-run' and '--yes' options cannot be specified together.")
+
+
+def validate_kv_revision_retention_period(namespace):
+    if namespace.kv_revision_retention_period is None:
+        return
+
+    retention_period = int(namespace.kv_revision_retention_period)
+
+    if retention_period < 0:
+        raise InvalidArgumentValueError("The key value revision retention period cannot be negative.")
