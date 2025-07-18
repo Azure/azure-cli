@@ -220,7 +220,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_EVENTHUB: None,
         ResourceType.MGMT_MONITOR: None,
         ResourceType.MGMT_MSI: '2023-01-31',
-        ResourceType.MGMT_APPSERVICE: '2023-01-01',
+        ResourceType.MGMT_APPSERVICE: '2024-04-01',
         ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
