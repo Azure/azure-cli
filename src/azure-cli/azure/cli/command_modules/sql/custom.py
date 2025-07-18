@@ -4162,10 +4162,15 @@ def server_create(
         external_admin_principal_type=None,
         external_admin_sid=None,
         external_admin_name=None,
+        create_mode=None,
+        retention_days=None,
         **kwargs):
     '''
     Creates a server.
     '''
+
+    if create_mode:
+        kwargs['create_mode'] = create_mode
 
     if assign_identity:
         kwargs['identity'] = _get_identity_object_from_type(True, identity_type, user_assigned_identity_id, None)
@@ -4181,6 +4186,10 @@ def server_create(
         kwargs['restrict_outbound_network_access'] = (
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
+        
+    if retention_days is not None:
+        kwargs['retention_days'] = retention_days
+        print(retention_days)
 
     if minimal_tls_version is not None:
         kwargs['minimal_tls_version'] = minimal_tls_version
@@ -4206,6 +4215,81 @@ def server_create(
         sid=external_admin_sid,
         azure_ad_only_authentication=ad_only,
         tenant_id=tenant_id)
+
+    print(kwargs['create_mode'])
+
+    # Create
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       server_name=server_name,
+                       resource_group_name=resource_group_name,
+                       parameters=kwargs)
+
+def server_restore(
+        client,
+        resource_group_name,
+        server_name,
+        assign_identity=False,
+        no_wait=False,
+        enable_public_network=None,
+        restrict_outbound_network_access=None,
+        key_id=None,
+        federated_client_id=None,
+        user_assigned_identity_id=None,
+        primary_user_assigned_identity_id=None,
+        identity_type=None,
+        enable_ad_only_auth=False,
+        external_admin_principal_type=None,
+        external_admin_sid=None,
+        external_admin_name=None,
+        create_mode=None,
+        retention_days=None,
+        **kwargs):
+    '''
+    Restores a soft-deleted server.
+    '''
+
+    if create_mode:
+        kwargs['create_mode'] = create_mode
+
+    if assign_identity:
+        kwargs['identity'] = _get_identity_object_from_type(True, identity_type, user_assigned_identity_id, None)
+    else:
+        kwargs['identity'] = _get_identity_object_from_type(False, identity_type, user_assigned_identity_id, None)
+
+    if enable_public_network is not None:
+        kwargs['public_network_access'] = (
+            ServerNetworkAccessFlag.ENABLED if enable_public_network
+            else ServerNetworkAccessFlag.DISABLED)
+
+    if restrict_outbound_network_access is not None:
+        kwargs['restrict_outbound_network_access'] = (
+            ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
+            else ServerNetworkAccessFlag.DISABLED)
+        
+    if retention_days is not None:
+        kwargs['retention_days'] = retention_days
+
+    kwargs['key_id'] = key_id
+    kwargs['federated_client_id'] = federated_client_id
+
+    kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
+
+    ad_only = None
+    if enable_ad_only_auth:
+        ad_only = True
+
+    tenant_id = None
+    if external_admin_name is not None:
+        tenant_id = _get_tenant_id()
+
+    kwargs['administrators'] = ServerExternalAdministrator(
+        principal_type=external_admin_principal_type,
+        login=external_admin_name,
+        sid=external_admin_sid,
+        azure_ad_only_authentication=ad_only,
+        tenant_id=tenant_id)
+
+    print(kwargs['create_mode'])
 
     # Create
     return sdk_no_wait(no_wait, client.begin_create_or_update,
@@ -4262,11 +4346,14 @@ def server_update(
         key_id=None,
         federated_client_id=None,
         identity_type=None,
-        user_assigned_identity_id=None):
+        user_assigned_identity_id=None,
+        retention_days=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
     '''
 
+    print(instance)
+    print(retention_days)
     # Once assigned, the identity cannot be removed
     # if instance.identity is None and assign_identity:
     #    instance.identity = ResourceIdentity(type=IdentityType.system_assigned.value)
@@ -4293,12 +4380,19 @@ def server_update(
         instance.public_network_access = (
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
+        
+    instance.retention_days = (retention_days or instance.retention_days)
+
+    print("instance.retention_days")
+    print(instance.retention_days)
 
     instance.primary_user_assigned_identity_id = (
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
 
     instance.key_id = (key_id or instance.key_id)
     instance.federated_client_id = (federated_client_id or instance.federated_client_id)
+
+    print(instance);
 
     return instance
 
