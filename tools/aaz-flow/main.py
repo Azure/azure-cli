@@ -1,36 +1,71 @@
-# --------------------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
-# --------------------------------------------------------------------------------------------
 import os
-from mcp.server.fastmcp import FastMCP
+from pathlib import Path
+from fastmcp import FastMCP, Context
+from models import AAZRequest
+from helpers import generate_tests, execute_commands, validate_paths, get_extension_name, get_swagger_config
 
-# Initialize MCP server
 mcp = FastMCP("AAZ Flow")
 
+@mcp.tool(
+    name="az_cli_generate_help",
+    description="Explains how to correctly call the az_cli_generate tool."
+)
+async def generate_help(ctx: Context):
+    help_message = {
+        "tool": "az_cli_generate",
+        "description": "Generate Azure CLI commands from Swagger specs.",
+        "parameters": {},
+        "usage": "Call with no parameters, e.g. {}"
+    }
+    await ctx.info("az_cli_generate_help retrieved.")
+    return help_message
 
-@mcp.tool()
-def generate_code(
-        extension_or_module_name: str,
-        swagger_module_path: str,
-        resource_provider: str,
-        swagger_tag: str,
-):
-    # Generate Azure CLI commands based on Swagger specifications
-    aaz_path = os.getenv("AAZ_PATH", "/workspaces/aaz")
-    cli_path = os.getenv("CLI_PATH", "/workspaces/azure-cli")
-    cli_extension_path = os.getenv("CLI_EXTENSION_PATH", "/workspaces/azure-cli-extensions")
-    swagger_path = os.getenv("SWAGGER_PATH", "/workspaces/azure-rest-api-specs")
+@mcp.tool(
+    name="az_cli_generate",
+    description="Generate Azure CLI commands from Swagger specs."
+)
+async def generate_code(ctx: Context):
+    await ctx.info("Initiating Azure CLI code generation workflow.")
 
-    swagger_module = os.path.split(swagger_module_path)[-1]
+    await ctx.report_progress(5, 100)
 
-    des = (
-        f"Just run the following command in the terminal: 'aaz-dev command-model generate-from-swagger --swagger-path {swagger_path} --swagger-module-path {swagger_module_path} --aaz-path {aaz_path} --module {swagger_module} --resource-provider {resource_provider} --swagger-tag {swagger_tag}'",
-        f"After the command is run successfully, then run the following command: 'aaz-dev cli generate-by-swagger-tag --aaz-path {aaz_path} --cli-path {cli_path} --cli-extension-path {cli_extension_path} --extension-or-module-name {extension_or_module_name} --swagger-module-path {swagger_module_path} --resource-provider {resource_provider} --swagger-tag {swagger_tag} --profile latest'",
-        f"After the command is run successfully, this task will be marked as completed.",
+    paths = await validate_paths(ctx)
+    if not paths:
+        return "Code generation cancelled."
+    await ctx.report_progress(20, 100)
+
+    extension_name = await get_extension_name(ctx)
+    if not extension_name:
+        return "Code generation cancelled."
+    await ctx.report_progress(40, 100)
+
+    swagger_config = await get_swagger_config(ctx, paths, service_name=extension_name)
+
+    if not swagger_config:
+        return "Code generation cancelled."
+    await ctx.report_progress(60, 100)
+
+    request = AAZRequest(
+        extension_or_module_name=extension_name,
+        swagger_module_path=swagger_config["file"],
+        resource_provider=swagger_config["resource_provider"],
+        swagger_tag=swagger_config["swagger_tag"]
     )
-    return des
 
+    await execute_commands(ctx, paths, request)
+    await ctx.report_progress(100, 100)
+    await ctx.info(f"Code generation completed for extension/module '{extension_name}'.")
+
+    ctx.generated_module = extension_name
+
+    await ctx.info("Automatically generating tests for the newly generated module...")
+    try:
+        test_result = await generate_tests(ctx)
+        await ctx.info(f"Automatic test generation result: {test_result}")
+    except Exception as e:
+        await ctx.info(f"Automatic test generation failed: {str(e)}")
+
+    return f"Code generation and test generation completed for extension/module '{extension_name}'."
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

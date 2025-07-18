@@ -1,17 +1,12 @@
 {
   "name": "Azure CLI Dev Container",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
+    "context": "."
   },
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "workspaceFolder": "/workspaces",
-  "onCreateCommand": "uv venv .venv --seed",
-  "postCreateCommand": "REPO_NAME=$(basename $GITHUB_REPOSITORY) && cat $REPO_NAME/.devcontainer/init.sh >> ~/.bashrc && mkdir .vscode && cp $REPO_NAME/.devcontainer/mcp.json .vscode/",
-  "hostRequirements": {
-    "cpus": 16,
-    "memory": "64gb",
-    "storage": "128gb"
-  }
+  "workspaceFolder": "/workspaces/azure-cli",
+  "postCreateCommand": "mkdir -p /workspaces/azure-cli/.vscode && cp /workspaces/azure-cli/.devcontainer/mcp.json /workspaces/azure-cli/.vscode/ && /workspaces/azure-cli/.devcontainer/init.sh"
 }
