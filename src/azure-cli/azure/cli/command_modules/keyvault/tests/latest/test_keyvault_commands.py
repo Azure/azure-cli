@@ -1902,7 +1902,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 
 class KeyVaultCertificateRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_soft_delete_')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-sd-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-sd-', additional_params='--enable-rbac-authorization false')
     def test_keyvault_certificate_soft_delete(self, resource_group, key_vault):
         self.kwargs.update({
             'loc': 'eastus',

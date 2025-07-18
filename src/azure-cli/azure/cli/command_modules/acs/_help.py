@@ -66,6 +66,9 @@ parameters:
   - name: --node-vm-size -s
     type: string
     short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
+  - name: --vm-sizes
+    type: string
+    short-summary: Comma-separated list of VM sizes. Valid for VirtualMachines node pool only. If `--vm-sizes` not specified but `--node-vm-size` specified, value of `--node-vm-size` will be used. If neither of them specified, defaults to Standard_DS2_v2 for Linux or Standard_D2s_v3 for Windows.
   - name: --dns-name-prefix -p
     type: string
     short-summary: Prefix for hostnames that are created. If not specified, generate a hostname using the managed cluster and resource group names.
@@ -201,7 +204,7 @@ parameters:
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000].
   - name: --vm-set-type
     type: string
-    short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet. Defaults to 'VirtualMachineScaleSets'
+    short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet or VirtualMachines. Defaults to 'VirtualMachineScaleSets'
   - name: --enable-addons -a
     type: string
     short-summary: Enable the Kubernetes addons in a comma-separated list.
@@ -263,8 +266,8 @@ parameters:
     long-summary: To access nodes after creating a cluster with this option, use the Azure Portal.
   - name: --pod-cidr
     type: string
-    short-summary: A CIDR notation IP range from which to assign pod IPs when kubenet is used.
-    long-summary: This range must not overlap with any Subnet IP ranges. For example, 172.244.0.0/16.
+    short-summary: A CIDR notation IP range from which to assign pod IPs when Azure CNI Overlay or Kubenet is used (On 31 March 2028, Kubenet will be retired).
+    long-summary: This range must not overlap with any Subnet IP ranges. For example, 172.244.0.0/16. See https://aka.ms/aks/azure-cni-overlay
   - name: --message-of-the-day
     type: string
     short-summary: Path to a file containing the desired message of the day. Only valid for linux nodes. Will be written to /etc/motd.
@@ -278,8 +281,8 @@ parameters:
     long-summary: Each range must not overlap with any Subnet IP ranges. For example, "10.0.0.0/16,2001:abcd::/108".
   - name: --pod-cidrs
     type: string
-    short-summary: A comma-separated list of CIDR notation IP ranges from which to assign pod IPs when kubenet is used.
-    long-summary: Each range must not overlap with any Subnet IP ranges. For example, "172.244.0.0/16,fd0:abcd::/64".
+    short-summary: A comma-separated list of CIDR notation IP ranges from which to assign pod IPs when Azure CNI Overlay or Kubenet is used (On 31 March 2028, Kubenet will be retired).
+    long-summary: Each range must not overlap with any Subnet IP ranges. For example, "172.244.0.0/16,fd0:abcd::/64". See https://aka.ms/aks/azure-cni-overlay
   - name: --ip-families
     type: string
     short-summary: A comma-separated list of IP versions to use for cluster networking.
@@ -301,10 +304,10 @@ parameters:
     short-summary: The ID of a PPG.
   - name: --enable-node-public-ip
     type: bool
-    short-summary: Enable VMSS node public IP.
+    short-summary: Enable VMSS or VMs node public IP.
   - name: --node-public-ip-prefix-id
     type: string
-    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS or VMs nodes.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
@@ -559,10 +562,10 @@ parameters:
     short-summary: Enable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal. For more information see aka.ms/aks/docs/cost-analysis.
   - name: --enable-secure-boot
     type: bool
-    short-summary: Enable Secure Boot on all node pools in the cluster. Must use VMSS agent pool type.
+    short-summary: Enable Secure Boot on all node pools in the cluster. Must use VMSS or VMs agent pool type.
   - name: --enable-vtpm
     type: bool
-    short-summary: Enable vTPM on all node pools in the cluster. Must use VMSS agent pool type.
+    short-summary: Enable vTPM on all node pools in the cluster. Must use VMSS or VMs agent pool type.
   - name: --enable-acns
     type: bool
     short-summary: Enable advanced network functionalities on a cluster. Enabling this will incur additional costs. For non-cilium clusters, acns security will be disabled by default until further notice.
@@ -670,6 +673,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-service-mesh
   - name: Create a kubernetes cluster with a nodepool having ip allocation mode set to "StaticBlock"
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu --max-pods MaxPodsPerNode --network-plugin azure --vnet-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/NodeSubnet --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/PodSubnet --pod-ip-allocation-mode StaticBlock
+  - name: Create a kubernetes cluster with VirtualMachines vm set type.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
 """
 
 helps['aks update'] = """
@@ -1570,6 +1575,12 @@ parameters:
   - name: --node-vm-size -s
     type: string
     short-summary: Size of Virtual Machines to create as Kubernetes nodes. If the user does not specify one, server will select a default VM size for her/him.
+  - name: --vm-sizes
+    type: string
+    short-summary: Comma-separated list of VM sizes. Valid for VirtualMachines node pool only. If `--vm-sizes` not specified but `--node-vm-size` specified, value of `--node-vm-size` will be used. If neither of them specified, defaults to Standard_DS2_v2 for Linux or Standard_D2s_v3 for Windows.
+  - name: --vm-set-type
+    type: string
+    short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet or VirtualMachines. Defaults to 'VirtualMachineScaleSets'
   - name: --node-count -c
     type: int
     short-summary: Number of nodes in the Kubernetes agent pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
@@ -1593,10 +1604,10 @@ parameters:
     short-summary: Availability zones where agent nodes will be placed. Also, to install agent nodes to more than one zone you need to pass zone numbers separated by blanks.  For example -  To have all 3 zones, you are expected to enter `--zones 1 2 3`
   - name: --enable-node-public-ip
     type: bool
-    short-summary: Enable VMSS node public IP.
+    short-summary: Enable VMSS or VMs node public IP.
   - name: --node-public-ip-prefix-id
     type: string
-    short-summary: Public IP prefix ID used to assign public IPs to VMSS nodes.
+    short-summary: Public IP prefix ID used to assign public IPs to VMSS or VMs nodes.
   - name: --vnet-subnet-id
     type: string
     short-summary: The Resource Id of a subnet in an existing VNet into which to deploy the cluster.
@@ -1710,10 +1721,10 @@ parameters:
     short-summary: Disable Windows OutboundNAT on Windows agent node pool.
   - name: --enable-secure-boot
     type: bool
-    short-summary: Enable Secure Boot on agent node pool. Must use VMSS agent pool type.
+    short-summary: Enable Secure Boot on agent node pool. Must use VMSS or VMs agent pool type.
   - name: --enable-vtpm
     type: bool
-    short-summary: Enable vTPM on agent node pool. Must use VMSS agent pool type.
+    short-summary: Enable vTPM on agent node pool. Must use VMSS or VMs agent pool type.
   - name: --if-match
     type: string
     short-summary: The value provided will be compared to the ETag of the agentpool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
@@ -1745,6 +1756,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --node-vm-size VMSize --crg-id "/subscriptions/SubID/resourceGroups/ResourceGroupName/providers/Microsoft.ContainerService/CapacityReservationGroups/MyCRGID"
   - name: Create a nodepool with ip allocation mode set to "StaticBlock" and using a pod subnet ID
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster  --os-sku Ubuntu --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet --pod-ip-allocation-mode StaticBlock
+  - name: create a nodepool of type VirtualMachines
+    text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
 """
 
 helps['aks nodepool delete'] = """
@@ -1857,13 +1870,13 @@ parameters:
     short-summary: Switch to use non-FIPS-enabled OS on agent nodes.
   - name: --enable-secure-boot
     type: bool
-    short-summary: Enable Secure Boot on an existing Trusted Launch enabled agent node pool. Must use VMSS agent pool type.
+    short-summary: Enable Secure Boot on an existing Trusted Launch enabled agent node pool. Must use VMSS or VMs agent pool type.
   - name: --disable-secure-boot
     type: bool
     short-summary: Disable Secure Boot on on an existing Trusted Launch enabled agent node pool.
   - name: --enable-vtpm
     type: bool
-    short-summary: Enable vTPM on an existing Trusted Launch enabled agent node pool. Must use VMSS agent pool type.
+    short-summary: Enable vTPM on an existing Trusted Launch enabled agent node pool. Must use VMSS or VMs agent pool type.
   - name: --disable-vtpm
     type: bool
     short-summary: Disable vTPM on an existing Trusted Launch enabled agent node pool.
@@ -1998,6 +2011,47 @@ examples:
   - name: Scale the node pool in a managed Kubernetes cluster. (autogenerated)
     text: az aks scale --name MyManagedCluster --node-count 3 --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['aks nodepool manual-scale'] = """
+    type: group
+    short-summary: Commands to manage nodepool virtualMachineProfile.scale.manual.
+"""
+
+helps['aks nodepool manual-scale add'] = """
+    type: command
+    short-summary: Add a new manual to a VirtualMachines agentpool in the managed Kubernetes cluster.
+    parameters:
+        - name: --vm-sizes
+          type: string
+          short-summary: Comma-separated list of sizes in the manual.
+        - name: --node-count -c
+          type: int
+          short-summary: Number of nodes in the manual.
+"""
+
+helps['aks nodepool manual-scale update'] = """
+    type: command
+    short-summary: Update an existing manual of a VirtualMachines agentpool in the managed Kubernetes cluster.
+    parameters:
+        - name: --current-vm-sizes
+          type: string
+          short-summary: Comma-separated list of sizes in the manual to be updated.
+        - name: --vm-sizes
+          type: string
+          short-summary: Comma-separated list of new sizes.
+        - name: --node-count -c
+          type: int
+          short-summary: Number of nodes in the manual.
+"""
+
+helps['aks nodepool manual-scale delete'] = """
+    type: command
+    short-summary: Delete an existing manual to a VirtualMachines agentpool in the managed Kubernetes cluster.
+    parameters:
+        - name: --current-vm-sizes
+          type: string
+          short-summary: Comma-separated list of sizes in the manual to be deleted.
 """
 
 helps['aks show'] = """
@@ -2609,9 +2663,9 @@ helps['aks machine list'] = """
        - name: --nodepool-name
          type: string
          short-summary: Name of the agentpool of a managed cluster
-   exmaples:
-       - name: Get information about IP Addresses, Hostname for all machines in an agentpool
-         text: az aks machine list --cluster-name <clusterName> --nodepool-name <apName>
+   examples:
+       - name: Get information about IP Addresses, Hostname, Availability Zones for all machines in an agentpool
+         text: az aks machine list  --resource-group <rg> --cluster-name <clusterName> --nodepool-name <apName>
 """
 helps['aks machine show'] = """
    type: command
@@ -2627,6 +2681,6 @@ helps['aks machine show'] = """
          type: string
          short-summary: Name of the machine in the agentpool of a managed cluster
    exmaples:
-       - name: Get IP Addresses, Hostname for a specific machine in an agentpool
-         text: az aks machine show --cluster-name <clusterName> --nodepool-name <apName> --machine-name <machineName>
+       - name: Get IP Addresses, Hostname, Availability Zones for a specific machine in an agentpool
+         text: az aks machine show --resource-group <rg> --cluster-name <clusterName> --nodepool-name <apName> --machine-name <machineName>
 """
