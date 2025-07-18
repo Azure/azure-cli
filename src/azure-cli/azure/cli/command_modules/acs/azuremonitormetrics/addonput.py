@@ -2,8 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import json
-from azure.cli.command_modules.acs.azuremonitormetrics.constants import AKS_CLUSTER_API
+from azure.cli.command_modules.acs._client_factory import get_container_service_client
 from azure.cli.core.azclierror import (
     UnknownError,
     CLIError
@@ -12,25 +11,17 @@ from azure.cli.core.azclierror import (
 
 # pylint: disable=line-too-long
 def addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
-    from azure.cli.core.util import send_raw_request
-    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
-    feature_check_url = f"{armendpoint}/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.ContainerService/managedClusters/{cluster_name}?api-version={AKS_CLUSTER_API}"
+    client = get_container_service_client(cmd.cli_ctx, cluster_subscription).managed_clusters
     try:
-        headers = ['User-Agent=azuremonitormetrics.addon_get']
-        r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url,
-                             body={}, headers=headers)
+        mc = client.get(cluster_resource_group_name, cluster_name)
     except CLIError as e:
         raise UnknownError(e)
-    json_response = json.loads(r.text)
-    if "azureMonitorProfile" in json_response["properties"]:
-        if "metrics" in json_response["properties"]["azureMonitorProfile"]:
-            if json_response["properties"]["azureMonitorProfile"]["metrics"]["enabled"] is False:
-                # What if enabled doesn't exist
-                json_response["properties"]["azureMonitorProfile"]["metrics"]["enabled"] = True
+    # Enable metrics if present and not already enabled
+    if hasattr(mc, "azure_monitor_profile") and mc.azure_monitor_profile:
+        if hasattr(mc.azure_monitor_profile, "metrics") and mc.azure_monitor_profile.metrics:
+            if getattr(mc.azure_monitor_profile.metrics, "enabled", None) is False:
+                mc.azure_monitor_profile.metrics.enabled = True
     try:
-        headers = ['User-Agent=azuremonitormetrics.addon_put']
-        body = json.dumps(json_response)
-        r = send_raw_request(cmd.cli_ctx, "PUT", feature_check_url,
-                             body=body, headers=headers)
-    except CLIError as e:
+        client.begin_create_or_update(cluster_resource_group_name, cluster_name, mc)
+    except Exception as e:
         raise UnknownError(e)

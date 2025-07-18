@@ -32,8 +32,9 @@ def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
 
 # pylint: disable=line-too-long
 def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, cluster_resource_id, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_rules, i):
-    from azure.cli.core.util import send_raw_request
-    body = json.dumps({
+    from azure.cli.command_modules.acs._client_factory import get_resources_client
+    resources = get_resources_client(cmd.cli_ctx, cmd.cli_ctx.data.get('subscription_id'))
+    body = {
         "id": default_rule_group_id,
         "name": default_rule_group_name,
         "type": "Microsoft.AlertsManagement/prometheusRuleGroups",
@@ -48,15 +49,17 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, c
             "interval": "PT1M",
             "rules": default_rules_template[i]["properties"]["rulesArmTemplate"]["resources"][0]["properties"]["rules"]
         }
-    })
+    }
     for _ in range(3):
         try:
-            headers = ['User-Agent=azuremonitormetrics.put_rules.' + default_rule_group_name]
-            send_raw_request(cmd.cli_ctx, "PUT", url,
-                             body=body, headers=headers)
+            resources.begin_create_or_update_by_id(
+                default_rule_group_id,
+                url.split('api-version=')[1],
+                body
+            )
             break
-        except CLIError as e:
-            raise e
+        except Exception as e:
+            raise CLIError(e)
 
 
 # pylint: disable=line-too-long
