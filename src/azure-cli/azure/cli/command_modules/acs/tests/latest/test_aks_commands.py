@@ -13078,9 +13078,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 self.is_empty(),
             ],
         )
-
-
-
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
