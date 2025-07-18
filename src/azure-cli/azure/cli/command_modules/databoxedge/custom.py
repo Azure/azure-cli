@@ -10,8 +10,6 @@
 
 from knack.log import get_logger
 
-from azure.cli.core.aaz import has_value
-
 from .aaz.latest.databoxedge.order import Create as _OrderCreate
 
 

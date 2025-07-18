@@ -52,7 +52,7 @@ class List(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg()
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
-            help="Specify $expand=details to populate additional fields related to the resource or Specify $skipToken=<token> to populate the next page in the list.",
+            help="Specify $expand=details to populate additional fields related to the resource or Specify $skipToken=token to populate the next page in the list.",
         )
         return cls._args_schema
 
