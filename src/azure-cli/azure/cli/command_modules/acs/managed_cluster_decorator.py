@@ -6659,7 +6659,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def set_up_azure_container_storage_v2(self, mc: ManagedCluster) -> ManagedCluster:  # pylint: disable=too-many-locals
         self._ensure_mc(mc)
         if self.context.raw_param.get("enable_azure_container_storage_v2"):
-            print("Setting up Azure Container Storage v2")
             self.context.set_intermediate("enable_azure_container_storage_v2", True, overwrite_exists=True)
         return mc
 
