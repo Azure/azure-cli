@@ -11835,8 +11835,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--ssh-key-value={ssh_key_value} --node-count=1 --enable-managed-identity ' \
-                     '--enable-oidc-issuer --enable-ai-toolchain-operator ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AIToolchainOperatorPreview '
+                     '--enable-oidc-issuer --enable-ai-toolchain-operator '
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('aiToolchainOperatorProfile.enabled', True),
@@ -11871,16 +11870,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update to enable
-        update_cmd = 'aks update --resource-group={resource_group} --name={name} --enable-ai-toolchain-operator ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AIToolchainOperatorPreview '
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --enable-ai-toolchain-operator '
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('aiToolchainOperatorProfile.enabled', True),
         ])
 
         # update to disable
-        update_cmd = 'aks update --resource-group={resource_group} --name={name} --disable-ai-toolchain-operator ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AIToolchainOperatorPreview '
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --disable-ai-toolchain-operator '
 
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
