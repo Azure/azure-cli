@@ -161,7 +161,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --disk-type Premium_LRS --vm-size Standard_DS2 --tags {nodeTypeTags}',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('dataDiskType', 'Premium_LRS'),
-                         self.check('isStateless ', False),
+                         self.check('isStateless', False),
                          self.check('tags', {'SFRP.WaitTimeBetweenUD': '00:00:10'})])
         
         self.cmd('az sf managed-node-type update -g {rg} -c {cluster_name} -n pnt --vm-size Standard_DS3_v2 --tags {nodeTypeTags2}',
