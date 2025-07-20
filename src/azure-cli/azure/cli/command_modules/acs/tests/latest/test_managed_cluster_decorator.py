@@ -12912,6 +12912,5 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_4, ground_truth_mc_4)
 
-
 if __name__ == "__main__":
     unittest.main()
