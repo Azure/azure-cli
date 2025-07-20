@@ -103,22 +103,17 @@ def _attach_token_tenant(subscription, tenant, tenant_id_description=None):
     """Attach the token tenant information to the subscription. CLI uses tenant_id to know which token should be used
     to access the subscription.
 
-    This function supports multiple APIs:
-      - v2016_06_01: Subscription doesn't have tenant_id
-      - v2022_12_01:
-        - Subscription has tenant_id representing the home tenant ID, mapped to home_tenant_id
-        - TenantIdDescription has default_domain, mapped to tenant_default_domain
-        - TenantIdDescription has display_name, mapped to tenant_display_name
+    - Subscription has tenant_id representing the home tenant ID, mapped to home_tenant_id
+    - TenantIdDescription has default_domain, mapped to tenant_default_domain
+    - TenantIdDescription has display_name, mapped to tenant_display_name
     """
-    if hasattr(subscription, "tenant_id"):
-        setattr(subscription, 'home_tenant_id', subscription.tenant_id)
+    setattr(subscription, 'home_tenant_id', subscription.tenant_id)
     setattr(subscription, 'tenant_id', tenant)
 
-    # Attach tenant_default_domain, if available
-    if tenant_id_description and hasattr(tenant_id_description, "default_domain"):
+    if tenant_id_description:
+        # Attach tenant_default_domain
         setattr(subscription, 'tenant_default_domain', tenant_id_description.default_domain)
-    # Attach display_name, if available
-    if tenant_id_description and hasattr(tenant_id_description, "display_name"):
+        # Attach display_name
         setattr(subscription, 'tenant_display_name', tenant_id_description.display_name)
 
 
@@ -880,18 +875,16 @@ def _transform_subscription_for_multiapi(s, s_dict):
     :param s: subscription object
     :param s_dict: subscription dict
     """
-    if hasattr(s, 'home_tenant_id'):
-        s_dict[_HOME_TENANT_ID] = s.home_tenant_id
+    s_dict[_HOME_TENANT_ID] = s.home_tenant_id
     if hasattr(s, 'tenant_default_domain'):
         s_dict[_TENANT_DEFAULT_DOMAIN] = s.tenant_default_domain
     if hasattr(s, 'tenant_display_name'):
         s_dict[_TENANT_DISPLAY_NAME] = s.tenant_display_name
 
-    if hasattr(s, 'managed_by_tenants'):
-        if s.managed_by_tenants is None:
-            s_dict[_MANAGED_BY_TENANTS] = None
-        else:
-            s_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
+    if s.managed_by_tenants is None:
+        s_dict[_MANAGED_BY_TENANTS] = None
+    else:
+        s_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
 
 
 def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None):
