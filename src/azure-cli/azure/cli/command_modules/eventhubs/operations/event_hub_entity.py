@@ -105,7 +105,6 @@ def cli_eventhub_update(cmd, resource_group_name, namespace_name, event_hub_name
                         mi_user_assigned=None, mi_system_assigned=False, encoding='Avro',
                         timestamp_type=None, user_metadata=None, min_compaction_lag_in_mins=None):
 
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Update
     command_arg_dict = {}
     if cleanup_policy:
         command_arg_dict.update({
@@ -170,4 +169,4 @@ def cli_eventhub_update(cmd, resource_group_name, namespace_name, event_hub_name
         "namespace_name": namespace_name,
         "event_hub_name": event_hub_name
     })
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
+    return _EventHubEntityUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
