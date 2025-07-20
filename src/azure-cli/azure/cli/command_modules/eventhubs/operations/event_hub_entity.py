@@ -35,7 +35,7 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
         })
     if min_compaction_lag_in_mins:
         command_arg_dict.update({
-            "min_compaction_lag_in_mins": int(min_compaction_lag_in_mins)
+            "min_compaction_lag_time_in_minutes": int(min_compaction_lag_in_mins)
         })
     if partition_count:
         command_arg_dict.update({
@@ -102,10 +102,10 @@ def cli_eventhub_update(cmd, resource_group_name, namespace_name, event_hub_name
                         partition_count=None, status=None, retention_time_in_hours=None, cleanup_policy=None, tombstone_retention_time_in_hours=None,
                         enable_capture=None, skip_empty_archives=None, capture_interval=None, capture_size_limit=None, destination_name=None,
                         blob_container=None, archive_name_format=None, storage_account=None,
-                        mi_user_assigned=None, mi_system_assigned=False, encoding=None,
+                        mi_user_assigned=None, mi_system_assigned=False, encoding='Avro',
                         timestamp_type=None, user_metadata=None, min_compaction_lag_in_mins=None):
 
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Create
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Update
     command_arg_dict = {}
     if cleanup_policy:
         command_arg_dict.update({
@@ -147,7 +147,7 @@ def cli_eventhub_update(cmd, resource_group_name, namespace_name, event_hub_name
             "capture_size_limit": capture_size_limit,
             "destination_name": destination_name,
             "enable_capture": bool(enable_capture),
-            "encoding": 'Avro',
+            "encoding": encoding,
             "storage_account": storage_account,
             "skip_empty_archives": skip_empty_archives
         })
@@ -170,4 +170,4 @@ def cli_eventhub_update(cmd, resource_group_name, namespace_name, event_hub_name
         "namespace_name": namespace_name,
         "event_hub_name": event_hub_name
     })
-    return Create(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
