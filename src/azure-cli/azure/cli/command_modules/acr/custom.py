@@ -397,7 +397,7 @@ def get_docker_command(is_diagnostics_context=False):
         docker_command = os.getenv('DOCKER_COMMAND')
     else:
         docker_command = 'docker'
-        if shutil.which('podman'):
+        if not shutil.which('docker') and shutil.which('podman'):
             docker_command = 'podman'
 
     from subprocess import PIPE, Popen, CalledProcessError
