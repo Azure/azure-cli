@@ -408,7 +408,7 @@ def get_docker_command(is_diagnostics_context=False):
         logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(e))
         # The executable may not be discoverable in WSL so retry *.exe once
         try:
-            docker_command = docker_command + '.exe'
+            docker_command = f'{docker_command}.exe'
             p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
             _, stderr = p.communicate()
         except OSError as inner:
