@@ -1091,6 +1091,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('osType', '{os_type}'),
                          self.check('containers[0].image', '{image}'),
                          self.exists('containers[0].configMap'),
+                         self.check('ipAddress.type', 'Public'),
+                         self.exists('ipAddress.ip'),
                          self.check(
                              'containers[0].resources.requests.cpu', cpu),
                          self.check(
@@ -1135,7 +1137,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         standby_pool_profile_id = '/subscriptions/da28f5e5-aa45-46fe-90c8-053ca49ab4b5/resourceGroups/azcliresources/providers/Microsoft.StandbyPool/standbyContainerGroupPools/testvnetpool'
         location = "eastus"
         config_map = 'KEY1=VALUE1 KEY2=VALUE2'
-        vnet_name = 'testvnet'
+        vnet_name = '/subscriptions/da28f5e5-aa45-46fe-90c8-053ca49ab4b5/resourceGroups/azcliresources/providers/Microsoft.Network/virtualNetworks/testvnet'
         subnet_name = 'subnet1'
         cpu = 1
         memory = 1.5
@@ -1168,10 +1170,13 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('osType', '{os_type}'),
                          self.check('containers[0].image', '{image}'),
                          self.exists('containers[0].configMap'),
+                         self.check('ipAddress.type', 'Private'),
+                         self.exists('ipAddress.ip'),
                          self.check(
                              'containers[0].resources.requests.cpu', cpu),
                          self.check(
-                             'containers[0].resources.requests.memoryInGb', memory)])
+                             'containers[0].resources.requests.memoryInGb', memory)]),
+
         
         # Test show
         self.cmd('container show -g {rg} -n {container_group_name}',
