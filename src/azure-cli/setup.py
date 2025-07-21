@@ -108,7 +108,7 @@ DEPENDENCIES = [
     'azure-mgmt-recoveryservices~=3.1.0',
     'azure-mgmt-redhatopenshift~=1.5.0',
     'azure-mgmt-redis~=14.5.0',
-    'azure-mgmt-resource==25.0.0',
+    'azure-mgmt-resource==25.0.0b1',
     'azure-mgmt-resource-deployments==1.0.0b1',
     'azure-mgmt-resource-deploymentscripts==1.0.0b1',
     'azure-mgmt-resource-deploymentstacks==1.0.0b1',
