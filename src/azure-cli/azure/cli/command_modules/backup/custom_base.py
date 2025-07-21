@@ -420,7 +420,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
                   target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None,
-                  tenant_id=None, disk_access_option=None, target_disk_access_id=None, cvm_os_disk_encryption_set_id=None):
+                  tenant_id=None, disk_access_option=None, target_disk_access_id=None,
+                  cvm_os_disk_encryption_set_id=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')

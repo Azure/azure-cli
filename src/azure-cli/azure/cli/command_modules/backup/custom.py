@@ -27,7 +27,8 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
     BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
-    UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings, SecuredVMDetails
+    UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings, \
+    SecuredVMDetails
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
@@ -1544,7 +1545,6 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
         trigger_restore_request.properties.secured_vm_details = SecuredVMDetails(
             secured_vmos_disk_encryption_set_id=cvm_os_disk_encryption_set_id
         )
-        logger.warning("Using secured VM OS disk encryption set ID: {}".format(trigger_restore_request.properties.secured_vm_details))
 
     # Trigger restore
     result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
