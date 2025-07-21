@@ -352,7 +352,8 @@ def map_cluster_type(cluster_type):
         cluster_type = 'mlservice'
     return cluster_type
 
-def get_entraUser_info(cmd,entra_user_identity,entra_user_full_info,toJson=True):
+
+def get_entra_user_info(cmd,entra_user_identity,entra_user_full_info,toJson=True):
     import json
     from ._client_factory import cf_graph
     from azure.cli.core.azclierror import ResourceNotFoundError,InvalidArgumentValueError,AzureResponseError

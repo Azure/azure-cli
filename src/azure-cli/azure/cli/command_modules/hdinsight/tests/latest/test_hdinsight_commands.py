@@ -701,7 +701,7 @@ class HDInsightClusterTests(ScenarioTest):
             HDInsightClusterTests._version_arguments()
         )
         self.kwargs.update({
-            'config_path': os.path.join(TEST_DIR, 'EntraUserFullInfoConfig.json')
+            'config_path': os.path.join(TEST_DIR, 'entrauserconfig.json')
         })
         self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} -E @"{config_path}"')
         self.cmd('az hdinsight credentials show -n {cluster} --resource-group {rg}')

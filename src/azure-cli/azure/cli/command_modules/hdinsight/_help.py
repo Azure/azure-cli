@@ -162,22 +162,28 @@ examples:
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount \\
         --storage-account-managed-identity MyMSI
-  - name: Create a entra user cluster with Entra User By ObjectId Or Upn
+  - name: Create a entra user cluster with Entra User By ObjectId Or Upn (comma-separated)
     text: |-
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
-        -P "HttpPassword1234!" \\
+        --ssh-password "sshPassword1234!" \\
         --storage-account MyStorageAccount \\
         --entra-user-identity "objectId1","objectId2","upn3"
+  - name: Create a entra user cluster with Entra User By ObjectId Or Upn (space-separated)
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        --ssh-password "sshPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --entra-user-identity "objectId1" "objectId2" "upn3"
   - name: Create a entra user cluster with Entra User By a JSON string
     text: |-
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
-        -P "HttpPassword1234!" \\
+        --ssh-password "sshPassword1234!" \\
         --storage-account MyStorageAccount \\
         --entra-user-full-info '[{\"objectID\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"displayName\",\"upn\": \"user@contoso.com\"}]'
   - name: Create a entra user cluster with Entra User By a JSON file
     text: |-
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
-        -P "HttpPassword1234!" \\
+        --ssh-password "sshPassword1234!" \\
         --storage-account MyStorageAccount \\
         --entra-user-full-info @config.json
 """
@@ -463,18 +469,26 @@ helps['hdinsight credentials update'] = """
 type: command
 short-summary: Update the credentials for an existing HDInsight cluster, including Entra ID users and HTTP password.
 examples:
-  - name: Update Entra ID users by object ID or UPN
+  - name: Update Entra ID users by object ID or UPN (comma-separated)
     text: |-
-        az hdinsight credentials update --name MyCluster --resource-group rg --entra-user-identity "objectId1","objectId2","upn3"
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-user-identity "objectId1","objectId2","upn3"
+  - name: Update Entra ID users by object ID or UPN (space-separated)
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-user-identity "objectId1" "objectId2" "upn3"
   - name: Update Entra ID users using a JSON string
     text: |-
-        az hdinsight credentials update --name MyCluster --resource-group rg --entra-user-full-info '[{\"objectID\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"displayName\",\"upn\": \"user@contoso.com\"}]'
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-user-full-info '[{\"objectID\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"displayName\",\"upn\": \"user@contoso.com\"}]'
   - name: Update Entra ID users using a JSON file
     text: |-
-        az hdinsight credentials update --name MyCluster --resource-group rg --entra-user-full-info @config.json
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-user-full-info @config.json
   - name: Update the HTTP password for the cluster
     text: |-
-        az hdinsight credentials update --name MyCluster --resource-group rg --http-password "HttpPassword1234!"
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --http-password "HttpPassword1234!"
 """
 
 helps['hdinsight credentials show'] = """
