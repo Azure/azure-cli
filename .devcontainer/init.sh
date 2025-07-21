@@ -1,74 +1,89 @@
+#!/bin/bash
+set -euo pipefail
 
-source .venv/bin/activate
+echo "======================================"
+echo " Azure CLI Devcontainer Setup Started "
+echo "======================================"
 
-# Logout default account
-export GITHUB_TOKEN=
+# -----------------------------
+# Remove existing virtual environments
+# -----------------------------
+VENV_DIRS=(
+    "$HOME/.venv"
+    "/workspaces/.venv"
+)
+for VENV in "${VENV_DIRS[@]}"; do
+    if [ -d "$VENV" ]; then
+        echo "Removing existing virtual environment at $VENV..."
+        rm -rf "$VENV"
+    fi
+done
 
-# Check `repo` scope exists or not
-if gh auth status -a 2>/dev/null | grep "Token scopes: " | grep -q "repo"; then
-    echo "You now have access to GitHub."
-else
+# -----------------------------
+# GitHub authentication
+# -----------------------------
+export GITHUB_TOKEN=${GITHUB_TOKEN:-}
+export GITHUB_USER=$(gh api user --jq .login 2>/dev/null || echo "")
+
+if [ -z "$GITHUB_USER" ]; then
+    echo "No GitHub user detected, running gh auth login..."
     gh auth login -p https -w
+    export GITHUB_USER=$(gh api user --jq .login || echo "unknown")
 fi
+echo "Using GitHub user: $GITHUB_USER"
 
-# Check `aaz-dev` is available or not
-if ! command -v aaz-dev &> /dev/null; then
-    GREEN="\033[0;32m"
-    YELLOW="\033[0;33m"
-    NC="\033[0m"  # no color
+# -----------------------------
+# Install aaz-dev
+# -----------------------------
+pip install --upgrade pip
+pip install --no-cache-dir aaz-dev
 
-    set_or_add_remote() {
-        local REPO=$1
-        local REMOTE=$2
-        local DIR="/workspaces/$REPO"
-        local OWNER=$([ "$REMOTE" = "origin" ] && echo "$GITHUB_USER" || echo "Azure")
-        local URL="https://github.com/$OWNER/$REPO.git"
+# -----------------------------
+# Repo paths
+# -----------------------------
+export AZDEV_CLI_PATH="/workspaces/azure-cli"
+export CLI_PATH="/workspaces/azure-cli"
+export CLI_EXTENSION_PATH="/workspaces-src/azure-cli-extensions"
+export AAZ_PATH="/workspaces-src/aaz"
+export SWAGGER_PATH="/workspaces-src/azure-rest-api-specs"
 
-        git -C "$DIR" remote get-url "$REMOTE" &>/dev/null || git -C "$DIR" remote add "$REMOTE" "$URL"
-        git -C "$DIR" remote set-url "$REMOTE" "$URL"
-    }
+# -----------------------------
+# Ensure /workspaces-src exists
+# -----------------------------
+mkdir -p /workspaces-src
 
-    setup_repo() {
-        local REPO=$1
-        local DIR="/workspaces/$REPO"
+# -----------------------------
+# Clone repos only if they don't exist
+# -----------------------------
+OTHER_REPOS=("azure-cli-extensions" "aaz" "azure-rest-api-specs")
 
-        echo
+for REPO in "${OTHER_REPOS[@]}"; do
+    DIR="/workspaces-src/$REPO"
+    if [ -d "$DIR/.git" ]; then
+        echo "$REPO already exists, skipping clone."
+    else
+        echo "Cloning $REPO..."
         gh repo fork "Azure/$REPO" --clone=false --default-branch-only
+        git clone "https://github.com/$GITHUB_USER/$REPO.git" "$DIR" --single-branch --no-tags
+        git -C "$DIR" remote add upstream "https://github.com/Azure/$REPO.git"
+        git -C "$DIR" pull -r upstream main || true
+    fi
+done
 
-        if [ -d "$DIR" ]; then
-            set_or_add_remote "$REPO" origin
-            set_or_add_remote "$REPO" upstream
-        else
-            git clone "https://github.com/$GITHUB_USER/$REPO.git" --single-branch --no-tags
-            set_or_add_remote "$REPO" upstream
+# -----------------------------
+# Install aaz-flow using uv (no separate venv)
+# -----------------------------
+echo "Installing aaz-flow and dependencies using uv..."
+cd "/workspaces/azure-cli/tools/aaz-flow"
+sudo uv pip install -e . --system
+cd -
 
-            # Synchronize with upstream
-            BRANCH=$(git -C "$DIR" remote show upstream | grep "HEAD branch" | awk '{print $NF}')
-            git -C "$DIR" pull -r upstream "$BRANCH"
-        fi
-    }
-
-    SECONDS=0
-
-    echo
-    uv pip install aaz-dev --link-mode=copy
-
-    # `azdev` repositories
-    setup_repo "azure-cli"
-    setup_repo "azure-cli-extensions"
-
-    azdev setup -c -r ./azure-cli-extensions
-
-    # `aaz-dev` repositories
-    setup_repo "aaz"
-    setup_repo "azure-rest-api-specs"
-
-    ELAPSED_TIME=$SECONDS
-
-    echo -e "\n${YELLOW}Elapsed time: $((ELAPSED_TIME / 60))m $((ELAPSED_TIME % 60))s.${NC}"
-    echo -e "\n${GREEN}Finished setup! Please launch the codegen tool via:${NC}"
-    echo -e "${GREEN}\$ aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz${NC}\n"
-else
-    echo -e "\nPlease launch the codegen tool via:"
-    echo -e "$ aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz\n"
-fi
+# -----------------------------
+# Final setup
+# -----------------------------
+echo "Running azdev setup..."
+python3 -m venv /workspaces-src/.azdev-env
+source /workspaces-src/.azdev-env/bin/activate
+pip install --upgrade pip
+pip install azdev
+azdev setup -c /workspaces/azure-cli -r /workspaces-src/azure-cli-extensions
