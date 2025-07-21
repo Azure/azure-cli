@@ -9,7 +9,7 @@ def setup_environment():
     """
     Setup the development environment for Azure CLI.
     """
-    return """Run `bash /workspaces/azure-cli/tools/aaz-flow/setup.sh` command in the terminal."""
+    pass
 
 
 if __name__ == "__main__":
