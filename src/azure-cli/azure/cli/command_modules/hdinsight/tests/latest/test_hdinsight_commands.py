@@ -32,8 +32,7 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_resize(self, storage_account_info):
         self._create_hdinsight_cluster(
             self._wasb_arguments(storage_account_info),
-            self._vnet_arguments(),
-            self._version_arguments())
+            self._vnet_arguments())
 
         resize_cluster_format = 'az hdinsight resize -n {cluster} -g {rg} --workernode-count 2'
         self.cmd(resize_cluster_format)
@@ -52,8 +51,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._kafka_arguments(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
     # Uses 'rg' kwarg
@@ -76,8 +74,7 @@ class HDInsightClusterTests(ScenarioTest):
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._kafka_arguments(),
             HDInsightClusterTests._optional_data_disk_arguments(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
     # Uses 'rg' kwarg
@@ -86,8 +83,7 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_with_component_version(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._component_version_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._component_version_arguments()
         )
 
     # Uses 'rg' kwarg
@@ -97,8 +93,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_cluster_config(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
     # Uses 'rg' kwarg
@@ -108,8 +103,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_explicit_ssh_creds(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
@@ -132,8 +126,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_encryption_in_transit(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
@@ -147,8 +140,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_load_based_autoscale(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
             self.check('properties.clusterState', 'Running'),
@@ -163,8 +155,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_schedule_based_autoscale(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
             self.check('properties.clusterState', 'Running'),
@@ -180,8 +171,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_encryption_at_host(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
@@ -252,8 +242,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_explicit_ssh_creds(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # define application item names
@@ -312,8 +301,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_explicit_ssh_creds(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # get monitor status
@@ -357,8 +345,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_explicit_ssh_creds(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # get monitor status
@@ -401,8 +388,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_explicit_ssh_creds(),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # execute script actions, and persist on success.
@@ -520,8 +506,7 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_autoscale_operation(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # enable load-based autoscale
@@ -618,8 +603,7 @@ class HDInsightClusterTests(ScenarioTest):
         })
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
         # Update manage identity with a UserAssigned msi.
         self.cmd(
@@ -635,8 +619,7 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_update_system_assigned(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
         # Update manage identity with a SystemAssigned msi.
         self.cmd(
@@ -656,8 +639,7 @@ class HDInsightClusterTests(ScenarioTest):
         })
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # Update manage identity with SystemAssigned,UserAssigned msi.
@@ -674,8 +656,7 @@ class HDInsightClusterTests(ScenarioTest):
         msi = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi"
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info,msi = msi),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
     @AllowLargeResponse()
@@ -685,8 +666,7 @@ class HDInsightClusterTests(ScenarioTest):
         msi = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi"
         self._create_hdinsight_cluster(
             HDInsightClusterTests._adlsgen2_arguments(storage_account_info,specify_filesystem=False,msi = msi),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
 
     @AllowLargeResponse()
@@ -697,8 +677,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._entra_arguments(entra),
-            HDInsightClusterTests._vnet_arguments(),
-            HDInsightClusterTests._version_arguments()
+            HDInsightClusterTests._vnet_arguments()
         )
         self.kwargs.update({
             'config_path': os.path.join(TEST_DIR, 'entrauserconfig.json')
@@ -761,7 +740,7 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _vnet_arguments():
-        return '--vnet-name {} --subnet {} '.format(HDInsightClusterTests.vnet_id, HDInsightClusterTests.subnet)
+        return '--vnet-name {} --subnet {} --version 5.1'.format(HDInsightClusterTests.vnet_id, HDInsightClusterTests.subnet)
 
     @staticmethod
     def _rest_proxy_arguments():
@@ -778,11 +757,7 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _component_version_arguments():
         return '-t {} --component-version {} --version {}'.format('spark', 'spark=3.3', '5.1')
-    
-    @staticmethod
-    def _version_arguments():
-        return '-t {} --version {}'.format('spark', '5.1')
-    
+
     @staticmethod
     def _entra_arguments(entra_user = None,entra_full_info = None):
         if entra_user:
