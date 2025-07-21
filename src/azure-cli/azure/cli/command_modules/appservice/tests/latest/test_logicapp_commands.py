@@ -35,7 +35,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         storage = self.create_random_name(prefix='logicstorage', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(storage, resource_group, DEFAULT_LOCATION))
 
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage),
                  checks=[
@@ -159,7 +159,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         storage = self.create_random_name(prefix='logicstorage', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(storage, resource_group, DEFAULT_LOCATION))
 
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage),
                  checks=[
@@ -203,7 +203,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan update -g {} -n {} --m 5 --elastic-scale'.format(resource_group, plan))
         self.cmd('appservice plan list -g {}'.format(resource_group))
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(storage, resource_group, DEFAULT_LOCATION))
 
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage),
                  checks=[
@@ -251,7 +251,7 @@ class LogicAppDeployTest(LiveScenarioTest):
         zip_file = os.path.join(TEST_DIR, 'logicapp.zip')
         storage = self.create_random_name(prefix='logic', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan))
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(storage, resource_group, DEFAULT_LOCATION))
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage))
 
         self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file), checks=[
@@ -267,7 +267,7 @@ class LogicAppDeployTest(LiveScenarioTest):
         zip_file = os.path.join(TEST_DIR, 'logicapp.zip')
         storage = self.create_random_name(prefix='logic', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku WS1 --is-linux'.format(resource_group, plan))
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(storage, resource_group, DEFAULT_LOCATION))
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage))
 
         self.cmd('logicapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, logicapp_name, zip_file), checks=[
