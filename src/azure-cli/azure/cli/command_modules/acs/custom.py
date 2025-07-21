@@ -694,6 +694,7 @@ def aks_create(
     enable_keda=False,
     enable_vpa=False,
     custom_ca_trust_certificates=None,
+    disable_run_command=False,
     # advanced networking
     enable_acns=None,
     disable_acns_observability=None,
@@ -913,6 +914,8 @@ def aks_update(
     disable_force_upgrade=False,
     upgrade_override_until=None,
     custom_ca_trust_certificates=None,
+    enable_run_command=False,
+    disable_run_command=False,
     # advanced networking
     disable_acns=None,
     enable_acns=None,

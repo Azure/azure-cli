@@ -454,6 +454,9 @@ parameters:
     type: string
     short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
     long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
+  - name: --disable-run-command
+    type: bool
+    short-summary: Disable Run Command feature for the cluster.
   - name: --enable-defender
     type: bool
     short-summary: Enable Microsoft Defender security profile.
@@ -915,6 +918,12 @@ parameters:
     type: string
     short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
     long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
+  - name: --enable-run-command
+    type: bool
+    short-summary: Enable Run Command feature for the cluster.
+  - name: --disable-run-command
+    type: bool
+    short-summary: Disable Run Command feature for the cluster.
   - name: --defender-config
     type: string
     short-summary: Path to JSON file containing Microsoft Defender profile configurations.
