@@ -413,5 +413,5 @@ def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=T
                         'Example valid format: [{"ObjectId": "...", "DisplayName": "...", "Upn": "..."}]'
                     ]
                 )
-            rest_auth_entra_users.append({'ObjectId':user_normalized.get('objectid'),'DisplayName': user_normalized.get('displayname'),'Upn':user_normalized.get('upn')})
+            rest_auth_entra_users.append({'ObjectId': user_normalized.get('objectid'), 'DisplayName': user_normalized.get('displayname'), 'Upn': user_normalized.get('upn')})
     return json.dumps(rest_auth_entra_users) if toJson else rest_auth_entra_users

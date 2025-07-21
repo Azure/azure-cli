@@ -139,4 +139,4 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # credentials operations
     with self.command_group('hdinsight credentials', hdinsight_clusters_sdk, client_factory=cf_hdinsight_clusters) as g:
         g.show_command('show', 'get_gateway_settings')
-        g.custom_command('update', 'update_gateway_settings', supports_no_wait=True)
+        g.custom_command('update', 'update_gateway_settings', supports_no_wait=True, confirmation=True)
