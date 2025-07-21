@@ -717,8 +717,8 @@ def perform_enable_azure_container_storage_v2(
         logger.error("Azure Container Storage failed to install.\nError: %s", ex)
         logger.warning(
             "AKS cluster is created. "
-            "Please run `az aks update` along with `--enable-azure-container-storage` "
-            "to enable Azure Container Storage."
+            "Please run `az aks update` along with `--enable-azure-container-storage-v2` "
+            "to enable Azure Container Storage v2."
         )
 
         delete_extension = True

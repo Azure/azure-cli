@@ -8847,6 +8847,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             )
 
         if disable_azure_container_storage_v2:
+            msg = (
+                "Please make sure there are no existing PVs and PVCs that are provisioned by Azure Container Storage before disabling. "
+                "If Azure Container Storage is disabled with remaining PVs and PVCs, the PVs and PVCs can only be cleaned up "
+                "after re-enabling it by running 'az aks update --enable-azure-container-storage-v2' "
+            )
+            if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+                raise DecoratorEarlyExitException()
+
             from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
                 validate_disable_azure_container_storage_v2_params
             )
