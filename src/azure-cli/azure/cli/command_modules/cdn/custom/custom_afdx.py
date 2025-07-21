@@ -181,7 +181,6 @@ class AFDProfileUpdate(_AFDProfileUpdate):
             'The dictionary values can be empty objects ({{}}) in requests.',
         )
         args_schema.user_assigned_identities.Element = AAZStrArg()
-        args_schema.location._registered = False
         args_schema.sku._registered = False
         return args_schema
 
@@ -194,8 +193,6 @@ class AFDProfileUpdate(_AFDProfileUpdate):
         if existing['sku']['name'] not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
             logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
             raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
-        existing_location = None if 'location' not in existing else existing['location']
-        args.location = existing_location
 
         if has_value(args.identity_type):
             user_assigned_identities = {}
@@ -241,24 +238,15 @@ class AFDEndpointUpdate(_AFDEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.location._registered = False
         args_schema.name_reuse_scope._registered = False
         return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        existing = _AFDEndpointShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group,
-            'profile_name': args.profile_name,
-            'endpoint_name': args.endpoint_name
-        })
-        existing_location = None if 'location' not in existing else existing['location']
-        args.location = existing_location
 
 
 def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds,
                               probe_path, probe_protocol, probe_request_type):
     params = [probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type]
+    if enable_health_probe is False:
+        return None
     if enable_health_probe is True:
         if any(param is None for param in params):
             raise InvalidArgumentValueError(
@@ -410,23 +398,29 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
                 enable_health_probe = False
             else:
                 enable_health_probe = True
+        else:
+            enable_health_probe = args.enable_health_probe.to_serialized_data()
 
         if has_value(args.probe_path):
+            enable_health_probe = True
             probe_path = args.probe_path.to_serialized_data()
         elif 'probePath' in existing['healthProbeSettings']:
             probe_path = existing['healthProbeSettings']['probePath']
 
         if has_value(args.probe_protocol):
+            enable_health_probe = True
             probe_protocol = args.probe_protocol.to_serialized_data()
         elif 'probeProtocol' in existing['healthProbeSettings']:
             probe_protocol = existing['healthProbeSettings']['probeProtocol']
 
         if has_value(args.probe_interval_in_seconds):
+            enable_health_probe = True
             probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
         elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
             probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
 
         if has_value(args.probe_request_type):
+            enable_health_probe = True
             probe_request_type = args.probe_request_type.to_serialized_data()
         elif 'probeRequestType' in existing['healthProbeSettings']:
             probe_request_type = existing['healthProbeSettings']['probeRequestType']

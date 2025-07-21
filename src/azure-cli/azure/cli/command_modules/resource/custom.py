@@ -20,7 +20,8 @@ from urllib.parse import urlparse, unquote
 
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
-from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
+from azure.mgmt.resource.resources.models import GenericResource
+from azure.mgmt.resource.deployments.models import DeploymentMode
 
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError, ResourceNotFoundError
 from azure.cli.core.parser import IncorrectUsageError
@@ -32,7 +33,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZUR
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
-    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _resource_deploymentstacks_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory, _resource_privatelinks_client_factory)
+    _resource_links_client_factory, _resource_deployments_client_factory, _resource_deploymentscripts_client_factory, _resource_deploymentstacks_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory, _resource_privatelinks_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 from azure.cli.command_modules.resource.parameters import StacksActionOnUnmanage
 
@@ -408,7 +409,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
-    smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+    smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS,
                                   aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     deployment_client = smc.deployments  # This solves the multi-api for you
@@ -427,15 +428,12 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     from azure.core.exceptions import HttpResponseError
     Deployment = cmd.get_models('Deployment')
     deployment = Deployment(properties=properties)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        try:
-            validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
-        except HttpResponseError as err:
-            err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-    else:
-        validation_result = deployment_client.validate(resource_group_name, deployment_name, deployment)
+    try:
+        validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -553,15 +551,12 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     from azure.core.exceptions import HttpResponseError
     Deployment = cmd.get_models('Deployment')
     deployment = Deployment(properties=deployment_properties, location=deployment_location)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        try:
-            validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
-        except HttpResponseError as err:
-            err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-    else:
-        validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
+    try:
+        validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -644,15 +639,12 @@ def _deploy_arm_template_at_resource_group(cmd,
     from azure.core.exceptions import HttpResponseError
     Deployment = cmd.get_models('Deployment')
     deployment = Deployment(properties=deployment_properties)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        try:
-            validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
-        except HttpResponseError as err:
-            err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-    else:
-        validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment)
+    try:
+        validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -735,17 +727,13 @@ def _deploy_arm_template_at_management_group(cmd,
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
     deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        try:
-            validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
-                                                                                     deployment_name, deployment)
-        except HttpResponseError as err:
-            err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-    else:
-        validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
-                                                                           deployment)
+    try:
+        validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
+                                                                                 deployment_name, deployment)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -819,17 +807,13 @@ def _deploy_arm_template_at_tenant_scope(cmd,
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
     deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
-    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        try:
-            validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
-                                                                           parameters=deployment)
-        except HttpResponseError as err:
-            err_message = _build_http_response_error_message(err)
-            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
-        validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-    else:
-        validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
-                                                                 parameters=deployment)
+    try:
+        validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
+                                                                       parameters=deployment)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -1186,7 +1170,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
 
 def _prepare_deployment_what_if_properties(cmd, deployment_scope, template_file, template_uri, parameters,
                                            mode, result_format, no_prompt, template_spec, query_string):
-    DeploymentWhatIfProperties, DeploymentWhatIfSettings = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+    DeploymentWhatIfProperties, DeploymentWhatIfSettings = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS,
                                                                    'DeploymentWhatIfProperties', 'DeploymentWhatIfSettings',
                                                                    mod='models')
 
@@ -1202,7 +1186,7 @@ def _prepare_deployment_what_if_properties(cmd, deployment_scope, template_file,
 # pylint: disable=protected-access
 def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenants=None, plug_pipeline=True):
 
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS,
                                   aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     deployment_client = smc.deployments  # This solves the multi-api for you
@@ -1667,7 +1651,7 @@ def update_resource_group(instance, tags=None):
 
 
 def export_group_as_template(
-        cmd, resource_group_name, include_comments=False, include_parameter_default_value=False, resource_ids=None, skip_resource_name_params=False, skip_all_params=False):
+        cmd, resource_group_name, include_comments=False, include_parameter_default_value=False, resource_ids=None, skip_resource_name_params=False, skip_all_params=False, export_format=None):
     """Captures a resource group as a template.
     :param str resource_group_name: the name of the resource group.
     :param resource_ids: space-separated resource ids to filter the export by. To export all resources, do not specify this argument or supply "*".
@@ -1701,12 +1685,26 @@ def export_group_as_template(
     options = ','.join(export_options) if export_options else None
 
     ExportTemplateRequest = cmd.get_models('ExportTemplateRequest')
-    export_template_request = ExportTemplateRequest(resources=resources, options=options)
+
+    if export_format is None or export_format.lower() == "json" or export_format.lower() == "arm":
+        export_template_request = ExportTemplateRequest(resources=resources, options=options, output_format="Json")
+    elif export_format.lower() == "bicep":
+        export_template_request = ExportTemplateRequest(resources=resources, options=options, output_format="Bicep")
+    else:
+        raise InvalidArgumentValueError('az resource: error: argument --export-format: invalid ExportFormat value: \'%s\'' % export_format)
 
     # Exporting a resource group as a template is async since API version 2019-08-01.
     if cmd.supported_api_version(min_api='2019-08-01'):
-        result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
-                                                                  parameters=export_template_request)
+        if cmd.supported_api_version(min_api='2024-11-01'):
+            result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
+                                                                      parameters=export_template_request,
+                                                                      api_version='2024-11-01')
+        else:
+            if export_format.lower() == "bicep":
+                raise CLIError("Bicep export is not supported in API version < 2024-11-01")
+
+            result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
+                                                                      parameters=export_template_request)
         result = LongRunningOperation(cmd.cli_ctx)(result_poller)
     else:
         result = rcf.resource_groups.begin_export_template(resource_group_name,
@@ -1723,7 +1721,7 @@ def export_group_as_template(
         for detail in getattr(error, 'details', None) or []:
             logger.error(detail.message)
 
-    return result.template
+    return result.output if export_format and export_format.lower() == "bicep" else result.template
 
 
 def create_application(cmd, resource_group_name,
@@ -1867,82 +1865,82 @@ def list_applications(cmd, resource_group_name=None):
 
 
 def list_deployments_at_subscription_scope(cmd, filter_string=None):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.list_at_subscription_scope(filter=filter_string)
 
 
 def list_deployments_at_resource_group(cmd, resource_group_name, filter_string=None):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.list_by_resource_group(resource_group_name, filter=filter_string)
 
 
 def list_deployments_at_management_group(cmd, management_group_id, filter_string=None):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.list_at_management_group_scope(management_group_id, filter=filter_string)
 
 
 def list_deployments_at_tenant_scope(cmd, filter_string=None):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.list_at_tenant_scope(filter=filter_string)
 
 
 def get_deployment_at_subscription_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_subscription_scope(deployment_name)
 
 
 def get_deployment_at_resource_group(cmd, resource_group_name, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.get(resource_group_name, deployment_name)
 
 
 def get_deployment_at_management_group(cmd, management_group_id, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_management_group_scope(management_group_id, deployment_name)
 
 
 def get_deployment_at_tenant_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_tenant_scope(deployment_name)
 
 
 def delete_deployment_at_subscription_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.begin_delete_at_subscription_scope(deployment_name)
 
 
 def delete_deployment_at_resource_group(cmd, resource_group_name, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.begin_delete(resource_group_name, deployment_name)
 
 
 def delete_deployment_at_management_group(cmd, management_group_id, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.begin_delete_at_management_group_scope(management_group_id, deployment_name)
 
 
 def delete_deployment_at_tenant_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.begin_delete_at_tenant_scope(deployment_name)
 
 
 def cancel_deployment_at_subscription_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.cancel_at_subscription_scope(deployment_name)
 
 
 def cancel_deployment_at_resource_group(cmd, resource_group_name, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.cancel(resource_group_name, deployment_name)
 
 
 def cancel_deployment_at_management_group(cmd, management_group_id, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.cancel_at_management_group_scope(management_group_id, deployment_name)
 
 
 def cancel_deployment_at_tenant_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployments.cancel_at_tenant_scope(deployment_name)
 
 
@@ -1970,35 +1968,35 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
 
 
 def export_template_at_subscription_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     result = rcf.deployments.export_template_at_subscription_scope(deployment_name)
 
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_template_at_resource_group(cmd, resource_group_name, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     result = rcf.deployments.export_template(resource_group_name, deployment_name)
 
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_template_at_management_group(cmd, management_group_id, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     result = rcf.deployments.export_template_at_management_group_scope(management_group_id, deployment_name)
 
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_template_at_tenant_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     result = rcf.deployments.export_template_at_tenant_scope(deployment_name)
 
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_deployment_as_template(cmd, resource_group_name, deployment_name):
-    smc = _resource_client_factory(cmd.cli_ctx)
+    smc = _resource_deployments_client_factory(cmd.cli_ctx)
     result = smc.deployments.export_template(resource_group_name, deployment_name)
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
@@ -3042,42 +3040,42 @@ def export_template_deployment_stack_at_management_group(cmd, management_group_i
 
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.list_at_subscription_scope(deployment_name)
 
 
 def list_deployment_operations_at_resource_group(cmd, resource_group_name, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.list(resource_group_name, deployment_name)
 
 
 def list_deployment_operations_at_management_group(cmd, management_group_id, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.list_at_management_group_scope(management_group_id, deployment_name)
 
 
 def list_deployment_operations_at_tenant_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.list_at_tenant_scope(deployment_name)
 
 
 def get_deployment_operation_at_subscription_scope(cmd, deployment_name, op_id):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.get_at_subscription_scope(deployment_name, op_id)
 
 
 def get_deployment_operation_at_resource_group(cmd, resource_group_name, deployment_name, op_id):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.get(resource_group_name, deployment_name, op_id)
 
 
 def get_deployment_operation_at_management_group(cmd, management_group_id, deployment_name, op_id):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.get_at_management_group_scope(management_group_id, deployment_name, op_id)
 
 
 def get_deployment_operation_at_tenant_scope(cmd, deployment_name, op_id):
-    rcf = _resource_client_factory(cmd.cli_ctx)
+    rcf = _resource_deployments_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.get_at_tenant_scope(deployment_name, op_id)
 
 

@@ -40,9 +40,9 @@ from azure.cli.core.profiles._shared import ResourceType
 from azure.cli.testsdk import live_only
 
 cli_ctx = DummyCli()
-loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
 cmd = AzCliCommand(loader, 'test', None)
-cmd.command_kwargs = {'resource_type': ResourceType.MGMT_RESOURCE_RESOURCES}
+cmd.command_kwargs = {'resource_type': ResourceType.MGMT_RESOURCE_DEPLOYMENTS}
 cmd.cli_ctx = cli_ctx
 
 WhatIfOperationResult, WhatIfChange, ChangeType = cmd.get_models(

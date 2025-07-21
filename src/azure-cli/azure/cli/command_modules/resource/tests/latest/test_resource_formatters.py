@@ -15,8 +15,8 @@ from azure.cli.command_modules.resource._formatters import format_json, format_w
 
 
 cli_ctx = DummyCli()
-loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-cmd = AzCliCommand(loader, "test", None, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
+cmd = AzCliCommand(loader, "test", None, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
 
 WhatIfOperationResult, WhatIfChange, WhatIfPropertyChange, ChangeType, PropertyChangeType, DeploymentDiagnosticsDefinition, Level = cmd.get_models(
     "WhatIfOperationResult", "WhatIfChange", "WhatIfPropertyChange", "ChangeType", "PropertyChangeType", "DeploymentDiagnosticsDefinition", "Level"
