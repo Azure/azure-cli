@@ -147,12 +147,9 @@ def create_container(cmd,
         vnet_address_prefix = None
         subnet_address_prefix = None
 
-    ports = ports or None
-    protocol = protocol or None
-
     if standby_pool_profile_id is None:
-        ports = [80]
-        protocol = ContainerGroupNetworkProtocol.tcp
+        ports = ports or [80]
+        protocol = protocol or ContainerGroupNetworkProtocol.tcp
 
     config_map = _create_config_map(config_map)
 
