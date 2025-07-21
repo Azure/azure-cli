@@ -186,10 +186,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
-        ResourceType.MGMT_KEYVAULT: SDKProfile('2024-11-01', {
-            'vaults': '2023-02-01',
-            'managed_hsms': '2024-11-01'
-        }),
+        ResourceType.MGMT_KEYVAULT: None,
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
@@ -219,18 +216,18 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.DATA_STORAGE_TABLE: None,
-        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
-        ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: None,
+        ResourceType.MGMT_EVENTHUB: None,
         ResourceType.MGMT_MONITOR: None,
         ResourceType.MGMT_MSI: '2023-01-31',
-        ResourceType.MGMT_APPSERVICE: '2023-01-01',
+        ResourceType.MGMT_APPSERVICE: '2024-11-01',
         ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-04-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-05-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     }
 }
@@ -258,10 +255,6 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
         'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
         'VERSION_2025_04_01': "2025-04-01"
-    },
-    ResourceType.MGMT_CONTAINERSERVICE: {
-        # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
-        'ManagedClusterAddonProfile': '2020-03-01',
     },
     ResourceType.MGMT_MSI: {
         'user_assigned_identities': '2022-01-31-preview',

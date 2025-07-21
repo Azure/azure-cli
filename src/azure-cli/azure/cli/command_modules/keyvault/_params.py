@@ -137,7 +137,7 @@ def load_arguments(self, _):
                    help='Control permission for data plane traffic coming from public networks '
                         'while private endpoint is enabled')
 
-    with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
+    with self.argument_context('keyvault', arg_group='Network Rule') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions),
                    help='Bypass traffic for space-separated uses.')
         c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction),
@@ -167,7 +167,7 @@ def load_arguments(self, _):
                    help='Soft delete data retention days. It accepts >=7 and <=90. '
                         'Defaults to 90 for keyvault creation. Required for MHSM creation')
         c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*',
-                   min_api='2023-07-01', resource_type=ResourceType.MGMT_KEYVAULT, operation_group="managed_hsms",
+                   resource_type=ResourceType.MGMT_KEYVAULT, operation_group="managed_hsms",
                    help="[HSM Only] Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
@@ -189,8 +189,7 @@ def load_arguments(self, _):
         c.argument('secondary_locations', nargs='+',
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
-        c.argument('user_identities', options_list=['--mi-user-assigned'],
-                   nargs='*', min_api='2023-07-01',
+        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*',
                    help="Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
@@ -244,18 +243,18 @@ def load_arguments(self, _):
         c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*',
                    help='Space-separated list of storage permissions to assign.')
 
-    with self.argument_context('keyvault network-rule', min_api='2018-02-14') as c:
+    with self.argument_context('keyvault network-rule') as c:
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
     for item in ['add', 'remove']:
-        with self.argument_context('keyvault network-rule {}'.format(item), min_api='2018-02-14') as c:
+        with self.argument_context('keyvault network-rule {}'.format(item)) as c:
             c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
                                                      '[ip2]...', validator=validate_ip_address)
 
     for item in ['approve', 'reject', 'delete', 'show', 'wait']:
-        with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
+        with self.argument_context('keyvault private-endpoint-connection {}'.format(item)) as c:
             c.extra('connection_id', options_list=['--id'], required=False,
                     help='The ID of the private endpoint connection associated with the Key Vault/HSM. '
                          'If specified --vault-name/--hsm-name and --name/-n, this should be omitted.')
@@ -265,16 +264,14 @@ def load_arguments(self, _):
                             'Required if --id is not specified')
             c.argument('vault_name', vault_name_type, required=False,
                        help='Name of the Key Vault. Required if --id is not specified')
-            c.argument('hsm_name', mgmt_plane_hsm_name_type, min_api='2021-04-01-preview',
+            c.argument('hsm_name', mgmt_plane_hsm_name_type,
                        help='Name of the HSM. Required if --id is not specified.'
                             '(--hsm-name and --vault-name are mutually exclusive, please specify just one of them)')
 
     with self.argument_context('keyvault private-endpoint-connection list') as c:
         c.argument("hsm_name", hsm_name_type)
 
-    with self.argument_context('keyvault private-link-resource', min_api='2018-02-14', max_api='2020-04-01-preview') as c:
-        c.argument('vault_name', vault_name_type, required=True)
-    with self.argument_context('keyvault private-link-resource', min_api='2021-04-01-preview') as c:
+    with self.argument_context('keyvault private-link-resource') as c:
         c.argument('vault_name', vault_name_type)
         c.argument('hsm_name', mgmt_plane_hsm_name_type)
     # endregion
