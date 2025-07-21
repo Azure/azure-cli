@@ -353,10 +353,10 @@ def map_cluster_type(cluster_type):
     return cluster_type
 
 
-def get_entra_user_info(cmd,entra_user_identity,entra_user_full_info,toJson=True):
+def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=True):
     import json
     from ._client_factory import cf_graph
-    from azure.cli.core.azclierror import ResourceNotFoundError,InvalidArgumentValueError,AzureResponseError
+    from azure.cli.core.azclierror import ResourceNotFoundError, InvalidArgumentValueError, AzureResponseError
     def is_email(value):
         return "@" in value and "." in value
     def normalize_keys(d):
@@ -403,7 +403,7 @@ def get_entra_user_info(cmd,entra_user_identity,entra_user_full_info,toJson=True
     else:
         for user in entra_user_full_info:
             user_normalized = normalize_keys(user)
-            allowed_keys = {'objectid','displayname','upn'}
+            allowed_keys = {'objectid', 'displayname', 'upn'}
             if invalid_keys := set(user_normalized.keys()) - allowed_keys:
                 raise InvalidArgumentValueError(
                     error_msg=f'Invalid keys detected in user object: {", ".join(invalid_keys)}',
