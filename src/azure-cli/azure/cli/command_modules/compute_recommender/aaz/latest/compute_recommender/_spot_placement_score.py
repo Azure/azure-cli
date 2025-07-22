@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "compute-recommender spot-placement-score",
-    is_preview=True,
 )
 class SpotPlacementScore(AAZCommand):
     """Generate placement scores for Spot VM skus.
