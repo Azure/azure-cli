@@ -3306,7 +3306,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                 imds_mode=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
-                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None):
+                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
+                enable_automatic_repairs=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3628,7 +3629,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
             enable_automatic_zone_balancing=enable_automatic_zone_balancing,
             automatic_zone_balancing_strategy=automatic_zone_balancing_strategy,
-            automatic_zone_balancing_behavior=automatic_zone_balancing_behavior)
+            automatic_zone_balancing_behavior=automatic_zone_balancing_behavior,
+            enable_automatic_repairs=enable_automatic_repairs)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 

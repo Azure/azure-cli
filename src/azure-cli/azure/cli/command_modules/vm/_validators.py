@@ -2532,6 +2532,9 @@ def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=
         if namespace.load_balancer is None or namespace.health_probe is None:
             raise ArgumentUsageError("usage error: --load-balancer and --health-probe are required "
                                      "when creating vmss with automatic repairs")
+        if namespace.enable_automatic_repairs is not None and namespace.enable_automatic_repairs is False:
+            raise ArgumentUsageError("usage error: --enable-automatic-repairs cannot be false when "
+                                     "--automatic-repairs-action or --automatic-repairs-grace-period are used")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
