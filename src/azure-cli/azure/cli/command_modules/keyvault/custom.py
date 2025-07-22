@@ -25,7 +25,7 @@ from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
     MutuallyExclusiveArgumentError
-from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 
 from cryptography.hazmat.backends import default_backend
@@ -39,31 +39,6 @@ from knack.util import CLIError, todict
 
 
 logger = get_logger(__name__)
-
-
-def _not_less_than(current_profile, resource_type, min_api_version, sub_resource_name=None):
-    if current_profile not in AZURE_API_PROFILES:
-        raise CLIError('Unsupported profile: {}'.format(current_profile))
-
-    profile = AZURE_API_PROFILES[current_profile]
-    if resource_type not in profile:
-        raise CLIError('ResourceType {} not in Profile {}'.format(resource_type, current_profile))
-
-    if not sub_resource_name:
-        api_version = profile[resource_type]
-        if isinstance(api_version, SDKProfile):
-            return api_version.default_api_version >= min_api_version
-        return api_version >= min_api_version
-
-    sdk_profile = profile[resource_type]
-    if not isinstance(sdk_profile, SDKProfile):
-        raise CLIError('Invalid SDKProfile {} in Profile {}'.format(resource_type, current_profile))
-    sub_profile = sdk_profile.profile
-    if sub_resource_name not in sub_profile:
-        raise CLIError('SubResource {} not in ResourceType {} under Profile {}'.
-                       format(sub_resource_name, resource_type, current_profile))
-    api_version = sub_profile[sub_resource_name]
-    return api_version >= min_api_version
 
 
 def _default_certificate_profile(cmd):
@@ -621,64 +596,19 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
 
     # if bypass or default_action was specified create a NetworkRuleSet
     # if neither were specified we will parse it from parameter `--network-acls`
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
-        if network_acls or network_acls_ips or network_acls_vnets:
-            network_acls = _parse_network_acls(
-                cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets, bypass, default_action)
-        else:
-            network_acls = _create_network_rule_set(cmd, bypass, default_action)
+    if network_acls or network_acls_ips or network_acls_vnets:
+        network_acls = _parse_network_acls(
+            cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets, bypass, default_action)
+    else:
+        network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2019-09-01'):
-            permissions = Permissions(keys=[KeyPermissions.all],
-                                      secrets=[SecretPermissions.all],
-                                      certificates=[CertificatePermissions.all],
-                                      storage=[StoragePermissions.all])
-        else:
-            permissions = Permissions(keys=[KeyPermissions.get,
-                                            KeyPermissions.create,
-                                            KeyPermissions.delete,
-                                            KeyPermissions.list,
-                                            KeyPermissions.update,
-                                            KeyPermissions.import_enum,
-                                            KeyPermissions.backup,
-                                            KeyPermissions.restore,
-                                            KeyPermissions.recover],
-                                      secrets=[
-                                          SecretPermissions.get,
-                                          SecretPermissions.list,
-                                          SecretPermissions.set,
-                                          SecretPermissions.delete,
-                                          SecretPermissions.backup,
-                                          SecretPermissions.restore,
-                                          SecretPermissions.recover],
-                                      certificates=[
-                                          CertificatePermissions.get,
-                                          CertificatePermissions.list,
-                                          CertificatePermissions.delete,
-                                          CertificatePermissions.create,
-                                          CertificatePermissions.import_enum,
-                                          CertificatePermissions.update,
-                                          CertificatePermissions.managecontacts,
-                                          CertificatePermissions.getissuers,
-                                          CertificatePermissions.listissuers,
-                                          CertificatePermissions.setissuers,
-                                          CertificatePermissions.deleteissuers,
-                                          CertificatePermissions.manageissuers,
-                                          CertificatePermissions.recover],
-                                      storage=[
-                                          StoragePermissions.get,
-                                          StoragePermissions.list,
-                                          StoragePermissions.delete,
-                                          StoragePermissions.set,
-                                          StoragePermissions.update,
-                                          StoragePermissions.regeneratekey,
-                                          StoragePermissions.setsas,
-                                          StoragePermissions.listsas,
-                                          StoragePermissions.getsas,
-                                          StoragePermissions.deletesas])
+        permissions = Permissions(keys=[KeyPermissions.all],
+                                  secrets=[SecretPermissions.all],
+                                  certificates=[CertificatePermissions.all],
+                                  storage=[StoragePermissions.all])
 
         from azure.cli.command_modules.role.util import get_current_identity_object_id
         object_id = get_current_identity_object_id(cmd.cli_ctx)

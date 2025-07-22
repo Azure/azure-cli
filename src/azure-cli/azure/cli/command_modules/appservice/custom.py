@@ -5515,6 +5515,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         subnet_resource_id = None
         vnet_route_all_enabled = None
 
+    # if this is a managed function app (Azure Functions on Azure Containers), http20_proxy_flag must be None
+    if environment is not None:
+        site_config.http20_proxy_flag = None
+
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
                            vnet_route_all_enabled=vnet_route_all_enabled)
