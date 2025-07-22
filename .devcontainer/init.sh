@@ -18,46 +18,39 @@ if ! command -v aaz-dev &> /dev/null; then
     NC="\033[0m"  # no color
 
     set_or_add_remote() {
-        local REMOTE_NAME=$1
-        local REMOTE_URL=$2
-        local REPO_PATH="/workspaces/$REPO_NAME"
+        local REPO=$1
+        local REMOTE=$2
+        local DIR="/workspaces/$REPO"
+        local OWNER=$([ "$REMOTE" = "origin" ] && echo "$GITHUB_USER" || echo "Azure")
+        local URL="https://github.com/$OWNER/$REPO.git"
 
-        git -C "$REPO_PATH" remote get-url "$REMOTE_NAME" &>/dev/null || git -C "$REPO_PATH" remote add "$REMOTE_NAME" "$REMOTE_URL"
-        git -C "$REPO_PATH" remote set-url "$REMOTE_NAME" "$REMOTE_URL"
+        git -C "$DIR" remote get-url "$REMOTE" &>/dev/null || git -C "$DIR" remote add "$REMOTE" "$URL"
+        git -C "$DIR" remote set-url "$REMOTE" "$URL"
     }
 
     setup_repo() {
-        local DIR_NAME="$1"
-        local DIR_PATH="/workspaces/$DIR_NAME"
-        local REPO="Azure/$DIR_NAME"
+        local REPO=$1
+        local DIR="/workspaces/$REPO"
 
-        if [ -d "$DIR_PATH" ]; then
-            echo -e "\n${YELLOW}($DIR_NAME) Pulling the latest changes from upstream...${NC}"
-            gh repo fork "$REPO" --clone=false
-        else
-            echo -e "\n${GREEN}($DIR_NAME) Forking and cloning the repository...${NC}"
-            gh repo fork "$REPO" --clone -- --depth=1
-        fi
+        echo
+        gh repo fork "Azure/$REPO" --clone=false --default-branch-only
 
-        # `git` doesn't work well with private repository
-        if [ "$(gh repo view "$REPO" --json visibility --jq '.visibility')" == "PRIVATE" ]; then
-            cd "$DIR_PATH"
-            gh repo sync --source "$REPO"
-            cd /workspaces
+        if [ -d "$DIR" ]; then
+            set_or_add_remote "$REPO" origin
+            set_or_add_remote "$REPO" upstream
         else
-            DEFAULT_BRANCH=$(git -C "$DIR_PATH" remote show upstream | grep "HEAD branch" | awk '{print $NF}')
-            git -C "$DIR_PATH" pull -r upstream "$DEFAULT_BRANCH"
+            git clone "https://github.com/$GITHUB_USER/$REPO.git" --single-branch --no-tags
+            set_or_add_remote "$REPO" upstream
+
+            # Synchronize with upstream
+            BRANCH=$(git -C "$DIR" remote show upstream | grep "HEAD branch" | awk '{print $NF}')
+            git -C "$DIR" pull -r upstream "$BRANCH"
         fi
     }
 
-    echo -e "\n${GREEN}Welcome to the dev environment setup wizard.${NC}\n"
-
     SECONDS=0
 
-    REPO_NAME=$(basename "$GITHUB_REPOSITORY")
-    set_or_add_remote origin "https://github.com/$GITHUB_USER/$REPO_NAME.git"
-    set_or_add_remote upstream "https://github.com/Azure/$REPO_NAME.git"
-
+    echo
     uv pip install aaz-dev
 
     # `azdev` repositories
@@ -69,10 +62,13 @@ if ! command -v aaz-dev &> /dev/null; then
     # `aaz-dev` repositories
     setup_repo "aaz"
     setup_repo "azure-rest-api-specs"
-    setup_repo "azure-rest-api-specs-pr"
 
     ELAPSED_TIME=$SECONDS
+
     echo -e "\n${YELLOW}Elapsed time: $((ELAPSED_TIME / 60))m $((ELAPSED_TIME % 60))s.${NC}"
     echo -e "\n${GREEN}Finished setup! Please launch the codegen tool via:${NC}"
-    echo -e "${GREEN}aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz${NC}\n"
+    echo -e "${GREEN}\$ aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz${NC}\n"
+else
+    echo -e "\n${GREEN}Please launch the codegen tool via:${NC}"
+    echo -e "${GREEN}\$ aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz${NC}\n"
 fi
