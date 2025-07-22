@@ -15,6 +15,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
+    CONST_DEFAULT_VMS_VM_SIZE,
+    CONST_DEFAULT_WINDOWS_VMS_VM_SIZE,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
     CONST_SCALE_DOWN_MODE_DELETE,
@@ -22,6 +24,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_VIRTUAL_MACHINES,
     CONST_OS_SKU_WINDOWS2019,
     CONST_OS_SKU_WINDOWS2022,
     AgentPoolDecoratorMode,
@@ -629,6 +632,33 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_node_vm_size(read_only=False)
 
+    def get_vm_sizes(self) -> List[str]:
+        """Obtain the value of vm_sizes.
+
+        :return: list of strings
+        """
+        raw_value = self.raw_param.get("vm_sizes")
+        node_vm_size = self.raw_param.get("node_vm_size")
+        if raw_value is not None:
+            # vm_sizes is a comma-separated string, only used when vm_set_type is VirtualMachines
+            if self.get_vm_set_type() != CONST_VIRTUAL_MACHINES:
+                raise InvalidArgumentValueError("--vm-sizes can only be used with --vm-set-type VirtualMachines.")
+            if node_vm_size:
+                raise MutuallyExclusiveArgumentError("Cannot specify -vm-sizes and --node-vm-size at the same time.")
+            vm_sizes = [x.strip() for x in raw_value.split(",")]
+        else:
+            # when vm_sizes is not specified, try to use the value from node_vm_size (only 1 size)
+            if node_vm_size:
+                vm_sizes = [node_vm_size]
+            else:
+                # use default value
+                if self.get_os_type().lower() == "windows":
+                    vm_sizes = [CONST_DEFAULT_WINDOWS_VMS_VM_SIZE]
+                else:
+                    vm_sizes = [CONST_DEFAULT_VMS_VM_SIZE]
+
+        return vm_sizes
+
     def _get_os_type(self, read_only: bool = False) -> Union[str, None]:
         """Internal function to dynamically obtain the value of os_type according to the context.
 
@@ -762,6 +792,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return pod_subnet_id
+
+    def get_pod_ip_allocation_mode(self: bool = False) -> Union[str, None]:
+        """Get the value of pod_ip_allocation_mode.
+
+        :return: str or None
+        """
+
+        # Get the value of pod_ip_allocation_mode from the raw parameters provided by the user
+        pod_ip_allocation_mode = self.raw_param.get("pod_ip_allocation_mode")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        # if it exists and user has not provided any value in raw parameters
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                pod_ip_allocation_mode and
+                self.agentpool and
+                self.agentpool.pod_ip_allocation_mode is not None
+            ):
+                pod_ip_allocation_mode = self.agentpool.pod_ip_allocation_mode
+
+        return pod_ip_allocation_mode
 
     def get_enable_node_public_ip(self) -> bool:
         """Obtain the value of enable_node_public_ip, default value is False.
@@ -1103,6 +1153,25 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return max_surge
 
+    def get_max_unavailable(self):
+        """Obtain the value of max_unavailable.
+        :return: string
+        """
+        # read the original value passed by the command
+        max_unavailable = self.raw_param.get("max_unavailable")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.max_unavailable is not None
+            ):
+                max_unavailable = self.agentpool.upgrade_settings.max_unavailable
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return max_unavailable
+
     def get_drain_timeout(self):
         """Obtain the value of drain_timeout.
 
@@ -1143,6 +1212,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return node_soak_duration
 
+    def get_undrainable_node_behavior(self) -> str:
+        """Obtain the value of undrainable_node_behavior.
+
+        :return: string
+        """
+        # read the original value passed by the command
+        undrainable_node_behavior = self.raw_param.get("undrainable_node_behavior")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.undrainable_node_behavior is not None
+            ):
+                undrainable_node_behavior = self.agentpool.upgrade_settings.undrainable_node_behavior
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return undrainable_node_behavior
+
     def get_vm_set_type(self) -> str:
         """Obtain the value of vm_set_type, default value is CONST_VIRTUAL_MACHINE_SCALE_SETS.
 
@@ -1163,8 +1252,12 @@ class AKSAgentPoolContext(BaseAKSContext):
             vm_set_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
         elif vm_set_type.lower() == CONST_AVAILABILITY_SET.lower():
             vm_set_type = CONST_AVAILABILITY_SET
+        elif vm_set_type.lower() == CONST_VIRTUAL_MACHINES.lower():
+            vm_set_type = CONST_VIRTUAL_MACHINES
         else:
-            raise InvalidArgumentValueError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet")
+            raise InvalidArgumentValueError(
+                "--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet or VirtualMachines"
+            )
         # this parameter does not need validation
         return vm_set_type
 
@@ -1580,6 +1673,13 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_gpu_driver()
 
+    def get_gateway_prefix_size(self) -> Union[int, None]:
+        """Obtain the value of gateway_prefix_size.
+
+        :return: int or None
+        """
+        return self.raw_param.get('gateway_prefix_size')
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1739,6 +1839,7 @@ class AKSAgentPoolAddDecorator:
 
         agentpool.vnet_subnet_id = self.context.get_vnet_subnet_id()
         agentpool.pod_subnet_id = self.context.get_pod_subnet_id()
+        agentpool.pod_ip_allocation_mode = self.context.get_pod_ip_allocation_mode()
         agentpool.enable_node_public_ip = self.context.get_enable_node_public_ip()
         agentpool.node_public_ip_prefix_id = self.context.get_node_public_ip_prefix_id()
         return agentpool
@@ -1813,6 +1914,10 @@ class AKSAgentPoolAddDecorator:
         if max_surge:
             upgrade_settings.max_surge = max_surge
 
+        max_unavailable = self.context.get_max_unavailable()
+        if max_unavailable:
+            upgrade_settings.max_unavailable = max_unavailable
+
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
@@ -1820,6 +1925,10 @@ class AKSAgentPoolAddDecorator:
         node_soak_duration = self.context.get_node_soak_duration()
         if node_soak_duration:
             upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
+
+        undrainable_node_behavior = self.context.get_undrainable_node_behavior()
+        if undrainable_node_behavior:
+            upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
 
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
@@ -1960,6 +2069,66 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_agentpool_gateway_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up agentpool gateway profile for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        gateway_prefix_size = self.context.get_gateway_prefix_size()
+        if gateway_prefix_size is not None:
+            if agentpool.gateway_profile is None:
+                agentpool.gateway_profile = self.models.AgentPoolGatewayProfile()  # pylint: disable=no-member
+
+            agentpool.gateway_profile.public_ip_prefix_size = gateway_prefix_size
+
+        return agentpool
+
+    def set_up_pod_ip_allocation_mode(self, agentpool: AgentPool) -> AgentPool:
+        """Set up pod ip allocation mode for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        pod_ip_allocation_mode = self.context.get_pod_ip_allocation_mode()
+        if pod_ip_allocation_mode is not None:
+            agentpool.pod_ip_allocation_mode = pod_ip_allocation_mode
+
+        return agentpool
+
+    def set_up_virtual_machines_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up virtual machines profile for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        # validate vm_sizes first, then skip if not Virtual Machines
+        sizes = self.context.get_vm_sizes()
+        if len(sizes) != 1:
+            raise InvalidArgumentValueError(f"We only accept single sku size for manual profile. {sizes} is invalid.")
+
+        if self.context.get_vm_set_type() != CONST_VIRTUAL_MACHINES:
+            return agentpool
+
+        count, _, _, _ = self.context.get_node_count_and_enable_cluster_autoscaler_min_max_count()
+        agentpool.virtual_machines_profile = self.models.VirtualMachinesProfile(
+            scale=self.models.ScaleProfile(
+                manual=[
+                    self.models.ManualScaleProfile(
+                        size=sizes[0],
+                        count=count,
+                    )
+                ]
+            )
+        )
+        agentpool.vm_size = None
+        agentpool.count = None
+
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -1996,6 +2165,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_gpu_properties(agentpool)
         # set up agentpool network profile
         agentpool = self.set_up_agentpool_network_profile(agentpool)
+        # set up agentpool pod ip allocation mode
+        agentpool = self.set_up_pod_ip_allocation_mode(agentpool)
         # set up agentpool windows profile
         agentpool = self.set_up_agentpool_windows_profile(agentpool)
         # set up crg id
@@ -2006,6 +2177,10 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_motd(agentpool)
         # set up gpu profile
         agentpool = self.set_up_gpu_profile(agentpool)
+        # set up agentpool gateway profile
+        agentpool = self.set_up_agentpool_gateway_profile(agentpool)
+        # set up virtual machines profile
+        agentpool = self.set_up_virtual_machines_profile(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -2200,6 +2375,10 @@ class AKSAgentPoolUpdateDecorator:
             # why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
             agentpool.upgrade_settings = upgrade_settings
 
+        max_unavailable = self.context.get_max_unavailable()
+        if max_unavailable:
+            upgrade_settings.max_unavailable = max_unavailable
+
         drain_timeout = self.context.get_drain_timeout()
         if drain_timeout:
             upgrade_settings.drain_timeout_in_minutes = drain_timeout
@@ -2208,6 +2387,11 @@ class AKSAgentPoolUpdateDecorator:
         node_soak_duration = self.context.get_node_soak_duration()
         if node_soak_duration:
             upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
+            agentpool.upgrade_settings = upgrade_settings
+
+        undrainable_node_behavior = self.context.get_undrainable_node_behavior()
+        if undrainable_node_behavior:
+            upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
             agentpool.upgrade_settings = upgrade_settings
 
         return agentpool

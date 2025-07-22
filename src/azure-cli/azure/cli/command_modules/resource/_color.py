@@ -13,6 +13,8 @@ class Color(Enum):
     PURPLE = "\033[38;5;141m"
     BLUE = "\033[38;5;39m"
     GRAY = "\033[38;5;246m"
+    RED = "\033[38;5;203m"
+    DARK_YELLOW = "\033[38;5;136m"
     RESET = "\033[0m"
 
     def __str__(self):

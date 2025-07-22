@@ -87,9 +87,12 @@ def _build_preflight_error_message(preflight_error):
 
 
 def _build_http_response_error_message(http_error):
-    error_txt = http_error.response.internal_response.text
-
-    error_info = json.loads(error_txt)['error']
+    from azure.core.exceptions import StreamClosedError, StreamConsumedError
+    try:
+        error_txt = http_error.response.internal_response.text
+        error_info = json.loads(error_txt)['error']
+    except (StreamClosedError, StreamConsumedError):
+        error_info = http_error.response.json()['error']
     error_details = error_info.pop('details') if 'details' in error_info else []
     err_messages = [f'{json.dumps(error_info)}']
 

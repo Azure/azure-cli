@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 import uuid
 import os
 
@@ -9,7 +10,7 @@ from knack.log import get_logger
 
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory, _is_linux_os
+from azure.cli.command_modules.vm.custom import _is_linux_os_aaz
 from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_data_plane_keyvault_key_client
 
 _DATA_VOLUME_TYPE = 'DATA'
@@ -36,26 +37,26 @@ vm_extension_info = {
 
 def _find_existing_ade(vm, use_instance_view=False, ade_ext_info=None):
     if not ade_ext_info:
-        ade_ext_info = vm_extension_info['Linux'] if _is_linux_os(vm) else vm_extension_info['Windows']
+        ade_ext_info = vm_extension_info['Linux'] if _is_linux_os_aaz(vm) else vm_extension_info['Windows']
     if use_instance_view:
-        exts = vm.instance_view.extensions or []
-        r = next((e for e in exts if e.type and e.type.lower().startswith(ade_ext_info['publisher'].lower()) and
-                  e.name.lower() == ade_ext_info['name'].lower()), None)
+        exts = vm['instanceView'].get('extensions', [])
+        r = next((e for e in exts if e['type'].lower().startswith(ade_ext_info['publisher'].lower()) and
+                  e['name'].lower() == ade_ext_info['name'].lower()), None)
     else:
-        exts = vm.resources or []
-        r = next((e for e in exts if (e.publisher.lower() == ade_ext_info['publisher'].lower() and
-                                      e.type_properties_type.lower() == ade_ext_info['name'].lower())), None)
+        exts = vm.get('resources', [])
+        r = next((e for e in exts if (e['publisher'].lower() == ade_ext_info['publisher'].lower() and
+                                      e['typePropertiesType'].lower() == ade_ext_info['name'].lower())), None)
     return r
 
 
 def _detect_ade_status(vm):
-    if vm.storage_profile.os_disk.encryption_settings:
+    if vm.get('storageProfile', {}).get('osDisk', {}).get('encryptionSettings', []):
         return False, True
-    ade_ext_info = vm_extension_info['Linux'] if _is_linux_os(vm) else vm_extension_info['Windows']
+    ade_ext_info = vm_extension_info['Linux'] if _is_linux_os_aaz(vm) else vm_extension_info['Windows']
     ade = _find_existing_ade(vm, ade_ext_info=ade_ext_info)
     if ade is None:
         return False, False
-    if ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.', maxsplit=1)[0]:
+    if ade['typeHandlerVersion'].split('.')[0] == ade_ext_info['legacy_version'].split('.', maxsplit=1)[0]:
         return False, True
 
     return True, False   # we believe impossible to have both old & new ADE
@@ -63,63 +64,60 @@ def _detect_ade_status(vm):
 
 def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity):
     from azure.cli.core.azclierror import ArgumentUsageError
-    if vm.identity is None or vm.identity.user_assigned_identities is None or encryption_identity.lower() not in \
-            (k.lower() for k in vm.identity.user_assigned_identities.keys()):
+    if encryption_identity.lower() not in (k.lower() for k in vm.get('identity', {}).get('userAssignedIdentities', {}).keys()):
         raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
                                  "user assigned identities associated to the resource")
 
-    SecurityProfile, EncryptionIdentity = cmd.get_models('SecurityProfile', 'EncryptionIdentity')
     updateVm = False
 
-    if vm.security_profile is None:
-        vm.security_profile = SecurityProfile()
-    if vm.security_profile.encryption_identity is None:
-        vm.security_profile.encryption_identity = EncryptionIdentity()
-    if vm.security_profile.encryption_identity.user_assigned_identity_resource_id is None \
-            or vm.security_profile.encryption_identity.user_assigned_identity_resource_id.lower() \
-            != encryption_identity:
-        vm.security_profile.encryption_identity.user_assigned_identity_resource_id = encryption_identity
+    if not (_encrypt_userid := vm.get('securityProfile', {}).get('encryptionIdentity', {}).get('userAssignedIdentityResourceId', None)) \
+       or _encrypt_userid.lower() != encryption_identity.lower():
         updateVm = True
 
     if updateVm:
-        compute_client = _compute_client_factory(cmd.cli_ctx)
-        updateEncryptionIdentity \
-            = compute_client.virtual_machines.begin_create_or_update(resource_group_name, vm_name, vm)
-        LongRunningOperation(cmd.cli_ctx)(updateEncryptionIdentity)
-        result = updateEncryptionIdentity.result()
-        return result is not None and result.provisioning_state == 'Succeeded'
+        from .aaz.latest.vm import Patch as VMPatchUpdate
+        security_profile = {
+            'encryption_identity': {
+                'user_assigned_identity_resource_id': encryption_identity
+            }
+        }
+        updateEncryptionIdentity = VMPatchUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': vm['location'],
+            'vm_name': vm_name,
+            'resource_group': resource_group_name,
+            'security_profile': security_profile
+        })
+        result = LongRunningOperation(cmd.cli_ctx)(updateEncryptionIdentity)
+        return result is not None and result['provisioningState'] == 'Succeeded'
     logger.info("No changes in identity")
     return True
 
 
 def updateVmssEncryptionSetting(cmd, vmss, resource_group_name, vmss_name, encryption_identity):
     from azure.cli.core.azclierror import ArgumentUsageError
-    if vmss.identity is None or vmss.identity.user_assigned_identities is None or encryption_identity.lower() not in \
-            (k.lower() for k in vmss.identity.user_assigned_identities.keys()):
+    if encryption_identity.lower() not in (k.lower() for k in vmss.get('identity', {}).get('userAssignedIdentities', {}).keys()):
         raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
                                  "user assigned identities associated to the resource")
 
-    VirtualMachineProfile, SecurityProfile, EncryptionIdentity \
-        = cmd.get_models('VirtualMachineProfile', 'SecurityProfile', 'EncryptionIdentity')
     updateVmss = False
-
-    if vmss.virtual_machine_profile is None:
-        vmss.virtual_machine_profile = VirtualMachineProfile()
-    if vmss.virtual_machine_profile.security_profile is None:
-        vmss.virtual_machine_profile.security_profile = SecurityProfile()
-    if vmss.virtual_machine_profile.security_profile.encryption_identity is None:
-        vmss.virtual_machine_profile.security_profile.encryption_identity = EncryptionIdentity()
-    if vmss.virtual_machine_profile.security_profile.encryption_identity.user_assigned_identity_resource_id\
-        is None or vmss.virtual_machine_profile.security_profile.encryption_identity\
-            .user_assigned_identity_resource_id.lower() != encryption_identity:
-        vmss.virtual_machine_profile.security_profile.encryption_identity.user_assigned_identity_resource_id \
-            = encryption_identity
+    if vmss['properties']['virtualMachineProfile'].get('securityProfile', {}).get('encryptionIdentity', {}).\
+            get('userAssignedIdentityResourceId', '').lower() != encryption_identity.lower():
         updateVmss = True
 
     if updateVmss:
-        compute_client = _compute_client_factory(cmd.cli_ctx)
-        updateEncryptionIdentity \
-            = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+        from .aaz.latest.vmss import Patch
+        virtual_machine_profile = {
+            'securityProfile': {
+                'encryptionIdentity': {
+                    'userAssignedIdentityResourceId': encryption_identity
+                }
+            }
+        }
+        updateEncryptionIdentity = Patch(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_scale_set_name': vmss_name,
+            'resource_group': resource_group_name,
+            'virtual_machine_profile': virtual_machine_profile
+        })
         LongRunningOperation(cmd.cli_ctx)(updateEncryptionIdentity)
         result = updateEncryptionIdentity.result()
         return result is not None and result.provisioning_state == 'Succeeded'
@@ -150,13 +148,15 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     from azure.mgmt.core.tools import parse_resource_id
     from knack.util import CLIError
 
-    # pylint: disable=no-member
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-    is_linux = _is_linux_os(vm)
-    backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
-    vm_encrypted = backup_encryption_settings.enabled if backup_encryption_settings else False
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_name': vm_name,
+        'resource_group': resource_group_name
+    })
+    is_linux = _is_linux_os_aaz(vm)
+    vm_encrypted = bool(vm['storageProfile']['osDisk'].get('encryptionSettings', {}).get('enabled', False))
     _, has_old_ade = _detect_ade_status(vm)
+
     use_new_ade = not aad_client_id and not has_old_ade
     extension = vm_extension_info['Linux' if is_linux else 'Windows']
 
@@ -170,7 +170,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     if volume_type is None:
         if not is_linux:
             volume_type = _ALL_VOLUME_TYPE
-        elif vm.storage_profile.data_disks:
+        elif vm['storageProfile'].get('dataDisks', []):
             raise CLIError('VM has data disks, please supply --volume-type')
         else:
             volume_type = 'OS'
@@ -225,63 +225,73 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         'AADClientSecret': aad_client_secret if is_linux else (aad_client_secret or '')
     }
 
-    VirtualMachineExtension, DiskEncryptionSettings, KeyVaultSecretReference, KeyVaultKeyReference, SubResource = \
-        cmd.get_models('VirtualMachineExtension', 'DiskEncryptionSettings', 'KeyVaultSecretReference',
-                       'KeyVaultKeyReference', 'SubResource')
-
-    ext = VirtualMachineExtension(
-        location=vm.location,  # pylint: disable=no-member
-        publisher=extension['publisher'],
-        type_properties_type=extension['name'],
-        protected_settings=None if use_new_ade else ade_legacy_private_config,
-        type_handler_version=extension['version'] if use_new_ade else extension['legacy_version'],
-        settings=public_config,
-        auto_upgrade_minor_version=True)
-
-    poller = compute_client.virtual_machine_extensions.begin_create_or_update(
-        resource_group_name, vm_name, extension['name'], ext)
-    LongRunningOperation(cmd.cli_ctx)(poller)
-    poller.result()
+    from .operations.vm_extension import VMExtensionCreate
+    poller = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'vm_extension_name': extension['name'],
+        'location': vm['location'],
+        'publisher': extension['publisher'],
+        'type': extension['name'],
+        'protected_settings': None if use_new_ade else ade_legacy_private_config,
+        'type_handler_version': extension['version'] if use_new_ade else extension['legacy_version'],
+        'settings': public_config,
+        'auto_upgrade_minor_version': True,
+    })
+    extension_result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     # verify the extension was ok
-    extension_result = compute_client.virtual_machine_extensions.get(
-        resource_group_name, vm_name, extension['name'], expand='instanceView')
-    if extension_result.provisioning_state != 'Succeeded':
+    if extension_result['provisioningState'] != 'Succeeded':
         raise CLIError('Extension needed for disk encryption was not provisioned correctly')
 
     if not use_new_ade:
-        if not (extension_result.instance_view.statuses and
-                extension_result.instance_view.statuses[0].message):
+        if not extension_result.get('instanceView', {}).get('statuses', [{}])[0].get('message', ''):
             raise CLIError('Could not find url pointing to the secret for disk encryption')
 
         # 3. update VM's storage profile with the secrets
-        status_url = extension_result.instance_view.statuses[0].message
+        status_url = extension_result['instanceView']['statuses'][0]['message']
 
-        vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-        secret_ref = KeyVaultSecretReference(secret_url=status_url,
-                                             source_vault=SubResource(id=disk_encryption_keyvault))
+        vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_name': vm_name,
+            'resource_group': resource_group_name
+        })
 
-        key_encryption_key_obj = None
+        settings = {
+            "storageProfile.osDisk.encryptionSettings.diskEncryptionKey.secretUrl": status_url,
+            "storageProfile.osDisk.encryptionSettings.diskEncryptionKey.sourceVault.id": disk_encryption_keyvault,
+            "storageProfile.osDisk.encryptionSettings.enabled": "True"
+        }
         if key_encryption_key:
-            key_encryption_key_obj = KeyVaultKeyReference(key_url=key_encryption_key,
-                                                          source_vault=SubResource(id=key_encryption_keyvault))
+            settings.update({
+                "storageProfile.osDisk.encryptionSettings.keyEncryptionKey.keyUrl": key_encryption_key,
+                "storageProfile.osDisk.encryptionSettings.keyEncryptionKey.sourceVault.id": key_encryption_keyvault
+            })
+        disk_encryption_settings = " ".join([f"{k}={v}" for k, v in settings.items()])
 
-        disk_encryption_settings = DiskEncryptionSettings(disk_encryption_key=secret_ref,
-                                                          key_encryption_key=key_encryption_key_obj,
-                                                          enabled=True)
         if vm_encrypted:
             # stop the vm before update if the vm is already encrypted
             logger.warning("Deallocating the VM before updating encryption settings...")
-            compute_client.virtual_machines.deallocate(resource_group_name, vm_name).result()
-            vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
+            from .aaz.latest.vm import Deallocate as VMDeallocate
+            VMDeallocate(cli_ctx=cmd.cli_ctx)(command_args={
+                'vm_name': vm_name,
+                'resource_group': resource_group_name
+            })
 
-        vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
-        set_vm(cmd, vm)
+        from .operations.vm import VMUpdate
+        LongRunningOperation(cmd.cli_ctx)(
+            VMUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+                'set': disk_encryption_settings
+            })
+        )
 
         if vm_encrypted:
             # and start after the update
             logger.warning("Restarting the VM after the update...")
-            compute_client.virtual_machines.start(resource_group_name, vm_name).result()
+            from .aaz.latest.vm import Start as VMStart
+            VMStart(cli_ctx=cmd.cli_ctx)(command_args={
+                'vm_name': vm_name,
+                'resource_group': resource_group_name
+            })
 
     if is_linux and volume_type != _DATA_VOLUME_TYPE:
         old_ade_msg = "If you see 'VMRestartPending', please restart the VM, and the encryption will finish shortly"
@@ -292,13 +302,16 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
 def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False):
     from knack.util import CLIError
 
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_name': vm_name,
+        'resource_group': resource_group_name,
+    })
     has_new_ade, has_old_ade = _detect_ade_status(vm)
     if not has_new_ade and not has_old_ade:
         logger.warning('Azure Disk Encryption is not enabled')
         return
-    is_linux = _is_linux_os(vm)
+    is_linux = _is_linux_os_aaz(vm)
     # pylint: disable=no-member
 
     # 1. be nice, figure out the default volume type and also verify VM will not be busted
@@ -324,49 +337,50 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         'SequenceVersion': sequence_version,
     }
 
-    VirtualMachineExtension, DiskEncryptionSettings = cmd.get_models(
-        'VirtualMachineExtension', 'DiskEncryptionSettings')
-
-    ext = VirtualMachineExtension(
-        location=vm.location,  # pylint: disable=no-member
-        publisher=extension['publisher'],
-        virtual_machine_extension_type=extension['name'],
-        type_handler_version=extension['version'] if has_new_ade else extension['legacy_version'],
-        settings=public_config,
-        auto_upgrade_minor_version=True)
-
-    poller = compute_client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
-                                                                              vm_name,
-                                                                              extension['name'], ext)
-    LongRunningOperation(cmd.cli_ctx)(poller)
-    poller.result()
-    extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
-                                                                     extension['name'],
-                                                                     expand='instanceView')
-    if extension_result.provisioning_state != 'Succeeded':
+    from .operations.vm_extension import VMExtensionCreate
+    poller = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'vm_extension_name': extension['name'],
+        'location': vm['location'],
+        'publisher': extension['publisher'],
+        'type': extension['name'] if has_new_ade else extension['legacy_version'],
+        'settings': public_config,
+        'auto_upgrade_minor_version': True,
+    })
+    extension_result = LongRunningOperation(cmd.cli_ctx)(poller)
+    if extension_result['provisioningState'] != 'Succeeded':
         raise CLIError("Extension updating didn't succeed")
 
     if not has_new_ade:
         # 3. Remove the secret from VM's storage profile
-        vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-        disk_encryption_settings = DiskEncryptionSettings(enabled=False)
-        vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
-        set_vm(cmd, vm)
+        from .operations.vm import VMUpdate
+
+        class RemoveSecret(VMUpdate):
+            def pre_instance_update(self, instance):
+                instance.properties.storage_profile.os_disk.encryption_settings = {'enabled': False}
+
+        LongRunningOperation(cmd.cli_ctx)(
+            RemoveSecret(cli_ctx=cmd.cli_ctx)(command_args={
+                'vm_name': vm_name,
+                'resource_group': resource_group_name
+            })
+        )
 
 
 def _show_vm_encryption_status_thru_new_ade(vm_instance_view):
     ade = _find_existing_ade(vm_instance_view, use_instance_view=True)
     disk_infos = []
-    for div in vm_instance_view.instance_view.disks or []:
+    for div in vm_instance_view.get('instanceView', {}).get('disks', []):
         disk_infos.append({
-            'name': div.name,
-            'encryptionSettings': div.encryption_settings,
-            'statuses': [x for x in (div.statuses or []) if (x.code or '').startswith('EncryptionState')],
+            'name': div['name'],
+            'encryptionSettings': div['encryptionSettings'],
+            'statuses': [x for x in div.get('statuses', []) if x.get('code', '').startswith('EncryptionState')],
         })
 
     return {
-        'status': ade.statuses if ade else None,
-        'substatus': ade.substatuses if ade else None,
+        'status': ade['statuses'] if ade else None,
+        'substatus': ade.get('substatuses', None) if ade else None,
         'disks': disk_infos
     }
 
@@ -379,34 +393,41 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
         'dataDisk': 'NotEncrypted',
         'osType': None
     }
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_name': vm_name,
+        'resource_group': resource_group_name,
+        'expand': 'instanceView'
+    })
     has_new_ade, has_old_ade = _detect_ade_status(vm)
     if not has_new_ade and not has_old_ade:
         logger.warning('Azure Disk Encryption is not enabled')
         return None
     if has_new_ade:
         return _show_vm_encryption_status_thru_new_ade(vm)
-    is_linux = _is_linux_os(vm)
+    is_linux = _is_linux_os_aaz(vm)
 
     # pylint: disable=no-member
     # The following logic was mostly ported from xplat-cli
     os_type = 'Linux' if is_linux else 'Windows'
     encryption_status['osType'] = os_type
     extension = vm_extension_info[os_type]
-    extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
-                                                                     vm_name,
-                                                                     extension['name'],
-                                                                     expand='instanceView')
+    from .operations.vm_extension import VMExtensionShow
+    extension_result = VMExtensionShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'vm_name': vm_name,
+        'resource_group': resource_group_name,
+        'name': extension['name'],
+        'expand': 'instanceView'
+    })
     logger.debug(extension_result)
-    if extension_result.instance_view and extension_result.instance_view.statuses:
-        encryption_status['progressMessage'] = extension_result.instance_view.statuses[0].message
+    if _statuses := extension_result['instanceView'].get('statuses', []):
+        encryption_status['progressMessage'] = _statuses[0].message
 
     substatus_message = None
-    if getattr(extension_result.instance_view, 'substatuses', None):
-        substatus_message = extension_result.instance_view.substatuses[0].message
+    if _substatuses := extension_result['instanceView'].get('substatuses', []):
+        substatus_message = _substatuses[0].message
 
-    encryption_status['osDiskEncryptionSettings'] = vm.storage_profile.os_disk.encryption_settings
+    encryption_status['osDiskEncryptionSettings'] = vm['storageProfile'].get('osDisk', {}).get('encryptionSettings', None)
 
     import json
     if is_linux:
@@ -427,17 +448,16 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
     else:
         # Windows - get os and data volume encryption state from the vm model
         if (encryption_status['osDiskEncryptionSettings'] and
-                encryption_status['osDiskEncryptionSettings'].enabled and
-                encryption_status['osDiskEncryptionSettings'].disk_encryption_key and
-                encryption_status['osDiskEncryptionSettings'].disk_encryption_key.secret_url):
+                bool(encryption_status['osDiskEncryptionSettings'].get('enabled', '')) and
+                encryption_status['osDiskEncryptionSettings'].get('diskEncryptionKey', {}).get('secret_url', '')):
             encryption_status['osDisk'] = _STATUS_ENCRYPTED
         else:
             encryption_status['osDisk'] = 'Unknown'
 
-        if extension_result.provisioning_state == 'Succeeded':
-            volume_type = extension_result.settings.get('VolumeType', None)
+        if extension_result['provisioning_state'] == 'Succeeded':
+            volume_type = extension_result.get('settings', {}).get('VolumeType', None)
             about_data_disk = not volume_type or volume_type.lower() != 'os'
-            if about_data_disk and extension_result.settings.get('EncryptionOperation', None) == 'EnableEncryption':
+            if about_data_disk and extension_result.get('settings', {}).get('EncryptionOperation', None) == 'EnableEncryption':
                 encryption_status['dataDisk'] = _STATUS_ENCRYPTED
 
     return encryption_status
@@ -476,120 +496,139 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
     from azure.mgmt.core.tools import parse_resource_id
     from knack.util import CLIError
 
-    # pylint: disable=no-member
-    UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
-        'UpgradeMode', 'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
+    from .aaz.latest.vmss import Update as VMSSUpdate
 
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    is_linux = _is_linux_os(vmss.virtual_machine_profile)
-    extension = vm_extension_info['Linux' if is_linux else 'Windows']
+    class VMSSEncrypt(VMSSUpdate):
+        def pre_instance_update(self, instance):
+            _disk_encryption_keyvault, _key_encryption_keyvault, _key_encryption_key, _volume_type = \
+                disk_encryption_keyvault, key_encryption_keyvault, key_encryption_key, volume_type
 
-    # 1. First validate arguments
-    volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force)
+            is_linux = _is_linux_os_aaz(instance.properties.virtual_machine_profile.to_serialized_data())
+            extension = vm_extension_info['Linux' if is_linux else 'Windows']
 
-    # retrieve keyvault details
-    disk_encryption_keyvault_url = get_key_vault_base_url(cmd.cli_ctx,
-                                                          (parse_resource_id(disk_encryption_keyvault))['name'])
+            # 1. First validate arguments
+            _volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, _volume_type, force)
 
-    # disk encryption key itself can be further protected, so let us verify
-    if key_encryption_key:
-        key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
+            # retrieve keyvault details
+            _disk_encryption_keyvault_url = get_key_vault_base_url(
+                cmd.cli_ctx, (parse_resource_id(_disk_encryption_keyvault))['name']
+            )
 
-    if encryption_identity:
-        result = updateVmssEncryptionSetting(cmd, vmss, resource_group_name, vmss_name, encryption_identity)
-        if result:
-            logger.info("Encryption Identity successfully set in virtual machine scale set")
-        else:
-            raise CLIError("Failed to update encryption Identity to the VMSS")
+            # disk encryption key itself can be further protected, so let us verify
+            if _key_encryption_key:
+                _key_encryption_keyvault = _key_encryption_keyvault or _disk_encryption_keyvault
 
-    #  to avoid bad server errors, ensure the vault has the right configurations
-    _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vmss, force)
+            if encryption_identity:
+                result = updateVmssEncryptionSetting(cmd, instance.to_serialized_data(), resource_group_name, vmss_name, encryption_identity)
+                if result:
+                    logger.info("Encryption Identity successfully set in virtual machine scale set")
+                else:
+                    raise CLIError("Failed to update encryption Identity to the VMSS")
 
-    # if key name and not key url, get url.
-    if key_encryption_key and '://' not in key_encryption_key:
-        key_encryption_key = _get_keyvault_key_url(
-            cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
+            #  to avoid bad server errors, ensure the vault has the right configurations
+            _verify_keyvault_good_for_encryption(cmd.cli_ctx, _disk_encryption_keyvault, _key_encryption_keyvault, instance.to_serialized_data(), force)
 
-    # 2. we are ready to provision/update the disk encryption extensions
-    public_config = {
-        'KeyVaultURL': disk_encryption_keyvault_url,
-        'KeyEncryptionKeyURL': key_encryption_key or '',
-        "KeyVaultResourceId": disk_encryption_keyvault,
-        "KekVaultResourceId": key_encryption_keyvault if key_encryption_key else '',
-        'KeyEncryptionAlgorithm': key_encryption_algorithm if key_encryption_key else '',
-        'VolumeType': volume_type,
-        'EncryptionOperation': 'EnableEncryption'
-    }
+            # if key name and not key url, get url.
+            if _key_encryption_key and '://' not in _key_encryption_key:
+                _key_encryption_key = _get_keyvault_key_url(
+                    cmd.cli_ctx, (parse_resource_id(_key_encryption_keyvault))['name'], _key_encryption_key)
 
-    ext = VirtualMachineScaleSetExtension(name=extension['name'],
-                                          publisher=extension['publisher'],
-                                          type_properties_type=extension['name'],
-                                          type_handler_version=extension['version'],
-                                          settings=public_config,
-                                          auto_upgrade_minor_version=True,
-                                          force_update_tag=uuid.uuid4())
-    exts = [ext]
+            # 2. we are ready to provision/update the disk encryption extensions
+            public_config = {
+                'KeyVaultURL': _disk_encryption_keyvault_url,
+                'KeyEncryptionKeyURL': _key_encryption_key or '',
+                "KeyVaultResourceId": _disk_encryption_keyvault,
+                "KekVaultResourceId": _key_encryption_keyvault if _key_encryption_key else '',
+                'KeyEncryptionAlgorithm': key_encryption_algorithm if _key_encryption_key else '',
+                'VolumeType': _volume_type,
+                'EncryptionOperation': 'EnableEncryption'
+            }
 
-    # remove any old ade extensions set by this command and add the new one.
-    vmss_ext_profile = vmss.virtual_machine_profile.extension_profile
-    if vmss_ext_profile and vmss_ext_profile.extensions:
-        exts.extend(old_ext for old_ext in vmss.virtual_machine_profile.extension_profile.extensions
-                    if old_ext.type != ext.type or old_ext.name != ext.name)
-    vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=exts)
+            ext = {
+                'name': extension['name'],
+                'properties': {
+                    'publisher': extension['publisher'],
+                    'type_handler_version': extension['version'],
+                    'type': extension['name'],
+                    'settings': public_config,
+                    'auto_upgrade_minor_version': True,
+                    'force_update_tag': str(uuid.uuid4())
+                }
+            }
+            exts = [ext]
 
-    # Avoid unnecessary permission error
-    vmss.virtual_machine_profile.storage_profile.image_reference = None
+            # remove any old ade extensions set by this command and add the new one.
+            vmss_ext_profile = instance.properties.virtual_machine_profile.extension_profile
+            if vmss_ext_profile and vmss_ext_profile.extensions:
+                exts.extend(old_ext for old_ext in instance.properties.virtual_machine_profile.extension_profile.extensions
+                            if old_ext.properties.type != ext['properties']['type'] or old_ext.name != ext['name'])
+            instance.properties.virtual_machine_profile.extension_profile.extensions = exts
 
-    poller = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+            # Avoid unnecessary permission error
+            instance.properties.virtual_machine_profile.storage_profile.image_reference = None
+
+        def post_operations(self):
+            _show_post_action_message(resource_group_name, vmss_name, self.ctx.vars.instance.properties.upgrade_policy.mode == "Manual", True)
+
+    poller = VMSSEncrypt(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vmss_name
+    })
     LongRunningOperation(cmd.cli_ctx)(poller)
-    _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, True)
 
 
 def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=False):
-    UpgradeMode, VirtualMachineScaleSetExtension = cmd.get_models('UpgradeMode', 'VirtualMachineScaleSetExtension')
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    is_linux = _is_linux_os(vmss.virtual_machine_profile)
-    extension = vm_extension_info['Linux' if is_linux else 'Windows']
+    from .aaz.latest.vmss import Update
 
-    # 1. be nice, figure out the default volume type
-    volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force)
+    class VMSSDecrypt(Update):
+        def pre_instance_update(self, instance):
+            is_linux = _is_linux_os_aaz(instance.properties.virtual_machine_profile.to_serialized_data())
+            extension = vm_extension_info['Linux' if is_linux else 'Windows']
 
-    # 2. update the disk encryption extension
-    public_config = {
-        'VolumeType': volume_type,
-        'EncryptionOperation': 'DisableEncryption',
-    }
+            # 1. be nice, figure out the default volume type
+            _volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force)
 
-    ext = VirtualMachineScaleSetExtension(name=extension['name'],
-                                          publisher=extension['publisher'],
-                                          type_properties_type=extension['name'],
-                                          type_handler_version=extension['version'],
-                                          settings=public_config,
-                                          auto_upgrade_minor_version=True,
-                                          force_update_tag=uuid.uuid4())
-    if (not vmss.virtual_machine_profile.extension_profile or
-            not vmss.virtual_machine_profile.extension_profile.extensions):
-        extensions = []
-    else:
-        extensions = vmss.virtual_machine_profile.extension_profile.extensions
+            # 2. update the disk encryption extension
+            public_config = {
+                'VolumeType': _volume_type,
+                'EncryptionOperation': 'DisableEncryption',
+            }
 
-    ade_extension = [x for x in extensions if
-                     x.type_properties_type.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
-    if not ade_extension:
-        from knack.util import CLIError
-        raise CLIError("VM scale set '{}' was not encrypted".format(vmss_name))
+            ext = {
+                'name': extension['name'],
+                'properties': {
+                    'publisher': extension['publisher'],
+                    'type_handler_version': extension['version'],
+                    'type': extension['name'],
+                    'settings': public_config,
+                    'auto_upgrade_minor_version': True,
+                    'force_update_tag': str(uuid.uuid4())
+                }
+            }
 
-    index = vmss.virtual_machine_profile.extension_profile.extensions.index(ade_extension[0])
-    vmss.virtual_machine_profile.extension_profile.extensions[index] = ext
+            ade_extension_matched = False
+            for i, x in enumerate(instance.properties.virtual_machine_profile.extension_profile.extensions):
+                if (str(x.name).lower() == extension['name'].lower() and
+                        str(x.properties.publisher).lower() == extension['publisher'].lower()):
+                    ade_extension_matched = True
+                    instance.properties.virtual_machine_profile.extension_profile.extensions[i] = ext
+                    break
 
-    # Avoid unnecessary permission error
-    vmss.virtual_machine_profile.storage_profile.image_reference = None
+            if not ade_extension_matched:
+                from knack.util import CLIError
+                raise CLIError("VM scale set '{}' was not encrypted".format(vmss_name))
 
-    poller = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+            # Avoid unnecessary permission error
+            instance.properties.virtual_machine_profile.storage_profile.image_reference = None
+
+        def post_operations(self):
+            _show_post_action_message(resource_group_name, vmss_name, self.ctx.vars.instance.properties.upgrade_policy.mode == "Manual", False)
+
+    poller = VMSSDecrypt(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vmss_name
+    })
     LongRunningOperation(cmd.cli_ctx)(poller)
-    _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, False)
 
 
 def _show_post_action_message(resource_group_name, vmss_name, maunal_mode, enable):
@@ -604,29 +643,35 @@ def _show_post_action_message(resource_group_name, vmss_name, maunal_mode, enabl
 
 
 def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vm_instances = list(client.virtual_machine_scale_set_vms.list(resource_group_name, vmss_name,
-                                                                  select='instanceView', expand='instanceView'))
+    from .operations.vmss import VMSSListInstances
+    vm_instances = VMSSListInstances(cli_ctx=cmd.cli_ctx)(command_args={
+        'virtual_machine_scale_set_name': vmss_name,
+        'resource_group': resource_group_name,
+        'expand': 'instanceView',
+        'select': 'instanceView'
+    })
+
     result = []
     for instance in vm_instances:
-        view = instance.instance_view
+        view = instance['instanceView']
         disk_infos = []
         vm_enc_info = {
-            'id': instance.id,
+            'id': instance['id'],
             'disks': disk_infos
         }
-        for div in view.disks:
+        for div in view['disks']:
             disk_infos.append({
-                'name': div.name,
-                'encryptionSettings': div.encryption_settings,
-                'statuses': [x for x in (div.statuses or []) if (x.code or '').startswith('EncryptionState')]
+                'name': div['name'],
+                'encryptionSettings': div.get('encryptionSettings', []),
+                'statuses': [x for x in (div.get('statuses', [])) if (x.get('code', '')).startswith('EncryptionState')]
             })
 
         result.append(vm_enc_info)
     return result
 
 
-def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, vm_or_vmss, force):
+# aaz implementation
+def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, key_vault_id, vm_or_vmss, force):
     def _report_client_side_validation_error(msg):
         if force:
             logger.warning("WARNING: %s %s", msg, "Encryption might fail.")
@@ -634,7 +679,7 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
             from knack.util import CLIError
             raise CLIError("ERROR: {}".format(msg))
 
-    resource_type = "VMSS" if vm_or_vmss.type.lower().endswith("virtualmachinescalesets") else "VM"
+    resource_type = "VMSS" if vm_or_vmss['type'].lower().endswith("virtualmachinescalesets") else "VM"
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -648,28 +693,26 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
     if resource_type == 'VM':
         vm_encryption_identity = vm_or_vmss
     else:
-        vm_encryption_identity = vm_or_vmss.virtual_machine_profile
+        vm_encryption_identity = vm_or_vmss['properties']['virtualMachineProfile']
 
-    if vm_encryption_identity and vm_encryption_identity.security_profile and \
-        vm_encryption_identity.security_profile.encryption_identity and \
-            vm_encryption_identity.security_profile.encryption_identity.user_assigned_identity_resource_id:
+    if vm_encryption_identity.get('securityProfile', {}).get('encryptionIdentity', {}).get('userAssignedIdentityResourceId', None):
         pass
     elif not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
         _report_client_side_validation_error(
             "Keyvault '{}' is not enabled for disk encryption.".format(disk_vault_resource_info['resource_name']))
 
-    if kek_vault_id:
-        kek_vault_info = parse_resource_id(kek_vault_id)
+    if key_vault_id:
+        kek_vault_info = parse_resource_id(key_vault_id)
         if disk_vault_resource_info['name'].lower() != kek_vault_info['name'].lower():
             client.get(kek_vault_info['resource_group'], kek_vault_info['name'])
 
     # verify subscription mataches
-    vm_vmss_resource_info = parse_resource_id(vm_or_vmss.id)
+    vm_vmss_resource_info = parse_resource_id(vm_or_vmss['id'])
     if vm_vmss_resource_info['subscription'].lower() != disk_vault_resource_info['subscription'].lower():
         _report_client_side_validation_error("{} {}'s subscription does not match keyvault's subscription."
                                              .format(resource_type, vm_vmss_resource_info['name']))
 
     # verify region matches
-    if key_vault.location.replace(' ', '').lower() != vm_or_vmss.location.replace(' ', '').lower():
+    if key_vault.location.replace(' ', '').lower() != vm_or_vmss['location'].replace(' ', '').lower():
         _report_client_side_validation_error(
             "{} {}'s region does not match keyvault's region.".format(resource_type, vm_vmss_resource_info['name']))

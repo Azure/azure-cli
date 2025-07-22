@@ -256,8 +256,8 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd(
-            'storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
-        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(
+            'storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(storage, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(
             storage2, resource_group2, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()['id']
 
         self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage), checks=[
@@ -294,7 +294,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Java|17')])
+            JMESPathCheck('linuxFxVersion', 'Java|21')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -515,7 +515,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
 
 class FunctionWorkloadProfile(ScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
@@ -712,7 +712,7 @@ class FunctionappDaprConfig(ScenarioTest):
 
 
 class FunctionappDapr(LiveScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location="northeurope")
     @StorageAccountPreparer()
     def test_functionapp_disable_dapr(self, resource_group, storage_account):
@@ -853,8 +853,42 @@ class FunctionAppFlex(LiveScenarioTest):
                                .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
 
         server_farm_id =functionapp['properties']['serverFarmId']
-        function_plan = self.cmd('az functionapp plan show --ids {}'
+        function_plan = self.cmd('functionapp plan show --ids {}'
                                .format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == False) 
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_plan_enable_zone_redundant(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id = functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == False) 
+        updated_plan = self.cmd('functionapp plan update --id {} --set zoneRedundant=true'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(updated_plan['zoneRedundant'] == True)
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == True) 
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_plan_disable_zone_redundant(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11 --zone-redundant'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id = functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == True) 
+        updated_plan = self.cmd('functionapp plan update --id {} --set zoneRedundant=false'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(updated_plan['zoneRedundant'] == False)
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
         self.assertTrue(function_plan['zoneRedundant'] == False) 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
@@ -936,10 +970,10 @@ class FunctionAppFlex(LiveScenarioTest):
         container_name = self.create_random_name('funccontainer', 24)
         storage2_name = self.create_random_name('funcstorage2', 24)
         identity_name = self.create_random_name('id1', 8)
-        storage_account = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'
+        storage_account = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'
                                    .format(storage_name, resource_group, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         storage_account_blob_endpoint = storage_account['primaryEndpoints']['blob']
-        deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'
+        deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS --allow-blob-public-access false'
                                               .format(resource_group, storage2_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         deployment_account_blob_endpoint = deployment_storage_account['primaryEndpoints']['blob']
         self.cmd('storage container create -g {} -n {} --account-name {}'
@@ -1017,7 +1051,7 @@ class FunctionAppFlex(LiveScenarioTest):
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment(self, resource_group, storage_account):
@@ -1208,7 +1242,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp function delete -g {} -n {} --function-name {}'
             .format(resource_group, functionapp_name, function_name))
 
-    @ResourceGroupPreparer(location='southcentralus')
+    @ResourceGroupPreparer(location='eastus2')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_plan_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -1220,13 +1254,13 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'functionappplan', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location southcentralus --logs-destination none'
+        self.cmd('containerapp env create --name {} --resource-group {} --location eastus2 --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'South Central US')])
+                     JMESPathCheck('location', 'East US 2')])
 
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location southcentralus'.format(resource_group, plan_name))
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location eastus2'.format(resource_group, plan_name))
 
         with self.assertRaises(ArgumentUsageError):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
@@ -1281,7 +1315,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1),
             JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
 
-    @ResourceGroupPreparer(location='southcentralus')
+    @ResourceGroupPreparer(location='eastus2')
     @StorageAccountPreparer()
     def test_functionapp_create_with_min_replicas_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -1291,7 +1325,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'functionappplan', 40
         )
 
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location southcentralus'.format(resource_group, plan_name))
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location eastus2'.format(resource_group, plan_name))
 
         with self.assertRaises(RequiredArgumentMissingError):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime dotnet --functions-version 4 --min-replicas 1'
@@ -1452,7 +1486,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('javaVersion', '17')])
+            JMESPathCheck('javaVersion', '21')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1793,7 +1827,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')])
+            JMESPathCheck('linuxFxVersion', 'Node|22')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
@@ -1879,7 +1913,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')
+            JMESPathCheck('linuxFxVersion', 'Node|22')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -1916,7 +1950,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')
+            JMESPathCheck('linuxFxVersion', 'Node|22')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -2592,7 +2626,7 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('functionapp plan delete -n {plan_name} -y')
 
 class FunctionappIdentityTest(ScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     @unittest.skip("Temp Skip")
@@ -2624,7 +2658,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group,
                                                            functionapp_name), checks=self.is_empty())
 
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_assign_user_identity(self, resource_group, storage_account):
@@ -2656,7 +2690,7 @@ class FunctionappIdentityTest(ScenarioTest):
             self.check('userAssignedIdentities', None),
         ])
 
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_remove_identity(self, resource_group, storage_account):
@@ -2783,7 +2817,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         functionapp_name = self.create_random_name('functionapp', 24)
         storage_account = self.create_random_name('funcstorage1', 24)
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --public-network-access Disabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --public-network-access Disabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
@@ -2794,7 +2828,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         functionapp_name = self.create_random_name('functionapp', 24)
         storage_account = self.create_random_name('funcstorage', 24)
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
@@ -2808,7 +2842,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
@@ -2824,7 +2858,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
             resource_group, vnet_name, subnet_name))
@@ -2843,7 +2877,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         subnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
             resource_group, vnet_name, subnet_name)).get_output_in_json()['newVNet']['subnets'][0]['id']
@@ -2863,7 +2897,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
 
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
         self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --cnl'.format(resource_group, functionapp_name, storage_account, ep_plan_name)).assert_with_checks([
             JMESPathCheck('vnetContentShareEnabled', True),

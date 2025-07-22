@@ -19,9 +19,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-09-01",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/origingroups", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/origingroups", "2025-06-01"],
         ]
     }
 
@@ -46,6 +46,11 @@ class List(AAZCommand):
             options=["--profile-name"],
             help="Name of the Azure Front Door Standard or Azure Front Door Premium profile which is unique within the resource group.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$",
+                max_length=260,
+                min_length=1,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -118,7 +123,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -180,6 +185,7 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.authentication = AAZObjectType()
             properties.deployment_status = AAZStrType(
                 serialized_name="deploymentStatus",
                 flags={"read_only": True},
@@ -204,6 +210,16 @@ class List(AAZCommand):
             properties.traffic_restoration_time_to_healed_or_new_endpoints_in_minutes = AAZIntType(
                 serialized_name="trafficRestorationTimeToHealedOrNewEndpointsInMinutes",
             )
+
+            authentication = cls._schema_on_200.value.Element.properties.authentication
+            authentication.scope = AAZStrType()
+            authentication.type = AAZStrType()
+            authentication.user_assigned_identity = AAZObjectType(
+                serialized_name="userAssignedIdentity",
+            )
+
+            user_assigned_identity = cls._schema_on_200.value.Element.properties.authentication.user_assigned_identity
+            user_assigned_identity.id = AAZStrType()
 
             health_probe_settings = cls._schema_on_200.value.Element.properties.health_probe_settings
             health_probe_settings.probe_interval_in_seconds = AAZIntType(

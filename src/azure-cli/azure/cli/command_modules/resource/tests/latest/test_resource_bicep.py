@@ -44,6 +44,7 @@ class TestBicep(unittest.TestCase):
     @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
     @mock.patch("os.chmod")
     @mock.patch("os.stat")
+    @mock.patch("os.makedirs")
     @mock.patch("io.BufferedWriter")
     @mock.patch("azure.cli.command_modules.resource._bicep.open")
     @mock.patch("azure.cli.command_modules.resource._bicep.urlopen")
@@ -58,6 +59,7 @@ class TestBicep(unittest.TestCase):
         urlopen_stub,
         open_stub,
         buffered_writer_stub,
+        makedirs_stub,
         stat_stub,
         chmod_stub,
         get_use_binary_from_path_config_stub,
@@ -75,6 +77,7 @@ class TestBicep(unittest.TestCase):
         stat_stub.return_value = stat_result
 
         chmod_stub.return_value = None
+        makedirs_stub.return_value = None
 
         response = mock.Mock()
         response.getcode.return_value = 200

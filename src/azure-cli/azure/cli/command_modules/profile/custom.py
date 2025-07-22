@@ -42,7 +42,7 @@ LOGIN_OUTPUT_WARNING = (
     "available subscriptions by default.\n")
 
 USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD = (
-    "Starting July 01, 2025, MFA will be gradually enforced for Azure public cloud. "
+    "Starting September 1, 2025, MFA will be gradually enforced for Azure public cloud. "
     "The authentication with username and password in the command line is not supported with MFA. "
     "Consider using one of the compatible authentication methods. "
     "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
@@ -122,6 +122,7 @@ def account_clear(cmd):
 
 # pylint: disable=too-many-branches, too-many-locals
 def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
+          claims_challenge=None,
           # Device code flow
           use_device_code=False,
           # Service principal
@@ -133,6 +134,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
+    if identity and username:
+        raise CLIError('Passing the managed identity ID with --username is no longer supported. '
+                       'Use --client-id, --object-id or --resource-id instead.')
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
     if use_cert_sn_issuer and not service_principal:
@@ -145,6 +149,10 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         else:
             logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD)
 
+    if claims_challenge:
+        from azure.cli.core.util import b64decode
+        claims_challenge = b64decode(claims_challenge)
+
     interactive = False
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -152,9 +160,6 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if identity:
         if in_cloud_console():
             return profile.login_in_cloud_shell()
-        if username:
-            from azure.cli.core.breaking_change import print_conditional_breaking_change
-            print_conditional_breaking_change(cmd.cli_ctx, tag='ManagedIdentityUsernameBreakingChange')
         return profile.login_with_managed_identity(
             client_id=client_id, object_id=object_id, resource_id=resource_id,
             allow_no_subscriptions=allow_no_subscriptions)
@@ -194,7 +199,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
         use_cert_sn_issuer=use_cert_sn_issuer,
-        show_progress=select_subscription)
+        show_progress=select_subscription,
+        claims_challenge=claims_challenge
+    )
 
     # Launch interactive account selection. No JSON output.
     if select_subscription:

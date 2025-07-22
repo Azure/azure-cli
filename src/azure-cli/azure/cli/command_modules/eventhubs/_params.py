@@ -28,7 +28,7 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
-    with self.argument_context('eventhubs namespace', min_api='2021-06-01-preview') as c:
+    with self.argument_context('eventhubs namespace') as c:
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.eventhubs/namespaces'), help='Name of Namespace')
         c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
@@ -58,14 +58,14 @@ def load_arguments_eh(self, _):
         c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
         c.argument('max_replication_lag_duration_in_seconds', type=int, options_list=['--max-replication-lag-duration-in-seconds', '--max-lag'], help='The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas')
 
-    with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
+    with self.argument_context('eventhubs namespace create') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='Cluster ARM ID of the Namespace')
 
 # region - Eventhub Create
     with self.argument_context('eventhubs eventhub') as c:
         c.argument('event_hub_name', arg_type=name_type, id_part='child_name_1', completer=get_eventhubs_command_completion_list, help='Name of Eventhub')
 
-    for scope in ['eventhubs eventhub create']:
+    for scope in ['eventhubs eventhub create', 'eventhubs eventhub update']:
         with self.argument_context(scope) as c:
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled']), help='Status of Eventhub')
@@ -86,6 +86,7 @@ def load_arguments_eh(self, _):
             c.argument('user_metadata', help="Gets and Sets Metadata of User.")
             c.argument('timestamp_type', arg_type=get_enum_type(['Create', 'LogAppend']), help='Denotes the type of timestamp the message will hold.')
             c.argument('min_compaction_lag_in_mins', type=int, arg_group='Retention-Description', options_list=['--min-lag', '--min-compaction-lag-in-mins'], help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.")
+            c.argument('encoding', arg_group='Capture', options_list=['encoding'], help='Enumerates the possible values for the encoding format of capture description. Note: \'AvroDeflate\' will be deprecated in New API Version')
     with self.argument_context('eventhubs eventhub list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 

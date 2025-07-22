@@ -42,7 +42,7 @@ from azure.cli.command_modules.acs.tests.latest.utils import (
 )
 from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import ResourceType
-from azure.mgmt.containerservice.v2020_03_01.models import (
+from azure.mgmt.containerservice.models import (
     ManagedClusterAddonProfile,
 )
 from azure.cli.core.azclierror import (

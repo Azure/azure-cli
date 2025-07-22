@@ -1544,6 +1544,58 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-rp-size 5 '
                      '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer('cli_test_vm_disk_attach_from_copy_and_restore', location='eastus2euap')
+    def test_vm_disk_attach_from_copy_and_restore(self):
+        self.kwargs.update({
+            'vm_name': self.create_random_name('vm_', length=15),
+            'collection_name': self.create_random_name('collection_', length=20),
+            'point_name': self.create_random_name('point_', length=15),
+            'disk_name1': self.create_random_name('disk_', length=15),
+            'disk_name2': self.create_random_name('disk_', length=15),
+            'disk_name3': self.create_random_name('disk_', length=15),
+            'disk_name4': self.create_random_name('disk_', length=15),
+            'disk_name5': self.create_random_name('disk_', length=15),
+            'subnet': self.create_random_name('subnet', length=15),
+            'vnet': self.create_random_name('vnet', length=15)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1 --sku Standard_LRS')
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --attach-data-disks {disk_name1} '
+                      '--admin-username rp_disk_test --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}')
+        self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}')
+        disk_restore_point = self.cmd('restore-point show --resource-group {rg} --collection-name {collection_name} --name {point_name}').get_output_in_json()
+        self.kwargs['disk_restore_point_id'] = disk_restore_point['sourceMetadata']['storageProfile']['dataDisks'][0]['diskRestorePoint']['id']
+
+        self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku Standard_LRS --size-gb 5 --source {disk_restore_point_id}').get_output_in_json()
+        self.cmd('disk create --resource-group {rg} --name {disk_name3} --sku Standard_LRS --size-gb 5')
+        copy_disk = self.cmd('disk create --resource-group {rg} --name {disk_name4} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
+        copy_snapshot = self.cmd('snapshot create --resource-group {rg} --name {disk_name5} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
+
+        self.kwargs.update({
+            'copy_resource1_id': copy_disk['id'],
+            'copy_resource2_id': copy_snapshot['id']
+        })
+        self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --source-resource {copy_resource1_id} {copy_resource2_id} '
+                 ' --source-disk-rp {disk_restore_point_id}')
+        self.cmd('vm show -g {rg} -n {vm_name}', checks=[
+            self.check('storageProfile.dataDisks[1].sourceResource.id', '{copy_resource1_id}'),
+            self.check('storageProfile.dataDisks[1].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[2].sourceResource.id', '{copy_resource2_id}'),
+            self.check('storageProfile.dataDisks[2].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[3].sourceResource.id', '{disk_restore_point_id}'),
+            self.check('storageProfile.dataDisks[3].createOption', 'Restore')
+        ])
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
     def test_vm_disk_upload(self, resource_group):
         self.kwargs.update({
@@ -1770,6 +1822,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
+    @unittest.skip('No match for the request (<Request (GET) https://azcliprod.blob.core.windows.net/cli-extensions/elastic_san-1.1.0-py3-none-any.whl>) was found.')
     @ResourceGroupPreparer(name_prefix='cli_disk_and_snapshot_with_elastic_san', location='westus2')
     @AllowLargeResponse(size_kb=99999)
     def test_disk_and_snapshot_with_elastic_san(self, resource_group):
@@ -3806,7 +3859,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use at least one of --name, --disks and --disk-ids'):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use at least one of --name, --disks, --disk-ids, --source-snapshots-or-disks and --source-disk-restore-point'):
             self.cmd('vm disk attach -g {rg} --vm-name {vm} --new --size-gb 1 ')
 
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disks'):
@@ -6838,8 +6891,9 @@ class VMDiskEncryptionTest(ScenarioTest):
 
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId}')
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
-        
-   
+
+
+    @unittest.skip('need feature for this scenario')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_identity_set_at_encryption_cmdlet', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
@@ -7038,6 +7092,7 @@ class VMDiskEncryptionTest(ScenarioTest):
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
 
+    @unittest.skip('need feature for this scenario')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_identity_set_at_encryption_cmdlet', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
@@ -8793,6 +8848,99 @@ class VMGalleryImage(ScenarioTest):
         #          checks=[
         #              self.check('sharingProfile.permissions', 'Community')
         #          ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_in_vm_access_', location='eastus2')
+    def test_gallery_in_vm_access_control_profile(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        rules_file = os.path.join(curr_dir, 'sig_in_vm_access_control_profile_version_rules.json').replace('\\', '\\\\')
+
+        self.kwargs.update({
+            'gallery': self.create_random_name('gellery', 16),
+            'profile1': 'profile1',
+            'profile2': 'profile2',
+            'profile_version': '1.0.0',
+            'rules_file': rules_file,
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+
+        self.cmd('sig in-vm-access-control-profile create --resource-group {rg} --gallery-name {gallery} --name {profile1} '
+                 '--os-type Linux --applicable-host-endpoint WireServer', checks=[
+            self.check('name', '{profile1}'),
+            self.check('properties.osType', 'Linux'),
+            self.check('properties.applicableHostEndpoint', 'WireServer'),
+        ])
+
+        self.cmd(
+            'sig in-vm-access-control-profile show --resource-group {rg} --gallery-name {gallery} --name {profile1}',
+            checks=[
+                self.check('name', '{profile1}'),
+                self.check('properties.osType', 'Linux'),
+                self.check('properties.applicableHostEndpoint', 'WireServer'),
+            ])
+
+        self.cmd('sig in-vm-access-control-profile update --resource-group {rg} --gallery-name {gallery} --name {profile1} '
+                 '--description test', checks=[
+            self.check('name', '{profile1}'),
+            self.check('properties.description', 'test'),
+        ])
+        
+        self.cmd('sig in-vm-access-control-profile list --resource-group {rg} --gallery-name {gallery}', checks=[
+            self.check('length(@)', '1'),
+        ])
+
+        self.cmd(
+            'sig in-vm-access-control-profile delete --resource-group {rg} --gallery-name {gallery} --name {profile1} --yes')
+
+    
+        self.cmd('sig in-vm-access-control-profile list --resource-group {rg} --gallery-name {gallery}', checks=[
+            self.check('length(@)', '0'),
+        ])
+
+        self.cmd(
+            'sig in-vm-access-control-profile create --resource-group {rg} --gallery-name {gallery} --name {profile2} '
+            '--os-type Linux --applicable-host-endpoint WireServer', checks=[
+                self.check('name', '{profile2}'),
+            ])
+
+        self.cmd('sig in-vm-access-control-profile-version create --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version} --default-access Allow --mode Audit '
+                 '--exclude-from-latest true --target-regions westus eastus2 --rules {rules_file}', checks=[
+            self.check('name', '{profile_version}'),
+            self.check('mode', 'Audit'),
+            self.check('defaultAccess', 'Allow'),
+            self.check('excludeFromLatest', True),
+            self.check('length(targetLocations)', '2'),
+            self.check('length(rules.identities)', '1'),
+            self.check('length(rules.privileges)', '1'),
+            self.check('length(rules.roleAssignments)', '1'),
+            self.check('length(rules.roles)', '1'),
+        ])
+
+        self.cmd('sig in-vm-access-control-profile-version update --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version} --exclude-from-latest true --target-regions eastus2 westus eastus', checks=[
+            self.check('name', '{profile_version}'),
+            self.check('excludeFromLatest', True),
+            self.check('length(targetLocations)', '3'),
+        ])
+
+        self.cmd('sig in-vm-access-control-profile-version show --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version}', checks=[
+            self.check('name', '{profile_version}'),
+            self.check('excludeFromLatest', True),
+            self.check('length(targetLocations)', '3'),
+        ])
+        
+        self.cmd('sig in-vm-access-control-profile-version list --resource-group {rg} --gallery-name {gallery} --profile-name {profile2}', checks=[
+            self.check('length(@)', '1'),
+        ])
+
+        self.cmd('sig in-vm-access-control-profile-version delete --resource-group {rg} --gallery-name {gallery} '
+                 '--profile-name {profile2} --profile-version {profile_version} --yes')
+           
+        self.cmd('sig in-vm-access-control-profile-version list --resource-group {rg} --gallery-name {gallery} --profile-name {profile2}', checks=[
+            self.check('length(@)', '0'),
+        ])
 
 
 class VMGalleryApplication(ScenarioTest):
@@ -10781,6 +10929,36 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
                      self.check('automaticRepairsPolicy.gracePeriod', 'PT30M')
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disbale_automatic_repairs_of_zone_balancing', location='eastus2')
+    def test_vmss_create_disbale_automatic_repairs_of_zone_balancing(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'nsg': self.create_random_name('nsg', 10),
+            'lb1': self.create_random_name('lb', 10),
+            'probe1': self.create_random_name('probe', 10),
+            'rule1': self.create_random_name('rule', 10)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network lb create -g {rg} -n {lb1}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb1} -n {probe1} --protocol http --port 80 --path /')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb1} -n {rule1} --probe-name {probe1} --protocol tcp --frontend-port 80 --backend-port 80')
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --enable-automatic-repairs false --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 '
+            '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('automaticRepairsPolicy.enabled', False),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', True),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate'),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceBehavior', 'CreateBeforeDelete')
+        ])
+        message = 'usage error: --enable-automatic-repairs cannot be false when --automatic-repairs-action or --automatic-repairs-grace-period are used'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss create -g {rg} -n {vmss2} --image {image} --enable-automatic-repairs false --automatic-repairs-grace-period 30 --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 '
+            '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
+
+
 class SkuProfileTest(ScenarioTest):
         
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile', location='eastus2')
@@ -12097,16 +12275,18 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2euap')
     def test_vm_vmss_proxy_agent(self, resource_group):
+        from azure.core.exceptions import HttpResponseError
         self.kwargs.update({
-            'nsg': self.create_random_name('nsg', 10),
+            'nsg1': self.create_random_name('nsg', 10),
+            'nsg2': self.create_random_name('nsg', 10),
             'vm1': self.create_random_name('vm', 10),
             'vm2': self.create_random_name('vm', 10),
             'vmss1': self.create_random_name('vmss', 10),
             'vmss2': self.create_random_name('vmss', 10),
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
         })
-        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network nsg create -g {rg} -n {nsg1}')
         self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
 
         # Disable default outbound access
@@ -12118,6 +12298,9 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
             self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
+        with self.assertRaises(HttpResponseError):
+            self.cmd('vm update -g {rg} -n {vm1} --wire-server-profile-id profileid')
+
         self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 2', checks=[
             self.check('securityProfile.proxyAgentSettings.enabled', False),
             self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
@@ -12133,21 +12316,44 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
             self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
+        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent False')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', False),
+            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
+        ])
+        self.cmd('vm update -g {rg} -n {vm2} --key-incarnation-id 2')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', False),
+            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 2)
+        ])
 
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
         ])
+        with self.assertRaises(HttpResponseError):
+            self.cmd('vmss update -g {rg} -n {vmss1} --wire-server-profile-id profileid')
+
         self.cmd('vmss update -g {rg} -n {vmss1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Enforce')
         ])
 
-        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg} --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!')
+        self.cmd('network nsg create -g {rg} -n {nsg2}')
+        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg2} --admin-password Password001!')
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --wire-server-mode Audit --imds-mode Audit', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent False', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit')
         ])
@@ -12489,8 +12695,8 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='centraluseuap')
-    def test_capacity_reservation_list_delete(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='eastus2euap')
+    def test_capacity_reservation_operations(self, resource_group):
 
         self.kwargs.update({
             'rg': resource_group,
@@ -12518,12 +12724,32 @@ class CapacityReservationScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ])
 
+        self.cmd('capacity reservation update -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--capacity 6 --tags key2=val2',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 6),
+                     self.check('tags', {'key2': 'val2'}),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg}',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 6),
+                     self.check('zones', ['1']),
+                     self.check('tags', {'key2': 'val2'}),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
         self.cmd('capacity reservation list -c {reservation_group} -g {rg} --query "[?name==\'{reservation_name}\']" ',
                  checks=[
                      self.check('[0].name', '{reservation_name}'),
                      self.check('[0].sku.name', '{sku}'),
-                     self.check('[0].sku.capacity', 5),
-                     self.check('[0].tags', {'key': 'val'}),
+                     self.check('[0].sku.capacity', 6),
+                     self.check('[0].tags', {'key2': 'val2'}),
                      self.check('[0].zones', ['1']),
                      self.check('[0].provisioningState', 'Succeeded')
                  ])

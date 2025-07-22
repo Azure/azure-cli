@@ -91,25 +91,23 @@ from ._util import (
     get_sql_managed_database_restore_details_operations,
     get_sql_replication_links_operations,
     get_sql_elastic_pools_operations,
+    get_sql_databases_operations,
 )
 
 
 logger = get_logger(__name__)
-
-BACKUP_STORAGE_ACCESS_TIERS = ["hot",
-                               "archive"]
 
 ###############################################
 #                Common funcs                 #
 ###############################################
 
 
-def _get_server_location(cli_ctx, server_name, resource_group_name):
+def _get_server_location(cli_ctx, server_name, resource_group_name, subscription_id=None):
     '''
     Returns the location (i.e. Azure region) that the specified server is in.
     '''
 
-    server_client = get_sql_servers_operations(cli_ctx, None)
+    server_client = get_sql_servers_operations(cli_ctx, None, subscription_id)
     # pylint: disable=no-member
     return server_client.get(
         server_name=server_name,
@@ -575,7 +573,7 @@ _DEFAULT_SERVER_VERSION = "12.0"
 def _failover_group_update_common(
         instance,
         failover_policy=None,
-        grace_period=None,):
+        grace_period=None):
     '''
     Updates the failover group grace period and failover policy. Common logic for both Sterling and Managed Instance
     '''
@@ -642,6 +640,11 @@ class ClientAuthenticationType(Enum):
 class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
+
+
+class FailoverReadOnlyEndpointPolicy(Enum):
+    enabled = 'Enabled'
+    disabled = 'Disabled'
 
 
 class FailoverGroupDatabasesSecondaryType(Enum):
@@ -955,19 +958,22 @@ class DatabaseIdentity:  # pylint: disable=too-few-public-methods
     database resource id.
     '''
 
-    def __init__(self, cli_ctx, database_name, server_name, resource_group_name):
-
+    def __init__(self, cli_ctx, database_name, server_name, resource_group_name, subscription_id=None):
+        from azure.cli.core.commands.client_factory import get_subscription_id
         self.database_name = database_name
         self.server_name = server_name
         self.resource_group_name = resource_group_name
         self.cli_ctx = cli_ctx
+        if subscription_id is not None:
+            self.subscription_id = subscription_id
+        else:
+            self.subscription_id = get_subscription_id(self.cli_ctx)
 
     def id(self):
         from urllib.parse import quote
-        from azure.cli.core.commands.client_factory import get_subscription_id
 
         return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
-            quote(get_subscription_id(self.cli_ctx)),
+            quote(self.subscription_id),
             quote(self.resource_group_name),
             quote(self.server_name),
             quote(self.database_name))
@@ -1024,7 +1030,8 @@ def _validate_elastic_pool_id(
         cli_ctx,
         elastic_pool_id,
         server_name,
-        resource_group_name):
+        resource_group_name,
+        subscription_id=None):
     '''
     Validates elastic_pool_id is either None or a valid resource id.
 
@@ -1039,9 +1046,12 @@ def _validate_elastic_pool_id(
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
+    if subscription_id is None:
+        subscription_id = get_subscription_id(cli_ctx)
+
     if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
         return resource_id(
-            subscription=get_subscription_id(cli_ctx),
+            subscription=subscription_id,
             resource_group=resource_group_name,
             namespace='Microsoft.Sql',
             type='servers',
@@ -1146,7 +1156,8 @@ def _db_dw_create(
     kwargs['location'] = _get_server_location(
         cli_ctx,
         server_name=dest_db.server_name,
-        resource_group_name=dest_db.resource_group_name)
+        resource_group_name=dest_db.resource_group_name,
+        subscription_id=dest_db.subscription_id)
 
     # Set create mode properties
     if source_db:
@@ -1168,7 +1179,8 @@ def _db_dw_create(
         cli_ctx,
         kwargs['elastic_pool_id'],
         dest_db.server_name,
-        dest_db.resource_group_name)
+        dest_db.resource_group_name,
+        dest_db.subscription_id)
 
     # Expand maintenance configuration id if needed
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
@@ -1401,6 +1413,7 @@ def db_create_replica(
         partner_server_name,
         partner_database_name=None,
         partner_resource_group_name=None,
+        partner_sub_id=None,
         secondary_type=None,
         no_wait=False,
         assign_identity=False,
@@ -1418,6 +1431,10 @@ def db_create_replica(
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
     partner_database_name = partner_database_name or database_name
+    if partner_sub_id is not None:
+        partner_client = get_sql_databases_operations(cmd.cli_ctx, None, partner_sub_id)
+    else:
+        partner_client = client
 
     # Set create mode
     kwargs['create_mode'] = CreateMode.SECONDARY
@@ -1435,18 +1452,26 @@ def db_create_replica(
     # Check backup storage redundancy configurations
     location = _get_server_location(cmd.cli_ctx,
                                     server_name=partner_server_name,
-                                    resource_group_name=partner_resource_group_name)
+                                    resource_group_name=partner_resource_group_name,
+                                    subscription_id=partner_sub_id)
     if _should_show_backup_storage_redundancy_warnings(location):
         if not kwargs['requested_backup_storage_redundancy']:
             _backup_storage_redundancy_take_source_warning()
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
+    primary_database = DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name)
+    secondary_database = DatabaseIdentity(cmd.cli_ctx,
+                                          partner_database_name,
+                                          partner_server_name,
+                                          partner_resource_group_name,
+                                          partner_sub_id)
+
     return _db_dw_create(
         cmd.cli_ctx,
-        client,
-        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
+        partner_client,
+        primary_database,
+        secondary_database,
         no_wait,
         secondary_type=secondary_type,
         assign_identity=assign_identity,
@@ -3080,7 +3105,6 @@ def update_long_term_retention(
         yearly_retention=None,
         week_of_year=None,
         make_backups_immutable=None,
-        backup_storage_access_tier=None,
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -3098,10 +3122,6 @@ def update_long_term_retention(
         if not confirmation:
             return
 
-    if backup_storage_access_tier and backup_storage_access_tier.lower() not in BACKUP_STORAGE_ACCESS_TIERS:
-        raise CLIError('Please specify a valid backup storage access tier type for backup storage access tier.'
-                       'See \'--help\' for more details.')
-
     kwargs['weekly_retention'] = weekly_retention
 
     kwargs['monthly_retention'] = monthly_retention
@@ -3111,8 +3131,6 @@ def update_long_term_retention(
     kwargs['week_of_year'] = week_of_year
 
     kwargs['make_backups_immutable'] = make_backups_immutable
-
-    kwargs['backup_storage_access_tier'] = backup_storage_access_tier
 
     policy = client.begin_create_or_update(
         database_name=database_name,
@@ -6496,7 +6514,10 @@ def failover_group_create(
         partner_resource_group=None,
         failover_policy=FailoverPolicyType.manual.value,
         grace_period=1,
-        add_db=None):
+        add_db=None,
+        partner_server_ids=None,
+        ro_failover_policy=FailoverReadOnlyEndpointPolicy.disabled.value,
+        ro_endpoint_target=None):
     '''
     Creates a failover group.
     '''
@@ -6529,14 +6550,24 @@ def failover_group_create(
         add_db,
         [])
 
+    if partner_server_ids is not None:
+        print(partner_server_ids)
+        partner_servers = [PartnerInfo(id=p) for p in partner_server_ids]
+    else:
+        partner_servers = [partner_server]
+
+    if ro_endpoint_target is None:
+        ro_endpoint_target = partner_server_id
+
     failover_group_params = FailoverGroup(
-        partner_servers=[partner_server],
+        partner_servers=partner_servers,
         databases=databases,
         read_write_endpoint=FailoverGroupReadWriteEndpoint(
             failover_policy=failover_policy,
             failover_with_data_loss_grace_period_minutes=grace_period),
         read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-            failover_policy="Disabled")
+            failover_policy=ro_failover_policy,
+            target_server=ro_endpoint_target)
     )
 
     if secondary_type is not None:
@@ -6558,7 +6589,10 @@ def failover_group_update(
         failover_policy=None,
         grace_period=None,
         add_db=None,
-        remove_db=None):
+        remove_db=None,
+        ro_endpoint_target=None,
+        ro_failover_policy=None,
+        partner_server_ids=None):
     '''
     Updates the failover group.
     '''
@@ -6585,6 +6619,13 @@ def failover_group_update(
     instance.databases = databases
     if secondary_type is not None:
         instance.secondary_type = secondary_type
+
+    if partner_server_ids is not None:
+        instance.partner_servers = [PartnerInfo(id=p) for p in partner_server_ids]
+
+    instance.read_only_endpoint = FailoverGroupReadOnlyEndpoint(
+        failover_policy=ro_failover_policy if ro_failover_policy is not None else instance.read_only_endpoint.failover_policy,
+        target_server=ro_endpoint_target if ro_endpoint_target is not None else instance.read_only_endpoint.target_server)
 
     return instance
 

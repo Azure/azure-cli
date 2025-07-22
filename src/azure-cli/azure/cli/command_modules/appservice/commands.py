@@ -471,8 +471,8 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
         g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)
         g.custom_command('create-inbound-services', 'create_ase_inbound_services', is_preview=True)
-        g.custom_command('upgrade', 'upgrade_appserviceenvironment', supports_no_wait=True, confirmation=True, is_preview=True)
-        g.custom_command('send-test-notification', 'send_test_notification_appserviceenvironment', is_preview=True)
+        g.custom_command('upgrade', 'upgrade_appserviceenvironment', supports_no_wait=True, confirmation=True)
+        g.custom_command('send-test-notification', 'send_test_notification_appserviceenvironment')
 
     with self.command_group('appservice domain', custom_command_type=appservice_domains, is_preview=True) as g:
         g.custom_command('create', 'create_domain')

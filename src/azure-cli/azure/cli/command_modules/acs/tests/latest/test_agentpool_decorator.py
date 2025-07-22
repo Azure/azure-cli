@@ -12,6 +12,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
+    CONST_DEFAULT_VMS_VM_SIZE,
+    CONST_DEFAULT_WINDOWS_VMS_VM_SIZE,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
     CONST_SCALE_DOWN_MODE_DEALLOCATE,
@@ -21,6 +23,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_VIRTUAL_MACHINES,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
@@ -489,6 +494,94 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         else:
             self.assertEqual(ctx_4.get_node_vm_size(), CONST_DEFAULT_WINDOWS_NODE_VM_SIZE)
 
+    def common_get_vm_sizes(self):
+        # linux default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(os_type="linux")
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_vm_sizes(), [CONST_DEFAULT_VMS_VM_SIZE])
+
+        # windows default
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.STANDALONE, # windows node pool can't be system node pool
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance(os_type="windows")
+        ctx_2.attach_agentpool(agentpool_2)
+        self.assertEqual(ctx_2.get_vm_sizes(), [CONST_DEFAULT_WINDOWS_VMS_VM_SIZE])
+
+        # get value from node_vm_size
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": None, "node_vm_size": "Standard_D4s_v3"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(os_type="linux")
+        ctx_3.attach_agentpool(agentpool_3)
+        self.assertEqual(ctx_3.get_vm_sizes(), ["Standard_D4s_v3"])
+
+        # one
+        ctx_4 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_4 = self.create_initialized_agentpool_instance(os_type="linux")
+        ctx_4.attach_agentpool(agentpool_4)
+        self.assertEqual(ctx_4.get_vm_sizes(), ["Standard_D4s_v3"])
+
+        # more than one, separated by comma
+        ctx_5 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3,Standard_D8s_v3"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_5 = self.create_initialized_agentpool_instance(os_type="linux")
+        ctx_5.attach_agentpool(agentpool_5)
+        self.assertEqual(ctx_5.get_vm_sizes(), ["Standard_D4s_v3", "Standard_D8s_v3"])
+
+        # fail when both vm_sizes and node_vm_size are specified
+        ctx_6 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3", "node_vm_size": "Standard_D8s_v3"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_6 = self.create_initialized_agentpool_instance(os_type="linux")
+        ctx_6.attach_agentpool(agentpool_6)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_6.get_vm_sizes()
+
+        # fail when vm_set_type is not VirtualMachines
+        ctx_7 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vm_set_type": None, "vm_sizes": "StandardD4s_v3"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_7 = self.create_initialized_agentpool_instance(os_type="linux")
+        ctx_7.attach_agentpool(agentpool_7)
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_7.get_vm_sizes()
+                                   
+
     def common_get_os_type(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -661,6 +754,37 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool = self.create_initialized_agentpool_instance(pod_subnet_id="test_pod_subnet_id")
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_pod_subnet_id(), "test_pod_subnet_id")
+    
+    def common_get_pod_ip_allocation_mode(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"pod_ip_allocation_mode": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_pod_ip_allocation_mode(), None)
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+        )
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_pod_ip_allocation_mode(), None)
+
+        # default to raw even if agentpool has different value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"pod_ip_allocation_mode": CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_pod_ip_allocation_mode(), CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL)
+        agentpool_2 = self.create_initialized_agentpool_instance(
+            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+        )
+        ctx_2.attach_agentpool(agentpool_2)
+        self.assertEqual(ctx_2.get_pod_ip_allocation_mode(), CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK)
 
     def common_get_enable_node_public_ip(self):
         # default
@@ -1541,7 +1665,28 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool_1 = self.create_initialized_agentpool_instance(upgrade_settings=self.models.AgentPoolUpgradeSettings(drain_timeout_in_minutes=123))
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_drain_timeout(), 123)
-    
+
+    def common_get_gateway_prefix_size(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"gateway_prefix_size": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_gateway_prefix_size(), None)
+
+        # custom value
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"gateway_prefix_size": 30}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_gateway_prefix_size(), 30)
+
     def get_if_match(self):
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
@@ -1683,6 +1828,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_node_vm_size(self):
         self.common_get_node_vm_size()
 
+    def test_get_vm_sizes(self):
+        self.common_get_vm_sizes()
+
     def test_get_os_type(self):
         self.common_get_os_type()
 
@@ -1694,6 +1842,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
 
     def test_get_pod_subnet_id(self):
         self.common_get_pod_subnet_id()
+    
+    def test_get_pod_ip_allocation_mode(self):
+        self.common_get_pod_ip_allocation_mode()
 
     def test_get_enable_node_public_ip(self):
         self.common_get_enable_node_public_ip()
@@ -1808,6 +1959,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_gpu_driver(self):
         self.common_get_gpu_driver()
 
+    def test_get_gateway_prefix_size(self):
+        self.common_get_gateway_prefix_size()
+
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1867,6 +2021,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_node_vm_size(self):
         self.common_get_node_vm_size()
 
+    def test_get_vm_sizes(self):
+        self.common_get_vm_sizes()
+
     def test_get_os_type(self):
         self.common_get_os_type()
 
@@ -1878,6 +2035,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_pod_subnet_id(self):
         self.common_get_pod_subnet_id()
+
+    def test_get_pod_ip_allocation_mode(self):
+        self.common_get_pod_ip_allocation_mode()
 
     def test_get_enable_node_public_ip(self):
         self.common_get_enable_node_public_ip()
@@ -1979,6 +2139,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_enable_secure_boot(self):
         self.common_get_enable_secure_boot()
+
+    def test_get_gateway_prefix_size(self):
+        self.common_get_gateway_prefix_size()
 
     def test_get_if_match(self):
         self.get_if_match()
@@ -2157,6 +2320,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "pod_subnet_id": "test_pod_subnet_id",
+                "pod_ip_allocation_mode": CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
                 "enable_node_public_ip": True,
                 "node_public_ip_prefix_id": "test_node_public_ip_prefix_id",
             },
@@ -2174,6 +2338,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             vnet_subnet_id="test_vnet_subnet_id",
             pod_subnet_id="test_pod_subnet_id",
+            pod_ip_allocation_mode=CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
             enable_node_public_ip=True,
             node_public_ip_prefix_id="test_node_public_ip_prefix_id",
         )
@@ -2473,6 +2638,87 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+    def common_set_up_agentpool_gateway_profile(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"gateway_prefix_size": 30},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_agentpool_gateway_profile(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_agentpool_gateway_profile(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            gateway_profile=self.models.AgentPoolGatewayProfile(
+                public_ip_prefix_size=30
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+    def common_set_up_virtual_machines_profile(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3", "node_count": 5},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_virtual_machines_profile(None)
+
+        agentpool_1 = self.create_initialized_agentpool_instance(type=CONST_VIRTUAL_MACHINES, restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_virtual_machines_profile(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            type=CONST_VIRTUAL_MACHINES,
+            count=None,
+            vm_size=None,
+            virtual_machines_profile=self.models.VirtualMachinesProfile(
+                scale=self.models.ScaleProfile(
+                    manual=[
+                        self.models.ManualScaleProfile(
+                            size="Standard_D4s_v3",
+                            count=5,
+                        )
+                    ]
+                )
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # fail on passing more than 1 vm_sizes
+        dec_2 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"vm_set_type": "VirtualMachines", "vm_sizes": "Standard_D4s_v3, Standard_D2s_v3", "node_count": 5},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+         )
+        agentpool_2 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_2.context.attach_agentpool(agentpool_2)
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_2.set_up_virtual_machines_profile(agentpool_2)
+
+        # fail on passing vm_sizes to VirtualMachinesScaleSets
+        dec_3 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"vm_set_type": "VirtualMachineScaleSets", "vm_sizes": "Standard_D4s_v3", "node_count": 5},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(type=CONST_VIRTUAL_MACHINE_SCALE_SETS, restore_defaults=False)
+        dec_3.context.attach_agentpool(agentpool_3)
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_3.set_up_virtual_machines_profile(agentpool_3)
+
 class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -2526,6 +2772,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
     
     def test_set_up_gpu_profile(self):
         self.common_set_up_gpu_profile()
+
+    def test_set_up_virtual_machines_profile(self):
+        self.common_set_up_virtual_machines_profile()
 
     def test_construct_agentpool_profile_default(self):
         import inspect
@@ -2628,6 +2877,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
     def test_set_up_gpu_propertes(self):
         self.common_set_up_gpu_propertes()
 
+    def test_set_up_agentpool_gateway_profile(self):
+        self.common_set_up_agentpool_gateway_profile()
+
 class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -2678,6 +2930,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
     def test_set_up_agentpool_security_profile(self):
         self.common_set_up_agentpool_security_profile()
+
+    def test_set_up_virtual_machines_profile(self):
+        self.common_set_up_virtual_machines_profile()
 
     def test_construct_agentpool_profile_default(self):
         import inspect
@@ -2748,6 +3003,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
     def test_set_up_gpu_propertes(self):
         self.common_set_up_gpu_propertes()
+
+    def test_set_up_agentpool_gateway_profile(self):
+        self.common_set_up_agentpool_gateway_profile()
 
 class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):

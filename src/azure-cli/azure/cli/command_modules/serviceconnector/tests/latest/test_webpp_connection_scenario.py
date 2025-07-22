@@ -695,6 +695,40 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
+    @record_only()
+    def test_webapp_mongodb_atlas_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-flexiblepostgresql-app',
+        })
+
+        # prepare params
+        name = 'mongodbtest'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create mongodb-atlas --connection {} --source-id {} --target-resource-group {} --server {} '
+                 '--secret secret={}'.format(name, source_id, 'rg', 'myservice', 'abc'))
+
+        
+        connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
+
+        # update connection
+        self.cmd('webapp connection update mongodb-atlas --id {} '
+                 '--secret secret={}'.format(connection_id, '123'))
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
     @record_only()
     def test_webapp_redis_e2e(self):

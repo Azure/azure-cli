@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import os
 import json
 from importlib import import_module
+from functools import cmp_to_key
 import re
 from urllib.parse import quote
 from urllib.request import urlretrieve
@@ -33,7 +34,8 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_flexible_config, cf_postgres_flexible_admin
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
-    _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
+    _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false, \
+    get_postgres_tiers, get_postgres_skus
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
 from ._util import get_index_tuning_settings_map
 from .flexible_server_custom_common import create_firewall_rule
@@ -41,7 +43,7 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
-    validate_virtual_endpoint_name_availability, validate_database_name
+    validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -84,6 +86,18 @@ def flexible_server_create(cmd, client,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     server_name = server_name.lower()
+
+    if sku_name is None:
+        # set sku_name from capability API
+        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+        tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
+        try:
+            sku_info = list_location_capability_info['sku_info']
+            skus = list(get_postgres_skus(sku_info, tier.lower()))
+            skus = sorted(skus, key=cmp_to_key(compare_sku_names))
+            sku_name = skus[0]
+        except:
+            raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
@@ -367,6 +381,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                                        location=location,
                                                        yes=yes)
         instance.network.private_dns_zone_arm_resource_id = private_dns_zone_id
+
+    _confirm_restart_server(instance, sku_name, storage_gb, yes)
 
     if sku_name:
         instance.sku.name = sku_name
@@ -1043,11 +1059,28 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     for identity in identities:
         identities_map[identity] = None
 
+    system_assigned_identity = instance.identity and 'principalId' in instance.identity.additional_properties and instance.identity.additional_properties['principalId'] is not None
+
+    # if there are no user-assigned identities or all user-assigned identities are already removed
     if not (instance.identity and instance.identity.user_assigned_identities) or \
        all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
+        if system_assigned_identity:
+            # if there is system assigned identity, then set identity type to SystemAssigned
+            parameters = {
+                'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                    type="SystemAssigned")}
+        else:
+            # no system assigned identity, set identity type to None
+            parameters = {
+                'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                    type="None")}
+    # if there are user-assigned identities and system assigned identity, then set identity type to SystemAssigned,UserAssigned
+    elif system_assigned_identity:
         parameters = {
             'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
-                type="None")}
+                user_assigned_identities=identities_map,
+                type="SystemAssigned,UserAssigned")}
+    # there is no system assigned identity, but there are user-assigned identities, then set identity type to UserAssigned
     else:
         parameters = {
             'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
@@ -1914,6 +1947,27 @@ def _update_login(server_name, resource_group_name, auth_config, password_auth, 
                            administrator_login_password, server_name, resource_group_name)
 
     return administrator_login, administrator_login_password
+
+
+# pylint: disable=chained-comparison
+def _confirm_restart_server(instance, sku_name, storage_gb, yes):
+    show_confirmation = False
+
+    # check if sku_name is changed
+    if sku_name and sku_name != instance.sku.name:
+        show_confirmation = True
+
+    # check if requested storage growth is crossing the 4096 threshold
+    if storage_gb and storage_gb > 4096 and instance.storage.storage_size_gb <= 4096 and instance.storage.type == "":
+        show_confirmation = True
+
+    # check if storage_gb changed for PremiumV2_LRS
+    if storage_gb and instance.storage.type == "PremiumV2_LRS" and instance.storage.storage_size_gb != storage_gb:
+        show_confirmation = True
+
+    if not yes and show_confirmation:
+        user_confirmation("You are trying to change the compute or the size of storage assigned to your server in a way that \
+            requires a server restart. During the restart, you'll experience some downtime of the server. Do you want to proceed?", yes=yes)
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods

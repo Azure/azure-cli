@@ -302,9 +302,7 @@ def load_command_table(self, _):
         g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
         g.custom_command('application list', 'list_vm_applications', min_api='2021-07-01')
 
-        g.custom_command('capture', 'capture_vm')
         g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_instance_view', table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
         g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
         g.custom_command('list-ip-addresses', 'list_vm_ip_addresses', table_transformer=transform_ip_addresses)
@@ -319,6 +317,9 @@ def load_command_table(self, _):
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
         g.custom_command('list-sizes', 'list_vm_sizes', deprecate_info=g.deprecate(redirect='az vm list-skus'))
+
+        from .operations.vm import VMCapture
+        self.command_table['vm capture'] = VMCapture(loader=self)
 
     with self.command_group('vm', compute_vm_sdk, client_factory=cf_vm) as g:
         g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')
@@ -526,6 +527,11 @@ def load_command_table(self, _):
         self.command_table['sig gallery-application version create'] = SigGalleryApplicationVersionCreate(loader=self)
         self.command_table['sig gallery-application version update'] = SiggalleryApplicationversionUpdate(loader=self)
 
+    with self.command_group('sig in-vm-access-control-profile-version'):
+        from .operations.sig_in_vm_access_control_profile_version import SigInVMAccessControlProfileVersionCreate, SigInVMAccessControlProfileVersionUpdate
+        self.command_table['sig in-vm-access-control-profile-version create'] = SigInVMAccessControlProfileVersionCreate(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version update'] = SigInVMAccessControlProfileVersionUpdate(loader=self)
+
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         from .operations.ppg import PPGCreate, PPGUpdate
         self.command_table['ppg create'] = PPGCreate(loader=self)
@@ -555,9 +561,9 @@ def load_command_table(self, _):
 
     with self.command_group('capacity reservation', capacity_reservations_sdk, min_api='2021-04-01',
                             client_factory=cf_capacity_reservations) as g:
-        g.custom_command('create', 'create_capacity_reservation', supports_no_wait=True)
-        g.custom_command('update', 'update_capacity_reservation', supports_no_wait=True)
-        g.custom_show_command('show', 'show_capacity_reservation')
+        from .operations.capacity_reservation import CapacityReservationUpdate, CapacityReservationShow
+        self.command_table['capacity reservation update'] = CapacityReservationUpdate(loader=self)
+        self.command_table['capacity reservation show'] = CapacityReservationShow(loader=self)
 
     with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
         g.custom_show_command('show', 'restore_point_show')

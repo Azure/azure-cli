@@ -32,6 +32,10 @@ short-summary: Manage the access keys for the auto storage account configured fo
 helps['batch account create'] = """
 type: command
 short-summary: Create a Batch account with the specified parameters.
+examples:
+  - name: Create a Batch account with the specified parameters.
+    text: >
+        az batch account create --name MyBatchAccount --resource-group MyResourceGroup --location eastus
 """
 
 helps['batch account keys'] = """
@@ -198,6 +202,14 @@ type: group
 short-summary: Manage Batch applications.
 """
 
+helps['batch application create'] = """
+type: command
+examples:
+  - name: Create a Batch application with the specified parameters.
+    text: >
+        az batch application create -g MyResourceGroup -n batch --application-name app
+"""
+
 helps['batch application package'] = """
 type: group
 short-summary: Manage Batch application packages.
@@ -212,6 +224,11 @@ long-summary: This step is unnecessary if the package has already been successfu
 helps['batch application package create'] = """
 type: command
 short-summary: Create a Batch application package record and activate it.
+examples:
+  - name: Create a Batch application package record and activate it.
+    text: >
+        az batch application package create -g rg -n batch --application-name myapp --version 1.0 --package-file PackageFilePath
+
 """
 
 helps['batch application set'] = """
@@ -517,6 +534,10 @@ short-summary: Manage automatic scaling of Batch pools.
 helps['batch pool create'] = """
 type: command
 short-summary: Create a Batch pool in an account. When creating a pool, choose arguments from either Cloud Services Configuration or Virtual Machine Configuration.
+examples:
+  - name: Create a Batch pool in an account. When creating a pool, choose arguments from either Cloud Services Configuration or Virtual Machine Configuration.
+    text: >
+        az batch pool create --json-file batch-pool-create.json --account-name clibatch --account-key BatchAccountKey
 """
 
 helps['batch pool node-counts'] = """
